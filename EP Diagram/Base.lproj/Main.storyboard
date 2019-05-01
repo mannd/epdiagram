@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="14490.70" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES" initialViewController="en3-9x-pbF">
-    <device id="retina6_1" orientation="landscape">
+    <device id="retina6_1" orientation="portrait">
         <adaptation id="fullscreen"/>
     </device>
     <dependencies>
@@ -15,11 +15,11 @@
             <objects>
                 <viewController id="BYZ-38-t0r" customClass="ViewController" customModule="EP_Diagram" customModuleProvider="target" sceneMemberID="viewController">
                     <view key="view" contentMode="scaleToFill" id="8bC-Xf-vdC">
-                        <rect key="frame" x="0.0" y="0.0" width="896" height="414"/>
+                        <rect key="frame" x="0.0" y="0.0" width="414" height="896"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
-                            <scrollView clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" maximumZoomScale="5" translatesAutoresizingMaskIntoConstraints="NO" id="QhZ-gG-IcS">
-                                <rect key="frame" x="44" y="0.0" width="808" height="276"/>
+                            <scrollView clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" maximumZoomScale="5" translatesAutoresizingMaskIntoConstraints="NO" id="QhZ-gG-IcS" userLabel="Image Scroll View">
+                                <rect key="frame" x="0.0" y="88" width="414" height="597.5"/>
                                 <subviews>
                                     <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="SampleECG" translatesAutoresizingMaskIntoConstraints="NO" id="Z9T-Bh-sBD">
                                         <rect key="frame" x="0.0" y="0.0" width="705.5" height="338"/>
@@ -32,29 +32,44 @@
                                     <constraint firstAttribute="trailing" secondItem="Z9T-Bh-sBD" secondAttribute="trailing" id="zbz-Xc-L8i"/>
                                 </constraints>
                             </scrollView>
-                            <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="rq1-PC-4iG">
-                                <rect key="frame" x="44" y="255" width="808" height="138"/>
-                                <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
-                            </view>
+                            <scrollView clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="xRS-Cj-fqm" userLabel="Ladder Scroll View">
+                                <rect key="frame" x="0.0" y="685.5" width="414" height="176.5"/>
+                                <subviews>
+                                    <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="rq1-PC-4iG" customClass="LadderView" customModule="EP_Diagram" customModuleProvider="target">
+                                        <rect key="frame" x="0.0" y="0.0" width="705.5" height="298.5"/>
+                                        <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                                    </view>
+                                </subviews>
+                                <constraints>
+                                    <constraint firstAttribute="trailing" secondItem="rq1-PC-4iG" secondAttribute="trailing" id="At5-82-RTp"/>
+                                    <constraint firstAttribute="bottom" secondItem="rq1-PC-4iG" secondAttribute="bottom" id="FNt-06-3rY"/>
+                                    <constraint firstItem="rq1-PC-4iG" firstAttribute="leading" secondItem="xRS-Cj-fqm" secondAttribute="leading" id="IvF-R2-JQa"/>
+                                    <constraint firstItem="rq1-PC-4iG" firstAttribute="top" secondItem="xRS-Cj-fqm" secondAttribute="top" id="V8o-qz-9WH"/>
+                                    <constraint firstAttribute="trailing" secondItem="rq1-PC-4iG" secondAttribute="trailing" id="hC5-lr-Bvq"/>
+                                </constraints>
+                            </scrollView>
                         </subviews>
                         <color key="backgroundColor" red="1" green="1" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                         <constraints>
-                            <constraint firstItem="QhZ-gG-IcS" firstAttribute="top" secondItem="8bC-Xf-vdC" secondAttribute="top" id="0PF-2Y-htw"/>
+                            <constraint firstItem="QhZ-gG-IcS" firstAttribute="top" secondItem="6Tk-OE-BBY" secondAttribute="top" id="0PF-2Y-htw"/>
                             <constraint firstItem="QhZ-gG-IcS" firstAttribute="height" secondItem="8bC-Xf-vdC" secondAttribute="height" multiplier="2:3" id="9vP-eV-cO0"/>
-                            <constraint firstItem="rq1-PC-4iG" firstAttribute="bottom" secondItem="6Tk-OE-BBY" secondAttribute="bottom" id="Cg4-U1-8Zd"/>
-                            <constraint firstItem="rq1-PC-4iG" firstAttribute="leading" secondItem="6Tk-OE-BBY" secondAttribute="leading" id="DVV-GI-w91"/>
+                            <constraint firstItem="rq1-PC-4iG" firstAttribute="width" secondItem="Z9T-Bh-sBD" secondAttribute="width" id="GIc-1q-Cuz"/>
                             <constraint firstItem="QhZ-gG-IcS" firstAttribute="leading" secondItem="6Tk-OE-BBY" secondAttribute="leading" id="HXN-Y0-Pmi"/>
                             <constraint firstItem="6Tk-OE-BBY" firstAttribute="trailing" secondItem="QhZ-gG-IcS" secondAttribute="trailing" id="ZQ7-RU-xca"/>
-                            <constraint firstItem="rq1-PC-4iG" firstAttribute="trailing" secondItem="6Tk-OE-BBY" secondAttribute="trailing" id="h0X-wF-Ws2"/>
-                            <constraint firstItem="rq1-PC-4iG" firstAttribute="height" secondItem="8bC-Xf-vdC" secondAttribute="height" multiplier="1:3" id="wzm-BR-JUa"/>
+                            <constraint firstItem="xRS-Cj-fqm" firstAttribute="top" secondItem="QhZ-gG-IcS" secondAttribute="bottom" id="aUi-8A-VNl"/>
+                            <constraint firstAttribute="trailing" secondItem="xRS-Cj-fqm" secondAttribute="trailing" id="apb-4y-jZd"/>
+                            <constraint firstItem="rq1-PC-4iG" firstAttribute="height" secondItem="8bC-Xf-vdC" secondAttribute="height" multiplier="1:3" id="fWy-d8-OBL"/>
+                            <constraint firstItem="6Tk-OE-BBY" firstAttribute="bottom" secondItem="xRS-Cj-fqm" secondAttribute="bottom" id="j77-iP-ixq"/>
+                            <constraint firstItem="xRS-Cj-fqm" firstAttribute="leading" secondItem="8bC-Xf-vdC" secondAttribute="leading" id="lnq-iO-g4Z"/>
                         </constraints>
                         <viewLayoutGuide key="safeArea" id="6Tk-OE-BBY"/>
                     </view>
                     <navigationItem key="navigationItem" id="ryt-Rx-YMV"/>
                     <connections>
+                        <outlet property="imageScrollView" destination="QhZ-gG-IcS" id="Jhd-Sa-e44"/>
                         <outlet property="imageView" destination="Z9T-Bh-sBD" id="6GT-g9-IHr"/>
+                        <outlet property="ladderScrollView" destination="xRS-Cj-fqm" id="u1B-J5-dK9"/>
                         <outlet property="ladderView" destination="rq1-PC-4iG" id="IAX-Gu-2b0"/>
-                        <outlet property="scrollView" destination="QhZ-gG-IcS" id="Jhd-Sa-e44"/>
                     </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="dkx-z0-nzr" sceneMemberID="firstResponder"/>
@@ -67,7 +82,7 @@
                 <navigationController automaticallyAdjustsScrollViewInsets="NO" id="en3-9x-pbF" sceneMemberID="viewController">
                     <toolbarItems/>
                     <navigationBar key="navigationBar" contentMode="scaleToFill" insetsLayoutMarginsFromSafeArea="NO" id="Kjy-Mf-VD6">
-                        <rect key="frame" x="0.0" y="0.0" width="896" height="44"/>
+                        <rect key="frame" x="0.0" y="44" width="414" height="44"/>
                         <autoresizingMask key="autoresizingMask"/>
                     </navigationBar>
                     <nil name="viewControllers"/>

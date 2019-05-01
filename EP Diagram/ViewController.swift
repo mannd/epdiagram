@@ -10,24 +10,45 @@ import UIKit
 
 class ViewController: UIViewController, UIScrollViewDelegate {
 
-    @IBOutlet var scrollView: UIScrollView!
+    @IBOutlet var imageScrollView: UIScrollView!
     @IBOutlet var imageView: UIImageView!
-    @IBOutlet var ladderView: UIView!
+    @IBOutlet var ladderView: LadderView!
+    @IBOutlet var ladderScrollView: UIScrollView!
+    var zoom: CGFloat = 1.0
 
     override func viewDidLoad() {
         super.viewDidLoad()
         // Do any additional setup after loading the view.
         title = "EP Diagram"
-        scrollView.delegate = self
-        ladderView.backgroundColor = UIColor.gray
+        imageScrollView.delegate = self
+        ladderView.backgroundColor = UIColor.white
+        ladderScrollView.isScrollEnabled = false
+        ladderView.lineXPosition = 100
     }
 
     func scrollViewDidScroll(_ scrollView: UIScrollView) {
-        print(scrollView.bounds)
+        if scrollView == imageScrollView {
+            print(scrollView.bounds)
+            ladderScrollView.bounds.origin.x = imageScrollView.bounds.origin.x
+        }
     }
 
+    // Not clear if there is any simple way to maintain relationship between
+    // image and ladder during zooming.
     func viewForZooming(in scrollView: UIScrollView) -> UIView? {
-        return imageView
+        if scrollView == imageScrollView {
+            return imageView
+        }
+        else {
+            return nil
+        }
+    }
+
+    func scrollViewDidEndZooming(_ scrollView: UIScrollView, with view: UIView?, atScale scale: CGFloat) {
+        print("Zoom = \(scale)")
+        ladderView.lineXPosition = ladderView.lineXPosition * Double(scale / zoom)
+        zoom = scale
+        ladderView.setNeedsDisplay()
     }
 
 }
