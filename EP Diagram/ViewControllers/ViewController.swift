@@ -27,12 +27,16 @@
             displayLadder()
         }
 
+        // This is just temporary testing code
         fileprivate func displayLadder() {
             ladderScrollView.bounds.origin.x = imageScrollView.bounds.origin.x
             ladderView.scrollViewBounds = ladderScrollView.bounds
             ladderView.setNeedsDisplay()
         }
 
+        // Functions below fire during scrolling of imageView and at end
+        // of scrolling.  Relabeling might best occur at end of scrolling,
+        // while redrawing of ladder can be done during scrolling.
         func scrollViewDidScroll(_ scrollView: UIScrollView) {
             if scrollView == imageScrollView {
                 print(scrollView.bounds)
@@ -40,7 +44,23 @@
             }
         }
 
+        func scrollViewDidEndDecelerating(_ scrollView: UIScrollView) {
+            if scrollView == imageScrollView {
+                print("End decelerating")
+                scrollFinished()
+            }
+        }
 
+        func scrollViewDidEndDragging(_ scrollView: UIScrollView, willDecelerate decelerate: Bool) {
+            if scrollView == imageScrollView && !decelerate {
+                print("End dragging")
+                scrollFinished()
+            }
+        }
+
+        fileprivate func scrollFinished() {
+            print("Scroll finished")
+        }
 
         // Not clear if there is any simple way to maintain relationship between
         // image and ladder during zooming.

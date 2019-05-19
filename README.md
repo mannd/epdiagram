@@ -1,5 +1,5 @@
-EP Coding
-=========
+EP Diagram
+==========
 
 <!-- [![Build Status](https://travis-ci.org/mannd/epcoding-ios.svg?branch=master)](https://travis-ci.org/mannd/epdiagram) -->
 

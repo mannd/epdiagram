@@ -8,10 +8,14 @@
 
 import Foundation
 
+// A Region is a collection of Marks, in left to right order.  Positions are
+// vertical, i.e. Y axis.  A Region has a RegionLabel such as "A" or "AV."
 class Region {
     public var startPosition: Double?
     public var endPosition: Double?
     public var selected: Bool = false
     public var label: RegionLabel?
     public var marks: [Mark]?
+    public var markable: Bool = true
+    public var decremental: Bool = false
 }
