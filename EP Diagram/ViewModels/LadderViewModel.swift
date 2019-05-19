@@ -37,6 +37,7 @@ class LadderViewModel {
         print("heightPerRegionUnit = \(heightPerRegionUnit)")
         // Draw first line of ladder.
         var regionY = heightPerRegionUnit
+        let ladderOriginY = regionY
         context.move(to: CGPoint(x: 0, y: regionY))
         context.addLine(to: CGPoint(x: rect.width, y: regionY))
         for region: Region in ladder.regions {
@@ -45,21 +46,43 @@ class LadderViewModel {
             context.move(to: CGPoint(x: 0, y: regionY))
             context.addLine(to: CGPoint(x: rect.width, y: regionY))
         }
+        context.strokePath()
 
-        context.strokePath()
-        
-        context.move(to: CGPoint(x: lineXPosition, y: 0.0))
-        context.addLine(to: CGPoint(x: lineXPosition, y: Double(rect
-            .height)))
-        context.strokePath()
-        context.setStrokeColor(UIColor.red.cgColor)
-        context.move(to: CGPoint(x: margin + scrollViewBounds.origin.x, y: 0))
-        context.addLine(to: CGPoint(x: margin + scrollViewBounds.origin.x, y: rect
-            .height))
-        context.strokePath()
-        context.move(to: CGPoint(x: scrollViewBounds.width + scrollViewBounds.origin.x - margin, y: 0))
-        context.addLine(to: CGPoint(x: scrollViewBounds.width + scrollViewBounds.origin.x - margin, y: rect
-            .height))
+        // blank out left margin
+        context.setStrokeColor(UIColor.red.cgColor) // define this as constant
+        context.setFillColor(UIColor.white.cgColor)
+        let rectangle = CGRect(x: scrollViewBounds.origin.x, y: ladderOriginY, width: margin, height: rect.height - 2 * heightPerRegionUnit)
+        context.addRect(rectangle)
+        context.drawPath(using: .fillStroke)
+
+        // draw labels
+        let paragraphStyle = NSMutableParagraphStyle()
+        paragraphStyle.alignment = .center
+        let attributes: [NSAttributedString.Key : Any] = [
+            .paragraphStyle: paragraphStyle,
+            .font: UIFont.systemFont(ofSize: 18.0),
+            .foregroundColor: UIColor.blue
+        ]
+        let text = "A"
+        let attributedString = NSAttributedString(string: text, attributes: attributes)
+
+        let stringRect = CGRect(x: scrollViewBounds.origin.x, y: ladderOriginY + heightPerRegionUnit / 2, width: margin, height: heightPerRegionUnit / 2)
+        attributedString.draw(in: stringRect)
+//
+//
+//
+//        context.move(to: CGPoint(x: lineXPosition, y: 0.0))
+//        context.addLine(to: CGPoint(x: lineXPosition, y: Double(rect
+//            .height)))
+//        context.strokePath()
+//        context.setStrokeColor(UIColor.red.cgColor)
+//        context.move(to: CGPoint(x: margin + scrollViewBounds.origin.x, y: 0))
+//        context.addLine(to: CGPoint(x: margin + scrollViewBounds.origin.x, y: rect
+//            .height))
+//        context.strokePath()
+//        context.move(to: CGPoint(x: scrollViewBounds.width + scrollViewBounds.origin.x - margin, y: 0))
+//        context.addLine(to: CGPoint(x: scrollViewBounds.width + scrollViewBounds.origin.x - margin, y: rect
+//            .height))
         context.strokePath()
     }
 }
