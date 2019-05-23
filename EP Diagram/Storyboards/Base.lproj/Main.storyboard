@@ -32,35 +32,21 @@
                                     <constraint firstAttribute="trailing" secondItem="Z9T-Bh-sBD" secondAttribute="trailing" id="zbz-Xc-L8i"/>
                                 </constraints>
                             </scrollView>
-                            <scrollView clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="xRS-Cj-fqm" userLabel="Ladder Scroll View">
+                            <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="rq1-PC-4iG" customClass="LadderView" customModule="EP_Diagram" customModuleProvider="target">
                                 <rect key="frame" x="0.0" y="625.5" width="414" height="236.5"/>
-                                <subviews>
-                                    <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="rq1-PC-4iG" customClass="LadderView" customModule="EP_Diagram" customModuleProvider="target">
-                                        <rect key="frame" x="0.0" y="0.0" width="705.5" height="236.5"/>
-                                        <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
-                                    </view>
-                                </subviews>
-                                <constraints>
-                                    <constraint firstAttribute="trailing" secondItem="rq1-PC-4iG" secondAttribute="trailing" id="At5-82-RTp"/>
-                                    <constraint firstAttribute="bottom" secondItem="rq1-PC-4iG" secondAttribute="bottom" id="FNt-06-3rY"/>
-                                    <constraint firstItem="rq1-PC-4iG" firstAttribute="leading" secondItem="xRS-Cj-fqm" secondAttribute="leading" id="IvF-R2-JQa"/>
-                                    <constraint firstItem="rq1-PC-4iG" firstAttribute="top" secondItem="xRS-Cj-fqm" secondAttribute="top" id="V8o-qz-9WH"/>
-                                    <constraint firstAttribute="trailing" secondItem="rq1-PC-4iG" secondAttribute="trailing" id="hC5-lr-Bvq"/>
-                                    <constraint firstItem="rq1-PC-4iG" firstAttribute="height" secondItem="xRS-Cj-fqm" secondAttribute="height" id="o4A-a7-uYj"/>
-                                </constraints>
-                            </scrollView>
+                                <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                            </view>
                         </subviews>
                         <color key="backgroundColor" red="1" green="1" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                         <constraints>
                             <constraint firstItem="QhZ-gG-IcS" firstAttribute="top" secondItem="6Tk-OE-BBY" secondAttribute="top" id="0PF-2Y-htw"/>
                             <constraint firstItem="QhZ-gG-IcS" firstAttribute="height" secondItem="8bC-Xf-vdC" secondAttribute="height" multiplier="0.6" id="9vP-eV-cO0"/>
-                            <constraint firstItem="rq1-PC-4iG" firstAttribute="width" secondItem="Z9T-Bh-sBD" secondAttribute="width" id="GIc-1q-Cuz"/>
+                            <constraint firstItem="6Tk-OE-BBY" firstAttribute="bottom" secondItem="rq1-PC-4iG" secondAttribute="bottom" id="Fbn-2F-g76"/>
                             <constraint firstItem="QhZ-gG-IcS" firstAttribute="leading" secondItem="6Tk-OE-BBY" secondAttribute="leading" id="HXN-Y0-Pmi"/>
+                            <constraint firstItem="rq1-PC-4iG" firstAttribute="leading" secondItem="8bC-Xf-vdC" secondAttribute="leading" id="Njx-CB-fTf"/>
+                            <constraint firstAttribute="trailing" secondItem="rq1-PC-4iG" secondAttribute="trailing" id="Tje-Vw-uSw"/>
                             <constraint firstItem="6Tk-OE-BBY" firstAttribute="trailing" secondItem="QhZ-gG-IcS" secondAttribute="trailing" id="ZQ7-RU-xca"/>
-                            <constraint firstItem="xRS-Cj-fqm" firstAttribute="top" secondItem="QhZ-gG-IcS" secondAttribute="bottom" id="aUi-8A-VNl"/>
-                            <constraint firstAttribute="trailing" secondItem="xRS-Cj-fqm" secondAttribute="trailing" id="apb-4y-jZd"/>
-                            <constraint firstItem="6Tk-OE-BBY" firstAttribute="bottom" secondItem="xRS-Cj-fqm" secondAttribute="bottom" id="j77-iP-ixq"/>
-                            <constraint firstItem="xRS-Cj-fqm" firstAttribute="leading" secondItem="8bC-Xf-vdC" secondAttribute="leading" id="lnq-iO-g4Z"/>
+                            <constraint firstItem="rq1-PC-4iG" firstAttribute="top" secondItem="QhZ-gG-IcS" secondAttribute="bottom" id="cGx-yL-szv"/>
                         </constraints>
                         <viewLayoutGuide key="safeArea" id="6Tk-OE-BBY"/>
                     </view>
@@ -68,7 +54,6 @@
                     <connections>
                         <outlet property="imageScrollView" destination="QhZ-gG-IcS" id="Jhd-Sa-e44"/>
                         <outlet property="imageView" destination="Z9T-Bh-sBD" id="6GT-g9-IHr"/>
-                        <outlet property="ladderScrollView" destination="xRS-Cj-fqm" id="u1B-J5-dK9"/>
                         <outlet property="ladderView" destination="rq1-PC-4iG" id="IAX-Gu-2b0"/>
                     </connections>
                 </viewController>

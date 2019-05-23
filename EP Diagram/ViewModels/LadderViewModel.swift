@@ -11,6 +11,7 @@ import UIKit
 class LadderViewModel {
     public var lineXPosition: Double = 100
     public var scrollViewBounds = CGRect(x: 0, y: 0 , width: 0, height: 0)
+    public var scale: CGFloat = 1.0
     let margin: CGFloat = 50
 
     let ladder: Ladder
@@ -31,22 +32,27 @@ class LadderViewModel {
         }
         // we'll allow one region unit space above and below, so...
         numRegionUnits += 2
-        print(numRegionUnits)
         let heightPerRegionUnit = rect.height / CGFloat(numRegionUnits)
-        print("rect.height = \(rect.height)")
-        print("heightPerRegionUnit = \(heightPerRegionUnit)")
+        let ladderWidth: CGFloat = rect.width * scale
+//        print("ladderWidth = \(ladderWidth)")
+//        print("rect.height = \(rect.height)")
+//        print("rect.width = \(rect.width)")
+//        print("heightPerRegionUnit = \(heightPerRegionUnit)")
         // Draw first line of ladder.
         var regionY = heightPerRegionUnit
         let ladderOriginY = regionY
         context.move(to: CGPoint(x: 0, y: regionY))
-        context.addLine(to: CGPoint(x: rect.width, y: regionY))
+        context.addLine(to: CGPoint(x: ladderWidth, y: regionY))
         for region: Region in ladder.regions {
             regionY += region.decremental ? 2 * heightPerRegionUnit : heightPerRegionUnit
-            print(regionY)
-            context.move(to: CGPoint(x: 0, y: regionY))
-            context.addLine(to: CGPoint(x: rect.width, y: regionY))
+//            print(regionY)
+            context.move(to: CGPoint(x: margin, y: regionY))
+            context.addLine(to: CGPoint(x: ladderWidth, y: regionY))
         }
         context.strokePath()
+
+        // instead of blank out left margin, create a rectangle for each label to
+        // be centered in.
 
         // blank out left margin
         context.setStrokeColor(UIColor.red.cgColor) // define this as constant
@@ -68,21 +74,21 @@ class LadderViewModel {
 
         let stringRect = CGRect(x: scrollViewBounds.origin.x, y: ladderOriginY + heightPerRegionUnit / 2, width: margin, height: heightPerRegionUnit / 2)
         attributedString.draw(in: stringRect)
-//
-//
-//
-//        context.move(to: CGPoint(x: lineXPosition, y: 0.0))
-//        context.addLine(to: CGPoint(x: lineXPosition, y: Double(rect
-//            .height)))
-//        context.strokePath()
-//        context.setStrokeColor(UIColor.red.cgColor)
-//        context.move(to: CGPoint(x: margin + scrollViewBounds.origin.x, y: 0))
-//        context.addLine(to: CGPoint(x: margin + scrollViewBounds.origin.x, y: rect
-//            .height))
-//        context.strokePath()
-//        context.move(to: CGPoint(x: scrollViewBounds.width + scrollViewBounds.origin.x - margin, y: 0))
-//        context.addLine(to: CGPoint(x: scrollViewBounds.width + scrollViewBounds.origin.x - margin, y: rect
-//            .height))
+
+
+        // draw sample Mark
+        context.move(to: CGPoint(x: lineXPosition, y: 0.0))
+        context.addLine(to: CGPoint(x: lineXPosition, y: Double(rect
+            .height)))
+        context.strokePath()
+        context.setStrokeColor(UIColor.red.cgColor)
+        context.move(to: CGPoint(x: margin + scrollViewBounds.origin.x, y: 0))
+        context.addLine(to: CGPoint(x: margin + scrollViewBounds.origin.x, y: rect
+            .height))
+        context.strokePath()
+        context.move(to: CGPoint(x: scrollViewBounds.width + scrollViewBounds.origin.x - margin, y: 0))
+        context.addLine(to: CGPoint(x: scrollViewBounds.width + scrollViewBounds.origin.x - margin, y: rect
+            .height))
         context.strokePath()
     }
 }

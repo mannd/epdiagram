@@ -9,28 +9,33 @@
     import UIKit
 
     class ViewController: UIViewController, UIScrollViewDelegate {
-
         @IBOutlet var imageScrollView: UIScrollView!
         @IBOutlet var imageView: UIImageView!
         @IBOutlet var ladderView: LadderView!
-        @IBOutlet var ladderScrollView: UIScrollView!
         var zoom: CGFloat = 1.0
 
         override func viewDidLoad() {
             super.viewDidLoad()
-            // Do any additional setup after loading the view.
             title = "EP Diagram"
             imageScrollView.delegate = self
+            // Ensure there is a space for labels at the left margin.
+            imageScrollView.contentInset = UIEdgeInsets(top: 0, left: ladderView.margin, bottom: 0, right: 0)
+            // Distinguish the two views.
+            imageScrollView.backgroundColor = UIColor.lightGray
             ladderView.backgroundColor = UIColor.white
-            ladderScrollView.isScrollEnabled = false
+            // just a temp mark
             ladderView.lineXPosition = 100
             displayLadder()
         }
 
-        // This is just temporary testing code
+        override func viewDidAppear(_ animated: Bool) {
+            // This centers image, as opposed to starting with it at the upper left
+            // hand corner of the screen.
+            let newContentOffsetX = (imageScrollView.contentSize.width/2) - (imageScrollView.bounds.size.width/2);
+            imageScrollView.contentOffset = CGPoint(x: newContentOffsetX, y: 0)
+        }
+
         fileprivate func displayLadder() {
-            ladderScrollView.bounds.origin.x = imageScrollView.bounds.origin.x
-            ladderView.scrollViewBounds = ladderScrollView.bounds
             ladderView.setNeedsDisplay()
         }
 
@@ -39,7 +44,6 @@
         // while redrawing of ladder can be done during scrolling.
         func scrollViewDidScroll(_ scrollView: UIScrollView) {
             if scrollView == imageScrollView {
-                print(scrollView.bounds)
                 displayLadder()
             }
         }
@@ -75,7 +79,10 @@
 
         func scrollViewDidEndZooming(_ scrollView: UIScrollView, with view: UIView?, atScale scale: CGFloat) {
             print("Zoom = \(scale)")
-            ladderView.lineXPosition = ladderView.lineXPosition * Double(scale / zoom)
+            //ladderView.lineXPosition = ladderView.lineXPosition * Double(scale / zoom)
+            // FIXME: Doesn't work: lineXPosition not fixed, ladderView width doesn't increase!!
+            // TODO: Fix adjust width of ladderView after zoom
+            // To do this, will need to pass scale or zoom to LadderView and adjust the rectangle width so that the full width of the ladder is drawn.  Will also need to adjust the mark location based on the scale.
             zoom = scale
 
             ladderView.setNeedsDisplay()
