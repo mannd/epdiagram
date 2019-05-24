@@ -32,6 +32,11 @@ class Ladder {
         let vRegion = Region()
         vRegion.label = RegionLabel("V")
         ladder.regions = [aRegion, avRegion, vRegion]
+        // Add Mark for testing
+        let testMark: Mark = Mark()
+        testMark.startPosition = 100.0
+        aRegion.marks.append(testMark)
+        
         return ladder
     }
 }

@@ -13,6 +13,7 @@
         @IBOutlet var imageView: UIImageView!
         @IBOutlet var ladderView: LadderView!
         var zoom: CGFloat = 1.0
+        var isZooming = false
 
         override func viewDidLoad() {
             super.viewDidLoad()
@@ -23,8 +24,9 @@
             // Distinguish the two views.
             imageScrollView.backgroundColor = UIColor.lightGray
             ladderView.backgroundColor = UIColor.white
+            ladderView.scrollView = imageScrollView
             // just a temp mark
-            ladderView.lineXPosition = 100
+//            ladderView.lineXPosition = 100
             displayLadder()
         }
 
@@ -43,8 +45,11 @@
         // of scrolling.  Relabeling might best occur at end of scrolling,
         // while redrawing of ladder can be done during scrolling.
         func scrollViewDidScroll(_ scrollView: UIScrollView) {
+            print("Scrolling")
             if scrollView == imageScrollView {
-                displayLadder()
+                if !isZooming {
+                    displayLadder()
+                }
             }
         }
 
@@ -77,12 +82,17 @@
             }
         }
 
+        func scrollViewWillBeginZooming(_ scrollView: UIScrollView, with view: UIView?) {
+            isZooming = true
+        }
+
         func scrollViewDidEndZooming(_ scrollView: UIScrollView, with view: UIView?, atScale scale: CGFloat) {
             print("Zoom = \(scale)")
-            //ladderView.lineXPosition = ladderView.lineXPosition * Double(scale / zoom)
-            // FIXME: Doesn't work: lineXPosition not fixed, ladderView width doesn't increase!!
-            // TODO: Fix adjust width of ladderView after zoom
-            // To do this, will need to pass scale or zoom to LadderView and adjust the rectangle width so that the full width of the ladder is drawn.  Will also need to adjust the mark location based on the scale.
+            print("imageView width = \(imageView.frame.width)")
+            print("imageScrollView bounds = \(imageScrollView.bounds)")
+            print("imageScrollView contentOffset = \(imageScrollView.contentOffset)")
+            isZooming = false
+            ladderView.scale = scale
             zoom = scale
 
             ladderView.setNeedsDisplay()

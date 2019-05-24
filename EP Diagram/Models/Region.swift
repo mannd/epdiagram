@@ -15,7 +15,7 @@ class Region {
     public var endPosition: Double?
     public var selected: Bool = false
     public var label: RegionLabel?
-    public var marks: [Mark]?
+    public var marks: [Mark] = []
     public var markable: Bool = true
     public var decremental: Bool = false
 }

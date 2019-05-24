@@ -9,9 +9,6 @@
 import UIKit
 
 class LadderViewModel {
-    public var lineXPosition: Double = 100
-    public var scrollViewBounds = CGRect(x: 0, y: 0 , width: 0, height: 0)
-    public var scale: CGFloat = 1.0
     let margin: CGFloat = 50
 
     let ladder: Ladder
@@ -19,8 +16,12 @@ class LadderViewModel {
     init() {
         ladder = Ladder.defaultLadder()
     }
+
+    init(ladder: Ladder) {
+        self.ladder = ladder
+    }
     
-    func draw(rect: CGRect, scrollViewBounds: CGRect, context: CGContext) {
+    func draw(rect: CGRect, scrollViewBounds: CGRect, scale: CGFloat, context: CGContext) {
         context.setStrokeColor(UIColor.black.cgColor)
         context.setLineWidth(1)
         // We'll divide the height of rect by number of regions.  Each decremental
@@ -57,7 +58,7 @@ class LadderViewModel {
         // blank out left margin
         context.setStrokeColor(UIColor.red.cgColor) // define this as constant
         context.setFillColor(UIColor.white.cgColor)
-        let rectangle = CGRect(x: scrollViewBounds.origin.x, y: ladderOriginY, width: margin, height: rect.height - 2 * heightPerRegionUnit)
+        let rectangle = CGRect(x: 0, y: ladderOriginY, width: margin, height: rect.height - 2 * heightPerRegionUnit)
         context.addRect(rectangle)
         context.drawPath(using: .fillStroke)
 
@@ -72,23 +73,16 @@ class LadderViewModel {
         let text = "A"
         let attributedString = NSAttributedString(string: text, attributes: attributes)
 
-        let stringRect = CGRect(x: scrollViewBounds.origin.x, y: ladderOriginY + heightPerRegionUnit / 2, width: margin, height: heightPerRegionUnit / 2)
+        let stringRect = CGRect(x: 0, y: ladderOriginY + heightPerRegionUnit / 2, width: margin, height: heightPerRegionUnit / 2)
         attributedString.draw(in: stringRect)
 
-
-        // draw sample Mark
-        context.move(to: CGPoint(x: lineXPosition, y: 0.0))
-        context.addLine(to: CGPoint(x: lineXPosition, y: Double(rect
-            .height)))
-        context.strokePath()
-        context.setStrokeColor(UIColor.red.cgColor)
-        context.move(to: CGPoint(x: margin + scrollViewBounds.origin.x, y: 0))
-        context.addLine(to: CGPoint(x: margin + scrollViewBounds.origin.x, y: rect
-            .height))
-        context.strokePath()
-        context.move(to: CGPoint(x: scrollViewBounds.width + scrollViewBounds.origin.x - margin, y: 0))
-        context.addLine(to: CGPoint(x: scrollViewBounds.width + scrollViewBounds.origin.x - margin, y: rect
-            .height))
-        context.strokePath()
+        for region: Region in ladder.regions {
+            for mark: Mark in region.marks {
+                let scrolledPosition = scale * CGFloat(mark.startPosition!) - scrollViewBounds.origin.x
+                context.move(to: CGPoint(x: scrolledPosition, y: 0))
+                context.addLine(to: CGPoint(x: scrolledPosition, y: rect.height))
+                context.strokePath()
+            }
+        }
     }
 }
