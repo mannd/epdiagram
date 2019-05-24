@@ -10,6 +10,7 @@ import UIKit
 
 class LadderViewModel {
     let margin: CGFloat = 50
+    var regionLines: [CGFloat] = []
 
     let ladder: Ladder
 
@@ -41,12 +42,14 @@ class LadderViewModel {
 //        print("heightPerRegionUnit = \(heightPerRegionUnit)")
         // Draw first line of ladder.
         var regionY = heightPerRegionUnit
+        regionLines.append(regionY)
         let ladderOriginY = regionY
-        context.move(to: CGPoint(x: 0, y: regionY))
+        context.move(to: CGPoint(x: margin, y: regionY))
         context.addLine(to: CGPoint(x: ladderWidth, y: regionY))
         for region: Region in ladder.regions {
             regionY += region.decremental ? 2 * heightPerRegionUnit : heightPerRegionUnit
 //            print(regionY)
+            regionLines.append(regionY)
             context.move(to: CGPoint(x: margin, y: regionY))
             context.addLine(to: CGPoint(x: ladderWidth, y: regionY))
         }
@@ -79,8 +82,8 @@ class LadderViewModel {
         for region: Region in ladder.regions {
             for mark: Mark in region.marks {
                 let scrolledPosition = scale * CGFloat(mark.startPosition!) - scrollViewBounds.origin.x
-                context.move(to: CGPoint(x: scrolledPosition, y: 0))
-                context.addLine(to: CGPoint(x: scrolledPosition, y: rect.height))
+                context.move(to: CGPoint(x: scrolledPosition, y: regionLines[0]))
+                context.addLine(to: CGPoint(x: scrolledPosition, y: regionLines[1]))
                 context.strokePath()
             }
         }

@@ -98,5 +98,15 @@
             ladderView.setNeedsDisplay()
         }
 
+        // TODO: This doesn't work right.
+        override func viewWillTransition(to size: CGSize, with coordinator: UIViewControllerTransitionCoordinator) {
+            super.viewWillTransition(to: size, with: coordinator)
+            coordinator.animate(alongsideTransition: nil, completion: {
+                _ in
+                print("Transitioning")
+                self.ladderView.setNeedsDisplay()
+            })
+        }
+
     }
 
