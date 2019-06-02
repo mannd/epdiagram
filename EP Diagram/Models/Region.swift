@@ -18,4 +18,8 @@ class Region {
     public var marks: [Mark] = []
     public var markable: Bool = true
     public var decremental: Bool = false
+
+    public func appendMark(_ mark: Mark) {
+        marks.append(mark)
+    }
 }

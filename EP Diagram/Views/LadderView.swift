@@ -15,28 +15,6 @@ class LadderView: UIView {
     public let margin: CGFloat = 50
     public var scale: CGFloat = 1.0
 
-//    var unzoomedViewHeight: CGFloat?
-//    override func layoutSubviews() {
-//        print("layoutSubviews in LadderView")
-//        super.layoutSubviews()
-//        unzoomedViewHeight = frame.size.height
-//    }
-//
-//    override var transform: CGAffineTransform {
-//        get {
-//            return super.transform
-//        }
-//        set {
-//            print("transform set in LadderView")
-//            if let unzoomedViewHeight = unzoomedViewHeight {
-//                var t = newValue
-//                t.d = 1.0
-//                t.ty = (1.0 - t.a) * unzoomedViewHeight/2
-//                super.transform = t
-//            }
-//        }
-//    }
-
     let ladderViewModel: LadderViewModel
 
     required init?(coder aDecoder: NSCoder) {

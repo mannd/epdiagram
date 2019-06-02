@@ -9,6 +9,7 @@
 /* Begin PBXBuildFile section */
 		8E01D9C522848F4E000F36FC /* LadderViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8E01D9C422848F4E000F36FC /* LadderViewModel.swift */; };
 		8E01D9C722849047000F36FC /* CursorView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8E01D9C622849047000F36FC /* CursorView.swift */; };
+		8E6F576422A42CE100C5ECDB /* RegionViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8E6F576322A42CE100C5ECDB /* RegionViewModel.swift */; };
 		8E7D24C322779DBD005A1729 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8E7D24C222779DBD005A1729 /* AppDelegate.swift */; };
 		8E7D24C522779DBD005A1729 /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8E7D24C422779DBD005A1729 /* ViewController.swift */; };
 		8E7D24C822779DBD005A1729 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 8E7D24C622779DBD005A1729 /* Main.storyboard */; };
@@ -44,6 +45,7 @@
 /* Begin PBXFileReference section */
 		8E01D9C422848F4E000F36FC /* LadderViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LadderViewModel.swift; sourceTree = "<group>"; };
 		8E01D9C622849047000F36FC /* CursorView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CursorView.swift; sourceTree = "<group>"; };
+		8E6F576322A42CE100C5ECDB /* RegionViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RegionViewModel.swift; sourceTree = "<group>"; };
 		8E7D24BF22779DBD005A1729 /* EP Diagram.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "EP Diagram.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		8E7D24C222779DBD005A1729 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		8E7D24C422779DBD005A1729 /* ViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ViewController.swift; sourceTree = "<group>"; };
@@ -158,6 +160,7 @@
 			isa = PBXGroup;
 			children = (
 				8E01D9C422848F4E000F36FC /* LadderViewModel.swift */,
+				8E6F576322A42CE100C5ECDB /* RegionViewModel.swift */,
 			);
 			path = ViewModels;
 			sourceTree = "<group>";
@@ -328,6 +331,7 @@
 				8EF9166B227926BC00B51F17 /* LadderView.swift in Sources */,
 				8E01D9C722849047000F36FC /* CursorView.swift in Sources */,
 				8E9B8045228347DE008873BB /* Region.swift in Sources */,
+				8E6F576422A42CE100C5ECDB /* RegionViewModel.swift in Sources */,
 				8E9B8041228344B5008873BB /* RegionLabel.swift in Sources */,
 				8E7D24C322779DBD005A1729 /* AppDelegate.swift in Sources */,
 			);

@@ -35,8 +35,21 @@ class Ladder {
         // Add Mark for testing
         let testMark: Mark = Mark()
         testMark.startPosition = 100.0
-        aRegion.marks.append(testMark)
-        
+        testMark.endPosition = 100.0
+        aRegion.appendMark(testMark)
+        let testMark2: Mark = Mark()
+        testMark2.startPosition = 200.0
+        testMark2.endPosition = 200.0
+        aRegion.appendMark(testMark2)
+        let testMark3: Mark = Mark()
+        testMark3.startPosition = 150
+        testMark3.endPosition = 150
+        vRegion.appendMark(testMark3)
+        let testMark4 = Mark()
+        testMark4.startPosition = 100
+        testMark4.endPosition = 150
+        avRegion.appendMark(testMark4)
+
         return ladder
     }
 }
