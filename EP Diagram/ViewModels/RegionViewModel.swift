@@ -9,31 +9,58 @@
 import UIKit
 
 class RegionViewModel: NSObject {
-    let startPosition: CGFloat
-    let height: CGFloat
+    let rect: CGRect
     let region: Region
+    let scale: CGFloat
+    let offset: CGFloat
+    var lastRegion = false
 
-    init(startPosition: CGFloat, height: CGFloat, region: Region) {
-        self.startPosition = startPosition
-        self.height = height
+    init(rect: CGRect, offset: CGFloat, scale: CGFloat, region: Region) {
+        self.rect = rect
+        self.offset = offset
+        self.scale = scale
         self.region = region
     }
 
-    func draw(context: CGContext, originX: CGFloat, scale: CGFloat, width: CGFloat, margin: CGFloat) {
+    func draw(context: CGContext) {
+        // draw labels
+        let stringRect = CGRect(x: 0, y: rect.origin.y, width: rect.origin.x, height: rect.height)
+        context.addRect(stringRect)
+        context.setStrokeColor(UIColor.red.cgColor)
+        context.setFillColor(UIColor.white.cgColor)
+        context.setLineWidth(1)
+        context.drawPath(using: .fillStroke)
+        let paragraphStyle = NSMutableParagraphStyle()
+        paragraphStyle.alignment = .center
+        let attributes: [NSAttributedString.Key : Any] = [
+            .paragraphStyle: paragraphStyle,
+            .font: UIFont.systemFont(ofSize: 18.0),
+            .foregroundColor: UIColor.blue
+        ]
+        let text = region.label?.name ?? ""
+        let attributedString = NSAttributedString(string: text, attributes: attributes)
+        let size: CGSize = text.size(withAttributes: attributes)
+        let labelRect = CGRect(x: 0, y: rect.origin.y + (rect.height - size.height) / 2, width: rect.origin.x, height: size.height)
+        attributedString.draw(in: labelRect)
+        // Draw ladder lines
         context.setStrokeColor(UIColor.black.cgColor)
         context.setLineWidth(1)
-        // Draw ladder lines
-        context.move(to: CGPoint(x: margin, y: startPosition))
-        context.addLine(to: CGPoint(x: width, y: startPosition))
+        context.move(to: CGPoint(x: rect.origin.x, y: rect.origin.y))
+        context.addLine(to: CGPoint(x: rect.width, y: rect.origin.y))
         for mark: Mark in region.marks {
-            let scrolledStartPosition = scale * CGFloat(mark.startPosition!) - originX
-            let scrolledEndPosition = scale * CGFloat(mark.endPosition!) - originX
-            context.move(to: CGPoint(x: scrolledStartPosition, y: startPosition))
-            context.addLine(to: CGPoint(x: scrolledEndPosition, y: startPosition + height))
+            let scrolledStartPosition = scale * mark.startPosition! - offset
+            let scrolledEndPosition = scale * mark.endPosition! - offset
+            // Don't bother drawing marks in margin.
+            if scrolledStartPosition > rect.origin.x {
+                context.move(to: CGPoint(x: scrolledStartPosition, y: rect.origin.y))
+                context.addLine(to: CGPoint(x: scrolledEndPosition, y: rect.origin.y + rect.height))
+            }
         }
-        // TODO: Really should only bother drawing last line if last region.
-        context.move(to: CGPoint(x: margin, y: startPosition + height))
-        context.addLine(to: CGPoint(x: width, y: startPosition + height))
+        // Only bother drawing last line if last region.
+        if lastRegion {
+            context.move(to: CGPoint(x: rect.origin.x, y: rect.origin.y + rect.height))
+            context.addLine(to: CGPoint(x: rect.width, y: rect.origin.y + rect.height))
+        }
         context.strokePath()
     }
 }

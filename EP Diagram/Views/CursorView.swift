@@ -9,13 +9,25 @@
 import UIKit
 
 class CursorView: UIView {
+    var cursor: Cursor = Cursor(position: 100)
 
-    /*
-    // Only override draw() if you perform custom drawing.
-    // An empty implementation adversely affects performance during animation.
     override func draw(_ rect: CGRect) {
         // Drawing code
+        if let context = UIGraphicsGetCurrentContext() {
+            context.setStrokeColor(UIColor.magenta.cgColor)
+            context.setLineWidth(1)
+            context.move(to: CGPoint(x: 100, y: 0))
+            context.addLine(to: CGPoint(x: 100, y: rect.height))
+            context.strokePath()
+        }
     }
-    */
 
+    // This function passes touch events to the views below if the point is not
+    // near the cursor.
+    override func point(inside point: CGPoint, with event: UIEvent?) -> Bool {
+        if cursor.isNearCursor(point: point) {
+            return true
+        }
+        return false
+    }
 }

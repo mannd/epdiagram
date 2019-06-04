@@ -9,10 +9,8 @@
 import UIKit
 
 class LadderView: UIView {
-    public var lineXPosition: Double = 0.0
-    public weak var scrollView: UIScrollView?
-    public var scrollViewBounds = CGRect(x: 0, y: 0 , width: 0, height: 0)
-    public let margin: CGFloat = 50
+    public weak var scrollView: UIScrollView!
+    public let margin: CGFloat = 40
     public var scale: CGFloat = 1.0
 
     let ladderViewModel: LadderViewModel
@@ -25,7 +23,7 @@ class LadderView: UIView {
     override func draw(_ rect: CGRect) {
         // Drawing code - note not necessary to call super.draw.
         if let context = UIGraphicsGetCurrentContext() {
-            ladderViewModel.draw(rect: rect, scrollViewBounds: scrollView!.bounds, scale: scale, context: context)
+            ladderViewModel.draw(rect: rect, margin: margin, offset: scrollView.contentOffset.x, scale: scale, context: context)
         }
     }
 

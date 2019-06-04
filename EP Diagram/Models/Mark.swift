@@ -6,7 +6,9 @@
 //  Copyright © 2019 EP Studios. All rights reserved.
 //
 
-import Foundation
+// We import UIKit here and elsewhere to use CGFloat and avoid conversions
+// of Double to CGFloat.
+import UIKit
 
 // A Mark is the little line drawn on the ladder, such as the vertical line for
 // atrial activation.  It isn't necessarily vertical, as in the AV region, so it
@@ -20,8 +22,8 @@ class Mark {
         case notOrigin
     }
 
-    public var startPosition: Double?
-    public var endPosition: Double?
+    public var startPosition: CGFloat?
+    public var endPosition: CGFloat?
     public var selected: Bool = false
     public var origin: Origin = .notOrigin
 

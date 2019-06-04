@@ -6,15 +6,15 @@
 //  Copyright © 2019 EP Studios. All rights reserved.
 //
 
-import Foundation
+import UIKit
 
 // A Ladder is simply a collection of Regions in top bottom order.  Presumably
 // an origin is necessay (maybe not, maybe in the ViewModel) in order for the
 // Ladder ViewController to know how to draw it.
 class Ladder {
     var regions: [Region] = []
-    var xOrigin: Double?
-    var yOrigin: Double?
+    var xOrigin: CGFloat?
+    var yOrigin: CGFloat?
     var numRegions: Int {
         get {
             return regions.count

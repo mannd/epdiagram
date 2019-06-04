@@ -31,4 +31,10 @@ class EP_DiagramTests: XCTestCase {
         }
     }
 
+    func testPointIsNearCursor() {
+        let cursor = Cursor(position: 100)
+        XCTAssertTrue(cursor.isNearCursor(point: CGPoint(x: 105, y: 55)))
+        XCTAssertFalse(cursor.isNearCursor(point: CGPoint(x: 115, y: 55)))
+    }
+
 }
