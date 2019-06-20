@@ -11,6 +11,19 @@ import UIKit
 class CursorView: UIView {
     var cursor: Cursor = Cursor(position: 100)
 
+    required init?(coder: NSCoder) {
+        super.init(coder: coder)
+        let singleTapRecognizer = UITapGestureRecognizer(target: self, action: #selector(self.singleTap))
+        singleTapRecognizer.numberOfTapsRequired = 1
+        self.addGestureRecognizer(singleTapRecognizer)
+        let doubleTapRecognizer = UITapGestureRecognizer(target: self, action: #selector(self.doubleTap))
+        doubleTapRecognizer.numberOfTapsRequired = 2
+        singleTapRecognizer.require(toFail: doubleTapRecognizer)
+        self.addGestureRecognizer(doubleTapRecognizer)
+        let draggingPanRecognizer = UIPanGestureRecognizer(target: self, action: #selector(self.dragging))
+        self.addGestureRecognizer(draggingPanRecognizer)
+    }
+
     override func draw(_ rect: CGRect) {
         // Drawing code
         if let context = UIGraphicsGetCurrentContext() {
@@ -26,8 +39,24 @@ class CursorView: UIView {
     // near the cursor.
     override func point(inside point: CGPoint, with event: UIEvent?) -> Bool {
         if cursor.isNearCursor(point: point) {
+            NSLog("Near point")
             return true
         }
         return false
+    }
+
+    @objc func singleTap(tap: UITapGestureRecognizer) {
+        NSLog("Single tap")
+        // position Mark
+    }
+
+    @objc func doubleTap(tap: UITapGestureRecognizer) {
+        NSLog("Double tap")
+        // delete Mark
+    }
+
+    @objc func dragging(pan: UIPanGestureRecognizer) {
+        NSLog("Panning")
+        // drag Mark
     }
 }
