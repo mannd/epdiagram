@@ -16,6 +16,7 @@ protocol MarkDelegate {
 class CursorView: UIView {
     var cursor: Cursor = Cursor(position: 100)
     var delegate: MarkDelegate?
+    var height: CGFloat = 0
 
     required init?(coder: NSCoder) {
         super.init(coder: coder)
@@ -35,6 +36,7 @@ class CursorView: UIView {
         if let context = UIGraphicsGetCurrentContext() {
             context.setStrokeColor(UIColor.magenta.cgColor)
             context.setLineWidth(1)
+            context.setAlpha(0.8)
             context.move(to: CGPoint(x: cursor.position, y: 0))
             context.addLine(to: CGPoint(x: cursor.position, y: rect.height))
             context.strokePath()

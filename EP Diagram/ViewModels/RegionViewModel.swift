@@ -47,17 +47,23 @@ class RegionViewModel: NSObject {
         context.setLineWidth(1)
         context.move(to: CGPoint(x: rect.origin.x, y: rect.origin.y))
         context.addLine(to: CGPoint(x: rect.width, y: rect.origin.y))
+        context.strokePath()
         // Draw marks
         for mark: Mark in region.marks {
             let scrolledStartPosition = scale * mark.startPosition! - offset
             let scrolledEndPosition = scale * mark.endPosition! - offset
+            context.setLineWidth(mark.width)
             // Don't bother drawing marks in margin.
             if scrolledStartPosition > rect.origin.x {
+                context.setStrokeColor(mark.color.cgColor)
                 context.move(to: CGPoint(x: scrolledStartPosition, y: rect.origin.y))
                 context.addLine(to: CGPoint(x: scrolledEndPosition, y: rect.origin.y + rect.height))
+                context.strokePath()
+                context.setStrokeColor(UIColor.black.cgColor)
             }
         }
         // Only bother drawing last line if last region.
+        context.setLineWidth(1)
         if lastRegion {
             context.move(to: CGPoint(x: rect.origin.x, y: rect.origin.y + rect.height))
             context.addLine(to: CGPoint(x: rect.width, y: rect.origin.y + rect.height))

@@ -29,6 +29,7 @@ class Ladder {
         let mark = Mark()
         mark.startPosition = location
         mark.endPosition = location
+        mark.selected = true
         activeRegion.appendMark(mark)
     }
 
@@ -45,8 +46,8 @@ class Ladder {
         ladder.regions = [aRegion, avRegion, vRegion]
         // Add Mark for testing
         let testMark: Mark = Mark()
-        testMark.startPosition = 0
-        testMark.endPosition = 0
+        testMark.startPosition = 10
+        testMark.endPosition = 10
         aRegion.appendMark(testMark)
         let testMark2: Mark = Mark()
         testMark2.startPosition = 100.0
@@ -57,7 +58,7 @@ class Ladder {
         testMark3.endPosition = 50
         vRegion.appendMark(testMark3)
         let testMark4 = Mark()
-        testMark4.startPosition = 0
+        testMark4.startPosition = 10
         testMark4.endPosition = 50
         avRegion.appendMark(testMark4)
 

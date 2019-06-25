@@ -27,6 +27,7 @@
             ladderView.backgroundColor = UIColor.white
             ladderView.scrollView = imageScrollView
             cursorView.delegate = ladderView
+            cursorView.height = ladderView.frame.height
             displayLadder()
         }
 

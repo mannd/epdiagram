@@ -26,5 +26,14 @@ class Mark {
     public var endPosition: CGFloat?
     public var selected: Bool = false
     public var origin: Origin = .notOrigin
+    let unselectedColor = UIColor.black
+    let selectedColor = UIColor.blue
+    let width: CGFloat = 2
 
+    var color: UIColor {
+        get {
+            if selected {return selectedColor}
+            else {return unselectedColor}
+        }
+    }
 }

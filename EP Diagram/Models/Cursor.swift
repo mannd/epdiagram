@@ -21,7 +21,7 @@ class Cursor: NSObject {
     var offset: CGFloat = 0
     var scale: CGFloat = 1
 
-    let differential: CGFloat = 10
+    let differential: CGFloat = 40
     
     init(position: CGFloat) {
         self.position = position
