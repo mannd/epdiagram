@@ -8,8 +8,14 @@
 
 import UIKit
 
+protocol MarkDelegate {
+    func makeMark(location: CGFloat)
+    func deleteMark(location: CGFloat)
+}
+
 class CursorView: UIView {
     var cursor: Cursor = Cursor(position: 100)
+    var delegate: MarkDelegate?
 
     required init?(coder: NSCoder) {
         super.init(coder: coder)
@@ -29,8 +35,8 @@ class CursorView: UIView {
         if let context = UIGraphicsGetCurrentContext() {
             context.setStrokeColor(UIColor.magenta.cgColor)
             context.setLineWidth(1)
-            context.move(to: CGPoint(x: 100, y: 0))
-            context.addLine(to: CGPoint(x: 100, y: rect.height))
+            context.move(to: CGPoint(x: cursor.position, y: 0))
+            context.addLine(to: CGPoint(x: cursor.position, y: rect.height))
             context.strokePath()
         }
     }
@@ -48,15 +54,23 @@ class CursorView: UIView {
     @objc func singleTap(tap: UITapGestureRecognizer) {
         NSLog("Single tap")
         // position Mark
+        // temp draw A mark
+        delegate?.makeMark(location: cursor.position)
+
     }
 
     @objc func doubleTap(tap: UITapGestureRecognizer) {
         NSLog("Double tap")
         // delete Mark
+        delegate?.deleteMark(location: cursor.position)
     }
 
     @objc func dragging(pan: UIPanGestureRecognizer) {
         NSLog("Panning")
         // drag Mark
+        let delta = pan.translation(in: self)
+        cursor.move(delta: delta)
+        pan.setTranslation(CGPoint(x: 0,y: 0), in: self)
+        setNeedsDisplay()
     }
 }

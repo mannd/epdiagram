@@ -8,7 +8,15 @@
 
 import UIKit
 
-class LadderView: UIView {
+class LadderView: UIView, MarkDelegate {
+    func deleteMark(location: CGFloat) {
+        print("Delete mark at \(location)")
+    }
+
+    func makeMark(location: CGFloat) {
+        print("Make mark at \(location)")
+    }
+
     public weak var scrollView: UIScrollView!
     public let margin: CGFloat = 40
     public var scale: CGFloat = 1.0
@@ -26,5 +34,7 @@ class LadderView: UIView {
             ladderViewModel.draw(rect: rect, margin: margin, offset: scrollView.contentOffset.x, scale: scale, context: context)
         }
     }
+
+
 
 }

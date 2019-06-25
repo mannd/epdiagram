@@ -1,11 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="14490.70" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES" initialViewController="en3-9x-pbF">
-    <device id="retina6_1" orientation="portrait">
-        <adaptation id="fullscreen"/>
-    </device>
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="14810.12" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES" initialViewController="en3-9x-pbF">
+    <device id="retina6_1" orientation="portrait" appearance="light"/>
     <dependencies>
         <deployment identifier="iOS"/>
-        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="14490.49"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="14766.15"/>
         <capability name="Safe area layout guides" minToolsVersion="9.0"/>
         <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
     </dependencies>
@@ -66,6 +64,7 @@
                     </view>
                     <navigationItem key="navigationItem" id="ryt-Rx-YMV"/>
                     <connections>
+                        <outlet property="cursorView" destination="4H8-sQ-vM2" id="bzr-S2-Omv"/>
                         <outlet property="imageScrollView" destination="QhZ-gG-IcS" id="Jhd-Sa-e44"/>
                         <outlet property="imageView" destination="Z9T-Bh-sBD" id="6GT-g9-IHr"/>
                         <outlet property="ladderView" destination="rq1-PC-4iG" id="IAX-Gu-2b0"/>

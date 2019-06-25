@@ -19,6 +19,10 @@ class LadderViewModel {
         self.ladder = ladder
     }
 
+    func addMark(location: CGFloat) {
+        print("Add mark at \(location)")
+    }
+
     func draw(rect: CGRect, margin: CGFloat, offset: CGFloat, scale: CGFloat, context: CGContext) {
         context.setStrokeColor(UIColor.black.cgColor)
         context.setLineWidth(1)

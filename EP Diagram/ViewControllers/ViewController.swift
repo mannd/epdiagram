@@ -12,6 +12,7 @@
         @IBOutlet var imageScrollView: UIScrollView!
         @IBOutlet var imageView: UIImageView!
         @IBOutlet var ladderView: LadderView!
+        @IBOutlet var cursorView: CursorView!
         var zoom: CGFloat = 1.0
         var isZooming = false
 
@@ -25,8 +26,7 @@
             imageScrollView.backgroundColor = UIColor.lightGray
             ladderView.backgroundColor = UIColor.white
             ladderView.scrollView = imageScrollView
-            // just a temp mark
-//            ladderView.lineXPosition = 100
+            cursorView.delegate = ladderView
             displayLadder()
         }
 

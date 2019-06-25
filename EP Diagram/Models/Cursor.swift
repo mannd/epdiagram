@@ -27,4 +27,8 @@ class Cursor: NSObject {
     func isNearCursor(point p: CGPoint) -> Bool {
         return abs(p.x - position) < differential
     }
+
+    func move(delta: CGPoint) {
+        position += delta.x
+    }
 }
