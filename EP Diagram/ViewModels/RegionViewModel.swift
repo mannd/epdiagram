@@ -47,6 +47,7 @@ class RegionViewModel: NSObject {
         context.setLineWidth(1)
         context.move(to: CGPoint(x: rect.origin.x, y: rect.origin.y))
         context.addLine(to: CGPoint(x: rect.width, y: rect.origin.y))
+        // Draw marks
         for mark: Mark in region.marks {
             let scrolledStartPosition = scale * mark.startPosition! - offset
             let scrolledEndPosition = scale * mark.endPosition! - offset

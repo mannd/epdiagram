@@ -15,7 +15,16 @@ class LadderView: UIView, MarkDelegate {
 
     func makeMark(location: CGFloat) {
         print("Make mark at \(location)")
+        // FIXME: Need to convert cursor location to a mark location, which
+        // depends on scale and scolling!
+        ladderViewModel.addMark(location: translatePosition(location))
+        setNeedsDisplay()
     }
+
+    func translatePosition(_ location: CGFloat) -> CGFloat {
+        return (location + scrollView.contentOffset.x) / scale
+    }
+
 
     public weak var scrollView: UIScrollView!
     public let margin: CGFloat = 40

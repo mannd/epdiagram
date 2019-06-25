@@ -18,6 +18,9 @@ class Cursor: NSObject {
 //    var linkedMark: Mark?
     // The x axis position of the cursor.
     var position: CGFloat
+    var offset: CGFloat = 0
+    var scale: CGFloat = 1
+
     let differential: CGFloat = 10
     
     init(position: CGFloat) {

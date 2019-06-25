@@ -20,6 +20,17 @@ class Ladder {
             return regions.count
         }
     }
+    var activeRegion: Region?
+
+    func addMarkAt(_ location: CGFloat) {
+        guard let activeRegion = activeRegion else {
+            return
+        }
+        let mark = Mark()
+        mark.startPosition = location
+        mark.endPosition = location
+        activeRegion.appendMark(mark)
+    }
 
     // Returns a basic ladder (A, AV, V).
     public static func defaultLadder() -> Ladder {
@@ -34,20 +45,20 @@ class Ladder {
         ladder.regions = [aRegion, avRegion, vRegion]
         // Add Mark for testing
         let testMark: Mark = Mark()
-        testMark.startPosition = 100.0
-        testMark.endPosition = 100.0
+        testMark.startPosition = 0
+        testMark.endPosition = 0
         aRegion.appendMark(testMark)
         let testMark2: Mark = Mark()
-        testMark2.startPosition = 200.0
-        testMark2.endPosition = 200.0
+        testMark2.startPosition = 100.0
+        testMark2.endPosition = 100.0
         aRegion.appendMark(testMark2)
         let testMark3: Mark = Mark()
-        testMark3.startPosition = 150
-        testMark3.endPosition = 150
+        testMark3.startPosition = 50
+        testMark3.endPosition = 50
         vRegion.appendMark(testMark3)
         let testMark4 = Mark()
-        testMark4.startPosition = 100
-        testMark4.endPosition = 150
+        testMark4.startPosition = 0
+        testMark4.endPosition = 50
         avRegion.appendMark(testMark4)
 
         return ladder

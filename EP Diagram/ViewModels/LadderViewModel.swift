@@ -13,6 +13,9 @@ class LadderViewModel {
 
     init() {
         ladder = Ladder.defaultLadder()
+        let regions = ladder.regions
+        // Temporarily act on A region.
+        ladder.activeRegion = regions[0]
     }
 
     init(ladder: Ladder) {
@@ -21,6 +24,7 @@ class LadderViewModel {
 
     func addMark(location: CGFloat) {
         print("Add mark at \(location)")
+        ladder.addMarkAt(location)
     }
 
     func draw(rect: CGRect, margin: CGFloat, offset: CGFloat, scale: CGFloat, context: CGContext) {
