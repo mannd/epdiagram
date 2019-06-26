@@ -39,6 +39,7 @@
         }
 
         fileprivate func displayLadder() {
+            print("displayLadder")
             ladderView.setNeedsDisplay()
         }
 
@@ -46,11 +47,11 @@
         // of scrolling.  Relabeling might best occur at end of scrolling,
         // while redrawing of ladder can be done during scrolling.
         func scrollViewDidScroll(_ scrollView: UIScrollView) {
-            print("Scrolling")
+//            print("Scrolling")
             if scrollView == imageScrollView {
-                if !isZooming {
+//                if !isZooming {
                     displayLadder()
-                }
+//                }
             }
         }
 
@@ -72,8 +73,6 @@
             print("Scroll finished")
         }
 
-        // Not clear if there is any simple way to maintain relationship between
-        // image and ladder during zooming.
         func viewForZooming(in scrollView: UIScrollView) -> UIView? {
             if scrollView == imageScrollView {
                 return imageView
@@ -88,6 +87,7 @@
         }
 
         func scrollViewDidEndZooming(_ scrollView: UIScrollView, with view: UIView?, atScale scale: CGFloat) {
+            print("scrollViewDidEndZooming")
             print("Zoom = \(scale)")
             print("imageView width = \(imageView.frame.width)")
             print("imageScrollView bounds = \(imageScrollView.bounds)")
@@ -95,8 +95,7 @@
             isZooming = false
             ladderView.scale = scale
             zoom = scale
-
-            ladderView.setNeedsDisplay()
+            displayLadder()
         }
 
         // TODO: This doesn't work right.
@@ -105,7 +104,7 @@
             coordinator.animate(alongsideTransition: nil, completion: {
                 _ in
                 print("Transitioning")
-                self.ladderView.setNeedsDisplay()
+                self.displayLadder()
             })
         }
 

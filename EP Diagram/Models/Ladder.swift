@@ -38,6 +38,7 @@ class Ladder {
         let ladder = Ladder()
         let aRegion = Region()
         aRegion.label = RegionLabel("A")
+        aRegion.selected = true
         let avRegion = Region()
         avRegion.label = RegionLabel("AV")
         avRegion.decremental = true

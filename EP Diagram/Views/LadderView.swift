@@ -17,7 +17,7 @@ class LadderView: UIView, MarkDelegate {
         print("Make mark at \(location)")
         // FIXME: Need to convert cursor location to a mark location, which
         // depends on scale and scolling!
-        ladderViewModel.addMark(location: translatePosition(location))
+        ladderViewModel?.addMark(location: translatePosition(location))
         setNeedsDisplay()
     }
 
@@ -30,17 +30,41 @@ class LadderView: UIView, MarkDelegate {
     public let margin: CGFloat = 40
     public var scale: CGFloat = 1.0
 
-    let ladderViewModel: LadderViewModel
+    var ladderViewModel: LadderViewModel? = nil
 
     required init?(coder aDecoder: NSCoder) {
-        ladderViewModel = LadderViewModel()
         super.init(coder: aDecoder)
+        ladderViewModel = LadderViewModel()
+        let singleTapRecognizer = UITapGestureRecognizer(target: self, action: #selector(self.singleTap))
+        singleTapRecognizer.numberOfTapsRequired = 1
+        self.addGestureRecognizer(singleTapRecognizer)
+        let doubleTapRecognizer = UITapGestureRecognizer(target: self, action: #selector(self.doubleTap))
+        doubleTapRecognizer.numberOfTapsRequired = 2
+        singleTapRecognizer.require(toFail: doubleTapRecognizer)
+        self.addGestureRecognizer(doubleTapRecognizer)
+        let draggingPanRecognizer = UIPanGestureRecognizer(target: self, action: #selector(self.dragging))
+        self.addGestureRecognizer(draggingPanRecognizer)
+    }
+
+    @objc func singleTap(tap: UITapGestureRecognizer) {
+        print("Single tap on ladder view")
+        // select region tapped or select mark
+    }
+
+    @objc func doubleTap(tap: UITapGestureRecognizer) {
+        print("Double tap on ladder view")
+        // unselect region or unselect mark
+    }
+
+    @objc func dragging(pan: UIPanGestureRecognizer) {
+        print("Dragging on ladder view")
+        // somehow draw connections :)
     }
 
     override func draw(_ rect: CGRect) {
         // Drawing code - note not necessary to call super.draw.
         if let context = UIGraphicsGetCurrentContext() {
-            ladderViewModel.draw(rect: rect, margin: margin, offset: scrollView.contentOffset.x, scale: scale, context: context)
+            ladderViewModel?.draw(rect: rect, margin: margin, offset: scrollView.contentOffset.x, scale: scale, context: context)
         }
     }
 

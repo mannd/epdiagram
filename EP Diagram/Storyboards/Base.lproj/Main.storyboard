@@ -34,9 +34,8 @@
                                 <rect key="frame" x="0.0" y="536" width="414" height="277"/>
                                 <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                             </view>
-                            <view opaque="NO" contentMode="scaleToFill" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="4H8-sQ-vM2" customClass="CursorView" customModule="EP_Diagram" customModuleProvider="target">
-                                <rect key="frame" x="0.0" y="61" width="414" height="774"/>
-                                <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+                            <view opaque="NO" contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="4H8-sQ-vM2" customClass="CursorView" customModule="EP_Diagram" customModuleProvider="target">
+                                <rect key="frame" x="0.0" y="88" width="414" height="725"/>
                                 <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                             </view>
                             <toolbar opaque="NO" clearsContextBeforeDrawing="NO" contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="DAT-qz-u84">
@@ -48,17 +47,21 @@
                         </subviews>
                         <color key="backgroundColor" red="1" green="1" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                         <constraints>
+                            <constraint firstItem="4H8-sQ-vM2" firstAttribute="top" secondItem="6Tk-OE-BBY" secondAttribute="top" id="0Ek-m5-aVH"/>
                             <constraint firstItem="QhZ-gG-IcS" firstAttribute="top" secondItem="6Tk-OE-BBY" secondAttribute="top" id="0PF-2Y-htw"/>
+                            <constraint firstItem="4H8-sQ-vM2" firstAttribute="trailing" secondItem="6Tk-OE-BBY" secondAttribute="trailing" id="1JO-aH-c1p"/>
+                            <constraint firstItem="DAT-qz-u84" firstAttribute="top" secondItem="4H8-sQ-vM2" secondAttribute="bottom" id="6tr-FD-MoM"/>
                             <constraint firstItem="QhZ-gG-IcS" firstAttribute="height" secondItem="8bC-Xf-vdC" secondAttribute="height" multiplier="0.5" id="9vP-eV-cO0"/>
                             <constraint firstItem="QhZ-gG-IcS" firstAttribute="leading" secondItem="6Tk-OE-BBY" secondAttribute="leading" id="HXN-Y0-Pmi"/>
-                            <constraint firstItem="rq1-PC-4iG" firstAttribute="leading" secondItem="8bC-Xf-vdC" secondAttribute="leading" id="Njx-CB-fTf"/>
-                            <constraint firstItem="DAT-qz-u84" firstAttribute="trailing" secondItem="6Tk-OE-BBY" secondAttribute="trailing" id="RO3-8P-XQB"/>
-                            <constraint firstAttribute="trailing" secondItem="rq1-PC-4iG" secondAttribute="trailing" id="Tje-Vw-uSw"/>
+                            <constraint firstItem="rq1-PC-4iG" firstAttribute="leading" secondItem="6Tk-OE-BBY" secondAttribute="leading" id="Njx-CB-fTf"/>
+                            <constraint firstItem="DAT-qz-u84" firstAttribute="trailing" secondItem="8bC-Xf-vdC" secondAttribute="trailing" id="RO3-8P-XQB"/>
+                            <constraint firstItem="6Tk-OE-BBY" firstAttribute="trailing" secondItem="rq1-PC-4iG" secondAttribute="trailing" id="Tje-Vw-uSw"/>
+                            <constraint firstItem="4H8-sQ-vM2" firstAttribute="leading" secondItem="6Tk-OE-BBY" secondAttribute="leading" id="WPA-iR-ux6"/>
                             <constraint firstItem="6Tk-OE-BBY" firstAttribute="trailing" secondItem="QhZ-gG-IcS" secondAttribute="trailing" id="ZQ7-RU-xca"/>
                             <constraint firstItem="rq1-PC-4iG" firstAttribute="top" secondItem="QhZ-gG-IcS" secondAttribute="bottom" id="cGx-yL-szv"/>
                             <constraint firstItem="DAT-qz-u84" firstAttribute="bottom" secondItem="6Tk-OE-BBY" secondAttribute="bottom" id="chb-4e-NF5"/>
                             <constraint firstItem="DAT-qz-u84" firstAttribute="top" secondItem="rq1-PC-4iG" secondAttribute="bottom" id="iag-3b-vDQ"/>
-                            <constraint firstItem="DAT-qz-u84" firstAttribute="leading" secondItem="6Tk-OE-BBY" secondAttribute="leading" id="wDu-cG-xtS"/>
+                            <constraint firstItem="DAT-qz-u84" firstAttribute="leading" secondItem="8bC-Xf-vdC" secondAttribute="leading" id="wDu-cG-xtS"/>
                         </constraints>
                         <viewLayoutGuide key="safeArea" id="6Tk-OE-BBY"/>
                     </view>

@@ -35,7 +35,7 @@ class RegionViewModel: NSObject {
         let attributes: [NSAttributedString.Key : Any] = [
             .paragraphStyle: paragraphStyle,
             .font: UIFont.systemFont(ofSize: 18.0),
-            .foregroundColor: UIColor.blue
+            .foregroundColor: region.selected ? UIColor.red : UIColor.blue
         ]
         let text = region.label?.name ?? ""
         let attributedString = NSAttributedString(string: text, attributes: attributes)
@@ -47,6 +47,15 @@ class RegionViewModel: NSObject {
         context.setLineWidth(1)
         context.move(to: CGPoint(x: rect.origin.x, y: rect.origin.y))
         context.addLine(to: CGPoint(x: rect.width, y: rect.origin.y))
+        context.strokePath()
+        if region.selected {
+            context.setFillColor(UIColor.red.cgColor)
+            let regionRect = CGRect(x: rect.origin.x, y: rect.origin.y, width: rect.width, height: rect.height)
+            context.setAlpha(0.1)
+            context.addRect(regionRect)
+            context.drawPath(using: .fillStroke)
+        }
+        context.setAlpha(1)
         context.strokePath()
         // Draw marks
         for mark: Mark in region.marks {
