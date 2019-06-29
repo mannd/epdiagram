@@ -15,20 +15,23 @@
         @IBOutlet var cursorView: CursorView!
         var zoom: CGFloat = 1.0
         var isZooming = false
+        // leftMargin is used by LadderView, ImageView, and CursorView, and is the same
+        // for all the views.
+        let leftMargin: CGFloat = 40
 
         override func viewDidLoad() {
             super.viewDidLoad()
             title = "EP Diagram"
             imageScrollView.delegate = self
             // Ensure there is a space for labels at the left margin.
-            imageScrollView.contentInset = UIEdgeInsets(top: 0, left: ladderView.margin, bottom: 0, right: 0)
+            imageScrollView.contentInset = UIEdgeInsets(top: 0, left: leftMargin, bottom: 0, right: 0)
             // Distinguish the two views.
             imageScrollView.backgroundColor = UIColor.lightGray
             ladderView.backgroundColor = UIColor.white
+            ladderView.leftMargin = leftMargin
             ladderView.scrollView = imageScrollView
+            cursorView.leftMargin = leftMargin
             cursorView.delegate = ladderView
-            cursorView.height = ladderView.frame.height
-            displayLadder()
         }
 
         override func viewDidAppear(_ animated: Bool) {
@@ -36,10 +39,7 @@
             // hand corner of the screen.
             let newContentOffsetX = (imageScrollView.contentSize.width/2) - (imageScrollView.bounds.size.width/2);
             imageScrollView.contentOffset = CGPoint(x: newContentOffsetX, y: 0)
-        }
-
-        fileprivate func displayLadder() {
-            print("displayLadder")
+            cursorView.setNeedsDisplay()
             ladderView.setNeedsDisplay()
         }
 
@@ -47,11 +47,8 @@
         // of scrolling.  Relabeling might best occur at end of scrolling,
         // while redrawing of ladder can be done during scrolling.
         func scrollViewDidScroll(_ scrollView: UIScrollView) {
-//            print("Scrolling")
             if scrollView == imageScrollView {
-//                if !isZooming {
-                    displayLadder()
-//                }
+                ladderView.setNeedsDisplay()
             }
         }
 
@@ -95,7 +92,7 @@
             isZooming = false
             ladderView.scale = scale
             zoom = scale
-            displayLadder()
+            ladderView.setNeedsDisplay()
         }
 
         // TODO: This doesn't work right.
@@ -104,7 +101,9 @@
             coordinator.animate(alongsideTransition: nil, completion: {
                 _ in
                 print("Transitioning")
-                self.displayLadder()
+                self.cursorView.initCursorViewModel()
+                self.ladderView.setNeedsDisplay()
+                self.cursorView.setNeedsDisplay()
             })
         }
 

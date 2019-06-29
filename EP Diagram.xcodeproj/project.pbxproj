@@ -10,7 +10,6 @@
 		8E01D9C522848F4E000F36FC /* LadderViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8E01D9C422848F4E000F36FC /* LadderViewModel.swift */; };
 		8E01D9C722849047000F36FC /* CursorView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8E01D9C622849047000F36FC /* CursorView.swift */; };
 		8E55612922A5FEDC00C4D391 /* Cursor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8E55612822A5FEDC00C4D391 /* Cursor.swift */; };
-		8E6F576422A42CE100C5ECDB /* RegionViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8E6F576322A42CE100C5ECDB /* RegionViewModel.swift */; };
 		8E7D24C322779DBD005A1729 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8E7D24C222779DBD005A1729 /* AppDelegate.swift */; };
 		8E7D24C522779DBD005A1729 /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8E7D24C422779DBD005A1729 /* ViewController.swift */; };
 		8E7D24C822779DBD005A1729 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 8E7D24C622779DBD005A1729 /* Main.storyboard */; };
@@ -19,6 +18,8 @@
 		8E7D24D822779DBF005A1729 /* EP_DiagramTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8E7D24D722779DBF005A1729 /* EP_DiagramTests.swift */; };
 		8E7D24E322779DBF005A1729 /* EP_DiagramUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8E7D24E222779DBF005A1729 /* EP_DiagramUITests.swift */; };
 		8E7D24F12277A00C005A1729 /* ImageView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8E7D24F02277A00C005A1729 /* ImageView.swift */; };
+		8E7F8DC122C82D890061ABF8 /* CursorViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8E7F8DC022C82D890061ABF8 /* CursorViewModel.swift */; };
+		8E7F8DC322C82D9E0061ABF8 /* ImageViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8E7F8DC222C82D9E0061ABF8 /* ImageViewModel.swift */; };
 		8E9B8041228344B5008873BB /* RegionLabel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8E9B8040228344B5008873BB /* RegionLabel.swift */; };
 		8E9B8043228345B5008873BB /* Mark.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8E9B8042228345B5008873BB /* Mark.swift */; };
 		8E9B8045228347DE008873BB /* Region.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8E9B8044228347DE008873BB /* Region.swift */; };
@@ -47,7 +48,6 @@
 		8E01D9C422848F4E000F36FC /* LadderViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LadderViewModel.swift; sourceTree = "<group>"; };
 		8E01D9C622849047000F36FC /* CursorView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CursorView.swift; sourceTree = "<group>"; };
 		8E55612822A5FEDC00C4D391 /* Cursor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Cursor.swift; sourceTree = "<group>"; };
-		8E6F576322A42CE100C5ECDB /* RegionViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RegionViewModel.swift; sourceTree = "<group>"; };
 		8E7D24BF22779DBD005A1729 /* EP Diagram.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "EP Diagram.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		8E7D24C222779DBD005A1729 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		8E7D24C422779DBD005A1729 /* ViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ViewController.swift; sourceTree = "<group>"; };
@@ -62,6 +62,8 @@
 		8E7D24E222779DBF005A1729 /* EP_DiagramUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EP_DiagramUITests.swift; sourceTree = "<group>"; };
 		8E7D24E422779DBF005A1729 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		8E7D24F02277A00C005A1729 /* ImageView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImageView.swift; sourceTree = "<group>"; };
+		8E7F8DC022C82D890061ABF8 /* CursorViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CursorViewModel.swift; sourceTree = "<group>"; };
+		8E7F8DC222C82D9E0061ABF8 /* ImageViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImageViewModel.swift; sourceTree = "<group>"; };
 		8E9B8040228344B5008873BB /* RegionLabel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RegionLabel.swift; sourceTree = "<group>"; };
 		8E9B8042228345B5008873BB /* Mark.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Mark.swift; sourceTree = "<group>"; };
 		8E9B8044228347DE008873BB /* Region.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Region.swift; sourceTree = "<group>"; };
@@ -163,7 +165,8 @@
 			isa = PBXGroup;
 			children = (
 				8E01D9C422848F4E000F36FC /* LadderViewModel.swift */,
-				8E6F576322A42CE100C5ECDB /* RegionViewModel.swift */,
+				8E7F8DC022C82D890061ABF8 /* CursorViewModel.swift */,
+				8E7F8DC222C82D9E0061ABF8 /* ImageViewModel.swift */,
 			);
 			path = ViewModels;
 			sourceTree = "<group>";
@@ -328,6 +331,7 @@
 			files = (
 				8E7D24F12277A00C005A1729 /* ImageView.swift in Sources */,
 				8E7D24C522779DBD005A1729 /* ViewController.swift in Sources */,
+				8E7F8DC122C82D890061ABF8 /* CursorViewModel.swift in Sources */,
 				8E9B8043228345B5008873BB /* Mark.swift in Sources */,
 				8E01D9C522848F4E000F36FC /* LadderViewModel.swift in Sources */,
 				8E9B804722834870008873BB /* Ladder.swift in Sources */,
@@ -335,9 +339,9 @@
 				8EF9166B227926BC00B51F17 /* LadderView.swift in Sources */,
 				8E01D9C722849047000F36FC /* CursorView.swift in Sources */,
 				8E9B8045228347DE008873BB /* Region.swift in Sources */,
-				8E6F576422A42CE100C5ECDB /* RegionViewModel.swift in Sources */,
 				8E9B8041228344B5008873BB /* RegionLabel.swift in Sources */,
 				8E7D24C322779DBD005A1729 /* AppDelegate.swift in Sources */,
+				8E7F8DC322C82D9E0061ABF8 /* ImageViewModel.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
