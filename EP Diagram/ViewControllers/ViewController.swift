@@ -32,6 +32,7 @@
             ladderView.scrollView = imageScrollView
             cursorView.leftMargin = leftMargin
             cursorView.delegate = ladderView
+            ladderView.delegate = cursorView
         }
 
         override func viewDidAppear(_ animated: Bool) {
@@ -101,7 +102,7 @@
             coordinator.animate(alongsideTransition: nil, completion: {
                 _ in
                 print("Transitioning")
-                self.cursorView.initCursorViewModel()
+                self.cursorView.reset()
                 self.ladderView.setNeedsDisplay()
                 self.cursorView.setNeedsDisplay()
             })

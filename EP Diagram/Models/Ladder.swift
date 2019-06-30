@@ -34,7 +34,7 @@ class Ladder {
     }
 
     // Returns a basic ladder (A, AV, V).
-    public static func defaultLadder() -> Ladder {
+    static func defaultLadder() -> Ladder {
         let ladder = Ladder()
         let aRegion = Region()
         aRegion.label = RegionLabel("A")
@@ -62,7 +62,6 @@ class Ladder {
         testMark4.startPosition = 10
         testMark4.endPosition = 50
         avRegion.appendMark(testMark4)
-
         return ladder
     }
 }

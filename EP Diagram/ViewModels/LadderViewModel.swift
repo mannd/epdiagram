@@ -10,21 +10,26 @@ import UIKit
 
 class LadderViewModel {
     let ladder: Ladder
+    var activeRegion: Region? {
+        set(value) {
+            ladder.activeRegion = value
+            activateRegion(region: ladder.activeRegion)
+        }
+        get {
+            return ladder.activeRegion
+        }
+    }
 
     init() {
         ladder = Ladder.defaultLadder()
         let regions = ladder.regions
 
         // Temporarily act on first region
-        ladder.activeRegion = regions[2]
+        ladder.activeRegion = regions[0]
     }
 
     init(ladder: Ladder) {
         self.ladder = ladder
-    }
-
-    func activeRegion() -> Region? {
-        return ladder.activeRegion
     }
 
     func addMark(location: CGFloat) {
@@ -101,8 +106,8 @@ class LadderViewModel {
 
         // Draw marks
         for mark: Mark in region.marks {
-            let scrolledStartPosition = scale * mark.startPosition! - offset
-            let scrolledEndPosition = scale * mark.endPosition! - offset
+            let scrolledStartPosition = scale * mark.startPosition - offset
+            let scrolledEndPosition = scale * mark.endPosition - offset
             context.setLineWidth(mark.width)
             // Don't bother drawing marks in margin.
             if scrolledStartPosition > rect.origin.x {
@@ -131,5 +136,27 @@ class LadderViewModel {
         // we'll allow one region unit space above and below, so...
         numRegionUnits += 2
         return rect.height / CGFloat(numRegionUnits)
+    }
+
+    func regions() -> [Region] {
+        return ladder.regions
+    }
+
+    func activateRegion(region: Region?) {
+        guard let region = region else { return }
+        for r in ladder.regions {
+            r.selected = false
+        }
+        region.selected = true
+    }
+
+    // Translates from LadderView coordinates to Mark coordinates.
+    func translateToAbsolutePosition(location: CGFloat, offset: CGFloat, scale: CGFloat) -> CGFloat {
+        return (location + offset) / scale
+    }
+
+    // Translate from Mark coordinates to LadderView coordinates.
+    func translateToRelativePosition(location: CGFloat, offset: CGFloat, scale: CGFloat) -> CGFloat {
+        return scale * location - offset
     }
 }

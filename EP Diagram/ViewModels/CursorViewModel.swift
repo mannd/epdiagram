@@ -12,6 +12,8 @@ class CursorViewModel: NSObject {
     let cursor: Cursor
     var leftMargin: CGFloat
     let rightMargin: CGFloat = 5
+    let alphaValue: CGFloat = 0.8
+    let lineWidth: CGFloat = 1
     var width: CGFloat
     var height: CGFloat
 
@@ -26,8 +28,8 @@ class CursorViewModel: NSObject {
 
     func draw(rect: CGRect, context: CGContext) {
         context.setStrokeColor(UIColor.magenta.cgColor)
-        context.setLineWidth(1)
-        context.setAlpha(0.8)
+        context.setLineWidth(lineWidth)
+        context.setAlpha(alphaValue)
         adjustPosition()
         context.move(to: CGPoint(x: cursor.position, y: 0))
         context.addLine(to: CGPoint(x: cursor.position, y: height))
