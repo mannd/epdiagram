@@ -18,13 +18,24 @@ class Cursor: NSObject {
 //    var linkedMark: Mark?
     // The x axis position of the cursor.
     var position: CGFloat
-    let differential: CGFloat = 10
+    var offset: CGFloat = 0
+    var scale: CGFloat = 1
+
+    let differential: CGFloat = 40
     
     init(position: CGFloat) {
         self.position = position
     }
 
+    convenience override init() {
+        self.init(position: 0)
+    }
+
     func isNearCursor(point p: CGPoint) -> Bool {
         return abs(p.x - position) < differential
+    }
+
+    func move(delta: CGPoint) {
+        position += delta.x
     }
 }

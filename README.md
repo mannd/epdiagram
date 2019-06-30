@@ -3,7 +3,7 @@ EP Diagram
 
 <!-- [![Build Status](https://travis-ci.org/mannd/epcoding-ios.svg?branch=master)](https://travis-ci.org/mannd/epdiagram) -->
 
-## Create ladder diagrams of ECG and EP recordins
+## Create ladder diagrams of ECG and EP recordings
 EP Diagram is in alpha development.  Its purpose is to create ladder
 diagrams as they appear in textbooks, but interactively on your phone
 or tablet.  We hope this will be a useful teaching tool for cardiologists.  EP Studios is not liable for any errors in coding that might occur from using this app.  Please see the licensing information below.

@@ -22,9 +22,18 @@ class Mark {
         case notOrigin
     }
 
-    public var startPosition: CGFloat?
-    public var endPosition: CGFloat?
+    public var startPosition: CGFloat = 0
+    public var endPosition: CGFloat = 0
     public var selected: Bool = false
     public var origin: Origin = .notOrigin
+    let unselectedColor = UIColor.black
+    let selectedColor = UIColor.blue
+    let width: CGFloat = 2
 
+    var color: UIColor {
+        get {
+            if selected {return selectedColor}
+            else {return unselectedColor}
+        }
+    }
 }

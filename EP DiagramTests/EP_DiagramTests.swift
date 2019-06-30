@@ -33,8 +33,19 @@ class EP_DiagramTests: XCTestCase {
 
     func testPointIsNearCursor() {
         let cursor = Cursor(position: 100)
+        // Assumes differential of 40.
         XCTAssertTrue(cursor.isNearCursor(point: CGPoint(x: 105, y: 55)))
-        XCTAssertFalse(cursor.isNearCursor(point: CGPoint(x: 115, y: 55)))
+        XCTAssertFalse(cursor.isNearCursor(point: CGPoint(x: 145, y: 55)))
+    }
+
+    func testTranslateCoordinates() {
+        let ladderViewModel = LadderViewModel()
+        let location: CGFloat = 134.56
+        let scale: CGFloat = 1.78
+        let offset: CGFloat = 333.45
+        let absoluteLocation = ladderViewModel.translateToAbsolutePosition(location: location, offset: offset, scale: scale)
+        let relativeLocation = ladderViewModel.translateToRelativePosition(location: absoluteLocation, offset: offset, scale: scale)
+        XCTAssertEqual(location, relativeLocation, accuracy:0.001)
     }
 
 }

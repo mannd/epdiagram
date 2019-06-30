@@ -12,22 +12,27 @@
         @IBOutlet var imageScrollView: UIScrollView!
         @IBOutlet var imageView: UIImageView!
         @IBOutlet var ladderView: LadderView!
+        @IBOutlet var cursorView: CursorView!
         var zoom: CGFloat = 1.0
         var isZooming = false
+        // leftMargin is used by LadderView, ImageView, and CursorView, and is the same
+        // for all the views.
+        let leftMargin: CGFloat = 40
 
         override func viewDidLoad() {
             super.viewDidLoad()
             title = "EP Diagram"
             imageScrollView.delegate = self
             // Ensure there is a space for labels at the left margin.
-            imageScrollView.contentInset = UIEdgeInsets(top: 0, left: ladderView.margin, bottom: 0, right: 0)
+            imageScrollView.contentInset = UIEdgeInsets(top: 0, left: leftMargin, bottom: 0, right: 0)
             // Distinguish the two views.
             imageScrollView.backgroundColor = UIColor.lightGray
             ladderView.backgroundColor = UIColor.white
+            ladderView.leftMargin = leftMargin
             ladderView.scrollView = imageScrollView
-            // just a temp mark
-//            ladderView.lineXPosition = 100
-            displayLadder()
+            cursorView.leftMargin = leftMargin
+            cursorView.delegate = ladderView
+            ladderView.delegate = cursorView
         }
 
         override func viewDidAppear(_ animated: Bool) {
@@ -35,9 +40,7 @@
             // hand corner of the screen.
             let newContentOffsetX = (imageScrollView.contentSize.width/2) - (imageScrollView.bounds.size.width/2);
             imageScrollView.contentOffset = CGPoint(x: newContentOffsetX, y: 0)
-        }
-
-        fileprivate func displayLadder() {
+            cursorView.setNeedsDisplay()
             ladderView.setNeedsDisplay()
         }
 
@@ -45,11 +48,8 @@
         // of scrolling.  Relabeling might best occur at end of scrolling,
         // while redrawing of ladder can be done during scrolling.
         func scrollViewDidScroll(_ scrollView: UIScrollView) {
-            print("Scrolling")
             if scrollView == imageScrollView {
-                if !isZooming {
-                    displayLadder()
-                }
+                ladderView.setNeedsDisplay()
             }
         }
 
@@ -71,8 +71,6 @@
             print("Scroll finished")
         }
 
-        // Not clear if there is any simple way to maintain relationship between
-        // image and ladder during zooming.
         func viewForZooming(in scrollView: UIScrollView) -> UIView? {
             if scrollView == imageScrollView {
                 return imageView
@@ -87,6 +85,7 @@
         }
 
         func scrollViewDidEndZooming(_ scrollView: UIScrollView, with view: UIView?, atScale scale: CGFloat) {
+            print("scrollViewDidEndZooming")
             print("Zoom = \(scale)")
             print("imageView width = \(imageView.frame.width)")
             print("imageScrollView bounds = \(imageScrollView.bounds)")
@@ -94,7 +93,6 @@
             isZooming = false
             ladderView.scale = scale
             zoom = scale
-
             ladderView.setNeedsDisplay()
         }
 
@@ -104,7 +102,9 @@
             coordinator.animate(alongsideTransition: nil, completion: {
                 _ in
                 print("Transitioning")
+                self.cursorView.reset()
                 self.ladderView.setNeedsDisplay()
+                self.cursorView.setNeedsDisplay()
             })
         }
 
