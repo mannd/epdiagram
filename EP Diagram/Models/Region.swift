@@ -11,8 +11,8 @@ import UIKit
 // A Region is a collection of Marks, in left to right order.  Positions are
 // vertical, i.e. Y axis.  A Region has a RegionLabel such as "A" or "AV."
 class Region {
-    public var startPosition: CGFloat = 0
-    public var endPosition: CGFloat = 0
+    public var upperBoundary: CGFloat = 0
+    public var lowerBoundary: CGFloat = 0
     public var selected: Bool = false
     public var label: RegionLabel?
     public var marks: [Mark] = []

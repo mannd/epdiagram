@@ -16,26 +16,28 @@ class Cursor: NSObject {
 //    var color: UIColor?
 //    var width: CGFloat?
 //    var linkedMark: Mark?
-    // The x axis position of the cursor.
-    var position: CGFloat
+    // The x coordinate of the cursor.
+    var location: CGFloat
+    var grabbed = false
     var offset: CGFloat = 0
     var scale: CGFloat = 1
 
+    // Touches +/- 40 points count as touches.
     let differential: CGFloat = 40
     
-    init(position: CGFloat) {
-        self.position = position
+    init(location: CGFloat) {
+        self.location = location
     }
 
     convenience override init() {
-        self.init(position: 0)
+        self.init(location: 0)
     }
 
     func isNearCursor(point p: CGPoint) -> Bool {
-        return abs(p.x - position) < differential
+        return abs(p.x - location) < differential
     }
 
     func move(delta: CGPoint) {
-        position += delta.x
+        location += delta.x
     }
 }

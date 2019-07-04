@@ -11,6 +11,9 @@ import UIKit
 protocol CursorViewDelegate: AnyObject {
     func cursorViewRefresh()
     func cursorViewGrabMark(mark: Mark?)
+    func cursorViewMoveCursor(location: CGFloat)
+    func cursorViewRecenterCursor()
+    func cursorViewHighlightCursor(_ on: Bool)
 }
 
 class LadderView: UIView, LadderViewDelegate {
@@ -36,34 +39,14 @@ class LadderView: UIView, LadderViewDelegate {
         self.addGestureRecognizer(draggingPanRecognizer)
     }
 
-    // Mark delegate
-    // convert region start Y position to view's coordinates and return to view
-    func ladderViewGetMarkStartPosition(view: UIView) -> CGFloat {
-            let position = CGPoint(x: 0, y: ladderViewModel?.activeRegion?.startPosition ?? 0)
-            NSLog("StartPosition = \(position)")
-            return convert(position, to: view).y
-    }
-
-    func ladderViewDeleteMark(location: CGFloat) {
-        print("Delete mark at \(location)")
-    }
-
-    func ladderViewMakeMark(location: CGFloat) {
-        print("Make mark at \(location)")
-        // FIXME: Need to convert cursor location to a mark location, which
-        // depends on scale and scolling!
-        ladderViewModel?.addMark(location: translateToAbsolutePosition(location))
-        setNeedsDisplay()
-    }
-
     // Translates from LadderView coordinates to Mark coordinates.
-    func translateToAbsolutePosition(_ location: CGFloat) -> CGFloat {
-        return ladderViewModel?.translateToAbsolutePosition(location: location, offset: scrollView.contentOffset.x, scale: scale) ?? location
+    func translateToAbsoluteLocation(_ location: CGFloat) -> CGFloat {
+        return ladderViewModel?.translateToAbsoluteLocation(location: location, offset: scrollView.contentOffset.x, scale: scale) ?? location
     }
 
     // Translate from Mark coordinates to LadderView coordinates.
-    func translateToRelativePosition(_ location: CGFloat) -> CGFloat {
-        return ladderViewModel?.translateToRelativePosition(location: location, offset: scrollView.contentOffset.x, scale: scale) ?? location
+    func translateToRelativeLocation(_ location: CGFloat) -> CGFloat {
+        return ladderViewModel?.translateToRelativeLocation(location: location, offset: scrollView.contentOffset.x, scale: scale) ?? location
     }
 
     // Touches
@@ -72,16 +55,30 @@ class LadderView: UIView, LadderViewDelegate {
         print("Single tap on ladder view")
         // select region tapped or select mark
         for region in (ladderViewModel.regions()) {
-            if tap.location(in: self).y > region.startPosition && tap.location(in: self).y < region.endPosition {
+            if tap.location(in: self).y > region.upperBoundary && tap.location(in: self).y < region.lowerBoundary {
                 ladderViewModel.activeRegion = region
                 // Are we near a mark?  If so, grab it, i.e. move cursor to it and attach.
                 if let activeRegion = ladderViewModel.activeRegion {
-                    // FIXME: need to adjust mark position for scrolling!
+                    // FIXME: need to adjust mark location for scrolling!
                     for mark in activeRegion.marks {
-                        if tap.location(in: self).x < translateToRelativePosition(mark.startPosition) + 40 && tap.location(in: self).x > translateToRelativePosition(mark.startPosition) - 40 {
+                        if tap.location(in: self).x < translateToRelativeLocation(mark.start) + 40 && tap.location(in: self).x > translateToRelativeLocation(mark.start) - 40 {
                             print("close to mark")
-                            delegate?.cursorViewGrabMark(mark: mark)
-                            return
+                            if mark.grabbed {
+                                mark.grabbed = false
+                                // delegate?.cursorViewReleaseMark(mark: mark)
+                                delegate?.cursorViewRecenterCursor()
+                                delegate?.cursorViewHighlightCursor(false)
+                                delegate?.cursorViewRefresh()
+                                return
+                            }
+                            else {
+                                mark.grabbed = true
+                                delegate?.cursorViewGrabMark(mark: mark)
+                                delegate?.cursorViewMoveCursor(location: translateToRelativeLocation(mark.start))
+                                delegate?.cursorViewHighlightCursor(true)
+                                delegate?.cursorViewRefresh()
+                                return
+                            }
                         }
                     }
                 }
@@ -109,6 +106,23 @@ class LadderView: UIView, LadderViewDelegate {
         }
     }
 
+    // MARK: - LadderView delegate methods
+    // convert region upper boundary to view's coordinates and return to view
+    func ladderViewGetRegionUpperBoundary(view: UIView) -> CGFloat {
+        let location = CGPoint(x: 0, y: ladderViewModel?.activeRegion?.upperBoundary ?? 0)
+        print("Upper boundary = \(location)")
+        return convert(location, to: view).y
+    }
+
+    func ladderViewDeleteMark(location: CGFloat) {
+        print("Delete mark at \(location)")
+    }
+
+    func ladderViewMakeMark(location: CGFloat) {
+        // print("Make mark at \(location)")
+        ladderViewModel?.addMark(location: translateToAbsoluteLocation(location))
+        setNeedsDisplay()
+    }
 
 
 }

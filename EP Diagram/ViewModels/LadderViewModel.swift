@@ -45,14 +45,13 @@ class LadderViewModel {
         let unitHeight = getUnitHeight(rect: rect, ladder: ladder)
         // All horizontal distances are adjusted to scale.
         let ladderWidth: CGFloat = rect.width * scale
-        // Determine y axis positioning of each region in ladder.
         // First region is one unitHeight below top of LadderView.
         var regionOriginY = unitHeight
         var regionNumber = 0
         for region: Region in ladder.regions {
             let regionHeight = region.decremental ? 2 * unitHeight : unitHeight
-            region.startPosition = regionOriginY
-            region.endPosition = regionOriginY + regionHeight
+            region.upperBoundary = regionOriginY
+            region.lowerBoundary = regionOriginY + regionHeight
             let regionRect = CGRect(x: margin, y: regionOriginY, width: ladderWidth, height: regionHeight)
             regionOriginY += regionHeight
             regionNumber += 1
@@ -106,14 +105,14 @@ class LadderViewModel {
 
         // Draw marks
         for mark: Mark in region.marks {
-            let scrolledStartPosition = scale * mark.startPosition - offset
-            let scrolledEndPosition = scale * mark.endPosition - offset
+            let scrolledStartLocation = scale * mark.start - offset
+            let scrolledEndLocation = scale * mark.end - offset
             context.setLineWidth(mark.width)
             // Don't bother drawing marks in margin.
-            if scrolledStartPosition > rect.origin.x {
+            if scrolledStartLocation > rect.origin.x {
                 context.setStrokeColor(mark.color.cgColor)
-                context.move(to: CGPoint(x: scrolledStartPosition, y: rect.origin.y))
-                context.addLine(to: CGPoint(x: scrolledEndPosition, y: rect.origin.y + rect.height))
+                context.move(to: CGPoint(x: scrolledStartLocation, y: rect.origin.y))
+                context.addLine(to: CGPoint(x: scrolledEndLocation, y: rect.origin.y + rect.height))
                 context.strokePath()
                 context.setStrokeColor(UIColor.black.cgColor)
             }
@@ -151,12 +150,12 @@ class LadderViewModel {
     }
 
     // Translates from LadderView coordinates to Mark coordinates.
-    func translateToAbsolutePosition(location: CGFloat, offset: CGFloat, scale: CGFloat) -> CGFloat {
+    func translateToAbsoluteLocation(location: CGFloat, offset: CGFloat, scale: CGFloat) -> CGFloat {
         return (location + offset) / scale
     }
 
     // Translate from Mark coordinates to LadderView coordinates.
-    func translateToRelativePosition(location: CGFloat, offset: CGFloat, scale: CGFloat) -> CGFloat {
+    func translateToRelativeLocation(location: CGFloat, offset: CGFloat, scale: CGFloat) -> CGFloat {
         return scale * location - offset
     }
 }

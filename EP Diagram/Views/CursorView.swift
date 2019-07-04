@@ -11,7 +11,7 @@ import UIKit
 protocol LadderViewDelegate: AnyObject {
     func ladderViewMakeMark(location: CGFloat)
     func ladderViewDeleteMark(location: CGFloat)
-    func ladderViewGetMarkStartPosition(view: UIView) -> CGFloat
+    func ladderViewGetRegionUpperBoundary(view: UIView) -> CGFloat
 }
 
 class CursorView: UIView, CursorViewDelegate {
@@ -46,6 +46,52 @@ class CursorView: UIView, CursorViewDelegate {
         cursorViewModel = CursorViewModel(cursor: cursor, leftMargin: leftMargin, width: self.frame.width, height: 0)
     }
 
+    override func draw(_ rect: CGRect) {
+        if let context = UIGraphicsGetCurrentContext() {
+            cursorViewModel?.height = delegate?.ladderViewGetRegionUpperBoundary(view: self) ?? self.frame.height
+            cursorViewModel?.draw(rect: rect, context: context)
+        }
+    }
+
+    // This function passes touch events to the views below if the point is not
+    // near the cursor.
+    override func point(inside point: CGPoint, with event: UIEvent?) -> Bool {
+        if cursor.isNearCursor(point: point) && point.y < delegate?.ladderViewGetRegionUpperBoundary(view: self) ?? self.frame.height {
+            print("Near cursor")
+            return true
+        }
+        return false
+    }
+
+    @objc func singleTap(tap: UITapGestureRecognizer) {
+        print("Single tap on cursor")
+        // position Mark
+        // temp draw A mark
+        delegate?.ladderViewMakeMark(location: cursor.location)
+
+    }
+
+    @objc func doubleTap(tap: UITapGestureRecognizer) {
+        print("Double tap on cursor")
+        // delete Mark
+        delegate?.ladderViewDeleteMark(location: cursor.location)
+    }
+
+    @objc func dragging(pan: UIPanGestureRecognizer) {
+        print("Panning cursor")
+        // drag Cursor
+        let delta = pan.translation(in: self)
+        cursor.move(delta: delta)
+        if let grabbedMark = grabbedMark {
+            print("Move grabbed Mark")
+            //delegate?.ladderViewMoveMark(mark: grabbedMark, location: cursor.position)
+            //delegate?.ladderViewNeedsDisplay()
+        }
+        pan.setTranslation(CGPoint(x: 0,y: 0), in: self)
+        setNeedsDisplay()
+    }
+
+    // MARK: - CursorView delegate methods
     func cursorViewRefresh() {
         setNeedsDisplay()
     }
@@ -56,43 +102,27 @@ class CursorView: UIView, CursorViewDelegate {
         print("Mark grabbed!")
     }
 
-    override func draw(_ rect: CGRect) {
-        if let context = UIGraphicsGetCurrentContext() {
-            cursorViewModel?.height = delegate?.ladderViewGetMarkStartPosition(view: self) ?? self.frame.height
-            cursorViewModel?.draw(rect: rect, context: context)
+    func cursorViewMoveCursor(location: CGFloat) {
+        cursor.location = location
+    }
+
+    func cursorViewRecenterCursor() {
+        // TODO: Deal with mark already in center, so cursor doesn't move:
+        // Possible solutions:
+        //    Test for this situation and move cursor elsewhere
+        //    Move cursor set distance from mark in either direction
+        //    Change color of grabbed vs released cursor (and change mark color too?)
+        //    Combination of above.
+        cursorViewModel?.centerCursor()
+    }
+
+    func cursorViewHighlightCursor(_ on: Bool) {
+        if on {
+            cursorViewModel?.color = UIColor.blue
+        }
+        else {
+            cursorViewModel?.color = UIColor.magenta
         }
     }
 
-    // This function passes touch events to the views below if the point is not
-    // near the cursor.
-    override func point(inside point: CGPoint, with event: UIEvent?) -> Bool {
-        if cursor.isNearCursor(point: point) && point.y < delegate?.ladderViewGetMarkStartPosition(view: self) ?? self.frame.height {
-            NSLog("Near cursor")
-            return true
-        }
-        return false
-    }
-
-    @objc func singleTap(tap: UITapGestureRecognizer) {
-        NSLog("Single tap on cursor")
-        // position Mark
-        // temp draw A mark
-        delegate?.ladderViewMakeMark(location: cursor.position)
-
-    }
-
-    @objc func doubleTap(tap: UITapGestureRecognizer) {
-        NSLog("Double tap on cursor")
-        // delete Mark
-        delegate?.ladderViewDeleteMark(location: cursor.position)
-    }
-
-    @objc func dragging(pan: UIPanGestureRecognizer) {
-        NSLog("Panning cursor")
-        // drag Cursor
-        let delta = pan.translation(in: self)
-        cursor.move(delta: delta)
-        pan.setTranslation(CGPoint(x: 0,y: 0), in: self)
-        setNeedsDisplay()
-    }
 }
