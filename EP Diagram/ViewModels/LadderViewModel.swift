@@ -19,6 +19,9 @@ class LadderViewModel {
             return ladder.activeRegion
         }
     }
+    // Set reset to true to reinit view model.
+    var reset = true
+    var regionUnitHeight: CGFloat = 0
 
     init() {
         ladder = Ladder.defaultLadder()
@@ -40,20 +43,23 @@ class LadderViewModel {
     func draw(rect: CGRect, margin: CGFloat, offset: CGFloat, scale: CGFloat, context: CGContext) {
         context.setStrokeColor(UIColor.black.cgColor)
         context.setLineWidth(1)
-        // unitHeight assumes top and bottom margins equal to height of non-decremental
-        // region, and decremental regions are twice this height.
-        let unitHeight = getUnitHeight(rect: rect, ladder: ladder)
         // All horizontal distances are adjusted to scale.
         let ladderWidth: CGFloat = rect.width * scale
+        // unitHeight assumes top and bottom margins equal to height of non-decremental
+        // region, and decremental regions are twice this height.
+        if reset {
+            regionUnitHeight = getRegionUnitHeight(rect: rect, ladder: ladder)
+            reset = false
+        }
         // First region is one unitHeight below top of LadderView.
-        var regionOriginY = unitHeight
+        var regionBoundary = regionUnitHeight
         var regionNumber = 0
         for region: Region in ladder.regions {
-            let regionHeight = region.decremental ? 2 * unitHeight : unitHeight
-            region.upperBoundary = regionOriginY
-            region.lowerBoundary = regionOriginY + regionHeight
-            let regionRect = CGRect(x: margin, y: regionOriginY, width: ladderWidth, height: regionHeight)
-            regionOriginY += regionHeight
+            let regionHeight = region.decremental ? 2 * regionUnitHeight : regionUnitHeight
+            region.upperBoundary = regionBoundary
+            region.lowerBoundary = regionBoundary + regionHeight
+            let regionRect = CGRect(x: margin, y: regionBoundary, width: ladderWidth, height: regionHeight)
+            regionBoundary += regionHeight
             regionNumber += 1
             var lastRegion = false
             if regionNumber >= ladder.regions.count {
@@ -61,7 +67,6 @@ class LadderViewModel {
             }
             drawRegion(rect: regionRect, context: context, region: region, offset: offset, scale: scale, lastRegion: lastRegion)
         }
-        context.strokePath()
     }
 
     func drawRegion(rect: CGRect, context: CGContext, region: Region, offset: CGFloat, scale: CGFloat, lastRegion: Bool) {
@@ -127,7 +132,7 @@ class LadderViewModel {
         context.strokePath()
     }
 
-    func getUnitHeight(rect: CGRect, ladder: Ladder) -> CGFloat {
+    func getRegionUnitHeight(rect: CGRect, ladder: Ladder) -> CGFloat {
         var numRegionUnits = 0
         for region: Region in ladder.regions {
             numRegionUnits += region.decremental ? 2 : 1

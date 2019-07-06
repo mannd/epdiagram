@@ -10,19 +10,38 @@ import UIKit
 
 class CursorViewModel: NSObject {
     let cursor: Cursor
+    let unattachedColor: UIColor = UIColor.red
+    let attachedColor: UIColor = UIColor.blue
+    let goneColor: UIColor = UIColor.clear
     var leftMargin: CGFloat
     let rightMargin: CGFloat = 5
     let alphaValue: CGFloat = 0.8
-    let lineWidth: CGFloat = 1
-    var color: UIColor = UIColor.magenta
+    let lineWidth: CGFloat = 2
+    var color: UIColor
     var width: CGFloat
     var height: CGFloat
+    var cursorState: Cursor.CursorState {
+        didSet {
+            cursor.state = cursorState
+            switch cursorState {
+            case .attached:
+                color = attachedColor
+            case .unattached:
+                color = unattachedColor
+            case .gone:
+                color = goneColor
+
+            }
+        }
+    }
 
     init(cursor: Cursor, leftMargin: CGFloat, width: CGFloat, height: CGFloat) {
         self.cursor = cursor
         self.leftMargin = leftMargin
         self.width = width
         self.height = height
+        self.cursorState = .unattached
+        self.color = unattachedColor
         super.init()
         centerCursor()
     }

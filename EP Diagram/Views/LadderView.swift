@@ -18,12 +18,28 @@ protocol CursorViewDelegate: AnyObject {
 
 class LadderView: UIView, LadderViewDelegate {
 
+    struct TapResult {
+        var tappedRegion: Region?
+        var tappedLabel: RegionLabel?
+        var tappedMark: Mark?
+        var regionTapped: Bool {
+            tappedRegion != nil
+        }
+        var labelTapped: Bool {
+            tappedLabel != nil
+        }
+        var markTapped: Bool {
+            tappedMark != nil
+        }
+    }
+
     weak var scrollView: UIScrollView!
     var leftMargin: CGFloat = 0
     var scale: CGFloat = 1.0
     weak var delegate: CursorViewDelegate?
-
     var ladderViewModel: LadderViewModel? = nil
+
+    let differential: CGFloat = 20
 
     required init?(coder aDecoder: NSCoder) {
         super.init(coder: aDecoder)
@@ -54,34 +70,24 @@ class LadderView: UIView, LadderViewDelegate {
         guard let ladderViewModel = ladderViewModel else { return }
         print("Single tap on ladder view")
         // select region tapped or select mark
-        for region in (ladderViewModel.regions()) {
-            if tap.location(in: self).y > region.upperBoundary && tap.location(in: self).y < region.lowerBoundary {
-                ladderViewModel.activeRegion = region
-                // Are we near a mark?  If so, grab it, i.e. move cursor to it and attach.
-                if let activeRegion = ladderViewModel.activeRegion {
-                    // FIXME: need to adjust mark location for scrolling!
-                    for mark in activeRegion.marks {
-                        if tap.location(in: self).x < translateToRelativeLocation(mark.start) + 40 && tap.location(in: self).x > translateToRelativeLocation(mark.start) - 40 {
-                            print("close to mark")
-                            if mark.grabbed {
-                                mark.grabbed = false
-                                // delegate?.cursorViewReleaseMark(mark: mark)
-                                delegate?.cursorViewRecenterCursor()
-                                delegate?.cursorViewHighlightCursor(false)
-                                delegate?.cursorViewRefresh()
-                                return
-                            }
-                            else {
-                                mark.grabbed = true
-                                delegate?.cursorViewGrabMark(mark: mark)
-                                delegate?.cursorViewMoveCursor(location: translateToRelativeLocation(mark.start))
-                                delegate?.cursorViewHighlightCursor(true)
-                                delegate?.cursorViewRefresh()
-                                return
-                            }
-                        }
-                    }
-                }
+        let tapLocation = tap.location(in: self)
+        let tapResult = getTapResult(location: tapLocation, ladderViewModel: ladderViewModel)
+        ladderViewModel.activeRegion = tapResult.tappedRegion
+        print("Region was tapped = \(tapResult.regionTapped)")
+        print("Label was tapped = \(tapResult.labelTapped)")
+        print("Mark was tapped = \(tapResult.markTapped)")
+        if let mark = tapResult.tappedMark {
+            if mark.grabbed {
+                mark.grabbed = false
+                // delegate?.cursorViewReleaseMark(mark: mark)
+                delegate?.cursorViewRecenterCursor()
+                delegate?.cursorViewHighlightCursor(false)
+            }
+            else {
+                mark.grabbed = true
+                delegate?.cursorViewGrabMark(mark: mark)
+                delegate?.cursorViewMoveCursor(location: translateToRelativeLocation(mark.start))
+                delegate?.cursorViewHighlightCursor(true)
             }
         }
         setNeedsDisplay()
@@ -97,6 +103,33 @@ class LadderView: UIView, LadderViewDelegate {
     @objc func dragging(pan: UIPanGestureRecognizer) {
         print("Dragging on ladder view")
         // somehow draw connections :)
+    }
+
+    func getTapResult(location: CGPoint, ladderViewModel: LadderViewModel) -> TapResult {
+        var tappedRegion: Region?
+        var tappedLabel: RegionLabel?
+        var tappedMark: Mark?
+        for region in (ladderViewModel.regions()) {
+            if location.y > region.upperBoundary && location.y < region.lowerBoundary {
+                tappedRegion = region
+            }
+        }
+        if let tappedRegion = tappedRegion {
+            if location.x < leftMargin {
+                tappedLabel = tappedRegion.label
+            }
+            outerLoop: for mark in tappedRegion.marks {
+                if nearMark(location: location.x, mark: mark) {
+                    tappedMark = mark
+                    break outerLoop
+                }
+            }
+        }
+        return TapResult(tappedRegion: tappedRegion, tappedLabel: tappedLabel, tappedMark: tappedMark)
+    }
+
+    private func nearMark(location: CGFloat, mark: Mark) -> Bool {
+        return location < translateToRelativeLocation(mark.end) + differential && location > translateToRelativeLocation(mark.start) - differential
     }
 
     override func draw(_ rect: CGRect) {
@@ -122,6 +155,10 @@ class LadderView: UIView, LadderViewDelegate {
         // print("Make mark at \(location)")
         ladderViewModel?.addMark(location: translateToAbsoluteLocation(location))
         setNeedsDisplay()
+    }
+
+    func reset() {
+        ladderViewModel?.reset = true
     }
 
 

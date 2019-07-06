@@ -13,14 +13,14 @@ import UIKit
 // of a known interval (1000 msec ideally).  Note that calibration is not
 // necessary to draw ladder diagrams.
 class Cursor: NSObject {
-//    var color: UIColor?
-//    var width: CGFloat?
-//    var linkedMark: Mark?
+    enum CursorState: String, Codable {
+        case attached
+        case unattached
+        case gone
+    }
     // The x coordinate of the cursor.
     var location: CGFloat
-    var grabbed = false
-    var offset: CGFloat = 0
-    var scale: CGFloat = 1
+    var state = CursorState.unattached
 
     // Touches +/- 40 points count as touches.
     let differential: CGFloat = 40

@@ -102,10 +102,15 @@
             coordinator.animate(alongsideTransition: nil, completion: {
                 _ in
                 print("Transitioning")
-                self.cursorView.reset()
-                self.ladderView.setNeedsDisplay()
-                self.cursorView.setNeedsDisplay()
+                self.resetViews()
             })
+        }
+
+        private func resetViews() {
+            self.cursorView.reset()
+            self.ladderView.reset()
+            self.ladderView.setNeedsDisplay()
+            self.cursorView.setNeedsDisplay()
         }
 
     }

@@ -82,11 +82,11 @@ class CursorView: UIView, CursorViewDelegate {
         // drag Cursor
         let delta = pan.translation(in: self)
         cursor.move(delta: delta)
-        if let grabbedMark = grabbedMark {
-            print("Move grabbed Mark")
-            //delegate?.ladderViewMoveMark(mark: grabbedMark, location: cursor.position)
-            //delegate?.ladderViewNeedsDisplay()
-        }
+//        if let grabbedMark = grabbedMark {
+//            print("Move grabbed Mark")
+//            //delegate?.ladderViewMoveMark(mark: grabbedMark, location: cursor.position)
+//            //delegate?.ladderViewNeedsDisplay()
+//        }
         pan.setTranslation(CGPoint(x: 0,y: 0), in: self)
         setNeedsDisplay()
     }
@@ -118,10 +118,10 @@ class CursorView: UIView, CursorViewDelegate {
 
     func cursorViewHighlightCursor(_ on: Bool) {
         if on {
-            cursorViewModel?.color = UIColor.blue
+            cursorViewModel?.cursorState = .attached
         }
         else {
-            cursorViewModel?.color = UIColor.magenta
+            cursorViewModel?.cursorState = .unattached
         }
     }
 
