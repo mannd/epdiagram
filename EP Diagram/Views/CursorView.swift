@@ -9,14 +9,15 @@
 import UIKit
 
 protocol LadderViewDelegate: AnyObject {
-    func ladderViewMakeMark(location: CGFloat)
+    func ladderViewMakeMark(location: CGFloat) -> Mark?
     func ladderViewDeleteMark(location: CGFloat)
     func ladderViewGetRegionUpperBoundary(view: UIView) -> CGFloat
+    func ladderViewRefresh()
 }
 
 class CursorView: UIView, CursorViewDelegate {
     var cursor: Cursor = Cursor()
-    var grabbedMark: Mark?
+    var attachedMark: Mark?
     var cursorViewModel: CursorViewModel?
     weak var delegate: LadderViewDelegate?
     var leftMargin: CGFloat {
@@ -56,8 +57,9 @@ class CursorView: UIView, CursorViewDelegate {
     // This function passes touch events to the views below if the point is not
     // near the cursor.
     override func point(inside point: CGPoint, with event: UIEvent?) -> Bool {
+        // Hidden cursor shouldn't interfere with touches.
+        guard cursor.state != .hidden else { return false }
         if cursor.isNearCursor(point: point) && point.y < delegate?.ladderViewGetRegionUpperBoundary(view: self) ?? self.frame.height {
-            print("Near cursor")
             return true
         }
         return false
@@ -67,8 +69,11 @@ class CursorView: UIView, CursorViewDelegate {
         print("Single tap on cursor")
         // position Mark
         // temp draw A mark
-        delegate?.ladderViewMakeMark(location: cursor.location)
-
+        let mark = delegate?.ladderViewMakeMark(location: cursor.location)
+        mark?.selected = true
+        mark?.attached = true
+        cursorViewAttachMark(mark: mark)
+        delegate?.ladderViewRefresh()
     }
 
     @objc func doubleTap(tap: UITapGestureRecognizer) {
@@ -79,6 +84,21 @@ class CursorView: UIView, CursorViewDelegate {
 
     @objc func dragging(pan: UIPanGestureRecognizer) {
         print("Panning cursor")
+        // FIXME: Move this to dragging in LadderView
+//        let vel: CGPoint = pan.velocity(in: self)
+//        if vel.x > 1.0 {
+//            print("Panning to right")
+//        }
+//        else if vel.x < 1.0 {
+//            print("Panning to left")
+//        }
+//        if vel.y > 1.0 {
+//            print("Panning down")
+//        }
+//        else if vel.y < 1.0 {
+//            print("Panning up")
+//        }
+
         // drag Cursor
         let delta = pan.translation(in: self)
         cursor.move(delta: delta)
@@ -96,10 +116,15 @@ class CursorView: UIView, CursorViewDelegate {
         setNeedsDisplay()
     }
 
-    func cursorViewGrabMark(mark: Mark?) {
+    func cursorViewAttachMark(mark: Mark?) {
         guard let mark = mark else { return }
-        grabbedMark = mark
-        print("Mark grabbed!")
+        attachedMark = mark
+        print("Mark attached!")
+    }
+
+    func cursorViewUnattachMark() {
+        attachedMark = nil
+        print("Mark unattached!")
     }
 
     func cursorViewMoveCursor(location: CGFloat) {
@@ -122,6 +147,15 @@ class CursorView: UIView, CursorViewDelegate {
         }
         else {
             cursorViewModel?.cursorState = .unattached
+        }
+    }
+
+    func cursorViewHideCursor(hide: Bool) {
+        if hide {
+            cursor.state = .hidden
+        }
+        else {
+            cursor.state = .unattached
         }
     }
 

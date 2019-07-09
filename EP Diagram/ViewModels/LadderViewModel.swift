@@ -35,9 +35,9 @@ class LadderViewModel {
         self.ladder = ladder
     }
 
-    func addMark(location: CGFloat) {
+    func addMark(location: CGFloat) -> Mark? {
         print("Add mark at \(location)")
-        ladder.addMarkAt(location)
+        return ladder.addMarkAt(location)
     }
 
     func draw(rect: CGRect, margin: CGFloat, offset: CGFloat, scale: CGFloat, context: CGContext) {
@@ -148,10 +148,14 @@ class LadderViewModel {
 
     func activateRegion(region: Region?) {
         guard let region = region else { return }
-        for r in ladder.regions {
-            r.selected = false
-        }
+        inactivateRegions()
         region.selected = true
+    }
+
+    func inactivateRegions() {
+        for region in ladder.regions {
+            region.selected = false
+        }
     }
 
     // Translates from LadderView coordinates to Mark coordinates.

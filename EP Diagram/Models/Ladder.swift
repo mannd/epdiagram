@@ -22,15 +22,16 @@ class Ladder {
     }
     var activeRegion: Region?
 
-    func addMarkAt(_ location: CGFloat) {
+    func addMarkAt(_ location: CGFloat) -> Mark? {
         guard let activeRegion = activeRegion else {
-            return
+            return nil
         }
         let mark = Mark()
         mark.start = location
         mark.end = location
         mark.selected = true
         activeRegion.appendMark(mark)
+        return mark
     }
 
     // Returns a basic ladder (A, AV, V).

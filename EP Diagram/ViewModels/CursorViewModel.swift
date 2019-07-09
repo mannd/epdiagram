@@ -28,7 +28,7 @@ class CursorViewModel: NSObject {
                 color = attachedColor
             case .unattached:
                 color = unattachedColor
-            case .gone:
+            case .hidden:
                 color = goneColor
 
             }
@@ -51,6 +51,7 @@ class CursorViewModel: NSObject {
     }
 
     func draw(rect: CGRect, context: CGContext) {
+        guard cursor.state != .hidden else { return }
         context.setStrokeColor(color.cgColor)
         context.setLineWidth(lineWidth)
         context.setAlpha(alphaValue)

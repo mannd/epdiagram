@@ -25,7 +25,7 @@ class Mark {
     public var start: CGFloat = 0
     public var end: CGFloat = 0
     public var selected: Bool = false
-    public var grabbed: Bool = false
+    public var attached: Bool = false
     public var origin: Origin = .notOrigin
     let unselectedColor = UIColor.black
     let selectedColor = UIColor.blue

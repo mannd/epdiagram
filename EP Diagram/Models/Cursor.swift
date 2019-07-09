@@ -16,14 +16,14 @@ class Cursor: NSObject {
     enum CursorState: String, Codable {
         case attached
         case unattached
-        case gone
+        case hidden
     }
     // The x coordinate of the cursor.
     var location: CGFloat
     var state = CursorState.unattached
 
-    // Touches +/- 40 points count as touches.
-    let differential: CGFloat = 40
+    // Touches +/- accuracy count as touches.
+    let accuracy: CGFloat = 20
     
     init(location: CGFloat) {
         self.location = location
@@ -34,7 +34,7 @@ class Cursor: NSObject {
     }
 
     func isNearCursor(point p: CGPoint) -> Bool {
-        return abs(p.x - location) < differential
+        return abs(p.x - location) < accuracy
     }
 
     func move(delta: CGPoint) {
