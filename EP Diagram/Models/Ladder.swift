@@ -21,6 +21,8 @@ class Ladder {
         }
     }
     var activeRegion: Region?
+    // For any ladder, only one Mark in only one Region can be active.
+    var activeMark: Mark?
 
     func addMarkAt(_ location: CGFloat) -> Mark? {
         guard let activeRegion = activeRegion else {

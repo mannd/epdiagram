@@ -133,7 +133,6 @@ class LadderView: UIView, LadderViewDelegate {
         }
         setNeedsDisplay()
         delegate?.cursorViewRefresh()
-
     }
 
     @objc func doubleTap(tap: UITapGestureRecognizer) {
@@ -143,7 +142,17 @@ class LadderView: UIView, LadderViewDelegate {
 
     @objc func dragging(pan: UIPanGestureRecognizer) {
         print("Dragging on ladder view")
-        // somehow draw connections :)
+        // FIXME: need to store active mark, and move it along with cursor, otherwise,
+        // ignore or draw connections.
+//        let delta = pan.translation(in: self)
+//        cursor.move(delta: delta)
+//        if let attachedMark = attachedMark {
+//            print("Move grabbed Mark")
+//            delegate?.ladderViewMoveMark(mark: attachedMark, location: cursor.location)
+//            delegate?.ladderViewRefresh()
+//        }
+//        pan.setTranslation(CGPoint(x: 0,y: 0), in: self)
+//        setNeedsDisplay())
     }
 
     /// Magic function that returns struct indicating what part of ladder was touched.
@@ -183,6 +192,10 @@ class LadderView: UIView, LadderViewDelegate {
         }
     }
 
+    func reset() {
+        ladderViewModel?.reset = true
+    }
+
     // MARK: - LadderView delegate methods
     // convert region upper boundary to view's coordinates and return to view
     func ladderViewGetRegionUpperBoundary(view: UIView) -> CGFloat {
@@ -203,8 +216,9 @@ class LadderView: UIView, LadderViewDelegate {
         setNeedsDisplay()
     }
     
-    func reset() {
-        ladderViewModel?.reset = true
+    func ladderViewMoveMark(mark: Mark, location: CGFloat) {
+        mark.start = translateToAbsoluteLocation(location)
+        mark.end = mark.start
     }
 
 

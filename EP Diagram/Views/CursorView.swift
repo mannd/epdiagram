@@ -12,6 +12,7 @@ protocol LadderViewDelegate: AnyObject {
     func ladderViewMakeMark(location: CGFloat) -> Mark?
     func ladderViewDeleteMark(location: CGFloat)
     func ladderViewGetRegionUpperBoundary(view: UIView) -> CGFloat
+    func ladderViewMoveMark(mark: Mark, location: CGFloat)
     func ladderViewRefresh()
 }
 
@@ -31,6 +32,7 @@ class CursorView: UIView, CursorViewDelegate {
 
     required init?(coder: NSCoder) {
         super.init(coder: coder)
+        self.isOpaque = false
         reset()
         let singleTapRecognizer = UITapGestureRecognizer(target: self, action: #selector(self.singleTap))
         singleTapRecognizer.numberOfTapsRequired = 1
@@ -67,13 +69,27 @@ class CursorView: UIView, CursorViewDelegate {
 
     @objc func singleTap(tap: UITapGestureRecognizer) {
         print("Single tap on cursor")
-        // position Mark
-        // temp draw A mark
-        let mark = delegate?.ladderViewMakeMark(location: cursor.location)
-        mark?.selected = true
-        mark?.attached = true
-        cursorViewAttachMark(mark: mark)
-        delegate?.ladderViewRefresh()
+        // Logic here is single tap adds mark if no mark attached.
+        // If mark attached, release mark
+        if attachedMark != nil {
+            cursorViewUnattachMark()
+            attachedMark?.selected = false
+            attachedMark?.attached = false
+            cursorViewHighlightCursor(false)
+            delegate?.ladderViewRefresh()
+            setNeedsDisplay()
+        }
+        else { // create mark and attach it
+            // FIXME: Don't create marks on top of each other.  If a mark exists
+            // with within "accuracy" points, just attach to it.
+            let mark = delegate?.ladderViewMakeMark(location: cursor.location)
+            mark?.selected = true
+            mark?.attached = true
+            cursorViewHighlightCursor(true)
+            cursorViewAttachMark(mark: mark)
+            delegate?.ladderViewRefresh()
+            setNeedsDisplay()
+        }
     }
 
     @objc func doubleTap(tap: UITapGestureRecognizer) {
@@ -102,11 +118,11 @@ class CursorView: UIView, CursorViewDelegate {
         // drag Cursor
         let delta = pan.translation(in: self)
         cursor.move(delta: delta)
-//        if let grabbedMark = grabbedMark {
-//            print("Move grabbed Mark")
-//            //delegate?.ladderViewMoveMark(mark: grabbedMark, location: cursor.position)
-//            //delegate?.ladderViewNeedsDisplay()
-//        }
+        if let attachedMark = attachedMark {
+            print("Move grabbed Mark")
+            delegate?.ladderViewMoveMark(mark: attachedMark, location: cursor.location)
+            delegate?.ladderViewRefresh()
+        }
         pan.setTranslation(CGPoint(x: 0,y: 0), in: self)
         setNeedsDisplay()
     }

@@ -19,6 +19,7 @@ class LadderViewModel {
             return ladder.activeRegion
         }
     }
+    var activeMark: Mark?
     // Set reset to true to reinit view model.
     var reset = true
     var regionUnitHeight: CGFloat = 0
