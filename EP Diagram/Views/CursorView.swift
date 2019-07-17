@@ -11,6 +11,7 @@ import UIKit
 protocol LadderViewDelegate: AnyObject {
     func ladderViewMakeMark(location: CGFloat) -> Mark?
     func ladderViewDeleteMark(location: CGFloat)
+    func ladderViewDeleteMark(mark: Mark)
     func ladderViewGetRegionUpperBoundary(view: UIView) -> CGFloat
     func ladderViewMoveMark(mark: Mark, location: CGFloat)
     func ladderViewRefresh()
@@ -94,8 +95,13 @@ class CursorView: UIView, CursorViewDelegate {
 
     @objc func doubleTap(tap: UITapGestureRecognizer) {
         print("Double tap on cursor")
-        // delete Mark
-        delegate?.ladderViewDeleteMark(location: cursor.location)
+        // delete attached Mark
+        if let attachedMark = attachedMark {
+            delegate?.ladderViewDeleteMark(mark: attachedMark)
+            cursorViewHighlightCursor(false)
+            delegate?.ladderViewRefresh()
+            setNeedsDisplay()
+        }
     }
 
     @objc func dragging(pan: UIPanGestureRecognizer) {

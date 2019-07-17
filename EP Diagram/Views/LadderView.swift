@@ -212,6 +212,11 @@ class LadderView: UIView, LadderViewDelegate {
         return ladderViewModel?.addMark(location: translateToAbsoluteLocation(location))
     }
 
+    func ladderViewDeleteMark(mark: Mark) {
+        print("Delete mark \(mark)")
+        ladderViewModel?.deleteMark(mark: mark)
+    }
+
     func ladderViewRefresh() {
         setNeedsDisplay()
     }

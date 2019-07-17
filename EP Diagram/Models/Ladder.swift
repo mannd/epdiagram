@@ -36,6 +36,14 @@ class Ladder {
         return mark
     }
 
+    func deleteMark(mark: Mark) {
+        guard let activeRegion = activeRegion else { return }
+        if let index = activeRegion.marks.firstIndex(where: {$0 === mark}) {
+            activeRegion.marks.remove(at: index)
+        }
+    }
+
+
     // Returns a basic ladder (A, AV, V).
     static func defaultLadder() -> Ladder {
         let ladder = Ladder()

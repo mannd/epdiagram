@@ -13,6 +13,8 @@
         @IBOutlet var imageView: UIImageView!
         @IBOutlet var ladderView: LadderView!
         @IBOutlet var cursorView: CursorView!
+
+
         var zoom: CGFloat = 1.0
         var isZooming = false
         // leftMargin is used by LadderView, ImageView, and CursorView, and is the same
@@ -42,6 +44,11 @@
             imageScrollView.contentOffset = CGPoint(x: newContentOffsetX, y: 0)
             cursorView.setNeedsDisplay()
             ladderView.setNeedsDisplay()
+            let toolbar = navigationController?.toolbar
+            let button = UIBarButtonItem(title: "Test", style: UIBarButtonItem.Style.plain, target: self, action: nil)
+            toolbar?.items = [button]
+            navigationController?.setToolbarHidden(false, animated: false)
+
         }
 
         // Functions below fire during scrolling of imageView and at end

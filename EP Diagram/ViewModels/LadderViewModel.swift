@@ -41,6 +41,10 @@ class LadderViewModel {
         return ladder.addMarkAt(location)
     }
 
+    func deleteMark(mark: Mark) {
+        ladder.deleteMark(mark: mark)
+    }
+
     func draw(rect: CGRect, margin: CGFloat, offset: CGFloat, scale: CGFloat, context: CGContext) {
         context.setStrokeColor(UIColor.black.cgColor)
         context.setLineWidth(1)
