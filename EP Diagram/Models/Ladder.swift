@@ -48,31 +48,14 @@ class Ladder {
     static func defaultLadder() -> Ladder {
         let ladder = Ladder()
         let aRegion = Region()
-        aRegion.label = RegionLabel("A")
+        aRegion.name = "A"
         aRegion.selected = true
         let avRegion = Region()
-        avRegion.label = RegionLabel("AV")
+        avRegion.name = "AV"
         avRegion.decremental = true
         let vRegion = Region()
-        vRegion.label = RegionLabel("V")
+        vRegion.name = "V"
         ladder.regions = [aRegion, avRegion, vRegion]
-        // Add Mark for testing
-        let testMark: Mark = Mark()
-        testMark.start = 10
-        testMark.end = 10
-        aRegion.appendMark(testMark)
-        let testMark2: Mark = Mark()
-        testMark2.start = 100.0
-        testMark2.end = 100.0
-        aRegion.appendMark(testMark2)
-        let testMark3: Mark = Mark()
-        testMark3.start = 50
-        testMark3.end = 50
-        vRegion.appendMark(testMark3)
-        let testMark4 = Mark()
-        testMark4.start = 10
-        testMark4.end = 50
-        avRegion.appendMark(testMark4)
         return ladder
     }
 }

@@ -57,4 +57,14 @@ class Mark {
             else {return unselectedColor}
         }
     }
+
+    init() {
+        // all fields automatically initialized
+    }
+
+    convenience init(location: CGFloat) {
+        self.init()
+        start = location
+        end = location
+    }
 }

@@ -23,13 +23,13 @@ class LadderView: UIView, LadderViewDelegate {
     /// Struct that pinpoints a point in a ladder.  Note that these tapped areas overlap (labels and marks are in regions).
     struct TapLocationInLadder {
         var tappedRegion: Region?
-        var tappedLabel: RegionLabel?
         var tappedMark: Mark?
+        var tappedRegionSection: RegionSection
         var regionWasTapped: Bool {
             tappedRegion != nil
         }
         var labelWasTapped: Bool {
-            tappedLabel != nil
+            tappedRegionSection == .labelSection
         }
         var markWasTapped: Bool {
             tappedMark != nil
@@ -160,8 +160,8 @@ class LadderView: UIView, LadderViewDelegate {
     /// - Parameter ladderViewModel: ladderViewModel in use
     func getTapLocationInLadder(location: CGPoint, ladderViewModel: LadderViewModel) -> TapLocationInLadder {
         var tappedRegion: Region?
-        var tappedLabel: RegionLabel?
         var tappedMark: Mark?
+        var tappedRegionSection: RegionSection = .markSection
         for region in (ladderViewModel.regions()) {
             if location.y > region.upperBoundary && location.y < region.lowerBoundary {
                 tappedRegion = region
@@ -169,16 +169,19 @@ class LadderView: UIView, LadderViewDelegate {
         }
         if let tappedRegion = tappedRegion {
             if location.x < leftMargin {
-                tappedLabel = tappedRegion.label
+                tappedRegionSection = .labelSection
             }
-            outerLoop: for mark in tappedRegion.marks {
-                if nearMark(location: location.x, mark: mark) {
-                    tappedMark = mark
-                    break outerLoop
+            else {
+                tappedRegionSection = .markSection
+                outerLoop: for mark in tappedRegion.marks {
+                    if nearMark(location: location.x, mark: mark) {
+                        tappedMark = mark
+                        break outerLoop
+                    }
                 }
             }
         }
-        return TapLocationInLadder(tappedRegion: tappedRegion, tappedLabel: tappedLabel, tappedMark: tappedMark)
+        return TapLocationInLadder(tappedRegion: tappedRegion, tappedMark: tappedMark, tappedRegionSection: tappedRegionSection)
     }
 
     private func nearMark(location: CGFloat, mark: Mark) -> Bool {

@@ -9,7 +9,7 @@
 import UIKit
 
 class LadderViewModel {
-    let ladder: Ladder
+    var ladder: Ladder
     var activeRegion: Region? {
         set(value) {
             ladder.activeRegion = value
@@ -84,7 +84,7 @@ class LadderViewModel {
             .font: UIFont.systemFont(ofSize: 18.0),
             .foregroundColor: region.selected ? UIColor.red : UIColor.blue
         ]
-        let text = region.label?.name ?? ""
+        let text = region.name
         let labelText = NSAttributedString(string: text, attributes: attributes)
         let size: CGSize = text.size(withAttributes: attributes)
         let labelRect = CGRect(x: 0, y: rect.origin.y + (rect.height - size.height) / 2, width: rect.origin.x, height: size.height)

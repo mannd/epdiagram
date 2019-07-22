@@ -8,13 +8,21 @@
 
 import UIKit
 
+// The two parts of a Region.
+enum RegionSection {
+    case labelSection
+    case markSection
+}
+
 // A Region is a collection of Marks, in left to right order.  Positions are
-// vertical, i.e. Y axis.  A Region has a RegionLabel such as "A" or "AV."
+// vertical, i.e. Y axis.  A Region has a labelSection such as "A" or "AV" and
+// a markSection.
 class Region {
     public var upperBoundary: CGFloat = 0
     public var lowerBoundary: CGFloat = 0
     public var selected: Bool = false
-    public var label: RegionLabel?
+//    public var label: RegionLabel?
+    public var name: String = ""
     public var marks: [Mark] = []
     public var markable: Bool = true
     public var decremental: Bool = false
