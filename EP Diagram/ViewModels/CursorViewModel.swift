@@ -30,40 +30,64 @@ class CursorViewModel: NSObject {
                 color = unattachedColor
             case .hidden:
                 color = goneColor
+            case .null:
+                color = attachedColor
 
             }
         }
     }
+    var cursorVisible: Bool = false {
+        didSet {
+            cursor.visible = cursorVisible
+        }
+    }
 
-    init(cursor: Cursor, leftMargin: CGFloat, width: CGFloat, height: CGFloat) {
-        self.cursor = cursor
+    override convenience init() {
+        self.init(leftMargin: 0, width: 0, height: 0)
+    }
+
+    init(leftMargin: CGFloat, width: CGFloat, height: CGFloat) {
+        self.cursor = Cursor()
+        self.cursor.visible = false
+        self.cursor.state = .hidden
         self.leftMargin = leftMargin
         self.width = width
         self.height = height
-        self.cursorState = .unattached
-        self.color = unattachedColor
+        self.cursorState = .null
+        self.color = attachedColor
         super.init()
-        centerCursor()
+        //centerCursor()
     }
 
     func centerCursor() {
         cursor.location = width / 2
     }
 
-    func draw(rect: CGRect, context: CGContext) {
-        guard cursor.state != .hidden else { return }
+    func hideCursor() {
+        cursor.visible = false
+    }
+
+    func showCursor() {
+        cursor.visible = true
+    }
+
+    func draw(rect: CGRect, scale: CGFloat, offset: CGFloat, context: CGContext) {
+        guard cursor.visible else { return }
         context.setStrokeColor(color.cgColor)
         context.setLineWidth(lineWidth)
         context.setAlpha(alphaValue)
         adjustLocation()
-        context.move(to: CGPoint(x: cursor.location, y: 0))
-        context.addLine(to: CGPoint(x: cursor.location, y: height))
+        let location = scale * cursor.location - offset
+        context.move(to: CGPoint(x: location, y: 0))
+        context.addLine(to: CGPoint(x: location, y: height))
         context.strokePath()
     }
 
     private func adjustLocation() {
-        cursor.location = max(cursor.location, leftMargin)
-        cursor.location = min(cursor.location, width - rightMargin)
+        return
+//        cursor.location = max(cursor.location, leftMargin)
+//        cursor.location = min(cursor.location, width - rightMargin)
     }
+    
 
 }

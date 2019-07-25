@@ -23,6 +23,7 @@ class LadderViewModel {
     // Set reset to true to reinit view model.
     var reset = true
     var regionUnitHeight: CGFloat = 0
+    var margin: CGFloat = 0
 
     init() {
         ladder = Ladder.defaultLadder()
@@ -45,7 +46,7 @@ class LadderViewModel {
         ladder.deleteMark(mark: mark)
     }
 
-    func draw(rect: CGRect, margin: CGFloat, offset: CGFloat, scale: CGFloat, context: CGContext) {
+    func draw(rect: CGRect, offset: CGFloat, scale: CGFloat, context: CGContext) {
         context.setStrokeColor(UIColor.black.cgColor)
         context.setLineWidth(1)
         // All horizontal distances are adjusted to scale.
@@ -163,13 +164,13 @@ class LadderViewModel {
         }
     }
 
-    // Translates from LadderView coordinates to Mark coordinates.
-    func translateToAbsoluteLocation(location: CGFloat, offset: CGFloat, scale: CGFloat) -> CGFloat {
-        return (location + offset) / scale
-    }
-
-    // Translate from Mark coordinates to LadderView coordinates.
-    func translateToRelativeLocation(location: CGFloat, offset: CGFloat, scale: CGFloat) -> CGFloat {
-        return scale * location - offset
-    }
+//    // Translates from LadderView coordinates to Mark coordinates.
+//    func translateToAbsoluteLocation(location: CGFloat, offset: CGFloat, scale: CGFloat) -> CGFloat {
+//        return (location + offset) / scale
+//    }
+//
+//    // Translate from Mark coordinates to LadderView coordinates.
+//    func translateToRelativeLocation(location: CGFloat, offset: CGFloat, scale: CGFloat) -> CGFloat {
+//        return scale * location - offset
+//    }
 }

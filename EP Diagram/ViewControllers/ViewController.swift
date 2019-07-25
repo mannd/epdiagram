@@ -31,10 +31,13 @@
             imageScrollView.backgroundColor = UIColor.lightGray
             ladderView.backgroundColor = UIColor.white
             ladderView.leftMargin = leftMargin
-            ladderView.scrollView = imageScrollView
             cursorView.leftMargin = leftMargin
-            cursorView.delegate = ladderView
-            ladderView.delegate = cursorView
+            cursorView.ladderViewDelegate = ladderView
+            ladderView.cursorViewDelegate = cursorView
+
+            let singleTapRecognizer = UITapGestureRecognizer(target: self, action: #selector(self.singleTap))
+            singleTapRecognizer.numberOfTapsRequired = 1
+            imageScrollView.addGestureRecognizer(singleTapRecognizer)
         }
 
         override func viewDidAppear(_ animated: Bool) {
@@ -51,12 +54,34 @@
 
         }
 
+        @objc func singleTap(tap: UITapGestureRecognizer) {
+            print("Scroll view single tap")
+//            if !ladderView.hasActiveRegion() {
+//                ladderView.setActiveRegion(regionNum: 0)
+//                ladderView.refresh()
+//            }
+            let location = tap.location(in: imageScrollView).x
+            cursorView.putCursor(location: location)
+            // TODO: cursor and mark added to wrong location when image zoomed.
+            let mark = ladderView.addMark(location: location)
+            cursorView.attachMark(mark: mark)
+            cursorView.setNeedsDisplay()
+            ladderView.setNeedsDisplay()
+        }
+
         // Functions below fire during scrolling of imageView and at end
         // of scrolling.  Relabeling might best occur at end of scrolling,
         // while redrawing of ladder can be done during scrolling.
+        // Note that scrollViewDidScroll is also called while zooming.
         func scrollViewDidScroll(_ scrollView: UIScrollView) {
             if scrollView == imageScrollView {
+                print("didScroll")
+                ladderView.contentOffset = scrollView.contentOffset.x
+                cursorView.contentOffset = scrollView.contentOffset.x
+                cursorView.scale = scrollView.zoomScale
+                ladderView.scale = scrollView.zoomScale
                 ladderView.setNeedsDisplay()
+                cursorView.setNeedsDisplay()
             }
         }
 
@@ -76,6 +101,8 @@
 
         fileprivate func scrollFinished() {
             print("Scroll finished")
+//            ladderView.setNeedsDisplay()
+//            cursorView.setNeedsDisplay()
         }
 
         func viewForZooming(in scrollView: UIScrollView) -> UIView? {
@@ -98,9 +125,17 @@
             print("imageScrollView bounds = \(imageScrollView.bounds)")
             print("imageScrollView contentOffset = \(imageScrollView.contentOffset)")
             isZooming = false
-            ladderView.scale = scale
-            zoom = scale
-            ladderView.setNeedsDisplay()
+//            ladderView.contentOffset = scrollView.contentOffset.x
+//            cursorView.contentOffset = scrollView.contentOffset.x
+//            ladderView.scale = scale
+//            cursorView.scale = scale
+//            zoom = scale
+//            ladderView.setNeedsDisplay()
+//            cursorView.setNeedsDisplay()
+        }
+
+        func scrollViewDidZoom(_ scrollView: UIScrollView) {
+            print("didZoom")
         }
 
         // TODO: This doesn't work right.
@@ -114,7 +149,7 @@
         }
 
         private func resetViews() {
-            self.cursorView.reset()
+            //self.cursorView.reset()
             self.ladderView.reset()
             self.ladderView.setNeedsDisplay()
             self.cursorView.setNeedsDisplay()
