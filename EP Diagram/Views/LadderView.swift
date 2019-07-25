@@ -72,11 +72,10 @@ class LadderView: UIView, LadderViewDelegate {
     // Touches
     @objc func singleTap(tap: UITapGestureRecognizer) {
         guard let ladderViewModel = ladderViewModel else { return }
-        print("Single tap on ladder view")
         let tapLocation = getTapLocationInLadder(location: tap.location(in: self), ladderViewModel: ladderViewModel)
-        print("Region was tapped = \(tapLocation.regionWasTapped)")
-        print("Label was tapped = \(tapLocation.labelWasTapped)")
-        print("Mark was tapped = \(tapLocation.markWasTapped)")
+        print("Region was single-tapped = \(tapLocation.regionWasTapped)")
+        print("Label was single-tapped = \(tapLocation.labelWasTapped)")
+        print("Mark was single-tapped = \(tapLocation.markWasTapped)")
         if tapLocation.labelWasTapped {
             if let tappedRegion = tapLocation.tappedRegion {
                 if tappedRegion.selected {

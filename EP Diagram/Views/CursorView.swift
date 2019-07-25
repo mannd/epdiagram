@@ -54,6 +54,11 @@ class CursorView: UIView, CursorViewDelegate {
         if let context = UIGraphicsGetCurrentContext() {
             cursorViewModel?.height = delegate?.ladderViewGetRegionUpperBoundary(view: self) ?? self.frame.height
             cursorViewModel?.draw(rect: rect, context: context)
+            // FIXME: draw rect temporarily
+            context.setFillColor(UIColor.black.cgColor)
+            let testRect = CGRect(x: 20, y: 20, width: 100, height: 100)
+            context.addRect(testRect)
+            context.drawPath(using: .fillStroke)
         }
     }
 
