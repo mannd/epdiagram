@@ -104,12 +104,14 @@ class LadderView: UIView, LadderViewDelegate {
                 if let mark = tapLocation.mark {
                     if mark.attached {
                         // FIXME: attached and selected maybe the same thing, eliminate duplication.
+                        print("Unattaching mark")
                         mark.attached = false
                         mark.selected = false
                         cursorViewDelegate?.hideCursor(hide: true)
                         cursorViewDelegate?.unattachMark()
                     }
                     else {
+                        print("Attaching mark")
                         mark.attached = true
                         mark.selected = true
                         cursorViewDelegate?.attachMark(mark: mark)
@@ -151,8 +153,6 @@ class LadderView: UIView, LadderViewDelegate {
 
     @objc func dragging(pan: UIPanGestureRecognizer) {
         print("Dragging on ladder view")
-        // FIXME: need to store active mark, and move it along with cursor, otherwise,
-        // ignore or draw connections.
         if pan.state == .began {
             print("dragging began")
             if let ladderViewModel = ladderViewModel {
@@ -254,7 +254,6 @@ class LadderView: UIView, LadderViewDelegate {
         setNeedsDisplay()
     }
 
-    // FIXME: cursor malpositioned on dragging mark
     func moveMark(mark: Mark, location: CGFloat, moveCursor: Bool) {
         mark.start = translateToAbsoluteLocation(location: location, offset: contentOffset, scale: scale)
         mark.end = mark.start

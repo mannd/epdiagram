@@ -48,21 +48,24 @@
             cursorView.setNeedsDisplay()
             ladderView.setNeedsDisplay()
             let toolbar = navigationController?.toolbar
-            let button = UIBarButtonItem(title: "Test", style: UIBarButtonItem.Style.plain, target: self, action: nil)
+            let button = UIBarButtonItem(title: "Calibrate", style: UIBarButtonItem.Style.plain, target: self, action: #selector(calibrate))
             toolbar?.items = [button]
             navigationController?.setToolbarHidden(false, animated: false)
+        }
 
+        @objc func calibrate() {
+           print("calibrate")
         }
 
         @objc func singleTap(tap: UITapGestureRecognizer) {
             print("Scroll view single tap")
-//            if !ladderView.hasActiveRegion() {
-//                ladderView.setActiveRegion(regionNum: 0)
-//                ladderView.refresh()
-//            }
+            if !ladderView.hasActiveRegion() {
+                ladderView.setActiveRegion(regionNum: 0)
+                ladderView.refresh()
+            }
+            cursorView.unattachMark()
             let location = tap.location(in: imageScrollView).x
             cursorView.putCursor(location: location)
-            // TODO: cursor and mark added to wrong location when image zoomed.
             let mark = ladderView.addMark(location: location)
             cursorView.attachMark(mark: mark)
             cursorView.setNeedsDisplay()
@@ -149,7 +152,6 @@
         }
 
         private func resetViews() {
-            //self.cursorView.reset()
             self.ladderView.reset()
             self.ladderView.setNeedsDisplay()
             self.cursorView.setNeedsDisplay()

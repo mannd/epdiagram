@@ -17,7 +17,6 @@ class Cursor: NSObject {
     enum CursorState: String, Codable {
         case attached
         case unattached
-        case hidden
         case null
     }
     // The x coordinate of the cursor.

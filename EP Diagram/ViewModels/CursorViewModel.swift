@@ -28,10 +28,8 @@ class CursorViewModel: NSObject {
                 color = attachedColor
             case .unattached:
                 color = unattachedColor
-            case .hidden:
-                color = goneColor
             case .null:
-                color = attachedColor
+                color = unattachedColor
 
             }
         }
@@ -49,7 +47,7 @@ class CursorViewModel: NSObject {
     init(leftMargin: CGFloat, width: CGFloat, height: CGFloat) {
         self.cursor = Cursor()
         self.cursor.visible = false
-        self.cursor.state = .hidden
+        self.cursor.state = .null
         self.leftMargin = leftMargin
         self.width = width
         self.height = height

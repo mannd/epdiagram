@@ -151,6 +151,11 @@ class CursorView: UIView, CursorViewDelegate {
     }
 
     func unattachMark() {
+        if let mark = attachedMark {
+            mark.selected = false
+            mark.attached = false
+            ladderViewDelegate?.refresh()
+        }
         attachedMark = nil
         print("Mark unattached!")
     }
