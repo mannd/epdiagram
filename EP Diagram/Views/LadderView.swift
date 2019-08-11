@@ -10,10 +10,9 @@ import UIKit
 
 protocol LadderViewDelegate: AnyObject {
     func makeMark(location: CGFloat) -> Mark?
-    func deleteMark(location: CGFloat)
     func deleteMark(mark: Mark)
     func getRegionUpperBoundary(view: UIView) -> CGFloat
-    func moveMark(mark: Mark, location: CGFloat)
+    func moveMark(mark: Mark, location: CGFloat, moveCursor: Bool)
     func refresh()
     func findMarkNearby(location: CGFloat) -> Mark?
     func setActiveRegion(regionNum: Int)
@@ -67,6 +66,8 @@ class LadderView: UIView, LadderViewDelegate {
         self.addGestureRecognizer(doubleTapRecognizer)
         let draggingPanRecognizer = UIPanGestureRecognizer(target: self, action: #selector(self.dragging))
         self.addGestureRecognizer(draggingPanRecognizer)
+        let longPressRecognizer = UILongPressGestureRecognizer(target: self, action: #selector(self.longPress))
+        self.addGestureRecognizer(longPressRecognizer)
     }
 
     // Touches
@@ -105,19 +106,15 @@ class LadderView: UIView, LadderViewDelegate {
                         // FIXME: attached and selected maybe the same thing, eliminate duplication.
                         mark.attached = false
                         mark.selected = false
-                        // delegate?.cursorViewReleaseMark(mark: mark)
                         cursorViewDelegate?.hideCursor(hide: true)
-//                        delegate?.cursorViewRecenterCursor()
-//                        delegate?.cursorViewHighlightCursor(false)
                         cursorViewDelegate?.unattachMark()
                     }
                     else {
                         mark.attached = true
                         mark.selected = true
                         cursorViewDelegate?.attachMark(mark: mark)
-                        cursorViewDelegate?.moveCursor(location: translateToRelativeLocation(location: mark.start, offset: contentOffset, scale: scale))
+                        cursorViewDelegate?.moveCursor(location: mark.start)
                         cursorViewDelegate?.hideCursor(hide: false)
-//                        delegate?.cursorViewHighlightCursor(true)
                     }
                 }
                 else { // make mark and attach cursor
@@ -127,8 +124,7 @@ class LadderView: UIView, LadderViewDelegate {
                         mark.attached = true
                         mark.selected = true
                         cursorViewDelegate?.attachMark(mark: mark)
-                        cursorViewDelegate?.moveCursor(location: translateToRelativeLocation(location: mark.start, offset: contentOffset, scale: scale))
-                        cursorViewDelegate?.highlightCursor(true)
+                        cursorViewDelegate?.moveCursor(location: mark.start)
                         cursorViewDelegate?.hideCursor(hide: false)
                     }
                 }
@@ -140,7 +136,17 @@ class LadderView: UIView, LadderViewDelegate {
 
     @objc func doubleTap(tap: UITapGestureRecognizer) {
         print("Double tap on ladder view")
-        // unselect region or unselect mark
+        // delete mark
+        guard let ladderViewModel = ladderViewModel else { return }
+        let tapLocation = getLocationInLadder(location: tap.location(in: self), ladderViewModel: ladderViewModel)
+        if tapLocation.markWasTapped {
+            if let mark = tapLocation.mark {
+                deleteMark(mark: mark)
+                cursorViewDelegate?.hideCursor(hide: true)
+            }
+        }
+
+
     }
 
     @objc func dragging(pan: UIPanGestureRecognizer) {
@@ -159,8 +165,7 @@ class LadderView: UIView, LadderViewDelegate {
         if pan.state == .changed {
             print("dragging state changed")
             if let mark = movingMark {
-                moveMark(mark: mark, location: pan.location(in: self).x)
-                // TODO: move cursor too
+                moveMark(mark: mark, location: pan.location(in: self).x, moveCursor: true)
                 setNeedsDisplay()
             }
         }
@@ -168,6 +173,13 @@ class LadderView: UIView, LadderViewDelegate {
             print("dragging state ended")
             movingMark = nil
         }
+    }
+
+    @objc func longPress(press: UILongPressGestureRecognizer) {
+        guard let ladderViewModel = ladderViewModel else { return }
+        let location = getLocationInLadder(location: press.location(in: self), ladderViewModel: ladderViewModel)
+        print("long press at \(location) ")
+        // TODO: menu (e.g. "clear marks in region, etc.")
     }
 
     /// Magic function that returns struct indicating in what part of ladder a point is.
@@ -222,36 +234,34 @@ class LadderView: UIView, LadderViewDelegate {
         return convert(location, to: view).y
     }
 
-    func deleteMark(location: CGFloat) {
-        print("Delete mark at \(location)")
-    }
-
     func makeMark(location: CGFloat) -> Mark? {
-        // print("Make mark at \(location)")
-        print("Relative location = \(translateToRelativeLocation(location: location, offset: contentOffset, scale: scale))")
-        print("Absoulte location = \(translateToAbsoluteLocation(location: location, offset: contentOffset, scale: scale))")
-//        return ladderViewModel?.addMark(location: translateToAbsoluteLocation(location: location, offset: contentOffset, scale: scale))
-        return ladderViewModel?.addMark(location: location)
+        return ladderViewModel?.addMark(location: translateToAbsoluteLocation(location: location, offset: contentOffset, scale: scale))
     }
 
     func addMark(location: CGFloat) -> Mark? {
-//                return ladderViewModel?.addMark(location: translateToAbsoluteLocation(location: location, offset: contentOffset, scale: scale))
         return ladderViewModel?.addMark(location: location / scale)
     }
 
     func deleteMark(mark: Mark) {
         print("Delete mark \(mark)")
         ladderViewModel?.deleteMark(mark: mark)
+        cursorViewDelegate?.hideCursor(hide: true)
+        cursorViewDelegate?.refresh()
+        setNeedsDisplay()
     }
 
     func refresh() {
         setNeedsDisplay()
     }
-    
-    func moveMark(mark: Mark, location: CGFloat) {
-//        mark.start = translateToAbsoluteLocation(location: location, offset: contentOffset, scale: scale)
-        mark.start = location
+
+    // FIXME: cursor malpositioned on dragging mark
+    func moveMark(mark: Mark, location: CGFloat, moveCursor: Bool) {
+        mark.start = translateToAbsoluteLocation(location: location, offset: contentOffset, scale: scale)
         mark.end = mark.start
+        if moveCursor {
+            cursorViewDelegate?.moveCursor(location: mark.start)
+            cursorViewDelegate?.refresh()
+        }
     }
 
     func findMarkNearby(location: CGFloat) -> Mark? {

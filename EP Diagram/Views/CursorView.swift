@@ -91,11 +91,10 @@ class CursorView: UIView, CursorViewDelegate {
         // delete attached Mark
         if let attachedMark = attachedMark {
             ladderViewDelegate?.deleteMark(mark: attachedMark)
-            highlightCursor(false)
             ladderViewDelegate?.refresh()
-            hideCursor(hide: true)
-            setNeedsDisplay()
         }
+        hideCursor(hide: true)
+        setNeedsDisplay()
     }
 
     @objc func dragging(pan: UIPanGestureRecognizer) {
@@ -121,7 +120,7 @@ class CursorView: UIView, CursorViewDelegate {
         cursorViewModel.cursor.move(delta: delta.x / scale)
         if let attachedMark = attachedMark {
             print("Move grabbed Mark")
-            ladderViewDelegate?.moveMark(mark: attachedMark, location: cursorViewModel.cursor.location)
+            ladderViewDelegate?.moveMark(mark: attachedMark, location: translateToRelativeLocation(location: cursorViewModel.cursor.location, offset: contentOffset, scale: scale), moveCursor: false)
             ladderViewDelegate?.refresh()
         }
         pan.setTranslation(CGPoint(x: 0,y: 0), in: self)
@@ -181,12 +180,6 @@ class CursorView: UIView, CursorViewDelegate {
 
     func hideCursor(hide: Bool) {
         cursorViewModel.cursorVisible = !hide
-        if hide {
-            cursorViewModel.cursor.state = .hidden
-        }
-        else {
-            cursorViewModel.cursor.state = .unattached
-        }
     }
 
 }
