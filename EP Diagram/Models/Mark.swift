@@ -52,7 +52,7 @@ class Mark {
     public var origin: Origin = .notOrigin
     // public var connections: [Connection] = []
 
-    let unselectedColor = UIColor.black
+    let unselectedColor: UIColor
     let selectedColor = UIColor.magenta
     let width: CGFloat = 2
 
@@ -64,7 +64,11 @@ class Mark {
     }
 
     init() {
-        // all fields automatically initialized
+        if #available(iOS 13.0, *) {
+            unselectedColor = UIColor.label
+        } else {
+            unselectedColor = UIColor.black
+        }
     }
 
     convenience init(location: CGFloat) {

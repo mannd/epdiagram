@@ -25,16 +25,20 @@ class LadderViewModel {
     var regionUnitHeight: CGFloat = 0
     var margin: CGFloat = 0
 
-    init() {
-        ladder = Ladder.defaultLadder()
-        let regions = ladder.regions
+    let red: UIColor
+    let blue: UIColor
 
+    convenience init() {
+        self.init(ladder: Ladder.defaultLadder())
+        let regions = ladder.regions
         // Temporarily act on first region
         ladder.activeRegion = regions[0]
     }
 
     init(ladder: Ladder) {
         self.ladder = ladder
+        red = UIColor.systemRed
+        blue = UIColor.systemBlue
     }
 
     func addMark(location: CGFloat) -> Mark? {
@@ -47,7 +51,11 @@ class LadderViewModel {
     }
 
     func draw(rect: CGRect, offset: CGFloat, scale: CGFloat, context: CGContext) {
-        context.setStrokeColor(UIColor.black.cgColor)
+        if #available(iOS 13.0, *) {
+            context.setStrokeColor(UIColor.label.cgColor)
+        } else {
+            context.setStrokeColor(UIColor.black.cgColor)
+        }
         context.setLineWidth(1)
         // All horizontal distances are adjusted to scale.
         let ladderWidth: CGFloat = rect.width * scale
@@ -83,21 +91,30 @@ class LadderViewModel {
         let attributes: [NSAttributedString.Key: Any] = [
             .paragraphStyle: paragraphStyle,
             .font: UIFont.systemFont(ofSize: 18.0),
-            .foregroundColor: region.selected ? UIColor.red : UIColor.blue
+            .foregroundColor: region.selected ? red : blue
         ]
         let text = region.name
         let labelText = NSAttributedString(string: text, attributes: attributes)
         let size: CGSize = text.size(withAttributes: attributes)
         let labelRect = CGRect(x: 0, y: rect.origin.y + (rect.height - size.height) / 2, width: rect.origin.x, height: size.height)
         context.addRect(stringRect)
-        context.setStrokeColor(UIColor.red.cgColor)
-        context.setFillColor(UIColor.white.cgColor)
+        context.setStrokeColor(red.cgColor)
+        if #available(iOS 13.0, *) {
+            context.setFillColor(UIColor.secondarySystemBackground.cgColor)
+        } else {
+            context.setFillColor(UIColor.white.cgColor)
+        }
         context.setLineWidth(1)
         context.drawPath(using: .fillStroke)
         labelText.draw(in: labelRect)
 
         // Draw top ladder line
-        context.setStrokeColor(UIColor.black.cgColor)
+        if #available(iOS 13.0, *) {
+            context.setStrokeColor(UIColor.label.cgColor)
+        } else {
+            context.setStrokeColor(UIColor.black.cgColor)
+        }
+
         context.setLineWidth(1)
         context.move(to: CGPoint(x: rect.origin.x, y: rect.origin.y))
         context.addLine(to: CGPoint(x: rect.width, y: rect.origin.y))
@@ -105,9 +122,9 @@ class LadderViewModel {
 
         // Highlight region if selected
         if region.selected {
-            context.setFillColor(UIColor.red.cgColor)
+            context.setFillColor(red.cgColor)
             let regionRect = CGRect(x: rect.origin.x, y: rect.origin.y, width: rect.width, height: rect.height)
-            context.setAlpha(0.1)
+            context.setAlpha(0.2)
             context.addRect(regionRect)
             context.drawPath(using: .fillStroke)
         }
@@ -125,7 +142,11 @@ class LadderViewModel {
                 context.move(to: CGPoint(x: scrolledStartLocation, y: rect.origin.y))
                 context.addLine(to: CGPoint(x: scrolledEndLocation, y: rect.origin.y + rect.height))
                 context.strokePath()
-                context.setStrokeColor(UIColor.black.cgColor)
+                if #available(iOS 13.0, *) {
+                    context.setStrokeColor(UIColor.label.cgColor)
+                } else {
+                    context.setStrokeColor(UIColor.black.cgColor)
+                }
             }
         }
 
@@ -161,6 +182,15 @@ class LadderViewModel {
     func inactivateRegions() {
         for region in ladder.regions {
             region.selected = false
+        }
+    }
+
+    func inactivateMarks() {
+        for region in ladder.regions {
+            for mark in region.marks {
+                mark.selected = false
+                mark.attached = false
+            }
         }
     }
 

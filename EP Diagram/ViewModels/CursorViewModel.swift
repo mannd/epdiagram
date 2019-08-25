@@ -10,8 +10,8 @@ import UIKit
 
 class CursorViewModel: NSObject {
     let cursor: Cursor
-    let unattachedColor: UIColor = UIColor.red
-    let attachedColor: UIColor = UIColor.blue
+    let unattachedColor: UIColor = UIColor.systemRed
+    let attachedColor: UIColor = UIColor.systemBlue
     let goneColor: UIColor = UIColor.clear
     var leftMargin: CGFloat
     let rightMargin: CGFloat = 5

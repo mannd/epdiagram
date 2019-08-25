@@ -16,6 +16,7 @@ protocol CursorViewDelegate: AnyObject {
     func recenterCursor()
     func highlightCursor(_ on: Bool)
     func hideCursor(hide: Bool)
+    func cursorIsVisible() -> Bool
 }
 
 class CursorView: UIView, CursorViewDelegate {
@@ -31,7 +32,6 @@ class CursorView: UIView, CursorViewDelegate {
     var contentOffset: CGFloat = 0
     let accuracy: CGFloat = 20
     var calibrating = false
-    var cursorIsVisible = true
 
     required init?(coder: NSCoder) {
         super.init(coder: coder)
@@ -185,6 +185,10 @@ class CursorView: UIView, CursorViewDelegate {
 
     func hideCursor(hide: Bool) {
         cursorViewModel.cursorVisible = !hide
+    }
+
+    func cursorIsVisible() -> Bool {
+        return cursorViewModel.cursorVisible
     }
 
 }

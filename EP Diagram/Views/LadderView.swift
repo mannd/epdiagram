@@ -123,6 +123,7 @@ class LadderView: UIView, LadderViewDelegate {
                     print("make mark and attach cursor")
                     let mark = makeMark(location: tap.location(in: self).x)
                     if let mark = mark {
+                        ladderViewModel.inactivateMarks()
                         mark.attached = true
                         mark.selected = true
                         cursorViewDelegate?.attachMark(mark: mark)
@@ -164,6 +165,9 @@ class LadderView: UIView, LadderViewDelegate {
         }
         if pan.state == .changed {
             print("dragging state changed")
+//            if cursorViewDelegate?.cursorIsVisible() ?? false {
+//                print("cursor is visible")
+//            }
             if let mark = movingMark {
                 moveMark(mark: mark, location: pan.location(in: self).x, moveCursor: true)
                 setNeedsDisplay()

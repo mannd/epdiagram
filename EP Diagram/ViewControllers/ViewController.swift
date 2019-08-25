@@ -28,8 +28,13 @@
             // Ensure there is a space for labels at the left margin.
             imageScrollView.contentInset = UIEdgeInsets(top: 0, left: leftMargin, bottom: 0, right: 0)
             // Distinguish the two views.
-            imageScrollView.backgroundColor = UIColor.lightGray
-            ladderView.backgroundColor = UIColor.white
+            if #available(iOS 13.0, *) {
+                imageScrollView.backgroundColor = UIColor.secondarySystemBackground
+                ladderView.backgroundColor = UIColor.tertiarySystemBackground
+            } else {
+                imageScrollView.backgroundColor = UIColor.lightGray
+                ladderView.backgroundColor = UIColor.white
+            }
             ladderView.leftMargin = leftMargin
             cursorView.leftMargin = leftMargin
             cursorView.ladderViewDelegate = ladderView
