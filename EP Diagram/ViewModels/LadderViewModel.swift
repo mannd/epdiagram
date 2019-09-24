@@ -24,9 +24,12 @@ class LadderViewModel {
     var reset = true
     var regionUnitHeight: CGFloat = 0
     var margin: CGFloat = 0
+    var lineWidth: CGFloat = 2
 
     let red: UIColor
     let blue: UIColor
+    let unselectedColor: UIColor
+    let selectedColor = UIColor.magenta
 
     convenience init() {
         self.init(ladder: Ladder.defaultLadder())
@@ -39,6 +42,11 @@ class LadderViewModel {
         self.ladder = ladder
         red = UIColor.systemRed
         blue = UIColor.systemBlue
+        if #available(iOS 13.0, *) {
+            unselectedColor = UIColor.label
+        } else {
+            unselectedColor = UIColor.black
+        }
     }
 
     func addMark(location: CGFloat) -> Mark? {
@@ -133,12 +141,19 @@ class LadderViewModel {
 
         // Draw marks
         for mark: Mark in region.marks {
-            let scrolledStartLocation = scale * mark.start - offset
-            let scrolledEndLocation = scale * mark.end - offset
-            context.setLineWidth(mark.width)
+            let scrolledStartLocation = scale * mark.position.origin.x - offset
+            let scrolledEndLocation = scale * mark.position.terminus.x - offset
+            context.setLineWidth(lineWidth)
             // Don't bother drawing marks in margin.
             if scrolledStartLocation > rect.origin.x {
-                context.setStrokeColor(mark.color.cgColor)
+                let color: CGColor
+                if mark.selected {
+                    color = selectedColor.cgColor
+                }
+                else {
+                    color = unselectedColor.cgColor
+                }
+                context.setStrokeColor(color)
                 context.move(to: CGPoint(x: scrolledStartLocation, y: rect.origin.y))
                 context.addLine(to: CGPoint(x: scrolledEndLocation, y: rect.origin.y + rect.height))
                 context.strokePath()

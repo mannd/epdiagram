@@ -45,13 +45,13 @@ class LadderTests: XCTestCase {
     func testAddMark() {
         ladder.activeRegion = ladder.regions[0]
         let mark = ladder.addMarkAt(100)
-        XCTAssertEqual(mark?.start, 100)
+        XCTAssertEqual(mark?.position, 100)
     }
 
     func testAddMarkNoActiveRegion() {
         ladder.activeRegion = nil
         let mark = ladder.addMarkAt(100)
-        XCTAssertEqual(mark?.start, nil)
+        XCTAssertEqual(mark?.position, nil)
     }
 
 }

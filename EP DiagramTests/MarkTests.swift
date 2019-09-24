@@ -21,8 +21,8 @@ class MarkTests: XCTestCase {
 
     func testMarkLocation() {
         let mark = Mark(location: 100)
-        XCTAssertEqual(mark.start, 100)
-        XCTAssertEqual(mark.end, 100)
+        XCTAssertEqual(mark.position, 100)
+        XCTAssertEqual(mark.distalPosition, 100)
     }
 
     func testMarkColor() {

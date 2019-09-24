@@ -19,12 +19,12 @@ class CursorViewTests: XCTestCase {
         // Put teardown code here. This method is called after the invocation of each test method in the class.
     }
 
-    func testIsNearCursor() {
-        XCTFail("Test not implemented")
-//        if let cursorView = CursorView(coder: NSCoder()) {
-//            var nearCursor = cursorView.isNearCursor(location: 100, cursor: Cursor(location: 100))
-//
-//            XCTAssert(nearCursor)
-//        }
-    }
+//    func testIsNearCursor() {
+//        XCTFail("Test not implemented")
+////        if let cursorView = CursorView(coder: NSCoder()) {
+////            var nearCursor = cursorView.isNearCursor(location: 100, cursor: Cursor(location: 100))
+////
+////            XCTAssert(nearCursor)
+////        }
+//    }
 }

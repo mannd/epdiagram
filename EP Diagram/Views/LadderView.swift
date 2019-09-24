@@ -37,26 +37,27 @@ class LadderView: UIView, LadderViewDelegate {
         }
     }
 
-    // FIXME: movingMark == selectedMark == highlightedMark ???
     var movingMark: Mark? = nil
+    var regionOfDragOrigin: Region? = nil
 
     var contentOffset: CGFloat = 0
     var leftMargin: CGFloat = 0 {
         didSet {
-            ladderViewModel?.margin = leftMargin
+            ladderViewModel.margin = leftMargin
         }
     }
 
     var scale: CGFloat = 1.0
     weak var cursorViewDelegate: CursorViewDelegate?
-    var ladderViewModel: LadderViewModel? = nil
+    var ladderViewModel: LadderViewModel
 
     // How close a touch has to be to count: +/- accuracy.
     let accuracy: CGFloat = 20
 
     required init?(coder aDecoder: NSCoder) {
-        super.init(coder: aDecoder)
         ladderViewModel = LadderViewModel()
+        super.init(coder: aDecoder)
+
         let singleTapRecognizer = UITapGestureRecognizer(target: self, action: #selector(self.singleTap))
         singleTapRecognizer.numberOfTapsRequired = 1
         self.addGestureRecognizer(singleTapRecognizer)
@@ -72,11 +73,10 @@ class LadderView: UIView, LadderViewDelegate {
 
     // Touches
     @objc func singleTap(tap: UITapGestureRecognizer) {
-        guard let ladderViewModel = ladderViewModel else { return }
         let tapLocation = getLocationInLadder(location: tap.location(in: self), ladderViewModel: ladderViewModel)
-        print("Region was single-tapped = \(tapLocation.regionWasTapped)")
-        print("Label was single-tapped = \(tapLocation.labelWasTapped)")
-        print("Mark was single-tapped = \(tapLocation.markWasTapped)")
+        PRINT("Region was single-tapped = \(tapLocation.regionWasTapped)")
+        PRINT("Label was single-tapped = \(tapLocation.labelWasTapped)")
+        PRINT("Mark was single-tapped = \(tapLocation.markWasTapped)")
         if tapLocation.labelWasTapped {
             if let tappedRegion = tapLocation.region {
                 if tappedRegion.selected {
@@ -86,8 +86,6 @@ class LadderView: UIView, LadderViewDelegate {
                 else { // !tappedRegion.selected
                     ladderViewModel.activeRegion = tappedRegion
                     cursorViewDelegate?.hideCursor(hide: true)
-                    // unattach cursor
-//                    delegate?.cursorViewRecenterCursor()
                 }
                 cursorViewDelegate?.hideCursor(hide: true)
                 cursorViewDelegate?.unattachMark()
@@ -97,37 +95,35 @@ class LadderView: UIView, LadderViewDelegate {
             if let tappedRegion = tapLocation.region {
                 if !tappedRegion.selected {
                     ladderViewModel.activeRegion = tappedRegion
-                    cursorViewDelegate?.hideCursor(hide: true)
-                    cursorViewDelegate?.unattachMark()
                 }
                 // make mark and attach cursor
                 if let mark = tapLocation.mark {
                     if mark.attached {
                         // FIXME: attached and selected maybe the same thing, eliminate duplication.
-                        print("Unattaching mark")
+                        PRINT("Unattaching mark")
                         mark.attached = false
                         mark.selected = false
                         cursorViewDelegate?.hideCursor(hide: true)
                         cursorViewDelegate?.unattachMark()
                     }
                     else {
-                        print("Attaching mark")
+                        PRINT("Attaching mark")
                         mark.attached = true
                         mark.selected = true
                         cursorViewDelegate?.attachMark(mark: mark)
-                        cursorViewDelegate?.moveCursor(location: mark.start)
+                        cursorViewDelegate?.moveCursor(location: mark.position.origin.x)
                         cursorViewDelegate?.hideCursor(hide: false)
                     }
                 }
                 else { // make mark and attach cursor
-                    print("make mark and attach cursor")
+                    PRINT("make mark and attach cursor")
                     let mark = makeMark(location: tap.location(in: self).x)
                     if let mark = mark {
                         ladderViewModel.inactivateMarks()
                         mark.attached = true
                         mark.selected = true
                         cursorViewDelegate?.attachMark(mark: mark)
-                        cursorViewDelegate?.moveCursor(location: mark.start)
+                        cursorViewDelegate?.moveCursor(location: mark.position.origin.x)
                         cursorViewDelegate?.hideCursor(hide: false)
                     }
                 }
@@ -138,9 +134,8 @@ class LadderView: UIView, LadderViewDelegate {
     }
 
     @objc func doubleTap(tap: UITapGestureRecognizer) {
-        print("Double tap on ladder view")
+        PRINT("Double tap on ladder view")
         // delete mark
-        guard let ladderViewModel = ladderViewModel else { return }
         let tapLocation = getLocationInLadder(location: tap.location(in: self), ladderViewModel: ladderViewModel)
         if tapLocation.markWasTapped {
             if let mark = tapLocation.mark {
@@ -153,36 +148,70 @@ class LadderView: UIView, LadderViewDelegate {
     }
 
     @objc func dragging(pan: UIPanGestureRecognizer) {
-        print("Dragging on ladder view")
+        PRINT("Dragging on ladder view")
         if pan.state == .began {
-            print("dragging began")
-            if let ladderViewModel = ladderViewModel {
-                let location = getLocationInLadder(location: pan.location(in: self), ladderViewModel: ladderViewModel)
-                if let mark = location.mark {
-                    movingMark = mark
+            PRINT("dragging began")
+            let location = getLocationInLadder(location: pan.location(in: self), ladderViewModel: ladderViewModel)
+            if let mark = location.mark {
+                movingMark = mark
+                if let region = location.region {
+                    regionOfDragOrigin = region
                 }
             }
         }
         if pan.state == .changed {
-            print("dragging state changed")
-//            if cursorViewDelegate?.cursorIsVisible() ?? false {
-//                print("cursor is visible")
-//            }
+            PRINT("dragging state changed")
             if let mark = movingMark {
-                moveMark(mark: mark, location: pan.location(in: self).x, moveCursor: true)
+                if mark.attached {
+                    moveMark(mark: mark, location: pan.location(in: self).x, moveCursor: true)
+                }
+                else {
+                    PRINT("dragging mark without cursor.")
+                    let location = getLocationInLadder(location: pan.location(in: self), ladderViewModel: ladderViewModel)
+                    if let region = location.region {
+                        let regionName = region.name
+                        let originalRegionName = regionOfDragOrigin?.name
+                        PRINT("Region of origin = \(String(describing: originalRegionName))")
+                        PRINT("Region dragged into = \(regionName)")
+                        /* Logic here:
+                         drag started near a mark
+                         mark has no attached cursor
+                         drag enters region different from region of origin
+                         region is conduction region
+                         drag is in the forward time direction (at least not negative!)
+                         THEN
+                         Add connection to mark
+                         Draw line from end of mark to drag point
+                         ON pan.state.ended
+                         if near next region (non conducting)
+                         attach to mark nearby otherwise create mark
+                         BUT if in middle of region
+                         offer popup menu with choices
+
+                         More logic
+                         single tap in conduction region create ectopic with two connections
+                         drag on these connections to connect
+                         flash mark about to be connected or created
+                         double tap on connector to delete it
+                         double tap on mark deletes its connectors too
+
+
+                         */
+                    }
+                }
                 setNeedsDisplay()
             }
         }
         if pan.state == .ended {
-            print("dragging state ended")
+            PRINT("dragging state ended")
             movingMark = nil
+            regionOfDragOrigin = nil
         }
     }
 
     @objc func longPress(press: UILongPressGestureRecognizer) {
-        guard let ladderViewModel = ladderViewModel else { return }
         let location = getLocationInLadder(location: press.location(in: self), ladderViewModel: ladderViewModel)
-        print("long press at \(location) ")
+        PRINT("long press at \(location) ")
         // TODO: menu (e.g. "clear marks in region, etc.")
     }
 
@@ -217,38 +246,38 @@ class LadderView: UIView, LadderViewDelegate {
 
     private func nearMark(location: CGFloat, mark: Mark) -> Bool {
 //        return location < mark.end && location > mark.start
-        return location < translateToRelativeLocation(location: mark.end, offset: contentOffset, scale: scale) + accuracy && location > translateToRelativeLocation(location: mark.start, offset: contentOffset, scale: scale) - accuracy
+        return location < translateToRelativeLocation(location: mark.position.terminus.x, offset: contentOffset, scale: scale) + accuracy && location > translateToRelativeLocation(location: mark.position.origin.x, offset: contentOffset, scale: scale) - accuracy
     }
 
     override func draw(_ rect: CGRect) {
         // Drawing code - note not necessary to call super.draw.
         if let context = UIGraphicsGetCurrentContext() {
-            ladderViewModel?.draw(rect: rect, offset: contentOffset, scale: scale, context: context)
+            ladderViewModel.draw(rect: rect, offset: contentOffset, scale: scale, context: context)
         }
     }
 
     func reset() {
-        ladderViewModel?.reset = true
+        ladderViewModel.reset = true
     }
 
     // MARK: - LadderView delegate methods
     // convert region upper boundary to view's coordinates and return to view
     func getRegionUpperBoundary(view: UIView) -> CGFloat {
-        let location = CGPoint(x: 0, y: ladderViewModel?.activeRegion?.upperBoundary ?? 0)
+        let location = CGPoint(x: 0, y: ladderViewModel.activeRegion?.upperBoundary ?? 0)
         return convert(location, to: view).y
     }
 
     func makeMark(location: CGFloat) -> Mark? {
-        return ladderViewModel?.addMark(location: translateToAbsoluteLocation(location: location, offset: contentOffset, scale: scale))
+        return ladderViewModel.addMark(location: translateToAbsoluteLocation(location: location, offset: contentOffset, scale: scale))
     }
 
     func addMark(location: CGFloat) -> Mark? {
-        return ladderViewModel?.addMark(location: location / scale)
+        return ladderViewModel.addMark(location: location / scale)
     }
 
     func deleteMark(mark: Mark) {
-        print("Delete mark \(mark)")
-        ladderViewModel?.deleteMark(mark: mark)
+        PRINT("Delete mark \(mark)")
+        ladderViewModel.deleteMark(mark: mark)
         cursorViewDelegate?.hideCursor(hide: true)
         cursorViewDelegate?.refresh()
         setNeedsDisplay()
@@ -259,19 +288,19 @@ class LadderView: UIView, LadderViewDelegate {
     }
 
     func moveMark(mark: Mark, location: CGFloat, moveCursor: Bool) {
-        mark.start = translateToAbsoluteLocation(location: location, offset: contentOffset, scale: scale)
-        mark.end = mark.start
+        mark.position.origin.x = translateToAbsoluteLocation(location: location, offset: contentOffset, scale: scale)
+        mark.position.terminus.x = mark.position.origin.x
         if moveCursor {
-            cursorViewDelegate?.moveCursor(location: mark.start)
+            cursorViewDelegate?.moveCursor(location: mark.position.origin.x)
             cursorViewDelegate?.refresh()
         }
     }
 
     func findMarkNearby(location: CGFloat) -> Mark? {
-        if let activeRegion = ladderViewModel?.activeRegion {
+        if let activeRegion = ladderViewModel.activeRegion {
             let relativeLocation = translateToRelativeLocation(location: location, offset: contentOffset, scale: scale)
             for mark in activeRegion.marks {
-                if abs(mark.start - relativeLocation) < accuracy {
+                if abs(mark.position.origin.x - relativeLocation) < accuracy {
                     return mark
                 }
             }
@@ -281,11 +310,11 @@ class LadderView: UIView, LadderViewDelegate {
 
     // TODO: This doesn't work, region not being selected
     func setActiveRegion(regionNum: Int) {
-        ladderViewModel?.activeRegion = ladderViewModel?.regions()[regionNum]
-        ladderViewModel?.activeRegion?.selected = true
+        ladderViewModel.activeRegion = ladderViewModel.regions()[regionNum]
+        ladderViewModel.activeRegion?.selected = true
     }
 
     func hasActiveRegion() -> Bool {
-        return ladderViewModel?.activeRegion != nil
+        return ladderViewModel.activeRegion != nil
     }
 }

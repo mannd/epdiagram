@@ -47,6 +47,9 @@ class CursorView: UIView, CursorViewDelegate {
         self.addGestureRecognizer(doubleTapRecognizer)
         let draggingPanRecognizer = UIPanGestureRecognizer(target: self, action: #selector(self.dragging))
         self.addGestureRecognizer(draggingPanRecognizer)
+        let longPressRecognizer = UILongPressGestureRecognizer(target: self, action: #selector(self.longPress))
+        self.addGestureRecognizer(longPressRecognizer)
+
     }
 
     override func draw(_ rect: CGRect) {
@@ -127,6 +130,10 @@ class CursorView: UIView, CursorViewDelegate {
         setNeedsDisplay()
     }
 
+    @objc func longPress(press: UILongPressGestureRecognizer) {
+        print("Long press on caliper")
+    }
+
     func doCalibration() {
         print("Do calibration")
     }
@@ -147,6 +154,8 @@ class CursorView: UIView, CursorViewDelegate {
     func attachMark(mark: Mark?) {
         guard let mark = mark else { return }
         attachedMark = mark
+        mark.attached = true
+        mark.selected = true
         print("Mark attached!")
     }
 

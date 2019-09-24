@@ -29,8 +29,10 @@ class Ladder {
             return nil
         }
         let mark = Mark()
-        mark.start = location
-        mark.end = location
+        mark.position.origin.x = location
+        mark.position.terminus.x = location
+//        mark.position = location
+//        mark.distalPosition = location
         mark.selected = true
         activeRegion.appendMark(mark)
         return mark

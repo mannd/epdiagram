@@ -28,6 +28,7 @@
 		8E9B8043228345B5008873BB /* Mark.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8E9B8042228345B5008873BB /* Mark.swift */; };
 		8E9B8045228347DE008873BB /* Region.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8E9B8044228347DE008873BB /* Region.swift */; };
 		8E9B804722834870008873BB /* Ladder.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8E9B804622834870008873BB /* Ladder.swift */; };
+		8EF8B5B72330739F00ADB77A /* ViewControllerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8EF8B5B62330739F00ADB77A /* ViewControllerTests.swift */; };
 		8EF9166B227926BC00B51F17 /* LadderView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8EF9166A227926BC00B51F17 /* LadderView.swift */; };
 /* End PBXBuildFile section */
 
@@ -76,6 +77,7 @@
 		8E9B8042228345B5008873BB /* Mark.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Mark.swift; sourceTree = "<group>"; };
 		8E9B8044228347DE008873BB /* Region.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Region.swift; sourceTree = "<group>"; };
 		8E9B804622834870008873BB /* Ladder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Ladder.swift; sourceTree = "<group>"; };
+		8EF8B5B62330739F00ADB77A /* ViewControllerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ViewControllerTests.swift; sourceTree = "<group>"; };
 		8EF9166A227926BC00B51F17 /* LadderView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LadderView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -157,6 +159,7 @@
 				8E25A9B222E5515D00D62E18 /* LadderTests.swift */,
 				8E7214DF22EB57FC0062C094 /* MarkTests.swift */,
 				8E9A466623005A600037AEAB /* CursorViewTests.swift */,
+				8EF8B5B62330739F00ADB77A /* ViewControllerTests.swift */,
 			);
 			path = "EP DiagramTests";
 			sourceTree = "<group>";
@@ -203,9 +206,9 @@
 		8E9B804B22834944008873BB /* Views */ = {
 			isa = PBXGroup;
 			children = (
-				8E7D24F02277A00C005A1729 /* ImageView.swift */,
 				8EF9166A227926BC00B51F17 /* LadderView.swift */,
 				8E01D9C622849047000F36FC /* CursorView.swift */,
+				8E7D24F02277A00C005A1729 /* ImageView.swift */,
 			);
 			path = Views;
 			sourceTree = "<group>";
@@ -369,6 +372,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				8EF8B5B72330739F00ADB77A /* ViewControllerTests.swift in Sources */,
 				8E7214E022EB57FC0062C094 /* MarkTests.swift in Sources */,
 				8E25A9B122E5505200D62E18 /* LadderViewModelTests.swift in Sources */,
 				8E25A9AF22E54F7200D62E18 /* CursorTests.swift in Sources */,

@@ -20,3 +20,12 @@ extension UIView {
     }
 }
 
+// Make false to suppress printing of messages.
+var printMessages = false
+
+func PRINT(_ s: String) {
+    if printMessages {
+        print(s)
+    }
+}
+
