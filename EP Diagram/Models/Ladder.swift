@@ -29,8 +29,8 @@ class Ladder {
             return nil
         }
         let mark = Mark()
-        mark.position.origin.x = location
-        mark.position.terminus.x = location
+        mark.position.proximal.x = location
+        mark.position.distal.x = location
 //        mark.position = location
 //        mark.distalPosition = location
         mark.selected = true

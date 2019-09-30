@@ -9,6 +9,12 @@
 import UIKit
 
 class LadderViewModel {
+    struct RegionDetail {
+        var region: Region
+        var isLastRegion: Bool = false
+    }
+    var regionDetails: [RegionDetail] = []
+
     var ladder: Ladder
     var activeRegion: Region? {
         set(value) {
@@ -21,8 +27,6 @@ class LadderViewModel {
     }
     var activeMark: Mark?
     // Set reset to true to reinit view model.
-    var reset = true
-    var regionUnitHeight: CGFloat = 0
     var margin: CGFloat = 0
     var lineWidth: CGFloat = 2
 
@@ -31,21 +35,39 @@ class LadderViewModel {
     let unselectedColor: UIColor
     let selectedColor = UIColor.magenta
 
+    var height: CGFloat = 0
+    var regionUnitHeight: CGFloat = 0
+
+    // Use default ladder for now...
     convenience init() {
         self.init(ladder: Ladder.defaultLadder())
-        let regions = ladder.regions
-        // Temporarily act on first region
-        ladder.activeRegion = regions[0]
     }
 
     init(ladder: Ladder) {
         self.ladder = ladder
+        ladder.activeRegion = ladder.regions[0]
         red = UIColor.systemRed
         blue = UIColor.systemBlue
         if #available(iOS 13.0, *) {
             unselectedColor = UIColor.label
         } else {
             unselectedColor = UIColor.black
+        }
+    }
+
+    func initialize() {
+        regionUnitHeight = getRegionUnitHeight(ladder: ladder)
+        var regionBoundary = regionUnitHeight
+        var regionNumber = 0
+        for region: Region in ladder.regions {
+            var regionDetail: RegionDetail = RegionDetail(region: region, isLastRegion: false)
+            let regionHeight = getRegionHeight(region: region)
+            region.upperBoundary = regionBoundary
+            region.lowerBoundary = regionBoundary + regionHeight
+            regionBoundary += regionHeight
+            regionNumber += 1
+            regionDetail.isLastRegion = (regionNumber >= ladder.regions.count)
+            regionDetails.append(regionDetail)
         }
     }
 
@@ -58,6 +80,10 @@ class LadderViewModel {
         ladder.deleteMark(mark: mark)
     }
 
+    func getRegionHeight(region: Region) -> CGFloat {
+        return region.decremental ? 2 * regionUnitHeight : regionUnitHeight
+    }
+
     func draw(rect: CGRect, offset: CGFloat, scale: CGFloat, context: CGContext) {
         if #available(iOS 13.0, *) {
             context.setStrokeColor(UIColor.label.cgColor)
@@ -67,32 +93,14 @@ class LadderViewModel {
         context.setLineWidth(1)
         // All horizontal distances are adjusted to scale.
         let ladderWidth: CGFloat = rect.width * scale
-        // unitHeight assumes top and bottom margins equal to height of non-decremental
-        // region, and decremental regions are twice this height.
-        if reset {
-            regionUnitHeight = getRegionUnitHeight(rect: rect, ladder: ladder)
-            reset = false
-        }
-        // First region is one unitHeight below top of LadderView.
-        var regionBoundary = regionUnitHeight
-        var regionNumber = 0
-        for region: Region in ladder.regions {
-            let regionHeight = region.decremental ? 2 * regionUnitHeight : regionUnitHeight
-            region.upperBoundary = regionBoundary
-            region.lowerBoundary = regionBoundary + regionHeight
-            let regionRect = CGRect(x: margin, y: regionBoundary, width: ladderWidth, height: regionHeight)
-            regionBoundary += regionHeight
-            regionNumber += 1
-            var lastRegion = false
-            if regionNumber >= ladder.regions.count {
-                lastRegion = true
-            }
-            drawRegion(rect: regionRect, context: context, region: region, offset: offset, scale: scale, lastRegion: lastRegion)
+        for regionDetail: RegionDetail in regionDetails {
+            let region = regionDetail.region
+            let regionRect = CGRect(x: margin, y: region.upperBoundary, width: ladderWidth, height: region.lowerBoundary - region.upperBoundary)
+            drawRegion(rect: regionRect, context: context, region: region, offset: offset, scale: scale, lastRegion: regionDetail.isLastRegion)
         }
     }
 
-    func drawRegion(rect: CGRect, context: CGContext, region: Region, offset: CGFloat, scale: CGFloat, lastRegion: Bool) {
-        // draw label
+    fileprivate func drawLabel(_ rect: CGRect, _ region: Region, _ context: CGContext) {
         let stringRect = CGRect(x: 0, y: rect.origin.y, width: rect.origin.x, height: rect.height)
         let paragraphStyle = NSMutableParagraphStyle()
         paragraphStyle.alignment = .center
@@ -115,7 +123,10 @@ class LadderViewModel {
         context.setLineWidth(1)
         context.drawPath(using: .fillStroke)
         labelText.draw(in: labelRect)
+    }
 
+    // TODO: Color alpha gets higher with each rotation of device.
+    fileprivate func drawRegionArea(_ context: CGContext, _ rect: CGRect, _ region: Region) {
         // Draw top ladder line
         if #available(iOS 13.0, *) {
             context.setStrokeColor(UIColor.label.cgColor)
@@ -130,19 +141,20 @@ class LadderViewModel {
 
         // Highlight region if selected
         if region.selected {
-            context.setFillColor(red.cgColor)
             let regionRect = CGRect(x: rect.origin.x, y: rect.origin.y, width: rect.width, height: rect.height)
             context.setAlpha(0.2)
             context.addRect(regionRect)
+            context.setFillColor(red.cgColor)
             context.drawPath(using: .fillStroke)
         }
         context.setAlpha(1)
-        context.strokePath()
+    }
 
+    fileprivate func drawMarks(_ region: Region, _ scale: CGFloat, _ offset: CGFloat, _ context: CGContext, _ rect: CGRect) {
         // Draw marks
         for mark: Mark in region.marks {
-            let scrolledStartLocation = scale * mark.position.origin.x - offset
-            let scrolledEndLocation = scale * mark.position.terminus.x - offset
+            let scrolledStartLocation = scale * mark.position.proximal.x - offset
+            let scrolledEndLocation = scale * mark.position.distal.x - offset
             context.setLineWidth(lineWidth)
             // Don't bother drawing marks in margin.
             if scrolledStartLocation > rect.origin.x {
@@ -164,7 +176,9 @@ class LadderViewModel {
                 }
             }
         }
+    }
 
+    fileprivate func drawBottomLine(_ context: CGContext, _ lastRegion: Bool, _ rect: CGRect) {
         // Draw bottom line of region if it is the last region of the ladder.
         context.setLineWidth(1)
         if lastRegion {
@@ -174,15 +188,26 @@ class LadderViewModel {
         context.strokePath()
     }
 
-    func getRegionUnitHeight(rect: CGRect, ladder: Ladder) -> CGFloat {
+    func drawRegion(rect: CGRect, context: CGContext, region: Region, offset: CGFloat, scale: CGFloat, lastRegion: Bool) {
+//        drawLabel(rect, region, context)
+        drawRegionArea(context, rect, region)
+//        drawMarks(region, scale, offset, context, rect)
+        drawBottomLine(context, lastRegion, rect)
+    }
+
+    func getRegionUnitHeight(ladder: Ladder) -> CGFloat {
         var numRegionUnits = 0
+        // Decremental regions are twice as high as regular regions.
+        // FIXME: It might be better to have this be a property of each region, e.g.
+        // Region.heightInRegionUnits.
         for region: Region in ladder.regions {
             numRegionUnits += region.decremental ? 2 : 1
         }
         // we'll allow one region unit space above and below, so...
         numRegionUnits += 2
-        return rect.height / CGFloat(numRegionUnits)
+        return height / CGFloat(numRegionUnits)
     }
+
 
     func regions() -> [Region] {
         return ladder.regions
@@ -207,6 +232,10 @@ class LadderViewModel {
                 mark.attached = false
             }
         }
+    }
+
+    func reset() {
+        initialize()
     }
 
 //    // Translates from LadderView coordinates to Mark coordinates.

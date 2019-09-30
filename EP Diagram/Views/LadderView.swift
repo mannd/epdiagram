@@ -57,6 +57,8 @@ class LadderView: UIView, LadderViewDelegate {
     required init?(coder aDecoder: NSCoder) {
         ladderViewModel = LadderViewModel()
         super.init(coder: aDecoder)
+        ladderViewModel.height = self.frame.height
+        ladderViewModel.initialize()
 
         let singleTapRecognizer = UITapGestureRecognizer(target: self, action: #selector(self.singleTap))
         singleTapRecognizer.numberOfTapsRequired = 1
@@ -70,6 +72,7 @@ class LadderView: UIView, LadderViewDelegate {
         let longPressRecognizer = UILongPressGestureRecognizer(target: self, action: #selector(self.longPress))
         self.addGestureRecognizer(longPressRecognizer)
     }
+
 
     // Touches
     @objc func singleTap(tap: UITapGestureRecognizer) {
@@ -111,7 +114,7 @@ class LadderView: UIView, LadderViewDelegate {
                         mark.attached = true
                         mark.selected = true
                         cursorViewDelegate?.attachMark(mark: mark)
-                        cursorViewDelegate?.moveCursor(location: mark.position.origin.x)
+                        cursorViewDelegate?.moveCursor(location: mark.position.proximal.x)
                         cursorViewDelegate?.hideCursor(hide: false)
                     }
                 }
@@ -123,7 +126,7 @@ class LadderView: UIView, LadderViewDelegate {
                         mark.attached = true
                         mark.selected = true
                         cursorViewDelegate?.attachMark(mark: mark)
-                        cursorViewDelegate?.moveCursor(location: mark.position.origin.x)
+                        cursorViewDelegate?.moveCursor(location: mark.position.proximal.x)
                         cursorViewDelegate?.hideCursor(hide: false)
                     }
                 }
@@ -246,7 +249,7 @@ class LadderView: UIView, LadderViewDelegate {
 
     private func nearMark(location: CGFloat, mark: Mark) -> Bool {
 //        return location < mark.end && location > mark.start
-        return location < translateToRelativeLocation(location: mark.position.terminus.x, offset: contentOffset, scale: scale) + accuracy && location > translateToRelativeLocation(location: mark.position.origin.x, offset: contentOffset, scale: scale) - accuracy
+        return location < translateToRelativeLocation(location: mark.position.distal.x, offset: contentOffset, scale: scale) + accuracy && location > translateToRelativeLocation(location: mark.position.proximal.x, offset: contentOffset, scale: scale) - accuracy
     }
 
     override func draw(_ rect: CGRect) {
@@ -257,7 +260,9 @@ class LadderView: UIView, LadderViewDelegate {
     }
 
     func reset() {
-        ladderViewModel.reset = true
+        print("LadderView height = \(self.frame.height)")
+        ladderViewModel.height = self.frame.height
+        ladderViewModel.reset()
     }
 
     // MARK: - LadderView delegate methods
@@ -288,10 +293,10 @@ class LadderView: UIView, LadderViewDelegate {
     }
 
     func moveMark(mark: Mark, location: CGFloat, moveCursor: Bool) {
-        mark.position.origin.x = translateToAbsoluteLocation(location: location, offset: contentOffset, scale: scale)
-        mark.position.terminus.x = mark.position.origin.x
+        mark.position.proximal.x = translateToAbsoluteLocation(location: location, offset: contentOffset, scale: scale)
+        mark.position.distal.x = mark.position.proximal.x
         if moveCursor {
-            cursorViewDelegate?.moveCursor(location: mark.position.origin.x)
+            cursorViewDelegate?.moveCursor(location: mark.position.proximal.x)
             cursorViewDelegate?.refresh()
         }
     }
@@ -300,7 +305,7 @@ class LadderView: UIView, LadderViewDelegate {
         if let activeRegion = ladderViewModel.activeRegion {
             let relativeLocation = translateToRelativeLocation(location: location, offset: contentOffset, scale: scale)
             for mark in activeRegion.marks {
-                if abs(mark.position.origin.x - relativeLocation) < accuracy {
+                if abs(mark.position.proximal.x - relativeLocation) < accuracy {
                     return mark
                 }
             }

@@ -21,7 +21,6 @@ class Region {
     public var upperBoundary: CGFloat = 0
     public var lowerBoundary: CGFloat = 0
     public var selected: Bool = false
-//    public var label: RegionLabel?
     public var name: String = ""
     public var marks: [Mark] = []
     public var markable: Bool = true
@@ -30,4 +29,5 @@ class Region {
     public func appendMark(_ mark: Mark) {
         marks.append(mark)
     }
+    
 }
