@@ -55,6 +55,7 @@ class LadderView: UIView, LadderViewDelegate {
     let accuracy: CGFloat = 20
 
     required init?(coder aDecoder: NSCoder) {
+        print("ladderView init")
         ladderViewModel = LadderViewModel()
         super.init(coder: aDecoder)
         ladderViewModel.height = self.frame.height
@@ -254,6 +255,7 @@ class LadderView: UIView, LadderViewDelegate {
 
     override func draw(_ rect: CGRect) {
         // Drawing code - note not necessary to call super.draw.
+        print("LadderView draw()")
         if let context = UIGraphicsGetCurrentContext() {
             ladderViewModel.draw(rect: rect, offset: contentOffset, scale: scale, context: context)
         }

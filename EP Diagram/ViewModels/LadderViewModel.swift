@@ -56,7 +56,9 @@ class LadderViewModel {
     }
 
     func initialize() {
+        print("LadderViewModel initialize()")
         regionUnitHeight = getRegionUnitHeight(ladder: ladder)
+        regionDetails.removeAll()
         var regionBoundary = regionUnitHeight
         var regionNumber = 0
         for region: Region in ladder.regions {
@@ -85,6 +87,7 @@ class LadderViewModel {
     }
 
     func draw(rect: CGRect, offset: CGFloat, scale: CGFloat, context: CGContext) {
+        print("LadderViewModel draw()")
         if #available(iOS 13.0, *) {
             context.setStrokeColor(UIColor.label.cgColor)
         } else {
@@ -94,6 +97,7 @@ class LadderViewModel {
         // All horizontal distances are adjusted to scale.
         let ladderWidth: CGFloat = rect.width * scale
         for regionDetail: RegionDetail in regionDetails {
+            print("regionDetails.count = \(regionDetails.count)")
             let region = regionDetail.region
             let regionRect = CGRect(x: margin, y: region.upperBoundary, width: ladderWidth, height: region.lowerBoundary - region.upperBoundary)
             drawRegion(rect: regionRect, context: context, region: region, offset: offset, scale: scale, lastRegion: regionDetail.isLastRegion)
@@ -134,6 +138,7 @@ class LadderViewModel {
             context.setStrokeColor(UIColor.black.cgColor)
         }
 
+        print("drawRegionArea")
         context.setLineWidth(1)
         context.move(to: CGPoint(x: rect.origin.x, y: rect.origin.y))
         context.addLine(to: CGPoint(x: rect.width, y: rect.origin.y))
@@ -159,7 +164,7 @@ class LadderViewModel {
             // Don't bother drawing marks in margin.
             if scrolledStartLocation > rect.origin.x {
                 let color: CGColor
-                if mark.selected {
+                if mark.selected && region.selected   {
                     color = selectedColor.cgColor
                 }
                 else {
@@ -189,9 +194,9 @@ class LadderViewModel {
     }
 
     func drawRegion(rect: CGRect, context: CGContext, region: Region, offset: CGFloat, scale: CGFloat, lastRegion: Bool) {
-//        drawLabel(rect, region, context)
+        drawLabel(rect, region, context)
         drawRegionArea(context, rect, region)
-//        drawMarks(region, scale, offset, context, rect)
+        drawMarks(region, scale, offset, context, rect)
         drawBottomLine(context, lastRegion, rect)
     }
 
