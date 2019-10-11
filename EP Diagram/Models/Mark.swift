@@ -31,19 +31,22 @@ class Mark {
         case dashed
     }
 
-    /// Hightlight is used in association with cursors and connecting marks.  It is different from Selected and should be a different color.  In addation, highlights may be indicated by solid circles at either end of the mark.
+    /** Highlight is used in association with cursors and selecting marks.
+     origin - high
+     */
     enum Highlight {
-        case origin
-        case terminus
+        case proximal
+        case distal
         case all
+        case selected
         case none
     }
 
     /// Whether cursor is shown and if so is linked to the origin or terminus of thef mark, or to the mark as a whole (positional).
     enum CursorType {
-        case origin
-        case terminus
-        case positional
+        case proximal
+        case distal
+        case all
         case none
     }
 
@@ -52,17 +55,17 @@ class Mark {
     var position: MarkPosition
 
     // TODO: Need to support multiple selection and copy features from one mark to a group of selected marks.
-    var selected: Bool = false {
-        didSet {
-            print("selected set and = \(selected)")
-        }
-    }
     var hasCursor: Bool = false
     var attached: Bool = false
+    var cursorType: CursorType = .none
+    var highlight: Highlight = .none
 
+    convenience init() {
+        self.init(MarkPosition(proximal: CGPoint.zero, distal: CGPoint.zero))
+    }
 
-    init() {
-        position = MarkPosition(proximal: CGPoint.zero, distal: CGPoint.zero)
+    init(_ position: MarkPosition) {
+        self.position = position
     }
 
 }

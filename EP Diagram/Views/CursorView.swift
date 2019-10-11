@@ -86,6 +86,7 @@ class CursorView: UIView, CursorViewDelegate {
         }
         // toggle hide or show cursor with single tap
         hideCursor(hide: cursorViewModel.cursorVisible)
+        unattachMark()
         setNeedsDisplay()
     }
 
@@ -155,14 +156,14 @@ class CursorView: UIView, CursorViewDelegate {
         guard let mark = mark else { return }
         attachedMark = mark
         mark.attached = true
-        mark.selected = true
+        mark.highlight = .all
         print("Mark attached!")
     }
 
     func unattachMark() {
         if let mark = attachedMark {
-            mark.selected = false
             mark.attached = false
+            mark.highlight = .none
             ladderViewDelegate?.refresh()
         }
         attachedMark = nil

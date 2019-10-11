@@ -24,6 +24,7 @@ class Ladder {
     // For any ladder, only one Mark in only one Region can be active.
     var activeMark: Mark?
 
+    // TODO: location must be a MarkPosition, to set both ends.
     func addMarkAt(_ location: CGFloat) -> Mark? {
         guard let activeRegion = activeRegion else {
             return nil
@@ -31,9 +32,9 @@ class Ladder {
         let mark = Mark()
         mark.position.proximal.x = location
         mark.position.distal.x = location
-//        mark.position = location
-//        mark.distalPosition = location
-        mark.selected = true
+        mark.position.proximal.y = 0
+        mark.position.distal.y = 1
+        mark.highlight = .all
         activeRegion.appendMark(mark)
         return mark
     }

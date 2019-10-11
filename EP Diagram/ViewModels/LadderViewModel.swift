@@ -155,31 +155,37 @@ class LadderViewModel {
         context.setAlpha(1)
     }
 
+    fileprivate func drawMark(_ scale: CGFloat, _ mark: Mark, _ offset: CGFloat, _ rect: CGRect, _ context: CGContext, _ region: Region) {
+        let proximalX = scale * mark.position.proximal.x - offset
+        let distalX = scale * mark.position.distal.x - offset
+        let proximalY = rect.origin.y + mark.position.proximal.y * rect.height
+        let distalY = rect.origin.y + mark.position.distal.y * rect.height
+        context.setLineWidth(lineWidth)
+        // Don't bother drawing marks in margin.
+        if proximalX > rect.origin.x {
+            let color: CGColor
+            if mark.highlight == .all && region.selected   {
+                color = selectedColor.cgColor
+            }
+            else {
+                color = unselectedColor.cgColor
+            }
+            context.setStrokeColor(color)
+            context.move(to: CGPoint(x: proximalX, y: proximalY))
+            context.addLine(to: CGPoint(x: distalX, y: distalY))
+            context.strokePath()
+            if #available(iOS 13.0, *) {
+                context.setStrokeColor(UIColor.label.cgColor)
+            } else {
+                context.setStrokeColor(UIColor.black.cgColor)
+            }
+        }
+    }
+
     fileprivate func drawMarks(_ region: Region, _ scale: CGFloat, _ offset: CGFloat, _ context: CGContext, _ rect: CGRect) {
         // Draw marks
         for mark: Mark in region.marks {
-            let scrolledStartLocation = scale * mark.position.proximal.x - offset
-            let scrolledEndLocation = scale * mark.position.distal.x - offset
-            context.setLineWidth(lineWidth)
-            // Don't bother drawing marks in margin.
-            if scrolledStartLocation > rect.origin.x {
-                let color: CGColor
-                if mark.selected && region.selected   {
-                    color = selectedColor.cgColor
-                }
-                else {
-                    color = unselectedColor.cgColor
-                }
-                context.setStrokeColor(color)
-                context.move(to: CGPoint(x: scrolledStartLocation, y: rect.origin.y))
-                context.addLine(to: CGPoint(x: scrolledEndLocation, y: rect.origin.y + rect.height))
-                context.strokePath()
-                if #available(iOS 13.0, *) {
-                    context.setStrokeColor(UIColor.label.cgColor)
-                } else {
-                    context.setStrokeColor(UIColor.black.cgColor)
-                }
-            }
+            drawMark(scale, mark, offset, rect, context, region)
         }
     }
 
@@ -233,7 +239,7 @@ class LadderViewModel {
     func inactivateMarks() {
         for region in ladder.regions {
             for mark in region.marks {
-                mark.selected = false
+                mark.highlight = .none
                 mark.attached = false
             }
         }

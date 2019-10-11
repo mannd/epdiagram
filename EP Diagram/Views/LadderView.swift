@@ -106,14 +106,14 @@ class LadderView: UIView, LadderViewDelegate {
                         // FIXME: attached and selected maybe the same thing, eliminate duplication.
                         PRINT("Unattaching mark")
                         mark.attached = false
-                        mark.selected = false
+                        unselectMark(mark)
                         cursorViewDelegate?.hideCursor(hide: true)
                         cursorViewDelegate?.unattachMark()
                     }
                     else {
                         PRINT("Attaching mark")
                         mark.attached = true
-                        mark.selected = true
+                        selectMark(mark)
                         cursorViewDelegate?.attachMark(mark: mark)
                         cursorViewDelegate?.moveCursor(location: mark.position.proximal.x)
                         cursorViewDelegate?.hideCursor(hide: false)
@@ -125,7 +125,7 @@ class LadderView: UIView, LadderViewDelegate {
                     if let mark = mark {
                         ladderViewModel.inactivateMarks()
                         mark.attached = true
-                        mark.selected = true
+                        selectMark(mark)
                         cursorViewDelegate?.attachMark(mark: mark)
                         cursorViewDelegate?.moveCursor(location: mark.position.proximal.x)
                         cursorViewDelegate?.hideCursor(hide: false)
@@ -135,6 +135,14 @@ class LadderView: UIView, LadderViewDelegate {
         }
         setNeedsDisplay()
         cursorViewDelegate?.refresh()
+    }
+
+    fileprivate func selectMark(_ mark: Mark) {
+        mark.highlight = .all
+    }
+
+    fileprivate func unselectMark(_ mark: Mark) {
+        mark.highlight = .none
     }
 
     @objc func doubleTap(tap: UITapGestureRecognizer) {
@@ -239,6 +247,7 @@ class LadderView: UIView, LadderViewDelegate {
                 tappedRegionSection = .markSection
                 outerLoop: for mark in tappedRegion.marks {
                     if nearMark(location: location.x, mark: mark) {
+                        print("tap near mark")
                         tappedMark = mark
                         break outerLoop
                     }
