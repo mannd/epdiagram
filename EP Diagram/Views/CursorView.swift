@@ -138,7 +138,17 @@ class CursorView: UIView, CursorViewDelegate {
         // Adjust movement to scale
         cursorViewModel.cursor.move(delta: delta.x / scale)
         if let attachedMark = attachedMark {
-            print("Move grabbed Mark")
+            print("Move attached Mark")
+            switch cursorViewModel.cursor.anchor {
+            case .proximal:
+                attachedMark.cursorType = .proximal
+            case .middle:
+                attachedMark.cursorType = .all
+            case .distal:
+                attachedMark.cursorType = .distal
+            case .none:
+                attachedMark.cursorType = .none
+            }
             ladderViewDelegate?.moveMark(mark: attachedMark, location: translateToRelativeLocation(location: cursorViewModel.cursor.location, offset: contentOffset, scale: scale), moveCursor: false)
             ladderViewDelegate?.refresh()
         }

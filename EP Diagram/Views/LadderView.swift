@@ -117,18 +117,7 @@ class LadderView: UIView, LadderViewDelegate {
                         mark.attached = true
                         selectMark(mark)
                         cursorViewDelegate?.attachMark(mark: mark)
-                        let anchor: Cursor.Anchor
-                        switch tapLocation.regionDivision {
-                        case .proximal:
-                            anchor = .proximal
-                        case .middle:
-                            anchor = .middle
-                        case .distal:
-                            anchor = .distal
-                        case .none:
-                            anchor = .none
-                        }
-                        cursorViewDelegate?.setAnchor(anchor: anchor)
+                        cursorViewDelegate?.setAnchor(anchor: getAnchor(regionDivision: tapLocation.regionDivision))
                         cursorViewDelegate?.moveCursor(location: mark.position.proximal.x)
                         cursorViewDelegate?.hideCursor(hide: false)
                     }
@@ -141,18 +130,7 @@ class LadderView: UIView, LadderViewDelegate {
                         mark.attached = true
                         selectMark(mark)
                         cursorViewDelegate?.attachMark(mark: mark)
-                        let anchor: Cursor.Anchor
-                        switch tapLocation.regionDivision {
-                        case .proximal:
-                            anchor = .proximal
-                        case .middle:
-                            anchor = .middle
-                        case .distal:
-                            anchor = .distal
-                        case .none:
-                            anchor = .none
-                        }
-                        cursorViewDelegate?.setAnchor(anchor: anchor)
+                        cursorViewDelegate?.setAnchor(anchor: getAnchor(regionDivision: tapLocation.regionDivision))
                         cursorViewDelegate?.moveCursor(location: mark.position.proximal.x)
                         cursorViewDelegate?.hideCursor(hide: false)
                     }
@@ -161,6 +139,21 @@ class LadderView: UIView, LadderViewDelegate {
         }
         setNeedsDisplay()
         cursorViewDelegate?.refresh()
+    }
+
+    fileprivate func getAnchor(regionDivision: RegionDivision) -> Cursor.Anchor {
+        let anchor: Cursor.Anchor
+        switch regionDivision {
+        case .proximal:
+            anchor = .proximal
+        case .middle:
+            anchor = .middle
+        case .distal:
+            anchor = .distal
+        case .none:
+            anchor = .none
+        }
+        return anchor
     }
 
     fileprivate func selectMark(_ mark: Mark) {
@@ -363,8 +356,17 @@ class LadderView: UIView, LadderViewDelegate {
     }
 
     func moveMark(mark: Mark, location: CGFloat, moveCursor: Bool) {
-        mark.position.proximal.x = translateToAbsoluteLocation(location: location, offset: contentOffset, scale: scale)
-        mark.position.distal.x = mark.position.proximal.x
+        switch mark.cursorType {
+        case .proximal:
+            mark.position.proximal.x = translateToAbsoluteLocation(location: location, offset: contentOffset, scale: scale)
+        case .all:
+            mark.position.proximal.x = translateToAbsoluteLocation(location: location, offset: contentOffset, scale: scale)
+            mark.position.distal.x = mark.position.proximal.x
+        case .distal:
+            mark.position.distal.x = translateToAbsoluteLocation(location: location, offset: contentOffset, scale: scale)
+        case .none:
+            break
+        }
         if moveCursor {
             cursorViewDelegate?.moveCursor(location: mark.position.proximal.x)
             cursorViewDelegate?.refresh()
