@@ -54,7 +54,7 @@ class CursorView: UIView, CursorViewDelegate {
     }
 
     override func draw(_ rect: CGRect) {
-        print("CursorView draw()")
+        PRINT("CursorView draw()")
         if let context = UIGraphicsGetCurrentContext() {
             cursorViewModel.height = getCursorHeight(anchor: cursorViewModel.cursor.anchor)
             cursorViewModel.draw(rect: rect, scale: scale, offset: contentOffset, context: context)
@@ -81,7 +81,7 @@ class CursorView: UIView, CursorViewDelegate {
         // TODO: However, scrollview must deal with single tap and create cursor via a delegate.
         guard cursorViewModel.cursor.visible else { return false }
         if isNearCursor(location: point.x, cursor: cursorViewModel.cursor) && point.y < ladderViewDelegate?.getRegionUpperBoundary(view: self) ?? self.frame.height {
-            print("near cursor")
+            PRINT("near cursor")
             return true
         }
         return false
@@ -94,7 +94,7 @@ class CursorView: UIView, CursorViewDelegate {
 
 
     @objc func singleTap(tap: UITapGestureRecognizer) {
-        print("Single tap on cursor")
+        PRINT("Single tap on cursor")
         if calibrating {
             doCalibration()
             return
@@ -106,7 +106,7 @@ class CursorView: UIView, CursorViewDelegate {
     }
 
     @objc func doubleTap(tap: UITapGestureRecognizer) {
-        print("Double tap on cursor")
+        PRINT("Double tap on cursor")
         // delete attached Mark
         if let attachedMark = attachedMark {
             ladderViewDelegate?.deleteMark(mark: attachedMark)
@@ -117,20 +117,20 @@ class CursorView: UIView, CursorViewDelegate {
     }
 
     @objc func dragging(pan: UIPanGestureRecognizer) {
-        print("Panning cursor")
+        PRINT("Panning cursor")
         // FIXME: Move this to dragging in LadderView
 //        let vel: CGPoint = pan.velocity(in: self)
 //        if vel.x > 1.0 {
-//            print("Panning to right")
+//            PRINT("Panning to right")
 //        }
 //        else if vel.x < 1.0 {
-//            print("Panning to left")
+//            PRINT("Panning to left")
 //        }
 //        if vel.y > 1.0 {
-//            print("Panning down")
+//            PRINT("Panning down")
 //        }
 //        else if vel.y < 1.0 {
-//            print("Panning up")
+//            PRINT("Panning up")
 //        }
 
         // drag Cursor
@@ -138,7 +138,7 @@ class CursorView: UIView, CursorViewDelegate {
         // Adjust movement to scale
         cursorViewModel.cursor.move(delta: delta.x / scale)
         if let attachedMark = attachedMark {
-            print("Move attached Mark")
+            PRINT("Move attached Mark")
             switch cursorViewModel.cursor.anchor {
             case .proximal:
                 attachedMark.cursorType = .proximal
@@ -157,16 +157,16 @@ class CursorView: UIView, CursorViewDelegate {
     }
 
     @objc func longPress(press: UILongPressGestureRecognizer) {
-        print("Long press on caliper")
+        PRINT("Long press on caliper")
     }
 
     func doCalibration() {
-        print("Do calibration")
+        PRINT("Do calibration")
     }
 
 
     func putCursor(location: CGFloat) {
-        print("Cursor location = \(location)")
+        PRINT("Cursor location = \(location)")
         // 
         cursorViewModel.cursor.location = location / scale
         hideCursor(hide: false)
@@ -182,7 +182,7 @@ class CursorView: UIView, CursorViewDelegate {
         attachedMark = mark
         mark.attached = true
         mark.highlight = .all
-        print("Mark attached!")
+        PRINT("Mark attached!")
     }
 
     func unattachMark() {
@@ -192,7 +192,7 @@ class CursorView: UIView, CursorViewDelegate {
             ladderViewDelegate?.refresh()
         }
         attachedMark = nil
-        print("Mark unattached!")
+        PRINT("Mark unattached!")
     }
 
     func moveCursor(location: CGFloat) {
@@ -227,7 +227,7 @@ class CursorView: UIView, CursorViewDelegate {
     }
 
     func setAnchor(anchor: Cursor.Anchor) {
-        print("CursorView set anchor to \(anchor)")
+        PRINT("CursorView set anchor to \(anchor)")
         cursorViewModel.cursor.anchor = anchor
     }
 

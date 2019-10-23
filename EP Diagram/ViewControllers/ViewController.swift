@@ -59,11 +59,11 @@
         }
 
         @objc func calibrate() {
-           print("calibrate")
+           PRINT("calibrate")
         }
 
         @objc func singleTap(tap: UITapGestureRecognizer) {
-            print("Scroll view single tap")
+            PRINT("Scroll view single tap")
             if !ladderView.hasActiveRegion() {
                 ladderView.setActiveRegion(regionNum: 0)
                 ladderView.refresh()
@@ -83,7 +83,7 @@
         // Note that scrollViewDidScroll is also called while zooming.
         func scrollViewDidScroll(_ scrollView: UIScrollView) {
             if scrollView == imageScrollView {
-                print("didScroll")
+                PRINT("didScroll")
                 ladderView.contentOffset = scrollView.contentOffset.x
                 cursorView.contentOffset = scrollView.contentOffset.x
                 cursorView.scale = scrollView.zoomScale
@@ -95,20 +95,20 @@
 
         func scrollViewDidEndDecelerating(_ scrollView: UIScrollView) {
             if scrollView == imageScrollView {
-                print("End decelerating")
+                PRINT("End decelerating")
                 scrollFinished()
             }
         }
 
         func scrollViewDidEndDragging(_ scrollView: UIScrollView, willDecelerate decelerate: Bool) {
             if scrollView == imageScrollView && !decelerate {
-                print("End dragging")
+                PRINT("End dragging")
                 scrollFinished()
             }
         }
 
         fileprivate func scrollFinished() {
-            print("Scroll finished")
+            PRINT("Scroll finished")
 //            ladderView.setNeedsDisplay()
 //            cursorView.setNeedsDisplay()
         }
@@ -127,11 +127,11 @@
         }
 
         func scrollViewDidEndZooming(_ scrollView: UIScrollView, with view: UIView?, atScale scale: CGFloat) {
-            print("scrollViewDidEndZooming")
-            print("Zoom = \(scale)")
-            print("imageView width = \(imageView.frame.width)")
-            print("imageScrollView bounds = \(imageScrollView.bounds)")
-            print("imageScrollView contentOffset = \(imageScrollView.contentOffset)")
+            PRINT("scrollViewDidEndZooming")
+            PRINT("Zoom = \(scale)")
+            PRINT("imageView width = \(imageView.frame.width)")
+            PRINT("imageScrollView bounds = \(imageScrollView.bounds)")
+            PRINT("imageScrollView contentOffset = \(imageScrollView.contentOffset)")
             isZooming = false
 //            ladderView.contentOffset = scrollView.contentOffset.x
 //            cursorView.contentOffset = scrollView.contentOffset.x
@@ -143,7 +143,7 @@
         }
 
         func scrollViewDidZoom(_ scrollView: UIScrollView) {
-            print("didZoom")
+            PRINT("didZoom")
         }
 
         // TODO: This doesn't work right.
@@ -151,7 +151,7 @@
             super.viewWillTransition(to: size, with: coordinator)
             coordinator.animate(alongsideTransition: nil, completion: {
                 _ in
-                print("Transitioning")
+                PRINT("Transitioning")
                 self.resetViews()
             })
         }

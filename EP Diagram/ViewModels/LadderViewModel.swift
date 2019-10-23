@@ -56,7 +56,7 @@ class LadderViewModel {
     }
 
     func initialize() {
-        print("LadderViewModel initialize()")
+        PRINT("LadderViewModel initialize()")
         regionUnitHeight = getRegionUnitHeight(ladder: ladder)
         regionDetails.removeAll()
         var regionBoundary = regionUnitHeight
@@ -74,7 +74,7 @@ class LadderViewModel {
     }
 
     func addMark(location: CGFloat) -> Mark? {
-        print("Add mark at \(location)")
+        PRINT("Add mark at \(location)")
         return ladder.addMarkAt(location)
     }
 
@@ -87,7 +87,7 @@ class LadderViewModel {
     }
 
     func draw(rect: CGRect, offset: CGFloat, scale: CGFloat, context: CGContext) {
-        print("LadderViewModel draw()")
+        PRINT("LadderViewModel draw()")
         if #available(iOS 13.0, *) {
             context.setStrokeColor(UIColor.label.cgColor)
         } else {
@@ -153,8 +153,8 @@ class LadderViewModel {
     }
 
     fileprivate func drawMark(_ scale: CGFloat, _ mark: Mark, _ offset: CGFloat, _ rect: CGRect, _ context: CGContext, _ region: Region) {
-        let proximalX = scale * mark.position.proximal.x - offset
-        let distalX = scale * mark.position.distal.x - offset
+        let proximalX = Common.translateToRelativeLocation(location:mark.position.proximal.x, offset:offset, scale: scale)
+        let distalX = Common.translateToRelativeLocation(location: mark.position.distal.x, offset: offset, scale: scale)
         let proximalY = rect.origin.y + mark.position.proximal.y * rect.height
         let distalY = rect.origin.y + mark.position.distal.y * rect.height
         context.setLineWidth(lineWidth)

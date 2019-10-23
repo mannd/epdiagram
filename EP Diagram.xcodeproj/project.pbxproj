@@ -28,6 +28,7 @@
 		8E9B8043228345B5008873BB /* Mark.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8E9B8042228345B5008873BB /* Mark.swift */; };
 		8E9B8045228347DE008873BB /* Region.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8E9B8044228347DE008873BB /* Region.swift */; };
 		8E9B804722834870008873BB /* Ladder.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8E9B804622834870008873BB /* Ladder.swift */; };
+		8ED3B1B62360DA0D00549381 /* Anchor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8ED3B1B52360DA0D00549381 /* Anchor.swift */; };
 		8EF8B5B72330739F00ADB77A /* ViewControllerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8EF8B5B62330739F00ADB77A /* ViewControllerTests.swift */; };
 		8EF9166B227926BC00B51F17 /* LadderView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8EF9166A227926BC00B51F17 /* LadderView.swift */; };
 /* End PBXBuildFile section */
@@ -77,6 +78,7 @@
 		8E9B8042228345B5008873BB /* Mark.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Mark.swift; sourceTree = "<group>"; };
 		8E9B8044228347DE008873BB /* Region.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Region.swift; sourceTree = "<group>"; };
 		8E9B804622834870008873BB /* Ladder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Ladder.swift; sourceTree = "<group>"; };
+		8ED3B1B52360DA0D00549381 /* Anchor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Anchor.swift; sourceTree = "<group>"; };
 		8EF8B5B62330739F00ADB77A /* ViewControllerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ViewControllerTests.swift; sourceTree = "<group>"; };
 		8EF9166A227926BC00B51F17 /* LadderView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LadderView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -180,6 +182,7 @@
 				8E9B8044228347DE008873BB /* Region.swift */,
 				8E9B804622834870008873BB /* Ladder.swift */,
 				8E55612822A5FEDC00C4D391 /* Cursor.swift */,
+				8ED3B1B52360DA0D00549381 /* Anchor.swift */,
 			);
 			path = Models;
 			sourceTree = "<group>";
@@ -360,6 +363,7 @@
 				8E01D9C522848F4E000F36FC /* LadderViewModel.swift in Sources */,
 				8E9B804722834870008873BB /* Ladder.swift in Sources */,
 				8E55612922A5FEDC00C4D391 /* Cursor.swift in Sources */,
+				8ED3B1B62360DA0D00549381 /* Anchor.swift in Sources */,
 				8EF9166B227926BC00B51F17 /* LadderView.swift in Sources */,
 				8E01D9C722849047000F36FC /* CursorView.swift in Sources */,
 				8E9B8045228347DE008873BB /* Region.swift in Sources */,

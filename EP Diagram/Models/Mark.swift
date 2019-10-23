@@ -59,6 +59,8 @@ class Mark {
     var attached: Bool = false
     var cursorType: CursorType = .none
     var highlight: Highlight = .none
+    // Anchor point for movement and to attach a cursor
+    var anchor: Anchor = .none
 
     convenience init() {
         self.init(MarkPosition(proximal: CGPoint.zero, distal: CGPoint.zero))

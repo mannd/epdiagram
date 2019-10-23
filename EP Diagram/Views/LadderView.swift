@@ -59,7 +59,7 @@ class LadderView: UIView, LadderViewDelegate {
     let accuracy: CGFloat = 20
 
     required init?(coder aDecoder: NSCoder) {
-        print("ladderView init")
+        PRINT("ladderView init")
         ladderViewModel = LadderViewModel()
         super.init(coder: aDecoder)
         ladderViewModel.height = self.frame.height
@@ -81,7 +81,7 @@ class LadderView: UIView, LadderViewDelegate {
 
     // Touches
     @objc func singleTap(tap: UITapGestureRecognizer) {
-        print("LadderView.singleTap()")
+        PRINT("LadderView.singleTap()")
         let tapLocation = getLocationInLadder(location: tap.location(in: self), ladderViewModel: ladderViewModel)
         if tapLocation.labelWasTapped {
             if let tappedRegion = tapLocation.region {
@@ -106,14 +106,14 @@ class LadderView: UIView, LadderViewDelegate {
                 if let mark = tapLocation.mark {
                     if mark.attached {
                         // FIXME: attached and selected maybe the same thing, eliminate duplication.
-                        print("Unattaching mark")
+                        PRINT("Unattaching mark")
                         mark.attached = false
                         unselectMark(mark)
                         cursorViewDelegate?.hideCursor(hide: true)
                         cursorViewDelegate?.unattachMark()
                     }
                     else {
-                        print("Attaching mark")
+                        PRINT("Attaching mark")
                         mark.attached = true
                         selectMark(mark)
                         cursorViewDelegate?.attachMark(mark: mark)
@@ -258,7 +258,7 @@ class LadderView: UIView, LadderViewDelegate {
             if location.y > region.proximalBoundary && location.y < region.distalBoundary {
                 tappedRegion = region
                 tappedRegionDivision = getTappedRegionDivision(region: region, location: location.y)
-                print("tappedRegionDivision = \(tappedRegionDivision)")
+                PRINT("tappedRegionDivision = \(tappedRegionDivision)")
             }
         }
         if let tappedRegion = tappedRegion {
@@ -269,7 +269,7 @@ class LadderView: UIView, LadderViewDelegate {
                 tappedRegionSection = .markSection
                 outerLoop: for mark in tappedRegion.marks {
                     if nearMark(location: location.x, mark: mark) {
-                        print("tap near mark")
+                        PRINT("tap near mark")
                         tappedMark = mark
                         break outerLoop
                     }
@@ -301,14 +301,14 @@ class LadderView: UIView, LadderViewDelegate {
 
     override func draw(_ rect: CGRect) {
         // Drawing code - note not necessary to call super.draw.
-        print("LadderView draw()")
+        PRINT("LadderView draw()")
         if let context = UIGraphicsGetCurrentContext() {
             ladderViewModel.draw(rect: rect, offset: contentOffset, scale: scale, context: context)
         }
     }
 
     func reset() {
-        print("LadderView height = \(self.frame.height)")
+        PRINT("LadderView height = \(self.frame.height)")
         ladderViewModel.height = self.frame.height
         ladderViewModel.reset()
     }
