@@ -17,6 +17,7 @@ protocol CursorViewDelegate: AnyObject {
     func highlightCursor(_ on: Bool)
     func hideCursor(hide: Bool)
     func cursorIsVisible() -> Bool
+    func setAnchor(anchor: Cursor.Anchor)
 }
 
 class CursorView: UIView, CursorViewDelegate {
@@ -53,9 +54,23 @@ class CursorView: UIView, CursorViewDelegate {
     }
 
     override func draw(_ rect: CGRect) {
+        print("CursorView draw()")
         if let context = UIGraphicsGetCurrentContext() {
-            cursorViewModel.height = ladderViewDelegate?.getRegionUpperBoundary(view: self) ?? self.frame.height
+            cursorViewModel.height = getCursorHeight(anchor: cursorViewModel.cursor.anchor)
             cursorViewModel.draw(rect: rect, scale: scale, offset: contentOffset, context: context)
+        }
+    }
+
+    private func getCursorHeight(anchor: Cursor.Anchor) -> CGFloat {
+        switch anchor {
+        case .proximal:
+            return ladderViewDelegate?.getRegionUpperBoundary(view: self) ?? self.frame.height
+        case .middle:
+            return ladderViewDelegate?.getRegionMidPoint(view: self) ?? self.frame.height
+        case .distal:
+            return ladderViewDelegate?.getRegionLowerBoundary(view: self) ?? self.frame.height
+        case .none:
+            return ladderViewDelegate?.getHeight() ?? self.frame.height
         }
     }
 
@@ -199,6 +214,11 @@ class CursorView: UIView, CursorViewDelegate {
 
     func cursorIsVisible() -> Bool {
         return cursorViewModel.cursorVisible
+    }
+
+    func setAnchor(anchor: Cursor.Anchor) {
+        print("CursorView set anchor to \(anchor)")
+        cursorViewModel.cursor.anchor = anchor
     }
 
 }

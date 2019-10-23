@@ -19,9 +19,20 @@ class Cursor: NSObject {
         case unattached
         case null
     }
-    // The x coordinate of the cursor.
+
+    /// Attachment point for the cursor on a mark.  If there is not attached mark, then this is ignored.
+    enum Anchor: String, Codable {
+        case proximal
+        case middle
+        case distal
+        case none
+    }
+
+    /// The x coordinate of the cursor.
     var location: CGFloat
+
     var state = CursorState.null
+    var anchor = Anchor.middle
     var visible = false
 
     // Touches +/- accuracy count as touches.

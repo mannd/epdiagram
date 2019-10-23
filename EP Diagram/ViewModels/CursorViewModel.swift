@@ -86,6 +86,4 @@ class CursorViewModel: NSObject {
 //        cursor.location = max(cursor.location, leftMargin)
 //        cursor.location = min(cursor.location, width - rightMargin)
     }
-    
-
 }

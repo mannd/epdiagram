@@ -12,11 +12,14 @@ protocol LadderViewDelegate: AnyObject {
     func makeMark(location: CGFloat) -> Mark?
     func deleteMark(mark: Mark)
     func getRegionUpperBoundary(view: UIView) -> CGFloat
+    func getRegionLowerBoundary(view: UIView) -> CGFloat
+    func getRegionMidPoint(view: UIView) -> CGFloat
     func moveMark(mark: Mark, location: CGFloat, moveCursor: Bool)
     func refresh()
     func findMarkNearby(location: CGFloat) -> Mark?
     func setActiveRegion(regionNum: Int)
     func hasActiveRegion() -> Bool
+    func getHeight() -> CGFloat
 }
 
 class LadderView: UIView, LadderViewDelegate {
@@ -26,6 +29,7 @@ class LadderView: UIView, LadderViewDelegate {
         var region: Region?
         var mark: Mark?
         var regionSection: RegionSection
+        var regionDivision: RegionDivision
         var regionWasTapped: Bool {
             region != nil
         }
@@ -77,10 +81,8 @@ class LadderView: UIView, LadderViewDelegate {
 
     // Touches
     @objc func singleTap(tap: UITapGestureRecognizer) {
+        print("LadderView.singleTap()")
         let tapLocation = getLocationInLadder(location: tap.location(in: self), ladderViewModel: ladderViewModel)
-        PRINT("Region was single-tapped = \(tapLocation.regionWasTapped)")
-        PRINT("Label was single-tapped = \(tapLocation.labelWasTapped)")
-        PRINT("Mark was single-tapped = \(tapLocation.markWasTapped)")
         if tapLocation.labelWasTapped {
             if let tappedRegion = tapLocation.region {
                 if tappedRegion.selected {
@@ -104,17 +106,29 @@ class LadderView: UIView, LadderViewDelegate {
                 if let mark = tapLocation.mark {
                     if mark.attached {
                         // FIXME: attached and selected maybe the same thing, eliminate duplication.
-                        PRINT("Unattaching mark")
+                        print("Unattaching mark")
                         mark.attached = false
                         unselectMark(mark)
                         cursorViewDelegate?.hideCursor(hide: true)
                         cursorViewDelegate?.unattachMark()
                     }
                     else {
-                        PRINT("Attaching mark")
+                        print("Attaching mark")
                         mark.attached = true
                         selectMark(mark)
                         cursorViewDelegate?.attachMark(mark: mark)
+                        let anchor: Cursor.Anchor
+                        switch tapLocation.regionDivision {
+                        case .proximal:
+                            anchor = .proximal
+                        case .middle:
+                            anchor = .middle
+                        case .distal:
+                            anchor = .distal
+                        case .none:
+                            anchor = .none
+                        }
+                        cursorViewDelegate?.setAnchor(anchor: anchor)
                         cursorViewDelegate?.moveCursor(location: mark.position.proximal.x)
                         cursorViewDelegate?.hideCursor(hide: false)
                     }
@@ -127,6 +141,18 @@ class LadderView: UIView, LadderViewDelegate {
                         mark.attached = true
                         selectMark(mark)
                         cursorViewDelegate?.attachMark(mark: mark)
+                        let anchor: Cursor.Anchor
+                        switch tapLocation.regionDivision {
+                        case .proximal:
+                            anchor = .proximal
+                        case .middle:
+                            anchor = .middle
+                        case .distal:
+                            anchor = .distal
+                        case .none:
+                            anchor = .none
+                        }
+                        cursorViewDelegate?.setAnchor(anchor: anchor)
                         cursorViewDelegate?.moveCursor(location: mark.position.proximal.x)
                         cursorViewDelegate?.hideCursor(hide: false)
                     }
@@ -234,9 +260,12 @@ class LadderView: UIView, LadderViewDelegate {
         var tappedRegion: Region?
         var tappedMark: Mark?
         var tappedRegionSection: RegionSection = .markSection
+        var tappedRegionDivision: RegionDivision = .none
         for region in (ladderViewModel.regions()) {
-            if location.y > region.upperBoundary && location.y < region.lowerBoundary {
+            if location.y > region.proximalBoundary && location.y < region.distalBoundary {
                 tappedRegion = region
+                tappedRegionDivision = getTappedRegionDivision(region: region, location: location.y)
+                print("tappedRegionDivision = \(tappedRegionDivision)")
             }
         }
         if let tappedRegion = tappedRegion {
@@ -254,12 +283,27 @@ class LadderView: UIView, LadderViewDelegate {
                 }
             }
         }
-        return LocationInLadder(region: tappedRegion, mark: tappedMark, regionSection: tappedRegionSection)
+        return LocationInLadder(region: tappedRegion, mark: tappedMark, regionSection: tappedRegionSection, regionDivision: tappedRegionDivision)
     }
 
     private func nearMark(location: CGFloat, mark: Mark) -> Bool {
 //        return location < mark.end && location > mark.start
         return location < translateToRelativeLocation(location: mark.position.distal.x, offset: contentOffset, scale: scale) + accuracy && location > translateToRelativeLocation(location: mark.position.proximal.x, offset: contentOffset, scale: scale) - accuracy
+    }
+
+    private func getTappedRegionDivision(region: Region, location: CGFloat) -> RegionDivision {
+        guard  location > region.proximalBoundary && location < region.distalBoundary else {
+            return .none
+        }
+        if location < region.proximalBoundary + 0.25 * (region.distalBoundary - region.proximalBoundary) {
+            return .proximal
+        }
+        else if location < region.proximalBoundary + 0.75 * (region.distalBoundary - region.proximalBoundary) {
+            return .middle
+        }
+        else {
+            return .distal
+        }
     }
 
     override func draw(_ rect: CGRect) {
@@ -279,8 +323,23 @@ class LadderView: UIView, LadderViewDelegate {
     // MARK: - LadderView delegate methods
     // convert region upper boundary to view's coordinates and return to view
     func getRegionUpperBoundary(view: UIView) -> CGFloat {
-        let location = CGPoint(x: 0, y: ladderViewModel.activeRegion?.upperBoundary ?? 0)
+        let location = CGPoint(x: 0, y: ladderViewModel.activeRegion?.proximalBoundary ?? 0)
         return convert(location, to: view).y
+    }
+
+    func getRegionMidPoint(view: UIView) -> CGFloat {
+        guard let activeRegion = ladderViewModel.activeRegion else { return 0 }
+        let location = CGPoint(x: 0, y: (activeRegion.distalBoundary -  activeRegion.proximalBoundary) / 2 + activeRegion.proximalBoundary)
+        return convert(location, to: view).y
+    }
+
+    func getRegionLowerBoundary(view: UIView) -> CGFloat {
+        let location = CGPoint(x: 0, y: ladderViewModel.activeRegion?.distalBoundary ?? 0)
+        return convert(location, to: view).y
+    }
+
+    func getHeight() -> CGFloat {
+        return ladderViewModel.height
     }
 
     func makeMark(location: CGFloat) -> Mark? {

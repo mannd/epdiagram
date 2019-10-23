@@ -64,8 +64,8 @@ class LadderViewModel {
         for region: Region in ladder.regions {
             var regionDetail: RegionDetail = RegionDetail(region: region, isLastRegion: false)
             let regionHeight = getRegionHeight(region: region)
-            region.upperBoundary = regionBoundary
-            region.lowerBoundary = regionBoundary + regionHeight
+            region.proximalBoundary = regionBoundary
+            region.distalBoundary = regionBoundary + regionHeight
             regionBoundary += regionHeight
             regionNumber += 1
             regionDetail.isLastRegion = (regionNumber >= ladder.regions.count)
@@ -97,9 +97,8 @@ class LadderViewModel {
         // All horizontal distances are adjusted to scale.
         let ladderWidth: CGFloat = rect.width * scale
         for regionDetail: RegionDetail in regionDetails {
-            print("regionDetails.count = \(regionDetails.count)")
             let region = regionDetail.region
-            let regionRect = CGRect(x: margin, y: region.upperBoundary, width: ladderWidth, height: region.lowerBoundary - region.upperBoundary)
+            let regionRect = CGRect(x: margin, y: region.proximalBoundary, width: ladderWidth, height: region.distalBoundary - region.proximalBoundary)
             drawRegion(rect: regionRect, context: context, region: region, offset: offset, scale: scale, lastRegion: regionDetail.isLastRegion)
         }
     }
@@ -137,8 +136,6 @@ class LadderViewModel {
         } else {
             context.setStrokeColor(UIColor.black.cgColor)
         }
-
-        print("drawRegionArea")
         context.setLineWidth(1)
         context.move(to: CGPoint(x: rect.origin.x, y: rect.origin.y))
         context.addLine(to: CGPoint(x: rect.width, y: rect.origin.y))
