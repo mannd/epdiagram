@@ -56,19 +56,19 @@ class CursorView: UIView, CursorViewDelegate {
     override func draw(_ rect: CGRect) {
         PRINT("CursorView draw()")
         if let context = UIGraphicsGetCurrentContext() {
-            cursorViewModel.height = getCursorHeight(anchor: cursorViewModel.cursor.anchor)
+            cursorViewModel.height = getCursorHeight(anchor: attachedMark?.anchor ?? .none)
             cursorViewModel.draw(rect: rect, scale: scale, offset: contentOffset, context: context)
         }
     }
 
-    private func getCursorHeight(anchor: Cursor.Anchor) -> CGFloat {
+    private func getCursorHeight(anchor: Anchor) -> CGFloat {
         switch anchor {
         case .proximal:
-            return ladderViewDelegate?.getRegionUpperBoundary(view: self) ?? self.frame.height
+            return ladderViewDelegate?.getRegionProximalBoundary(view: self) ?? self.frame.height
         case .middle:
             return ladderViewDelegate?.getRegionMidPoint(view: self) ?? self.frame.height
         case .distal:
-            return ladderViewDelegate?.getRegionLowerBoundary(view: self) ?? self.frame.height
+            return ladderViewDelegate?.getRegionDistalBoundary(view: self) ?? self.frame.height
         case .none:
             return ladderViewDelegate?.getHeight() ?? self.frame.height
         }
@@ -80,7 +80,7 @@ class CursorView: UIView, CursorViewDelegate {
         // Hidden cursor shouldn't interfere with touches.
         // TODO: However, scrollview must deal with single tap and create cursor via a delegate.
         guard cursorViewModel.cursor.visible else { return false }
-        if isNearCursor(location: point.x, cursor: cursorViewModel.cursor) && point.y < ladderViewDelegate?.getRegionUpperBoundary(view: self) ?? self.frame.height {
+        if isNearCursor(location: point.x, cursor: cursorViewModel.cursor) && point.y < ladderViewDelegate?.getRegionProximalBoundary(view: self) ?? self.frame.height {
             PRINT("near cursor")
             return true
         }
@@ -139,16 +139,16 @@ class CursorView: UIView, CursorViewDelegate {
         cursorViewModel.cursor.move(delta: delta.x / scale)
         if let attachedMark = attachedMark {
             PRINT("Move attached Mark")
-            switch cursorViewModel.cursor.anchor {
-            case .proximal:
-                attachedMark.cursorType = .proximal
-            case .middle:
-                attachedMark.cursorType = .all
-            case .distal:
-                attachedMark.cursorType = .distal
-            case .none:
-                attachedMark.cursorType = .none
-            }
+//            switch cursorViewModel.cursor.anchor {
+//            case .proximal:
+//                attachedMark.anchor = .proximal
+//            case .middle:
+//                attachedMark.anchor = .middle
+//            case .distal:
+//                attachedMark.anchor = .distal
+//            case .none:
+//                attachedMark.anchor = .none
+//            }
             ladderViewDelegate?.moveMark(mark: attachedMark, location: translateToRelativeLocation(location: cursorViewModel.cursor.location, offset: contentOffset, scale: scale), moveCursor: false)
             ladderViewDelegate?.refresh()
         }

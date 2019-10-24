@@ -42,14 +42,6 @@ class Mark {
         case none
     }
 
-    /// Whether cursor is shown and if so is linked to the origin or terminus of thef mark, or to the mark as a whole (positional).
-    enum CursorType {
-        case proximal
-        case distal
-        case all
-        case none
-    }
-
     /// If a mark is an impulse origin and properties indicate show this, a dot of some sort with appear at the origin of the mark.
     var isImpulseOrigin: Bool = false
     var position: MarkPosition
@@ -57,7 +49,6 @@ class Mark {
     // TODO: Need to support multiple selection and copy features from one mark to a group of selected marks.
     var hasCursor: Bool = false
     var attached: Bool = false
-    var cursorType: CursorType = .none
     var highlight: Highlight = .none
     // Anchor point for movement and to attach a cursor
     var anchor: Anchor = .none

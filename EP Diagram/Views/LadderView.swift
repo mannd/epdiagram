@@ -11,8 +11,8 @@ import UIKit
 protocol LadderViewDelegate: AnyObject {
     func makeMark(location: CGFloat) -> Mark?
     func deleteMark(mark: Mark)
-    func getRegionUpperBoundary(view: UIView) -> CGFloat
-    func getRegionLowerBoundary(view: UIView) -> CGFloat
+    func getRegionProximalBoundary(view: UIView) -> CGFloat
+    func getRegionDistalBoundary(view: UIView) -> CGFloat
     func getRegionMidPoint(view: UIView) -> CGFloat
     func moveMark(mark: Mark, location: CGFloat, moveCursor: Bool)
     func refresh()
@@ -115,9 +115,9 @@ class LadderView: UIView, LadderViewDelegate {
                     else {
                         PRINT("Attaching mark")
                         mark.attached = true
+                        mark.anchor = getAnchor(regionDivision: tapLocation.regionDivision)
                         selectMark(mark)
                         cursorViewDelegate?.attachMark(mark: mark)
-                        cursorViewDelegate?.setAnchor(anchor: getAnchor(regionDivision: tapLocation.regionDivision))
                         cursorViewDelegate?.moveCursor(location: mark.position.proximal.x)
                         cursorViewDelegate?.hideCursor(hide: false)
                     }
@@ -128,9 +128,9 @@ class LadderView: UIView, LadderViewDelegate {
                     if let mark = mark {
                         ladderViewModel.inactivateMarks()
                         mark.attached = true
+                        mark.anchor = getAnchor(regionDivision: tapLocation.regionDivision)
                         selectMark(mark)
                         cursorViewDelegate?.attachMark(mark: mark)
-                        cursorViewDelegate?.setAnchor(anchor: getAnchor(regionDivision: tapLocation.regionDivision))
                         cursorViewDelegate?.moveCursor(location: mark.position.proximal.x)
                         cursorViewDelegate?.hideCursor(hide: false)
                     }
@@ -141,8 +141,8 @@ class LadderView: UIView, LadderViewDelegate {
         cursorViewDelegate?.refresh()
     }
 
-    fileprivate func getAnchor(regionDivision: RegionDivision) -> Cursor.Anchor {
-        let anchor: Cursor.Anchor
+    fileprivate func getAnchor(regionDivision: RegionDivision) -> Anchor {
+        let anchor: Anchor
         switch regionDivision {
         case .proximal:
             anchor = .proximal
@@ -315,7 +315,7 @@ class LadderView: UIView, LadderViewDelegate {
 
     // MARK: - LadderView delegate methods
     // convert region upper boundary to view's coordinates and return to view
-    func getRegionUpperBoundary(view: UIView) -> CGFloat {
+    func getRegionProximalBoundary(view: UIView) -> CGFloat {
         let location = CGPoint(x: 0, y: ladderViewModel.activeRegion?.proximalBoundary ?? 0)
         return convert(location, to: view).y
     }
@@ -326,7 +326,7 @@ class LadderView: UIView, LadderViewDelegate {
         return convert(location, to: view).y
     }
 
-    func getRegionLowerBoundary(view: UIView) -> CGFloat {
+    func getRegionDistalBoundary(view: UIView) -> CGFloat {
         let location = CGPoint(x: 0, y: ladderViewModel.activeRegion?.distalBoundary ?? 0)
         return convert(location, to: view).y
     }
@@ -356,10 +356,10 @@ class LadderView: UIView, LadderViewDelegate {
     }
 
     func moveMark(mark: Mark, location: CGFloat, moveCursor: Bool) {
-        switch mark.cursorType {
+        switch mark.anchor {
         case .proximal:
             mark.position.proximal.x = translateToAbsoluteLocation(location: location, offset: contentOffset, scale: scale)
-        case .all:
+        case .middle:
             mark.position.proximal.x = translateToAbsoluteLocation(location: location, offset: contentOffset, scale: scale)
             mark.position.distal.x = mark.position.proximal.x
         case .distal:
