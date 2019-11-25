@@ -118,7 +118,18 @@ class LadderView: UIView, LadderViewDelegate {
                         mark.anchor = getAnchor(regionDivision: tapLocation.regionDivision)
                         selectMark(mark)
                         cursorViewDelegate?.attachMark(mark: mark)
-                        cursorViewDelegate?.moveCursor(location: mark.position.proximal.x)
+                        let anchorLocation: CGFloat
+                        switch mark.anchor {
+                        case .distal:
+                            anchorLocation = mark.position.distal.x
+                        case .middle:
+                            anchorLocation = mark.midpoint().x
+                        case .proximal:
+                            anchorLocation = mark.position.proximal.x
+                        case .none:
+                            anchorLocation = mark.position.proximal.x
+                        }
+                        cursorViewDelegate?.moveCursor(location: anchorLocation)
                         cursorViewDelegate?.hideCursor(hide: false)
                     }
                 }
@@ -139,6 +150,10 @@ class LadderView: UIView, LadderViewDelegate {
         }
         setNeedsDisplay()
         cursorViewDelegate?.refresh()
+    }
+
+    func markMidpoint(mark: Mark) -> CGFloat {
+        return (mark.position.distal.x - mark.position.proximal.x) / 2.0 + mark.position.proximal.x
     }
 
     fileprivate func getAnchor(regionDivision: RegionDivision) -> Anchor {
@@ -280,8 +295,9 @@ class LadderView: UIView, LadderViewDelegate {
     }
 
     private func nearMark(location: CGFloat, mark: Mark) -> Bool {
-//        return location < mark.end && location > mark.start
-        return location < translateToRelativeLocation(location: mark.position.distal.x, offset: contentOffset, scale: scale) + accuracy && location > translateToRelativeLocation(location: mark.position.proximal.x, offset: contentOffset, scale: scale) - accuracy
+        let maxX = max(translateToRelativeLocation(location: mark.position.distal.x, offset: contentOffset, scale: scale), translateToRelativeLocation(location: mark.position.proximal.x, offset: contentOffset, scale: scale))
+        let minX = min(translateToRelativeLocation(location: mark.position.distal.x, offset: contentOffset, scale: scale), translateToRelativeLocation(location: mark.position.proximal.x, offset: contentOffset, scale: scale))
+        return location < maxX + accuracy && location > minX - accuracy
     }
 
     private func getTappedRegionDivision(region: Region, location: CGFloat) -> RegionDivision {
@@ -360,8 +376,12 @@ class LadderView: UIView, LadderViewDelegate {
         case .proximal:
             mark.position.proximal.x = translateToAbsoluteLocation(location: location, offset: contentOffset, scale: scale)
         case .middle:
-            mark.position.proximal.x = translateToAbsoluteLocation(location: location, offset: contentOffset, scale: scale)
-            mark.position.distal.x = mark.position.proximal.x
+            // Calculate difference between prox and distal x
+//            let diff = translateToAbsoluteLocation(location: mark.position.proximal.x, offset: contentOffset, scale: scale) - translateToAbsoluteLocation(location: mark.position.distal.x, offset: contentOffset, scale: scale)
+
+            mark.position.proximal.x = translateToAbsoluteLocation(location: location , offset: contentOffset, scale: scale)
+            mark.position.distal.x = translateToAbsoluteLocation(location: location, offset: contentOffset, scale: scale)
+
         case .distal:
             mark.position.distal.x = translateToAbsoluteLocation(location: location, offset: contentOffset, scale: scale)
         case .none:

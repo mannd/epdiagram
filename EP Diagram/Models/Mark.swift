@@ -61,4 +61,12 @@ class Mark {
         self.position = position
     }
 
+    /// Return midpoint of mark as CGPoint
+    func midpoint() -> CGPoint {
+        let x = (position.distal.x - position.proximal.x) / 2.0 + position.proximal.x
+        let y = (position.distal.y - position.proximal.y) / 2.0 + position.proximal.y
+        return CGPoint(x: x, y: y)
+    }
+
+
 }
