@@ -13,14 +13,27 @@ import UIKit
 // of a known interval (1000 msec ideally).  Note that calibration is not
 // necessary to draw ladder diagrams.
 class Cursor: NSObject {
+    // TODO: CursorState probably will not be used.  Set to null for now.
     enum CursorState: String, Codable {
         case attached
         case unattached
-        case hidden
+        case null
     }
-    // The x coordinate of the cursor.
+
+    /// Attachment point for the cursor on a mark.  If there is not attached mark, then this is ignored.
+    enum Anchor: String, Codable {
+        case proximal
+        case middle
+        case distal
+        case none
+    }
+
+    /// The x coordinate of the cursor.
     var location: CGFloat
-    var state = CursorState.unattached
+
+    var state = CursorState.null
+    var anchor = Anchor.middle
+    var visible = false
 
     // Touches +/- accuracy count as touches.
     let accuracy: CGFloat = 20
@@ -37,7 +50,7 @@ class Cursor: NSObject {
         return abs(p.x - location) < accuracy
     }
 
-    func move(delta: CGPoint) {
-        location += delta.x
+    func move(delta: CGFloat) {
+        location += delta
     }
 }

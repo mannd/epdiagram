@@ -26,4 +26,9 @@ class CursorTests: XCTestCase {
         XCTAssertFalse(cursor.isNearCursor(point: CGPoint(x: 145, y: 55)))
     }
 
+    func testCursorMove() {
+        let cursor = Cursor(location: 100)
+        cursor.move(delta: 20)
+        XCTAssertEqual(cursor.location, 120)
+    }
 }

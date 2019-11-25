@@ -31,11 +31,27 @@ class LadderTests: XCTestCase {
         XCTAssertEqual(region.name, "V")
     }
 
+    func testNumberOfRegionsInDefaultLadder() {
+        XCTAssertEqual(ladder.numRegions, 3)
+    }
+
     func testDefaultRegionMarks() {
         for region in ladder.regions {
             // default ladder has no marks
             XCTAssertEqual(region.marks.count, 0)
         }
+    }
+
+    func testAddMark() {
+        ladder.activeRegion = ladder.regions[0]
+        let mark = ladder.addMarkAt(100)
+        XCTAssertEqual(mark?.position, 100)
+    }
+
+    func testAddMarkNoActiveRegion() {
+        ladder.activeRegion = nil
+        let mark = ladder.addMarkAt(100)
+        XCTAssertEqual(mark?.position, nil)
     }
 
 }
