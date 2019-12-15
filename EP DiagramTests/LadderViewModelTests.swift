@@ -26,16 +26,28 @@ class LadderViewModelTests: XCTestCase {
         let location: CGFloat = 134.56
         let scale: CGFloat = 1.78
         let offset: CGFloat = 333.45
-        let view = UIView()
-        let absoluteLocation = view.translateToAbsoluteLocation(location: location, offset: offset, scale: scale)
-        let relativeLocation = view.translateToRelativeLocation(location: absoluteLocation, offset: offset, scale: scale)
+        let absoluteLocation = Common.translateToAbsoluteLocation(location: location, offset: offset, scale: scale)
+        let relativeLocation = Common.translateToRelativeLocation(location: absoluteLocation, offset: offset, scale: scale)
         XCTAssertEqual(location, relativeLocation, accuracy: 0.0001)
     }
 
     func testLadderViewModelUnitHeight() {
         ladderViewModel.ladder = Ladder.defaultLadder()
-        let height = ladderViewModel.getRegionUnitHeight(rect: CGRect(x: 0, y: 0, width: 0, height: 100), ladder: ladderViewModel.ladder)
+        ladderViewModel.height = 100
+        let height = ladderViewModel.getRegionUnitHeight(ladder: ladderViewModel.ladder)
         XCTAssertEqual(height, 16.6666, accuracy: 0.0001)
+    }
+
+    // Pass scale and offset to ladderViewModel.
+    func testScaleAndContent() {
+        let sb = UIStoryboard(name: "Main", bundle: nil)
+        let sut = sb.instantiateViewController(withIdentifier: String(describing: ViewController.self)) as! ViewController
+        sut.loadViewIfNeeded()
+        let ladderView = sut.ladderView
+        ladderView!.scale = 2.5
+        ladderView!.offset = 305
+        XCTAssertEqual(ladderView!.ladderViewModel.scale, 2.5)
+        XCTAssertEqual(ladderView!.ladderViewModel.offset, 305)
     }
 
 }

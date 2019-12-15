@@ -69,15 +69,17 @@ class CursorViewModel: NSObject {
         cursor.visible = true
     }
 
-    func draw(rect: CGRect, scale: CGFloat, offset: CGFloat, context: CGContext) {
+    func draw(rect: CGRect, scale: CGFloat, offset: CGFloat, context: CGContext, defaultHeight: CGFloat?) {
         guard cursor.visible else { return }
         context.setStrokeColor(color.cgColor)
         context.setLineWidth(lineWidth)
         context.setAlpha(alphaValue)
         adjustLocation()
         let location = scale * cursor.location - offset
+        let defaultHeight = defaultHeight ?? height
+        let cursorHeight = (location <= leftMargin) ? defaultHeight : height
         context.move(to: CGPoint(x: location, y: 0))
-        context.addLine(to: CGPoint(x: location, y: height))
+        context.addLine(to: CGPoint(x: location, y: cursorHeight))
         context.strokePath()
     }
 

@@ -14,20 +14,16 @@
         @IBOutlet var ladderView: LadderView!
         @IBOutlet var cursorView: CursorView!
 
-
         var zoom: CGFloat = 1.0
         var isZooming = false
-        // leftMargin is used by LadderView, ImageView, and CursorView, and is the same
-        // for all the views.
         let leftMargin: CGFloat = 40
 
         override func viewDidLoad() {
             super.viewDidLoad()
-            title = "EP Diagram"
-            imageScrollView.delegate = self
+            title = NSLocalizedString("EP Diagram", comment: "app name")
             // Ensure there is a space for labels at the left margin.
             imageScrollView.contentInset = UIEdgeInsets(top: 0, left: leftMargin, bottom: 0, right: 0)
-            // Distinguish the two views.
+            // Distinguish the two views using slightly different background colors.
             if #available(iOS 13.0, *) {
                 imageScrollView.backgroundColor = UIColor.secondarySystemBackground
                 ladderView.backgroundColor = UIColor.tertiarySystemBackground
@@ -39,6 +35,7 @@
             cursorView.leftMargin = leftMargin
             cursorView.ladderViewDelegate = ladderView
             ladderView.cursorViewDelegate = cursorView
+            imageScrollView.delegate = self
 
             let singleTapRecognizer = UITapGestureRecognizer(target: self, action: #selector(self.singleTap))
             singleTapRecognizer.numberOfTapsRequired = 1
@@ -52,15 +49,28 @@
             imageScrollView.contentOffset = CGPoint(x: newContentOffsetX, y: 0)
             cursorView.setNeedsDisplay()
             ladderView.setNeedsDisplay()
+            // Set up toolbar and buttons.
             let toolbar = navigationController?.toolbar
-            let button = UIBarButtonItem(title: "Calibrate", style: UIBarButtonItem.Style.plain, target: self, action: #selector(calibrate))
-            toolbar?.items = [button]
+            let calibrateTitle = NSLocalizedString("Calibrate", comment: "calibrate button label title")
+            let selectTitle = NSLocalizedString("Select", comment: "select button label title")
+            let calibrateButton = UIBarButtonItem(title: calibrateTitle, style: UIBarButtonItem.Style.plain, target: self, action: #selector(calibrate))
+            let selectButton = UIBarButtonItem(title: selectTitle, style: UIBarButtonItem.Style.plain, target: self, action: #selector(selectMarks))
+            // More buttons here.
+            toolbar?.items = [calibrateButton, selectButton]
             navigationController?.setToolbarHidden(false, animated: false)
         }
+
+        // MARK: -  Buttons
 
         @objc func calibrate() {
            PRINT("calibrate")
         }
+
+        @objc func selectMarks() {
+            PRINT("select")
+        }
+
+        // MARK: - Touches
 
         @objc func singleTap(tap: UITapGestureRecognizer) {
             PRINT("Scroll view single tap")
@@ -78,6 +88,17 @@
             ladderView.setNeedsDisplay()
         }
 
+        // MARK: - Scrolling and zooming
+
+        func viewForZooming(in scrollView: UIScrollView) -> UIView? {
+            if scrollView == imageScrollView {
+                return imageView
+            }
+            else {
+                return nil
+            }
+        }
+
         // Functions below fire during scrolling of imageView and at end
         // of scrolling.  Relabeling might best occur at end of scrolling,
         // while redrawing of ladder can be done during scrolling.
@@ -85,8 +106,9 @@
         func scrollViewDidScroll(_ scrollView: UIScrollView) {
             if scrollView == imageScrollView {
                 PRINT("didScroll")
-                ladderView.contentOffset = scrollView.contentOffset.x
-                cursorView.contentOffset = scrollView.contentOffset.x
+                // Only scrolling in the horizontal direction affects ladderView.
+                ladderView.offset = scrollView.contentOffset.x
+                cursorView.offset = scrollView.contentOffset.x
                 cursorView.scale = scrollView.zoomScale
                 ladderView.scale = scrollView.zoomScale
                 ladderView.setNeedsDisplay()
@@ -110,18 +132,8 @@
 
         fileprivate func scrollFinished() {
             PRINT("Scroll finished")
-//            ladderView.setNeedsDisplay()
-//            cursorView.setNeedsDisplay()
         }
 
-        func viewForZooming(in scrollView: UIScrollView) -> UIView? {
-            if scrollView == imageScrollView {
-                return imageView
-            }
-            else {
-                return nil
-            }
-        }
 
         func scrollViewWillBeginZooming(_ scrollView: UIScrollView, with view: UIView?) {
             isZooming = true
@@ -134,20 +146,14 @@
             PRINT("imageScrollView bounds = \(imageScrollView.bounds)")
             PRINT("imageScrollView contentOffset = \(imageScrollView.contentOffset)")
             isZooming = false
-//            ladderView.contentOffset = scrollView.contentOffset.x
-//            cursorView.contentOffset = scrollView.contentOffset.x
-//            ladderView.scale = scale
-//            cursorView.scale = scale
-//            zoom = scale
-//            ladderView.setNeedsDisplay()
-//            cursorView.setNeedsDisplay()
         }
 
         func scrollViewDidZoom(_ scrollView: UIScrollView) {
             PRINT("didZoom")
         }
 
-        // TODO: This doesn't work right.
+        // MARK: - Rotate view
+
         override func viewWillTransition(to size: CGSize, with coordinator: UIViewControllerTransitionCoordinator) {
             super.viewWillTransition(to: size, with: coordinator)
             coordinator.animate(alongsideTransition: nil, completion: {
@@ -163,5 +169,16 @@
             self.cursorView.setNeedsDisplay()
         }
 
+        // MARK: - Save and restore views
+
+        // TODO: Need to implement this functionality.
+
+        override func encodeRestorableState(with coder: NSCoder) {
+            PRINT("Encode restorable state")
+        }
+
+        override func decodeRestorableState(with coder: NSCoder) {
+            PRINT("Decode restorable state")
+        }
     }
 

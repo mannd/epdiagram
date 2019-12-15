@@ -17,6 +17,29 @@ import UIKit
 struct MarkPosition {
     var proximal: CGPoint
     var distal: CGPoint
+
+    func maxXPoint() -> CGPoint {
+        if proximal.x >= distal.x {
+            return proximal
+        }
+        return distal
+    }
+
+    func maxX() -> CGFloat {
+        return max(proximal.x, distal.x)
+    }
+
+    func maxY() -> CGFloat {
+        return max(proximal.y, distal.y)
+    }
+
+    func minX() -> CGFloat {
+        return min(proximal.x, distal.x)
+    }
+
+    func minY() -> CGFloat {
+        return min(proximal.y, distal.y)
+    }
 }
 
 /**
@@ -31,9 +54,10 @@ class Mark {
         case dashed
     }
 
-    /** Highlight is used in association with cursors and selecting marks.
+    /** Highlight is used in association with cursors, selecting marks, and showing connections
      origin - high
      */
+    // TODO: This might not work because we need prox/distal highlights and selection at the same time.
     enum Highlight {
         case proximal
         case distal
@@ -44,21 +68,44 @@ class Mark {
 
     /// If a mark is an impulse origin and properties indicate show this, a dot of some sort with appear at the origin of the mark.
     var isImpulseOrigin: Bool = false
-    var position: MarkPosition
+    var position: MarkPosition {
+        didSet {
+            // set linked marks' positions
+            PRINT("Did set a mark position")
+        }
+    }
 
     // TODO: Need to support multiple selection and copy features from one mark to a group of selected marks.
     var hasCursor: Bool = false
     var attached: Bool = false
     var highlight: Highlight = .none
+    // Set when one end or another of a mark is close enough to connect
+    var potentiallyConnected = false
     // Anchor point for movement and to attach a cursor
     var anchor: Anchor = .none
+
+    // A mark may have up to three attachments to marks in the proximal and distal regions
+    // and in its own region, i.e. rentry spawning a mark.
+    struct AttachedMarks {
+        var proximal: Mark?
+        var middle: Mark?
+        var distal: Mark?
+    }
+    var attachedMarks: AttachedMarks
+
+    init(_ position: MarkPosition) {
+        self.position = position
+        attachedMarks = AttachedMarks(proximal: nil, middle: nil, distal: nil)
+    }
 
     convenience init() {
         self.init(MarkPosition(proximal: CGPoint.zero, distal: CGPoint.zero))
     }
 
-    init(_ position: MarkPosition) {
-        self.position = position
+    // init a mark that is vertical and spans a region.
+    convenience init(positionX: CGFloat) {
+        let position = MarkPosition(proximal: CGPoint(x: positionX, y: 0), distal: CGPoint(x: positionX, y:1.0))
+        self.init(position)
     }
 
     /// Return midpoint of mark as CGPoint

@@ -8,18 +8,6 @@
 
 import UIKit
 
-extension UIView {
-    // Translates from LadderView coordinates to Mark coordinates.
-    func translateToAbsoluteLocation(location: CGFloat, offset: CGFloat, scale: CGFloat) -> CGFloat {
-        return Common.translateToAbsoluteLocation(location: location, offset: offset, scale: scale)
-    }
-
-    // Translate from Mark coordinates to LadderView coordinates.
-    func translateToRelativeLocation(location: CGFloat, offset: CGFloat, scale: CGFloat) -> CGFloat {
-        return Common.translateToRelativeLocation(location: location, offset: offset, scale: scale)
-    }
-}
-
 class Common {
     // Translates from LadderView coordinates to Mark coordinates.
     static func translateToAbsoluteLocation(location: CGFloat, offset: CGFloat, scale: CGFloat) -> CGFloat {
@@ -29,6 +17,19 @@ class Common {
     // Translate from Mark coordinates to LadderView coordinates.
     static func translateToRelativeLocation(location: CGFloat, offset: CGFloat, scale: CGFloat) -> CGFloat {
         return scale * location - offset
+    }
+
+    // translate mark points to and from host coordinate system
+    static func translateToRelativePosition(location: CGPoint, inRect rect: CGRect, offsetX offset: CGFloat, scale: CGFloat) -> CGPoint {
+        let x = translateToRelativeLocation(location: location.x, offset: offset, scale: scale)
+        let y = rect.origin.y + location.y * rect.height
+        return CGPoint(x: x, y: y)
+    }
+
+    static func translateToAbsolutePosition(location: CGPoint, inRect rect: CGRect, offsetX offset: CGFloat, scale: CGFloat) -> CGPoint {
+        let x = translateToAbsoluteLocation(location: location.x, offset: offset, scale: scale)
+        let y = (location.y - rect.origin.y) / rect.height
+        return CGPoint(x: x, y: y)
     }
 }
 

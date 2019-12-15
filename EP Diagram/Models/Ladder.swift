@@ -8,13 +8,9 @@
 
 import UIKit
 
-// A Ladder is simply a collection of Regions in top bottom order.  Presumably
-// an origin is necessay (maybe not, maybe in the ViewModel) in order for the
-// Ladder ViewController to know how to draw it.
+// A Ladder is simply a collection of Regions in top bottom order.
 class Ladder {
     var regions: [Region] = []
-    var xOrigin: CGFloat?
-    var yOrigin: CGFloat?
     var numRegions: Int {
         get {
             return regions.count
@@ -22,18 +18,24 @@ class Ladder {
     }
     var activeRegion: Region?
     // For any ladder, only one Mark in only one Region can be active.
+    // TODO: activeMark unused?
     var activeMark: Mark?
 
-    // TODO: location must be a MarkPosition, to set both ends.
-    func addMarkAt(_ location: CGFloat) -> Mark? {
+    // By default, a new mark is vertical and spans the region.
+    func addMarkAt(_ positionX: CGFloat) -> Mark? {
         guard let activeRegion = activeRegion else {
             return nil
         }
-        let mark = Mark()
-        mark.position.proximal.x = location
-        mark.position.distal.x = location
-        mark.position.proximal.y = 0
-        mark.position.distal.y = 1
+        let mark = Mark(positionX: positionX)
+        mark.highlight = .all
+        activeRegion.appendMark(mark)
+        return mark
+    }
+
+    func addMark(mark: Mark) -> Mark? {
+        guard let activeRegion = activeRegion else {
+            return nil
+        }
         mark.highlight = .all
         activeRegion.appendMark(mark)
         return mark
@@ -45,7 +47,6 @@ class Ladder {
             activeRegion.marks.remove(at: index)
         }
     }
-
 
     // Returns a basic ladder (A, AV, V).
     static func defaultLadder() -> Ladder {

@@ -37,5 +37,23 @@ class Region {
     public func appendMark(_ mark: Mark) {
         marks.append(mark)
     }
-    
+
+    // Two functions to use while moving marks to see is we are close to another mark
+    // for purposes of highlighting them for connection.
+    func getMarkProximalXPositions() -> [CGFloat] {
+        var points: [CGFloat] = []
+        for mark in marks {
+            points.append(mark.position.proximal.x)
+        }
+        return points
+    }
+
+    func getMarkDistalXPositions() -> [CGFloat] {
+        var points: [CGFloat] = []
+        for mark in marks {
+            points.append(mark.position.distal.x)
+        }
+        return points
+    }
+
 }

@@ -30,7 +30,7 @@ class CursorView: UIView, CursorViewDelegate {
         }
     }
     var scale: CGFloat = 1.0
-    var contentOffset: CGFloat = 0
+    var offset: CGFloat = 0
     let accuracy: CGFloat = 20
     var calibrating = false
 
@@ -57,7 +57,7 @@ class CursorView: UIView, CursorViewDelegate {
         PRINT("CursorView draw()")
         if let context = UIGraphicsGetCurrentContext() {
             cursorViewModel.height = getCursorHeight(anchor: attachedMark?.anchor ?? .none)
-            cursorViewModel.draw(rect: rect, scale: scale, offset: contentOffset, context: context)
+            cursorViewModel.draw(rect: rect, scale: scale, offset: offset, context: context, defaultHeight: ladderViewDelegate?.getTopOfLadder(view: self))
         }
     }
 
@@ -88,8 +88,8 @@ class CursorView: UIView, CursorViewDelegate {
     }
 
     func isNearCursor(location: CGFloat, cursor: Cursor) -> Bool {
-        return location < translateToRelativeLocation(location: cursor.location, offset: contentOffset, scale: scale) + accuracy
-            && location > translateToRelativeLocation(location: cursor.location, offset: contentOffset, scale: scale) - accuracy
+        return location < Common.translateToRelativeLocation(location: cursor.location, offset: offset, scale: scale) + accuracy
+            && location > Common.translateToRelativeLocation(location: cursor.location, offset: offset, scale: scale) - accuracy
     }
 
 
@@ -149,7 +149,7 @@ class CursorView: UIView, CursorViewDelegate {
 //            case .none:
 //                attachedMark.anchor = .none
 //            }
-            ladderViewDelegate?.moveMark(mark: attachedMark, location: translateToRelativeLocation(location: cursorViewModel.cursor.location, offset: contentOffset, scale: scale), moveCursor: false)
+            ladderViewDelegate?.moveMark(mark: attachedMark, location: Common.translateToRelativeLocation(location: cursorViewModel.cursor.location, offset: offset, scale: scale), moveCursor: false)
             ladderViewDelegate?.refresh()
         }
         pan.setTranslation(CGPoint(x: 0,y: 0), in: self)

@@ -20,16 +20,9 @@ class MarkTests: XCTestCase {
     }
 
     func testMarkLocation() {
-        let mark = Mark(location: 100)
-        XCTAssertEqual(mark.position, 100)
-        XCTAssertEqual(mark.distalPosition, 100)
-    }
-
-    func testMarkColor() {
-        let mark = Mark()
-        XCTAssertEqual(mark.color, mark.unselectedColor)
-        mark.selected = true
-        XCTAssertEqual(mark.color, mark.selectedColor)
+        let mark = Mark(MarkPosition(proximal: CGPoint(x: 100, y: 0), distal: CGPoint(x: 100, y: 1.0)))
+        XCTAssertEqual(mark.position.proximal.x, 100)
+        XCTAssertEqual(mark.position.distal.x, 100)
     }
 
 }
