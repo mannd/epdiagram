@@ -29,6 +29,6 @@ class CursorTests: XCTestCase {
     func testCursorMove() {
         let cursor = Cursor(location: 100)
         cursor.move(delta: 20)
-        XCTAssertEqual(cursor.location, 120)
+        XCTAssertEqual(cursor.position, 120)
     }
 }

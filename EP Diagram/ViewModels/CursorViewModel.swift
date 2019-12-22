@@ -20,6 +20,8 @@ class CursorViewModel: NSObject {
     var color: UIColor
     var width: CGFloat
     var height: CGFloat
+    var scale: CGFloat = 1
+    var offset: CGFloat = 0
     var cursorState: Cursor.CursorState {
         didSet {
             cursor.state = cursorState
@@ -58,7 +60,7 @@ class CursorViewModel: NSObject {
     }
 
     func centerCursor() {
-        cursor.location = width / 2
+        cursor.position = width / 2
     }
 
     func hideCursor() {
@@ -69,23 +71,31 @@ class CursorViewModel: NSObject {
         cursor.visible = true
     }
 
-    func draw(rect: CGRect, scale: CGFloat, offset: CGFloat, context: CGContext, defaultHeight: CGFloat?) {
+    func draw(rect: CGRect, context: CGContext, defaultHeight: CGFloat?) {
+        // TODO: Until horizontal cursors are implemented, trap them.
+        assert(cursor.direction == .vertical)
+
         guard cursor.visible else { return }
+
         context.setStrokeColor(color.cgColor)
         context.setLineWidth(lineWidth)
         context.setAlpha(alphaValue)
-        adjustLocation()
-        let location = scale * cursor.location - offset
+        let position = scale * cursor.position - offset
         let defaultHeight = defaultHeight ?? height
-        let cursorHeight = (location <= leftMargin) ? defaultHeight : height
-        context.move(to: CGPoint(x: location, y: 0))
-        context.addLine(to: CGPoint(x: location, y: cursorHeight))
+        let cursorHeight = (position <= leftMargin) ? defaultHeight : height
+        context.move(to: CGPoint(x: position, y: 0))
+        let endPoint = CGPoint(x: position, y: cursorHeight)
+        context.addLine(to: endPoint)
+        context.strokePath()
+        // Add tiny circle around intersection of cursor and mark.
+        if position > leftMargin {
+            drawCircle(context: context, center: endPoint, radius: 5)
+        }
+    }
+
+    func drawCircle(context: CGContext, center: CGPoint, radius: CGFloat) {
+        context.addArc(center: center, radius: radius, startAngle: 0.0, endAngle: .pi * 2.0, clockwise: true)
         context.strokePath()
     }
 
-    private func adjustLocation() {
-        return
-//        cursor.location = max(cursor.location, leftMargin)
-//        cursor.location = min(cursor.location, width - rightMargin)
-    }
 }

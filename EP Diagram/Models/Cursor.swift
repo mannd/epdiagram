@@ -20,6 +20,13 @@ class Cursor: NSObject {
         case null
     }
 
+    // TODO: Use direction to implement cursors that change x vs y.
+    // Vertical cursor is vertical and changes x, horizontal changes y position.
+    enum Direction: String, Codable {
+        case vertical
+        case horizontal
+    }
+
     /// Attachment point for the cursor on a mark.  If there is not attached mark, then this is ignored.
     enum Anchor: String, Codable {
         case proximal
@@ -28,18 +35,19 @@ class Cursor: NSObject {
         case none
     }
 
-    /// The x coordinate of the cursor.
-    var location: CGFloat
+    /// Cursors have one dimensional positions along the x or y axis depending on their direction.
+    var position: CGFloat
 
     var state = CursorState.null
     var anchor = Anchor.middle
     var visible = false
+    var direction = Direction.vertical
 
     // Touches +/- accuracy count as touches.
     let accuracy: CGFloat = 20
     
     init(location: CGFloat) {
-        self.location = location
+        self.position = location
     }
 
     convenience override init() {
@@ -47,10 +55,10 @@ class Cursor: NSObject {
     }
 
     func isNearCursor(point p: CGPoint) -> Bool {
-        return abs(p.x - location) < accuracy
+        return abs(p.x - position) < accuracy
     }
 
     func move(delta: CGFloat) {
-        location += delta
+        position += delta
     }
 }
