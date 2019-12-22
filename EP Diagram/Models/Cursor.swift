@@ -13,29 +13,52 @@ import UIKit
 // of a known interval (1000 msec ideally).  Note that calibration is not
 // necessary to draw ladder diagrams.
 class Cursor: NSObject {
-//    var color: UIColor?
-//    var width: CGFloat?
-//    var linkedMark: Mark?
-    // The x axis position of the cursor.
-    var position: CGFloat
-    var offset: CGFloat = 0
-    var scale: CGFloat = 1
+    // TODO: CursorState probably will not be used.  Set to null for now.
+    enum CursorState: String, Codable {
+        case attached
+        case unattached
+        case null
+    }
 
-    let differential: CGFloat = 40
+    // TODO: Use direction to implement cursors that change x vs y.
+    // Vertical cursor is vertical and changes x, horizontal changes y position.
+    enum Direction: String, Codable {
+        case vertical
+        case horizontal
+    }
+
+    /// Attachment point for the cursor on a mark.  If there is not attached mark, then this is ignored.
+    enum Anchor: String, Codable {
+        case proximal
+        case middle
+        case distal
+        case none
+    }
+
+    /// Cursors have one dimensional positions along the x or y axis depending on their direction.
+    var position: CGFloat
+
+    var state = CursorState.null
+    var anchor = Anchor.middle
+    var visible = false
+    var direction = Direction.vertical
+
+    // Touches +/- accuracy count as touches.
+    let accuracy: CGFloat = 20
     
-    init(position: CGFloat) {
-        self.position = position
+    init(location: CGFloat) {
+        self.position = location
     }
 
     convenience override init() {
-        self.init(position: 0)
+        self.init(location: 0)
     }
 
     func isNearCursor(point p: CGPoint) -> Bool {
-        return abs(p.x - position) < differential
+        return abs(p.x - position) < accuracy
     }
 
-    func move(delta: CGPoint) {
-        position += delta.x
+    func move(delta: CGFloat) {
+        position += delta
     }
 }

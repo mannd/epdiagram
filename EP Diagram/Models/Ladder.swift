@@ -8,60 +8,58 @@
 
 import UIKit
 
-// A Ladder is simply a collection of Regions in top bottom order.  Presumably
-// an origin is necessay (maybe not, maybe in the ViewModel) in order for the
-// Ladder ViewController to know how to draw it.
+// A Ladder is simply a collection of Regions in top bottom order.
 class Ladder {
     var regions: [Region] = []
-    var xOrigin: CGFloat?
-    var yOrigin: CGFloat?
     var numRegions: Int {
         get {
             return regions.count
         }
     }
     var activeRegion: Region?
+    // For any ladder, only one Mark in only one Region can be active.
+    // TODO: activeMark unused?
+    var activeMark: Mark?
 
-    func addMarkAt(_ location: CGFloat) {
+    // By default, a new mark is vertical and spans the region.
+    func addMarkAt(_ positionX: CGFloat) -> Mark? {
         guard let activeRegion = activeRegion else {
-            return
+            return nil
         }
-        let mark = Mark()
-        mark.startPosition = location
-        mark.endPosition = location
-        mark.selected = true
+        let mark = Mark(positionX: positionX)
+        mark.highlight = .all
         activeRegion.appendMark(mark)
+        return mark
+    }
+
+    func addMark(mark: Mark) -> Mark? {
+        guard let activeRegion = activeRegion else {
+            return nil
+        }
+        mark.highlight = .all
+        activeRegion.appendMark(mark)
+        return mark
+    }
+
+    func deleteMark(mark: Mark) {
+        guard let activeRegion = activeRegion else { return }
+        if let index = activeRegion.marks.firstIndex(where: {$0 === mark}) {
+            activeRegion.marks.remove(at: index)
+        }
     }
 
     // Returns a basic ladder (A, AV, V).
     static func defaultLadder() -> Ladder {
         let ladder = Ladder()
         let aRegion = Region()
-        aRegion.label = RegionLabel("A")
+        aRegion.name = "A"
         aRegion.selected = true
         let avRegion = Region()
-        avRegion.label = RegionLabel("AV")
+        avRegion.name = "AV"
         avRegion.decremental = true
         let vRegion = Region()
-        vRegion.label = RegionLabel("V")
+        vRegion.name = "V"
         ladder.regions = [aRegion, avRegion, vRegion]
-        // Add Mark for testing
-        let testMark: Mark = Mark()
-        testMark.startPosition = 10
-        testMark.endPosition = 10
-        aRegion.appendMark(testMark)
-        let testMark2: Mark = Mark()
-        testMark2.startPosition = 100.0
-        testMark2.endPosition = 100.0
-        aRegion.appendMark(testMark2)
-        let testMark3: Mark = Mark()
-        testMark3.startPosition = 50
-        testMark3.endPosition = 50
-        vRegion.appendMark(testMark3)
-        let testMark4 = Mark()
-        testMark4.startPosition = 10
-        testMark4.endPosition = 50
-        avRegion.appendMark(testMark4)
         return ladder
     }
 }

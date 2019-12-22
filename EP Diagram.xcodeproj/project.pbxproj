@@ -9,21 +9,28 @@
 /* Begin PBXBuildFile section */
 		8E01D9C522848F4E000F36FC /* LadderViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8E01D9C422848F4E000F36FC /* LadderViewModel.swift */; };
 		8E01D9C722849047000F36FC /* CursorView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8E01D9C622849047000F36FC /* CursorView.swift */; };
+		8E25A9AF22E54F7200D62E18 /* CursorTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8E25A9AE22E54F7200D62E18 /* CursorTests.swift */; };
+		8E25A9B122E5505200D62E18 /* LadderViewModelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8E25A9B022E5505200D62E18 /* LadderViewModelTests.swift */; };
+		8E25A9B322E5515D00D62E18 /* LadderTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8E25A9B222E5515D00D62E18 /* LadderTests.swift */; };
 		8E55612922A5FEDC00C4D391 /* Cursor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8E55612822A5FEDC00C4D391 /* Cursor.swift */; };
+		8E7214DE22E95C860062C094 /* Common.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8E7214DD22E95C860062C094 /* Common.swift */; };
+		8E7214E022EB57FC0062C094 /* MarkTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8E7214DF22EB57FC0062C094 /* MarkTests.swift */; };
 		8E7D24C322779DBD005A1729 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8E7D24C222779DBD005A1729 /* AppDelegate.swift */; };
 		8E7D24C522779DBD005A1729 /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8E7D24C422779DBD005A1729 /* ViewController.swift */; };
 		8E7D24C822779DBD005A1729 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 8E7D24C622779DBD005A1729 /* Main.storyboard */; };
 		8E7D24CA22779DBF005A1729 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 8E7D24C922779DBF005A1729 /* Assets.xcassets */; };
 		8E7D24CD22779DBF005A1729 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 8E7D24CB22779DBF005A1729 /* LaunchScreen.storyboard */; };
-		8E7D24D822779DBF005A1729 /* EP_DiagramTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8E7D24D722779DBF005A1729 /* EP_DiagramTests.swift */; };
 		8E7D24E322779DBF005A1729 /* EP_DiagramUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8E7D24E222779DBF005A1729 /* EP_DiagramUITests.swift */; };
 		8E7D24F12277A00C005A1729 /* ImageView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8E7D24F02277A00C005A1729 /* ImageView.swift */; };
 		8E7F8DC122C82D890061ABF8 /* CursorViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8E7F8DC022C82D890061ABF8 /* CursorViewModel.swift */; };
 		8E7F8DC322C82D9E0061ABF8 /* ImageViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8E7F8DC222C82D9E0061ABF8 /* ImageViewModel.swift */; };
-		8E9B8041228344B5008873BB /* RegionLabel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8E9B8040228344B5008873BB /* RegionLabel.swift */; };
+		8E9A466723005A600037AEAB /* CursorViewTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8E9A466623005A600037AEAB /* CursorViewTests.swift */; };
 		8E9B8043228345B5008873BB /* Mark.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8E9B8042228345B5008873BB /* Mark.swift */; };
 		8E9B8045228347DE008873BB /* Region.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8E9B8044228347DE008873BB /* Region.swift */; };
 		8E9B804722834870008873BB /* Ladder.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8E9B804622834870008873BB /* Ladder.swift */; };
+		8EAF336123A570A2001437E2 /* MarkViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8EAF336023A570A2001437E2 /* MarkViewModel.swift */; };
+		8ED3B1B62360DA0D00549381 /* Anchor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8ED3B1B52360DA0D00549381 /* Anchor.swift */; };
+		8EF8B5B72330739F00ADB77A /* ViewControllerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8EF8B5B62330739F00ADB77A /* ViewControllerTests.swift */; };
 		8EF9166B227926BC00B51F17 /* LadderView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8EF9166A227926BC00B51F17 /* LadderView.swift */; };
 /* End PBXBuildFile section */
 
@@ -47,7 +54,12 @@
 /* Begin PBXFileReference section */
 		8E01D9C422848F4E000F36FC /* LadderViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LadderViewModel.swift; sourceTree = "<group>"; };
 		8E01D9C622849047000F36FC /* CursorView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CursorView.swift; sourceTree = "<group>"; };
+		8E25A9AE22E54F7200D62E18 /* CursorTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CursorTests.swift; sourceTree = "<group>"; };
+		8E25A9B022E5505200D62E18 /* LadderViewModelTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LadderViewModelTests.swift; sourceTree = "<group>"; };
+		8E25A9B222E5515D00D62E18 /* LadderTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LadderTests.swift; sourceTree = "<group>"; };
 		8E55612822A5FEDC00C4D391 /* Cursor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Cursor.swift; sourceTree = "<group>"; };
+		8E7214DD22E95C860062C094 /* Common.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Common.swift; sourceTree = "<group>"; };
+		8E7214DF22EB57FC0062C094 /* MarkTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MarkTests.swift; sourceTree = "<group>"; };
 		8E7D24BF22779DBD005A1729 /* EP Diagram.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "EP Diagram.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		8E7D24C222779DBD005A1729 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		8E7D24C422779DBD005A1729 /* ViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ViewController.swift; sourceTree = "<group>"; };
@@ -56,7 +68,6 @@
 		8E7D24CC22779DBF005A1729 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
 		8E7D24CE22779DBF005A1729 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		8E7D24D322779DBF005A1729 /* EP DiagramTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "EP DiagramTests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
-		8E7D24D722779DBF005A1729 /* EP_DiagramTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EP_DiagramTests.swift; sourceTree = "<group>"; };
 		8E7D24D922779DBF005A1729 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		8E7D24DE22779DBF005A1729 /* EP DiagramUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "EP DiagramUITests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
 		8E7D24E222779DBF005A1729 /* EP_DiagramUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EP_DiagramUITests.swift; sourceTree = "<group>"; };
@@ -64,10 +75,13 @@
 		8E7D24F02277A00C005A1729 /* ImageView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImageView.swift; sourceTree = "<group>"; };
 		8E7F8DC022C82D890061ABF8 /* CursorViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CursorViewModel.swift; sourceTree = "<group>"; };
 		8E7F8DC222C82D9E0061ABF8 /* ImageViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImageViewModel.swift; sourceTree = "<group>"; };
-		8E9B8040228344B5008873BB /* RegionLabel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RegionLabel.swift; sourceTree = "<group>"; };
+		8E9A466623005A600037AEAB /* CursorViewTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CursorViewTests.swift; sourceTree = "<group>"; };
 		8E9B8042228345B5008873BB /* Mark.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Mark.swift; sourceTree = "<group>"; };
 		8E9B8044228347DE008873BB /* Region.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Region.swift; sourceTree = "<group>"; };
 		8E9B804622834870008873BB /* Ladder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Ladder.swift; sourceTree = "<group>"; };
+		8EAF336023A570A2001437E2 /* MarkViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MarkViewModel.swift; sourceTree = "<group>"; };
+		8ED3B1B52360DA0D00549381 /* Anchor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Anchor.swift; sourceTree = "<group>"; };
+		8EF8B5B62330739F00ADB77A /* ViewControllerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ViewControllerTests.swift; sourceTree = "<group>"; };
 		8EF9166A227926BC00B51F17 /* LadderView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LadderView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -96,6 +110,14 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		8E7214DC22E95C630062C094 /* Common */ = {
+			isa = PBXGroup;
+			children = (
+				8E7214DD22E95C860062C094 /* Common.swift */,
+			);
+			path = Common;
+			sourceTree = "<group>";
+		};
 		8E7D24B622779DBD005A1729 = {
 			isa = PBXGroup;
 			children = (
@@ -119,6 +141,7 @@
 		8E7D24C122779DBD005A1729 /* EP Diagram */ = {
 			isa = PBXGroup;
 			children = (
+				8E7214DC22E95C630062C094 /* Common */,
 				8E9B804C22834960008873BB /* ViewControllers */,
 				8E9B804B22834944008873BB /* Views */,
 				8E9B8049228348F7008873BB /* Storyboards */,
@@ -134,8 +157,13 @@
 		8E7D24D622779DBF005A1729 /* EP DiagramTests */ = {
 			isa = PBXGroup;
 			children = (
-				8E7D24D722779DBF005A1729 /* EP_DiagramTests.swift */,
 				8E7D24D922779DBF005A1729 /* Info.plist */,
+				8E25A9AE22E54F7200D62E18 /* CursorTests.swift */,
+				8E25A9B022E5505200D62E18 /* LadderViewModelTests.swift */,
+				8E25A9B222E5515D00D62E18 /* LadderTests.swift */,
+				8E7214DF22EB57FC0062C094 /* MarkTests.swift */,
+				8E9A466623005A600037AEAB /* CursorViewTests.swift */,
+				8EF8B5B62330739F00ADB77A /* ViewControllerTests.swift */,
 			);
 			path = "EP DiagramTests";
 			sourceTree = "<group>";
@@ -152,11 +180,11 @@
 		8E9B803F22834431008873BB /* Models */ = {
 			isa = PBXGroup;
 			children = (
-				8E9B8040228344B5008873BB /* RegionLabel.swift */,
 				8E9B8042228345B5008873BB /* Mark.swift */,
 				8E9B8044228347DE008873BB /* Region.swift */,
 				8E9B804622834870008873BB /* Ladder.swift */,
 				8E55612822A5FEDC00C4D391 /* Cursor.swift */,
+				8ED3B1B52360DA0D00549381 /* Anchor.swift */,
 			);
 			path = Models;
 			sourceTree = "<group>";
@@ -167,6 +195,7 @@
 				8E01D9C422848F4E000F36FC /* LadderViewModel.swift */,
 				8E7F8DC022C82D890061ABF8 /* CursorViewModel.swift */,
 				8E7F8DC222C82D9E0061ABF8 /* ImageViewModel.swift */,
+				8EAF336023A570A2001437E2 /* MarkViewModel.swift */,
 			);
 			path = ViewModels;
 			sourceTree = "<group>";
@@ -183,9 +212,9 @@
 		8E9B804B22834944008873BB /* Views */ = {
 			isa = PBXGroup;
 			children = (
-				8E7D24F02277A00C005A1729 /* ImageView.swift */,
 				8EF9166A227926BC00B51F17 /* LadderView.swift */,
 				8E01D9C622849047000F36FC /* CursorView.swift */,
+				8E7D24F02277A00C005A1729 /* ImageView.swift */,
 			);
 			path = Views;
 			sourceTree = "<group>";
@@ -331,16 +360,18 @@
 			files = (
 				8E7D24F12277A00C005A1729 /* ImageView.swift in Sources */,
 				8E7D24C522779DBD005A1729 /* ViewController.swift in Sources */,
+				8E7214DE22E95C860062C094 /* Common.swift in Sources */,
 				8E7F8DC122C82D890061ABF8 /* CursorViewModel.swift in Sources */,
 				8E9B8043228345B5008873BB /* Mark.swift in Sources */,
 				8E01D9C522848F4E000F36FC /* LadderViewModel.swift in Sources */,
 				8E9B804722834870008873BB /* Ladder.swift in Sources */,
 				8E55612922A5FEDC00C4D391 /* Cursor.swift in Sources */,
+				8ED3B1B62360DA0D00549381 /* Anchor.swift in Sources */,
 				8EF9166B227926BC00B51F17 /* LadderView.swift in Sources */,
 				8E01D9C722849047000F36FC /* CursorView.swift in Sources */,
 				8E9B8045228347DE008873BB /* Region.swift in Sources */,
-				8E9B8041228344B5008873BB /* RegionLabel.swift in Sources */,
 				8E7D24C322779DBD005A1729 /* AppDelegate.swift in Sources */,
+				8EAF336123A570A2001437E2 /* MarkViewModel.swift in Sources */,
 				8E7F8DC322C82D9E0061ABF8 /* ImageViewModel.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -349,7 +380,12 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				8E7D24D822779DBF005A1729 /* EP_DiagramTests.swift in Sources */,
+				8EF8B5B72330739F00ADB77A /* ViewControllerTests.swift in Sources */,
+				8E7214E022EB57FC0062C094 /* MarkTests.swift in Sources */,
+				8E25A9B122E5505200D62E18 /* LadderViewModelTests.swift in Sources */,
+				8E25A9AF22E54F7200D62E18 /* CursorTests.swift in Sources */,
+				8E9A466723005A600037AEAB /* CursorViewTests.swift in Sources */,
+				8E25A9B322E5515D00D62E18 /* LadderTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

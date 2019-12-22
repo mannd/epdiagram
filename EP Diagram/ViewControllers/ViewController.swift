@@ -13,26 +13,33 @@
         @IBOutlet var imageView: UIImageView!
         @IBOutlet var ladderView: LadderView!
         @IBOutlet var cursorView: CursorView!
+
         var zoom: CGFloat = 1.0
         var isZooming = false
-        // leftMargin is used by LadderView, ImageView, and CursorView, and is the same
-        // for all the views.
         let leftMargin: CGFloat = 40
 
         override func viewDidLoad() {
             super.viewDidLoad()
-            title = "EP Diagram"
-            imageScrollView.delegate = self
+            title = NSLocalizedString("EP Diagram", comment: "app name")
             // Ensure there is a space for labels at the left margin.
             imageScrollView.contentInset = UIEdgeInsets(top: 0, left: leftMargin, bottom: 0, right: 0)
-            // Distinguish the two views.
-            imageScrollView.backgroundColor = UIColor.lightGray
-            ladderView.backgroundColor = UIColor.white
+            // Distinguish the two views using slightly different background colors.
+            if #available(iOS 13.0, *) {
+                imageScrollView.backgroundColor = UIColor.secondarySystemBackground
+                ladderView.backgroundColor = UIColor.tertiarySystemBackground
+            } else {
+                imageScrollView.backgroundColor = UIColor.lightGray
+                ladderView.backgroundColor = UIColor.white
+            }
             ladderView.leftMargin = leftMargin
-            ladderView.scrollView = imageScrollView
             cursorView.leftMargin = leftMargin
-            cursorView.delegate = ladderView
-            ladderView.delegate = cursorView
+            cursorView.ladderViewDelegate = ladderView
+            ladderView.cursorViewDelegate = cursorView
+            imageScrollView.delegate = self
+
+            let singleTapRecognizer = UITapGestureRecognizer(target: self, action: #selector(self.singleTap))
+            singleTapRecognizer.numberOfTapsRequired = 1
+            imageScrollView.addGestureRecognizer(singleTapRecognizer)
         }
 
         override func viewDidAppear(_ animated: Bool) {
@@ -42,34 +49,46 @@
             imageScrollView.contentOffset = CGPoint(x: newContentOffsetX, y: 0)
             cursorView.setNeedsDisplay()
             ladderView.setNeedsDisplay()
+            // Set up toolbar and buttons.
+            let toolbar = navigationController?.toolbar
+            let calibrateTitle = NSLocalizedString("Calibrate", comment: "calibrate button label title")
+            let selectTitle = NSLocalizedString("Select", comment: "select button label title")
+            let calibrateButton = UIBarButtonItem(title: calibrateTitle, style: UIBarButtonItem.Style.plain, target: self, action: #selector(calibrate))
+            let selectButton = UIBarButtonItem(title: selectTitle, style: UIBarButtonItem.Style.plain, target: self, action: #selector(selectMarks))
+            // More buttons here.
+            toolbar?.items = [calibrateButton, selectButton]
+            navigationController?.setToolbarHidden(false, animated: false)
         }
 
-        // Functions below fire during scrolling of imageView and at end
-        // of scrolling.  Relabeling might best occur at end of scrolling,
-        // while redrawing of ladder can be done during scrolling.
-        func scrollViewDidScroll(_ scrollView: UIScrollView) {
-            if scrollView == imageScrollView {
-                ladderView.setNeedsDisplay()
+        // MARK: -  Buttons
+
+        @objc func calibrate() {
+           PRINT("calibrate")
+        }
+
+        @objc func selectMarks() {
+            PRINT("select")
+        }
+
+        // MARK: - Touches
+
+        @objc func singleTap(tap: UITapGestureRecognizer) {
+            PRINT("Scroll view single tap")
+            if !ladderView.hasActiveRegion() {
+                ladderView.setActiveRegion(regionNum: 0)
+                ladderView.refresh()
             }
+            cursorView.unattachMark()
+            let location = tap.location(in: imageScrollView).x
+            cursorView.putCursor(location: location)
+            let mark = ladderView.addMark(location: location)
+            mark?.anchor = .middle
+            cursorView.attachMark(mark: mark)
+            cursorView.setNeedsDisplay()
+            ladderView.setNeedsDisplay()
         }
 
-        func scrollViewDidEndDecelerating(_ scrollView: UIScrollView) {
-            if scrollView == imageScrollView {
-                print("End decelerating")
-                scrollFinished()
-            }
-        }
-
-        func scrollViewDidEndDragging(_ scrollView: UIScrollView, willDecelerate decelerate: Bool) {
-            if scrollView == imageScrollView && !decelerate {
-                print("End dragging")
-                scrollFinished()
-            }
-        }
-
-        fileprivate func scrollFinished() {
-            print("Scroll finished")
-        }
+        // MARK: - Scrolling and zooming
 
         func viewForZooming(in scrollView: UIScrollView) -> UIView? {
             if scrollView == imageScrollView {
@@ -80,33 +99,86 @@
             }
         }
 
+        // Functions below fire during scrolling of imageView and at end
+        // of scrolling.  Relabeling might best occur at end of scrolling,
+        // while redrawing of ladder can be done during scrolling.
+        // Note that scrollViewDidScroll is also called while zooming.
+        func scrollViewDidScroll(_ scrollView: UIScrollView) {
+            if scrollView == imageScrollView {
+                PRINT("didScroll")
+                // Only scrolling in the horizontal direction affects ladderView.
+                ladderView.offset = scrollView.contentOffset.x
+                cursorView.offset = scrollView.contentOffset.x
+                cursorView.scale = scrollView.zoomScale
+                ladderView.scale = scrollView.zoomScale
+                ladderView.setNeedsDisplay()
+                cursorView.setNeedsDisplay()
+            }
+        }
+
+        func scrollViewDidEndDecelerating(_ scrollView: UIScrollView) {
+            if scrollView == imageScrollView {
+                PRINT("End decelerating")
+                scrollFinished()
+            }
+        }
+
+        func scrollViewDidEndDragging(_ scrollView: UIScrollView, willDecelerate decelerate: Bool) {
+            if scrollView == imageScrollView && !decelerate {
+                PRINT("End dragging")
+                scrollFinished()
+            }
+        }
+
+        fileprivate func scrollFinished() {
+            PRINT("Scroll finished")
+        }
+
+
         func scrollViewWillBeginZooming(_ scrollView: UIScrollView, with view: UIView?) {
             isZooming = true
         }
 
         func scrollViewDidEndZooming(_ scrollView: UIScrollView, with view: UIView?, atScale scale: CGFloat) {
-            print("scrollViewDidEndZooming")
-            print("Zoom = \(scale)")
-            print("imageView width = \(imageView.frame.width)")
-            print("imageScrollView bounds = \(imageScrollView.bounds)")
-            print("imageScrollView contentOffset = \(imageScrollView.contentOffset)")
+            PRINT("scrollViewDidEndZooming")
+            PRINT("Zoom = \(scale)")
+            PRINT("imageView width = \(imageView.frame.width)")
+            PRINT("imageScrollView bounds = \(imageScrollView.bounds)")
+            PRINT("imageScrollView contentOffset = \(imageScrollView.contentOffset)")
             isZooming = false
-            ladderView.scale = scale
-            zoom = scale
-            ladderView.setNeedsDisplay()
         }
 
-        // TODO: This doesn't work right.
+        func scrollViewDidZoom(_ scrollView: UIScrollView) {
+            PRINT("didZoom")
+        }
+
+        // MARK: - Rotate view
+
         override func viewWillTransition(to size: CGSize, with coordinator: UIViewControllerTransitionCoordinator) {
             super.viewWillTransition(to: size, with: coordinator)
             coordinator.animate(alongsideTransition: nil, completion: {
                 _ in
-                print("Transitioning")
-                self.cursorView.reset()
-                self.ladderView.setNeedsDisplay()
-                self.cursorView.setNeedsDisplay()
+                PRINT("Transitioning")
+                self.resetViews()
             })
         }
 
+        private func resetViews() {
+            self.ladderView.reset()
+            self.ladderView.setNeedsDisplay()
+            self.cursorView.setNeedsDisplay()
+        }
+
+        // MARK: - Save and restore views
+
+        // TODO: Need to implement this functionality.
+
+        override func encodeRestorableState(with coder: NSCoder) {
+            PRINT("Encode restorable state")
+        }
+
+        override func decodeRestorableState(with coder: NSCoder) {
+            PRINT("Decode restorable state")
+        }
     }
 
