@@ -96,8 +96,7 @@ class CursorView: UIView, CursorViewDelegate {
     }
 
     func isNearCursor(location: CGFloat, cursor: Cursor) -> Bool {
-        return location < Common.translateToRelativeLocation(location: cursor.position, offset: offset, scale: scale) + accuracy
-            && location > Common.translateToRelativeLocation(location: cursor.position, offset: offset, scale: scale) - accuracy
+        cursorViewModel.isNearCursor(location: location, cursor: cursor, accuracy: accuracy)
     }
 
 
@@ -157,7 +156,7 @@ class CursorView: UIView, CursorViewDelegate {
 //            case .none:
 //                attachedMark.anchor = .none
 //            }
-            ladderViewDelegate?.moveMark(mark: attachedMark, location: Common.translateToRelativeLocation(location: cursorViewModel.cursor.position, offset: offset, scale: scale), moveCursor: false)
+            ladderViewDelegate?.moveMark(mark: attachedMark, position: CGPoint(x: Common.translateToRelativeLocation(location: cursorViewModel.cursor.position, offset: offset, scale: scale), y: 0), moveCursor: false)
             ladderViewDelegate?.refresh()
         }
         pan.setTranslation(CGPoint(x: 0,y: 0), in: self)

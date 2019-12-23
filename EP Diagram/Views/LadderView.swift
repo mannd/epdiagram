@@ -14,7 +14,7 @@ protocol LadderViewDelegate: AnyObject {
     func getRegionProximalBoundary(view: UIView) -> CGFloat
     func getRegionDistalBoundary(view: UIView) -> CGFloat
     func getRegionMidPoint(view: UIView) -> CGFloat
-    func moveMark(mark: Mark, location: CGFloat, moveCursor: Bool)
+    func moveMark(mark: Mark, position: CGPoint, moveCursor: Bool)
     func refresh()
     func findMarkNearby(location: CGFloat) -> Mark?
     func setActiveRegion(regionNum: Int)
@@ -246,7 +246,7 @@ class LadderView: UIView, LadderViewDelegate {
             PRINT("dragging state changed")
             if let mark = movingMark {
                 if mark.attached {
-                    moveMark(mark: mark, location: pan.location(in: self).x, moveCursor: true)
+                    moveMark(mark: mark, position: pan.location(in: self), moveCursor: true)
                 }
                 else {
                     PRINT("dragging mark without cursor.")
@@ -320,7 +320,7 @@ class LadderView: UIView, LadderViewDelegate {
             else {
                 tappedRegionSection = .markSection
                 outerLoop: for mark in tappedRegion.marks {
-                    if nearMark(location: location.x, mark: mark) {
+                    if nearMark(positionX: location.x, mark: mark) {
                         PRINT("tap near mark")
                         tappedMark = mark
                         break outerLoop
@@ -331,11 +331,8 @@ class LadderView: UIView, LadderViewDelegate {
         return LocationInLadder(region: tappedRegion, mark: tappedMark, regionSection: tappedRegionSection, regionDivision: tappedRegionDivision)
     }
 
-    // TODO: Move to LadderViewModel
-    private func nearMark(location: CGFloat, mark: Mark) -> Bool {
-        let maxX = max(Common.translateToRelativeLocation(location: mark.position.distal.x, offset: offset, scale: scale), Common.translateToRelativeLocation(location: mark.position.proximal.x, offset: offset, scale: scale))
-        let minX = min(Common.translateToRelativeLocation(location: mark.position.distal.x, offset: offset, scale: scale), Common.translateToRelativeLocation(location: mark.position.proximal.x, offset: offset, scale: scale))
-        return location < maxX + accuracy && location > minX - accuracy
+    private func nearMark(positionX: CGFloat, mark: Mark) -> Bool {
+        return ladderViewModel.nearMark(positionX: positionX, mark: mark, accuracy: accuracy)
     }
 
     private func getTappedRegionDivision(region: Region, location: CGFloat) -> RegionDivision {
@@ -395,9 +392,7 @@ class LadderView: UIView, LadderViewDelegate {
     }
 
     func makeMark(location: CGFloat) -> Mark? {
-  //      let displacement = Displacement(rect: CGRect(), offset: contentOffset, scale: scale)
-        return ladderViewModel.addMark(location: Common.translateToAbsoluteLocation(location: location, offset: offset, scale: scale))
-//        return ladderViewModel.addMark(relativePosition: MarkPosition(proximal: CGPoint(x: location, y: 0), distal: CGPoint(x: location, y: 1.0)), displacement: displacement)
+        return ladderViewModel.makeMark(location: location)
     }
 
     func addMark(location: CGFloat) -> Mark? {
@@ -416,22 +411,8 @@ class LadderView: UIView, LadderViewDelegate {
         setNeedsDisplay()
     }
 
-    func moveMark(mark: Mark, location: CGFloat, moveCursor: Bool) {
-        switch mark.anchor {
-        case .proximal:
-            mark.position.proximal.x = Common.translateToAbsoluteLocation(location: location, offset: offset, scale: scale)
-        case .middle:
-            // Calculate difference between prox and distal x
-//            let diff = translateToAbsoluteLocation(location: mark.position.proximal.x, offset: contentOffset, scale: scale) - translateToAbsoluteLocation(location: mark.position.distal.x, offset: contentOffset, scale: scale)
-
-            mark.position.proximal.x = Common.translateToAbsoluteLocation(location: location , offset: offset, scale: scale)
-            mark.position.distal.x = Common.translateToAbsoluteLocation(location: location, offset: offset, scale: scale)
-
-        case .distal:
-            mark.position.distal.x = Common.translateToAbsoluteLocation(location: location, offset: offset, scale: scale)
-        case .none:
-            break
-        }
+    func moveMark(mark: Mark, position: CGPoint, moveCursor: Bool) {
+        ladderViewModel.moveMark(mark: mark, position: position.x)
         if moveCursor {
             cursorViewDelegate?.moveCursor(location: mark.position.proximal.x)
             cursorViewDelegate?.refresh()
@@ -439,15 +420,7 @@ class LadderView: UIView, LadderViewDelegate {
     }
 
     func findMarkNearby(location: CGFloat) -> Mark? {
-        if let activeRegion = ladderViewModel.activeRegion {
-            let relativeLocation = Common.translateToRelativeLocation(location: location, offset: offset, scale: scale)
-            for mark in activeRegion.marks {
-                if abs(mark.position.proximal.x - relativeLocation) < accuracy {
-                    return mark
-                }
-            }
-        }
-        return nil
+        return ladderViewModel.findMarkNearby(location: location, accuracy: accuracy)
     }
 
     // TODO: This doesn't work, region not being selected

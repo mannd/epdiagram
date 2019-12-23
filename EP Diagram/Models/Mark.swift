@@ -83,6 +83,7 @@ class Mark {
     var potentiallyConnected = false
     // Anchor point for movement and to attach a cursor
     var anchor: Anchor = .none
+    var lineStyle: LineStyle = .solid
 
     // A mark may have up to three attachments to marks in the proximal and distal regions
     // and in its own region, i.e. rentry spawning a mark.

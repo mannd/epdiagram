@@ -15,7 +15,7 @@ struct Displacement {
     var scale: CGFloat
 }
 
-fileprivate extension Mark {
+extension Mark {
     func setPosition(relativePosition: MarkPosition, in rect:CGRect, offset: CGFloat, scale: CGFloat) {
         position.proximal = Common.translateToAbsolutePosition(location: relativePosition.proximal, inRect: rect, offsetX: offset, scale: scale)
         position.distal = Common.translateToAbsolutePosition(location: relativePosition.distal, inRect: rect, offsetX: offset, scale: scale)
@@ -67,8 +67,8 @@ class LadderViewModel {
     var lineWidth: CGFloat = 2
 
     // variables that need to eventually be preferences
-    let red: UIColor
-    let blue: UIColor
+    let red = UIColor.systemRed
+    let blue = UIColor.systemBlue
     let unselectedColor: UIColor
     let selectedColor = UIColor.magenta
     let markLineWidth: CGFloat = 2
@@ -85,8 +85,6 @@ class LadderViewModel {
     init(ladder: Ladder) {
         self.ladder = ladder
         ladder.activeRegion = ladder.regions[0]
-        red = UIColor.systemRed
-        blue = UIColor.systemBlue
         if #available(iOS 13.0, *) {
             unselectedColor = UIColor.label
         } else {
@@ -120,6 +118,50 @@ class LadderViewModel {
 
     func deleteMark(mark: Mark) {
         ladder.deleteMark(mark: mark)
+    }
+
+    func moveMark(mark: Mark, position: CGFloat) {
+        let absolutePosition = Common.translateToAbsoluteLocation(location: position, offset: offset, scale: scale)
+        switch mark.anchor {
+        case .proximal:
+            mark.position.proximal.x = absolutePosition
+        case .middle:
+            // Determine halfway point between proximal and distal.
+            let difference = (mark.position.proximal.x - mark.position.distal.x) / 2
+            PRINT("mark.position.proximal.x = \(mark.position.proximal.x)")
+            PRINT("mark.position.distal.x = \(mark.position.distal.x)")
+            PRINT("difference = \(difference)")
+            mark.position.proximal.x = absolutePosition + difference
+            mark.position.distal.x = absolutePosition - difference
+        case .distal:
+            mark.position.distal.x = absolutePosition
+        case .none:
+            break
+        }
+    }
+
+   func nearMark(positionX: CGFloat, mark: Mark, accuracy: CGFloat) -> Bool {
+        let positionDistalX = Common.translateToRelativeLocation(location: mark.position.distal.x, offset: offset, scale: scale)
+        let positionProximalX = Common.translateToRelativeLocation(location: mark.position.proximal.x, offset: offset, scale: scale)
+        let maxX = max(positionDistalX, positionProximalX)
+        let minX = min(positionDistalX, positionProximalX)
+        return positionX < maxX + accuracy && positionX > minX - accuracy
+    }
+
+    func findMarkNearby(location: CGFloat, accuracy: CGFloat) -> Mark? {
+        if let activeRegion = activeRegion {
+            let relativeLocation = Common.translateToRelativeLocation(location: location, offset: offset, scale: scale)
+            for mark in activeRegion.marks {
+                if abs(mark.position.proximal.x - relativeLocation) < accuracy {
+                    return mark
+                }
+            }
+        }
+        return nil
+    }
+
+    func makeMark(location: CGFloat) -> Mark? {
+        return addMark(location: Common.translateToAbsoluteLocation(location: location, offset: offset, scale: scale))
     }
 
     func getRegionHeight(region: Region) -> CGFloat {
@@ -195,8 +237,6 @@ class LadderViewModel {
     fileprivate func drawMark(mark: Mark, rect: CGRect, context: CGContext, region: Region) {
         let position = mark.getPosition(in: rect, offset: offset, scale: scale)
         // Don't bother drawing marks in margin.
-        // TODO: Handle reverse slanting of points
-        PRINT("Mark position = \(position)")
         if position.proximal.x <= margin && position.distal.x <= margin {
             return
         }
@@ -220,9 +260,17 @@ class LadderViewModel {
         context.setLineWidth(getMarkLineWidth(mark))
         context.move(to: p1)
         context.addLine(to: p2)
-        context.strokePath()
+        // Draw dashed line
+        if mark.lineStyle == .dashed {
+            let dashes: [CGFloat] = [5, 5]
+            context.setLineDash(phase: 0, lengths: dashes)
+            context.strokePath()
+            context.setLineDash(phase: 0, lengths: [])
+        }
+        else { // draw solid line
+            context.strokePath()
+        }
         context.setStrokeColor(getLineColor())
-        //        }
     }
 
     func getTruncatedPosition(position: MarkPosition) -> CGPoint? {
@@ -325,11 +373,6 @@ class LadderViewModel {
         numRegionUnits += 2
         return height / CGFloat(numRegionUnits)
     }
-
-
-//    func regions() -> [Region] {
-//        return ladder.regions
-//    }
 
     func activateRegion(region: Region?) {
         guard let region = region else { return }

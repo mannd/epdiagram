@@ -71,6 +71,11 @@ class CursorViewModel: NSObject {
         cursor.visible = true
     }
 
+    func isNearCursor(location: CGFloat, cursor: Cursor, accuracy: CGFloat) -> Bool {
+        return location < Common.translateToRelativeLocation(location: cursor.position, offset: offset, scale: scale) + accuracy
+            && location > Common.translateToRelativeLocation(location: cursor.position, offset: offset, scale: scale) - accuracy
+    }
+
     func draw(rect: CGRect, context: CGContext, defaultHeight: CGFloat?) {
         // TODO: Until horizontal cursors are implemented, trap them.
         assert(cursor.direction == .vertical)

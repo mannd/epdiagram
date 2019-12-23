@@ -16,7 +16,7 @@
 
         var zoom: CGFloat = 1.0
         var isZooming = false
-        let leftMargin: CGFloat = 40
+        let leftMargin: CGFloat = 30
 
         override func viewDidLoad() {
             super.viewDidLoad()
@@ -76,7 +76,7 @@
             PRINT("Scroll view single tap")
             if !ladderView.hasActiveRegion() {
                 ladderView.setActiveRegion(regionNum: 0)
-                ladderView.refresh()
+                ladderView.setNeedsDisplay()
             }
             cursorView.unattachMark()
             let location = tap.location(in: imageScrollView).x
