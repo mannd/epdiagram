@@ -26,8 +26,8 @@ class LadderViewModelTests: XCTestCase {
         let location: CGFloat = 134.56
         let scale: CGFloat = 1.78
         let offset: CGFloat = 333.45
-        let absoluteLocation = Common.translateToAbsoluteLocation(location: location, offset: offset, scale: scale)
-        let relativeLocation = Common.translateToRelativeLocation(location: absoluteLocation, offset: offset, scale: scale)
+        let absoluteLocation = Common.translateToAbsolutePositionX(positionX: location, offset: offset, scale: scale)
+        let relativeLocation = Common.translateToRelativePositionX(positionX: absoluteLocation, offset: offset, scale: scale)
         XCTAssertEqual(location, relativeLocation, accuracy: 0.0001)
     }
 

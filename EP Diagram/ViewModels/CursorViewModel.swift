@@ -71,9 +71,9 @@ class CursorViewModel: NSObject {
         cursor.visible = true
     }
 
-    func isNearCursor(location: CGFloat, cursor: Cursor, accuracy: CGFloat) -> Bool {
-        return location < Common.translateToRelativeLocation(location: cursor.position, offset: offset, scale: scale) + accuracy
-            && location > Common.translateToRelativeLocation(location: cursor.position, offset: offset, scale: scale) - accuracy
+    func isNearCursor(positionX: CGFloat, cursor: Cursor, accuracy: CGFloat) -> Bool {
+        return positionX < Common.translateToRelativePositionX(positionX: cursor.position, offset: offset, scale: scale) + accuracy
+            && positionX > Common.translateToRelativePositionX(positionX: cursor.position, offset: offset, scale: scale) - accuracy
     }
 
     func draw(rect: CGRect, context: CGContext, defaultHeight: CGFloat?) {

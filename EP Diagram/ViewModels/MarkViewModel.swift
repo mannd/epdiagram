@@ -18,11 +18,11 @@ class MarkViewModel: NSObject {
     // Or is a func better, always sending in scale, offset and rect?
     var position: MarkPosition {
         set(newPosition) {
-            mark.position.proximal = Common.translateToAbsolutePosition(location: newPosition.proximal, inRect: rect, offsetX: offset, scale: scale)
-            mark.position.distal = Common.translateToAbsolutePosition(location: newPosition.distal, inRect: rect, offsetX: offset, scale: scale)
+            mark.position.proximal = Common.translateToAbsolutePosition(position: newPosition.proximal, inRect: rect, offsetX: offset, scale: scale)
+            mark.position.distal = Common.translateToAbsolutePosition(position: newPosition.distal, inRect: rect, offsetX: offset, scale: scale)
         }
         get {
-            return MarkPosition(proximal: Common.translateToRelativePosition(location: mark.position.proximal, inRect: rect, offsetX: offset, scale: scale), distal: Common.translateToRelativePosition(location: mark.position.distal, inRect: rect, offsetX: offset, scale: scale))
+            return MarkPosition(proximal: Common.translateToRelativePosition(position: mark.position.proximal, inRect: rect, offsetX: offset, scale: scale), distal: Common.translateToRelativePosition(position: mark.position.distal, inRect: rect, offsetX: offset, scale: scale))
         }
     }
 

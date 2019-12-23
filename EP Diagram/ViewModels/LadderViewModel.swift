@@ -17,22 +17,22 @@ struct Displacement {
 
 extension Mark {
     func setPosition(relativePosition: MarkPosition, in rect:CGRect, offset: CGFloat, scale: CGFloat) {
-        position.proximal = Common.translateToAbsolutePosition(location: relativePosition.proximal, inRect: rect, offsetX: offset, scale: scale)
-        position.distal = Common.translateToAbsolutePosition(location: relativePosition.distal, inRect: rect, offsetX: offset, scale: scale)
+        position.proximal = Common.translateToAbsolutePosition(position: relativePosition.proximal, inRect: rect, offsetX: offset, scale: scale)
+        position.distal = Common.translateToAbsolutePosition(position: relativePosition.distal, inRect: rect, offsetX: offset, scale: scale)
 
     }
 
     func getPosition(in rect:CGRect, offset: CGFloat, scale: CGFloat) -> MarkPosition {
-        return MarkPosition(proximal: Common.translateToRelativePosition(location: position.proximal, inRect: rect, offsetX: offset, scale: scale), distal: Common.translateToRelativePosition(location: position.distal, inRect: rect, offsetX: offset, scale: scale))
+        return MarkPosition(proximal: Common.translateToRelativePosition(position: position.proximal, inRect: rect, offsetX: offset, scale: scale), distal: Common.translateToRelativePosition(position: position.distal, inRect: rect, offsetX: offset, scale: scale))
     }
 
     func setPosition(relativePosition: MarkPosition, displacement: Displacement) {
-        position.proximal = Common.translateToAbsolutePosition(location: relativePosition.proximal, inRect: displacement.rect, offsetX: displacement.offset, scale: displacement.scale)
-        position.distal = Common.translateToAbsolutePosition(location: relativePosition.distal, inRect: displacement.rect, offsetX: displacement.offset, scale: displacement.scale)
+        position.proximal = Common.translateToAbsolutePosition(position: relativePosition.proximal, inRect: displacement.rect, offsetX: displacement.offset, scale: displacement.scale)
+        position.distal = Common.translateToAbsolutePosition(position: relativePosition.distal, inRect: displacement.rect, offsetX: displacement.offset, scale: displacement.scale)
     }
 
     func getPosition(displacement: Displacement) -> MarkPosition {
-        return MarkPosition(proximal: Common.translateToRelativePosition(location: position.proximal, inRect: displacement.rect, offsetX: displacement.offset, scale: displacement.scale), distal: Common.translateToRelativePosition(location: position.distal, inRect: displacement.rect, offsetX: displacement.offset, scale: displacement.scale))
+        return MarkPosition(proximal: Common.translateToRelativePosition(position: position.proximal, inRect: displacement.rect, offsetX: displacement.offset, scale: displacement.scale), distal: Common.translateToRelativePosition(position: position.distal, inRect: displacement.rect, offsetX: displacement.offset, scale: displacement.scale))
     }
 
     convenience init(relativePosition: MarkPosition, in rect: CGRect, offset: CGFloat, scale: CGFloat) {
@@ -106,9 +106,9 @@ class LadderViewModel {
         }
     }
 
-    func addMark(location: CGFloat) -> Mark? {
-        PRINT("Add mark at \(location)")
-        return ladder.addMarkAt(location)
+    func addMark(positionX: CGFloat) -> Mark? {
+        PRINT("Add mark at \(positionX)")
+        return ladder.addMarkAt(positionX)
     }
 
     func addMark(relativePosition: MarkPosition, displacement: Displacement) -> Mark? {
@@ -121,7 +121,7 @@ class LadderViewModel {
     }
 
     func moveMark(mark: Mark, position: CGFloat) {
-        let absolutePosition = Common.translateToAbsoluteLocation(location: position, offset: offset, scale: scale)
+        let absolutePosition = Common.translateToAbsolutePositionX(positionX: position, offset: offset, scale: scale)
         switch mark.anchor {
         case .proximal:
             mark.position.proximal.x = absolutePosition
@@ -141,16 +141,16 @@ class LadderViewModel {
     }
 
    func nearMark(positionX: CGFloat, mark: Mark, accuracy: CGFloat) -> Bool {
-        let positionDistalX = Common.translateToRelativeLocation(location: mark.position.distal.x, offset: offset, scale: scale)
-        let positionProximalX = Common.translateToRelativeLocation(location: mark.position.proximal.x, offset: offset, scale: scale)
+        let positionDistalX = Common.translateToRelativePositionX(positionX: mark.position.distal.x, offset: offset, scale: scale)
+        let positionProximalX = Common.translateToRelativePositionX(positionX: mark.position.proximal.x, offset: offset, scale: scale)
         let maxX = max(positionDistalX, positionProximalX)
         let minX = min(positionDistalX, positionProximalX)
         return positionX < maxX + accuracy && positionX > minX - accuracy
     }
 
-    func findMarkNearby(location: CGFloat, accuracy: CGFloat) -> Mark? {
+    func findMarkNearby(positionX: CGFloat, accuracy: CGFloat) -> Mark? {
         if let activeRegion = activeRegion {
-            let relativeLocation = Common.translateToRelativeLocation(location: location, offset: offset, scale: scale)
+            let relativeLocation = Common.translateToRelativePositionX(positionX: positionX, offset: offset, scale: scale)
             for mark in activeRegion.marks {
                 if abs(mark.position.proximal.x - relativeLocation) < accuracy {
                     return mark
@@ -160,8 +160,8 @@ class LadderViewModel {
         return nil
     }
 
-    func makeMark(location: CGFloat) -> Mark? {
-        return addMark(location: Common.translateToAbsoluteLocation(location: location, offset: offset, scale: scale))
+    func makeMark(positionX: CGFloat) -> Mark? {
+        return addMark(positionX: Common.translateToAbsolutePositionX(positionX: positionX, offset: offset, scale: scale))
     }
 
     func getRegionHeight(region: Region) -> CGFloat {
@@ -328,8 +328,8 @@ class LadderViewModel {
     }
 
     fileprivate func relativeMarkPosition(mark: Mark, offset: CGFloat, scale: CGFloat, rect: CGRect) -> MarkPosition{
-        let proximalX = Common.translateToRelativeLocation(location:mark.position.proximal.x, offset:offset, scale: scale)
-        let distalX = Common.translateToRelativeLocation(location: mark.position.distal.x, offset: offset, scale: scale)
+        let proximalX = Common.translateToRelativePositionX(positionX:mark.position.proximal.x, offset:offset, scale: scale)
+        let distalX = Common.translateToRelativePositionX(positionX: mark.position.distal.x, offset: offset, scale: scale)
         let proximalY = rect.origin.y + mark.position.proximal.y * rect.height
         let distalY = rect.origin.y + mark.position.distal.y * rect.height
         let proximalPoint = CGPoint(x: proximalX, y: proximalY)

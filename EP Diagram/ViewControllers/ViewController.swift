@@ -79,9 +79,9 @@
                 ladderView.setNeedsDisplay()
             }
             cursorView.unattachMark()
-            let location = tap.location(in: imageScrollView).x
-            cursorView.putCursor(location: location)
-            let mark = ladderView.addMark(location: location)
+            let positionX = tap.location(in: imageScrollView).x
+            cursorView.putCursor(positionX: positionX)
+            let mark = ladderView.addMark(positionX: positionX)
             mark?.anchor = .middle
             cursorView.attachMark(mark: mark)
             cursorView.setNeedsDisplay()

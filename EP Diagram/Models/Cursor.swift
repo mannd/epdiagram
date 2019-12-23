@@ -46,12 +46,12 @@ class Cursor: NSObject {
     // Touches +/- accuracy count as touches.
     let accuracy: CGFloat = 20
     
-    init(location: CGFloat) {
-        self.position = location
+    init(positionX: CGFloat) {
+        self.position = positionX
     }
 
     convenience override init() {
-        self.init(location: 0)
+        self.init(positionX: 0)
     }
 
     func isNearCursor(point p: CGPoint) -> Bool {

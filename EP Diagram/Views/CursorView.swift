@@ -12,7 +12,7 @@ protocol CursorViewDelegate: AnyObject {
     func refresh()
     func attachMark(mark: Mark?)
     func unattachMark()
-    func moveCursor(location: CGFloat)
+    func moveCursor(positionX: CGFloat)
     func recenterCursor()
     func highlightCursor(_ on: Bool)
     func hideCursor(hide: Bool)
@@ -88,15 +88,15 @@ class CursorView: UIView, CursorViewDelegate {
         // Hidden cursor shouldn't interfere with touches.
         // TODO: However, scrollview must deal with single tap and create cursor via a delegate.
         guard cursorViewModel.cursor.visible else { return false }
-        if isNearCursor(location: point.x, cursor: cursorViewModel.cursor) && point.y < ladderViewDelegate?.getRegionProximalBoundary(view: self) ?? self.frame.height {
+        if isNearCursor(positionX: point.x, cursor: cursorViewModel.cursor) && point.y < ladderViewDelegate?.getRegionProximalBoundary(view: self) ?? self.frame.height {
             PRINT("near cursor")
             return true
         }
         return false
     }
 
-    func isNearCursor(location: CGFloat, cursor: Cursor) -> Bool {
-        cursorViewModel.isNearCursor(location: location, cursor: cursor, accuracy: accuracy)
+    func isNearCursor(positionX: CGFloat, cursor: Cursor) -> Bool {
+        cursorViewModel.isNearCursor(positionX: positionX, cursor: cursor, accuracy: accuracy)
     }
 
 
@@ -156,7 +156,7 @@ class CursorView: UIView, CursorViewDelegate {
 //            case .none:
 //                attachedMark.anchor = .none
 //            }
-            ladderViewDelegate?.moveMark(mark: attachedMark, position: CGPoint(x: Common.translateToRelativeLocation(location: cursorViewModel.cursor.position, offset: offset, scale: scale), y: 0), moveCursor: false)
+            ladderViewDelegate?.moveMark(mark: attachedMark, position: CGPoint(x: Common.translateToRelativePositionX(positionX: cursorViewModel.cursor.position, offset: offset, scale: scale), y: 0), moveCursor: false)
             ladderViewDelegate?.refresh()
         }
         pan.setTranslation(CGPoint(x: 0,y: 0), in: self)
@@ -172,10 +172,10 @@ class CursorView: UIView, CursorViewDelegate {
     }
 
 
-    func putCursor(location: CGFloat) {
-        PRINT("Cursor location = \(location)")
+    func putCursor(positionX: CGFloat) {
+        PRINT("Cursor positionX = \(positionX)")
         // 
-        cursorViewModel.cursor.position = location / scale
+        cursorViewModel.cursor.position = positionX / scale
         hideCursor(hide: false)
     }
 
@@ -202,8 +202,9 @@ class CursorView: UIView, CursorViewDelegate {
         PRINT("Mark unattached!")
     }
 
-    func moveCursor(location: CGFloat) {
-        cursorViewModel.cursor.position = location
+    func moveCursor(positionX: CGFloat) {
+        PRINT("Move cursor")
+        cursorViewModel.cursor.position = positionX
     }
 
     func recenterCursor() {

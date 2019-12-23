@@ -10,25 +10,25 @@ import UIKit
 
 class Common {
     // Translates from LadderView coordinates to Mark coordinates.
-    static func translateToAbsoluteLocation(location: CGFloat, offset: CGFloat, scale: CGFloat) -> CGFloat {
-        return (location + offset) / scale
+    static func translateToAbsolutePositionX(positionX: CGFloat, offset: CGFloat, scale: CGFloat) -> CGFloat {
+        return (positionX + offset) / scale
     }
 
     // Translate from Mark coordinates to LadderView coordinates.
-    static func translateToRelativeLocation(location: CGFloat, offset: CGFloat, scale: CGFloat) -> CGFloat {
-        return scale * location - offset
+    static func translateToRelativePositionX(positionX: CGFloat, offset: CGFloat, scale: CGFloat) -> CGFloat {
+        return scale * positionX - offset
     }
 
     // translate mark points to and from host coordinate system
-    static func translateToRelativePosition(location: CGPoint, inRect rect: CGRect, offsetX offset: CGFloat, scale: CGFloat) -> CGPoint {
-        let x = translateToRelativeLocation(location: location.x, offset: offset, scale: scale)
-        let y = rect.origin.y + location.y * rect.height
+    static func translateToRelativePosition(position: CGPoint, inRect rect: CGRect, offsetX offset: CGFloat, scale: CGFloat) -> CGPoint {
+        let x = translateToRelativePositionX(positionX: position.x, offset: offset, scale: scale)
+        let y = rect.origin.y + position.y * rect.height
         return CGPoint(x: x, y: y)
     }
 
-    static func translateToAbsolutePosition(location: CGPoint, inRect rect: CGRect, offsetX offset: CGFloat, scale: CGFloat) -> CGPoint {
-        let x = translateToAbsoluteLocation(location: location.x, offset: offset, scale: scale)
-        let y = (location.y - rect.origin.y) / rect.height
+    static func translateToAbsolutePosition(position: CGPoint, inRect rect: CGRect, offsetX offset: CGFloat, scale: CGFloat) -> CGPoint {
+        let x = translateToAbsolutePositionX(positionX: position.x, offset: offset, scale: scale)
+        let y = (position.y - rect.origin.y) / rect.height
         return CGPoint(x: x, y: y)
     }
 }
