@@ -9,12 +9,12 @@
 import UIKit
 
 class Common {
-    // Translates from LadderView coordinates to Mark coordinates.
+    // Translates from LadderView X coordinate to Mark X coordinates.
     static func translateToAbsolutePositionX(positionX: CGFloat, offset: CGFloat, scale: CGFloat) -> CGFloat {
         return (positionX + offset) / scale
     }
 
-    // Translate from Mark coordinates to LadderView coordinates.
+    // Translate from Mark X coordinate to LadderView X coordinate.
     static func translateToRelativePositionX(positionX: CGFloat, offset: CGFloat, scale: CGFloat) -> CGFloat {
         return scale * positionX - offset
     }
@@ -30,6 +30,16 @@ class Common {
         let x = translateToAbsolutePositionX(positionX: position.x, offset: offset, scale: scale)
         let y = (position.y - rect.origin.y) / rect.height
         return CGPoint(x: x, y: y)
+    }
+
+    // translate from absolute MarkPosition to relative MarkPosition
+    static func translateToRelativeMarkPosition(markPosition: MarkPosition, inRect rect: CGRect, offsetX offset: CGFloat, scale: CGFloat) -> MarkPosition {
+        return MarkPosition(proximal: translateToRelativePosition(position: markPosition.proximal, inRect: rect, offsetX: offset, scale: scale), distal: translateToRelativePosition(position: markPosition.distal, inRect: rect, offsetX: offset, scale: scale))
+    }
+
+    // translate from relative MarkPosition to absolute MarkPosition
+    static func translateToAbsoluteMarkPosition(markPosition: MarkPosition, inRect rect: CGRect, offsetX offset: CGFloat, scale: CGFloat) -> MarkPosition {
+        return MarkPosition(proximal: translateToAbsolutePosition(position: markPosition.proximal, inRect: rect, offsetX: offset, scale: scale), distal: translateToAbsolutePosition(position: markPosition.distal, inRect: rect, offsetX: offset, scale: scale))
     }
 }
 

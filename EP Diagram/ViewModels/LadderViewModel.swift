@@ -8,31 +8,63 @@
 
 import UIKit
 
-// We're going to be throwing around a lot these parameters, so let's make them a struct.
-struct Displacement {
-    var rect: CGRect
+// FIXME: experimental.
+struct RelativeMarkPosition {
+    var position: MarkPosition
+    var proximal: CGPoint {
+        get {
+            position.proximal
+        }
+    }
+    var distal: CGPoint {
+        get {
+            position.distal
+        }
+    }
     var offset: CGFloat
     var scale: CGFloat
+    var rect: CGRect
+    var absoluteMarkPosition: MarkPosition {
+        get {
+            return Common.translateToAbsoluteMarkPosition(markPosition: position, inRect: rect, offsetX: offset, scale: scale)
+        }
+        set(newPosition) {
+            position = Common.translateToRelativeMarkPosition(markPosition: newPosition, inRect: rect, offsetX: offset, scale: scale)
+        }
+    }
+
+    init(relativePosition: MarkPosition, inRect rect: CGRect, offsetX offset: CGFloat, scale: CGFloat) {
+        position = relativePosition
+        self.rect = rect
+        self.offset = offset
+        self.scale = scale
+    }
+
+    // Essentially a zeroed out RelativeMarkPosition.
+    init() {
+        position = MarkPosition(proximal: CGPoint.zero, distal: CGPoint.zero)
+        rect = CGRect.zero
+        offset = 0
+        scale = 1.0
+    }
+
+    func getAbsoluteMarkPosition(inRect rect: CGRect) -> MarkPosition {
+        return Common.translateToAbsoluteMarkPosition(markPosition: position, inRect: rect, offsetX: offset, scale: scale)
+    }
 }
 
 extension Mark {
+    func setRelativeMarkPosition(relativeMarkPosition: RelativeMarkPosition) {
+        position = relativeMarkPosition.absoluteMarkPosition
+    }
+
     func setPosition(relativePosition: MarkPosition, in rect:CGRect, offset: CGFloat, scale: CGFloat) {
         position.proximal = Common.translateToAbsolutePosition(position: relativePosition.proximal, inRect: rect, offsetX: offset, scale: scale)
         position.distal = Common.translateToAbsolutePosition(position: relativePosition.distal, inRect: rect, offsetX: offset, scale: scale)
-
     }
 
     func getPosition(in rect:CGRect, offset: CGFloat, scale: CGFloat) -> MarkPosition {
         return MarkPosition(proximal: Common.translateToRelativePosition(position: position.proximal, inRect: rect, offsetX: offset, scale: scale), distal: Common.translateToRelativePosition(position: position.distal, inRect: rect, offsetX: offset, scale: scale))
-    }
-
-    func setPosition(relativePosition: MarkPosition, displacement: Displacement) {
-        position.proximal = Common.translateToAbsolutePosition(position: relativePosition.proximal, inRect: displacement.rect, offsetX: displacement.offset, scale: displacement.scale)
-        position.distal = Common.translateToAbsolutePosition(position: relativePosition.distal, inRect: displacement.rect, offsetX: displacement.offset, scale: displacement.scale)
-    }
-
-    func getPosition(displacement: Displacement) -> MarkPosition {
-        return MarkPosition(proximal: Common.translateToRelativePosition(position: position.proximal, inRect: displacement.rect, offsetX: displacement.offset, scale: displacement.scale), distal: Common.translateToRelativePosition(position: position.distal, inRect: displacement.rect, offsetX: displacement.offset, scale: displacement.scale))
     }
 
     convenience init(relativePosition: MarkPosition, in rect: CGRect, offset: CGFloat, scale: CGFloat) {
@@ -40,15 +72,21 @@ extension Mark {
         setPosition(relativePosition: relativePosition, in: rect, offset: offset, scale: scale)
     }
 
-    convenience init(relativePosition: MarkPosition, displacement: Displacement) {
-        self.init()
-        setPosition(relativePosition: relativePosition, displacement: displacement)
-    }
 }
 
 class LadderViewModel {
-    var offset: CGFloat = 0
-    var scale: CGFloat = 1
+    // This is used to hold relative mark positions and easily feed them to marks.
+    var relativeMarkPosition = RelativeMarkPosition()
+    var offset: CGFloat = 0 {
+        didSet {
+            relativeMarkPosition.offset = offset
+        }
+    }
+    var scale: CGFloat = 1 {
+        didSet {
+            relativeMarkPosition.scale = scale
+        }
+    }
 
     var regions: [Region] = []
     var ladder: Ladder
@@ -106,22 +144,33 @@ class LadderViewModel {
         }
     }
 
-    func addMark(positionX: CGFloat) -> Mark? {
-        PRINT("Add mark at \(positionX)")
-        return ladder.addMarkAt(positionX)
+    // Here we want to add the Mark at the X position on the screen.  This is independent of
+    // the offset.  If the content is offset, the X position is offset too.  However,
+    // the zoomScale does affect the X position.  Say the scale is 2, then what appears to be
+    // the X position is actually 2 * X.  Thus we unscale the position and get an absolute mark X position.
+    func addMark(relativePositionX: CGFloat) -> Mark? {
+        PRINT("Add mark at \(relativePositionX)")
+        return ladder.addMarkAt(unscaledPositionX(positionX: relativePositionX))
     }
 
-    func addMark(relativePosition: MarkPosition, displacement: Displacement) -> Mark? {
-        let mark = Mark(relativePosition: relativePosition, displacement: displacement)
-        return ladder.addMark(mark: mark)
+    private func unscaledPositionX(positionX: CGFloat) -> CGFloat {
+        return positionX / scale
+    }
+
+    func addMark(absolutePositionX: CGFloat) -> Mark? {
+        return ladder.addMarkAt(absolutePositionX)
     }
 
     func deleteMark(mark: Mark) {
         ladder.deleteMark(mark: mark)
     }
 
-    func moveMark(mark: Mark, position: CGFloat) {
-        let absolutePosition = Common.translateToAbsolutePositionX(positionX: position, offset: offset, scale: scale)
+    func deleteMark(mark: Mark, region: Region?) {
+        ladder.deleteMark(mark: mark, region: region)
+    }
+
+    func moveMark(mark: Mark, relativePositionX: CGFloat) {
+        let absolutePosition = Common.translateToAbsolutePositionX(positionX: relativePositionX, offset: offset, scale: scale)
         switch mark.anchor {
         case .proximal:
             mark.position.proximal.x = absolutePosition
@@ -140,7 +189,13 @@ class LadderViewModel {
         }
     }
 
-   func nearMark(positionX: CGFloat, mark: Mark, accuracy: CGFloat) -> Bool {
+    /// Determine if a mark is near the X position, using relative coordinates.  Internally compares the relative mark X position to the positionX parameter.
+    /// Limitation: trouble with overlapping marks.
+    /// - Parameters:
+    ///   - positionX: X position of, say a tap on the screen
+    ///   - mark: mark to check for proximity
+    ///   - accuracy: how close does it have to be?
+    func nearMark(positionX: CGFloat, mark: Mark, accuracy: CGFloat) -> Bool {
         let positionDistalX = Common.translateToRelativePositionX(positionX: mark.position.distal.x, offset: offset, scale: scale)
         let positionProximalX = Common.translateToRelativePositionX(positionX: mark.position.proximal.x, offset: offset, scale: scale)
         let maxX = max(positionDistalX, positionProximalX)
@@ -148,11 +203,12 @@ class LadderViewModel {
         return positionX < maxX + accuracy && positionX > minX - accuracy
     }
 
+    // FIXME: Probably dead code.
     func findMarkNearby(positionX: CGFloat, accuracy: CGFloat) -> Mark? {
         if let activeRegion = activeRegion {
-            let relativeLocation = Common.translateToRelativePositionX(positionX: positionX, offset: offset, scale: scale)
+            let relativePositionX = Common.translateToRelativePositionX(positionX: positionX, offset: offset, scale: scale)
             for mark in activeRegion.marks {
-                if abs(mark.position.proximal.x - relativeLocation) < accuracy {
+                if abs(mark.position.proximal.x - relativePositionX) < accuracy {
                     return mark
                 }
             }
@@ -160,8 +216,8 @@ class LadderViewModel {
         return nil
     }
 
-    func makeMark(positionX: CGFloat) -> Mark? {
-        return addMark(positionX: Common.translateToAbsolutePositionX(positionX: positionX, offset: offset, scale: scale))
+    func makeMark(relativePositionX: CGFloat) -> Mark? {
+        return addMark(absolutePositionX: Common.translateToAbsolutePositionX(positionX: relativePositionX, offset: offset, scale: scale))
     }
 
     func getRegionHeight(region: Region) -> CGFloat {

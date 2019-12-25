@@ -100,6 +100,8 @@ class CursorView: UIView, CursorViewDelegate {
     }
 
 
+    // FIXME: This is overriden in ViewController.
+    // TODO: Need to move all touches to ViewController.
     @objc func singleTap(tap: UITapGestureRecognizer) {
         PRINT("Single tap on cursor")
         if calibrating {
@@ -114,6 +116,17 @@ class CursorView: UIView, CursorViewDelegate {
 
     @objc func doubleTap(tap: UITapGestureRecognizer) {
         PRINT("Double tap on cursor")
+        // delete attached Mark
+        if let attachedMark = attachedMark {
+            ladderViewDelegate?.deleteMark(mark: attachedMark)
+            ladderViewDelegate?.refresh()
+        }
+        hideCursor(hide: true)
+        setNeedsDisplay()
+    }
+
+    func doubleTapHandler(tap: UITapGestureRecognizer) {
+        PRINT("Double tap handler")
         // delete attached Mark
         if let attachedMark = attachedMark {
             ladderViewDelegate?.deleteMark(mark: attachedMark)
@@ -146,16 +159,6 @@ class CursorView: UIView, CursorViewDelegate {
         cursorViewModel.cursor.move(delta: delta.x / scale)
         if let attachedMark = attachedMark {
             PRINT("Move attached Mark")
-//            switch cursorViewModel.cursor.anchor {
-//            case .proximal:
-//                attachedMark.anchor = .proximal
-//            case .middle:
-//                attachedMark.anchor = .middle
-//            case .distal:
-//                attachedMark.anchor = .distal
-//            case .none:
-//                attachedMark.anchor = .none
-//            }
             ladderViewDelegate?.moveMark(mark: attachedMark, position: CGPoint(x: Common.translateToRelativePositionX(positionX: cursorViewModel.cursor.position, offset: offset, scale: scale), y: 0), moveCursor: false)
             ladderViewDelegate?.refresh()
         }
@@ -207,13 +210,8 @@ class CursorView: UIView, CursorViewDelegate {
         cursorViewModel.cursor.position = positionX
     }
 
+    // FIXME: Not called by anyone.
     func recenterCursor() {
-        // TODO: Deal with mark already in center, so cursor doesn't move:
-        // Possible solutions:
-        //    Test for this situation and move cursor elsewhere
-        //    Move cursor set distance from mark in either direction
-        //    Change color of grabbed vs released cursor (and change mark color too?)
-        //    Combination of above.
         cursorViewModel.centerCursor()
     }
 

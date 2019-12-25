@@ -10,6 +10,7 @@ import UIKit
 
 protocol LadderViewDelegate: AnyObject {
     func makeMark(positionX: CGFloat) -> Mark?
+    func deleteMark(mark: Mark, region: Region?)
     func deleteMark(mark: Mark)
     func getRegionProximalBoundary(view: UIView) -> CGFloat
     func getRegionDistalBoundary(view: UIView) -> CGFloat
@@ -47,6 +48,7 @@ class LadderView: UIView, LadderViewDelegate {
         }
     }
 
+    var pressedMark: Mark? = nil
     var movingMark: Mark? = nil
     var regionOfDragOrigin: Region? = nil
 
@@ -67,6 +69,9 @@ class LadderView: UIView, LadderViewDelegate {
         }
     }
 
+    // FIXME: Take out viewController if we don't use it for UIAlertControllers.
+    // LadderView needs a weak copy of the calling VC in order to display UIAlertControllers.
+    weak var viewController: ViewController? = nil
     weak var cursorViewDelegate: CursorViewDelegate?
     var ladderViewModel: LadderViewModel
 
@@ -133,17 +138,7 @@ class LadderView: UIView, LadderViewDelegate {
                         mark.anchor = getAnchor(regionDivision: tapLocationInLadder.regionDivision)
                         selectMark(mark)
                         cursorViewDelegate?.attachMark(mark: mark)
-                        let anchorPositionX: CGFloat
-                        switch mark.anchor {
-                        case .distal:
-                            anchorPositionX = mark.position.distal.x
-                        case .middle:
-                            anchorPositionX = mark.midpoint().x
-                        case .proximal:
-                            anchorPositionX = mark.position.proximal.x
-                        case .none:
-                            anchorPositionX = mark.position.proximal.x
-                        }
+                        let anchorPositionX = getAnchorPositionX(mark: mark)
                         cursorViewDelegate?.moveCursor(positionX: anchorPositionX)
                         cursorViewDelegate?.hideCursor(hide: false)
                     }
@@ -200,7 +195,8 @@ class LadderView: UIView, LadderViewDelegate {
         let tapLocation = getLocationInLadder(position: tap.location(in: self), ladderViewModel: ladderViewModel)
         if tapLocation.markWasTapped {
             if let mark = tapLocation.mark {
-                deleteMark(mark: mark)
+                let region = tapLocation.region
+                deleteMark(mark: mark, region: region)
                 cursorViewDelegate?.hideCursor(hide: true)
             }
         }
@@ -292,10 +288,52 @@ class LadderView: UIView, LadderViewDelegate {
         }
     }
 
+    // TODO: Consider test for iOS 13 and use context menu instead.
     @objc func longPress(press: UILongPressGestureRecognizer) {
+        self.becomeFirstResponder()
         let location = getLocationInLadder(position: press.location(in: self), ladderViewModel: ladderViewModel)
         PRINT("long press at \(location) ")
-        // TODO: menu (e.g. "clear marks in region, etc.")
+        //        if let mark = location.mark, let vc = viewController {
+        if let mark = location.mark {
+            PRINT("you pressed a mark")
+            //            let alert = UIAlertController(title: "Mark style", message: "change styel", preferredStyle: .actionSheet)
+//            alert.addAction(UIAlertAction(title: "Solid", style: .default, handler: {_ in mark.lineStyle = .solid; self.setNeedsDisplay()}))
+//            alert.addAction(UIAlertAction(title: "Dashed", style: .default, handler: {_ in mark.lineStyle = .dashed; self.setNeedsDisplay()}))
+//            alert.addAction(UIAlertAction(title: "Cancel", style: .default, handler: nil))
+//            vc.present(alert, animated: true, completion: nil)
+            pressedMark = mark
+            let position = press.location(in: self)
+            // TODO: internationalize
+            // TODO: Put into a submenu "Style".
+            let solidMenuItem = UIMenuItem(title: "Solid", action: #selector(setSolid))
+            let dashedMenuItem = UIMenuItem(title: "Dashed", action: #selector(setDashed))
+            UIMenuController.shared.menuItems = [solidMenuItem, dashedMenuItem]
+            let rect = CGRect(x: position.x, y: position.y, width: 0, height: 0)
+            UIMenuController.shared.setTargetRect(rect, in: self)
+            UIMenuController.shared.setMenuVisible(true, animated: true)
+        }
+    }
+
+    override var canBecomeFirstResponder: Bool {
+        get {
+            return true
+        }
+    }
+
+    @objc func setSolid() {
+        if let pressedMark = pressedMark {
+            pressedMark.lineStyle = .solid
+        }
+        pressedMark = nil
+        setNeedsDisplay()
+    }
+
+    @objc func setDashed() {
+        if let pressedMark = pressedMark {
+            pressedMark.lineStyle = .dashed
+        }
+        pressedMark = nil
+        setNeedsDisplay()
     }
 
     /// Magic function that returns struct indicating in what part of ladder a point is.
@@ -392,15 +430,26 @@ class LadderView: UIView, LadderViewDelegate {
     }
 
     func makeMark(positionX: CGFloat) -> Mark? {
-        return ladderViewModel.makeMark(positionX: positionX)
+        return ladderViewModel.makeMark(relativePositionX: positionX)
     }
 
     func addMark(positionX: CGFloat) -> Mark? {
-        return ladderViewModel.addMark(positionX: positionX / scale)
+        return ladderViewModel.addMark(relativePositionX: positionX)
+    }
+
+    private func unscaledPositionX(positionX: CGFloat) -> CGFloat {
+        return positionX / scale
+    }
+
+    func deleteMark(mark: Mark, region: Region?) {
+        PRINT("Delete mark \(mark)")
+        ladderViewModel.deleteMark(mark: mark, region: region)
+        cursorViewDelegate?.hideCursor(hide: true)
+        cursorViewDelegate?.refresh()
+        setNeedsDisplay()
     }
 
     func deleteMark(mark: Mark) {
-        PRINT("Delete mark \(mark)")
         ladderViewModel.deleteMark(mark: mark)
         cursorViewDelegate?.hideCursor(hide: true)
         cursorViewDelegate?.refresh()
@@ -412,30 +461,35 @@ class LadderView: UIView, LadderViewDelegate {
     }
 
     func moveMark(mark: Mark, position: CGPoint, moveCursor: Bool) {
-        ladderViewModel.moveMark(mark: mark, position: position.x)
+        ladderViewModel.moveMark(mark: mark, relativePositionX: position.x)
         if moveCursor {
-            // TODO: refactor out this repetitive code.
-            let anchorPositionX: CGFloat
-            switch mark.anchor {
-            case .distal:
-                anchorPositionX = mark.position.distal.x
-            case .middle:
-                anchorPositionX = mark.midpoint().x
-            case .proximal:
-                anchorPositionX = mark.position.proximal.x
-            case .none:
-                anchorPositionX = mark.position.proximal.x
-            }
+            let anchorPositionX = getAnchorPositionX(mark: mark)
             cursorViewDelegate?.moveCursor(positionX: anchorPositionX)
             cursorViewDelegate?.refresh()
         }
     }
 
+    func getAnchorPositionX(mark: Mark) -> CGFloat {
+        let anchorPositionX: CGFloat
+        switch mark.anchor {
+        case .distal:
+            anchorPositionX = mark.position.distal.x
+        case .middle:
+            anchorPositionX = mark.midpoint().x
+        case .proximal:
+            anchorPositionX = mark.position.proximal.x
+        case .none:
+            anchorPositionX = mark.position.proximal.x
+        }
+        return anchorPositionX
+
+    }
+
+    // FIXME: Not called by anyone.  Redundant with nearMark()?
     func findMarkNearby(positionX: CGFloat) -> Mark? {
         return ladderViewModel.findMarkNearby(positionX: positionX, accuracy: accuracy)
     }
 
-    // TODO: This doesn't work, region not being selected
     func setActiveRegion(regionNum: Int) {
         ladderViewModel.activeRegion = ladderViewModel.regions[regionNum]
         ladderViewModel.activeRegion?.selected = true

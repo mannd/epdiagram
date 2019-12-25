@@ -16,13 +16,13 @@
 
         var zoom: CGFloat = 1.0
         var isZooming = false
+        // This margin is used for all the views.  As ECGs are always read from left
+        // to right, there is no reason to reverse this.
         let leftMargin: CGFloat = 30
 
         override func viewDidLoad() {
             super.viewDidLoad()
             title = NSLocalizedString("EP Diagram", comment: "app name")
-            // Ensure there is a space for labels at the left margin.
-            imageScrollView.contentInset = UIEdgeInsets(top: 0, left: leftMargin, bottom: 0, right: 0)
             // Distinguish the two views using slightly different background colors.
             if #available(iOS 13.0, *) {
                 imageScrollView.backgroundColor = UIColor.secondarySystemBackground
@@ -31,11 +31,14 @@
                 imageScrollView.backgroundColor = UIColor.lightGray
                 ladderView.backgroundColor = UIColor.white
             }
+            // Ensure there is a space for labels at the left margin.
+            imageScrollView.contentInset = UIEdgeInsets(top: 0, left: leftMargin, bottom: 0, right: 0)
             ladderView.leftMargin = leftMargin
             cursorView.leftMargin = leftMargin
             cursorView.ladderViewDelegate = ladderView
             ladderView.cursorViewDelegate = cursorView
             imageScrollView.delegate = self
+            ladderView.viewController = self
 
             let singleTapRecognizer = UITapGestureRecognizer(target: self, action: #selector(self.singleTap))
             singleTapRecognizer.numberOfTapsRequired = 1
@@ -79,11 +82,16 @@
                 ladderView.setNeedsDisplay()
             }
             cursorView.unattachMark()
-            let positionX = tap.location(in: imageScrollView).x
-            cursorView.putCursor(positionX: positionX)
-            let mark = ladderView.addMark(positionX: positionX)
-            mark?.anchor = .middle
-            cursorView.attachMark(mark: mark)
+            if cursorView.cursorIsVisible() {
+                cursorView.hideCursor(hide: true)
+            }
+            else {
+                let positionX = tap.location(in: imageScrollView).x
+                cursorView.putCursor(positionX: positionX)
+                let mark = ladderView.addMark(positionX: positionX)
+                mark?.anchor = .middle
+                cursorView.attachMark(mark: mark)
+            }
             cursorView.setNeedsDisplay()
             ladderView.setNeedsDisplay()
         }
