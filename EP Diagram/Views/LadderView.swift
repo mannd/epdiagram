@@ -48,6 +48,7 @@ class LadderView: UIView, LadderViewDelegate {
         }
     }
 
+
     var pressedMark: Mark? = nil
     var movingMark: Mark? = nil
     var regionOfDragOrigin: Region? = nil
@@ -466,6 +467,7 @@ class LadderView: UIView, LadderViewDelegate {
     }
 
     func refresh() {
+        cursorViewDelegate?.refresh()
         setNeedsDisplay()
     }
 

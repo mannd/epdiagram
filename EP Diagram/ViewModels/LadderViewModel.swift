@@ -75,6 +75,9 @@ extension Mark {
 }
 
 class LadderViewModel {
+    // Half a region width above and below ladder
+    let ladderPaddingMultiplier: CGFloat = 0.5
+
     // This is used to hold relative mark positions and easily feed them to marks.
     var relativeMarkPosition = RelativeMarkPosition()
     var offset: CGFloat = 0 {
@@ -134,7 +137,7 @@ class LadderViewModel {
         PRINT("LadderViewModel initialize()")
         regionUnitHeight = getRegionUnitHeight(ladder: ladder)
         regions.removeAll()
-        var regionBoundary = regionUnitHeight
+        var regionBoundary = regionUnitHeight * ladderPaddingMultiplier
         for region: Region in ladder.regions {
             let regionHeight = getRegionHeight(region: region)
             region.proximalBoundary = regionBoundary
@@ -425,8 +428,9 @@ class LadderViewModel {
         for region: Region in ladder.regions {
             numRegionUnits += region.decremental ? 2 : 1
         }
-        // we'll allow one region unit space above and below, so...
-        numRegionUnits += 2
+        // we'll allow padding above and below, so...
+        let padding = Int(ladderPaddingMultiplier * 2)
+        numRegionUnits += padding
         return height / CGFloat(numRegionUnits)
     }
 
