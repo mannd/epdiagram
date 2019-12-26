@@ -80,10 +80,15 @@ class LadderView: UIView, LadderViewDelegate {
 
     required init?(coder aDecoder: NSCoder) {
         PRINT("ladderView init")
+
         ladderViewModel = LadderViewModel()
         super.init(coder: aDecoder)
         ladderViewModel.height = self.frame.height
         ladderViewModel.initialize()
+
+        self.layer.masksToBounds = true
+        self.layer.borderColor = UIColor.blue.cgColor
+        self.layer.borderWidth = 2
 
         let singleTapRecognizer = UITapGestureRecognizer(target: self, action: #selector(self.singleTap))
         singleTapRecognizer.numberOfTapsRequired = 1
@@ -309,8 +314,12 @@ class LadderView: UIView, LadderViewDelegate {
             let dashedMenuItem = UIMenuItem(title: "Dashed", action: #selector(setDashed))
             UIMenuController.shared.menuItems = [solidMenuItem, dashedMenuItem]
             let rect = CGRect(x: position.x, y: position.y, width: 0, height: 0)
-            UIMenuController.shared.setTargetRect(rect, in: self)
-            UIMenuController.shared.setMenuVisible(true, animated: true)
+            if #available(iOS 13.0, *) {
+                UIMenuController.shared.showMenu(from: self, rect: rect)
+            } else {
+                UIMenuController.shared.setTargetRect(rect, in: self)
+                UIMenuController.shared.setMenuVisible(true, animated: true)
+            }
         }
     }
 
