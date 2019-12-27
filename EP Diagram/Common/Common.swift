@@ -41,6 +41,14 @@ class Common {
     static func translateToAbsoluteMarkPosition(markPosition: MarkPosition, inRect rect: CGRect, offsetX offset: CGFloat, scale: CGFloat) -> MarkPosition {
         return MarkPosition(proximal: translateToAbsolutePosition(position: markPosition.proximal, inRect: rect, offsetX: offset, scale: scale), distal: translateToAbsolutePosition(position: markPosition.distal, inRect: rect, offsetX: offset, scale: scale))
     }
+
+    static func isRunningOnMac() -> Bool {
+        #if targetEnvironment(macCatalyst)
+            return true
+        #else
+            return false
+        #endif
+    }
 }
 
 // Make false to suppress printing of messages.

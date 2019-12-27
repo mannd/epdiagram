@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="14868" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES" initialViewController="en3-9x-pbF">
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="15702" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES" initialViewController="en3-9x-pbF">
     <device id="retina6_1" orientation="portrait" appearance="light"/>
     <dependencies>
         <deployment identifier="iOS"/>
-        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="14824"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="15704"/>
         <capability name="Safe area layout guides" minToolsVersion="9.0"/>
         <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
     </dependencies>
@@ -17,7 +17,7 @@
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
                             <scrollView clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" maximumZoomScale="5" translatesAutoresizingMaskIntoConstraints="NO" id="QhZ-gG-IcS" userLabel="Image Scroll View">
-                                <rect key="frame" x="0.0" y="88" width="414" height="358.5"/>
+                                <rect key="frame" x="0.0" y="88" width="414" height="362.5"/>
                                 <subviews>
                                     <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="SampleECG" translatesAutoresizingMaskIntoConstraints="NO" id="Z9T-Bh-sBD">
                                         <rect key="frame" x="0.0" y="0.0" width="705.5" height="338"/>
@@ -30,8 +30,8 @@
                                     <constraint firstAttribute="trailing" secondItem="Z9T-Bh-sBD" secondAttribute="trailing" id="zbz-Xc-L8i"/>
                                 </constraints>
                             </scrollView>
-                            <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="rq1-PC-4iG" customClass="LadderView" customModule="EP_Diagram" customModuleProvider="target">
-                                <rect key="frame" x="0.0" y="446.5" width="414" height="366.5"/>
+                            <view contentMode="scaleToFill" horizontalCompressionResistancePriority="250" verticalCompressionResistancePriority="250" translatesAutoresizingMaskIntoConstraints="NO" id="rq1-PC-4iG" customClass="LadderView" customModule="EP_Diagram" customModuleProvider="target">
+                                <rect key="frame" x="0.0" y="450.5" width="414" height="362.5"/>
                                 <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                             </view>
                             <view opaque="NO" contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="4H8-sQ-vM2" customClass="CursorView" customModule="EP_Diagram" customModuleProvider="target">
@@ -45,7 +45,7 @@
                             <constraint firstItem="QhZ-gG-IcS" firstAttribute="top" secondItem="6Tk-OE-BBY" secondAttribute="top" id="0PF-2Y-htw"/>
                             <constraint firstItem="4H8-sQ-vM2" firstAttribute="trailing" secondItem="6Tk-OE-BBY" secondAttribute="trailing" id="1JO-aH-c1p"/>
                             <constraint firstItem="6Tk-OE-BBY" firstAttribute="bottom" secondItem="4H8-sQ-vM2" secondAttribute="bottom" id="6Xa-AR-dQe"/>
-                            <constraint firstItem="QhZ-gG-IcS" firstAttribute="height" secondItem="8bC-Xf-vdC" secondAttribute="height" multiplier="0.4" id="9vP-eV-cO0"/>
+                            <constraint firstItem="QhZ-gG-IcS" firstAttribute="height" secondItem="4H8-sQ-vM2" secondAttribute="height" multiplier="0.5" priority="250" id="9vP-eV-cO0"/>
                             <constraint firstItem="QhZ-gG-IcS" firstAttribute="leading" secondItem="6Tk-OE-BBY" secondAttribute="leading" id="HXN-Y0-Pmi"/>
                             <constraint firstItem="rq1-PC-4iG" firstAttribute="leading" secondItem="6Tk-OE-BBY" secondAttribute="leading" id="Njx-CB-fTf"/>
                             <constraint firstItem="6Tk-OE-BBY" firstAttribute="trailing" secondItem="rq1-PC-4iG" secondAttribute="trailing" id="Tje-Vw-uSw"/>

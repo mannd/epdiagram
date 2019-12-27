@@ -45,6 +45,10 @@ class CursorView: UIView, CursorViewDelegate {
     required init?(coder: NSCoder) {
         super.init(coder: coder)
         self.isOpaque = false
+        self.layer.masksToBounds = true
+        self.layer.borderColor = UIColor.black.cgColor
+        self.layer.borderWidth = 1
+
         cursorViewModel = CursorViewModel(leftMargin: leftMargin, width: self.frame.width, height: 0)
 
         let singleTapRecognizer = UITapGestureRecognizer(target: self, action: #selector(self.singleTap))

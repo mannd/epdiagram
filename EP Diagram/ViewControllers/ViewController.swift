@@ -14,6 +14,8 @@
         @IBOutlet var ladderView: LadderView!
         @IBOutlet var cursorView: CursorView!
 
+        var separatorView: SeparatorView? = nil
+
         var zoom: CGFloat = 1.0
         var isZooming = false
         // This margin is used for all the views.  As ECGs are always read from left
@@ -23,6 +25,9 @@
         override func viewDidLoad() {
             super.viewDidLoad()
             title = NSLocalizedString("EP Diagram", comment: "app name")
+            if Common.isRunningOnMac() {
+                navigationController?.setNavigationBarHidden(true, animated: false)
+            }
             // Distinguish the two views using slightly different background colors.
             if #available(iOS 13.0, *) {
                 imageScrollView.backgroundColor = UIColor.secondarySystemBackground
@@ -39,6 +44,12 @@
             ladderView.cursorViewDelegate = cursorView
             imageScrollView.delegate = self
             ladderView.viewController = self
+
+            // FIXME: This forces ladderView below the toolbar.  Not clear
+            // why?  Also note that I changed priority of constraint of
+            // imageView = 0.4 to .defaultLow (was .required) superview and changed the superview to include
+            // the safe areas.
+            separatorView = HorizontalSeparatorView.addSeparatorBetweenViews(separatorType: .horizontal, primaryView: imageScrollView, secondaryView: ladderView, parentView: self.view)
 
             let singleTapRecognizer = UITapGestureRecognizer(target: self, action: #selector(self.singleTap))
             singleTapRecognizer.numberOfTapsRequired = 1
@@ -61,6 +72,9 @@
             // More buttons here.
             toolbar?.items = [calibrateButton, selectButton]
             navigationController?.setToolbarHidden(false, animated: false)
+
+            // Size ladderView after views laid out.
+            ladderView.reset()
         }
 
         // MARK: -  Buttons
@@ -164,16 +178,27 @@
 
         override func viewWillTransition(to size: CGSize, with coordinator: UIViewControllerTransitionCoordinator) {
             super.viewWillTransition(to: size, with: coordinator)
+            // Remove separatorView when rotating to let original constraints resume.
+            // Otherwise, views are not laid out correctly.
+            if let separatorView = separatorView {
+                separatorView.removeFromSuperview()
+            }
             coordinator.animate(alongsideTransition: nil, completion: {
                 _ in
                 PRINT("Transitioning")
                 self.resetViews()
+                PRINT("new ladderView height = \(self.ladderView.frame.height)")
             })
         }
 
         private func resetViews() {
+            // Add back in separatorView after rotation.
+            separatorView = HorizontalSeparatorView.addSeparatorBetweenViews(separatorType: .horizontal, primaryView: imageScrollView, secondaryView: ladderView, parentView: self.view)
+            // TODO: redundant or not?
             self.ladderView.reset()
+            self.ladderView.refresh()
             self.ladderView.setNeedsDisplay()
+            self.imageView.setNeedsDisplay()
             self.cursorView.setNeedsDisplay()
         }
 
