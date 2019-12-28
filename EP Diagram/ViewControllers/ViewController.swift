@@ -59,8 +59,11 @@
         override func viewDidAppear(_ animated: Bool) {
             // This centers image, as opposed to starting with it at the upper left
             // hand corner of the screen.
-            let newContentOffsetX = (imageScrollView.contentSize.width/2) - (imageScrollView.bounds.size.width/2);
-            imageScrollView.contentOffset = CGPoint(x: newContentOffsetX, y: 0)
+            // FIXME: However, this causes image to jump on mac, ? other times, so:
+            if !Common.isRunningOnMac() {
+                let newContentOffsetX = (imageScrollView.contentSize.width/2) - (imageScrollView.bounds.size.width/2);
+                imageScrollView.contentOffset = CGPoint(x: newContentOffsetX, y: 0)
+            }
             cursorView.setNeedsDisplay()
             ladderView.setNeedsDisplay()
             // Set up toolbar and buttons.

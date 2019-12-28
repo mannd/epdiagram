@@ -106,63 +106,83 @@ class LadderView: UIView, LadderViewDelegate {
 
 
     // Touches
-    @objc func singleTap(tap: UITapGestureRecognizer) {
-        PRINT("LadderView.singleTap()")
-        let tapLocationInLadder = getLocationInLadder(position: tap.location(in: self), ladderViewModel: ladderViewModel)
-        if tapLocationInLadder.labelWasTapped {
-            if let tappedRegion = tapLocationInLadder.region {
-                if tappedRegion.selected {
-                    tappedRegion.selected = false
-                    ladderViewModel.activeRegion = nil
-                }
-                else { // !tappedRegion.selected
-                    ladderViewModel.activeRegion = tappedRegion
-                    cursorViewDelegate?.hideCursor(hide: true)
-                }
+    fileprivate func labelWasTapped(_ tapLocationInLadder: LadderView.LocationInLadder) {
+        if let tappedRegion = tapLocationInLadder.region {
+            if tappedRegion.selected {
+                tappedRegion.selected = false
+                ladderViewModel.activeRegion = nil
+            }
+            else { // !tappedRegion.selected
+                ladderViewModel.activeRegion = tappedRegion
+                cursorViewDelegate?.hideCursor(hide: true)
+            }
+            cursorViewDelegate?.hideCursor(hide: true)
+            cursorViewDelegate?.unattachMark()
+        }
+    }
+
+    fileprivate func markWasTapped(mark: Mark, _ tapLocationInLadder: LadderView.LocationInLadder) {
+        if mark.attached {
+            // FIXME: attached and selected maybe the same thing, eliminate duplication.
+            let anchor = getAnchor(regionDivision: tapLocationInLadder.regionDivision)
+            PRINT(">>>>>Mark location = \(anchor)")
+            // Just reanchor cursor
+            if anchor != mark.anchor {
+                mark.anchor = anchor
+            }
+            else {
+                // Unattach mark and hide cursor
+                PRINT("Unattaching mark")
+                mark.attached = false
+                unselectMark(mark)
                 cursorViewDelegate?.hideCursor(hide: true)
                 cursorViewDelegate?.unattachMark()
             }
         }
-        else if (tapLocationInLadder.regionWasTapped) {
-            if let tappedRegion = tapLocationInLadder.region {
-                if !tappedRegion.selected {
-                    ladderViewModel.activeRegion = tappedRegion
-                }
-                // make mark and attach cursor
-                if let mark = tapLocationInLadder.mark {
-                    if mark.attached {
-                        // FIXME: attached and selected maybe the same thing, eliminate duplication.
-                        PRINT("Unattaching mark")
-                        mark.attached = false
-                        unselectMark(mark)
-                        cursorViewDelegate?.hideCursor(hide: true)
-                        cursorViewDelegate?.unattachMark()
-                    }
-                    else {
-                        PRINT("Attaching mark")
-                        mark.attached = true
-                        mark.anchor = getAnchor(regionDivision: tapLocationInLadder.regionDivision)
-                        selectMark(mark)
-                        cursorViewDelegate?.attachMark(mark: mark)
-                        let anchorPositionX = getAnchorPositionX(mark: mark)
-                        cursorViewDelegate?.moveCursor(positionX: anchorPositionX)
-                        cursorViewDelegate?.hideCursor(hide: false)
-                    }
-                }
-                else { // make mark and attach cursor
-                    PRINT("make mark and attach cursor")
-                    let mark = makeMark(positionX: tap.location(in: self).x)
-                    if let mark = mark {
-                        ladderViewModel.inactivateMarks()
-                        mark.attached = true
-                        mark.anchor = getAnchor(regionDivision: tapLocationInLadder.regionDivision)
-                        selectMark(mark)
-                        cursorViewDelegate?.attachMark(mark: mark)
-                        cursorViewDelegate?.moveCursor(positionX: mark.position.proximal.x)
-                        cursorViewDelegate?.hideCursor(hide: false)
-                    }
+        else {
+            PRINT("Attaching mark")
+            mark.attached = true
+            mark.anchor = getAnchor(regionDivision: tapLocationInLadder.regionDivision)
+            selectMark(mark)
+            cursorViewDelegate?.attachMark(mark: mark)
+            let anchorPositionX = getAnchorPositionX(mark: mark)
+            cursorViewDelegate?.moveCursor(positionX: anchorPositionX)
+            cursorViewDelegate?.hideCursor(hide: false)
+        }
+    }
+
+    fileprivate func regionWasTapped(_ tapLocationInLadder: LadderView.LocationInLadder, _ tap: UITapGestureRecognizer) {
+        if let tappedRegion = tapLocationInLadder.region {
+            if !tappedRegion.selected {
+                ladderViewModel.activeRegion = tappedRegion
+            }
+            if let mark = tapLocationInLadder.mark {
+                markWasTapped(mark: mark, tapLocationInLadder)
+            }
+            else { // make mark and attach cursor
+                PRINT("make mark and attach cursor")
+                let mark = makeMark(positionX: tap.location(in: self).x)
+                if let mark = mark {
+                    ladderViewModel.inactivateMarks()
+                    mark.attached = true
+                    mark.anchor = getAnchor(regionDivision: tapLocationInLadder.regionDivision)
+                    selectMark(mark)
+                    cursorViewDelegate?.attachMark(mark: mark)
+                    cursorViewDelegate?.moveCursor(positionX: mark.position.proximal.x)
+                    cursorViewDelegate?.hideCursor(hide: false)
                 }
             }
+        }
+    }
+
+    @objc func singleTap(tap: UITapGestureRecognizer) {
+        PRINT("LadderView.singleTap()")
+        let tapLocationInLadder = getLocationInLadder(position: tap.location(in: self), ladderViewModel: ladderViewModel)
+        if tapLocationInLadder.labelWasTapped {
+            labelWasTapped(tapLocationInLadder)
+        }
+        else if (tapLocationInLadder.regionWasTapped) {
+            regionWasTapped(tapLocationInLadder, tap)
         }
         setNeedsDisplay()
         cursorViewDelegate?.refresh()
@@ -208,7 +228,7 @@ class LadderView: UIView, LadderViewDelegate {
         }
     }
 
-    // See below.  We get relative points for relavent regions and return them in an dictionary
+    // See below.  We get relative points for relevent regions and return them in an dictionary
     /*
      Need proximalRegion?, distalRegion?
      for each mark in proximal region, get mark and distal relative location
