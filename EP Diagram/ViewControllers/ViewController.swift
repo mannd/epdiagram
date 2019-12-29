@@ -54,6 +54,11 @@
             let singleTapRecognizer = UITapGestureRecognizer(target: self, action: #selector(self.singleTap))
             singleTapRecognizer.numberOfTapsRequired = 1
             imageScrollView.addGestureRecognizer(singleTapRecognizer)
+
+            if #available(iOS 13.0, *) {
+                let interaction = UIContextMenuInteraction(delegate: ladderView)
+                ladderView.addInteraction(interaction)
+            }
         }
 
         override func viewDidAppear(_ animated: Bool) {

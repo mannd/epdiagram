@@ -17,7 +17,6 @@ enum SeparatorType {
 let totalSize: CGFloat = 18
 let visibleSize: CGFloat = 8
 let margin: CGFloat = (totalSize - visibleSize) / 2
-// TODO: increase this
 let minSize: CGFloat = 100
 let indicatorSize: CGFloat = 36  // indicator in middle of separator
 
@@ -108,6 +107,7 @@ class SeparatorView: UIView {
     }
 
     func drawIndicator(_ rect: CGRect, with color: UIColor) {
+        color.set()
         let path = UIBezierPath(roundedRect: rect, cornerRadius: 2.5)
         path.stroke()
         path.fill()
@@ -124,6 +124,7 @@ class HorizontalSeparatorView: SeparatorView, OnConstraintUpdateProtocol {
         fatalError("init(coder:) has not been implemented")
     }
 
+    // We don't need to setup the views like below.
     override func setupParentViewConstraints(parentView: UIView) {
 //        parentView.leadingAnchor.constraint(equalTo: primaryView.leadingAnchor).isActive = true
 //        parentView.trailingAnchor.constraint(equalTo: primaryView.trailingAnchor).isActive = true
@@ -136,6 +137,9 @@ class HorizontalSeparatorView: SeparatorView, OnConstraintUpdateProtocol {
 //        parentView.bottomAnchor.constraint(equalTo: secondaryView.bottomAnchor).isActive = true
     }
 
+    // FIXME: Separator is drawn across width of screen in landscape view.
+    // Would like to constrain to Safe Margin Area, but since we have made
+    // the separator clear it doesn't matter much.
     override func setupSeparatorConstraints() {
         self.heightAnchor.constraint(equalToConstant: totalSize).isActive = true
         self.superview?.leadingAnchor.constraint(equalTo: self.leadingAnchor).isActive = true
@@ -172,8 +176,9 @@ class HorizontalSeparatorView: SeparatorView, OnConstraintUpdateProtocol {
     override func draw(_ rect: CGRect) {
         let separatorRect = CGRect(x: 0, y: margin, width: self.bounds.size.width, height: visibleSize)
         let indicatorRect = CGRect(x: (self.bounds.size.width - indicatorSize) / 2, y: margin + (visibleSize - (visibleSize / 4)) / 2, width: indicatorSize, height: visibleSize / 4)
+        // We'll hide the separator and let the ladder view draw it.
         super.drawSeparator(separatorRect, with: .clear)
-        super.drawIndicator(indicatorRect, with: .clear)
+        super.drawIndicator(indicatorRect, with: .systemRed)
     }
 }
 

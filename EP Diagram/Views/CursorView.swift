@@ -46,7 +46,11 @@ class CursorView: UIView, CursorViewDelegate {
         super.init(coder: coder)
         self.isOpaque = false
         self.layer.masksToBounds = true
-        self.layer.borderColor = UIColor.black.cgColor
+        if #available(iOS 13.0, *) {
+            self.layer.borderColor = UIColor.label.cgColor
+        } else {
+            self.layer.borderColor = UIColor.black.cgColor
+        }
         self.layer.borderWidth = 1
 
         cursorViewModel = CursorViewModel(leftMargin: leftMargin, width: self.frame.width, height: 0)

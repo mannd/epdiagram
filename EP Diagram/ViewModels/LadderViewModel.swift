@@ -151,13 +151,13 @@ class LadderViewModel {
     // the offset.  If the content is offset, the X position is offset too.  However,
     // the zoomScale does affect the X position.  Say the scale is 2, then what appears to be
     // the X position is actually 2 * X.  Thus we unscale the position and get an absolute mark X position.
-    func addMark(relativePositionX: CGFloat) -> Mark? {
+    func addMark(positionX relativePositionX: CGFloat) -> Mark? {
         PRINT("Add mark at \(relativePositionX)")
-        return ladder.addMarkAt(unscaledPositionX(positionX: relativePositionX))
+        return ladder.addMarkAt(unscaledRelativePositionX(relativePositionX: relativePositionX))
     }
 
-    private func unscaledPositionX(positionX: CGFloat) -> CGFloat {
-        return positionX / scale
+    private func unscaledRelativePositionX(relativePositionX: CGFloat) -> CGFloat {
+        return relativePositionX / scale
     }
 
     func addMark(absolutePositionX: CGFloat) -> Mark? {
@@ -198,12 +198,12 @@ class LadderViewModel {
     ///   - positionX: X position of, say a tap on the screen
     ///   - mark: mark to check for proximity
     ///   - accuracy: how close does it have to be?
-    func nearMark(positionX: CGFloat, mark: Mark, accuracy: CGFloat) -> Bool {
+    func nearMark(positionX relativePositionX: CGFloat, mark: Mark, accuracy: CGFloat) -> Bool {
         let positionDistalX = Common.translateToRelativePositionX(positionX: mark.position.distal.x, offset: offset, scale: scale)
         let positionProximalX = Common.translateToRelativePositionX(positionX: mark.position.proximal.x, offset: offset, scale: scale)
         let maxX = max(positionDistalX, positionProximalX)
         let minX = min(positionDistalX, positionProximalX)
-        return positionX < maxX + accuracy && positionX > minX - accuracy
+        return relativePositionX < maxX + accuracy && relativePositionX > minX - accuracy
     }
 
     // FIXME: Probably dead code.
@@ -219,7 +219,7 @@ class LadderViewModel {
         return nil
     }
 
-    func makeMark(relativePositionX: CGFloat) -> Mark? {
+    func makeMark(positionX relativePositionX: CGFloat) -> Mark? {
         return addMark(absolutePositionX: Common.translateToAbsolutePositionX(positionX: relativePositionX, offset: offset, scale: scale))
     }
 

@@ -24,6 +24,55 @@ protocol LadderViewDelegate: AnyObject {
     func getTopOfLadder(view: UIView) -> CGFloat
 }
 
+// FIXME: Proof of concept on how to use new context menu.  Will need to
+// adjust menu depending on what was pressed.  Nice alternative to old-fashioned
+// menus in iOS.
+// Also, change the line style to use a submenu: Style : Solid | Dashed.
+@available(iOS 13.0, *)
+extension LadderView: UIContextMenuInteractionDelegate {
+    func contextMenuInteraction(_ interaction: UIContextMenuInteraction, configurationForMenuAtLocation location: CGPoint) -> UIContextMenuConfiguration? {
+        let markFound = getLocationInLadder(position: location, ladderViewModel: ladderViewModel).markWasTapped
+        return UIContextMenuConfiguration(identifier: nil, previewProvider: nil) { suggestedActions in
+
+            // Create an action for sharing
+            let solid = UIAction(title: "Solid", image: UIImage(systemName: "pencil")) { action in
+                let locationInLadder = self.getLocationInLadder(position: location, ladderViewModel: self.ladderViewModel)
+                if let mark = locationInLadder.mark {
+                    PRINT("you pressed a mark")
+                    self.pressedMark = mark
+                    self.setSolid()
+                }
+            }
+
+            // Create an action for renaming
+            let dashed = UIAction(title: "Dashed", image: UIImage(systemName: "pencil.and.ellipsis.rectangle")) { action in
+                let locationInLadder = self.getLocationInLadder(position: location, ladderViewModel: self.ladderViewModel)
+                if let mark = locationInLadder.mark {
+                    PRINT("you pressed a mark")
+                    self.pressedMark = mark
+                    self.setDashed()
+                }
+            }
+
+            // Here we specify the "destructive" attribute to show that it’s destructive in nature
+            let delete = UIAction(title: "Delete", image: UIImage(systemName: "trash"), attributes: .destructive) { action in
+                let locationInLadder = self.getLocationInLadder(position: location, ladderViewModel: self.ladderViewModel)
+                if let mark = locationInLadder.mark {
+                    PRINT("you pressed a mark")
+                    self.deleteMark(mark: mark)
+                }
+            }
+
+            // Create and return a UIMenu with all of the actions as children
+            if markFound {
+                return UIMenu(title: "", children: [solid, dashed, delete])
+            }
+            else {
+                return UIMenu(title: "", children: [delete])
+            }
+        }
+    }}
+
 // TODO: Marks only know absolute positioning (not affected by offset or scale and with
 // y position between 0 and 1.0), but need to seemless convert all screen positions
 // so that LadderView never has to worry about the raw Mark level.  Perhaps need a
@@ -88,7 +137,7 @@ class LadderView: UIView, LadderViewDelegate {
         ladderViewModel.initialize()
 
         self.layer.masksToBounds = true
-        self.layer.borderColor = UIColor.blue.cgColor
+        self.layer.borderColor = UIColor.systemBlue.cgColor
         self.layer.borderWidth = 2
 
         let singleTapRecognizer = UITapGestureRecognizer(target: self, action: #selector(self.singleTap))
@@ -218,10 +267,10 @@ class LadderView: UIView, LadderViewDelegate {
     @objc func doubleTap(tap: UITapGestureRecognizer) {
         PRINT("Double tap on ladder view")
         // delete mark
-        let tapLocation = getLocationInLadder(position: tap.location(in: self), ladderViewModel: ladderViewModel)
-        if tapLocation.markWasTapped {
-            if let mark = tapLocation.mark {
-                let region = tapLocation.region
+        let tapLocationInLadder = getLocationInLadder(position: tap.location(in: self), ladderViewModel: ladderViewModel)
+        if tapLocationInLadder.markWasTapped {
+            if let mark = tapLocationInLadder.mark {
+                let region = tapLocationInLadder.region
                 deleteMark(mark: mark, region: region)
                 cursorViewDelegate?.hideCursor(hide: true)
             }
@@ -256,10 +305,10 @@ class LadderView: UIView, LadderViewDelegate {
         PRINT("Dragging on ladder view")
         if pan.state == .began {
             PRINT("dragging began")
-            let location = getLocationInLadder(position: pan.location(in: self), ladderViewModel: ladderViewModel)
-            if let mark = location.mark {
+            let locationInLadder = getLocationInLadder(position: pan.location(in: self), ladderViewModel: ladderViewModel)
+            if let mark = locationInLadder.mark {
                 movingMark = mark
-                if let region = location.region {
+                if let region = locationInLadder.region {
                     regionOfDragOrigin = region
                 }
             }
@@ -272,8 +321,8 @@ class LadderView: UIView, LadderViewDelegate {
                 }
                 else {
                     PRINT("dragging mark without cursor.")
-                    let location = getLocationInLadder(position: pan.location(in: self), ladderViewModel: ladderViewModel)
-                    if let region = location.region {
+                    let locationInLadder = getLocationInLadder(position: pan.location(in: self), ladderViewModel: ladderViewModel)
+                    if let region = locationInLadder.region {
                         let regionName = region.name
                         let originalRegionName = regionOfDragOrigin?.name
                         PRINT("Region of origin = \(String(describing: originalRegionName))")
@@ -314,32 +363,34 @@ class LadderView: UIView, LadderViewDelegate {
         }
     }
 
-    // TODO: Consider test for iOS 13 and use context menu instead.
+    fileprivate func longPressMarkOldOS(_ position: CGPoint) {
+        // TODO: internationalize
+        // TODO: Put into a submenu "Style".
+        let solidMenuItem = UIMenuItem(title: "Solid", action: #selector(setSolid))
+        let dashedMenuItem = UIMenuItem(title: "Dashed", action: #selector(setDashed))
+        UIMenuController.shared.menuItems = [solidMenuItem, dashedMenuItem]
+        let rect = CGRect(x: position.x, y: position.y, width: 0, height: 0)
+        if #available(iOS 13.0, *) {
+            UIMenuController.shared.showMenu(from: self, rect: rect)
+        } else {
+            UIMenuController.shared.setTargetRect(rect, in: self)
+            UIMenuController.shared.setMenuVisible(true, animated: true)
+        }
+    }
+
     @objc func longPress(press: UILongPressGestureRecognizer) {
         self.becomeFirstResponder()
-        let location = getLocationInLadder(position: press.location(in: self), ladderViewModel: ladderViewModel)
-        PRINT("long press at \(location) ")
-        //        if let mark = location.mark, let vc = viewController {
-        if let mark = location.mark {
+        let locationInLadder = getLocationInLadder(position: press.location(in: self), ladderViewModel: ladderViewModel)
+        PRINT("long press at \(locationInLadder) ")
+        if let mark = locationInLadder.mark {
             PRINT("you pressed a mark")
-            //            let alert = UIAlertController(title: "Mark style", message: "change styel", preferredStyle: .actionSheet)
-//            alert.addAction(UIAlertAction(title: "Solid", style: .default, handler: {_ in mark.lineStyle = .solid; self.setNeedsDisplay()}))
-//            alert.addAction(UIAlertAction(title: "Dashed", style: .default, handler: {_ in mark.lineStyle = .dashed; self.setNeedsDisplay()}))
-//            alert.addAction(UIAlertAction(title: "Cancel", style: .default, handler: nil))
-//            vc.present(alert, animated: true, completion: nil)
             pressedMark = mark
             let position = press.location(in: self)
-            // TODO: internationalize
-            // TODO: Put into a submenu "Style".
-            let solidMenuItem = UIMenuItem(title: "Solid", action: #selector(setSolid))
-            let dashedMenuItem = UIMenuItem(title: "Dashed", action: #selector(setDashed))
-            UIMenuController.shared.menuItems = [solidMenuItem, dashedMenuItem]
-            let rect = CGRect(x: position.x, y: position.y, width: 0, height: 0)
             if #available(iOS 13.0, *) {
-                UIMenuController.shared.showMenu(from: self, rect: rect)
-            } else {
-                UIMenuController.shared.setTargetRect(rect, in: self)
-                UIMenuController.shared.setMenuVisible(true, animated: true)
+                // use LadderView extensions
+            }
+            else {
+                longPressMarkOldOS(position)
             }
         }
     }
@@ -460,11 +511,11 @@ class LadderView: UIView, LadderViewDelegate {
     }
 
     func makeMark(positionX: CGFloat) -> Mark? {
-        return ladderViewModel.makeMark(relativePositionX: positionX)
+        return ladderViewModel.makeMark(positionX: positionX)
     }
 
     func addMark(positionX: CGFloat) -> Mark? {
-        return ladderViewModel.addMark(relativePositionX: positionX)
+        return ladderViewModel.addMark(positionX: positionX)
     }
 
     private func unscaledPositionX(positionX: CGFloat) -> CGFloat {
