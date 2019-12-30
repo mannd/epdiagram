@@ -329,6 +329,8 @@ class LadderViewModel {
         else { // draw solid line
             context.strokePath()
         }
+        // FIXME: Draw circles as mark ends approach
+//        drawCircle(context: context, center: p2, radius: 5)
         context.setStrokeColor(getLineColor())
     }
 
@@ -336,6 +338,11 @@ class LadderViewModel {
         // TODO: Handle lines slanted backwards, don't draw at all in margin
         let intersection = getIntersection(ofLineFrom: CGPoint(x: margin, y: 0), to: CGPoint(x: margin, y: height), withLineFrom: position.proximal, to: position.distal)
         return intersection
+    }
+
+    func drawCircle(context: CGContext, center: CGPoint, radius: CGFloat) {
+        context.addArc(center: center, radius: radius, startAngle: 0.0, endAngle: .pi * 2.0, clockwise: true)
+        context.strokePath()
     }
 
     // Algorithm from: https://stackoverflow.com/questions/15690103/intersection-between-two-lines-in-coordinates

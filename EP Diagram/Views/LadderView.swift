@@ -27,7 +27,6 @@ protocol LadderViewDelegate: AnyObject {
 // FIXME: Proof of concept on how to use new context menu.  Will need to
 // adjust menu depending on what was pressed.  Nice alternative to old-fashioned
 // menus in iOS.
-// Also, change the line style to use a submenu: Style : Solid | Dashed.
 @available(iOS 13.0, *)
 extension LadderView: UIContextMenuInteractionDelegate {
     func contextMenuInteraction(_ interaction: UIContextMenuInteraction, configurationForMenuAtLocation location: CGPoint) -> UIContextMenuConfiguration? {
@@ -54,6 +53,8 @@ extension LadderView: UIContextMenuInteractionDelegate {
                 }
             }
 
+            let style = UIMenu(title: "Style...", children: [solid, dashed])
+
             // Here we specify the "destructive" attribute to show that it’s destructive in nature
             let delete = UIAction(title: "Delete", image: UIImage(systemName: "trash"), attributes: .destructive) { action in
                 let locationInLadder = self.getLocationInLadder(position: location, ladderViewModel: self.ladderViewModel)
@@ -65,7 +66,7 @@ extension LadderView: UIContextMenuInteractionDelegate {
 
             // Create and return a UIMenu with all of the actions as children
             if markFound {
-                return UIMenu(title: "", children: [solid, dashed, delete])
+                return UIMenu(title: "", children: [style, delete])
             }
             else {
                 return UIMenu(title: "", children: [delete])
@@ -365,10 +366,12 @@ class LadderView: UIView, LadderViewDelegate {
 
     fileprivate func longPressMarkOldOS(_ position: CGPoint) {
         // TODO: internationalize
-        // TODO: Put into a submenu "Style".
+        // Note: it doesn't look like you can add a submenu to a UIMenuController like
+        // you can do with context menus available in iOS 13.
         let solidMenuItem = UIMenuItem(title: "Solid", action: #selector(setSolid))
         let dashedMenuItem = UIMenuItem(title: "Dashed", action: #selector(setDashed))
-        UIMenuController.shared.menuItems = [solidMenuItem, dashedMenuItem]
+        let deleteMenuItem = UIMenuItem(title: "Delete", action: #selector(deletePressedMark))
+        UIMenuController.shared.menuItems = [solidMenuItem, dashedMenuItem, deleteMenuItem]
         let rect = CGRect(x: position.x, y: position.y, width: 0, height: 0)
         if #available(iOS 13.0, *) {
             UIMenuController.shared.showMenu(from: self, rect: rect)
@@ -535,6 +538,12 @@ class LadderView: UIView, LadderViewDelegate {
         cursorViewDelegate?.hideCursor(hide: true)
         cursorViewDelegate?.refresh()
         setNeedsDisplay()
+    }
+
+    @objc func deletePressedMark() {
+        if let pressedMark = pressedMark {
+            deleteMark(mark: pressedMark)
+        }
     }
 
     func refresh() {
