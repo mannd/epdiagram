@@ -54,4 +54,14 @@ class LadderTests: XCTestCase {
         XCTAssertEqual(mark?.position.proximal.x, nil)
     }
 
+    func testGetRegionIndex() {
+        ladder.activeRegion = ladder.regions[1]
+        XCTAssertEqual(ladder.getRegionIndex(region: ladder.activeRegion), 1)
+        XCTAssert(ladder.getRegionAfter(region: ladder.activeRegion) === ladder.regions[2])
+        XCTAssert(ladder.getRegionBefore(region: ladder.activeRegion) === ladder.regions[0])
+        let regionBefore = ladder.getRegionBefore(region: ladder.activeRegion)
+        XCTAssertNil(ladder.getRegionBefore(region: regionBefore))
+        let regionAfter = ladder.getRegionAfter(region: ladder.activeRegion)
+        XCTAssertNil(ladder.getRegionAfter(region: regionAfter))
+    }
 }

@@ -184,6 +184,7 @@ class LadderView: UIView, LadderViewDelegate {
                 // Unattach mark and hide cursor
                 PRINT("Unattaching mark")
                 mark.attached = false
+                mark.highlight = .none
                 unselectMark(mark)
                 cursorViewDelegate?.hideCursor(hide: true)
                 cursorViewDelegate?.unattachMark()

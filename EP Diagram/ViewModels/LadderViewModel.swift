@@ -54,9 +54,9 @@ struct RelativeMarkPosition {
 }
 
 extension Mark {
-    func setRelativeMarkPosition(relativeMarkPosition: RelativeMarkPosition) {
-        position = relativeMarkPosition.absoluteMarkPosition
-    }
+//    func setRelativeMarkPosition(relativeMarkPosition: RelativeMarkPosition) {
+//        position = relativeMarkPosition.absoluteMarkPosition
+//    }
 
     func setPosition(relativePosition: MarkPosition, in rect:CGRect, offset: CGFloat, scale: CGFloat) {
         position.proximal = Common.translateToAbsolutePosition(position: relativePosition.proximal, inRect: rect, offsetX: offset, scale: scale)
@@ -160,16 +160,44 @@ class LadderViewModel {
         return relativePositionX / scale
     }
 
+    // FIXME: There are 2 addMark functions.  Why?
     func addMark(absolutePositionX: CGFloat) -> Mark? {
         return ladder.addMarkAt(absolutePositionX)
     }
 
     func deleteMark(mark: Mark) {
         ladder.deleteMark(mark: mark)
+        ladder.setHighlight(highlight: .none)
     }
 
     func deleteMark(mark: Mark, region: Region?) {
         ladder.deleteMark(mark: mark, region: region)
+        ladder.setHighlight(highlight: .none)
+    }
+
+    fileprivate func highlightNearbyMarks(_ mark: Mark) {
+        let nearbyProximalMarks: [Mark] = ladder.getNearbyMarks(mark: mark).proximalMarks
+        let nearbyDistalMarks: [Mark] = ladder.getNearbyMarks(mark: mark).distalMarks
+        if nearbyProximalMarks.count > 0 {
+            PRINT("nearby Marks = \(nearbyProximalMarks)")
+            for nearbyMark in nearbyProximalMarks {
+                nearbyMark.highlight = .all
+                PRINT("nearby Mark highlight = \(nearbyMark.highlight)")
+            }
+        }
+        else {
+            ladder.setHighlight(highlight: .none, region: ladder.getRegionBefore(region: activeRegion))
+        }
+        if nearbyDistalMarks.count > 0 {
+            PRINT("nearby Marks = \(nearbyDistalMarks)")
+            for nearbyMark in nearbyDistalMarks {
+                nearbyMark.highlight = .all
+                PRINT("nearby Mark highlight = \(nearbyMark.highlight)")
+            }
+        }
+        else {
+            ladder.setHighlight(highlight: .none, region: ladder.getRegionAfter(region: activeRegion))
+        }
     }
 
     func moveMark(mark: Mark, relativePositionX: CGFloat) {
@@ -190,6 +218,7 @@ class LadderViewModel {
         case .none:
             break
         }
+        highlightNearbyMarks(mark)
     }
 
     /// Determine if a mark is near the X position, using relative coordinates.  Internally compares the relative mark X position to the positionX parameter.
@@ -376,7 +405,7 @@ class LadderViewModel {
     }
 
     private func getMarkColor(mark: Mark, region: Region) -> CGColor {
-        if mark.highlight == .all && region.selected   {
+        if mark.highlight == .all {
             return selectedColor.cgColor
         }
         else {
@@ -464,5 +493,11 @@ class LadderViewModel {
 
     func reset() {
         initialize()
+    }
+
+    func regionsToCheckForCloseness() -> [Region] {
+        guard activeRegion != nil else { return [] }
+        // FIXME: temporary
+        return []
     }
 }
