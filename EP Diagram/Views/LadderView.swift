@@ -33,29 +33,32 @@ extension LadderView: UIContextMenuInteractionDelegate {
         let markFound = getLocationInLadder(position: location, ladderViewModel: ladderViewModel).markWasTapped
         return UIContextMenuConfiguration(identifier: nil, previewProvider: nil) { suggestedActions in
 
-            // Create an action for sharing
             let solid = UIAction(title: "Solid", image: UIImage(systemName: "pencil")) { action in
                 let locationInLadder = self.getLocationInLadder(position: location, ladderViewModel: self.ladderViewModel)
                 if let mark = locationInLadder.mark {
-                    PRINT("you pressed a mark")
                     self.pressedMark = mark
                     self.setSolid()
                 }
             }
 
-            // Create an action for renaming
             let dashed = UIAction(title: "Dashed", image: UIImage(systemName: "pencil.and.ellipsis.rectangle")) { action in
                 let locationInLadder = self.getLocationInLadder(position: location, ladderViewModel: self.ladderViewModel)
                 if let mark = locationInLadder.mark {
-                    PRINT("you pressed a mark")
                     self.pressedMark = mark
                     self.setDashed()
                 }
             }
 
-            let style = UIMenu(title: "Style...", children: [solid, dashed])
+            let dotted = UIAction(title: "Dotted") { action in
+                let locationInLadder = self.getLocationInLadder(position: location, ladderViewModel: self.ladderViewModel)
+                if let mark = locationInLadder.mark {
+                    self.pressedMark = mark
+                    self.setDotted()
+                }
+            }
 
-            // Here we specify the "destructive" attribute to show that it’s destructive in nature
+            let style = UIMenu(title: "Style...", children: [solid, dashed, dotted])
+
             let delete = UIAction(title: "Delete", image: UIImage(systemName: "trash"), attributes: .destructive) { action in
                 let locationInLadder = self.getLocationInLadder(position: location, ladderViewModel: self.ladderViewModel)
                 if let mark = locationInLadder.mark {
@@ -371,8 +374,9 @@ class LadderView: UIView, LadderViewDelegate {
         // you can do with context menus available in iOS 13.
         let solidMenuItem = UIMenuItem(title: "Solid", action: #selector(setSolid))
         let dashedMenuItem = UIMenuItem(title: "Dashed", action: #selector(setDashed))
+        let dottedMenuItem = UIMenuItem(title: "Dotted", action: #selector(setDotted))
         let deleteMenuItem = UIMenuItem(title: "Delete", action: #selector(deletePressedMark))
-        UIMenuController.shared.menuItems = [solidMenuItem, dashedMenuItem, deleteMenuItem]
+        UIMenuController.shared.menuItems = [solidMenuItem, dashedMenuItem, dottedMenuItem, deleteMenuItem]
         let rect = CGRect(x: position.x, y: position.y, width: 0, height: 0)
         if #available(iOS 13.0, *) {
             UIMenuController.shared.showMenu(from: self, rect: rect)
@@ -416,6 +420,14 @@ class LadderView: UIView, LadderViewDelegate {
     @objc func setDashed() {
         if let pressedMark = pressedMark {
             pressedMark.lineStyle = .dashed
+        }
+        pressedMark = nil
+        setNeedsDisplay()
+    }
+
+    @objc func setDotted() {
+        if let pressedMark = pressedMark {
+            pressedMark.lineStyle = .dotted
         }
         pressedMark = nil
         setNeedsDisplay()

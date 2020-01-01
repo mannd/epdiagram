@@ -355,6 +355,12 @@ class LadderViewModel {
             context.strokePath()
             context.setLineDash(phase: 0, lengths: [])
         }
+        else if mark.lineStyle == .dotted {
+            let dots: [CGFloat] = [2, 2]
+            context.setLineDash(phase: 0, lengths: dots)
+            context.strokePath()
+            context.setLineDash(phase: 0, lengths: [])
+        }
         else { // draw solid line
             context.strokePath()
         }

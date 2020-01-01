@@ -53,6 +53,7 @@ class Mark {
     enum LineStyle {
         case solid
         case dashed
+        case dotted
     }
 
     /** Highlight is used in association with cursors, selecting marks, and showing connections

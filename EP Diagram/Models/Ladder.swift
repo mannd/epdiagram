@@ -96,6 +96,8 @@ class Ladder {
     }
 
     func getNearbyMarks(mark: Mark) -> NearbyMarks {
+        // FIXME: minimum affected by zoom.  Probably pass in minimum
+        // so that we always use the same proximity on screen.
         let minimum: CGFloat = 10
         var proximalMarks: [Mark] = []
         var distalMarks: [Mark] = []
