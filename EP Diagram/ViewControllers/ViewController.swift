@@ -16,15 +16,16 @@
 
         var separatorView: SeparatorView? = nil
 
-        var zoom: CGFloat = 1.0
-        var isZooming = false
+//        var zoom: CGFloat = 1.0
+//        var isZooming = false
         // This margin is used for all the views.  As ECGs are always read from left
         // to right, there is no reason to reverse this.
         let leftMargin: CGFloat = 30
 
         override func viewDidLoad() {
+            P("viewDidLoad")
             super.viewDidLoad()
-            title = NSLocalizedString("EP Diagram", comment: "app name")
+            title = L("EP Diagram", comment: "app name")
             if Common.isRunningOnMac() {
                 navigationController?.setNavigationBarHidden(true, animated: false)
             }
@@ -61,20 +62,25 @@
             }
         }
 
-        override func viewDidAppear(_ animated: Bool) {
+        fileprivate func centerImage() {
             // This centers image, as opposed to starting with it at the upper left
             // hand corner of the screen.
-            // FIXME: However, this causes image to jump on mac, ? other times, so:
             if !Common.isRunningOnMac() {
                 let newContentOffsetX = (imageScrollView.contentSize.width/2) - (imageScrollView.bounds.size.width/2);
                 imageScrollView.contentOffset = CGPoint(x: newContentOffsetX, y: 0)
             }
             cursorView.setNeedsDisplay()
             ladderView.setNeedsDisplay()
+        }
+
+        override func viewDidAppear(_ animated: Bool) {
+            P("viewDidAppear")
+            // Does not appear that centering image at start is useful.
+            //centerImage()
             // Set up toolbar and buttons.
             let toolbar = navigationController?.toolbar
-            let calibrateTitle = NSLocalizedString("Calibrate", comment: "calibrate button label title")
-            let selectTitle = NSLocalizedString("Select", comment: "select button label title")
+            let calibrateTitle = L("Calibrate", comment: "calibrate button label title")
+            let selectTitle = L("Select", comment: "select button label title")
             let calibrateButton = UIBarButtonItem(title: calibrateTitle, style: UIBarButtonItem.Style.plain, target: self, action: #selector(calibrate))
             let selectButton = UIBarButtonItem(title: selectTitle, style: UIBarButtonItem.Style.plain, target: self, action: #selector(selectMarks))
             // More buttons here.
@@ -82,23 +88,23 @@
             navigationController?.setToolbarHidden(false, animated: false)
 
             // Size ladderView after views laid out.
-            ladderView.reset()
+            ladderView.resetSize()
         }
 
         // MARK: -  Buttons
 
         @objc func calibrate() {
-           PRINT("calibrate")
+           P("calibrate")
         }
 
         @objc func selectMarks() {
-            PRINT("select")
+            P("select")
         }
 
         // MARK: - Touches
 
         @objc func singleTap(tap: UITapGestureRecognizer) {
-            PRINT("Scroll view single tap")
+            P("Scroll view single tap")
             if !ladderView.hasActiveRegion() {
                 ladderView.setActiveRegion(regionNum: 0)
                 ladderView.setNeedsDisplay()
@@ -135,7 +141,7 @@
         // Note that scrollViewDidScroll is also called while zooming.
         func scrollViewDidScroll(_ scrollView: UIScrollView) {
             if scrollView == imageScrollView {
-                PRINT("didScroll")
+                P("didScroll")
                 // Only scrolling in the horizontal direction affects ladderView.
                 ladderView.offset = scrollView.contentOffset.x
                 cursorView.offset = scrollView.contentOffset.x
@@ -148,38 +154,36 @@
 
         func scrollViewDidEndDecelerating(_ scrollView: UIScrollView) {
             if scrollView == imageScrollView {
-                PRINT("End decelerating")
+                P("End decelerating")
                 scrollFinished()
             }
         }
 
         func scrollViewDidEndDragging(_ scrollView: UIScrollView, willDecelerate decelerate: Bool) {
             if scrollView == imageScrollView && !decelerate {
-                PRINT("End dragging")
+                P("End dragging")
                 scrollFinished()
             }
         }
 
         fileprivate func scrollFinished() {
-            PRINT("Scroll finished")
+            P("Scroll finished")
         }
 
-
         func scrollViewWillBeginZooming(_ scrollView: UIScrollView, with view: UIView?) {
-            isZooming = true
+            P("scrollViewWillBeginZooming")
         }
 
         func scrollViewDidEndZooming(_ scrollView: UIScrollView, with view: UIView?, atScale scale: CGFloat) {
-            PRINT("scrollViewDidEndZooming")
-            PRINT("Zoom = \(scale)")
-            PRINT("imageView width = \(imageView.frame.width)")
-            PRINT("imageScrollView bounds = \(imageScrollView.bounds)")
-            PRINT("imageScrollView contentOffset = \(imageScrollView.contentOffset)")
-            isZooming = false
+            P("scrollViewDidEndZooming")
+            P("Zoom = \(scale)")
+            P("imageView width = \(imageView.frame.width)")
+            P("imageScrollView bounds = \(imageScrollView.bounds)")
+            P("imageScrollView contentOffset = \(imageScrollView.contentOffset)")
         }
 
         func scrollViewDidZoom(_ scrollView: UIScrollView) {
-            PRINT("didZoom")
+            P("didZoom")
         }
 
         // MARK: - Rotate view
@@ -193,18 +197,16 @@
             }
             coordinator.animate(alongsideTransition: nil, completion: {
                 _ in
-                PRINT("Transitioning")
+                P("Transitioning")
                 self.resetViews()
-                PRINT("new ladderView height = \(self.ladderView.frame.height)")
+                P("new ladderView height = \(self.ladderView.frame.height)")
             })
         }
 
         private func resetViews() {
             // Add back in separatorView after rotation.
             separatorView = HorizontalSeparatorView.addSeparatorBetweenViews(separatorType: .horizontal, primaryView: imageScrollView, secondaryView: ladderView, parentView: self.view)
-            // TODO: redundant or not?
-            self.ladderView.reset()
-            self.ladderView.refresh()
+            self.ladderView.resetSize()
             self.ladderView.setNeedsDisplay()
             self.imageView.setNeedsDisplay()
             self.cursorView.setNeedsDisplay()
@@ -215,11 +217,11 @@
         // TODO: Need to implement this functionality.
 
         override func encodeRestorableState(with coder: NSCoder) {
-            PRINT("Encode restorable state")
+            P("Encode restorable state")
         }
 
         override func decodeRestorableState(with coder: NSCoder) {
-            PRINT("Decode restorable state")
+            P("Decode restorable state")
         }
     }
 

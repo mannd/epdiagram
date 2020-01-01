@@ -33,7 +33,7 @@ extension LadderView: UIContextMenuInteractionDelegate {
         let markFound = getLocationInLadder(position: location, ladderViewModel: ladderViewModel).markWasTapped
         return UIContextMenuConfiguration(identifier: nil, previewProvider: nil) { suggestedActions in
 
-            let solid = UIAction(title: "Solid", image: UIImage(systemName: "pencil")) { action in
+            let solid = UIAction(title: L("Solid")) { action in
                 let locationInLadder = self.getLocationInLadder(position: location, ladderViewModel: self.ladderViewModel)
                 if let mark = locationInLadder.mark {
                     self.pressedMark = mark
@@ -41,7 +41,7 @@ extension LadderView: UIContextMenuInteractionDelegate {
                 }
             }
 
-            let dashed = UIAction(title: "Dashed", image: UIImage(systemName: "pencil.and.ellipsis.rectangle")) { action in
+            let dashed = UIAction(title: L("Dashed")) { action in
                 let locationInLadder = self.getLocationInLadder(position: location, ladderViewModel: self.ladderViewModel)
                 if let mark = locationInLadder.mark {
                     self.pressedMark = mark
@@ -49,7 +49,7 @@ extension LadderView: UIContextMenuInteractionDelegate {
                 }
             }
 
-            let dotted = UIAction(title: "Dotted") { action in
+            let dotted = UIAction(title: L("Dotted")) { action in
                 let locationInLadder = self.getLocationInLadder(position: location, ladderViewModel: self.ladderViewModel)
                 if let mark = locationInLadder.mark {
                     self.pressedMark = mark
@@ -57,19 +57,18 @@ extension LadderView: UIContextMenuInteractionDelegate {
                 }
             }
 
-            let style = UIMenu(title: "Style...", children: [solid, dashed, dotted])
+            let style = UIMenu(title: L("Style..."), children: [solid, dashed, dotted])
 
-            let delete = UIAction(title: "Delete", image: UIImage(systemName: "trash"), attributes: .destructive) { action in
+            let delete = UIAction(title: L("Delete"), image: UIImage(systemName: "trash"), attributes: .destructive) { action in
                 let locationInLadder = self.getLocationInLadder(position: location, ladderViewModel: self.ladderViewModel)
                 if let mark = locationInLadder.mark {
-                    PRINT("you pressed a mark")
                     self.deleteMark(mark: mark)
                 }
             }
 
             // Create and return a UIMenu with all of the actions as children
             if markFound {
-                return UIMenu(title: "", children: [style, delete])
+                return UIMenu(title: L("Edit mark"), children: [style, delete])
             }
             else {
                 return UIMenu(title: "", children: [delete])
@@ -133,7 +132,7 @@ class LadderView: UIView, LadderViewDelegate {
     let accuracy: CGFloat = 20
 
     required init?(coder aDecoder: NSCoder) {
-        PRINT("ladderView init")
+        P("ladderView init")
 
         ladderViewModel = LadderViewModel()
         super.init(coder: aDecoder)
@@ -178,14 +177,14 @@ class LadderView: UIView, LadderViewDelegate {
         if mark.attached {
             // FIXME: attached and selected maybe the same thing, eliminate duplication.
             let anchor = getAnchor(regionDivision: tapLocationInLadder.regionDivision)
-            PRINT(">>>>>Mark location = \(anchor)")
+            P(">>>>>Mark location = \(anchor)")
             // Just reanchor cursor
             if anchor != mark.anchor {
                 mark.anchor = anchor
             }
             else {
                 // Unattach mark and hide cursor
-                PRINT("Unattaching mark")
+                P("Unattaching mark")
                 mark.attached = false
                 mark.highlight = .none
                 unselectMark(mark)
@@ -194,7 +193,7 @@ class LadderView: UIView, LadderViewDelegate {
             }
         }
         else {
-            PRINT("Attaching mark")
+            P("Attaching mark")
             mark.attached = true
             mark.anchor = getAnchor(regionDivision: tapLocationInLadder.regionDivision)
             selectMark(mark)
@@ -214,7 +213,7 @@ class LadderView: UIView, LadderViewDelegate {
                 markWasTapped(mark: mark, tapLocationInLadder)
             }
             else { // make mark and attach cursor
-                PRINT("make mark and attach cursor")
+                P("make mark and attach cursor")
                 let mark = makeMark(positionX: tap.location(in: self).x)
                 if let mark = mark {
                     ladderViewModel.inactivateMarks()
@@ -230,7 +229,7 @@ class LadderView: UIView, LadderViewDelegate {
     }
 
     @objc func singleTap(tap: UITapGestureRecognizer) {
-        PRINT("LadderView.singleTap()")
+        P("LadderView.singleTap()")
         let tapLocationInLadder = getLocationInLadder(position: tap.location(in: self), ladderViewModel: ladderViewModel)
         if tapLocationInLadder.labelWasTapped {
             labelWasTapped(tapLocationInLadder)
@@ -270,7 +269,7 @@ class LadderView: UIView, LadderViewDelegate {
     }
 
     @objc func doubleTap(tap: UITapGestureRecognizer) {
-        PRINT("Double tap on ladder view")
+        P("Double tap on ladder view")
         // delete mark
         let tapLocationInLadder = getLocationInLadder(position: tap.location(in: self), ladderViewModel: ladderViewModel)
         if tapLocationInLadder.markWasTapped {
@@ -307,9 +306,9 @@ class LadderView: UIView, LadderViewDelegate {
     // distal points of the proximal region's marks, and the proximal points of the distal region's marks.
     // We also need any connected marks to make sure we move them to (i.e. update their positions).
     @objc func dragging(pan: UIPanGestureRecognizer) {
-        PRINT("Dragging on ladder view")
+        P("Dragging on ladder view")
         if pan.state == .began {
-            PRINT("dragging began")
+            P("dragging began")
             let locationInLadder = getLocationInLadder(position: pan.location(in: self), ladderViewModel: ladderViewModel)
             if let mark = locationInLadder.mark {
                 movingMark = mark
@@ -319,19 +318,19 @@ class LadderView: UIView, LadderViewDelegate {
             }
         }
         if pan.state == .changed {
-            PRINT("dragging state changed")
+            P("dragging state changed")
             if let mark = movingMark {
                 if mark.attached {
                     moveMark(mark: mark, position: pan.location(in: self), moveCursor: true)
                 }
                 else {
-                    PRINT("dragging mark without cursor.")
+                    P("dragging mark without cursor.")
                     let locationInLadder = getLocationInLadder(position: pan.location(in: self), ladderViewModel: ladderViewModel)
                     if let region = locationInLadder.region {
                         let regionName = region.name
                         let originalRegionName = regionOfDragOrigin?.name
-                        PRINT("Region of origin = \(String(describing: originalRegionName))")
-                        PRINT("Region dragged into = \(regionName)")
+                        P("Region of origin = \(String(describing: originalRegionName))")
+                        P("Region dragged into = \(regionName)")
                         /* Logic here:
                          drag started near a mark
                          mark has no attached cursor
@@ -362,7 +361,7 @@ class LadderView: UIView, LadderViewDelegate {
             }
         }
         if pan.state == .ended {
-            PRINT("dragging state ended")
+            P("dragging state ended")
             movingMark = nil
             regionOfDragOrigin = nil
         }
@@ -389,9 +388,9 @@ class LadderView: UIView, LadderViewDelegate {
     @objc func longPress(press: UILongPressGestureRecognizer) {
         self.becomeFirstResponder()
         let locationInLadder = getLocationInLadder(position: press.location(in: self), ladderViewModel: ladderViewModel)
-        PRINT("long press at \(locationInLadder) ")
+        P("long press at \(locationInLadder) ")
         if let mark = locationInLadder.mark {
-            PRINT("you pressed a mark")
+            P("you pressed a mark")
             pressedMark = mark
             let position = press.location(in: self)
             if #available(iOS 13.0, *) {
@@ -445,7 +444,7 @@ class LadderView: UIView, LadderViewDelegate {
             if position.y > region.proximalBoundary && position.y < region.distalBoundary {
                 tappedRegion = region
                 tappedRegionDivision = getTappedRegionDivision(region: region, positionY: position.y)
-                PRINT("tappedRegionDivision = \(tappedRegionDivision)")
+                P("tappedRegionDivision = \(tappedRegionDivision)")
             }
         }
         if let tappedRegion = tappedRegion {
@@ -456,7 +455,7 @@ class LadderView: UIView, LadderViewDelegate {
                 tappedRegionSection = .markSection
                 outerLoop: for mark in tappedRegion.marks {
                     if nearMark(positionX: position.x, mark: mark) {
-                        PRINT("tap near mark")
+                        P("tap near mark")
                         tappedMark = mark
                         break outerLoop
                     }
@@ -487,16 +486,15 @@ class LadderView: UIView, LadderViewDelegate {
 
     override func draw(_ rect: CGRect) {
         // Drawing code - note not necessary to call super.draw.
-        PRINT("LadderView draw()")
+        P("LadderView draw()")
         if let context = UIGraphicsGetCurrentContext() {
             ladderViewModel.draw(rect: rect, context: context)
         }
     }
 
-    func reset() {
-        PRINT("LadderView height = \(self.frame.height)")
+    func resetSize() {
         ladderViewModel.height = self.frame.height
-        ladderViewModel.reset()
+        ladderViewModel.reinit()
     }
 
     // MARK: - LadderView delegate methods
@@ -539,7 +537,7 @@ class LadderView: UIView, LadderViewDelegate {
     }
 
     func deleteMark(mark: Mark, region: Region?) {
-        PRINT("Delete mark \(mark)")
+        P("Delete mark \(mark)")
         ladderViewModel.deleteMark(mark: mark, region: region)
         cursorViewDelegate?.hideCursor(hide: true)
         cursorViewDelegate?.refresh()

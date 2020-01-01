@@ -91,7 +91,7 @@ class SeparatorView: UIView {
         // FIXME: reset marks, etc.
         // redraw views.
         let ladderView = secondaryView as? LadderView
-        ladderView?.reset()
+        ladderView?.resetSize()
         ladderView?.refresh()
         primaryView.setNeedsDisplay()
         secondaryView.setNeedsDisplay()

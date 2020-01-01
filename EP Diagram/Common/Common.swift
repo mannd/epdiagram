@@ -8,6 +8,7 @@
 
 import UIKit
 
+/// Namespace for global static functions.
 class Common {
     // Translates from LadderView X coordinate to Mark X coordinates.
     static func translateToAbsolutePositionX(positionX: CGFloat, offset: CGFloat, scale: CGFloat) -> CGFloat {
@@ -42,6 +43,7 @@ class Common {
         return MarkPosition(proximal: translateToAbsolutePosition(position: markPosition.proximal, inRect: rect, offsetX: offset, scale: scale), distal: translateToAbsolutePosition(position: markPosition.distal, inRect: rect, offsetX: offset, scale: scale))
     }
 
+    /// Returns true if target is a Mac, false for iOS.
     static func isRunningOnMac() -> Bool {
         #if targetEnvironment(macCatalyst)
             return true
@@ -51,14 +53,26 @@ class Common {
     }
 }
 
-// Make false to suppress printing of messages.
-var printMessages = true
+// MARK: - Global namespace functions
+
+// A few macro-like functions in the global namespace.
+
+/// Language localization "macro."
+/// - Parameters:
+///   - s: string to be translated
+///   - comment: optional comment for translator
+func L(_ s: String, comment: String = "") -> String {
+    return NSLocalizedString(s, comment: comment)
+}
 
 #if DEBUG
-func PRINT(_ s: String) {
+/// Print logging info only while in debug mode.
+/// - Parameter s: logging message to print
+// Make false to suppress printing of messages, even in debug mode.
+var printMessages = true
+func P(_ s: String) {
     if printMessages {
         print(s)
     }
 }
 #endif
-

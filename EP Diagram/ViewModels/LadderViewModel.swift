@@ -134,7 +134,7 @@ class LadderViewModel {
     }
 
     func initialize() {
-        PRINT("LadderViewModel initialize()")
+        P("LadderViewModel initialize()")
         regionUnitHeight = getRegionUnitHeight(ladder: ladder)
         regions.removeAll()
         var regionBoundary = regionUnitHeight * ladderPaddingMultiplier
@@ -152,7 +152,7 @@ class LadderViewModel {
     // the zoomScale does affect the X position.  Say the scale is 2, then what appears to be
     // the X position is actually 2 * X.  Thus we unscale the position and get an absolute mark X position.
     func addMark(positionX relativePositionX: CGFloat) -> Mark? {
-        PRINT("Add mark at \(relativePositionX)")
+        P("Add mark at \(relativePositionX)")
         return ladder.addMarkAt(unscaledRelativePositionX(relativePositionX: relativePositionX))
     }
 
@@ -176,23 +176,25 @@ class LadderViewModel {
     }
 
     fileprivate func highlightNearbyMarks(_ mark: Mark) {
-        let nearbyProximalMarks: [Mark] = ladder.getNearbyMarks(mark: mark).proximalMarks
-        let nearbyDistalMarks: [Mark] = ladder.getNearbyMarks(mark: mark).distalMarks
+        var minimum: CGFloat = 10
+        minimum = minimum / scale
+        let nearbyProximalMarks: [Mark] = ladder.getNearbyMarks(mark: mark, minimum: minimum).proximalMarks
+        let nearbyDistalMarks: [Mark] = ladder.getNearbyMarks(mark: mark, minimum: minimum).distalMarks
         if nearbyProximalMarks.count > 0 {
-            PRINT("nearby Marks = \(nearbyProximalMarks)")
+            P("nearby Marks = \(nearbyProximalMarks)")
             for nearbyMark in nearbyProximalMarks {
                 nearbyMark.highlight = .all
-                PRINT("nearby Mark highlight = \(nearbyMark.highlight)")
+                P("nearby Mark highlight = \(nearbyMark.highlight)")
             }
         }
         else {
             ladder.setHighlight(highlight: .none, region: ladder.getRegionBefore(region: activeRegion))
         }
         if nearbyDistalMarks.count > 0 {
-            PRINT("nearby Marks = \(nearbyDistalMarks)")
+            P("nearby Marks = \(nearbyDistalMarks)")
             for nearbyMark in nearbyDistalMarks {
                 nearbyMark.highlight = .all
-                PRINT("nearby Mark highlight = \(nearbyMark.highlight)")
+                P("nearby Mark highlight = \(nearbyMark.highlight)")
             }
         }
         else {
@@ -208,9 +210,9 @@ class LadderViewModel {
         case .middle:
             // Determine halfway point between proximal and distal.
             let difference = (mark.position.proximal.x - mark.position.distal.x) / 2
-            PRINT("mark.position.proximal.x = \(mark.position.proximal.x)")
-            PRINT("mark.position.distal.x = \(mark.position.distal.x)")
-            PRINT("difference = \(difference)")
+            P("mark.position.proximal.x = \(mark.position.proximal.x)")
+            P("mark.position.distal.x = \(mark.position.distal.x)")
+            P("difference = \(difference)")
             mark.position.proximal.x = absolutePosition + difference
             mark.position.distal.x = absolutePosition - difference
         case .distal:
@@ -257,7 +259,7 @@ class LadderViewModel {
     }
 
     func draw(rect: CGRect, context: CGContext) {
-        PRINT("LadderViewModel draw()")
+        P("LadderViewModel draw()")
         if #available(iOS 13.0, *) {
             context.setStrokeColor(UIColor.label.cgColor)
         } else {
@@ -343,7 +345,6 @@ class LadderViewModel {
             p1 = getTruncatedPosition(position: position) ?? position.distal
             p2 = position.proximal
         }
-        //        if position.maxX() > rect.origin.x {
         context.setStrokeColor(getMarkColor(mark: mark, region: region))
         context.setLineWidth(getMarkLineWidth(mark))
         context.move(to: p1)
@@ -497,7 +498,7 @@ class LadderViewModel {
         }
     }
 
-    func reset() {
+    func reinit() {
         initialize()
     }
 

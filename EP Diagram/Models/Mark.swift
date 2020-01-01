@@ -73,7 +73,7 @@ class Mark {
     var position: MarkPosition {
         didSet {
             // set linked marks' positions
-            PRINT("Did set a mark position")
+            P("Did set a mark position")
         }
     }
 
