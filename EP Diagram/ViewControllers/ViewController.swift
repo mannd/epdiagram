@@ -69,14 +69,14 @@
                 let newContentOffsetX = (imageScrollView.contentSize.width/2) - (imageScrollView.bounds.size.width/2);
                 imageScrollView.contentOffset = CGPoint(x: newContentOffsetX, y: 0)
             }
-            cursorView.setNeedsDisplay()
-            ladderView.setNeedsDisplay()
         }
 
         override func viewDidAppear(_ animated: Bool) {
             P("viewDidAppear")
-            // Does not appear that centering image at start is useful.
-            //centerImage()
+            // FIXME: BUG.  If we don't center image, initial single taps on image result in cursor and mark offset by left margin (offset to the left of tap).  Once image is manipulated this offset disappears.
+            centerImage()
+            cursorView.setNeedsDisplay()
+            ladderView.setNeedsDisplay()
             // Set up toolbar and buttons.
             let toolbar = navigationController?.toolbar
             let calibrateTitle = L("Calibrate", comment: "calibrate button label title")

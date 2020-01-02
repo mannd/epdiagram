@@ -90,15 +90,16 @@ class Mark {
     // A mark may have up to three attachments to marks in the proximal and distal regions
     // and in its own region, i.e. rentry spawning a mark.
     struct AttachedMarks {
-        var proximal: Mark?
-        var middle: Mark?
-        var distal: Mark?
+        var proximal: [Mark] = []
+        var middle: [Mark] = []
+        var distal: [Mark] = []
     }
+    
     var attachedMarks: AttachedMarks
 
     init(_ position: MarkPosition) {
         self.position = position
-        attachedMarks = AttachedMarks(proximal: nil, middle: nil, distal: nil)
+        attachedMarks = AttachedMarks()
     }
 
     convenience init() {

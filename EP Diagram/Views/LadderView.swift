@@ -59,6 +59,13 @@ extension LadderView: UIContextMenuInteractionDelegate {
 
             let style = UIMenu(title: L("Style..."), children: [solid, dashed, dotted])
 
+            let unlink = UIAction(title: L("Unlink")) { action in
+                let locationInLadder = self.getLocationInLadder(position: location, ladderViewModel: self.ladderViewModel)
+                if let mark = locationInLadder.mark {
+                    self.unlinkMarks(mark: mark)
+                }
+            }
+
             let delete = UIAction(title: L("Delete"), image: UIImage(systemName: "trash"), attributes: .destructive) { action in
                 let locationInLadder = self.getLocationInLadder(position: location, ladderViewModel: self.ladderViewModel)
                 if let mark = locationInLadder.mark {
@@ -68,7 +75,7 @@ extension LadderView: UIContextMenuInteractionDelegate {
 
             // Create and return a UIMenu with all of the actions as children
             if markFound {
-                return UIMenu(title: L("Edit mark"), children: [style, delete])
+                return UIMenu(title: L("Edit mark"), children: [style, unlink, delete])
             }
             else {
                 return UIMenu(title: "", children: [delete])
@@ -181,6 +188,8 @@ class LadderView: UIView, LadderViewDelegate {
             // Just reanchor cursor
             if anchor != mark.anchor {
                 mark.anchor = anchor
+                let anchorPositionX = getAnchorPositionX(mark: mark)
+                cursorViewDelegate?.moveCursor(positionX: anchorPositionX)
             }
             else {
                 // Unattach mark and hide cursor
@@ -362,20 +371,32 @@ class LadderView: UIView, LadderViewDelegate {
         }
         if pan.state == .ended {
             P("dragging state ended")
+            if let mark = movingMark {
+                linkNearbyMarks(mark: mark)
+            }
             movingMark = nil
             regionOfDragOrigin = nil
+            setNeedsDisplay()
         }
     }
 
+    func linkNearbyMarks(mark: Mark) {
+        ladderViewModel.linkNearbyMarks(mark: mark)
+    }
+
+    func unlinkMarks(mark: Mark) {
+        mark.attachedMarks = Mark.AttachedMarks()
+    }
+
     fileprivate func longPressMarkOldOS(_ position: CGPoint) {
-        // TODO: internationalize
         // Note: it doesn't look like you can add a submenu to a UIMenuController like
         // you can do with context menus available in iOS 13.
-        let solidMenuItem = UIMenuItem(title: "Solid", action: #selector(setSolid))
-        let dashedMenuItem = UIMenuItem(title: "Dashed", action: #selector(setDashed))
-        let dottedMenuItem = UIMenuItem(title: "Dotted", action: #selector(setDotted))
-        let deleteMenuItem = UIMenuItem(title: "Delete", action: #selector(deletePressedMark))
-        UIMenuController.shared.menuItems = [solidMenuItem, dashedMenuItem, dottedMenuItem, deleteMenuItem]
+        let solidMenuItem = UIMenuItem(title: L("Solid"), action: #selector(setSolid))
+        let dashedMenuItem = UIMenuItem(title: L("Dashed"), action: #selector(setDashed))
+        let dottedMenuItem = UIMenuItem(title: L("Dotted"), action: #selector(setDotted))
+        let unlinkMenuItem = UIMenuItem(title: L("Unlink"), action: #selector(unlinkPressedMark))
+        let deleteMenuItem = UIMenuItem(title: L("Delete"), action: #selector(deletePressedMark))
+        UIMenuController.shared.menuItems = [solidMenuItem, dashedMenuItem, dottedMenuItem, unlinkMenuItem, deleteMenuItem]
         let rect = CGRect(x: position.x, y: position.y, width: 0, height: 0)
         if #available(iOS 13.0, *) {
             UIMenuController.shared.showMenu(from: self, rect: rect)
@@ -554,6 +575,12 @@ class LadderView: UIView, LadderViewDelegate {
     @objc func deletePressedMark() {
         if let pressedMark = pressedMark {
             deleteMark(mark: pressedMark)
+        }
+    }
+
+    @objc func unlinkPressedMark() {
+        if let pressedMark = pressedMark {
+            unlinkMarks(mark: pressedMark)
         }
     }
 

@@ -237,6 +237,25 @@ class LadderViewModel {
         return relativePositionX < maxX + accuracy && relativePositionX > minX - accuracy
     }
 
+    func linkNearbyMarks(mark: Mark) {
+        P("linkNearbyMarks")
+        let minimum = 10 / scale
+        let nearbyMarks = ladder.getNearbyMarks(mark: mark, minimum: minimum)
+        let proxMarks = nearbyMarks.proximalMarks
+        let distalMarks = nearbyMarks.distalMarks
+        for proxMark in proxMarks {
+            mark.attachedMarks.proximal.append(proxMark)
+            proxMark.position.distal.x = mark.position.proximal.x
+        }
+        for distalMark in distalMarks {
+            mark.attachedMarks.distal.append(distalMark)
+            distalMark.position.proximal.x = mark.position.distal.x
+        }
+        P("Attached prox marks = \(mark.attachedMarks.proximal)")
+        P("Attached distal marks = \(mark.attachedMarks.distal)")
+    }
+
+
     // FIXME: Probably dead code.
     func findMarkNearby(positionX: CGFloat, accuracy: CGFloat) -> Mark? {
         if let activeRegion = activeRegion {
@@ -249,6 +268,8 @@ class LadderViewModel {
         }
         return nil
     }
+
+
 
     func makeMark(positionX relativePositionX: CGFloat) -> Mark? {
         return addMark(absolutePositionX: Common.translateToAbsolutePositionX(positionX: relativePositionX, offset: offset, scale: scale))
@@ -324,7 +345,7 @@ class LadderViewModel {
         context.setAlpha(1)
     }
 
-    fileprivate func drawMark(mark: Mark, rect: CGRect, context: CGContext, region: Region) {
+    fileprivate func drawMark(mark: Mark, rect: CGRect, context: CGContext) {
         let position = mark.getPosition(in: rect, offset: offset, scale: scale)
         // Don't bother drawing marks in margin.
         if position.proximal.x <= margin && position.distal.x <= margin {
@@ -345,10 +366,17 @@ class LadderViewModel {
             p1 = getTruncatedPosition(position: position) ?? position.distal
             p2 = position.proximal
         }
-        context.setStrokeColor(getMarkColor(mark: mark, region: region))
+        context.setStrokeColor(getMarkColor(mark: mark))
         context.setLineWidth(getMarkLineWidth(mark))
         context.move(to: p1)
         context.addLine(to: p2)
+        // Move linked marks
+        for proximalMark in mark.attachedMarks.proximal {
+            proximalMark.position.distal.x = mark.position.proximal.x
+        }
+        for distalMark in mark.attachedMarks.distal {
+            distalMark.position.proximal.x = mark.position.distal.x
+        }
         // Draw dashed line
         if mark.lineStyle == .dashed {
             let dashes: [CGFloat] = [5, 5]
@@ -411,7 +439,7 @@ class LadderViewModel {
         }
     }
 
-    private func getMarkColor(mark: Mark, region: Region) -> CGColor {
+    private func getMarkColor(mark: Mark) -> CGColor {
         if mark.highlight == .all {
             return selectedColor.cgColor
         }
@@ -442,7 +470,7 @@ class LadderViewModel {
     fileprivate func drawMarks(region: Region, context: CGContext,  rect: CGRect) {
         // Draw marks
         for mark: Mark in region.marks {
-            drawMark(mark: mark, rect: rect, context: context, region: region)
+            drawMark(mark: mark, rect: rect, context: context)
         }
     }
 
