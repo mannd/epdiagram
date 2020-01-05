@@ -44,7 +44,6 @@
             cursorView.ladderViewDelegate = ladderView
             ladderView.cursorViewDelegate = cursorView
             imageScrollView.delegate = self
-            ladderView.viewController = self
 
             // FIXME: This forces ladderView below the toolbar.  Not clear
             // why?  Also note that I changed priority of constraint of

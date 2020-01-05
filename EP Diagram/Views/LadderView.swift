@@ -22,6 +22,7 @@ protocol LadderViewDelegate: AnyObject {
     func hasActiveRegion() -> Bool
     func getHeight() -> CGFloat
     func getTopOfLadder(view: UIView) -> CGFloat
+    func linkNearbyMarks(mark: Mark)
 }
 
 // FIXME: Proof of concept on how to use new context menu.  Will need to
@@ -58,6 +59,8 @@ extension LadderView: UIContextMenuInteractionDelegate {
             }
 
             let style = UIMenu(title: L("Style..."), children: [solid, dashed, dotted])
+            // Use .displayInline option to show menu inline with separator.
+//           let style = UIMenu(title: L("Style..."), options: .displayInline,  children: [solid, dashed, dotted])
 
             let unlink = UIAction(title: L("Unlink")) { action in
                 let locationInLadder = self.getLocationInLadder(position: location, ladderViewModel: self.ladderViewModel)
@@ -83,29 +86,8 @@ extension LadderView: UIContextMenuInteractionDelegate {
         }
     }}
 
-// TODO: Marks only know absolute positioning (not affected by offset or scale and with
-// y position between 0 and 1.0), but need to seemless convert all screen positions
-// so that LadderView never has to worry about the raw Mark level.  Perhaps need a
-// MarkViewModel class for this.
-// OR: Maybe Mark should just handle this.
 class LadderView: UIView, LadderViewDelegate {
 
-    /// Struct that pinpoints a point in a ladder.  Note that these tapped areas overlap (labels and marks are in regions).
-    struct LocationInLadder {
-        var region: Region?
-        var mark: Mark?
-        var regionSection: RegionSection
-        var regionDivision: RegionDivision
-        var regionWasTapped: Bool {
-            region != nil
-        }
-        var labelWasTapped: Bool {
-            regionSection == .labelSection
-        }
-        var markWasTapped: Bool {
-            mark != nil
-        }
-    }
 
 
     var pressedMark: Mark? = nil
@@ -129,9 +111,6 @@ class LadderView: UIView, LadderViewDelegate {
         }
     }
 
-    // FIXME: Take out viewController if we don't use it for UIAlertControllers.
-    // LadderView needs a weak copy of the calling VC in order to display UIAlertControllers.
-    weak var viewController: ViewController? = nil
     weak var cursorViewDelegate: CursorViewDelegate?
     var ladderViewModel: LadderViewModel
 
@@ -140,16 +119,18 @@ class LadderView: UIView, LadderViewDelegate {
 
     required init?(coder aDecoder: NSCoder) {
         P("ladderView init")
-
         ladderViewModel = LadderViewModel()
         super.init(coder: aDecoder)
+
         ladderViewModel.height = self.frame.height
         ladderViewModel.initialize()
 
+        // Draw border around view.
         self.layer.masksToBounds = true
         self.layer.borderColor = UIColor.systemBlue.cgColor
         self.layer.borderWidth = 2
 
+        // Set up touches.
         let singleTapRecognizer = UITapGestureRecognizer(target: self, action: #selector(self.singleTap))
         singleTapRecognizer.numberOfTapsRequired = 1
         self.addGestureRecognizer(singleTapRecognizer)
@@ -165,7 +146,7 @@ class LadderView: UIView, LadderViewDelegate {
 
 
     // Touches
-    fileprivate func labelWasTapped(_ tapLocationInLadder: LadderView.LocationInLadder) {
+    fileprivate func labelWasTapped(_ tapLocationInLadder: LadderViewModel.LocationInLadder) {
         if let tappedRegion = tapLocationInLadder.region {
             if tappedRegion.selected {
                 tappedRegion.selected = false
@@ -180,7 +161,7 @@ class LadderView: UIView, LadderViewDelegate {
         }
     }
 
-    fileprivate func markWasTapped(mark: Mark, _ tapLocationInLadder: LadderView.LocationInLadder) {
+    fileprivate func markWasTapped(mark: Mark, _ tapLocationInLadder: LadderViewModel.LocationInLadder) {
         if mark.attached {
             // FIXME: attached and selected maybe the same thing, eliminate duplication.
             let anchor = getAnchor(regionDivision: tapLocationInLadder.regionDivision)
@@ -213,7 +194,7 @@ class LadderView: UIView, LadderViewDelegate {
         }
     }
 
-    fileprivate func regionWasTapped(_ tapLocationInLadder: LadderView.LocationInLadder, _ tap: UITapGestureRecognizer) {
+    fileprivate func regionWasTapped(_ tapLocationInLadder: LadderViewModel.LocationInLadder, _ tap: UITapGestureRecognizer) {
         if let tappedRegion = tapLocationInLadder.region {
             if !tappedRegion.selected {
                 ladderViewModel.activeRegion = tappedRegion
@@ -269,12 +250,27 @@ class LadderView: UIView, LadderViewDelegate {
         return anchor
     }
 
+    // TODO: need to recursively select all linked marks.
     fileprivate func selectMark(_ mark: Mark) {
         mark.highlight = .all
+        let attachedMarks = mark.attachedMarks
+        for proximalMark in attachedMarks.proximal {
+            proximalMark.highlight = .all
+        }
+        for distalMark in attachedMarks.distal {
+            distalMark.highlight = .all
+        }
     }
 
     fileprivate func unselectMark(_ mark: Mark) {
         mark.highlight = .none
+        let attachedMarks = mark.attachedMarks
+        for proximalMark in attachedMarks.proximal {
+            proximalMark.highlight = .none
+        }
+        for distalMark in attachedMarks.distal {
+            distalMark.highlight = .none
+        }
     }
 
     @objc func doubleTap(tap: UITapGestureRecognizer) {
@@ -456,7 +452,7 @@ class LadderView: UIView, LadderViewDelegate {
     /// Magic function that returns struct indicating in what part of ladder a point is.
     /// - Parameter position: point to be processed
     /// - Parameter ladderViewModel: ladderViewModel in use
-    func getLocationInLadder(position: CGPoint, ladderViewModel: LadderViewModel) -> LocationInLadder {
+    func getLocationInLadder(position: CGPoint, ladderViewModel: LadderViewModel) -> LadderViewModel.LocationInLadder {
         var tappedRegion: Region?
         var tappedMark: Mark?
         var tappedRegionSection: RegionSection = .markSection
@@ -483,7 +479,7 @@ class LadderView: UIView, LadderViewDelegate {
                 }
             }
         }
-        return LocationInLadder(region: tappedRegion, mark: tappedMark, regionSection: tappedRegionSection, regionDivision: tappedRegionDivision)
+        return LadderViewModel.LocationInLadder(region: tappedRegion, mark: tappedMark, regionSection: tappedRegionSection, regionDivision: tappedRegionDivision)
     }
 
     private func nearMark(positionX: CGFloat, mark: Mark) -> Bool {

@@ -119,5 +119,4 @@ class Mark {
         return CGPoint(x: x, y: y)
     }
 
-
 }

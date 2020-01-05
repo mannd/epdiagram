@@ -75,6 +75,22 @@ extension Mark {
 }
 
 class LadderViewModel {
+    /// Struct that pinpoints a point in a ladder.  Note that these tapped areas overlap (labels and marks are in regions).
+    struct LocationInLadder {
+        var region: Region?
+        var mark: Mark?
+        var regionSection: RegionSection
+        var regionDivision: RegionDivision
+        var regionWasTapped: Bool {
+            region != nil
+        }
+        var labelWasTapped: Bool {
+            regionSection == .labelSection
+        }
+        var markWasTapped: Bool {
+            mark != nil
+        }
+    }
     // Half a region width above and below ladder
     let ladderPaddingMultiplier: CGFloat = 0.5
 
@@ -181,10 +197,8 @@ class LadderViewModel {
         let nearbyProximalMarks: [Mark] = ladder.getNearbyMarks(mark: mark, minimum: minimum).proximalMarks
         let nearbyDistalMarks: [Mark] = ladder.getNearbyMarks(mark: mark, minimum: minimum).distalMarks
         if nearbyProximalMarks.count > 0 {
-            P("nearby Marks = \(nearbyProximalMarks)")
             for nearbyMark in nearbyProximalMarks {
                 nearbyMark.highlight = .all
-                P("nearby Mark highlight = \(nearbyMark.highlight)")
             }
         }
         else {
@@ -210,15 +224,19 @@ class LadderViewModel {
         case .middle:
             // Determine halfway point between proximal and distal.
             let difference = (mark.position.proximal.x - mark.position.distal.x) / 2
-            P("mark.position.proximal.x = \(mark.position.proximal.x)")
-            P("mark.position.distal.x = \(mark.position.distal.x)")
-            P("difference = \(difference)")
             mark.position.proximal.x = absolutePosition + difference
             mark.position.distal.x = absolutePosition - difference
         case .distal:
             mark.position.distal.x = absolutePosition
         case .none:
             break
+        }
+        // Move linked marks
+        for proximalMark in mark.attachedMarks.proximal {
+            proximalMark.position.distal.x = mark.position.proximal.x
+        }
+        for distalMark in mark.attachedMarks.distal {
+            distalMark.position.proximal.x = mark.position.distal.x
         }
         highlightNearbyMarks(mark)
     }
@@ -239,20 +257,21 @@ class LadderViewModel {
 
     func linkNearbyMarks(mark: Mark) {
         P("linkNearbyMarks")
-        let minimum = 10 / scale
+        var minimum: CGFloat = 10
+        minimum = minimum / scale
         let nearbyMarks = ladder.getNearbyMarks(mark: mark, minimum: minimum)
         let proxMarks = nearbyMarks.proximalMarks
         let distalMarks = nearbyMarks.distalMarks
         for proxMark in proxMarks {
             mark.attachedMarks.proximal.append(proxMark)
             proxMark.position.distal.x = mark.position.proximal.x
+            proxMark.attachedMarks.distal.append(mark)
         }
         for distalMark in distalMarks {
             mark.attachedMarks.distal.append(distalMark)
             distalMark.position.proximal.x = mark.position.distal.x
+            distalMark.attachedMarks.proximal.append(mark)
         }
-        P("Attached prox marks = \(mark.attachedMarks.proximal)")
-        P("Attached distal marks = \(mark.attachedMarks.distal)")
     }
 
 
@@ -370,13 +389,6 @@ class LadderViewModel {
         context.setLineWidth(getMarkLineWidth(mark))
         context.move(to: p1)
         context.addLine(to: p2)
-        // Move linked marks
-        for proximalMark in mark.attachedMarks.proximal {
-            proximalMark.position.distal.x = mark.position.proximal.x
-        }
-        for distalMark in mark.attachedMarks.distal {
-            distalMark.position.proximal.x = mark.position.distal.x
-        }
         // Draw dashed line
         if mark.lineStyle == .dashed {
             let dashes: [CGFloat] = [5, 5]

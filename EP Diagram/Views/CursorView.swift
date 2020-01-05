@@ -162,16 +162,25 @@ class CursorView: UIView, CursorViewDelegate {
 //        }
 
         // drag Cursor
-        let delta = pan.translation(in: self)
-        // Adjust movement to scale
-        cursorViewModel.cursor.move(delta: delta.x / scale)
-        if let attachedMark = attachedMark {
-            P("Move attached Mark")
-            ladderViewDelegate?.moveMark(mark: attachedMark, position: CGPoint(x: Common.translateToRelativePositionX(positionX: cursorViewModel.cursor.position, offset: offset, scale: scale), y: 0), moveCursor: false)
-            ladderViewDelegate?.refresh()
+        if pan.state == .changed {
+            let delta = pan.translation(in: self)
+            // Adjust movement to scale
+            cursorViewModel.cursor.move(delta: delta.x / scale)
+            if let attachedMark = attachedMark {
+                P("Move attached Mark")
+                ladderViewDelegate?.moveMark(mark: attachedMark, position: CGPoint(x: Common.translateToRelativePositionX(positionX: cursorViewModel.cursor.position, offset: offset, scale: scale), y: 0), moveCursor: false)
+                ladderViewDelegate?.refresh()
+            }
+            pan.setTranslation(CGPoint(x: 0,y: 0), in: self)
+            setNeedsDisplay()
         }
-        pan.setTranslation(CGPoint(x: 0,y: 0), in: self)
-        setNeedsDisplay()
+        if pan.state == .ended {
+            if let attachedMark = attachedMark {
+                ladderViewDelegate?.linkNearbyMarks(mark: attachedMark)
+                ladderViewDelegate?.refresh()
+                setNeedsDisplay()
+            }
+        }
     }
 
     @objc func longPress(press: UILongPressGestureRecognizer) {
