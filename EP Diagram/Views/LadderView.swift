@@ -87,9 +87,6 @@ extension LadderView: UIContextMenuInteractionDelegate {
     }}
 
 class LadderView: UIView, LadderViewDelegate {
-
-
-
     var pressedMark: Mark? = nil
     var movingMark: Mark? = nil
     var regionOfDragOrigin: Region? = nil

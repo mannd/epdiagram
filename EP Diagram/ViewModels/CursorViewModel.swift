@@ -36,9 +36,30 @@ class CursorViewModel: NSObject {
             }
         }
     }
-    var cursorVisible: Bool = false {
-        didSet {
-            cursor.visible = cursorVisible
+    var cursorVisible: Bool {
+        get {
+           cursor.visible
+        }
+        set(newValue) {
+            cursor.visible = newValue
+        }
+    }
+
+    var cursorPosition: CGFloat {
+        get {
+            cursor.position
+        }
+        set(newValue) {
+            cursor.position = newValue
+        }
+    }
+
+    var cursorAnchor: Cursor.Anchor {
+        get {
+            cursor.anchor
+        }
+        set(newValue) {
+            cursor.anchor = newValue
         }
     }
 
@@ -71,7 +92,12 @@ class CursorViewModel: NSObject {
         cursor.visible = true
     }
 
-    func isNearCursor(positionX: CGFloat, cursor: Cursor, accuracy: CGFloat) -> Bool {
+    func cursorMove(delta: CGFloat) {
+        // Movement adjusted to scale.
+        cursor.move(delta: delta / scale)
+    }
+
+    func isNearCursor(positionX: CGFloat, accuracy: CGFloat) -> Bool {
         return positionX < Common.translateToRelativePositionX(positionX: cursor.position, offset: offset, scale: scale) + accuracy
             && positionX > Common.translateToRelativePositionX(positionX: cursor.position, offset: offset, scale: scale) - accuracy
     }

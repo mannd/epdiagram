@@ -93,23 +93,13 @@ class CursorView: UIView, CursorViewDelegate {
     // This function passes touch events to the views below if the point is not
     // near the cursor.
     override func point(inside point: CGPoint, with event: UIEvent?) -> Bool {
-        // Hidden cursor shouldn't interfere with touches.
-        // TODO: However, scrollview must deal with single tap and create cursor via a delegate.
-        guard cursorViewModel.cursor.visible else { return false }
-        if isNearCursor(positionX: point.x, cursor: cursorViewModel.cursor) && point.y < ladderViewDelegate?.getRegionProximalBoundary(view: self) ?? self.frame.height {
-            P("near cursor")
+        guard cursorViewModel.cursorVisible, let ladderViewDelegate = ladderViewDelegate else { return false }
+        if cursorViewModel.isNearCursor(positionX: point.x, accuracy: accuracy) && point.y < ladderViewDelegate.getRegionProximalBoundary(view: self) {
             return true
         }
         return false
     }
 
-    func isNearCursor(positionX: CGFloat, cursor: Cursor) -> Bool {
-        cursorViewModel.isNearCursor(positionX: positionX, cursor: cursor, accuracy: accuracy)
-    }
-
-
-    // FIXME: This is overriden in ViewController.
-    // TODO: Need to move all touches to ViewController.
     @objc func singleTap(tap: UITapGestureRecognizer) {
         P("Single tap on cursor")
         if calibrating {
@@ -164,11 +154,10 @@ class CursorView: UIView, CursorViewDelegate {
         // drag Cursor
         if pan.state == .changed {
             let delta = pan.translation(in: self)
-            // Adjust movement to scale
-            cursorViewModel.cursor.move(delta: delta.x / scale)
+            cursorViewModel.cursorMove(delta: delta.x)
             if let attachedMark = attachedMark {
                 P("Move attached Mark")
-                ladderViewDelegate?.moveMark(mark: attachedMark, position: CGPoint(x: Common.translateToRelativePositionX(positionX: cursorViewModel.cursor.position, offset: offset, scale: scale), y: 0), moveCursor: false)
+                ladderViewDelegate?.moveMark(mark: attachedMark, position: CGPoint(x: Common.translateToRelativePositionX(positionX: cursorViewModel.cursorPosition, offset: offset, scale: scale), y: 0), moveCursor: false)
                 ladderViewDelegate?.refresh()
             }
             pan.setTranslation(CGPoint(x: 0,y: 0), in: self)
@@ -195,7 +184,7 @@ class CursorView: UIView, CursorViewDelegate {
     func putCursor(positionX: CGFloat) {
         P("Cursor positionX = \(positionX)")
         // 
-        cursorViewModel.cursor.position = positionX / scale
+        cursorViewModel.cursorPosition = positionX / scale
         hideCursor(hide: false)
     }
 
@@ -224,7 +213,7 @@ class CursorView: UIView, CursorViewDelegate {
 
     func moveCursor(positionX: CGFloat) {
         P("Move cursor")
-        cursorViewModel.cursor.position = positionX
+        cursorViewModel.cursorPosition = positionX
     }
 
     // FIXME: Not called by anyone.
@@ -250,8 +239,7 @@ class CursorView: UIView, CursorViewDelegate {
     }
 
     func setAnchor(anchor: Cursor.Anchor) {
-        P("CursorView set anchor to \(anchor)")
-        cursorViewModel.cursor.anchor = anchor
+        cursorViewModel.cursorAnchor = anchor
     }
 
 }
