@@ -22,6 +22,7 @@ class CursorViewModel: NSObject {
     var height: CGFloat
     var scale: CGFloat = 1
     var offset: CGFloat = 0
+    var attachedMark: Mark?
     var cursorState: Cursor.CursorState {
         didSet {
             cursor.state = cursorState
@@ -68,18 +69,19 @@ class CursorViewModel: NSObject {
     }
 
     init(leftMargin: CGFloat, width: CGFloat, height: CGFloat) {
-        self.cursor = Cursor()
-        self.cursor.visible = false
-        self.cursor.state = .null
         self.leftMargin = leftMargin
         self.width = width
         self.height = height
+
+        self.cursor = Cursor()
+        self.cursor.visible = false
+        self.cursor.state = .null
         self.cursorState = .null
         self.color = attachedColor
         super.init()
-        //centerCursor()
     }
 
+    // Not currently used.
     func centerCursor() {
         cursor.position = width / 2
     }
@@ -97,9 +99,10 @@ class CursorViewModel: NSObject {
         cursor.move(delta: delta / scale)
     }
 
+    // FIXME: This is not working.  Cursor is drawing new mark right next to old mark.  However, tapping on LadderView _does_ put the cursor in the right place.
     func isNearCursor(positionX: CGFloat, accuracy: CGFloat) -> Bool {
-        return positionX < Common.translateToRelativePositionX(positionX: cursor.position, offset: offset, scale: scale) + accuracy
-            && positionX > Common.translateToRelativePositionX(positionX: cursor.position, offset: offset, scale: scale) - accuracy
+//        return positionX < cursor.position / scale + accuracy && positionX > cursor.position / scale - accuracy
+        return positionX < Common.translateToRelativePositionX(positionX: cursor.position, offset: offset, scale: scale) + accuracy && positionX > Common.translateToRelativePositionX(positionX: cursor.position, offset: offset, scale: scale) - accuracy
     }
 
     func draw(rect: CGRect, context: CGContext, defaultHeight: CGFloat?) {
@@ -129,4 +132,27 @@ class CursorViewModel: NSObject {
         context.strokePath()
     }
 
+    func attachMark(mark: Mark?) {
+        guard let mark = mark else { return }
+        attachedMark = mark
+        mark.attached = true
+        mark.highlight = .all
+        P("Mark attached!")
+    }
+
+    /// Unattaches mark if attached.  Returns true if mark was unattached, false if attached mark was already nil.
+    func unattachMark() -> Bool {
+        if let mark = attachedMark {
+            mark.attached = false
+            mark.highlight = .none
+            attachedMark = nil
+            return true
+        }
+        return false
+    }
+
+    func getAttachedMarkAnchor() -> Anchor {
+        guard let attachedMark = attachedMark else { return .none }
+        return attachedMark.anchor
+    }
 }

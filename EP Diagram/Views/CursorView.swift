@@ -10,7 +10,7 @@ import UIKit
 
 protocol CursorViewDelegate: AnyObject {
     func refresh()
-    func attachMark(mark: Mark?)
+    func attachMark(_: Mark?)
     func unattachMark()
     func moveCursor(positionX: CGFloat)
     func recenterCursor()
@@ -21,7 +21,6 @@ protocol CursorViewDelegate: AnyObject {
 }
 
 class CursorView: UIView, CursorViewDelegate {
-    var attachedMark: Mark?
     var cursorViewModel: CursorViewModel = CursorViewModel()
     weak var ladderViewDelegate: LadderViewDelegate?
     var leftMargin: CGFloat = 0 {
@@ -39,12 +38,26 @@ class CursorView: UIView, CursorViewDelegate {
             cursorViewModel.offset = offset
         }
     }
+
+    // How close a tap has to be to a cursor to register.
     let accuracy: CGFloat = 20
     var calibrating = false
 
     required init?(coder: NSCoder) {
         super.init(coder: coder)
+        didLoad()
+    }
+
+    override init(frame: CGRect) {
+        super.init(frame: frame)
+        didLoad()
+    }
+
+    fileprivate func didLoad() {
+        // CursorView is mostly transparent, so let iOS know.
         self.isOpaque = false
+
+        // Draw a border around the view.
         self.layer.masksToBounds = true
         if #available(iOS 13.0, *) {
             self.layer.borderColor = UIColor.label.cgColor
@@ -53,7 +66,7 @@ class CursorView: UIView, CursorViewDelegate {
         }
         self.layer.borderWidth = 1
 
-        cursorViewModel = CursorViewModel(leftMargin: leftMargin, width: self.frame.width, height: 0)
+        cursorViewModel = CursorViewModel(leftMargin: leftMargin, width: self.frame.width, height: self.frame.width)
 
         let singleTapRecognizer = UITapGestureRecognizer(target: self, action: #selector(self.singleTap))
         singleTapRecognizer.numberOfTapsRequired = 1
@@ -66,27 +79,26 @@ class CursorView: UIView, CursorViewDelegate {
         self.addGestureRecognizer(draggingPanRecognizer)
         let longPressRecognizer = UILongPressGestureRecognizer(target: self, action: #selector(self.longPress))
         self.addGestureRecognizer(longPressRecognizer)
-
     }
 
     override func draw(_ rect: CGRect) {
-        P("CursorView draw()")
         if let context = UIGraphicsGetCurrentContext() {
-            cursorViewModel.height = getCursorHeight(anchor: attachedMark?.anchor ?? .none)
+            cursorViewModel.height = getCursorHeight(anchor: cursorViewModel.getAttachedMarkAnchor())
             cursorViewModel.draw(rect: rect, context: context, defaultHeight: ladderViewDelegate?.getTopOfLadder(view: self))
         }
     }
 
     private func getCursorHeight(anchor: Anchor) -> CGFloat {
+        guard let ladderViewDelegate = ladderViewDelegate else { return self.frame.height }
         switch anchor {
         case .proximal:
-            return ladderViewDelegate?.getRegionProximalBoundary(view: self) ?? self.frame.height
+            return ladderViewDelegate.getRegionProximalBoundary(view: self)
         case .middle:
-            return ladderViewDelegate?.getRegionMidPoint(view: self) ?? self.frame.height
+            return ladderViewDelegate.getRegionMidPoint(view: self)
         case .distal:
-            return ladderViewDelegate?.getRegionDistalBoundary(view: self) ?? self.frame.height
+            return ladderViewDelegate.getRegionDistalBoundary(view: self)
         case .none:
-            return ladderViewDelegate?.getHeight() ?? self.frame.height
+            return ladderViewDelegate.getHeight()
         }
     }
 
@@ -115,8 +127,8 @@ class CursorView: UIView, CursorViewDelegate {
     @objc func doubleTap(tap: UITapGestureRecognizer) {
         P("Double tap on cursor")
         // delete attached Mark
-        if let attachedMark = attachedMark {
-            ladderViewDelegate?.deleteMark(mark: attachedMark)
+        if let attachedMark = cursorViewModel.attachedMark {
+            ladderViewDelegate?.deleteMark(attachedMark)
             ladderViewDelegate?.refresh()
         }
         hideCursor(hide: true)
@@ -126,8 +138,8 @@ class CursorView: UIView, CursorViewDelegate {
     func doubleTapHandler(tap: UITapGestureRecognizer) {
         P("Double tap handler")
         // delete attached Mark
-        if let attachedMark = attachedMark {
-            ladderViewDelegate?.deleteMark(mark: attachedMark)
+        if let attachedMark = cursorViewModel.attachedMark {
+            ladderViewDelegate?.deleteMark(attachedMark)
             ladderViewDelegate?.refresh()
         }
         hideCursor(hide: true)
@@ -155,7 +167,7 @@ class CursorView: UIView, CursorViewDelegate {
         if pan.state == .changed {
             let delta = pan.translation(in: self)
             cursorViewModel.cursorMove(delta: delta.x)
-            if let attachedMark = attachedMark {
+            if let attachedMark = cursorViewModel.attachedMark {
                 P("Move attached Mark")
                 ladderViewDelegate?.moveMark(mark: attachedMark, position: CGPoint(x: Common.translateToRelativePositionX(positionX: cursorViewModel.cursorPosition, offset: offset, scale: scale), y: 0), moveCursor: false)
                 ladderViewDelegate?.refresh()
@@ -164,7 +176,7 @@ class CursorView: UIView, CursorViewDelegate {
             setNeedsDisplay()
         }
         if pan.state == .ended {
-            if let attachedMark = attachedMark {
+            if let attachedMark = cursorViewModel.attachedMark {
                 ladderViewDelegate?.linkNearbyMarks(mark: attachedMark)
                 ladderViewDelegate?.refresh()
                 setNeedsDisplay()
@@ -173,7 +185,7 @@ class CursorView: UIView, CursorViewDelegate {
     }
 
     @objc func longPress(press: UILongPressGestureRecognizer) {
-        P("Long press on caliper")
+        P("Long press on cursor")
     }
 
     func doCalibration() {
@@ -182,8 +194,6 @@ class CursorView: UIView, CursorViewDelegate {
 
 
     func putCursor(positionX: CGFloat) {
-        P("Cursor positionX = \(positionX)")
-        // 
         cursorViewModel.cursorPosition = positionX / scale
         hideCursor(hide: false)
     }
@@ -193,22 +203,14 @@ class CursorView: UIView, CursorViewDelegate {
         setNeedsDisplay()
     }
 
-    func attachMark(mark: Mark?) {
-        guard let mark = mark else { return }
-        attachedMark = mark
-        mark.attached = true
-        mark.highlight = .all
-        P("Mark attached!")
+    func attachMark(_ mark: Mark?) {
+        cursorViewModel.attachMark(mark: mark)
     }
 
     func unattachMark() {
-        if let mark = attachedMark {
-            mark.attached = false
-            mark.highlight = .none
+        if cursorViewModel.unattachMark() {
             ladderViewDelegate?.refresh()
         }
-        attachedMark = nil
-        P("Mark unattached!")
     }
 
     func moveCursor(positionX: CGFloat) {
@@ -240,6 +242,11 @@ class CursorView: UIView, CursorViewDelegate {
 
     func setAnchor(anchor: Cursor.Anchor) {
         cursorViewModel.cursorAnchor = anchor
+    }
+
+    func attachMark(positionX: CGFloat) {
+        let mark = ladderViewDelegate?.addMark(positionX: positionX)
+        attachMark(mark)
     }
 
 }

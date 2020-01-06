@@ -47,8 +47,8 @@ class Ladder {
     }
 
     // Assumes mark is in active region, which is always true when mark has a cursor.
-    func deleteMark(mark: Mark) {
-        guard let activeRegion = activeRegion else { return }
+    func deleteMark(_ mark: Mark?) {
+        guard let activeRegion = activeRegion, let mark = mark else { return }
         if let index = activeRegion.marks.firstIndex(where: {$0 === mark}) {
             activeRegion.marks.remove(at: index)
         

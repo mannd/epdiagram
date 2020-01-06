@@ -15,9 +15,7 @@
         @IBOutlet var cursorView: CursorView!
 
         var separatorView: SeparatorView? = nil
-
-//        var zoom: CGFloat = 1.0
-//        var isZooming = false
+        
         // This margin is used for all the views.  As ECGs are always read from left
         // to right, there is no reason to reverse this.
         let leftMargin: CGFloat = 30
@@ -102,6 +100,7 @@
 
         // MARK: - Touches
 
+        // FIXME: Should we ignore double taps here?  Without implementing double tap, this acts like two single taps (creates mark, then hides cursor).
         @objc func singleTap(tap: UITapGestureRecognizer) {
             P("Scroll view single tap")
             if !ladderView.hasActiveRegion() {
@@ -115,9 +114,7 @@
             else {
                 let positionX = tap.location(in: imageScrollView).x
                 cursorView.putCursor(positionX: positionX)
-                let mark = ladderView.addMark(positionX: positionX)
-                mark?.anchor = .middle
-                cursorView.attachMark(mark: mark)
+                cursorView.attachMark(positionX: positionX)
             }
             cursorView.setNeedsDisplay()
             ladderView.setNeedsDisplay()
@@ -175,10 +172,10 @@
 
         func scrollViewDidEndZooming(_ scrollView: UIScrollView, with view: UIView?, atScale scale: CGFloat) {
             P("scrollViewDidEndZooming")
-            P("Zoom = \(scale)")
-            P("imageView width = \(imageView.frame.width)")
-            P("imageScrollView bounds = \(imageScrollView.bounds)")
-            P("imageScrollView contentOffset = \(imageScrollView.contentOffset)")
+//            P("Zoom = \(scale)")
+//            P("imageView width = \(imageView.frame.width)")
+//            P("imageScrollView bounds = \(imageScrollView.bounds)")
+//            P("imageScrollView contentOffset = \(imageScrollView.contentOffset)")
         }
 
         func scrollViewDidZoom(_ scrollView: UIScrollView) {
@@ -198,7 +195,7 @@
                 _ in
                 P("Transitioning")
                 self.resetViews()
-                P("new ladderView height = \(self.ladderView.frame.height)")
+//                P("new ladderView height = \(self.ladderView.frame.height)")
             })
         }
 
@@ -206,6 +203,7 @@
             // Add back in separatorView after rotation.
             separatorView = HorizontalSeparatorView.addSeparatorBetweenViews(separatorType: .horizontal, primaryView: imageScrollView, secondaryView: ladderView, parentView: self.view)
             self.ladderView.resetSize()
+            // FIXME: save and restore scrollview offset so it is maintained with rotation.
             self.ladderView.setNeedsDisplay()
             self.imageView.setNeedsDisplay()
             self.cursorView.setNeedsDisplay()

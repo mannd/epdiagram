@@ -8,6 +8,7 @@
 
 import UIKit
 
+// FIXME: Refactor for EP Diagram.  Eliminate vertical separator, etc.
 // After https://gist.github.com/ElegyD/c5af8892de04fa8a33e26fb919972d6a
 enum SeparatorType {
     case horizontal

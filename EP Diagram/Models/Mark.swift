@@ -84,7 +84,7 @@ class Mark {
     // Set when one end or another of a mark is close enough to connect
     var potentiallyConnected = false
     // Anchor point for movement and to attach a cursor
-    var anchor: Anchor = .none
+    var anchor: Anchor
     var lineStyle: LineStyle = .solid
 
     // A mark may have up to three attachments to marks in the proximal and distal regions
@@ -100,6 +100,8 @@ class Mark {
     init(_ position: MarkPosition) {
         self.position = position
         attachedMarks = AttachedMarks()
+        // Default anchor for new marks is middle.
+        anchor = .middle
     }
 
     convenience init() {
@@ -119,4 +121,18 @@ class Mark {
         return CGPoint(x: x, y: y)
     }
 
+    func getAnchorPositionX() -> CGFloat {
+        let anchorPositionX: CGFloat
+        switch anchor {
+        case .distal:
+            anchorPositionX = position.distal.x
+        case .middle:
+            anchorPositionX = midpoint().x
+        case .proximal:
+            anchorPositionX = position.proximal.x
+        case .none:
+            anchorPositionX = position.proximal.x
+        }
+        return anchorPositionX
+    }
 }
