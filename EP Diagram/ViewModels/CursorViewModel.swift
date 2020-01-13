@@ -132,7 +132,7 @@ class CursorViewModel: NSObject {
         context.strokePath()
     }
 
-    func attachMark(mark: Mark?) {
+    func attachMark(_ mark: Mark?) {
         guard let mark = mark else { return }
         attachedMark = mark
         mark.attached = true
@@ -151,8 +151,30 @@ class CursorViewModel: NSObject {
         return false
     }
 
+    func dragMark(ladderViewDelegate: LadderViewDelegate?, cursorViewDelegate: CursorViewDelegate?) {
+        if let attachedMark = attachedMark {
+            P("Move attached Mark")
+            ladderViewDelegate?.getViewModel().moveMark(mark: attachedMark, position: CGPoint(x: Common.translateToRelativePositionX(positionX: cursorPosition, offset: offset, scale: scale), y: 0), moveCursor: false, cursorViewDelegate: cursorViewDelegate)
+            ladderViewDelegate?.refresh()
+        }
+    }
+
     func getAttachedMarkAnchor() -> Anchor {
         guard let attachedMark = attachedMark else { return .none }
         return attachedMark.anchor
     }
+
+    func doubleTap(ladderViewDelegate: LadderViewDelegate?) {
+        if let attachedMark = attachedMark {
+            ladderViewDelegate?.getViewModel().deleteMark(attachedMark)
+            hideCursor()
+            ladderViewDelegate?.refresh()
+        }
+    }
+
+    func attachMark(positionX: CGFloat, ladderViewDelegate: LadderViewDelegate?) {
+        let mark = ladderViewDelegate?.getViewModel().addMark(positionX: positionX)
+        attachMark(mark)
+    }
+
 }

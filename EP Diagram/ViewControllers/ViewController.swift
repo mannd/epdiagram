@@ -105,11 +105,10 @@
             P("Scroll view single tap")
             if !ladderView.hasActiveRegion() {
                 ladderView.setActiveRegion(regionNum: 0)
-                ladderView.setNeedsDisplay()
             }
             cursorView.unattachMark()
             if cursorView.cursorIsVisible() {
-                cursorView.hideCursor(hide: true)
+                cursorView.hideCursor(true)
             }
             else {
                 let positionX = tap.location(in: imageScrollView).x

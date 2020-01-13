@@ -10,19 +10,18 @@ import UIKit
 
 protocol CursorViewDelegate: AnyObject {
     func refresh()
-    func attachMark(_: Mark?)
     func unattachMark()
     func moveCursor(positionX: CGFloat)
-    func recenterCursor()
     func highlightCursor(_ on: Bool)
-    func hideCursor(hide: Bool)
+    func hideCursor(_ hide: Bool)
     func cursorIsVisible() -> Bool
-    func setAnchor(anchor: Cursor.Anchor)
+    func getViewModel() -> CursorViewModel
 }
 
 class CursorView: UIView, CursorViewDelegate {
     var cursorViewModel: CursorViewModel = CursorViewModel()
     weak var ladderViewDelegate: LadderViewDelegate?
+
     var leftMargin: CGFloat = 0 {
         didSet {
             cursorViewModel.leftMargin = leftMargin
@@ -42,6 +41,8 @@ class CursorView: UIView, CursorViewDelegate {
     // How close a tap has to be to a cursor to register.
     let accuracy: CGFloat = 20
     var calibrating = false
+
+    // MARK: - init
 
     required init?(coder: NSCoder) {
         super.init(coder: coder)
@@ -71,15 +72,20 @@ class CursorView: UIView, CursorViewDelegate {
         let singleTapRecognizer = UITapGestureRecognizer(target: self, action: #selector(self.singleTap))
         singleTapRecognizer.numberOfTapsRequired = 1
         self.addGestureRecognizer(singleTapRecognizer)
+
         let doubleTapRecognizer = UITapGestureRecognizer(target: self, action: #selector(self.doubleTap))
         doubleTapRecognizer.numberOfTapsRequired = 2
         singleTapRecognizer.require(toFail: doubleTapRecognizer)
         self.addGestureRecognizer(doubleTapRecognizer)
+
         let draggingPanRecognizer = UIPanGestureRecognizer(target: self, action: #selector(self.dragging))
         self.addGestureRecognizer(draggingPanRecognizer)
+
         let longPressRecognizer = UILongPressGestureRecognizer(target: self, action: #selector(self.longPress))
         self.addGestureRecognizer(longPressRecognizer)
     }
+
+    // MARK: - draw
 
     override func draw(_ rect: CGRect) {
         if let context = UIGraphicsGetCurrentContext() {
@@ -102,6 +108,8 @@ class CursorView: UIView, CursorViewDelegate {
         }
     }
 
+    // MARK: - touches
+
     // This function passes touch events to the views below if the point is not
     // near the cursor.
     override func point(inside point: CGPoint, with event: UIEvent?) -> Bool {
@@ -119,30 +127,15 @@ class CursorView: UIView, CursorViewDelegate {
             return
         }
         // toggle hide or show cursor with single tap
-        hideCursor(hide: cursorViewModel.cursorVisible)
+        hideCursor(cursorViewModel.cursorVisible)
         unattachMark()
         setNeedsDisplay()
     }
 
     @objc func doubleTap(tap: UITapGestureRecognizer) {
         P("Double tap on cursor")
-        // delete attached Mark
-        if let attachedMark = cursorViewModel.attachedMark {
-            ladderViewDelegate?.deleteMark(attachedMark)
-            ladderViewDelegate?.refresh()
-        }
-        hideCursor(hide: true)
-        setNeedsDisplay()
-    }
-
-    func doubleTapHandler(tap: UITapGestureRecognizer) {
-        P("Double tap handler")
-        // delete attached Mark
-        if let attachedMark = cursorViewModel.attachedMark {
-            ladderViewDelegate?.deleteMark(attachedMark)
-            ladderViewDelegate?.refresh()
-        }
-        hideCursor(hide: true)
+        cursorViewModel.doubleTap(ladderViewDelegate: ladderViewDelegate)
+        hideCursor(true)
         setNeedsDisplay()
     }
 
@@ -167,17 +160,13 @@ class CursorView: UIView, CursorViewDelegate {
         if pan.state == .changed {
             let delta = pan.translation(in: self)
             cursorViewModel.cursorMove(delta: delta.x)
-            if let attachedMark = cursorViewModel.attachedMark {
-                P("Move attached Mark")
-                ladderViewDelegate?.moveMark(mark: attachedMark, position: CGPoint(x: Common.translateToRelativePositionX(positionX: cursorViewModel.cursorPosition, offset: offset, scale: scale), y: 0), moveCursor: false)
-                ladderViewDelegate?.refresh()
-            }
+            cursorViewModel.dragMark(ladderViewDelegate: ladderViewDelegate, cursorViewDelegate: self)
             pan.setTranslation(CGPoint(x: 0,y: 0), in: self)
             setNeedsDisplay()
         }
         if pan.state == .ended {
             if let attachedMark = cursorViewModel.attachedMark {
-                ladderViewDelegate?.linkNearbyMarks(mark: attachedMark)
+                ladderViewDelegate?.getViewModel().linkNearbyMarks(mark: attachedMark)
                 ladderViewDelegate?.refresh()
                 setNeedsDisplay()
             }
@@ -195,7 +184,7 @@ class CursorView: UIView, CursorViewDelegate {
 
     func putCursor(positionX: CGFloat) {
         cursorViewModel.cursorPosition = positionX / scale
-        hideCursor(hide: false)
+        hideCursor(false)
     }
 
     // MARK: - CursorView delegate methods
@@ -204,7 +193,7 @@ class CursorView: UIView, CursorViewDelegate {
     }
 
     func attachMark(_ mark: Mark?) {
-        cursorViewModel.attachMark(mark: mark)
+        cursorViewModel.attachMark(mark)
     }
 
     func unattachMark() {
@@ -214,25 +203,14 @@ class CursorView: UIView, CursorViewDelegate {
     }
 
     func moveCursor(positionX: CGFloat) {
-        P("Move cursor")
         cursorViewModel.cursorPosition = positionX
     }
 
-    // FIXME: Not called by anyone.
-    func recenterCursor() {
-        cursorViewModel.centerCursor()
-    }
-
     func highlightCursor(_ on: Bool) {
-        if on {
-            cursorViewModel.cursorState = .attached
-        }
-        else {
-            cursorViewModel.cursorState = .unattached
-        }
+        cursorViewModel.cursorState = on ? .attached : .unattached
     }
 
-    func hideCursor(hide: Bool) {
+    func hideCursor(_ hide: Bool) {
         cursorViewModel.cursorVisible = !hide
     }
 
@@ -240,13 +218,12 @@ class CursorView: UIView, CursorViewDelegate {
         return cursorViewModel.cursorVisible
     }
 
-    func setAnchor(anchor: Cursor.Anchor) {
-        cursorViewModel.cursorAnchor = anchor
-    }
-
     func attachMark(positionX: CGFloat) {
-        let mark = ladderViewDelegate?.addMark(positionX: positionX)
-        attachMark(mark)
+        cursorViewModel.attachMark(positionX: positionX, ladderViewDelegate: ladderViewDelegate)
     }
 
+    // We expose the underlying view model to avoid exposing elements of the model.
+    func getViewModel() -> CursorViewModel {
+        return cursorViewModel
+    }
 }

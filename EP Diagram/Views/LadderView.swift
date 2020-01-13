@@ -9,19 +9,15 @@
 import UIKit
 
 protocol LadderViewDelegate: AnyObject {
-    func deleteMark(_ mark: Mark?)
     func getRegionProximalBoundary(view: UIView) -> CGFloat
     func getRegionDistalBoundary(view: UIView) -> CGFloat
     func getRegionMidPoint(view: UIView) -> CGFloat
-    func moveMark(mark: Mark, position: CGPoint, moveCursor: Bool)
     func refresh()
-    func findMarkNearby(positionX: CGFloat) -> Mark?
     func setActiveRegion(regionNum: Int)
     func hasActiveRegion() -> Bool
     func getHeight() -> CGFloat
     func getTopOfLadder(view: UIView) -> CGFloat
-    func linkNearbyMarks(mark: Mark)
-    func addMark(positionX: CGFloat) -> Mark?
+    func getViewModel() -> LadderViewModel
 }
 
 @available(iOS 13.0, *)
@@ -30,31 +26,24 @@ extension LadderView: UIContextMenuInteractionDelegate {
         let markFound = ladderViewModel.markWasTapped(position: location)
         ladderViewModel.setPressedMark(position: location)
         return UIContextMenuConfiguration(identifier: nil, previewProvider: nil) { suggestedActions in
-
             let solid = UIAction(title: L("Solid")) { action in
                 self.setSolid()
             }
-
             let dashed = UIAction(title: L("Dashed")) { action in
                 self.setDashed()
             }
-
             let dotted = UIAction(title: L("Dotted")) { action in
                 self.setDotted()
             }
-
             let style = UIMenu(title: L("Style..."), children: [solid, dashed, dotted])
             // Use .displayInline option to show menu inline with separator.
 //           let style = UIMenu(title: L("Style..."), options: .displayInline,  children: [solid, dashed, dotted])
-
             let unlink = UIAction(title: L("Unlink")) { action in
                 self.ladderViewModel.unlinkPressedMark()
             }
-
             let delete = UIAction(title: L("Delete"), image: UIImage(systemName: "trash"), attributes: .destructive) { action in
                 self.deletePressedMark()
             }
-
             // Create and return a UIMenu with all of the actions as children
             if markFound {
                 return UIMenu(title: L("Edit mark"), children: [style, unlink, delete])
@@ -66,28 +55,14 @@ extension LadderView: UIContextMenuInteractionDelegate {
     }}
 
 class LadderView: UIView, LadderViewDelegate {
+    weak var cursorViewDelegate: CursorViewDelegate?
+    var ladderViewModel = LadderViewModel()
+
     override var canBecomeFirstResponder: Bool {
         get {
             return true
         }
     }
-    var pressedMark: Mark? {
-        set(newValue) {
-            ladderViewModel.pressedMark = newValue
-        }
-        get {
-            ladderViewModel.pressedMark
-        }
-    }
-    var movingMark: Mark? {
-        set(newValue) {
-            ladderViewModel.movingMark = newValue
-        }
-        get {
-            ladderViewModel.movingMark
-        }
-    }
-    // These are passed from the viewController, and in turn passed to the ladderViewModel
     var leftMargin: CGFloat = 0 {
         didSet {
             ladderViewModel.margin = leftMargin
@@ -104,11 +79,10 @@ class LadderView: UIView, LadderViewDelegate {
         }
     }
 
-    weak var cursorViewDelegate: CursorViewDelegate?
-    var ladderViewModel = LadderViewModel()
-
     // How close a touch has to be to count: +/- accuracy.
     let accuracy: CGFloat = 20
+
+    // MARK: - init
 
     override init(frame: CGRect) {
         super.init(frame: frame)
@@ -133,17 +107,20 @@ class LadderView: UIView, LadderViewDelegate {
         let singleTapRecognizer = UITapGestureRecognizer(target: self, action: #selector(self.singleTap))
         singleTapRecognizer.numberOfTapsRequired = 1
         self.addGestureRecognizer(singleTapRecognizer)
+
         let doubleTapRecognizer = UITapGestureRecognizer(target: self, action: #selector(self.doubleTap))
         doubleTapRecognizer.numberOfTapsRequired = 2
         singleTapRecognizer.require(toFail: doubleTapRecognizer)
         self.addGestureRecognizer(doubleTapRecognizer)
+
         let draggingPanRecognizer = UIPanGestureRecognizer(target: self, action: #selector(self.dragging))
         self.addGestureRecognizer(draggingPanRecognizer)
+
         let longPressRecognizer = UILongPressGestureRecognizer(target: self, action: #selector(self.longPress))
         self.addGestureRecognizer(longPressRecognizer)
     }
 
-    // Touches
+    // MARK: - Touches
 
     @objc func singleTap(tap: UITapGestureRecognizer) {
         ladderViewModel.singleTap(position: tap.location(in: self), cursorViewDelegate: cursorViewDelegate)
@@ -164,16 +141,16 @@ class LadderView: UIView, LadderViewDelegate {
 
     @objc func longPress(press: UILongPressGestureRecognizer) {
         self.becomeFirstResponder()
-        let locationInLadder = ladderViewModel.getLocationInLadder(position: press.location(in: self))
+        let position = press.location(in: self)
+        let locationInLadder = ladderViewModel.getLocationInLadder(position: position)
         P("long press at \(locationInLadder) ")
-        if let mark = locationInLadder.mark {
+        if locationInLadder.markWasTapped {
             P("you pressed a mark")
-            pressedMark = mark
-            let position = press.location(in: self)
             if #available(iOS 13.0, *) {
                 // use LadderView extensions
             }
             else {
+                ladderViewModel.setPressedMark(position: position)
                 longPressMarkOldOS(position)
             }
         }
@@ -213,41 +190,6 @@ class LadderView: UIView, LadderViewDelegate {
         ladderViewModel.setPressedMarkStyle(style: .dotted)
         ladderViewModel.nullifyPressedMark()
         setNeedsDisplay()
-    }
-
-    // TODO: need to recursively select all linked marks.
-    fileprivate func selectMark(_ mark: Mark) {
-        mark.highlight = .all
-        let attachedMarks = mark.attachedMarks
-        for proximalMark in attachedMarks.proximal {
-            proximalMark.highlight = .all
-        }
-        for distalMark in attachedMarks.distal {
-            distalMark.highlight = .all
-        }
-    }
-
-    fileprivate func unselectMark(_ mark: Mark) {
-        mark.highlight = .none
-        let attachedMarks = mark.attachedMarks
-        for proximalMark in attachedMarks.proximal {
-            proximalMark.highlight = .none
-        }
-        for distalMark in attachedMarks.distal {
-            distalMark.highlight = .none
-        }
-    }
-
-    func linkNearbyMarks(mark: Mark) {
-        ladderViewModel.linkNearbyMarks(mark: mark)
-    }
-
-    func unlinkMarks(mark: Mark) {
-        mark.attachedMarks = Mark.AttachedMarks()
-    }
-
-    private func nearMark(positionX: CGFloat, mark: Mark) -> Bool {
-        return ladderViewModel.nearMark(positionX: positionX, mark: mark, accuracy: accuracy)
     }
 
     override func draw(_ rect: CGRect) {
@@ -290,10 +232,6 @@ class LadderView: UIView, LadderViewDelegate {
         return ladderViewModel.height
     }
 
-    func addMark(positionX: CGFloat) -> Mark? {
-        return ladderViewModel.addMark(positionX: positionX)
-    }
-
     func addAttachedMark(positionX: CGFloat) {
         ladderViewModel.addAttachedMark(positionX: positionX)
     }
@@ -302,15 +240,9 @@ class LadderView: UIView, LadderViewDelegate {
         return positionX / scale
     }
 
-    func deleteMark(_ mark: Mark?) {
-        ladderViewModel.deleteMark(mark)
-        cursorViewDelegate?.hideCursor(hide: true)
-        refresh()
-    }
-
     @objc func deletePressedMark() {
         ladderViewModel.deletePressedMark()
-        cursorViewDelegate?.hideCursor(hide: true)
+        cursorViewDelegate?.hideCursor(true)
         refresh()
     }
 
@@ -323,20 +255,6 @@ class LadderView: UIView, LadderViewDelegate {
         setNeedsDisplay()
     }
 
-    func moveMark(mark: Mark, position: CGPoint, moveCursor: Bool) {
-        ladderViewModel.moveMark(mark: mark, relativePositionX: position.x)
-        if moveCursor {
-            let anchorPositionX = mark.getAnchorPositionX()
-            cursorViewDelegate?.moveCursor(positionX: anchorPositionX)
-            cursorViewDelegate?.refresh()
-        }
-    }
-
-    // FIXME: Not called by anyone.  Redundant with nearMark()?
-    func findMarkNearby(positionX: CGFloat) -> Mark? {
-        return ladderViewModel.findMarkNearby(positionX: positionX, accuracy: accuracy)
-    }
-
     func setActiveRegion(regionNum: Int) {
         ladderViewModel.setActiveRegion(regionNum: regionNum)
     }
@@ -344,4 +262,10 @@ class LadderView: UIView, LadderViewDelegate {
     func hasActiveRegion() -> Bool {
         return ladderViewModel.hasActiveRegion()
     }
+
+    // We expose the underlying view model to avoid exposing elements of the model.
+    func getViewModel() -> LadderViewModel {
+        return ladderViewModel
+    }
 }
+
