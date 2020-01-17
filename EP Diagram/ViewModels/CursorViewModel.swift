@@ -141,10 +141,11 @@ class CursorViewModel: NSObject {
     }
 
     /// Unattaches mark if attached.  Returns true if mark was unattached, false if attached mark was already nil.
-    func unattachMark() -> Bool {
+    func unattachMark(ladderViewDelegate: LadderViewDelegate?) -> Bool {
         if let mark = attachedMark {
             mark.attached = false
-            mark.highlight = .none
+            ladderViewDelegate?.getViewModel().unhighlightMarks()
+//            mark.highlight = .none
             attachedMark = nil
             return true
         }

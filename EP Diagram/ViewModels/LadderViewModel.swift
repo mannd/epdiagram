@@ -215,6 +215,10 @@ class LadderViewModel {
         mark.attachedMarks = Mark.AttachedMarks()
     }
 
+    func unhighlightMarks() {
+        ladder.setHighlight(highlight: .none)
+    }
+
     func nullifyPressedMark() {
         pressedMark = nil
     }
@@ -253,7 +257,6 @@ class LadderViewModel {
             P("nearby Marks = \(nearbyDistalMarks)")
             for nearbyMark in nearbyDistalMarks {
                 nearbyMark.highlight = .all
-                P("nearby Mark highlight = \(nearbyMark.highlight)")
             }
         }
         else {
@@ -726,7 +729,8 @@ class LadderViewModel {
                 // Unattach mark and hide cursor
                 P("Unattaching mark")
                 mark.attached = false
-                mark.highlight = .none
+                unhighlightMarks()
+//                mark.highlight = .none
                 unselectMark(mark)
                 cursorViewDelegate?.hideCursor(true)
                 cursorViewDelegate?.unattachMark()

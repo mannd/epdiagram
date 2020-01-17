@@ -197,7 +197,7 @@ class CursorView: UIView, CursorViewDelegate {
     }
 
     func unattachMark() {
-        if cursorViewModel.unattachMark() {
+        if cursorViewModel.unattachMark(ladderViewDelegate: ladderViewDelegate) {
             ladderViewDelegate?.refresh()
         }
     }
