@@ -23,6 +23,10 @@
         override func viewDidLoad() {
             P("viewDidLoad")
             super.viewDidLoad()
+
+            // Transitions on mac look better without animation.
+            UIView.setAnimationsEnabled(!Common.isRunningOnMac())
+            
             title = L("EP Diagram", comment: "app name")
             if Common.isRunningOnMac() {
                 navigationController?.setNavigationBarHidden(true, animated: false)

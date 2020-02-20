@@ -27,6 +27,12 @@ class Common {
         return CGPoint(x: x, y: y)
     }
 
+    static func translateToAbsolutePosition(position: CGPoint, regionProximalBoundary proxBoundary: CGFloat, regionHeight height: CGFloat, offsetX offset: CGFloat, scale: CGFloat) -> CGPoint {
+        let x = translateToAbsolutePositionX(positionX: position.x, offset: offset, scale: scale)
+        let y = (position.y - proxBoundary) / height
+        return CGPoint(x: x, y: y)
+    }
+
     static func translateToAbsolutePosition(position: CGPoint, inRect rect: CGRect, offsetX offset: CGFloat, scale: CGFloat) -> CGPoint {
         let x = translateToAbsolutePositionX(positionX: position.x, offset: offset, scale: scale)
         let y = (position.y - rect.origin.y) / rect.height

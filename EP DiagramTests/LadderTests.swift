@@ -64,4 +64,12 @@ class LadderTests: XCTestCase {
         let regionAfter = ladder.getRegionAfter(region: ladder.activeRegion)
         XCTAssertNil(ladder.getRegionAfter(region: regionAfter))
     }
+
+    func testRegionsEqual() {
+        let region1 = ladder.regions[0]
+        let region2 = ladder.regions[1]
+        XCTAssert(!(region1 === region2))
+        let region3 = region1
+        XCTAssert(region1 === region3)
+    }
 }

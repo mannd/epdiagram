@@ -138,8 +138,14 @@ class LadderViewModel {
     let connectedLineWidth: CGFloat = 4
 
     var height: CGFloat = 0
-    var regionOfDragOrigin: Region? = nil
     var regionUnitHeight: CGFloat = 0
+
+    // All the fields needed to implement dragging in regions.
+    var regionOfDragOrigin: Region? = nil
+    var regionProxToDragOrigin: Region? = nil
+    var regionDistalToDragOrigin: Region? = nil
+    var dragCreatedMark: Mark? = nil
+    var dragOriginDivision: RegionDivision = .none
 
     // Use default ladder for now...
     convenience init() {
@@ -795,19 +801,41 @@ class LadderViewModel {
     ///   - cursorViewDelegate: CursorViewDelegate from LadderView
     func dragMark(position: CGPoint, state: UIPanGestureRecognizer.State, cursorViewDelegate: CursorViewDelegate?) -> Bool {
         var needsDisplay = false
-        P("Dragging on ladder view")
         if state == .began {
-            P("dragging began")
             let locationInLadder = getLocationInLadder(position: position)
+            if let region = locationInLadder.region {
+                regionOfDragOrigin = region
+                regionProxToDragOrigin = ladder.getRegionBefore(region: region)
+                regionDistalToDragOrigin = ladder.getRegionAfter(region: region)
+            }
             if let mark = locationInLadder.mark {
                 movingMark = mark
-                if let region = locationInLadder.region {
-                    regionOfDragOrigin = region
+            }
+            else {
+                P("Dragging started away from a mark")
+                dragOriginDivision = locationInLadder.regionDivision
+                switch dragOriginDivision {
+                case .proximal:
+                    P("prox")
+                    dragCreatedMark = makeMark(positionX: position.x)
+                    dragCreatedMark?.position.proximal.y = 0
+                    dragCreatedMark?.position.distal.y = 0.5
+                case .middle:
+                    P("middle")
+                    dragCreatedMark = makeMark(positionX: position.x)
+                    dragCreatedMark?.position.proximal.y = 0.5
+                    dragCreatedMark?.position.distal.y = 0.75
+                case .distal:
+                    P("distal")
+                    dragCreatedMark = makeMark(positionX: position.x)
+                    dragCreatedMark?.position.proximal.y = 0.5
+                    dragCreatedMark?.position.distal.y = 1
+                case .none:
+                    P("none")
                 }
             }
         }
         if state == .changed {
-            P("dragging state changed")
             if let mark = movingMark {
                 if mark.attached {
                     moveMark(mark: mark, relativePositionX: position.x)
@@ -815,26 +843,39 @@ class LadderViewModel {
                     cursorViewDelegate?.moveCursor(positionX: anchorPositionX)
                     cursorViewDelegate?.refresh()
                 }
-                else {
-                    P("dragging mark without cursor.")
-                    let locationInLadder = getLocationInLadder(position: position)
-                    if let region = locationInLadder.region {
-                        let regionName = region.name
-                        let originalRegionName = regionOfDragOrigin?.name
-                        P("regionName = \(regionName)")
-                        P("orignalRegionName = \(String(describing: originalRegionName))")
+            }
+            else {
+                P("dragging mark without cursor.")
+                let locationInLadder = getLocationInLadder(position: position)
+                if regionProxToDragOrigin === locationInLadder.region {
+                    P("Dragging into previous region")
+                }
+                else if regionDistalToDragOrigin === locationInLadder.region {
+                    P("Dragging into next region")
+                }
+                else if regionOfDragOrigin === locationInLadder.region {
+                    P(">>> Dragging into same region")
+                    if dragOriginDivision != .distal {
+                    dragCreatedMark?.position.distal = Common.translateToAbsolutePosition(position: position, regionProximalBoundary: regionOfDragOrigin!.proximalBoundary, regionHeight: regionOfDragOrigin!.height, offsetX: offset,scale: scale)
+                    }
+                    else {
+                        dragCreatedMark?.position.proximal = Common.translateToAbsolutePosition(position: position, regionProximalBoundary: regionOfDragOrigin!.proximalBoundary, regionHeight: regionOfDragOrigin!.height, offsetX: offset,scale: scale)
                     }
                 }
-                needsDisplay = true
             }
+            needsDisplay = true
         }
         if state == .ended {
-            P("dragging state ended")
             if let mark = movingMark {
                 linkNearbyMarks(mark: mark)
             }
+            unhighlightMarks()
             movingMark = nil
+            dragCreatedMark = nil
             regionOfDragOrigin = nil
+            regionProxToDragOrigin = nil
+            regionDistalToDragOrigin = nil
+            dragOriginDivision = .none
             needsDisplay = true
         }
         return needsDisplay
