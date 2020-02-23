@@ -27,6 +27,12 @@ class Common {
         return CGPoint(x: x, y: y)
     }
 
+    static func translateToRelativePosition(position: CGPoint, regionProximalBoundary proxBoundary: CGFloat, regionHeight height: CGFloat, offsetX offset: CGFloat, scale: CGFloat) -> CGPoint {
+        let x = translateToRelativePositionX(positionX: position.x, offset: offset, scale: scale)
+        let y = proxBoundary + position.y * height
+        return CGPoint(x: x, y: y)
+    }
+
     static func translateToAbsolutePosition(position: CGPoint, regionProximalBoundary proxBoundary: CGFloat, regionHeight height: CGFloat, offsetX offset: CGFloat, scale: CGFloat) -> CGPoint {
         let x = translateToAbsolutePositionX(positionX: position.x, offset: offset, scale: scale)
         let y = (position.y - proxBoundary) / height
@@ -56,6 +62,15 @@ class Common {
         #else
             return false
         #endif
+    }
+
+    // Measures shortest distance from a line defined by two points and a point.
+    static func distance(linePoint1: CGPoint, linePoint2: CGPoint, point: CGPoint) -> CGFloat {
+        var numerator = (linePoint2.y - linePoint1.y) * point.x - (linePoint2.x - linePoint1.x) * point.y + linePoint2.x * linePoint1.y - linePoint2.y * linePoint1.x
+        numerator = abs(numerator)
+        var denominator = pow((linePoint2.y - linePoint1.y), 2) + pow((linePoint2.x - linePoint1.x), 2)
+        denominator = sqrt(denominator)
+        return numerator / denominator
     }
 }
 

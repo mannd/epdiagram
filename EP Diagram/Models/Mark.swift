@@ -77,6 +77,18 @@ class Mark {
         }
     }
 
+    // Useful to detect marks that are too tiny to keep.
+    var height: CGFloat {
+        get {
+            return abs(position.proximal.y - position.distal.y)
+        }
+    }
+    var length: CGFloat {
+        get {
+            return sqrt(pow((position.proximal.x - position.distal.x), 2) + pow((position.proximal.y - position.distal.y), 2))
+        }
+    }
+
     // TODO: Need to support multiple selection and copy features from one mark to a group of selected marks.
     var hasCursor: Bool = false
     var attached: Bool = false
@@ -134,5 +146,14 @@ class Mark {
             anchorPositionX = position.proximal.x
         }
         return anchorPositionX
+    }
+
+    // Note point must be in absolute coordiates, with y between 0 and 1 relative to region height.
+    func distance(point: CGPoint) -> CGFloat {
+        var numerator = (position.distal.y - position.proximal.y) * point.x - (position.distal.x - position.proximal.x) * point.y + position.distal.x * position.proximal.y - position.distal.y * position.proximal.x
+        numerator = abs(numerator)
+        var denominator = pow((position.distal.y - position.proximal.y), 2) + pow((position.distal.x - position.proximal.x), 2)
+        denominator = sqrt(denominator)
+        return numerator / denominator
     }
 }

@@ -72,4 +72,13 @@ class LadderTests: XCTestCase {
         let region3 = region1
         XCTAssert(region1 === region3)
     }
+
+    // TODO: move to RegionTests
+    func testRelativeYPosition() {
+        let region = Region()
+        region.proximalBoundary = 200
+        region.distalBoundary = 500
+        XCTAssertNotNil(region.getRelativeYPosition(y: 300))
+        XCTAssertEqual(region.getRelativeYPosition(y: 300)!, 0.3333, accuracy: 0.001)
+    }
 }

@@ -96,6 +96,7 @@ class LadderViewModel {
     // Half a region width above and below ladder
     let ladderPaddingMultiplier: CGFloat = 0.5
     let accuracy: CGFloat = 20
+    let lowerLimitMarkHeight: CGFloat = 0.1
 
     // This is used to hold relative mark positions and easily feed them to marks.
     var relativeMarkPosition = RelativeMarkPosition()
@@ -308,6 +309,22 @@ class LadderViewModel {
         let minX = min(positionDistalX, positionProximalX)
         return relativePositionX < maxX + accuracy && relativePositionX > minX - accuracy
     }
+
+    // TODO: Need to use relative coordinates because y scale is so different from x scale.  And what about zoomed view?  We always want the same tap distance to indicate we are close to a mark.
+    func nearMark(positionX relativePositionX: CGFloat, positionY relativePositionY: CGFloat, mark: Mark, accuracy: CGFloat) -> Bool {
+        let point = CGPoint(x: Common.translateToAbsolutePositionX(positionX: relativePositionX, offset: offset, scale: scale), y: relativePositionY)
+        P("mark.distance(point) = \(mark.distance(point: point))")
+        return mark.distance(point: point) < accuracy
+    }
+
+    func nearMark(point: CGPoint, mark: Mark, region: Region, accuracy: CGFloat) -> Bool {
+        var linePoint1 = Common.translateToRelativePosition(position: mark.position.proximal, regionProximalBoundary: region.proximalBoundary, regionHeight: region.height, offsetX: offset, scale: scale)
+        var linePoint2 = Common.translateToRelativePosition(position: mark.position.distal, regionProximalBoundary: region.proximalBoundary, regionHeight: region.height, offsetX: offset, scale: scale)
+        let distance = Common.distance(linePoint1: linePoint1, linePoint2: linePoint2, point: point)
+        P("distance = \(distance)")
+        return distance < accuracy
+    }
+
 
     func linkNearbyMarks(mark: Mark) {
         P("linkNearbyMarks")
@@ -624,7 +641,8 @@ class LadderViewModel {
             else {
                 tappedRegionSection = .markSection
                 outerLoop: for mark in tappedRegion.marks {
-                    if nearMark(positionX: position.x, mark: mark, accuracy: accuracy) {
+                    if nearMark(point: position, mark: mark, region: tappedRegion, accuracy: accuracy) {
+//                    if nearMark(positionX: position.x, mark: mark, accuracy: accuracy) {
                         P("tap near mark")
                         tappedMark = mark
                         break outerLoop
@@ -807,6 +825,7 @@ class LadderViewModel {
                 regionOfDragOrigin = region
                 regionProxToDragOrigin = ladder.getRegionBefore(region: region)
                 regionDistalToDragOrigin = ladder.getRegionAfter(region: region)
+                activeRegion = region
             }
             if let mark = locationInLadder.mark {
                 movingMark = mark
@@ -868,6 +887,11 @@ class LadderViewModel {
         if state == .ended {
             if let mark = movingMark {
                 linkNearbyMarks(mark: mark)
+            }
+            if let dragCreatedMark = dragCreatedMark {
+                if dragCreatedMark.height < lowerLimitMarkHeight {
+                    deleteMark(dragCreatedMark)
+                }
             }
             unhighlightMarks()
             movingMark = nil
