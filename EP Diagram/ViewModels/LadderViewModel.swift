@@ -8,108 +8,11 @@
 
 import UIKit
 
-// FIXME: experimental.
-struct RelativeMarkPosition {
-    var position: MarkPosition
-    var proximal: CGPoint {
-        get {
-            position.proximal
-        }
-    }
-    var distal: CGPoint {
-        get {
-            position.distal
-        }
-    }
-    var offset: CGFloat
-    var scale: CGFloat
-    var rect: CGRect
-    var absoluteMarkPosition: MarkPosition {
-        get {
-            return Common.translateToAbsoluteMarkPosition(markPosition: position, inRect: rect, offsetX: offset, scale: scale)
-        }
-        set(newPosition) {
-            position = Common.translateToRelativeMarkPosition(markPosition: newPosition, inRect: rect, offsetX: offset, scale: scale)
-        }
-    }
-
-    init(relativePosition: MarkPosition, inRect rect: CGRect, offsetX offset: CGFloat, scale: CGFloat) {
-        position = relativePosition
-        self.rect = rect
-        self.offset = offset
-        self.scale = scale
-    }
-
-    // Essentially a zeroed out RelativeMarkPosition.
-    init() {
-        position = MarkPosition(proximal: CGPoint.zero, distal: CGPoint.zero)
-        rect = CGRect.zero
-        offset = 0
-        scale = 1.0
-    }
-
-    func getAbsoluteMarkPosition(inRect rect: CGRect) -> MarkPosition {
-        return Common.translateToAbsoluteMarkPosition(markPosition: position, inRect: rect, offsetX: offset, scale: scale)
-    }
-}
-
-// FIXME: Experimental
-extension Mark {
-//    func setRelativeMarkPosition(relativeMarkPosition: RelativeMarkPosition) {
-//        position = relativeMarkPosition.absoluteMarkPosition
-//    }
-
-    func setPosition(relativePosition: MarkPosition, in rect:CGRect, offset: CGFloat, scale: CGFloat) {
-        position.proximal = Common.translateToAbsolutePosition(position: relativePosition.proximal, inRect: rect, offsetX: offset, scale: scale)
-        position.distal = Common.translateToAbsolutePosition(position: relativePosition.distal, inRect: rect, offsetX: offset, scale: scale)
-    }
-
-    func getPosition(in rect:CGRect, offset: CGFloat, scale: CGFloat) -> MarkPosition {
-        return MarkPosition(proximal: Common.translateToRelativePosition(position: position.proximal, inRect: rect, offsetX: offset, scale: scale), distal: Common.translateToRelativePosition(position: position.distal, inRect: rect, offsetX: offset, scale: scale))
-    }
-
-    convenience init(relativePosition: MarkPosition, in rect: CGRect, offset: CGFloat, scale: CGFloat) {
-        self.init()
-        setPosition(relativePosition: relativePosition, in: rect, offset: offset, scale: scale)
-    }
-
-}
-
-/// Struct that pinpoints a point in a ladder.  Note that these tapped areas overlap (labels and marks are in regions).
-struct LocationInLadder {
-    var region: Region?
-    var mark: Mark?
-    var regionSection: RegionSection
-    var regionDivision: RegionDivision
-    var regionWasTapped: Bool {
-        region != nil
-    }
-    var labelWasTapped: Bool {
-        regionSection == .labelSection
-    }
-    var markWasTapped: Bool {
-        mark != nil
-    }
-}
-
-class LadderViewModel {
+class LadderViewModel : ScaledViewModel {
     // Half a region width above and below ladder
     let ladderPaddingMultiplier: CGFloat = 0.5
     let accuracy: CGFloat = 20
     let lowerLimitMarkHeight: CGFloat = 0.1
-
-    // This is used to hold relative mark positions and easily feed them to marks.
-    var relativeMarkPosition = RelativeMarkPosition()
-    var offset: CGFloat = 0 {
-        didSet {
-            relativeMarkPosition.offset = offset
-        }
-    }
-    var scale: CGFloat = 1 {
-        didSet {
-            relativeMarkPosition.scale = scale
-        }
-    }
 
     var regions: [Region] = []
     var ladder: Ladder
@@ -149,7 +52,7 @@ class LadderViewModel {
     var dragOriginDivision: RegionDivision = .none
 
     // Use default ladder for now...
-    convenience init() {
+    convenience override init() {
         self.init(ladder: Ladder.defaultLadder())
     }
 
@@ -272,7 +175,7 @@ class LadderViewModel {
     }
 
     func moveMark(mark: Mark, relativePositionX: CGFloat) {
-        let absolutePosition = Common.translateToAbsolutePositionX(positionX: relativePositionX, offset: offset, scale: scale)
+        let absolutePosition = translateToAbsolutePositionX(positionX: relativePositionX)
         switch mark.anchor {
         case .proximal:
             mark.position.proximal.x = absolutePosition
@@ -296,32 +199,18 @@ class LadderViewModel {
         highlightNearbyMarks(mark)
     }
 
+
     /// Determine if a mark is near the X position, using relative coordinates.  Internally compares the relative mark X position to the positionX parameter.
-    /// Limitation: trouble with overlapping marks.
+    /// Uses a sophistcated distance measurement of a point to a line segment which gives the same screen results regardless of zoom.
     /// - Parameters:
-    ///   - positionX: X position of, say a tap on the screen
+    ///   - position: position of, say a tap on the screen
     ///   - mark: mark to check for proximity
+    ///   - region: region in which mark is located
     ///   - accuracy: how close does it have to be?
-    func nearMark(positionX relativePositionX: CGFloat, mark: Mark, accuracy: CGFloat) -> Bool {
-        let positionDistalX = Common.translateToRelativePositionX(positionX: mark.position.distal.x, offset: offset, scale: scale)
-        let positionProximalX = Common.translateToRelativePositionX(positionX: mark.position.proximal.x, offset: offset, scale: scale)
-        let maxX = max(positionDistalX, positionProximalX)
-        let minX = min(positionDistalX, positionProximalX)
-        return relativePositionX < maxX + accuracy && relativePositionX > minX - accuracy
-    }
-
-    // TODO: Need to use relative coordinates because y scale is so different from x scale.  And what about zoomed view?  We always want the same tap distance to indicate we are close to a mark.
-    func nearMark(positionX relativePositionX: CGFloat, positionY relativePositionY: CGFloat, mark: Mark, accuracy: CGFloat) -> Bool {
-        let point = CGPoint(x: Common.translateToAbsolutePositionX(positionX: relativePositionX, offset: offset, scale: scale), y: relativePositionY)
-        P("mark.distance(point) = \(mark.distance(point: point))")
-        return mark.distance(point: point) < accuracy
-    }
-
     func nearMark(point: CGPoint, mark: Mark, region: Region, accuracy: CGFloat) -> Bool {
-        var linePoint1 = Common.translateToRelativePosition(position: mark.position.proximal, regionProximalBoundary: region.proximalBoundary, regionHeight: region.height, offsetX: offset, scale: scale)
-        var linePoint2 = Common.translateToRelativePosition(position: mark.position.distal, regionProximalBoundary: region.proximalBoundary, regionHeight: region.height, offsetX: offset, scale: scale)
+        let linePoint1 = translateToRelativePosition(position: mark.position.proximal, regionProximalBoundary: region.proximalBoundary, regionHeight: region.height)
+        let linePoint2 = translateToRelativePosition(position: mark.position.distal, regionProximalBoundary: region.proximalBoundary, regionHeight: region.height)
         let distance = Common.distance(linePoint1: linePoint1, linePoint2: linePoint2, point: point)
-        P("distance = \(distance)")
         return distance < accuracy
     }
 
@@ -347,17 +236,17 @@ class LadderViewModel {
 
 
     // FIXME: Probably dead code.
-    func findMarkNearby(positionX: CGFloat, accuracy: CGFloat) -> Mark? {
-        if let activeRegion = activeRegion {
-            let relativePositionX = Common.translateToRelativePositionX(positionX: positionX, offset: offset, scale: scale)
-            for mark in activeRegion.marks {
-                if abs(mark.position.proximal.x - relativePositionX) < accuracy {
-                    return mark
-                }
-            }
-        }
-        return nil
-    }
+//    func findMarkNearby(positionX: CGFloat, accuracy: CGFloat) -> Mark? {
+//        if let activeRegion = activeRegion {
+//            let relativePositionX = Common.translateToRelativePositionX(positionX: positionX, offset: offset, scale: scale)
+//            for mark in activeRegion.marks {
+//                if abs(mark.position.proximal.x - relativePositionX) < accuracy {
+//                    return mark
+//                }
+//            }
+//        }
+//        return nil
+//    }
 
 
 
@@ -541,8 +430,8 @@ class LadderViewModel {
     }
 
     fileprivate func relativeMarkPosition(mark: Mark, offset: CGFloat, scale: CGFloat, rect: CGRect) -> MarkPosition{
-        let proximalX = Common.translateToRelativePositionX(positionX:mark.position.proximal.x, offset:offset, scale: scale)
-        let distalX = Common.translateToRelativePositionX(positionX: mark.position.distal.x, offset: offset, scale: scale)
+        let proximalX = translateToRelativePositionX(positionX: mark.position.proximal.x)
+        let distalX = translateToRelativePositionX(positionX: mark.position.distal.x)
         let proximalY = rect.origin.y + mark.position.proximal.y * rect.height
         let distalY = rect.origin.y + mark.position.distal.y * rect.height
         let proximalPoint = CGPoint(x: proximalX, y: proximalY)
@@ -875,10 +764,10 @@ class LadderViewModel {
                 else if regionOfDragOrigin === locationInLadder.region {
                     P(">>> Dragging into same region")
                     if dragOriginDivision != .distal {
-                    dragCreatedMark?.position.distal = Common.translateToAbsolutePosition(position: position, regionProximalBoundary: regionOfDragOrigin!.proximalBoundary, regionHeight: regionOfDragOrigin!.height, offsetX: offset,scale: scale)
+                    dragCreatedMark?.position.distal = translateToAbsolutePosition(position: position, regionProximalBoundary: regionOfDragOrigin!.proximalBoundary, regionHeight: regionOfDragOrigin!.height)
                     }
                     else {
-                        dragCreatedMark?.position.proximal = Common.translateToAbsolutePosition(position: position, regionProximalBoundary: regionOfDragOrigin!.proximalBoundary, regionHeight: regionOfDragOrigin!.height, offsetX: offset,scale: scale)
+                        dragCreatedMark?.position.proximal = translateToAbsolutePosition(position: position, regionProximalBoundary: regionOfDragOrigin!.proximalBoundary, regionHeight: regionOfDragOrigin!.height)
                     }
                 }
             }
@@ -903,6 +792,10 @@ class LadderViewModel {
             needsDisplay = true
         }
         return needsDisplay
+    }
+
+    func translateToAbsolutePosition(position: CGPoint, regionProximalBoundary: CGFloat, regionHeight: CGFloat) -> CGPoint {
+        return Common.translateToAbsolutePosition(position: position, regionProximalBoundary: regionProximalBoundary, regionHeight: regionHeight, offsetX: offset,scale: scale)
     }
 
     func getAnchor(regionDivision: RegionDivision) -> Anchor {

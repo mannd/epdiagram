@@ -8,7 +8,7 @@
 
 import UIKit
 
-class CursorViewModel: NSObject {
+class CursorViewModel: ScaledViewModel {
     let cursor: Cursor
     let unattachedColor: UIColor = UIColor.systemRed
     let attachedColor: UIColor = UIColor.systemBlue
@@ -20,8 +20,6 @@ class CursorViewModel: NSObject {
     var color: UIColor
     var width: CGFloat
     var height: CGFloat
-    var scale: CGFloat = 1
-    var offset: CGFloat = 0
     var attachedMark: Mark?
     var cursorState: Cursor.CursorState {
         didSet {
@@ -99,10 +97,8 @@ class CursorViewModel: NSObject {
         cursor.move(delta: delta / scale)
     }
 
-    // FIXME: This is not working.  Cursor is drawing new mark right next to old mark.  However, tapping on LadderView _does_ put the cursor in the right place.
     func isNearCursor(positionX: CGFloat, accuracy: CGFloat) -> Bool {
-//        return positionX < cursor.position / scale + accuracy && positionX > cursor.position / scale - accuracy
-        return positionX < Common.translateToRelativePositionX(positionX: cursor.position, offset: offset, scale: scale) + accuracy && positionX > Common.translateToRelativePositionX(positionX: cursor.position, offset: offset, scale: scale) - accuracy
+        return positionX < translateToRelativePositionX(positionX: cursor.position) + accuracy && positionX > translateToRelativePositionX(positionX: cursor.position) - accuracy
     }
 
     func draw(rect: CGRect, context: CGContext, defaultHeight: CGFloat?) {
@@ -155,7 +151,7 @@ class CursorViewModel: NSObject {
     func dragMark(ladderViewDelegate: LadderViewDelegate?, cursorViewDelegate: CursorViewDelegate?) {
         if let attachedMark = attachedMark {
             P("Move attached Mark")
-            ladderViewDelegate?.getViewModel().moveMark(mark: attachedMark, position: CGPoint(x: Common.translateToRelativePositionX(positionX: cursorPosition, offset: offset, scale: scale), y: 0), moveCursor: false, cursorViewDelegate: cursorViewDelegate)
+            ladderViewDelegate?.getViewModel().moveMark(mark: attachedMark, position: CGPoint(x: translateToRelativePositionX(positionX: cursorPosition), y: 0), moveCursor: false, cursorViewDelegate: cursorViewDelegate)
             ladderViewDelegate?.refresh()
         }
     }

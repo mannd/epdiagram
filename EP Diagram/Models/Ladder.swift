@@ -13,6 +13,23 @@ struct NearbyMarks {
     var distalMarks: [Mark] = []
 }
 
+/// Struct that pinpoints a point in a ladder.  Note that these tapped areas overlap (labels and marks are in regions).
+struct LocationInLadder {
+    var region: Region?
+    var mark: Mark?
+    var regionSection: RegionSection
+    var regionDivision: RegionDivision
+    var regionWasTapped: Bool {
+        region != nil
+    }
+    var labelWasTapped: Bool {
+        regionSection == .labelSection
+    }
+    var markWasTapped: Bool {
+        mark != nil
+    }
+}
+
 // A Ladder is simply a collection of Regions in top bottom order.
 class Ladder {
     var regions: [Region] = []
