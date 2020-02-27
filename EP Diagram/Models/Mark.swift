@@ -68,14 +68,19 @@ class Mark {
         case none
     }
 
-    /// If a mark is an impulse origin and properties indicate show this, a dot of some sort with appear at the origin of the mark.
-    var isImpulseOrigin: Bool = false
-    var position: MarkPosition {
-        didSet {
-            // set linked marks' positions
-            P("Did set a mark position")
-        }
+    enum Block {
+        case proximal
+        case distal
+        case none
     }
+
+    enum ImpulseOrigin {
+        case proximal
+        case distal
+        case none
+    }
+
+    var position: MarkPosition
 
     // Useful to detect marks that are too tiny to keep.
     var height: CGFloat {
@@ -89,15 +94,18 @@ class Mark {
         }
     }
 
+
     // TODO: Need to support multiple selection and copy features from one mark to a group of selected marks.
-    var hasCursor: Bool = false
     var attached: Bool = false
     var highlight: Highlight = .none
-    // Set when one end or another of a mark is close enough to connect
+    // Set when one end or another of a mark is close enough to connect, or when there is a chain of marks.
     var potentiallyConnected = false
     // Anchor point for movement and to attach a cursor
     var anchor: Anchor
     var lineStyle: LineStyle = .solid
+
+    var block: Block = .none
+    var impulseOrigin: ImpulseOrigin = .none
 
     // A mark may have up to three attachments to marks in the proximal and distal regions
     // and in its own region, i.e. rentry spawning a mark.
@@ -131,6 +139,12 @@ class Mark {
         let x = (position.distal.x - position.proximal.x) / 2.0 + position.proximal.x
         let y = (position.distal.y - position.proximal.y) / 2.0 + position.proximal.y
         return CGPoint(x: x, y: y)
+    }
+
+    func swapEnds() {
+        let tmp = position.proximal
+        position.proximal = position.distal
+        position.distal = tmp
     }
 
     func getAnchorPositionX() -> CGFloat {

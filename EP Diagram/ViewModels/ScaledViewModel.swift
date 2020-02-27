@@ -12,15 +12,27 @@ class ScaledViewModel: NSObject {
     var scale: CGFloat = 1
     var offset: CGFloat = 0
 
-    func translateToAbsolutePositionX(positionX: CGFloat) -> CGFloat {
-        return Common.translateToAbsolutePositionX(positionX: positionX, offset: offset, scale: scale)
+    func translateToRegionPositionX(screenPositionX: CGFloat) -> CGFloat {
+        return Common.translateToRegionPositionX(screenPositionX: screenPositionX, offset: offset, scale: scale)
     }
     
-    func translateToRelativePosition(position: CGPoint, regionProximalBoundary: CGFloat, regionHeight: CGFloat) -> CGPoint {
-        Common.translateToRelativePosition(position: position, regionProximalBoundary: regionProximalBoundary, regionHeight: regionHeight, offsetX: offset, scale: scale)
+    func translateToScreenPosition(regionPosition: CGPoint, regionProximalBoundary: CGFloat, regionHeight: CGFloat) -> CGPoint {
+        Common.translateToScreenPosition(regionPosition: regionPosition, regionProximalBoundary: regionProximalBoundary, regionHeight: regionHeight, offsetX: offset, scale: scale)
     }
 
-    func translateToRelativePositionX(positionX: CGFloat) -> CGFloat {
-        Common.translateToRelativePositionX(positionX: positionX, offset:offset, scale: scale)
+    func translateToScreenPosition(regionPosition: CGPoint, region: Region) -> CGPoint {
+        Common.translateToScreenPosition(regionPosition: regionPosition, regionProximalBoundary: region.proximalBoundary, regionHeight: region.height, offsetX: offset, scale: scale)
+    }
+
+    func translateToScreenPositionX(regionPositionX: CGFloat) -> CGFloat {
+        Common.translateToScreenPositionX(regionPositionX: regionPositionX, offset:offset, scale: scale)
+    }
+
+    func translateToRegionPosition(screenPosition: CGPoint, regionProximalBoundary: CGFloat, regionHeight: CGFloat) -> CGPoint {
+        return Common.translateToRegionPosition(screenPosition: screenPosition, regionProximalBoundary: regionProximalBoundary, regionHeight: regionHeight, offsetX: offset,scale: scale)
+    }
+
+    func translateToRegionPosition(screenPosition: CGPoint, region: Region) -> CGPoint {
+        return Common.translateToRegionPosition(screenPosition: screenPosition, regionProximalBoundary: region.proximalBoundary, regionHeight: region.height, offsetX: offset,scale: scale)
     }
 }

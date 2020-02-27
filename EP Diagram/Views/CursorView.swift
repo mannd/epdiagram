@@ -94,6 +94,7 @@ class CursorView: UIView, CursorViewDelegate {
         }
     }
 
+    // TODO: This must be changed, so that the anchor points are the proximal mark position, midpoint of mark, and distal mark position.
     private func getCursorHeight(anchor: Anchor) -> CGFloat {
         guard let ladderViewDelegate = ladderViewDelegate else { return self.frame.height }
         switch anchor {
@@ -107,6 +108,13 @@ class CursorView: UIView, CursorViewDelegate {
             return ladderViewDelegate.getHeight()
         }
     }
+
+    // TODO: move to CursorViewModel and get the endpoints and midpoint of the attached mark.
+//    private func getNewCursorHeight(anchor: Anchor) -> CGFloat {
+//        guard let ladderViewDelegate = ladderViewDelegate else { return self.frame.height }
+//        guard let attachedMark = cursorViewModel.geta
+//
+//    }
 
     // MARK: - touches
 
@@ -140,37 +148,19 @@ class CursorView: UIView, CursorViewDelegate {
     }
 
     @objc func dragging(pan: UIPanGestureRecognizer) {
-        P("Panning cursor")
-        // FIXME: Move this to dragging in LadderView
-//        let vel: CGPoint = pan.velocity(in: self)
-//        if vel.x > 1.0 {
-//            PRINT("Panning to right")
-//        }
-//        else if vel.x < 1.0 {
-//            PRINT("Panning to left")
-//        }
-//        if vel.y > 1.0 {
-//            PRINT("Panning down")
-//        }
-//        else if vel.y < 1.0 {
-//            PRINT("Panning up")
-//        }
-
-        // drag Cursor
         if pan.state == .changed {
             let delta = pan.translation(in: self)
             cursorViewModel.cursorMove(delta: delta.x)
             cursorViewModel.dragMark(ladderViewDelegate: ladderViewDelegate, cursorViewDelegate: self)
             pan.setTranslation(CGPoint(x: 0,y: 0), in: self)
-            setNeedsDisplay()
         }
         if pan.state == .ended {
             if let attachedMark = cursorViewModel.attachedMark {
                 ladderViewDelegate?.getViewModel().linkNearbyMarks(mark: attachedMark)
                 ladderViewDelegate?.refresh()
-                setNeedsDisplay()
             }
         }
+        setNeedsDisplay()
     }
 
     @objc func longPress(press: UILongPressGestureRecognizer) {

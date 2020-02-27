@@ -49,4 +49,15 @@ class MarkTests: XCTestCase {
         XCTAssertEqual(mark3.distance(point: point3), 0.1961, accuracy: 0.001)
     }
 
+    func testMidpoint() {
+        let mark = Mark(MarkPosition(proximal: CGPoint(x: 50, y: 0.21), distal: CGPoint(x:120, y: 0.88)))
+        let relativeMarkPosition = Common.translateToScreenMarkPosition(regionMarkPosition: mark.position, regionProximalBoundary: 100, regionHeight: 400, offsetX: 0, scale: 1)
+        P("relativeMarkPosition = \(relativeMarkPosition)")
+        let midPoint = Common.getMidpoint(markPosition: relativeMarkPosition)
+        XCTAssertEqual(midPoint, CGPoint(x: 85, y: 318))
+        let anotherMarkPosition = MarkPosition(proximal: CGPoint(x: -3, y: 5), distal: CGPoint(x: 8, y: -1))
+        let anotherMidPoint = Common.getMidpoint(markPosition: anotherMarkPosition)
+        XCTAssertEqual(anotherMidPoint, CGPoint(x: 2.5, y: 2))
+    }
+
 }

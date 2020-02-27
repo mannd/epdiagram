@@ -26,8 +26,8 @@ class LadderViewModelTests: XCTestCase {
         let positionX: CGFloat = 134.56
         ladderViewModel.scale = 1.78
         ladderViewModel.offset = 333.45
-        let absolutePositionX = ladderViewModel.translateToAbsolutePositionX(positionX: positionX)
-        let relativeLocation = ladderViewModel.translateToRelativePositionX(positionX: absolutePositionX)
+        let absolutePositionX = ladderViewModel.translateToRegionPositionX(screenPositionX: positionX)
+        let relativeLocation = ladderViewModel.translateToScreenPositionX(positionX: absolutePositionX)
         XCTAssertEqual(positionX, relativeLocation, accuracy: 0.0001)
     }
 
@@ -56,7 +56,7 @@ class LadderViewModelTests: XCTestCase {
         let offset: CGFloat = 333.45
         let rect: CGRect = CGRect(x: 0, y: 0, width: 800, height: 300)
         let absolutePosition = Common.translateToAbsoluteMarkPosition(markPosition: markPosition, inRect: rect, offsetX: offset, scale: scale)
-        let relativePosition = Common.translateToRelativeMarkPosition(markPosition: absolutePosition, inRect: rect, offsetX: offset, scale: scale)
+        let relativePosition = Common.translateToScreenMarkPosition(markPosition: absolutePosition, inRect: rect, offsetX: offset, scale: scale)
         XCTAssertEqual(markPosition.proximal.x, relativePosition.proximal.x, accuracy: 0.0001)
         XCTAssertEqual(markPosition.proximal.y, relativePosition.proximal.y, accuracy: 0.0001)
         XCTAssertEqual(markPosition.distal.x, relativePosition.distal.x, accuracy: 0.001)

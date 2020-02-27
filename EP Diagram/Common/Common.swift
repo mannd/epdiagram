@@ -10,49 +10,53 @@ import UIKit
 
 /// Namespace for global static functions.
 class Common {
-    // Translates from LadderView X coordinate to Mark X coordinates.
-    static func translateToAbsolutePositionX(positionX: CGFloat, offset: CGFloat, scale: CGFloat) -> CGFloat {
-        return (positionX + offset) / scale
+    static func translateToRegionPositionX(screenPositionX: CGFloat, offset: CGFloat, scale: CGFloat) -> CGFloat {
+        return (screenPositionX + offset) / scale
     }
 
-    // Translate from Mark X coordinate to LadderView X coordinate.
-    static func translateToRelativePositionX(positionX: CGFloat, offset: CGFloat, scale: CGFloat) -> CGFloat {
-        return scale * positionX - offset
+    static func translateToScreenPositionX(regionPositionX: CGFloat, offset: CGFloat, scale: CGFloat) -> CGFloat {
+        return scale * regionPositionX - offset
     }
 
-    // translate mark points to and from host coordinate system
-    static func translateToRelativePosition(position: CGPoint, inRect rect: CGRect, offsetX offset: CGFloat, scale: CGFloat) -> CGPoint {
-        let x = translateToRelativePositionX(positionX: position.x, offset: offset, scale: scale)
+
+    static func translateToScreenPosition(regionPosition: CGPoint, regionProximalBoundary proxBoundary: CGFloat, regionHeight height: CGFloat, offsetX offset: CGFloat, scale: CGFloat) -> CGPoint {
+        let x = translateToScreenPositionX(regionPositionX: regionPosition.x, offset: offset, scale: scale)
+        let y = proxBoundary + regionPosition.y * height
+        return CGPoint(x: x, y: y)
+    }
+
+    static func translateToScreenMarkPosition(regionMarkPosition: MarkPosition, regionProximalBoundary proxBoundary: CGFloat, regionHeight height: CGFloat, offsetX offset: CGFloat, scale: CGFloat) -> MarkPosition {
+        return MarkPosition(proximal: translateToScreenPosition(regionPosition: regionMarkPosition.proximal, regionProximalBoundary: proxBoundary, regionHeight: height, offsetX: offset, scale: scale), distal: translateToScreenPosition(regionPosition: regionMarkPosition.distal, regionProximalBoundary: proxBoundary, regionHeight: height, offsetX: offset, scale: scale))
+    }
+
+    static func translateToRegionPosition(screenPosition: CGPoint, regionProximalBoundary proxBoundary: CGFloat, regionHeight height: CGFloat, offsetX offset: CGFloat, scale: CGFloat) -> CGPoint {
+        let x = translateToRegionPositionX(screenPositionX: screenPosition.x, offset: offset, scale: scale)
+        let y = (screenPosition.y - proxBoundary) / height
+        return CGPoint(x: x, y: y)
+    }
+
+    // Rect based translation function -- deprecated
+    static func translateToScreenPosition(position: CGPoint, inRect rect: CGRect, offsetX offset: CGFloat, scale: CGFloat) -> CGPoint {
+        let x = translateToScreenPositionX(regionPositionX: position.x, offset: offset, scale: scale)
         let y = rect.origin.y + position.y * rect.height
         return CGPoint(x: x, y: y)
     }
 
-    static func translateToRelativePosition(position: CGPoint, regionProximalBoundary proxBoundary: CGFloat, regionHeight height: CGFloat, offsetX offset: CGFloat, scale: CGFloat) -> CGPoint {
-        let x = translateToRelativePositionX(positionX: position.x, offset: offset, scale: scale)
-        let y = proxBoundary + position.y * height
-        return CGPoint(x: x, y: y)
-    }
-
-    static func translateToAbsolutePosition(position: CGPoint, regionProximalBoundary proxBoundary: CGFloat, regionHeight height: CGFloat, offsetX offset: CGFloat, scale: CGFloat) -> CGPoint {
-        let x = translateToAbsolutePositionX(positionX: position.x, offset: offset, scale: scale)
-        let y = (position.y - proxBoundary) / height
-        return CGPoint(x: x, y: y)
-    }
-
-    static func translateToAbsolutePosition(position: CGPoint, inRect rect: CGRect, offsetX offset: CGFloat, scale: CGFloat) -> CGPoint {
-        let x = translateToAbsolutePositionX(positionX: position.x, offset: offset, scale: scale)
+    static func translateToRegionPosition(position: CGPoint, inRect rect: CGRect, offsetX offset: CGFloat, scale: CGFloat) -> CGPoint {
+        let x = translateToRegionPositionX(screenPositionX: position.x, offset: offset, scale: scale)
         let y = (position.y - rect.origin.y) / rect.height
         return CGPoint(x: x, y: y)
     }
 
-    // translate from absolute MarkPosition to relative MarkPosition
-    static func translateToRelativeMarkPosition(markPosition: MarkPosition, inRect rect: CGRect, offsetX offset: CGFloat, scale: CGFloat) -> MarkPosition {
-        return MarkPosition(proximal: translateToRelativePosition(position: markPosition.proximal, inRect: rect, offsetX: offset, scale: scale), distal: translateToRelativePosition(position: markPosition.distal, inRect: rect, offsetX: offset, scale: scale))
+    static func translateToScreenMarkPosition(markPosition: MarkPosition, inRect rect: CGRect, offsetX offset: CGFloat, scale: CGFloat) -> MarkPosition {
+        return MarkPosition(proximal: translateToScreenPosition(position: markPosition.proximal, inRect: rect, offsetX: offset, scale: scale), distal: translateToScreenPosition(position: markPosition.distal, inRect: rect, offsetX: offset, scale: scale))
     }
 
-    // translate from relative MarkPosition to absolute MarkPosition
     static func translateToAbsoluteMarkPosition(markPosition: MarkPosition, inRect rect: CGRect, offsetX offset: CGFloat, scale: CGFloat) -> MarkPosition {
-        return MarkPosition(proximal: translateToAbsolutePosition(position: markPosition.proximal, inRect: rect, offsetX: offset, scale: scale), distal: translateToAbsolutePosition(position: markPosition.distal, inRect: rect, offsetX: offset, scale: scale))
+        return MarkPosition(proximal: translateToRegionPosition(position: markPosition.proximal, inRect: rect, offsetX: offset, scale: scale), distal: translateToRegionPosition(position: markPosition.distal, inRect: rect, offsetX: offset, scale: scale))
+    }
+    static func getMidpoint(markPosition pos: MarkPosition) -> CGPoint {
+        return CGPoint(x: (pos.proximal.x + pos.distal.x) / 2.0, y: (pos.proximal.y + pos.distal.y) / 2.0)
     }
 
     /// Returns true if target is a Mac, false for iOS.

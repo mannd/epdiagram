@@ -31,7 +31,7 @@ struct RelativeMarkPosition {
             return Common.translateToAbsoluteMarkPosition(markPosition: position, inRect: rect, offsetX: offset, scale: scale)
         }
         set(newPosition) {
-            position = Common.translateToRelativeMarkPosition(markPosition: newPosition, inRect: rect, offsetX: offset, scale: scale)
+            position = Common.translateToScreenMarkPosition(markPosition: newPosition, inRect: rect, offsetX: offset, scale: scale)
         }
     }
 
@@ -62,12 +62,12 @@ extension Mark {
     //    }
 
     func setPosition(relativePosition: MarkPosition, in rect:CGRect, offset: CGFloat, scale: CGFloat) {
-        position.proximal = Common.translateToAbsolutePosition(position: relativePosition.proximal, inRect: rect, offsetX: offset, scale: scale)
-        position.distal = Common.translateToAbsolutePosition(position: relativePosition.distal, inRect: rect, offsetX: offset, scale: scale)
+        position.proximal = Common.translateToRegionPosition(position: relativePosition.proximal, inRect: rect, offsetX: offset, scale: scale)
+        position.distal = Common.translateToRegionPosition(position: relativePosition.distal, inRect: rect, offsetX: offset, scale: scale)
     }
 
     func getPosition(in rect:CGRect, offset: CGFloat, scale: CGFloat) -> MarkPosition {
-        return MarkPosition(proximal: Common.translateToRelativePosition(position: position.proximal, inRect: rect, offsetX: offset, scale: scale), distal: Common.translateToRelativePosition(position: position.distal, inRect: rect, offsetX: offset, scale: scale))
+        return MarkPosition(proximal: Common.translateToScreenPosition(position: position.proximal, inRect: rect, offsetX: offset, scale: scale), distal: Common.translateToScreenPosition(position: position.distal, inRect: rect, offsetX: offset, scale: scale))
     }
 
     convenience init(relativePosition: MarkPosition, in rect: CGRect, offset: CGFloat, scale: CGFloat) {

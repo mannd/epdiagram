@@ -84,9 +84,9 @@ class LadderViewModel : ScaledViewModel {
     // the offset.  If the content is offset, the X position is offset too.  However,
     // the zoomScale does affect the X position.  Say the scale is 2, then what appears to be
     // the X position is actually 2 * X.  Thus we unscale the position and get an absolute mark X position.
-    func addMark(positionX relativePositionX: CGFloat) -> Mark? {
-        P("Add mark at \(relativePositionX)")
-        return ladder.addMarkAt(unscaledRelativePositionX(relativePositionX: relativePositionX))
+    func addMark(positionX screenPositionX: CGFloat) -> Mark? {
+        P("Add mark at \(screenPositionX)")
+        return ladder.addMarkAt(unscaledRelativePositionX(relativePositionX: screenPositionX))
     }
 
     func addAttachedMark(positionX relativePositionX: CGFloat) {
@@ -150,7 +150,9 @@ class LadderViewModel : ScaledViewModel {
         return false
     }
 
-    fileprivate func highlightNearbyMarks(_ mark: Mark) {
+    // TODO: must also highlight nearby marks that are in the same region (and link them too).
+    fileprivate func highlightNearbyMarks(_ mark: Mark?) {
+        guard let mark = mark else { return }
         var minimum: CGFloat = 10
         minimum = minimum / scale
         let nearbyProximalMarks: [Mark] = ladder.getNearbyMarks(mark: mark, minimum: minimum).proximalMarks
@@ -175,7 +177,7 @@ class LadderViewModel : ScaledViewModel {
     }
 
     func moveMark(mark: Mark, relativePositionX: CGFloat) {
-        let absolutePosition = translateToAbsolutePositionX(positionX: relativePositionX)
+        let absolutePosition = translateToRegionPositionX(screenPositionX: relativePositionX)
         switch mark.anchor {
         case .proximal:
             mark.position.proximal.x = absolutePosition
@@ -208,8 +210,8 @@ class LadderViewModel : ScaledViewModel {
     ///   - region: region in which mark is located
     ///   - accuracy: how close does it have to be?
     func nearMark(point: CGPoint, mark: Mark, region: Region, accuracy: CGFloat) -> Bool {
-        let linePoint1 = translateToRelativePosition(position: mark.position.proximal, regionProximalBoundary: region.proximalBoundary, regionHeight: region.height)
-        let linePoint2 = translateToRelativePosition(position: mark.position.distal, regionProximalBoundary: region.proximalBoundary, regionHeight: region.height)
+        let linePoint1 = translateToScreenPosition(regionPosition: mark.position.proximal, region: region)
+        let linePoint2 = translateToScreenPosition(regionPosition: mark.position.distal, region: region)
         let distance = Common.distance(linePoint1: linePoint1, linePoint2: linePoint2, point: point)
         return distance < accuracy
     }
@@ -224,34 +226,18 @@ class LadderViewModel : ScaledViewModel {
         let distalMarks = nearbyMarks.distalMarks
         for proxMark in proxMarks {
             mark.attachedMarks.proximal.append(proxMark)
-            proxMark.position.distal.x = mark.position.proximal.x
+            mark.position.proximal.x = proxMark.position.distal.x
             proxMark.attachedMarks.distal.append(mark)
         }
         for distalMark in distalMarks {
             mark.attachedMarks.distal.append(distalMark)
-            distalMark.position.proximal.x = mark.position.distal.x
+            mark.position.distal.x = distalMark.position.proximal.x
             distalMark.attachedMarks.proximal.append(mark)
         }
     }
 
-
-    // FIXME: Probably dead code.
-//    func findMarkNearby(positionX: CGFloat, accuracy: CGFloat) -> Mark? {
-//        if let activeRegion = activeRegion {
-//            let relativePositionX = Common.translateToRelativePositionX(positionX: positionX, offset: offset, scale: scale)
-//            for mark in activeRegion.marks {
-//                if abs(mark.position.proximal.x - relativePositionX) < accuracy {
-//                    return mark
-//                }
-//            }
-//        }
-//        return nil
-//    }
-
-
-
     func makeMark(positionX relativePositionX: CGFloat) -> Mark? {
-        return addMark(absolutePositionX: Common.translateToAbsolutePositionX(positionX: relativePositionX, offset: offset, scale: scale))
+        return addMark(absolutePositionX: Common.translateToRegionPositionX(screenPositionX: relativePositionX, offset: offset, scale: scale))
     }
 
     func getRegionHeight(region: Region) -> CGFloat {
@@ -367,6 +353,9 @@ class LadderViewModel : ScaledViewModel {
         }
         // FIXME: Draw circles as mark ends approach
 //        drawCircle(context: context, center: p2, radius: 5)
+
+        drawBlock(context: context, mark: mark, position: position)
+        
         context.setStrokeColor(getLineColor())
     }
 
@@ -378,6 +367,26 @@ class LadderViewModel : ScaledViewModel {
 
     func drawCircle(context: CGContext, center: CGPoint, radius: CGFloat) {
         context.addArc(center: center, radius: radius, startAngle: 0.0, endAngle: .pi * 2.0, clockwise: true)
+        context.strokePath()
+    }
+
+    func drawBlock(context: CGContext, mark: Mark, position: MarkPosition) {
+        let blockLength: CGFloat = 20
+        let blockSeparation: CGFloat = 5
+        switch mark.block {
+        case .none:
+            return
+        case .distal:
+            context.move(to: CGPoint(x: position.distal.x - blockLength / 2, y: position.distal.y))
+            context.addLine(to: CGPoint(x: position.distal.x + blockLength / 2, y: position.distal.y))
+            context.move(to: CGPoint(x: position.distal.x - blockLength / 2, y: position.distal.y + blockSeparation))
+            context.addLine(to: CGPoint(x: position.distal.x + blockLength / 2, y: position.distal.y + blockSeparation))
+        case .proximal:
+            context.move(to: CGPoint(x: position.proximal.x - blockLength / 2, y: position.proximal.y))
+            context.addLine(to: CGPoint(x: position.proximal.x + blockLength / 2, y: position.proximal.y))
+            context.move(to: CGPoint(x: position.proximal.x - blockLength / 2, y: position.proximal.y - blockSeparation))
+            context.addLine(to: CGPoint(x: position.proximal.x + blockLength / 2, y: position.proximal.y - blockSeparation))
+        }
         context.strokePath()
     }
 
@@ -418,7 +427,6 @@ class LadderViewModel : ScaledViewModel {
         else {
             return unselectedColor.cgColor
         }
-
     }
 
     private func getLineColor() -> CGColor {
@@ -430,8 +438,8 @@ class LadderViewModel : ScaledViewModel {
     }
 
     fileprivate func relativeMarkPosition(mark: Mark, offset: CGFloat, scale: CGFloat, rect: CGRect) -> MarkPosition{
-        let proximalX = translateToRelativePositionX(positionX: mark.position.proximal.x)
-        let distalX = translateToRelativePositionX(positionX: mark.position.distal.x)
+        let proximalX = translateToScreenPositionX(regionPositionX: mark.position.proximal.x)
+        let distalX = translateToScreenPositionX(regionPositionX: mark.position.distal.x)
         let proximalY = rect.origin.y + mark.position.proximal.y * rect.height
         let distalY = rect.origin.y + mark.position.distal.y * rect.height
         let proximalPoint = CGPoint(x: proximalX, y: proximalY)
@@ -609,6 +617,11 @@ class LadderViewModel : ScaledViewModel {
             if let mark = tapLocationInLadder.mark {
                 markWasTapped(mark: mark, tapLocationInLadder: tapLocationInLadder, cursorViewDelegate: cursorViewDelegate)
             }
+            else if cursorViewDelegate?.cursorIsVisible() ?? false {
+                unhighlightMarks()
+                cursorViewDelegate?.hideCursor(true)
+                cursorViewDelegate?.unattachMark()
+            }
             else { // make mark and attach cursor
                 P("make mark and attach cursor")
                 let mark = makeMark(positionX: positionX)
@@ -717,10 +730,11 @@ class LadderViewModel : ScaledViewModel {
                 activeRegion = region
             }
             if let mark = locationInLadder.mark {
-                movingMark = mark
+                if mark.attached {
+                    movingMark = mark
+                }
             }
-            else {
-                P("Dragging started away from a mark")
+            if movingMark == nil {
                 dragOriginDivision = locationInLadder.regionDivision
                 switch dragOriginDivision {
                 case .proximal:
@@ -731,7 +745,8 @@ class LadderViewModel : ScaledViewModel {
                 case .middle:
                     P("middle")
                     dragCreatedMark = makeMark(positionX: position.x)
-                    dragCreatedMark?.position.proximal.y = 0.5
+                    // TODO: REFACTOR
+                    dragCreatedMark?.position.proximal.y = (position.y - regionOfDragOrigin!.proximalBoundary) / (regionOfDragOrigin!.distalBoundary - regionOfDragOrigin!.proximalBoundary)
                     dragCreatedMark?.position.distal.y = 0.75
                 case .distal:
                     P("distal")
@@ -741,6 +756,7 @@ class LadderViewModel : ScaledViewModel {
                 case .none:
                     P("none")
                 }
+                highlightNearbyMarks(dragCreatedMark)
             }
         }
         if state == .changed {
@@ -763,12 +779,23 @@ class LadderViewModel : ScaledViewModel {
                 }
                 else if regionOfDragOrigin === locationInLadder.region {
                     P(">>> Dragging into same region")
-                    if dragOriginDivision != .distal {
-                    dragCreatedMark?.position.distal = translateToAbsolutePosition(position: position, regionProximalBoundary: regionOfDragOrigin!.proximalBoundary, regionHeight: regionOfDragOrigin!.height)
+                    switch dragOriginDivision {
+                    case .proximal:
+                        dragCreatedMark?.position.distal = translateToRegionPosition(screenPosition: position, regionProximalBoundary: regionOfDragOrigin!.proximalBoundary, regionHeight: regionOfDragOrigin!.height)
+                    case .distal:
+                        dragCreatedMark?.position.proximal = translateToRegionPosition(screenPosition: position, regionProximalBoundary: regionOfDragOrigin!.proximalBoundary, regionHeight: regionOfDragOrigin!.height)
+                    case .middle:
+                        // TODO: Fix this
+//                        if let proximalY = dragCreatedMark?.position.proximal.y, let distalY = dragCreatedMark?.position.distal.y {
+//                            if proximalY > distalY {
+//                                dragCreatedMark?.swapEnds()
+//                            }
+//                        }
+                        dragCreatedMark?.position.distal = translateToRegionPosition(screenPosition: position, regionProximalBoundary: regionOfDragOrigin!.proximalBoundary, regionHeight: regionOfDragOrigin!.height)
+                    default:
+                        break
                     }
-                    else {
-                        dragCreatedMark?.position.proximal = translateToAbsolutePosition(position: position, regionProximalBoundary: regionOfDragOrigin!.proximalBoundary, regionHeight: regionOfDragOrigin!.height)
-                    }
+                    highlightNearbyMarks(dragCreatedMark)
                 }
             }
             needsDisplay = true
@@ -780,6 +807,15 @@ class LadderViewModel : ScaledViewModel {
             if let dragCreatedMark = dragCreatedMark {
                 if dragCreatedMark.height < lowerLimitMarkHeight {
                     deleteMark(dragCreatedMark)
+                }
+                else {
+                    linkNearbyMarks(mark: dragCreatedMark)
+                }
+            }
+            // FIXME: At this point determine if there are anchors to other marks, anchors to the prox and distal boundaries, which end is the block end, etc.
+            if let proximalY = dragCreatedMark?.position.proximal.y, let distalY = dragCreatedMark?.position.distal.y {
+                if proximalY > distalY {
+                    dragCreatedMark?.swapEnds()
                 }
             }
             unhighlightMarks()
@@ -794,9 +830,6 @@ class LadderViewModel : ScaledViewModel {
         return needsDisplay
     }
 
-    func translateToAbsolutePosition(position: CGPoint, regionProximalBoundary: CGFloat, regionHeight: CGFloat) -> CGPoint {
-        return Common.translateToAbsolutePosition(position: position, regionProximalBoundary: regionProximalBoundary, regionHeight: regionHeight, offsetX: offset,scale: scale)
-    }
 
     func getAnchor(regionDivision: RegionDivision) -> Anchor {
         let anchor: Anchor
