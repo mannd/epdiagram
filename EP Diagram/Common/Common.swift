@@ -18,15 +18,14 @@ class Common {
         return scale * regionPositionX - offset
     }
 
-
     static func translateToScreenPosition(regionPosition: CGPoint, regionProximalBoundary proxBoundary: CGFloat, regionHeight height: CGFloat, offsetX offset: CGFloat, scale: CGFloat) -> CGPoint {
         let x = translateToScreenPositionX(regionPositionX: regionPosition.x, offset: offset, scale: scale)
         let y = proxBoundary + regionPosition.y * height
         return CGPoint(x: x, y: y)
     }
 
-    static func translateToScreenMarkPosition(regionMarkPosition: MarkPosition, regionProximalBoundary proxBoundary: CGFloat, regionHeight height: CGFloat, offsetX offset: CGFloat, scale: CGFloat) -> MarkPosition {
-        return MarkPosition(proximal: translateToScreenPosition(regionPosition: regionMarkPosition.proximal, regionProximalBoundary: proxBoundary, regionHeight: height, offsetX: offset, scale: scale), distal: translateToScreenPosition(regionPosition: regionMarkPosition.distal, regionProximalBoundary: proxBoundary, regionHeight: height, offsetX: offset, scale: scale))
+    static func translateToScreenSegment(regionSegment: Segment, regionProximalBoundary proxBoundary: CGFloat, regionHeight height: CGFloat, offsetX offset: CGFloat, scale: CGFloat) -> Segment {
+        return Segment(proximal: translateToScreenPosition(regionPosition: regionSegment.proximal, regionProximalBoundary: proxBoundary, regionHeight: height, offsetX: offset, scale: scale), distal: translateToScreenPosition(regionPosition: regionSegment.distal, regionProximalBoundary: proxBoundary, regionHeight: height, offsetX: offset, scale: scale))
     }
 
     static func translateToRegionPosition(screenPosition: CGPoint, regionProximalBoundary proxBoundary: CGFloat, regionHeight height: CGFloat, offsetX offset: CGFloat, scale: CGFloat) -> CGPoint {
@@ -48,15 +47,15 @@ class Common {
         return CGPoint(x: x, y: y)
     }
 
-    static func translateToScreenMarkPosition(markPosition: MarkPosition, inRect rect: CGRect, offsetX offset: CGFloat, scale: CGFloat) -> MarkPosition {
-        return MarkPosition(proximal: translateToScreenPosition(position: markPosition.proximal, inRect: rect, offsetX: offset, scale: scale), distal: translateToScreenPosition(position: markPosition.distal, inRect: rect, offsetX: offset, scale: scale))
+    static func translateToScreenSegment(regionSegment: Segment, inRect rect: CGRect, offsetX offset: CGFloat, scale: CGFloat) -> Segment {
+        return Segment(proximal: translateToScreenPosition(position: regionSegment.proximal, inRect: rect, offsetX: offset, scale: scale), distal: translateToScreenPosition(position: regionSegment.distal, inRect: rect, offsetX: offset, scale: scale))
     }
 
-    static func translateToAbsoluteMarkPosition(markPosition: MarkPosition, inRect rect: CGRect, offsetX offset: CGFloat, scale: CGFloat) -> MarkPosition {
-        return MarkPosition(proximal: translateToRegionPosition(position: markPosition.proximal, inRect: rect, offsetX: offset, scale: scale), distal: translateToRegionPosition(position: markPosition.distal, inRect: rect, offsetX: offset, scale: scale))
+    static func translateToRegionSegment(screenSegment: Segment, inRect rect: CGRect, offsetX offset: CGFloat, scale: CGFloat) -> Segment {
+        return Segment(proximal: translateToRegionPosition(position: screenSegment.proximal, inRect: rect, offsetX: offset, scale: scale), distal: translateToRegionPosition(position: screenSegment.distal, inRect: rect, offsetX: offset, scale: scale))
     }
-    static func getMidpoint(markPosition pos: MarkPosition) -> CGPoint {
-        return CGPoint(x: (pos.proximal.x + pos.distal.x) / 2.0, y: (pos.proximal.y + pos.distal.y) / 2.0)
+    static func getMidpoint(_ segment: Segment) -> CGPoint {
+        return CGPoint(x: (segment.proximal.x + segment.distal.x) / 2.0, y: (segment.proximal.y + segment.distal.y) / 2.0)
     }
 
     /// Returns true if target is a Mac, false for iOS.

@@ -180,23 +180,23 @@ class LadderViewModel : ScaledViewModel {
         let absolutePosition = translateToRegionPositionX(screenPositionX: relativePositionX)
         switch mark.anchor {
         case .proximal:
-            mark.position.proximal.x = absolutePosition
+            mark.segment.proximal.x = absolutePosition
         case .middle:
             // Determine halfway point between proximal and distal.
-            let difference = (mark.position.proximal.x - mark.position.distal.x) / 2
-            mark.position.proximal.x = absolutePosition + difference
-            mark.position.distal.x = absolutePosition - difference
+            let difference = (mark.segment.proximal.x - mark.segment.distal.x) / 2
+            mark.segment.proximal.x = absolutePosition + difference
+            mark.segment.distal.x = absolutePosition - difference
         case .distal:
-            mark.position.distal.x = absolutePosition
+            mark.segment.distal.x = absolutePosition
         case .none:
             break
         }
         // Move linked marks
         for proximalMark in mark.attachedMarks.proximal {
-            proximalMark.position.distal.x = mark.position.proximal.x
+            proximalMark.segment.distal.x = mark.segment.proximal.x
         }
         for distalMark in mark.attachedMarks.distal {
-            distalMark.position.proximal.x = mark.position.distal.x
+            distalMark.segment.proximal.x = mark.segment.distal.x
         }
         highlightNearbyMarks(mark)
     }
@@ -210,8 +210,8 @@ class LadderViewModel : ScaledViewModel {
     ///   - region: region in which mark is located
     ///   - accuracy: how close does it have to be?
     func nearMark(point: CGPoint, mark: Mark, region: Region, accuracy: CGFloat) -> Bool {
-        let linePoint1 = translateToScreenPosition(regionPosition: mark.position.proximal, region: region)
-        let linePoint2 = translateToScreenPosition(regionPosition: mark.position.distal, region: region)
+        let linePoint1 = translateToScreenPosition(regionPosition: mark.segment.proximal, region: region)
+        let linePoint2 = translateToScreenPosition(regionPosition: mark.segment.distal, region: region)
         let distance = Common.distance(linePoint1: linePoint1, linePoint2: linePoint2, point: point)
         return distance < accuracy
     }
@@ -226,12 +226,12 @@ class LadderViewModel : ScaledViewModel {
         let distalMarks = nearbyMarks.distalMarks
         for proxMark in proxMarks {
             mark.attachedMarks.proximal.append(proxMark)
-            mark.position.proximal.x = proxMark.position.distal.x
+            mark.segment.proximal.x = proxMark.segment.distal.x
             proxMark.attachedMarks.distal.append(mark)
         }
         for distalMark in distalMarks {
             mark.attachedMarks.distal.append(distalMark)
-            mark.position.distal.x = distalMark.position.proximal.x
+            mark.segment.distal.x = distalMark.segment.proximal.x
             distalMark.attachedMarks.proximal.append(mark)
         }
     }
@@ -359,7 +359,7 @@ class LadderViewModel : ScaledViewModel {
         context.setStrokeColor(getLineColor())
     }
 
-    func getTruncatedPosition(position: MarkPosition) -> CGPoint? {
+    func getTruncatedPosition(position: Segment) -> CGPoint? {
         // TODO: Handle lines slanted backwards, don't draw at all in margin
         let intersection = getIntersection(ofLineFrom: CGPoint(x: margin, y: 0), to: CGPoint(x: margin, y: height), withLineFrom: position.proximal, to: position.distal)
         return intersection
@@ -370,7 +370,7 @@ class LadderViewModel : ScaledViewModel {
         context.strokePath()
     }
 
-    func drawBlock(context: CGContext, mark: Mark, position: MarkPosition) {
+    func drawBlock(context: CGContext, mark: Mark, position: Segment) {
         let blockLength: CGFloat = 20
         let blockSeparation: CGFloat = 5
         switch mark.block {
@@ -437,14 +437,14 @@ class LadderViewModel : ScaledViewModel {
         }
     }
 
-    fileprivate func relativeMarkPosition(mark: Mark, offset: CGFloat, scale: CGFloat, rect: CGRect) -> MarkPosition{
-        let proximalX = translateToScreenPositionX(regionPositionX: mark.position.proximal.x)
-        let distalX = translateToScreenPositionX(regionPositionX: mark.position.distal.x)
-        let proximalY = rect.origin.y + mark.position.proximal.y * rect.height
-        let distalY = rect.origin.y + mark.position.distal.y * rect.height
+    fileprivate func relativeMarkPosition(mark: Mark, offset: CGFloat, scale: CGFloat, rect: CGRect) -> Segment{
+        let proximalX = translateToScreenPositionX(regionPositionX: mark.segment.proximal.x)
+        let distalX = translateToScreenPositionX(regionPositionX: mark.segment.distal.x)
+        let proximalY = rect.origin.y + mark.segment.proximal.y * rect.height
+        let distalY = rect.origin.y + mark.segment.distal.y * rect.height
         let proximalPoint = CGPoint(x: proximalX, y: proximalY)
         let distalPoint = CGPoint(x: distalX, y: distalY)
-        return MarkPosition(proximal: proximalPoint, distal: distalPoint)
+        return Segment(proximal: proximalPoint, distal: distalPoint)
     }
 
     fileprivate func drawMarks(region: Region, context: CGContext,  rect: CGRect) {
@@ -631,7 +631,7 @@ class LadderViewModel : ScaledViewModel {
                     mark.anchor = getAnchor(regionDivision: tapLocationInLadder.regionDivision)
                     selectMark(mark)
                     cursorViewDelegate?.getViewModel().attachMark(mark)
-                    cursorViewDelegate?.moveCursor(positionX: mark.position.proximal.x)
+                    cursorViewDelegate?.moveCursor(positionX: mark.segment.proximal.x)
                     cursorViewDelegate?.hideCursor(false)
                 }
             }
@@ -740,19 +740,19 @@ class LadderViewModel : ScaledViewModel {
                 case .proximal:
                     P("prox")
                     dragCreatedMark = makeMark(positionX: position.x)
-                    dragCreatedMark?.position.proximal.y = 0
-                    dragCreatedMark?.position.distal.y = 0.5
+                    dragCreatedMark?.segment.proximal.y = 0
+                    dragCreatedMark?.segment.distal.y = 0.5
                 case .middle:
                     P("middle")
                     dragCreatedMark = makeMark(positionX: position.x)
                     // TODO: REFACTOR
-                    dragCreatedMark?.position.proximal.y = (position.y - regionOfDragOrigin!.proximalBoundary) / (regionOfDragOrigin!.distalBoundary - regionOfDragOrigin!.proximalBoundary)
-                    dragCreatedMark?.position.distal.y = 0.75
+                    dragCreatedMark?.segment.proximal.y = (position.y - regionOfDragOrigin!.proximalBoundary) / (regionOfDragOrigin!.distalBoundary - regionOfDragOrigin!.proximalBoundary)
+                    dragCreatedMark?.segment.distal.y = 0.75
                 case .distal:
                     P("distal")
                     dragCreatedMark = makeMark(positionX: position.x)
-                    dragCreatedMark?.position.proximal.y = 0.5
-                    dragCreatedMark?.position.distal.y = 1
+                    dragCreatedMark?.segment.proximal.y = 0.5
+                    dragCreatedMark?.segment.distal.y = 1
                 case .none:
                     P("none")
                 }
@@ -781,9 +781,9 @@ class LadderViewModel : ScaledViewModel {
                     P(">>> Dragging into same region")
                     switch dragOriginDivision {
                     case .proximal:
-                        dragCreatedMark?.position.distal = translateToRegionPosition(screenPosition: position, regionProximalBoundary: regionOfDragOrigin!.proximalBoundary, regionHeight: regionOfDragOrigin!.height)
+                        dragCreatedMark?.segment.distal = translateToRegionPosition(screenPosition: position, regionProximalBoundary: regionOfDragOrigin!.proximalBoundary, regionHeight: regionOfDragOrigin!.height)
                     case .distal:
-                        dragCreatedMark?.position.proximal = translateToRegionPosition(screenPosition: position, regionProximalBoundary: regionOfDragOrigin!.proximalBoundary, regionHeight: regionOfDragOrigin!.height)
+                        dragCreatedMark?.segment.proximal = translateToRegionPosition(screenPosition: position, regionProximalBoundary: regionOfDragOrigin!.proximalBoundary, regionHeight: regionOfDragOrigin!.height)
                     case .middle:
                         // TODO: Fix this
 //                        if let proximalY = dragCreatedMark?.position.proximal.y, let distalY = dragCreatedMark?.position.distal.y {
@@ -791,7 +791,7 @@ class LadderViewModel : ScaledViewModel {
 //                                dragCreatedMark?.swapEnds()
 //                            }
 //                        }
-                        dragCreatedMark?.position.distal = translateToRegionPosition(screenPosition: position, regionProximalBoundary: regionOfDragOrigin!.proximalBoundary, regionHeight: regionOfDragOrigin!.height)
+                        dragCreatedMark?.segment.distal = translateToRegionPosition(screenPosition: position, regionProximalBoundary: regionOfDragOrigin!.proximalBoundary, regionHeight: regionOfDragOrigin!.height)
                     default:
                         break
                     }
@@ -813,7 +813,7 @@ class LadderViewModel : ScaledViewModel {
                 }
             }
             // FIXME: At this point determine if there are anchors to other marks, anchors to the prox and distal boundaries, which end is the block end, etc.
-            if let proximalY = dragCreatedMark?.position.proximal.y, let distalY = dragCreatedMark?.position.distal.y {
+            if let proximalY = dragCreatedMark?.segment.proximal.y, let distalY = dragCreatedMark?.segment.distal.y {
                 if proximalY > distalY {
                     dragCreatedMark?.swapEnds()
                 }

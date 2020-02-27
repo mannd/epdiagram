@@ -141,7 +141,6 @@ class CursorViewModel: ScaledViewModel {
         if let mark = attachedMark {
             mark.attached = false
             ladderViewDelegate?.getViewModel().unhighlightMarks()
-//            mark.highlight = .none
             attachedMark = nil
             return true
         }

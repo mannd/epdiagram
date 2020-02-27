@@ -14,7 +14,7 @@ import UIKit
 
 
 /// A mark is a line segment, defined by its two end points.  Marks may slant in different directions, depending on the origin of an impulse.  So rather than using origin and terminus (which could swap positions if the slant of the mark is changed), we use the same convention as with regions: the two ends are termed *proximal* and *distal*.i
-struct MarkPosition {
+struct Segment {
     var proximal: CGPoint
     var distal: CGPoint
 
@@ -80,17 +80,17 @@ class Mark {
         case none
     }
 
-    var position: MarkPosition
+    var segment: Segment
 
     // Useful to detect marks that are too tiny to keep.
     var height: CGFloat {
         get {
-            return abs(position.proximal.y - position.distal.y)
+            return abs(segment.proximal.y - segment.distal.y)
         }
     }
     var length: CGFloat {
         get {
-            return sqrt(pow((position.proximal.x - position.distal.x), 2) + pow((position.proximal.y - position.distal.y), 2))
+            return sqrt(pow((segment.proximal.x - segment.distal.x), 2) + pow((segment.proximal.y - segment.distal.y), 2))
         }
     }
 
@@ -117,56 +117,56 @@ class Mark {
     
     var attachedMarks: AttachedMarks
 
-    init(_ position: MarkPosition) {
-        self.position = position
+    init(_ segment: Segment) {
+        self.segment = segment
         attachedMarks = AttachedMarks()
         // Default anchor for new marks is middle.
         anchor = .middle
     }
 
     convenience init() {
-        self.init(MarkPosition(proximal: CGPoint.zero, distal: CGPoint.zero))
+        self.init(Segment(proximal: CGPoint.zero, distal: CGPoint.zero))
     }
 
     // init a mark that is vertical and spans a region.
     convenience init(positionX: CGFloat) {
-        let position = MarkPosition(proximal: CGPoint(x: positionX, y: 0), distal: CGPoint(x: positionX, y:1.0))
+        let position = Segment(proximal: CGPoint(x: positionX, y: 0), distal: CGPoint(x: positionX, y:1.0))
         self.init(position)
     }
 
     /// Return midpoint of mark as CGPoint
     func midpoint() -> CGPoint {
-        let x = (position.distal.x - position.proximal.x) / 2.0 + position.proximal.x
-        let y = (position.distal.y - position.proximal.y) / 2.0 + position.proximal.y
+        let x = (segment.distal.x - segment.proximal.x) / 2.0 + segment.proximal.x
+        let y = (segment.distal.y - segment.proximal.y) / 2.0 + segment.proximal.y
         return CGPoint(x: x, y: y)
     }
 
     func swapEnds() {
-        let tmp = position.proximal
-        position.proximal = position.distal
-        position.distal = tmp
+        let tmp = segment.proximal
+        segment.proximal = segment.distal
+        segment.distal = tmp
     }
 
     func getAnchorPositionX() -> CGFloat {
         let anchorPositionX: CGFloat
         switch anchor {
         case .distal:
-            anchorPositionX = position.distal.x
+            anchorPositionX = segment.distal.x
         case .middle:
             anchorPositionX = midpoint().x
         case .proximal:
-            anchorPositionX = position.proximal.x
+            anchorPositionX = segment.proximal.x
         case .none:
-            anchorPositionX = position.proximal.x
+            anchorPositionX = segment.proximal.x
         }
         return anchorPositionX
     }
 
     // Note point must be in absolute coordiates, with y between 0 and 1 relative to region height.
     func distance(point: CGPoint) -> CGFloat {
-        var numerator = (position.distal.y - position.proximal.y) * point.x - (position.distal.x - position.proximal.x) * point.y + position.distal.x * position.proximal.y - position.distal.y * position.proximal.x
+        var numerator = (segment.distal.y - segment.proximal.y) * point.x - (segment.distal.x - segment.proximal.x) * point.y + segment.distal.x * segment.proximal.y - segment.distal.y * segment.proximal.x
         numerator = abs(numerator)
-        var denominator = pow((position.distal.y - position.proximal.y), 2) + pow((position.distal.x - position.proximal.x), 2)
+        var denominator = pow((segment.distal.y - segment.proximal.y), 2) + pow((segment.distal.x - segment.proximal.x), 2)
         denominator = sqrt(denominator)
         return numerator / denominator
     }

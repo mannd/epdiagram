@@ -12,7 +12,7 @@ import UIKit
 
 // FIXME: experimental.
 struct RelativeMarkPosition {
-    var position: MarkPosition
+    var position: Segment
     var proximal: CGPoint {
         get {
             position.proximal
@@ -26,16 +26,16 @@ struct RelativeMarkPosition {
     var offset: CGFloat
     var scale: CGFloat
     var rect: CGRect
-    var absoluteMarkPosition: MarkPosition {
+    var absoluteMarkPosition: Segment {
         get {
-            return Common.translateToAbsoluteMarkPosition(markPosition: position, inRect: rect, offsetX: offset, scale: scale)
+            return Common.translateToRegionSegment(screenSegment: position, inRect: rect, offsetX: offset, scale: scale)
         }
         set(newPosition) {
-            position = Common.translateToScreenMarkPosition(markPosition: newPosition, inRect: rect, offsetX: offset, scale: scale)
+            position = Common.translateToScreenSegment(regionSegment: newPosition, inRect: rect, offsetX: offset, scale: scale)
         }
     }
 
-    init(relativePosition: MarkPosition, inRect rect: CGRect, offsetX offset: CGFloat, scale: CGFloat) {
+    init(relativePosition: Segment, inRect rect: CGRect, offsetX offset: CGFloat, scale: CGFloat) {
         position = relativePosition
         self.rect = rect
         self.offset = offset
@@ -44,14 +44,14 @@ struct RelativeMarkPosition {
 
     // Essentially a zeroed out RelativeMarkPosition.
     init() {
-        position = MarkPosition(proximal: CGPoint.zero, distal: CGPoint.zero)
+        position = Segment(proximal: CGPoint.zero, distal: CGPoint.zero)
         rect = CGRect.zero
         offset = 0
         scale = 1.0
     }
 
-    func getAbsoluteMarkPosition(inRect rect: CGRect) -> MarkPosition {
-        return Common.translateToAbsoluteMarkPosition(markPosition: position, inRect: rect, offsetX: offset, scale: scale)
+    func getAbsoluteMarkPosition(inRect rect: CGRect) -> Segment {
+        return Common.translateToRegionSegment(screenSegment: position, inRect: rect, offsetX: offset, scale: scale)
     }
 }
 
@@ -61,16 +61,16 @@ extension Mark {
     //        position = relativeMarkPosition.absoluteMarkPosition
     //    }
 
-    func setPosition(relativePosition: MarkPosition, in rect:CGRect, offset: CGFloat, scale: CGFloat) {
-        position.proximal = Common.translateToRegionPosition(position: relativePosition.proximal, inRect: rect, offsetX: offset, scale: scale)
-        position.distal = Common.translateToRegionPosition(position: relativePosition.distal, inRect: rect, offsetX: offset, scale: scale)
+    func setPosition(relativePosition: Segment, in rect:CGRect, offset: CGFloat, scale: CGFloat) {
+        segment.proximal = Common.translateToRegionPosition(position: relativePosition.proximal, inRect: rect, offsetX: offset, scale: scale)
+        segment.distal = Common.translateToRegionPosition(position: relativePosition.distal, inRect: rect, offsetX: offset, scale: scale)
     }
 
-    func getPosition(in rect:CGRect, offset: CGFloat, scale: CGFloat) -> MarkPosition {
-        return MarkPosition(proximal: Common.translateToScreenPosition(position: position.proximal, inRect: rect, offsetX: offset, scale: scale), distal: Common.translateToScreenPosition(position: position.distal, inRect: rect, offsetX: offset, scale: scale))
+    func getPosition(in rect:CGRect, offset: CGFloat, scale: CGFloat) -> Segment {
+        return Segment(proximal: Common.translateToScreenPosition(position: segment.proximal, inRect: rect, offsetX: offset, scale: scale), distal: Common.translateToScreenPosition(position: segment.distal, inRect: rect, offsetX: offset, scale: scale))
     }
 
-    convenience init(relativePosition: MarkPosition, in rect: CGRect, offset: CGFloat, scale: CGFloat) {
+    convenience init(relativePosition: Segment, in rect: CGRect, offset: CGFloat, scale: CGFloat) {
         self.init()
         setPosition(relativePosition: relativePosition, in: rect, offset: offset, scale: scale)
     }

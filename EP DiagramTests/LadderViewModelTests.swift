@@ -27,7 +27,7 @@ class LadderViewModelTests: XCTestCase {
         ladderViewModel.scale = 1.78
         ladderViewModel.offset = 333.45
         let absolutePositionX = ladderViewModel.translateToRegionPositionX(screenPositionX: positionX)
-        let relativeLocation = ladderViewModel.translateToScreenPositionX(positionX: absolutePositionX)
+        let relativeLocation = ladderViewModel.translateToScreenPositionX(regionPositionX: absolutePositionX)
         XCTAssertEqual(positionX, relativeLocation, accuracy: 0.0001)
     }
 
@@ -51,16 +51,15 @@ class LadderViewModelTests: XCTestCase {
     }
 
     func testMoreCoordinateTranslations() {
-        let markPosition: MarkPosition = MarkPosition(proximal: CGPoint(x: 543.21, y: 99), distal: CGPoint(x: 329.8, y: 55.4))
+        let markPosition: Segment = Segment(proximal: CGPoint(x: 543.21, y: 99), distal: CGPoint(x: 329.8, y: 55.4))
         let scale: CGFloat = 1.78
         let offset: CGFloat = 333.45
         let rect: CGRect = CGRect(x: 0, y: 0, width: 800, height: 300)
-        let absolutePosition = Common.translateToAbsoluteMarkPosition(markPosition: markPosition, inRect: rect, offsetX: offset, scale: scale)
-        let relativePosition = Common.translateToScreenMarkPosition(markPosition: absolutePosition, inRect: rect, offsetX: offset, scale: scale)
+        let absolutePosition = Common.translateToRegionSegment(screenSegment: markPosition, inRect: rect, offsetX: offset, scale: scale)
+        let relativePosition = Common.translateToScreenSegment(regionSegment: absolutePosition, inRect: rect, offsetX: offset, scale: scale)
         XCTAssertEqual(markPosition.proximal.x, relativePosition.proximal.x, accuracy: 0.0001)
         XCTAssertEqual(markPosition.proximal.y, relativePosition.proximal.y, accuracy: 0.0001)
         XCTAssertEqual(markPosition.distal.x, relativePosition.distal.x, accuracy: 0.001)
         XCTAssertEqual(markPosition.distal.y, relativePosition.distal.y, accuracy: 0.001)
     }
-
 }

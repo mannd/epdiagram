@@ -53,7 +53,7 @@ class Region {
     func getMarkProximalXPositions() -> [CGFloat] {
         var points: [CGFloat] = []
         for mark in marks {
-            points.append(mark.position.proximal.x)
+            points.append(mark.segment.proximal.x)
         }
         return points
     }
@@ -61,7 +61,7 @@ class Region {
     func getMarkDistalXPositions() -> [CGFloat] {
         var points: [CGFloat] = []
         for mark in marks {
-            points.append(mark.position.distal.x)
+            points.append(mark.segment.distal.x)
         }
         return points
     }

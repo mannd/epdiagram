@@ -118,7 +118,7 @@ class Ladder {
         // check proximal region
         if let proximalRegion = getRegionBefore(region: activeRegion) {
             for neighboringMark in proximalRegion.marks {
-                if abs(mark.position.proximal.x - neighboringMark.position.distal.x) < minimum {
+                if abs(mark.segment.proximal.x - neighboringMark.segment.distal.x) < minimum {
                     proximalMarks.append(neighboringMark)
                     break
                 }
@@ -127,7 +127,7 @@ class Ladder {
         // check distal region
         if let distalRegion = getRegionAfter(region: activeRegion) {
             for neighboringMark in distalRegion.marks {
-                if abs(mark.position.distal.x - neighboringMark.position.proximal.x) < minimum {
+                if abs(mark.segment.distal.x - neighboringMark.segment.proximal.x) < minimum {
                     distalMarks.append(neighboringMark)
                     break
                 }
