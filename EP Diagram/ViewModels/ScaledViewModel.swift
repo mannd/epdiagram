@@ -13,26 +13,26 @@ class ScaledViewModel: NSObject {
     var offset: CGFloat = 0
 
     func translateToRegionPositionX(screenPositionX: CGFloat) -> CGFloat {
-        return Common.translateToRegionPositionX(screenPositionX: screenPositionX, offset: offset, scale: scale)
+        return Common.translateToRegionPositionX(ladderViewPositionX: screenPositionX, offset: offset, scale: scale)
     }
     
     func translateToScreenPosition(regionPosition: CGPoint, regionProximalBoundary: CGFloat, regionHeight: CGFloat) -> CGPoint {
-        Common.translateToScreenPosition(regionPosition: regionPosition, regionProximalBoundary: regionProximalBoundary, regionHeight: regionHeight, offsetX: offset, scale: scale)
+        Common.translateToLadderViewPosition(regionPosition: regionPosition, regionProximalBoundary: regionProximalBoundary, regionHeight: regionHeight, offsetX: offset, scale: scale)
     }
 
     func translateToScreenPosition(regionPosition: CGPoint, region: Region) -> CGPoint {
-        Common.translateToScreenPosition(regionPosition: regionPosition, regionProximalBoundary: region.proximalBoundary, regionHeight: region.height, offsetX: offset, scale: scale)
+        Common.translateToLadderViewPosition(regionPosition: regionPosition, regionProximalBoundary: region.proximalBoundary, regionHeight: region.height, offsetX: offset, scale: scale)
     }
 
     func translateToScreenPositionX(regionPositionX: CGFloat) -> CGFloat {
-        Common.translateToScreenPositionX(regionPositionX: regionPositionX, offset:offset, scale: scale)
+        Common.translateToLadderViewPositionX(regionPositionX: regionPositionX, offset:offset, scale: scale)
     }
 
     func translateToRegionPosition(screenPosition: CGPoint, regionProximalBoundary: CGFloat, regionHeight: CGFloat) -> CGPoint {
-        return Common.translateToRegionPosition(screenPosition: screenPosition, regionProximalBoundary: regionProximalBoundary, regionHeight: regionHeight, offsetX: offset,scale: scale)
+        return Common.translateToRegionPosition(ladderViewPosition: screenPosition, regionProximalBoundary: regionProximalBoundary, regionHeight: regionHeight, offsetX: offset,scale: scale)
     }
 
     func translateToRegionPosition(screenPosition: CGPoint, region: Region) -> CGPoint {
-        return Common.translateToRegionPosition(screenPosition: screenPosition, regionProximalBoundary: region.proximalBoundary, regionHeight: region.height, offsetX: offset,scale: scale)
+        return Common.translateToRegionPosition(ladderViewPosition: screenPosition, regionProximalBoundary: region.proximalBoundary, regionHeight: region.height, offsetX: offset,scale: scale)
     }
 }

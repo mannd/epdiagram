@@ -110,7 +110,7 @@
             if !ladderView.hasActiveRegion() {
                 ladderView.setActiveRegion(regionNum: 0)
             }
-            cursorView.unattachMark()
+            cursorView.unattachAttachedMark()
             if cursorView.cursorIsVisible() {
                 cursorView.hideCursor(true)
             }

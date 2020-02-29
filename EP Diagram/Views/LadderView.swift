@@ -18,6 +18,7 @@ protocol LadderViewDelegate: AnyObject {
     func getHeight() -> CGFloat
     func getTopOfLadder(view: UIView) -> CGFloat
     func getViewModel() -> LadderViewModel
+    func unhighlightMarks()
 }
 
 @available(iOS 13.0, *)
@@ -194,7 +195,6 @@ class LadderView: UIView, LadderViewDelegate {
 
     override func draw(_ rect: CGRect) {
         // Drawing code - note not necessary to call super.draw.
-        P("LadderView draw()")
         if let context = UIGraphicsGetCurrentContext() {
             ladderViewModel.draw(rect: rect, context: context)
         }
@@ -266,6 +266,10 @@ class LadderView: UIView, LadderViewDelegate {
     // We expose the underlying view model to avoid exposing elements of the model.
     func getViewModel() -> LadderViewModel {
         return ladderViewModel
+    }
+
+    func unhighlightMarks() {
+        ladderViewModel.unhighlightMarks()
     }
 }
 

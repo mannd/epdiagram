@@ -31,7 +31,6 @@
 		8E9B804722834870008873BB /* Ladder.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8E9B804622834870008873BB /* Ladder.swift */; };
 		8ED3B1B62360DA0D00549381 /* Anchor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8ED3B1B52360DA0D00549381 /* Anchor.swift */; };
 		8EED72932403447100DB5563 /* ScaledViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8EED72922403447100DB5563 /* ScaledViewModel.swift */; };
-		8EED72952403470800DB5563 /* RelativeMarkPosition.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8EED72942403470800DB5563 /* RelativeMarkPosition.swift */; };
 		8EF8B5B72330739F00ADB77A /* ViewControllerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8EF8B5B62330739F00ADB77A /* ViewControllerTests.swift */; };
 		8EF9166B227926BC00B51F17 /* LadderView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8EF9166A227926BC00B51F17 /* LadderView.swift */; };
 /* End PBXBuildFile section */
@@ -85,7 +84,6 @@
 		8E9B804622834870008873BB /* Ladder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Ladder.swift; sourceTree = "<group>"; };
 		8ED3B1B52360DA0D00549381 /* Anchor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Anchor.swift; sourceTree = "<group>"; };
 		8EED72922403447100DB5563 /* ScaledViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScaledViewModel.swift; sourceTree = "<group>"; };
-		8EED72942403470800DB5563 /* RelativeMarkPosition.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RelativeMarkPosition.swift; sourceTree = "<group>"; };
 		8EF8B5B62330739F00ADB77A /* ViewControllerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ViewControllerTests.swift; sourceTree = "<group>"; };
 		8EF9166A227926BC00B51F17 /* LadderView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LadderView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -202,7 +200,6 @@
 				8E7F8DC022C82D890061ABF8 /* CursorViewModel.swift */,
 				8E7F8DC222C82D9E0061ABF8 /* ImageViewModel.swift */,
 				8EED72922403447100DB5563 /* ScaledViewModel.swift */,
-				8EED72942403470800DB5563 /* RelativeMarkPosition.swift */,
 			);
 			path = ViewModels;
 			sourceTree = "<group>";
@@ -368,7 +365,6 @@
 			files = (
 				8E7D24F12277A00C005A1729 /* ImageView.swift in Sources */,
 				8E7D24C522779DBD005A1729 /* ViewController.swift in Sources */,
-				8EED72952403470800DB5563 /* RelativeMarkPosition.swift in Sources */,
 				8E8248DD23B53B55001A85F9 /* SeparatorView.swift in Sources */,
 				8E7214DE22E95C860062C094 /* Common.swift in Sources */,
 				8E7F8DC122C82D890061ABF8 /* CursorViewModel.swift in Sources */,

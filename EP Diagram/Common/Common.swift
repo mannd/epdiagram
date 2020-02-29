@@ -10,39 +10,43 @@ import UIKit
 
 /// Namespace for global static functions.
 class Common {
-    static func translateToRegionPositionX(screenPositionX: CGFloat, offset: CGFloat, scale: CGFloat) -> CGFloat {
-        return (screenPositionX + offset) / scale
+    static func translateToRegionPositionX(ladderViewPositionX: CGFloat, offset: CGFloat, scale: CGFloat) -> CGFloat {
+        return (ladderViewPositionX + offset) / scale
     }
 
-    static func translateToScreenPositionX(regionPositionX: CGFloat, offset: CGFloat, scale: CGFloat) -> CGFloat {
+    static func translateToLadderViewPositionX(regionPositionX: CGFloat, offset: CGFloat, scale: CGFloat) -> CGFloat {
         return scale * regionPositionX - offset
     }
 
-    static func translateToScreenPosition(regionPosition: CGPoint, regionProximalBoundary proxBoundary: CGFloat, regionHeight height: CGFloat, offsetX offset: CGFloat, scale: CGFloat) -> CGPoint {
-        let x = translateToScreenPositionX(regionPositionX: regionPosition.x, offset: offset, scale: scale)
+    static func translateToLadderViewPositionY(regionPositionY: CGFloat, regionProximalBoundary: CGFloat, regionHeight: CGFloat) -> CGFloat {
+        return regionProximalBoundary + regionPositionY * regionHeight
+    }
+
+    static func translateToLadderViewPosition(regionPosition: CGPoint, regionProximalBoundary proxBoundary: CGFloat, regionHeight height: CGFloat, offsetX offset: CGFloat, scale: CGFloat) -> CGPoint {
+        let x = translateToLadderViewPositionX(regionPositionX: regionPosition.x, offset: offset, scale: scale)
         let y = proxBoundary + regionPosition.y * height
         return CGPoint(x: x, y: y)
     }
 
-    static func translateToScreenSegment(regionSegment: Segment, regionProximalBoundary proxBoundary: CGFloat, regionHeight height: CGFloat, offsetX offset: CGFloat, scale: CGFloat) -> Segment {
-        return Segment(proximal: translateToScreenPosition(regionPosition: regionSegment.proximal, regionProximalBoundary: proxBoundary, regionHeight: height, offsetX: offset, scale: scale), distal: translateToScreenPosition(regionPosition: regionSegment.distal, regionProximalBoundary: proxBoundary, regionHeight: height, offsetX: offset, scale: scale))
+    static func translateToLadderViewSegment(regionSegment: Segment, regionProximalBoundary proxBoundary: CGFloat, regionHeight height: CGFloat, offsetX offset: CGFloat, scale: CGFloat) -> Segment {
+        return Segment(proximal: translateToLadderViewPosition(regionPosition: regionSegment.proximal, regionProximalBoundary: proxBoundary, regionHeight: height, offsetX: offset, scale: scale), distal: translateToLadderViewPosition(regionPosition: regionSegment.distal, regionProximalBoundary: proxBoundary, regionHeight: height, offsetX: offset, scale: scale))
     }
 
-    static func translateToRegionPosition(screenPosition: CGPoint, regionProximalBoundary proxBoundary: CGFloat, regionHeight height: CGFloat, offsetX offset: CGFloat, scale: CGFloat) -> CGPoint {
-        let x = translateToRegionPositionX(screenPositionX: screenPosition.x, offset: offset, scale: scale)
-        let y = (screenPosition.y - proxBoundary) / height
+    static func translateToRegionPosition(ladderViewPosition: CGPoint, regionProximalBoundary proxBoundary: CGFloat, regionHeight height: CGFloat, offsetX offset: CGFloat, scale: CGFloat) -> CGPoint {
+        let x = translateToRegionPositionX(ladderViewPositionX: ladderViewPosition.x, offset: offset, scale: scale)
+        let y = (ladderViewPosition.y - proxBoundary) / height
         return CGPoint(x: x, y: y)
     }
 
     // Rect based translation function -- deprecated
     static func translateToScreenPosition(position: CGPoint, inRect rect: CGRect, offsetX offset: CGFloat, scale: CGFloat) -> CGPoint {
-        let x = translateToScreenPositionX(regionPositionX: position.x, offset: offset, scale: scale)
+        let x = translateToLadderViewPositionX(regionPositionX: position.x, offset: offset, scale: scale)
         let y = rect.origin.y + position.y * rect.height
         return CGPoint(x: x, y: y)
     }
 
     static func translateToRegionPosition(position: CGPoint, inRect rect: CGRect, offsetX offset: CGFloat, scale: CGFloat) -> CGPoint {
-        let x = translateToRegionPositionX(screenPositionX: position.x, offset: offset, scale: scale)
+        let x = translateToRegionPositionX(ladderViewPositionX: position.x, offset: offset, scale: scale)
         let y = (position.y - rect.origin.y) / rect.height
         return CGPoint(x: x, y: y)
     }

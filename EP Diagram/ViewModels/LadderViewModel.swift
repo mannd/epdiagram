@@ -8,6 +8,13 @@
 
 import UIKit
 
+
+extension Mark {
+    func getPosition(in rect:CGRect, offset: CGFloat, scale: CGFloat) -> Segment {
+        return Segment(proximal: Common.translateToScreenPosition(position: segment.proximal, inRect: rect, offsetX: offset, scale: scale), distal: Common.translateToScreenPosition(position: segment.distal, inRect: rect, offsetX: offset, scale: scale))
+    }
+}
+
 class LadderViewModel : ScaledViewModel {
     // Half a region width above and below ladder
     let ladderPaddingMultiplier: CGFloat = 0.5
@@ -67,7 +74,6 @@ class LadderViewModel : ScaledViewModel {
     }
 
     func initialize() {
-        P("LadderViewModel initialize()")
         regionUnitHeight = getRegionUnitHeight(ladder: ladder)
         regions.removeAll()
         var regionBoundary = regionUnitHeight * ladderPaddingMultiplier
@@ -176,18 +182,18 @@ class LadderViewModel : ScaledViewModel {
         }
     }
 
-    func moveMark(mark: Mark, relativePositionX: CGFloat) {
-        let absolutePosition = translateToRegionPositionX(screenPositionX: relativePositionX)
+    func moveMark(mark: Mark, screenPositionX: CGFloat) {
+        let regionPosition = translateToRegionPositionX(screenPositionX: screenPositionX)
         switch mark.anchor {
         case .proximal:
-            mark.segment.proximal.x = absolutePosition
+            mark.segment.proximal.x = regionPosition
         case .middle:
             // Determine halfway point between proximal and distal.
             let difference = (mark.segment.proximal.x - mark.segment.distal.x) / 2
-            mark.segment.proximal.x = absolutePosition + difference
-            mark.segment.distal.x = absolutePosition - difference
+            mark.segment.proximal.x = regionPosition + difference
+            mark.segment.distal.x = regionPosition - difference
         case .distal:
-            mark.segment.distal.x = absolutePosition
+            mark.segment.distal.x = regionPosition
         case .none:
             break
         }
@@ -237,7 +243,7 @@ class LadderViewModel : ScaledViewModel {
     }
 
     func makeMark(positionX relativePositionX: CGFloat) -> Mark? {
-        return addMark(absolutePositionX: Common.translateToRegionPositionX(screenPositionX: relativePositionX, offset: offset, scale: scale))
+        return addMark(absolutePositionX: Common.translateToRegionPositionX(ladderViewPositionX: relativePositionX, offset: offset, scale: scale))
     }
 
     func getRegionHeight(region: Region) -> CGFloat {
@@ -539,7 +545,6 @@ class LadderViewModel : ScaledViewModel {
                 tappedRegionSection = .markSection
                 outerLoop: for mark in tappedRegion.marks {
                     if nearMark(point: position, mark: mark, region: tappedRegion, accuracy: accuracy) {
-//                    if nearMark(positionX: position.x, mark: mark, accuracy: accuracy) {
                         P("tap near mark")
                         tappedMark = mark
                         break outerLoop
@@ -620,7 +625,7 @@ class LadderViewModel : ScaledViewModel {
             else if cursorViewDelegate?.cursorIsVisible() ?? false {
                 unhighlightMarks()
                 cursorViewDelegate?.hideCursor(true)
-                cursorViewDelegate?.unattachMark()
+                cursorViewDelegate?.unattachAttachedMark()
             }
             else { // make mark and attach cursor
                 P("make mark and attach cursor")
@@ -643,34 +648,31 @@ class LadderViewModel : ScaledViewModel {
     /// - Parameter tapLocationInLadder: the tapped LocationInLadder
     func markWasTapped(mark: Mark?, tapLocationInLadder: LocationInLadder, cursorViewDelegate: CursorViewDelegate?) {
         if let mark = mark {
-        if mark.attached {
-            let anchor = getAnchor(regionDivision: tapLocationInLadder.regionDivision)
-            // Just reanchor cursor
-            if anchor != mark.anchor {
-                mark.anchor = anchor
-                let anchorPositionX = mark.getAnchorPositionX()
-                cursorViewDelegate?.moveCursor(positionX: anchorPositionX)
+            if mark.attached {
+                let anchor = getAnchor(regionDivision: tapLocationInLadder.regionDivision)
+                // Just reanchor cursor
+                if anchor != mark.anchor {
+                    mark.anchor = anchor
+                    let anchorPositionX = mark.getAnchorPositionX()
+                    cursorViewDelegate?.moveCursor(positionX: anchorPositionX)
+                }
+                else {
+                    // Unattach mark and hide cursor
+                    mark.attached = false
+                    unhighlightMarks()
+                    unselectMark(mark)
+                    cursorViewDelegate?.hideCursor(true)
+                    cursorViewDelegate?.unattachAttachedMark()
+                }
             }
             else {
-                // Unattach mark and hide cursor
-                P("Unattaching mark")
-                mark.attached = false
-                unhighlightMarks()
-//                mark.highlight = .none
-                unselectMark(mark)
-                cursorViewDelegate?.hideCursor(true)
-                cursorViewDelegate?.unattachMark()
-            }
-        }
-        else {
-            P("Attaching mark")
-            mark.attached = true
-            mark.anchor = getAnchor(regionDivision: tapLocationInLadder.regionDivision)
-            selectMark(mark)
-            cursorViewDelegate?.getViewModel().attachMark(mark)
-            let anchorPositionX = mark.getAnchorPositionX()
-            cursorViewDelegate?.moveCursor(positionX: anchorPositionX)
-            cursorViewDelegate?.hideCursor(false)
+                mark.attached = true
+                mark.anchor = getAnchor(regionDivision: tapLocationInLadder.regionDivision)
+                selectMark(mark)
+                cursorViewDelegate?.getViewModel().attachMark(mark)
+                let anchorPosition = mark.getAnchorPosition()
+                cursorViewDelegate?.moveCursor(positionX: anchorPosition.x)
+                cursorViewDelegate?.hideCursor(false)
             }
         }
     }
@@ -705,7 +707,7 @@ class LadderViewModel : ScaledViewModel {
             if let region = tapLocationInLadder.region {
                 labelWasTapped(labelRegion: region)
                 cursorViewDelegate?.hideCursor(true)
-                cursorViewDelegate?.unattachMark()
+                cursorViewDelegate?.unattachAttachedMark()
             }
         }
         else if (tapLocationInLadder.regionWasTapped) {
@@ -738,18 +740,15 @@ class LadderViewModel : ScaledViewModel {
                 dragOriginDivision = locationInLadder.regionDivision
                 switch dragOriginDivision {
                 case .proximal:
-                    P("prox")
                     dragCreatedMark = makeMark(positionX: position.x)
                     dragCreatedMark?.segment.proximal.y = 0
                     dragCreatedMark?.segment.distal.y = 0.5
                 case .middle:
-                    P("middle")
                     dragCreatedMark = makeMark(positionX: position.x)
                     // TODO: REFACTOR
                     dragCreatedMark?.segment.proximal.y = (position.y - regionOfDragOrigin!.proximalBoundary) / (regionOfDragOrigin!.distalBoundary - regionOfDragOrigin!.proximalBoundary)
                     dragCreatedMark?.segment.distal.y = 0.75
                 case .distal:
-                    P("distal")
                     dragCreatedMark = makeMark(positionX: position.x)
                     dragCreatedMark?.segment.proximal.y = 0.5
                     dragCreatedMark?.segment.distal.y = 1
@@ -762,23 +761,19 @@ class LadderViewModel : ScaledViewModel {
         if state == .changed {
             if let mark = movingMark {
                 if mark.attached {
-                    moveMark(mark: mark, relativePositionX: position.x)
+                    moveMark(mark: mark, screenPositionX: position.x)
                     let anchorPositionX = mark.getAnchorPositionX()
                     cursorViewDelegate?.moveCursor(positionX: anchorPositionX)
                     cursorViewDelegate?.refresh()
                 }
             }
             else {
-                P("dragging mark without cursor.")
                 let locationInLadder = getLocationInLadder(position: position)
                 if regionProxToDragOrigin === locationInLadder.region {
-                    P("Dragging into previous region")
                 }
                 else if regionDistalToDragOrigin === locationInLadder.region {
-                    P("Dragging into next region")
                 }
                 else if regionOfDragOrigin === locationInLadder.region {
-                    P(">>> Dragging into same region")
                     switch dragOriginDivision {
                     case .proximal:
                         dragCreatedMark?.segment.distal = translateToRegionPosition(screenPosition: position, regionProximalBoundary: regionOfDragOrigin!.proximalBoundary, regionHeight: regionOfDragOrigin!.height)
@@ -847,7 +842,7 @@ class LadderViewModel : ScaledViewModel {
     }
 
     func moveMark(mark: Mark, position: CGPoint, moveCursor: Bool, cursorViewDelegate: CursorViewDelegate?) {
-        moveMark(mark: mark, relativePositionX: position.x)
+        moveMark(mark: mark, screenPositionX: position.x)
         if moveCursor {
             let anchorPositionX = mark.getAnchorPositionX()
             cursorViewDelegate?.moveCursor(positionX: anchorPositionX)

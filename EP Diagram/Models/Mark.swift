@@ -162,6 +162,36 @@ class Mark {
         return anchorPositionX
     }
 
+    func getAnchorPositionY() -> CGFloat {
+        let anchorPositionY: CGFloat
+        switch anchor {
+        case .distal:
+            anchorPositionY = segment.distal.y
+        case .middle:
+            anchorPositionY = midpoint().y
+        case .proximal:
+            anchorPositionY = segment.proximal.y
+        case .none:
+            anchorPositionY = segment.proximal.y
+        }
+        return anchorPositionY
+    }
+
+    func getAnchorPosition() -> CGPoint {
+        let anchorPosition: CGPoint
+        switch anchor {
+        case .distal:
+            anchorPosition = segment.distal
+        case .middle:
+            anchorPosition = midpoint()
+        case .proximal:
+            anchorPosition = segment.proximal
+        case .none:
+            anchorPosition = segment.proximal
+        }
+        return anchorPosition
+    }
+
     // Note point must be in absolute coordiates, with y between 0 and 1 relative to region height.
     func distance(point: CGPoint) -> CGFloat {
         var numerator = (segment.distal.y - segment.proximal.y) * point.x - (segment.distal.x - segment.proximal.x) * point.y + segment.distal.x * segment.proximal.y - segment.distal.y * segment.proximal.x

@@ -10,7 +10,7 @@ import UIKit
 
 protocol CursorViewDelegate: AnyObject {
     func refresh()
-    func unattachMark()
+    func unattachAttachedMark()
     func moveCursor(positionX: CGFloat)
     func highlightCursor(_ on: Bool)
     func hideCursor(_ hide: Bool)
@@ -109,12 +109,19 @@ class CursorView: UIView, CursorViewDelegate {
         }
     }
 
-    // TODO: move to CursorViewModel and get the endpoints and midpoint of the attached mark.
-//    private func getNewCursorHeight(anchor: Anchor) -> CGFloat {
-//        guard let ladderViewDelegate = ladderViewDelegate else { return self.frame.height }
-//        guard let attachedMark = cursorViewModel.geta
-//
-//    }
+    private func getNewCursorHeight(anchor: Anchor) -> CGFloat {
+        guard let ladderViewDelegate = ladderViewDelegate else { return self.frame.height }
+        switch anchor {
+        case .proximal:
+            return ladderViewDelegate.getRegionProximalBoundary(view: self)
+        case .middle:
+            return ladderViewDelegate.getRegionMidPoint(view: self)
+        case .distal:
+            return ladderViewDelegate.getRegionDistalBoundary(view: self)
+        case .none:
+            return ladderViewDelegate.getHeight()
+        }
+    }
 
     // MARK: - touches
 
@@ -136,7 +143,7 @@ class CursorView: UIView, CursorViewDelegate {
         }
         // toggle hide or show cursor with single tap
         hideCursor(cursorViewModel.cursorVisible)
-        unattachMark()
+        unattachAttachedMark()
         setNeedsDisplay()
     }
 
@@ -186,8 +193,8 @@ class CursorView: UIView, CursorViewDelegate {
         cursorViewModel.attachMark(mark)
     }
 
-    func unattachMark() {
-        if cursorViewModel.unattachMark(ladderViewDelegate: ladderViewDelegate) {
+    func unattachAttachedMark() {
+        if cursorViewModel.unattachAttachedMark(ladderViewDelegate: ladderViewDelegate) {
             ladderViewDelegate?.refresh()
         }
     }
