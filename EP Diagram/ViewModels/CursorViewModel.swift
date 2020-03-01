@@ -98,7 +98,7 @@ class CursorViewModel: ScaledViewModel {
     }
 
     func isNearCursor(positionX: CGFloat, accuracy: CGFloat) -> Bool {
-        return positionX < translateToScreenPositionX(regionPositionX: cursor.position) + accuracy && positionX > translateToScreenPositionX(regionPositionX: cursor.position) - accuracy
+        return positionX < translateToLadderViewPositionX(regionPositionX: cursor.position) + accuracy && positionX > translateToLadderViewPositionX(regionPositionX: cursor.position) - accuracy
     }
 
     func draw(rect: CGRect, context: CGContext, defaultHeight: CGFloat?) {
@@ -110,7 +110,7 @@ class CursorViewModel: ScaledViewModel {
         context.setStrokeColor(color.cgColor)
         context.setLineWidth(lineWidth)
         context.setAlpha(alphaValue)
-        let position = scale * cursor.position - offset
+        let position = scale * cursor.position - offsetX
         let defaultHeight = defaultHeight ?? height
         let cursorHeight = (position <= leftMargin) ? defaultHeight : height
         context.move(to: CGPoint(x: position, y: 0))
@@ -150,7 +150,7 @@ class CursorViewModel: ScaledViewModel {
     func dragMark(ladderViewDelegate: LadderViewDelegate?, cursorViewDelegate: CursorViewDelegate?) {
         if let attachedMark = attachedMark {
             P("Move attached Mark")
-            ladderViewDelegate?.getViewModel().moveMark(mark: attachedMark, position: CGPoint(x: translateToScreenPositionX(regionPositionX: cursorPosition), y: 0), moveCursor: false, cursorViewDelegate: cursorViewDelegate)
+            ladderViewDelegate?.getViewModel().moveMark(mark: attachedMark, position: CGPoint(x: translateToLadderViewPositionX(regionPositionX: cursorPosition), y: 0), moveCursor: false, cursorViewDelegate: cursorViewDelegate)
             ladderViewDelegate?.refresh()
         }
     }

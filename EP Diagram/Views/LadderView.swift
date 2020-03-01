@@ -21,41 +21,7 @@ protocol LadderViewDelegate: AnyObject {
     func unhighlightMarks()
 }
 
-@available(iOS 13.0, *)
-extension LadderView: UIContextMenuInteractionDelegate {
-    func contextMenuInteraction(_ interaction: UIContextMenuInteraction, configurationForMenuAtLocation location: CGPoint) -> UIContextMenuConfiguration? {
-        let markFound = ladderViewModel.markWasTapped(position: location)
-        ladderViewModel.setPressedMark(position: location)
-        return UIContextMenuConfiguration(identifier: nil, previewProvider: nil) { suggestedActions in
-            let solid = UIAction(title: L("Solid")) { action in
-                self.setSolid()
-            }
-            let dashed = UIAction(title: L("Dashed")) { action in
-                self.setDashed()
-            }
-            let dotted = UIAction(title: L("Dotted")) { action in
-                self.setDotted()
-            }
-            let style = UIMenu(title: L("Style..."), children: [solid, dashed, dotted])
-            // Use .displayInline option to show menu inline with separator.
-//           let style = UIMenu(title: L("Style..."), options: .displayInline,  children: [solid, dashed, dotted])
-            let unlink = UIAction(title: L("Unlink")) { action in
-                self.ladderViewModel.unlinkPressedMark()
-            }
-            let delete = UIAction(title: L("Delete"), image: UIImage(systemName: "trash"), attributes: .destructive) { action in
-                self.deletePressedMark()
-            }
-            // Create and return a UIMenu with all of the actions as children
-            if markFound {
-                return UIMenu(title: L("Edit mark"), children: [style, unlink, delete])
-            }
-            else {
-                return UIMenu(title: "", children: [delete])
-            }
-        }
-    }}
-
-class LadderView: UIView, LadderViewDelegate {
+class LadderView: UIView {
     weak var cursorViewDelegate: CursorViewDelegate?
     var ladderViewModel = LadderViewModel()
 
@@ -71,7 +37,7 @@ class LadderView: UIView, LadderViewDelegate {
     }
     var offset: CGFloat = 0 {
         didSet {
-            ladderViewModel.offset = offset
+            ladderViewModel.offsetX = offset
         }
     }
     var scale: CGFloat = 1 {
@@ -200,10 +166,36 @@ class LadderView: UIView, LadderViewDelegate {
         }
     }
 
+    // FIXME: test which offsetY works.
     func resetSize() {
         ladderViewModel.height = self.frame.height
+//        ladderViewModel.offsetY = superview!.frame.height - ladderViewModel.height
+//        P("offsetY = \(ladderViewModel.offsetY)")
+        ladderViewModel.offsetY = convert(self.frame.origin, to: cursorViewDelegate!.view()).y
+        P("offsetY = \(ladderViewModel.offsetY)")
         ladderViewModel.reinit()
     }
+
+    func addAttachedMark(positionX: CGFloat) {
+        ladderViewModel.addAttachedMark(positionX: positionX)
+    }
+
+    private func unscaledPositionX(positionX: CGFloat) -> CGFloat {
+        return positionX / scale
+    }
+
+    @objc func deletePressedMark() {
+        ladderViewModel.deletePressedMark()
+        cursorViewDelegate?.hideCursor(true)
+        refresh()
+    }
+
+    @objc func unlinkPressedMark() {
+        ladderViewModel.unlinkPressedMark()
+    }
+}
+
+extension LadderView: LadderViewDelegate {
 
     // MARK: - LadderView delegate methods
     // convert region upper boundary to view's coordinates and return to view
@@ -232,24 +224,6 @@ class LadderView: UIView, LadderViewDelegate {
         return ladderViewModel.height
     }
 
-    func addAttachedMark(positionX: CGFloat) {
-        ladderViewModel.addAttachedMark(positionX: positionX)
-    }
-
-    private func unscaledPositionX(positionX: CGFloat) -> CGFloat {
-        return positionX / scale
-    }
-
-    @objc func deletePressedMark() {
-        ladderViewModel.deletePressedMark()
-        cursorViewDelegate?.hideCursor(true)
-        refresh()
-    }
-
-    @objc func unlinkPressedMark() {
-        ladderViewModel.unlinkPressedMark()
-    }
-
     func refresh() {
         cursorViewDelegate?.refresh()
         setNeedsDisplay()
@@ -271,5 +245,39 @@ class LadderView: UIView, LadderViewDelegate {
     func unhighlightMarks() {
         ladderViewModel.unhighlightMarks()
     }
+
 }
 
+@available(iOS 13.0, *)
+extension LadderView: UIContextMenuInteractionDelegate {
+    func contextMenuInteraction(_ interaction: UIContextMenuInteraction, configurationForMenuAtLocation location: CGPoint) -> UIContextMenuConfiguration? {
+        let markFound = ladderViewModel.markWasTapped(position: location)
+        ladderViewModel.setPressedMark(position: location)
+        return UIContextMenuConfiguration(identifier: nil, previewProvider: nil) { suggestedActions in
+            let solid = UIAction(title: L("Solid")) { action in
+                self.setSolid()
+            }
+            let dashed = UIAction(title: L("Dashed")) { action in
+                self.setDashed()
+            }
+            let dotted = UIAction(title: L("Dotted")) { action in
+                self.setDotted()
+            }
+            let style = UIMenu(title: L("Style..."), children: [solid, dashed, dotted])
+            // Use .displayInline option to show menu inline with separator.
+            //           let style = UIMenu(title: L("Style..."), options: .displayInline,  children: [solid, dashed, dotted])
+            let unlink = UIAction(title: L("Unlink")) { action in
+                self.ladderViewModel.unlinkPressedMark()
+            }
+            let delete = UIAction(title: L("Delete"), image: UIImage(systemName: "trash"), attributes: .destructive) { action in
+                self.deletePressedMark()
+            }
+            // Create and return a UIMenu with all of the actions as children
+            if markFound {
+                return UIMenu(title: L("Edit mark"), children: [style, unlink, delete])
+            }
+            else {
+                return UIMenu(title: "", children: [delete])
+            }
+        }
+    }}

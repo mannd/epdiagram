@@ -25,8 +25,8 @@ class LadderViewModelTests: XCTestCase {
     func testTranslateCoordinates() {
         let positionX: CGFloat = 134.56
         ladderViewModel.scale = 1.78
-        ladderViewModel.offset = 333.45
-        let absolutePositionX = ladderViewModel.translateToRegionPositionX(screenPositionX: positionX)
+        ladderViewModel.offsetX = 333.45
+        let absolutePositionX = ladderViewModel.translateToRegionPositionX(ladderViewPositionX: positionX)
         let relativeLocation = ladderViewModel.translateToScreenPositionX(regionPositionX: absolutePositionX)
         XCTAssertEqual(positionX, relativeLocation, accuracy: 0.0001)
     }
@@ -47,7 +47,7 @@ class LadderViewModelTests: XCTestCase {
         ladderView!.scale = 2.5
         ladderView!.offset = 305
         XCTAssertEqual(ladderView!.ladderViewModel.scale, 2.5)
-        XCTAssertEqual(ladderView!.ladderViewModel.offset, 305)
+        XCTAssertEqual(ladderView!.ladderViewModel.offsetX, 305)
     }
 
     func testMoreCoordinateTranslations() {

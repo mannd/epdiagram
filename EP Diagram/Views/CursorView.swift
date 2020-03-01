@@ -16,9 +16,10 @@ protocol CursorViewDelegate: AnyObject {
     func hideCursor(_ hide: Bool)
     func cursorIsVisible() -> Bool
     func getViewModel() -> CursorViewModel
+    func view() -> UIView
 }
 
-class CursorView: UIView, CursorViewDelegate {
+class CursorView: UIView {
     var cursorViewModel: CursorViewModel = CursorViewModel()
     weak var ladderViewDelegate: LadderViewDelegate?
 
@@ -34,7 +35,7 @@ class CursorView: UIView, CursorViewDelegate {
     }
     var offset: CGFloat = 0 {
         didSet {
-            cursorViewModel.offset = offset
+            cursorViewModel.offsetX = offset
         }
     }
 
@@ -178,12 +179,13 @@ class CursorView: UIView, CursorViewDelegate {
         P("Do calibration")
     }
 
-
     func putCursor(positionX: CGFloat) {
         cursorViewModel.cursorPosition = positionX / scale
         hideCursor(false)
     }
+}
 
+extension CursorView: CursorViewDelegate {
     // MARK: - CursorView delegate methods
     func refresh() {
         setNeedsDisplay()
@@ -222,5 +224,9 @@ class CursorView: UIView, CursorViewDelegate {
     // We expose the underlying view model to avoid exposing elements of the model.
     func getViewModel() -> CursorViewModel {
         return cursorViewModel
+    }
+
+    func view() -> UIView {
+        return self
     }
 }

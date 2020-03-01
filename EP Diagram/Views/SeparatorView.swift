@@ -98,8 +98,6 @@ class SeparatorView: UIView {
         secondaryView.setNeedsDisplay()
     }
 
-
-
     func drawSeparator(_ rect: CGRect, with color: UIColor) {
         color.set()
         let path = UIBezierPath(rect: rect)
@@ -125,7 +123,6 @@ class HorizontalSeparatorView: SeparatorView, OnConstraintUpdateProtocol {
         fatalError("init(coder:) has not been implemented")
     }
 
-    // We don't need to setup the views like below.
     override func setupParentViewConstraints(parentView: UIView) {
 //        parentView.leadingAnchor.constraint(equalTo: primaryView.leadingAnchor).isActive = true
 //        parentView.trailingAnchor.constraint(equalTo: primaryView.trailingAnchor).isActive = true
@@ -183,6 +180,7 @@ class HorizontalSeparatorView: SeparatorView, OnConstraintUpdateProtocol {
     }
 }
 
+// Vertical separator not used in EP Diagram.
 class VerticalSeparatorView: SeparatorView, OnConstraintUpdateProtocol {
     override init(primaryView: UIView, secondaryView: UIView) {
            super.init(primaryView: primaryView, secondaryView: secondaryView)

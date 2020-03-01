@@ -28,6 +28,19 @@ class Common {
         return CGPoint(x: x, y: y)
     }
 
+    // Version just passing region.
+    static func translateToLadderViewPosition(regionPosition: CGPoint, region: Region, offsetX offset: CGFloat, scale: CGFloat) -> CGPoint {
+        let x = translateToLadderViewPositionX(regionPositionX: regionPosition.x, offset: offset, scale: scale)
+        let y = region.proximalBoundary + regionPosition.y * region.height
+        return CGPoint(x: x, y: y)
+    }
+
+    static func translateToScreenPosition(regionPosition: CGPoint, regionProximalBoundary proxBoundary: CGFloat, regionHeight height: CGFloat, offsetX: CGFloat, offsetY: CGFloat, scale: CGFloat) -> CGPoint {
+        let x = translateToLadderViewPositionX(regionPositionX: regionPosition.x, offset: offsetX, scale: scale)
+        let y = proxBoundary + regionPosition.y * height + offsetY
+        return CGPoint(x: x, y: y)
+    }
+
     static func translateToLadderViewSegment(regionSegment: Segment, regionProximalBoundary proxBoundary: CGFloat, regionHeight height: CGFloat, offsetX offset: CGFloat, scale: CGFloat) -> Segment {
         return Segment(proximal: translateToLadderViewPosition(regionPosition: regionSegment.proximal, regionProximalBoundary: proxBoundary, regionHeight: height, offsetX: offset, scale: scale), distal: translateToLadderViewPosition(regionPosition: regionSegment.distal, regionProximalBoundary: proxBoundary, regionHeight: height, offsetX: offset, scale: scale))
     }
@@ -78,6 +91,12 @@ class Common {
         var denominator = pow((linePoint2.y - linePoint1.y), 2) + pow((linePoint2.x - linePoint1.x), 2)
         denominator = sqrt(denominator)
         return numerator / denominator
+    }
+
+    static func distance(_ p1: CGPoint, _ p2: CGPoint) -> CGFloat {
+        let diffX = p1.x - p2.x
+        let diffY = p1.y - p2.y
+        return sqrt(diffX * diffX + diffY * diffY)
     }
 }
 
