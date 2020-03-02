@@ -644,7 +644,7 @@ class LadderViewModel : ScaledViewModel {
                     mark.attached = true
                     mark.anchor = getAnchor(regionDivision: tapLocationInLadder.regionDivision)
                     selectMark(mark)
-                    cursorViewDelegate?.getViewModel().attachMark(mark)
+                    cursorViewDelegate?.attachMark(mark)
                     cursorViewDelegate?.moveCursor(positionX: mark.segment.proximal.x)
                     cursorViewDelegate?.hideCursor(false)
                 }
@@ -678,16 +678,16 @@ class LadderViewModel : ScaledViewModel {
                 mark.attached = true
                 mark.anchor = tapLocationInLadder.markAnchor
                 selectMark(mark)
-                cursorViewDelegate?.getViewModel().attachMark(mark)
+                cursorViewDelegate?.attachMark(mark)
                 let anchorPosition = mark.getAnchorPosition()
-                P("anchorPosition = \(anchorPosition)")
-                let adjustedAnchorPosition = Common.translateToLadderViewPosition(regionPosition: anchorPosition, region: activeRegion!, offsetX: offsetX, scale: scale)
-                P("ladderView anchorPosition = \(adjustedAnchorPosition)")
-                let height = cursorViewDelegate?.convertPoint(adjustedAnchorPosition).y
-                if let height = height {
-                    cursorViewDelegate?.setHeight(height)
-                    P("height = \(height)")
-                }
+//                P("anchorPosition = \(anchorPosition)")
+//                let adjustedAnchorPosition = Common.translateToLadderViewPosition(regionPosition: anchorPosition, region: activeRegion!, offsetX: offsetX, scale: scale)
+//                P("ladderView anchorPosition = \(adjustedAnchorPosition)")
+//                let height = cursorViewDelegate?.convertPoint(adjustedAnchorPosition).y
+//                if let height = height {
+//                    cursorViewDelegate?.setHeight(height)
+//                    P("height = \(height)")
+//                }
                 cursorViewDelegate?.moveCursor(positionX: anchorPosition.x)
                 cursorViewDelegate?.hideCursor(false)
             }

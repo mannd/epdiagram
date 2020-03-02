@@ -170,10 +170,6 @@ class LadderView: UIView {
     // FIXME: test which offsetY works.
     func resetSize() {
         ladderViewModel.height = self.frame.height
-//        ladderViewModel.offsetY = superview!.frame.height - ladderViewModel.height
-//        P("offsetY = \(ladderViewModel.offsetY)")
-        ladderViewModel.offsetY = convert(self.frame.origin, to: cursorViewDelegate!.view()).y
-        P("offsetY = \(ladderViewModel.offsetY)")
         ladderViewModel.reinit()
     }
 

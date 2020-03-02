@@ -9,7 +9,7 @@
 import UIKit
 
 class CursorViewModel: ScaledViewModel {
-    let cursor: Cursor
+    var cursor: Cursor
     let unattachedColor: UIColor = UIColor.systemRed
     let attachedColor: UIColor = UIColor.systemBlue
     let goneColor: UIColor = UIColor.clear
