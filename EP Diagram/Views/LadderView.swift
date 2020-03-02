@@ -27,7 +27,6 @@ protocol LadderViewDelegate: AnyObject {
 
 class LadderView: ScaledView {
     weak var cursorViewDelegate: CursorViewDelegate?
-    var ladderViewModel = LadderViewModel()
 
     override var canBecomeFirstResponder: Bool {
         get {
