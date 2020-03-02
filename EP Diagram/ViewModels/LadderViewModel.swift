@@ -606,12 +606,6 @@ class LadderViewModel : ScaledViewModel {
         return getLocationInLadder(position: position).markWasTapped
     }
 
-//    let locationInLadder = self.ladderViewModel.getLocationInLadder(position: location)
-//    if let mark = locationInLadder.mark {
-//        self.pressedMark = mark
-//        self.setSolid()
-//    }
-
     func labelWasTapped(labelRegion: Region) {
         if labelRegion.selected {
             labelRegion.selected = false

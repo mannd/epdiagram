@@ -9,6 +9,7 @@
 /* Begin PBXBuildFile section */
 		8E01D9C522848F4E000F36FC /* LadderViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8E01D9C422848F4E000F36FC /* LadderViewModel.swift */; };
 		8E01D9C722849047000F36FC /* CursorView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8E01D9C622849047000F36FC /* CursorView.swift */; };
+		8E1B6CB8240CAE5300EA88A6 /* ScaledView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8E1B6CB7240CAE5300EA88A6 /* ScaledView.swift */; };
 		8E25A9AF22E54F7200D62E18 /* CursorTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8E25A9AE22E54F7200D62E18 /* CursorTests.swift */; };
 		8E25A9B122E5505200D62E18 /* LadderViewModelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8E25A9B022E5505200D62E18 /* LadderViewModelTests.swift */; };
 		8E25A9B322E5515D00D62E18 /* LadderTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8E25A9B222E5515D00D62E18 /* LadderTests.swift */; };
@@ -22,8 +23,6 @@
 		8E7D24CD22779DBF005A1729 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 8E7D24CB22779DBF005A1729 /* LaunchScreen.storyboard */; };
 		8E7D24E322779DBF005A1729 /* EP_DiagramUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8E7D24E222779DBF005A1729 /* EP_DiagramUITests.swift */; };
 		8E7D24F12277A00C005A1729 /* ImageView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8E7D24F02277A00C005A1729 /* ImageView.swift */; };
-		8E7F8DC122C82D890061ABF8 /* CursorViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8E7F8DC022C82D890061ABF8 /* CursorViewModel.swift */; };
-		8E7F8DC322C82D9E0061ABF8 /* ImageViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8E7F8DC222C82D9E0061ABF8 /* ImageViewModel.swift */; };
 		8E8248DD23B53B55001A85F9 /* SeparatorView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8E8248DC23B53B55001A85F9 /* SeparatorView.swift */; };
 		8E9A466723005A600037AEAB /* CursorViewTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8E9A466623005A600037AEAB /* CursorViewTests.swift */; };
 		8E9B8043228345B5008873BB /* Mark.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8E9B8042228345B5008873BB /* Mark.swift */; };
@@ -55,6 +54,7 @@
 /* Begin PBXFileReference section */
 		8E01D9C422848F4E000F36FC /* LadderViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LadderViewModel.swift; sourceTree = "<group>"; };
 		8E01D9C622849047000F36FC /* CursorView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CursorView.swift; sourceTree = "<group>"; };
+		8E1B6CB7240CAE5300EA88A6 /* ScaledView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScaledView.swift; sourceTree = "<group>"; };
 		8E25A9AE22E54F7200D62E18 /* CursorTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CursorTests.swift; sourceTree = "<group>"; };
 		8E25A9B022E5505200D62E18 /* LadderViewModelTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LadderViewModelTests.swift; sourceTree = "<group>"; };
 		8E25A9B222E5515D00D62E18 /* LadderTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LadderTests.swift; sourceTree = "<group>"; };
@@ -75,8 +75,6 @@
 		8E7D24E222779DBF005A1729 /* EP_DiagramUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EP_DiagramUITests.swift; sourceTree = "<group>"; };
 		8E7D24E422779DBF005A1729 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		8E7D24F02277A00C005A1729 /* ImageView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImageView.swift; sourceTree = "<group>"; };
-		8E7F8DC022C82D890061ABF8 /* CursorViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CursorViewModel.swift; sourceTree = "<group>"; };
-		8E7F8DC222C82D9E0061ABF8 /* ImageViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImageViewModel.swift; sourceTree = "<group>"; };
 		8E8248DC23B53B55001A85F9 /* SeparatorView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SeparatorView.swift; sourceTree = "<group>"; };
 		8E9A466623005A600037AEAB /* CursorViewTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CursorViewTests.swift; sourceTree = "<group>"; };
 		8E9B8042228345B5008873BB /* Mark.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Mark.swift; sourceTree = "<group>"; };
@@ -197,8 +195,6 @@
 			isa = PBXGroup;
 			children = (
 				8E01D9C422848F4E000F36FC /* LadderViewModel.swift */,
-				8E7F8DC022C82D890061ABF8 /* CursorViewModel.swift */,
-				8E7F8DC222C82D9E0061ABF8 /* ImageViewModel.swift */,
 				8EED72922403447100DB5563 /* ScaledViewModel.swift */,
 			);
 			path = ViewModels;
@@ -220,6 +216,7 @@
 				8E01D9C622849047000F36FC /* CursorView.swift */,
 				8E7D24F02277A00C005A1729 /* ImageView.swift */,
 				8E8248DC23B53B55001A85F9 /* SeparatorView.swift */,
+				8E1B6CB7240CAE5300EA88A6 /* ScaledView.swift */,
 			);
 			path = Views;
 			sourceTree = "<group>";
@@ -365,9 +362,9 @@
 			files = (
 				8E7D24F12277A00C005A1729 /* ImageView.swift in Sources */,
 				8E7D24C522779DBD005A1729 /* ViewController.swift in Sources */,
+				8E1B6CB8240CAE5300EA88A6 /* ScaledView.swift in Sources */,
 				8E8248DD23B53B55001A85F9 /* SeparatorView.swift in Sources */,
 				8E7214DE22E95C860062C094 /* Common.swift in Sources */,
-				8E7F8DC122C82D890061ABF8 /* CursorViewModel.swift in Sources */,
 				8E9B8043228345B5008873BB /* Mark.swift in Sources */,
 				8E01D9C522848F4E000F36FC /* LadderViewModel.swift in Sources */,
 				8E9B804722834870008873BB /* Ladder.swift in Sources */,
@@ -378,7 +375,6 @@
 				8E01D9C722849047000F36FC /* CursorView.swift in Sources */,
 				8E9B8045228347DE008873BB /* Region.swift in Sources */,
 				8E7D24C322779DBD005A1729 /* AppDelegate.swift in Sources */,
-				8E7F8DC322C82D9E0061ABF8 /* ImageViewModel.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

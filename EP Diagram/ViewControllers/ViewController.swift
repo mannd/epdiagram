@@ -185,7 +185,7 @@
             if scrollView == imageScrollView {
                 P("didScroll")
                 // Only scrolling in the horizontal direction affects ladderView.
-                ladderView.offset = scrollView.contentOffset.x
+                ladderView.offsetX = scrollView.contentOffset.x
                 cursorView.offsetX = scrollView.contentOffset.x
                 cursorView.scale = scrollView.zoomScale
                 ladderView.scale = scrollView.zoomScale

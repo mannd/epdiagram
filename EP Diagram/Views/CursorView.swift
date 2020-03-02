@@ -18,7 +18,7 @@ protocol CursorViewDelegate: AnyObject {
     func cursorIsVisible() -> Bool
 }
 
-class CursorView: UIView {
+class CursorView: ScaledView {
     let unattachedColor: UIColor = UIColor.systemRed
     let attachedColor: UIColor = UIColor.systemBlue
     let goneColor: UIColor = UIColor.clear
@@ -45,13 +45,7 @@ class CursorView: UIView {
     }
     var width: CGFloat = 0
     var height: CGFloat = 0
-    // scale determined by pinch to zoom.
-    var scale: CGFloat = 1
-    // offsetX determined by scrolling.
-    var offsetX: CGFloat = 0
-    // offsetY is the distance from the top of the cursorView to the top of the ladderView, set by LadderView.
 
-    var cursorViewModel: CursorViewModel = CursorViewModel()
     weak var ladderViewDelegate: LadderViewDelegate?
 
     var leftMargin: CGFloat = 0
@@ -96,8 +90,6 @@ class CursorView: UIView {
             self.layer.borderColor = UIColor.black.cgColor
         }
         self.layer.borderWidth = 1
-
-        cursorViewModel = CursorViewModel(leftMargin: leftMargin, width: self.frame.width, height: self.frame.width)
 
         let singleTapRecognizer = UITapGestureRecognizer(target: self, action: #selector(self.singleTap))
         singleTapRecognizer.numberOfTapsRequired = 1
@@ -189,10 +181,6 @@ class CursorView: UIView {
         return positionX < translateToLadderViewPositionX(regionPositionX: cursor.position) + accuracy && positionX > translateToLadderViewPositionX(regionPositionX: cursor.position) - accuracy
     }
 
-    func translateToLadderViewPositionX(regionPositionX: CGFloat) -> CGFloat {
-        Common.translateToLadderViewPositionX(regionPositionX: regionPositionX, offset:offsetX, scale: scale)
-    }
-
     @objc func singleTap(tap: UITapGestureRecognizer) {
         if calibrating {
             doCalibration()
@@ -205,7 +193,7 @@ class CursorView: UIView {
 
     @objc func doubleTap(tap: UITapGestureRecognizer) {
         if let attachedMark = attachedMark {
-            ladderViewDelegate?.getViewModel().deleteMark(attachedMark)
+            ladderViewDelegate?.deleteMark(attachedMark)
             cursor.visible = false
             ladderViewDelegate?.refresh()
             setNeedsDisplay()
@@ -221,7 +209,7 @@ class CursorView: UIView {
         }
         if pan.state == .ended {
             if let attachedMark = attachedMark {
-                ladderViewDelegate?.getViewModel().linkNearbyMarks(mark: attachedMark)
+                ladderViewDelegate?.linkNearbyMarks(mark: attachedMark)
                 ladderViewDelegate?.refresh()
             }
         }
@@ -236,7 +224,7 @@ class CursorView: UIView {
     func dragMark(ladderViewDelegate: LadderViewDelegate?, cursorViewDelegate: CursorViewDelegate?) {
         if let attachedMark = attachedMark {
             P("Move attached Mark")
-            ladderViewDelegate?.getViewModel().moveMark(mark: attachedMark, position: CGPoint(x: translateToLadderViewPositionX(regionPositionX: cursor.position), y: 0), moveCursor: false, cursorViewDelegate: cursorViewDelegate)
+            ladderViewDelegate?.moveMark(mark: attachedMark, position: CGPoint(x: translateToLadderViewPositionX(regionPositionX: cursor.position), y: 0), moveCursor: false, cursorViewDelegate: cursorViewDelegate)
             ladderViewDelegate?.refresh()
         }
     }
@@ -270,7 +258,7 @@ extension CursorView: CursorViewDelegate {
     }
 
     func attachMark(positionX: CGFloat) {
-        let mark = ladderViewDelegate?.getViewModel().addMark(positionX: positionX)
+        let mark = ladderViewDelegate?.addMark(positionX: positionX)
         attachMark(mark)
     }
 
