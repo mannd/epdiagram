@@ -1,5 +1,5 @@
 //
-//  LadderViewModelTests.swift
+//  LadderViewTests.swift
 //  EP DiagramTests
 //
 //  Created by David Mann on 7/21/19.
@@ -9,32 +9,32 @@
 import XCTest
 @testable import EP_Diagram
 
-class LadderViewModelTests: XCTestCase {
-    private var ladderViewModel: LadderViewModel!
+class LadderViewTests: XCTestCase {
+    private var ladderView: LadderView!
 
     override func setUp() {
         super.setUp()
-        ladderViewModel = LadderViewModel()
+        ladderView = LadderView()
     }
 
     override func tearDown() {
-        ladderViewModel = nil
+        ladderView = nil
         super.tearDown()
     }
 
     func testTranslateCoordinates() {
         let positionX: CGFloat = 134.56
-        ladderViewModel.scale = 1.78
-        ladderViewModel.offsetX = 333.45
-        let absolutePositionX = ladderViewModel.translateToRegionPositionX(ladderViewPositionX: positionX)
-        let relativeLocation = ladderViewModel.translateToScreenPositionX(regionPositionX: absolutePositionX)
+        ladderView.scale = 1.78
+        ladderView.offsetX = 333.45
+        let absolutePositionX = ladderView.translateToRegionPositionX(ladderViewPositionX: positionX)
+        let relativeLocation = ladderView.translateToLadderViewPositionX(regionPositionX: absolutePositionX)
         XCTAssertEqual(positionX, relativeLocation, accuracy: 0.0001)
     }
 
     func testLadderViewModelUnitHeight() {
-        ladderViewModel.ladder = Ladder.defaultLadder()
-        ladderViewModel.height = 100
-        let height = ladderViewModel.getRegionUnitHeight(ladder: ladderViewModel.ladder)
+        ladderView.ladder = Ladder.defaultLadder()
+        ladderView.height = 100
+        let height = ladderView.getRegionUnitHeight(ladder: ladderView.ladder)
         XCTAssertEqual(height, 20, accuracy: 0.0001)
     }
 
@@ -45,9 +45,9 @@ class LadderViewModelTests: XCTestCase {
         sut.loadViewIfNeeded()
         let ladderView = sut.ladderView
         ladderView!.scale = 2.5
-        ladderView!.offset = 305
-        XCTAssertEqual(ladderView!.ladderViewModel.scale, 2.5)
-        XCTAssertEqual(ladderView!.ladderViewModel.offsetX, 305)
+        ladderView!.offsetX = 305
+        XCTAssertEqual(ladderView!.scale, 2.5)
+        XCTAssertEqual(ladderView!.offsetX, 305)
     }
 
     func testMoreCoordinateTranslations() {
