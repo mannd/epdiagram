@@ -19,6 +19,7 @@ struct LocationInLadder {
     var mark: Mark?
     var regionSection: RegionSection
     var regionDivision: RegionDivision
+    var markAnchor: Anchor
     var regionWasTapped: Bool {
         region != nil
     }
@@ -28,7 +29,6 @@ struct LocationInLadder {
     var markWasTapped: Bool {
         mark != nil
     }
-    var anchorWasTapped: Anchor
 }
 
 // A Ladder is simply a collection of Regions in top bottom order.

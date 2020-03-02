@@ -19,7 +19,11 @@ class CursorViewModel: ScaledViewModel {
     let lineWidth: CGFloat = 2
     var color: UIColor
     var width: CGFloat
-    var height: CGFloat
+    var height: CGFloat {
+        didSet {
+            P("Real height = \(height)")
+        }
+    }
     var attachedMark: Mark?
     var cursorState: Cursor.CursorState {
         didSet {
@@ -136,15 +140,13 @@ class CursorViewModel: ScaledViewModel {
         P("Mark attached!")
     }
 
-    /// Unattaches mark if attached.  Returns true if mark was unattached, false if attached mark was already nil.
-    func unattachAttachedMark(ladderViewDelegate: LadderViewDelegate?) -> Bool {
+    /// Unattaches mark if attached.
+    func unattachAttachedMark(ladderViewDelegate: LadderViewDelegate?) {
         if let mark = attachedMark {
             mark.attached = false
             attachedMark = nil
             ladderViewDelegate?.unhighlightMarks()
-            return true
         }
-        return false
     }
 
     func dragMark(ladderViewDelegate: LadderViewDelegate?, cursorViewDelegate: CursorViewDelegate?) {

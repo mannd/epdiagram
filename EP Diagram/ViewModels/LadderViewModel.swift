@@ -13,6 +13,7 @@ class LadderViewModel : ScaledViewModel {
     let ladderPaddingMultiplier: CGFloat = 0.5
     let accuracy: CGFloat = 20
     let lowerLimitMarkHeight: CGFloat = 0.1
+    let lowerlimitMarkWidth: CGFloat = 20
 
     var regions: [Region] = []
     var ladder: Ladder
@@ -270,7 +271,6 @@ class LadderViewModel : ScaledViewModel {
     }
 
     func draw(rect: CGRect, context: CGContext) {
-        P("LadderViewModel draw()")
         if #available(iOS 13.0, *) {
             context.setStrokeColor(UIColor.label.cgColor)
         } else {
@@ -462,16 +462,6 @@ class LadderViewModel : ScaledViewModel {
         }
     }
 
-//    fileprivate func relativeMarkPosition(mark: Mark, offset: CGFloat, scale: CGFloat, rect: CGRect) -> Segment{
-//        let proximalX = translateToLadderViewPositionX(regionPositionX: mark.segment.proximal.x)
-//        let distalX = translateToLadderViewPositionX(regionPositionX: mark.segment.distal.x)
-//        let proximalY = rect.origin.y + mark.segment.proximal.y * rect.height
-//        let distalY = rect.origin.y + mark.segment.distal.y * rect.height
-//        let proximalPoint = CGPoint(x: proximalX, y: proximalY)
-//        let distalPoint = CGPoint(x: distalX, y: distalY)
-//        return Segment(proximal: proximalPoint, distal: distalPoint)
-//    }
-
     fileprivate func drawMarks(region: Region, context: CGContext,  rect: CGRect) {
         // Draw marks
         for mark: Mark in region.marks {
@@ -571,7 +561,7 @@ class LadderViewModel : ScaledViewModel {
                 }
             }
         }
-        return LocationInLadder(region: tappedRegion, mark: tappedMark, regionSection: tappedRegionSection, regionDivision: tappedRegionDivision, anchorWasTapped: tappedAnchor)
+        return LocationInLadder(region: tappedRegion, mark: tappedMark, regionSection: tappedRegionSection, regionDivision: tappedRegionDivision, markAnchor: tappedAnchor)
     }
     
     private func getTappedRegionDivision(region: Region, positionY: CGFloat) -> RegionDivision {
@@ -668,7 +658,7 @@ class LadderViewModel : ScaledViewModel {
     func markWasTapped(mark: Mark?, tapLocationInLadder: LocationInLadder, cursorViewDelegate: CursorViewDelegate?) {
         if let mark = mark {
             if mark.attached {
-                let anchor = getAnchor(regionDivision: tapLocationInLadder.regionDivision)
+                let anchor = tapLocationInLadder.markAnchor
                 // Just reanchor cursor
                 if anchor != mark.anchor {
                     mark.anchor = anchor
@@ -686,14 +676,45 @@ class LadderViewModel : ScaledViewModel {
             }
             else {
                 mark.attached = true
-                mark.anchor = getAnchor(regionDivision: tapLocationInLadder.regionDivision)
+                mark.anchor = tapLocationInLadder.markAnchor
                 selectMark(mark)
                 cursorViewDelegate?.getViewModel().attachMark(mark)
                 let anchorPosition = mark.getAnchorPosition()
+                P("anchorPosition = \(anchorPosition)")
+                let adjustedAnchorPosition = Common.translateToLadderViewPosition(regionPosition: anchorPosition, region: activeRegion!, offsetX: offsetX, scale: scale)
+                P("ladderView anchorPosition = \(adjustedAnchorPosition)")
+                let height = cursorViewDelegate?.convertPoint(adjustedAnchorPosition).y
+                if let height = height {
+                    cursorViewDelegate?.setHeight(height)
+                    P("height = \(height)")
+                }
                 cursorViewDelegate?.moveCursor(positionX: anchorPosition.x)
                 cursorViewDelegate?.hideCursor(false)
             }
         }
+    }
+
+    func getMarkAnchorRegionPosition(_ mark: Mark) -> CGPoint {
+        let anchor = mark.anchor
+        let anchorPosition: CGPoint
+        switch anchor {
+        case .proximal:
+            anchorPosition = mark.segment.proximal
+        case .middle:
+            anchorPosition = mark.midpoint()
+        case .distal:
+            anchorPosition = mark.segment.distal
+        case .none:
+            anchorPosition = mark.segment.proximal
+        }
+        return anchorPosition
+    }
+
+    func getMarkAnchorLadderViewPosition(mark: Mark?, region: Region?) -> CGPoint? {
+        guard let mark = mark, let region = region else { return nil }
+        var anchorPosition = getMarkAnchorRegionPosition(mark)
+        anchorPosition = translateToLadderViewPosition(regionPosition: anchorPosition, regionProximalBoundary: region.proximalBoundary, regionHeight: region.height)
+        return anchorPosition
     }
 
     fileprivate func setMarkSelection(_ mark: Mark?, highlight: Mark.Highlight) {
@@ -756,6 +777,14 @@ class LadderViewModel : ScaledViewModel {
                 }
             }
             if movingMark == nil {
+                // reset marks to be unattached and unhighlighted
+                cursorViewDelegate?.unattachAttachedMark()
+                cursorViewDelegate?.hideCursor(true)
+//                attachedMark?.attached = false
+//                attachedMark = nil
+                unhighlightMarks()
+                cursorViewDelegate?.refresh()
+
                 dragOriginDivision = locationInLadder.regionDivision
                 switch dragOriginDivision {
                 case .proximal:
@@ -799,12 +828,6 @@ class LadderViewModel : ScaledViewModel {
                     case .distal:
                         dragCreatedMark?.segment.proximal = translateToRegionPosition(ladderViewPosition: position, regionProximalBoundary: regionOfDragOrigin!.proximalBoundary, regionHeight: regionOfDragOrigin!.height)
                     case .middle:
-                        // TODO: Fix this
-//                        if let proximalY = dragCreatedMark?.position.proximal.y, let distalY = dragCreatedMark?.position.distal.y {
-//                            if proximalY > distalY {
-//                                dragCreatedMark?.swapEnds()
-//                            }
-//                        }
                         dragCreatedMark?.segment.distal = translateToRegionPosition(ladderViewPosition: position, regionProximalBoundary: regionOfDragOrigin!.proximalBoundary, regionHeight: regionOfDragOrigin!.height)
                     default:
                         break
@@ -819,7 +842,7 @@ class LadderViewModel : ScaledViewModel {
                 linkNearbyMarks(mark: mark)
             }
             if let dragCreatedMark = dragCreatedMark {
-                if dragCreatedMark.height < lowerLimitMarkHeight {
+                if dragCreatedMark.height < lowerLimitMarkHeight && dragCreatedMark.width < lowerlimitMarkWidth {
                     deleteMark(dragCreatedMark)
                 }
                 else {

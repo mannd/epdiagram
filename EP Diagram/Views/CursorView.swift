@@ -17,6 +17,8 @@ protocol CursorViewDelegate: AnyObject {
     func cursorIsVisible() -> Bool
     func getViewModel() -> CursorViewModel
     func view() -> UIView
+    func convertPoint(_ point: CGPoint) -> CGPoint
+    func setHeight(_ height: CGFloat)
 }
 
 class CursorView: UIView {
@@ -95,33 +97,24 @@ class CursorView: UIView {
         }
     }
 
-    // TODO: This must be changed, so that the anchor points are the proximal mark position, midpoint of mark, and distal mark position.
-    private func getCursorHeight(anchor: Anchor) -> CGFloat {
-        guard let ladderViewDelegate = ladderViewDelegate else { return self.frame.height }
+    fileprivate func getAnchorY(_ anchor: Anchor, _ ladderViewDelegate: LadderViewDelegate) -> CGFloat {
+        let anchorY: CGFloat
         switch anchor {
         case .proximal:
-            return ladderViewDelegate.getRegionProximalBoundary(view: self)
+            anchorY = ladderViewDelegate.getRegionProximalBoundary(view: self)
         case .middle:
-            return ladderViewDelegate.getRegionMidPoint(view: self)
+            anchorY = ladderViewDelegate.getRegionMidPoint(view: self)
         case .distal:
-            return ladderViewDelegate.getRegionDistalBoundary(view: self)
+            anchorY = ladderViewDelegate.getRegionDistalBoundary(view: self)
         case .none:
-            return ladderViewDelegate.getHeight()
+            anchorY = ladderViewDelegate.getHeight()
         }
+        return anchorY
     }
 
-    private func getNewCursorHeight(anchor: Anchor) -> CGFloat {
+    private func getCursorHeight(anchor: Anchor) -> CGFloat {
         guard let ladderViewDelegate = ladderViewDelegate else { return self.frame.height }
-        switch anchor {
-        case .proximal:
-            return ladderViewDelegate.getRegionProximalBoundary(view: self)
-        case .middle:
-            return ladderViewDelegate.getRegionMidPoint(view: self)
-        case .distal:
-            return ladderViewDelegate.getRegionDistalBoundary(view: self)
-        case .none:
-            return ladderViewDelegate.getHeight()
-        }
+        return getAnchorY(anchor, ladderViewDelegate)
     }
 
     // MARK: - touches
@@ -137,19 +130,16 @@ class CursorView: UIView {
     }
 
     @objc func singleTap(tap: UITapGestureRecognizer) {
-        P("Single tap on cursor")
         if calibrating {
             doCalibration()
             return
         }
-        // toggle hide or show cursor with single tap
         hideCursor(cursorViewModel.cursorVisible)
         unattachAttachedMark()
         setNeedsDisplay()
     }
 
     @objc func doubleTap(tap: UITapGestureRecognizer) {
-        P("Double tap on cursor")
         cursorViewModel.doubleTap(ladderViewDelegate: ladderViewDelegate)
         hideCursor(true)
         setNeedsDisplay()
@@ -196,9 +186,7 @@ extension CursorView: CursorViewDelegate {
     }
 
     func unattachAttachedMark() {
-        if cursorViewModel.unattachAttachedMark(ladderViewDelegate: ladderViewDelegate) {
-            ladderViewDelegate?.refresh()
-        }
+        cursorViewModel.unattachAttachedMark(ladderViewDelegate: ladderViewDelegate)
     }
 
     func moveCursor(positionX: CGFloat) {
@@ -228,5 +216,13 @@ extension CursorView: CursorViewDelegate {
 
     func view() -> UIView {
         return self
+    }
+
+    func convertPoint(_ point: CGPoint) -> CGPoint {
+        return convert(point, to: self)
+    }
+
+    func setHeight(_ height: CGFloat) {
+        cursorViewModel.height = height
     }
 }

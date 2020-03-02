@@ -12,6 +12,7 @@ protocol LadderViewDelegate: AnyObject {
     func getRegionProximalBoundary(view: UIView) -> CGFloat
     func getRegionDistalBoundary(view: UIView) -> CGFloat
     func getRegionMidPoint(view: UIView) -> CGFloat
+    func getAttachedMarkLadderViewPositionY(view: UIView) -> CGFloat?
     func refresh()
     func setActiveRegion(regionNum: Int)
     func hasActiveRegion() -> Bool
@@ -202,6 +203,16 @@ extension LadderView: LadderViewDelegate {
     func getRegionProximalBoundary(view: UIView) -> CGFloat {
         let position = CGPoint(x: 0, y: ladderViewModel.activeRegion?.proximalBoundary ?? 0)
         return convert(position, to: view).y
+    }
+
+//    func getAttachedMarkScreenPositionY(view: UIView) -> CGFloat? {
+//        let position = ladderViewModel.getMarkAnchorLadderViewPosition(mark: ladderViewModel.attachedMark, region: ladderViewModel.activeRegion)
+//        return position?.y
+//    }
+
+    func getAttachedMarkLadderViewPositionY(view: UIView) -> CGFloat? {
+        let position = ladderViewModel.getMarkAnchorLadderViewPosition(mark: ladderViewModel.attachedMark, region: ladderViewModel.activeRegion)
+        return position?.y
     }
 
     func getTopOfLadder(view: UIView) -> CGFloat {

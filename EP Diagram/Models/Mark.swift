@@ -88,6 +88,11 @@ class Mark {
             return abs(segment.proximal.y - segment.distal.y)
         }
     }
+    var width: CGFloat {
+        get {
+            return abs(segment.proximal.x - segment.distal.x)
+        }
+    }
     var length: CGFloat {
         get {
             return sqrt(pow((segment.proximal.x - segment.distal.x), 2) + pow((segment.proximal.y - segment.distal.y), 2))

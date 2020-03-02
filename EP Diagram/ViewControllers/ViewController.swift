@@ -8,7 +8,7 @@
 
     import UIKit
 
-    class ViewController: UIViewController, UIScrollViewDelegate {
+    class ViewController: UIViewController {
         @IBOutlet var imageScrollView: UIScrollView!
         @IBOutlet var imageView: UIImageView!
         @IBOutlet var ladderView: LadderView!
@@ -95,7 +95,7 @@
         // MARK: -  Buttons
 
         @objc func calibrate() {
-           P("calibrate")
+            P("calibrate")
         }
 
         @objc func selectMarks() {
@@ -104,7 +104,7 @@
 
         // MARK: - Touches
 
-        // FIXME: Should we ignore double taps here?  Without implementing double tap, this acts like two single taps (creates mark, then hides cursor).
+        // Single tap on a cursor or in ladderView always passes through.  This only handles situation where the imageView is tapped, causing creation of a fully region spanning mark with cursor attached to middle of the mark, OR, simply unattaching attached mark.
         @objc func singleTap(tap: UITapGestureRecognizer) {
             P("Scroll view single tap")
             if !ladderView.hasActiveRegion() {
@@ -123,7 +123,50 @@
             ladderView.setNeedsDisplay()
         }
 
-        // MARK: - Scrolling and zooming
+
+        // MARK: - Rotate view
+
+        override func viewWillTransition(to size: CGSize, with coordinator: UIViewControllerTransitionCoordinator) {
+            super.viewWillTransition(to: size, with: coordinator)
+            // Remove separatorView when rotating to let original constraints resume.
+            // Otherwise, views are not laid out correctly.
+            if let separatorView = separatorView {
+                separatorView.removeFromSuperview()
+            }
+            coordinator.animate(alongsideTransition: nil, completion: {
+                _ in
+                P("Transitioning")
+                self.resetViews()
+                //                P("new ladderView height = \(self.ladderView.frame.height)")
+            })
+        }
+
+        private func resetViews() {
+            // Add back in separatorView after rotation.
+            separatorView = HorizontalSeparatorView.addSeparatorBetweenViews(separatorType: .horizontal, primaryView: imageScrollView, secondaryView: ladderView, parentView: self.view)
+            self.ladderView.resetSize()
+            // FIXME: save and restore scrollview offset so it is maintained with rotation.
+            self.ladderView.setNeedsDisplay()
+            self.imageView.setNeedsDisplay()
+            self.cursorView.setNeedsDisplay()
+        }
+
+        // MARK: - Save and restore views
+
+        // TODO: Need to implement this functionality.
+
+        override func encodeRestorableState(with coder: NSCoder) {
+            P("Encode restorable state")
+        }
+
+        override func decodeRestorableState(with coder: NSCoder) {
+            P("Decode restorable state")
+        }
+    }
+
+    // MARK: - Scrolling and zooming
+    extension ViewController: UIScrollViewDelegate {
+
 
         func viewForZooming(in scrollView: UIScrollView) -> UIView? {
             if scrollView == imageScrollView {
@@ -175,53 +218,13 @@
 
         func scrollViewDidEndZooming(_ scrollView: UIScrollView, with view: UIView?, atScale scale: CGFloat) {
             P("scrollViewDidEndZooming")
-//            P("Zoom = \(scale)")
-//            P("imageView width = \(imageView.frame.width)")
-//            P("imageScrollView bounds = \(imageScrollView.bounds)")
-//            P("imageScrollView contentOffset = \(imageScrollView.contentOffset)")
+            //            P("Zoom = \(scale)")
+            //            P("imageView width = \(imageView.frame.width)")
+            //            P("imageScrollView bounds = \(imageScrollView.bounds)")
+            //            P("imageScrollView contentOffset = \(imageScrollView.contentOffset)")
         }
 
         func scrollViewDidZoom(_ scrollView: UIScrollView) {
             P("didZoom")
         }
-
-        // MARK: - Rotate view
-
-        override func viewWillTransition(to size: CGSize, with coordinator: UIViewControllerTransitionCoordinator) {
-            super.viewWillTransition(to: size, with: coordinator)
-            // Remove separatorView when rotating to let original constraints resume.
-            // Otherwise, views are not laid out correctly.
-            if let separatorView = separatorView {
-                separatorView.removeFromSuperview()
-            }
-            coordinator.animate(alongsideTransition: nil, completion: {
-                _ in
-                P("Transitioning")
-                self.resetViews()
-//                P("new ladderView height = \(self.ladderView.frame.height)")
-            })
-        }
-
-        private func resetViews() {
-            // Add back in separatorView after rotation.
-            separatorView = HorizontalSeparatorView.addSeparatorBetweenViews(separatorType: .horizontal, primaryView: imageScrollView, secondaryView: ladderView, parentView: self.view)
-            self.ladderView.resetSize()
-            // FIXME: save and restore scrollview offset so it is maintained with rotation.
-            self.ladderView.setNeedsDisplay()
-            self.imageView.setNeedsDisplay()
-            self.cursorView.setNeedsDisplay()
-        }
-
-        // MARK: - Save and restore views
-
-        // TODO: Need to implement this functionality.
-
-        override func encodeRestorableState(with coder: NSCoder) {
-            P("Encode restorable state")
-        }
-
-        override func decodeRestorableState(with coder: NSCoder) {
-            P("Decode restorable state")
-        }
     }
-
