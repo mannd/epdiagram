@@ -12,78 +12,48 @@ protocol CursorViewDelegate: AnyObject {
     func refresh()
     func attachMark(_ mark: Mark?)
     func unattachAttachedMark()
-    func moveCursor(positionX: CGFloat)
-    func highlightCursor(_ on: Bool)
+    func moveCursor(cursorViewPositionX positionX: CGFloat)
     func hideCursor(_ hide: Bool)
     func cursorIsVisible() -> Bool
 }
 
-class CursorView: ScaledView {
-    let unattachedColor: UIColor = UIColor.systemRed
-    let attachedColor: UIColor = UIColor.systemBlue
-    let goneColor: UIColor = UIColor.clear
-    var cursor: Cursor
-    var attachedMark: Mark?
+final class CursorView: ScaledView {
+    private let rightMargin: CGFloat = 5
+    private let alphaValue: CGFloat = 0.8
+    private let accuracy: CGFloat = 20 // How close a tap has to be to a cursor to register.
+    private let lineWidth: CGFloat = 2
+    private let color: UIColor = UIColor.systemBlue
 
-    let rightMargin: CGFloat = 5
-    let alphaValue: CGFloat = 0.8
-    let lineWidth: CGFloat = 2
-    var color: UIColor
-    var cursorState: Cursor.CursorState {
-        didSet {
-            cursor.state = cursorState
-            switch cursorState {
-            case .attached:
-                color = attachedColor
-            case .unattached:
-                color = unattachedColor
-            case .null:
-                color = unattachedColor
+    private var cursor: Cursor
+    private var attachedMark: Mark?
 
-            }
-        }
-    }
-    var width: CGFloat = 0
-    var height: CGFloat = 0
+    var cursorHeight: CGFloat = 0
+    var leftMargin: CGFloat = 0
 
     weak var ladderViewDelegate: LadderViewDelegate?
 
-    var leftMargin: CGFloat = 0
-
-    // How close a tap has to be to a cursor to register.
-    let accuracy: CGFloat = 20
     var calibrating = false
 
     // MARK: - init
 
     required init?(coder: NSCoder) {
-        P("CursorView required init")
         self.cursor = Cursor()
         self.cursor.visible = false
-        self.cursor.state = .null
-        self.cursorState = .null
-        self.color = attachedColor
         super.init(coder: coder)
         didLoad()
     }
 
     override init(frame: CGRect) {
-        P("CursorView override init")
         self.cursor = Cursor()
         self.cursor.visible = false
-        self.cursor.state = .null
-        self.cursorState = .null
-        self.color = attachedColor
         super.init(frame: frame)
         didLoad()
     }
 
-    fileprivate func didLoad() {
-        // CursorView is mostly transparent, so let iOS know.
-        self.isOpaque = false
+    private func didLoad() {
+        self.isOpaque = false // CursorView is mostly transparent, so let iOS know.
 
-        // Draw a border around the view.
-        self.layer.masksToBounds = true
+        self.layer.masksToBounds = true // Draw a border around the view.
         if #available(iOS 13.0, *) {
             self.layer.borderColor = UIColor.label.cgColor
         } else {
@@ -100,7 +70,7 @@ class CursorView: ScaledView {
         singleTapRecognizer.require(toFail: doubleTapRecognizer)
         self.addGestureRecognizer(doubleTapRecognizer)
 
-        let draggingPanRecognizer = UIPanGestureRecognizer(target: self, action: #selector(self.dragging))
+        let draggingPanRecognizer = UIPanGestureRecognizer(target: self, action: #selector(self.drag))
         self.addGestureRecognizer(draggingPanRecognizer)
 
         let longPressRecognizer = UILongPressGestureRecognizer(target: self, action: #selector(self.longPress))
@@ -111,30 +81,29 @@ class CursorView: ScaledView {
 
     override func draw(_ rect: CGRect) {
         if let context = UIGraphicsGetCurrentContext() {
-            height = getCursorHeight(anchor: getAttachedMarkAnchor())
-            let viewDefaultHeight = ladderViewDelegate?.getTopOfLadder(view: self)
-            assert(cursor.direction == .vertical)
-
             guard cursor.visible else { return }
+
+            cursorHeight = getCursorHeight(anchor: getAttachedMarkAnchor())
+            let cursorDefaultHeight = ladderViewDelegate?.getTopOfLadder(view: self)
+            let position = scale * cursor.position - offsetX
+            let defaultHeight = cursorDefaultHeight ?? cursorHeight
+            let height = (position <= leftMargin) ? defaultHeight : cursorHeight
+            let endPoint = CGPoint(x: position, y: height)
 
             context.setStrokeColor(color.cgColor)
             context.setLineWidth(lineWidth)
             context.setAlpha(alphaValue)
-            let position = scale * cursor.position - offsetX
-            let defaultHeight = viewDefaultHeight ?? height
-            let cursorHeight = (position <= leftMargin) ? defaultHeight : height
             context.move(to: CGPoint(x: position, y: 0))
-            let endPoint = CGPoint(x: position, y: cursorHeight)
             context.addLine(to: endPoint)
             context.strokePath()
-            // Add tiny circle around intersection of cursor and mark.
             if position > leftMargin {
                 drawCircle(context: context, center: endPoint, radius: 5)
             }
         }
     }
 
-    func drawCircle(context: CGContext, center: CGPoint, radius: CGFloat) {
+    // Add tiny circle around intersection of cursor and mark.
+    private func drawCircle(context: CGContext, center: CGPoint, radius: CGFloat) {
         context.addArc(center: center, radius: radius, startAngle: 0.0, endAngle: .pi * 2.0, clockwise: true)
         context.strokePath()
     }
@@ -144,7 +113,7 @@ class CursorView: ScaledView {
         return attachedMark.anchor
     }
 
-    fileprivate func getAnchorY(_ anchor: Anchor, _ ladderViewDelegate: LadderViewDelegate) -> CGFloat {
+    private func getAnchorY(_ anchor: Anchor, _ ladderViewDelegate: LadderViewDelegate) -> CGFloat {
         let anchorY: CGFloat
         switch anchor {
         case .proximal:
@@ -169,7 +138,6 @@ class CursorView: ScaledView {
     // This function passes touch events to the views below if the point is not
     // near the cursor.
     override func point(inside point: CGPoint, with event: UIEvent?) -> Bool {
-        P("cursor.visible = \(cursor.visible)")
         guard cursor.visible, let ladderViewDelegate = ladderViewDelegate else { return false }
         if isNearCursor(positionX: point.x, accuracy: accuracy) && point.y < ladderViewDelegate.getRegionProximalBoundary(view: self) {
             return true
@@ -188,6 +156,7 @@ class CursorView: ScaledView {
         }
         hideCursor(cursor.visible)
         unattachAttachedMark()
+        ladderViewDelegate?.refresh()
         setNeedsDisplay()
     }
 
@@ -200,11 +169,11 @@ class CursorView: ScaledView {
         }
     }
 
-    @objc func dragging(pan: UIPanGestureRecognizer) {
+    @objc func drag(pan: UIPanGestureRecognizer) {
         if pan.state == .changed {
             let delta = pan.translation(in: self)
             cursorMove(delta: delta.x)
-            dragMark(ladderViewDelegate: ladderViewDelegate, cursorViewDelegate: self)
+            dragMark(ladderViewDelegate: ladderViewDelegate)
             pan.setTranslation(CGPoint(x: 0,y: 0), in: self)
         }
         if pan.state == .ended {
@@ -216,15 +185,14 @@ class CursorView: ScaledView {
         setNeedsDisplay()
     }
 
-    func cursorMove(delta: CGFloat) {
+    private func cursorMove(delta: CGFloat) {
         // Movement adjusted to scale.
         cursor.move(delta: delta / scale)
     }
 
-    func dragMark(ladderViewDelegate: LadderViewDelegate?, cursorViewDelegate: CursorViewDelegate?) {
+    private func dragMark(ladderViewDelegate: LadderViewDelegate?) {
         if let attachedMark = attachedMark {
-            P("Move attached Mark")
-            ladderViewDelegate?.moveMark(mark: attachedMark, position: CGPoint(x: translateToLadderViewPositionX(regionPositionX: cursor.position), y: 0), moveCursor: false, cursorViewDelegate: cursorViewDelegate)
+            ladderViewDelegate?.moveMark(mark: attachedMark, position: CGPoint(x: translateToLadderViewPositionX(regionPositionX: cursor.position), y: 0), moveCursor: false)
             ladderViewDelegate?.refresh()
         }
     }
@@ -237,14 +205,21 @@ class CursorView: ScaledView {
         P("Do calibration")
     }
 
-    func putCursor(positionX: CGFloat) {
+    func putCursor(screenPositionX positionX: CGFloat) {
         cursor.position = positionX / scale
-        hideCursor(false)
+    }
+
+    func attachMark(screenPositionX positionX: CGFloat) {
+        guard let mark = ladderViewDelegate?.addMark(positionX: positionX) else { return }
+        attachMark(mark)
+        mark.attached = true
+        mark.highlight = .all
     }
 }
 
+// MARK: - CursorView delegate methods
+
 extension CursorView: CursorViewDelegate {
-    // MARK: - CursorView delegate methods
     func refresh() {
         setNeedsDisplay()
     }
@@ -254,28 +229,17 @@ extension CursorView: CursorViewDelegate {
         attachedMark = mark
         mark.attached = true
         mark.highlight = .all
-        P("Mark attached!")
-    }
-
-    func attachMark(positionX: CGFloat) {
-        let mark = ladderViewDelegate?.addMark(positionX: positionX)
-        attachMark(mark)
     }
 
     func unattachAttachedMark() {
-        if let mark = attachedMark {
-            mark.attached = false
-            attachedMark = nil
-            ladderViewDelegate?.unhighlightMarks()
-        }
+        guard let mark = attachedMark else { return }
+        mark.attached = false
+        mark.highlight = .none
+        attachedMark = nil
     }
 
-    func moveCursor(positionX: CGFloat) {
+    func moveCursor(cursorViewPositionX positionX: CGFloat) {
         cursor.position = positionX
-    }
-
-    func highlightCursor(_ on: Bool) {
-        cursorState = on ? .attached : .unattached
     }
 
     func hideCursor(_ hide: Bool) {
@@ -285,5 +249,4 @@ extension CursorView: CursorViewDelegate {
     func cursorIsVisible() -> Bool {
         return cursor.visible
     }
-
 }

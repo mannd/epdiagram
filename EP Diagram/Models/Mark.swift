@@ -139,6 +139,10 @@ class Mark {
         self.init(position)
     }
 
+    deinit {
+        P("******Mark deinited******")
+    }
+
     /// Return midpoint of mark as CGPoint
     func midpoint() -> CGPoint {
         let x = (segment.distal.x - segment.proximal.x) / 2.0 + segment.proximal.x

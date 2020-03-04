@@ -13,8 +13,11 @@ class ScaledView: UIView {
     var scale: CGFloat = 1
     // offsetX determined by scrolling.
     var offsetX: CGFloat = 0
+    // DEPRECATED
     // offsetY is the distance from the top of the cursorView to the top of the ladderView, set by LadderView.
     var offsetY: CGFloat = 0
+
+    // Translation functions.  These translate positions from Region coordinates (x = position in unzoomed, unscrolled region, y = 0..1.0 as a fraction of vertical height of region) to LadderView coordinates (the x,y position in the LadderView) and vice versa.
 
     // PositionX functions.
     func translateToRegionPositionX(ladderViewPositionX: CGFloat) -> CGFloat {

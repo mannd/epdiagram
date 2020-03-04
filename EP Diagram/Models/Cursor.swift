@@ -38,7 +38,6 @@ class Cursor: NSObject {
     /// Cursors have one dimensional positions along the x or y axis depending on their direction.
     var position: CGFloat
 
-    var state = CursorState.null
     var anchor = Anchor.middle
     var visible = false
     var direction = Direction.vertical

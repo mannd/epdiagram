@@ -21,7 +21,6 @@
         let leftMargin: CGFloat = 30
 
         override func viewDidLoad() {
-            P("viewDidLoad")
             super.viewDidLoad()
 
             // Transitions on mac look better without animation.
@@ -47,10 +46,6 @@
             ladderView.cursorViewDelegate = cursorView
             imageScrollView.delegate = self
 
-            // FIXME: This forces ladderView below the toolbar.  Not clear
-            // why?  Also note that I changed priority of constraint of
-            // imageView = 0.4 to .defaultLow (was .required) superview and changed the superview to include
-            // the safe areas.
             separatorView = HorizontalSeparatorView.addSeparatorBetweenViews(separatorType: .horizontal, primaryView: imageScrollView, secondaryView: ladderView, parentView: self.view)
 
             let singleTapRecognizer = UITapGestureRecognizer(target: self, action: #selector(self.singleTap))
@@ -63,18 +58,7 @@
             }
         }
 
-        fileprivate func centerImage() {
-            // This centers image, as opposed to starting with it at the upper left
-            // hand corner of the screen.
-            if !Common.isRunningOnMac() {
-                let newContentOffsetX = (imageScrollView.contentSize.width/2) - (imageScrollView.bounds.size.width/2);
-                imageScrollView.contentOffset = CGPoint(x: newContentOffsetX, y: 0)
-            }
-        }
-
         override func viewDidAppear(_ animated: Bool) {
-            P("viewDidAppear")
-            // FIXME: BUG.  If we don't center image, initial single taps on image result in cursor and mark offset by left margin (offset to the left of tap).  Once image is manipulated this offset disappears.
             centerImage()
             cursorView.setNeedsDisplay()
             ladderView.setNeedsDisplay()
@@ -88,8 +72,16 @@
             toolbar?.items = [calibrateButton, selectButton]
             navigationController?.setToolbarHidden(false, animated: false)
 
-            // Size ladderView after views laid out.
-            ladderView.resetSize()
+            resetViews()
+        }
+
+        private func centerImage() {
+            // This centers image, as opposed to starting with it at the upper left
+            // hand corner of the screen.
+            if !Common.isRunningOnMac() {
+                let newContentOffsetX = (imageScrollView.contentSize.width/2) - (imageScrollView.bounds.size.width/2);
+                imageScrollView.contentOffset = CGPoint(x: newContentOffsetX, y: 0)
+            }
         }
 
         // MARK: -  Buttons
@@ -104,9 +96,7 @@
 
         // MARK: - Touches
 
-        // Single tap on a cursor or in ladderView always passes through.  This only handles situation where the imageView is tapped, causing creation of a fully region spanning mark with cursor attached to middle of the mark, OR, simply unattaching attached mark.
         @objc func singleTap(tap: UITapGestureRecognizer) {
-            P("Scroll view single tap")
             if !ladderView.hasActiveRegion() {
                 ladderView.setActiveRegion(regionNum: 0)
             }
@@ -115,9 +105,11 @@
                 cursorView.hideCursor(true)
             }
             else {
+                // By getting x in imageScrollView, offset doesn't apply, though zoom does.  See CursorView.putCursor().
                 let positionX = tap.location(in: imageScrollView).x
-                cursorView.putCursor(positionX: positionX)
-                cursorView.attachMark(positionX: positionX)
+                cursorView.putCursor(screenPositionX: positionX)
+                cursorView.hideCursor(false)
+                cursorView.attachMark(screenPositionX: positionX)
             }
             cursorView.setNeedsDisplay()
             ladderView.setNeedsDisplay()
@@ -135,9 +127,7 @@
             }
             coordinator.animate(alongsideTransition: nil, completion: {
                 _ in
-                P("Transitioning")
                 self.resetViews()
-                //                P("new ladderView height = \(self.ladderView.frame.height)")
             })
         }
 

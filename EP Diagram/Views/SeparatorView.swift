@@ -89,13 +89,10 @@ class SeparatorView: UIView {
     override func touchesEnded(_ touches: Set<UITouch>, with event: UIEvent?) {
         guard let touch = touches.first else { return }
         updateListener?.updateConstraintOnBasisOfTouch(touch: touch)
-        // FIXME: reset marks, etc.
         // redraw views.
         let ladderView = secondaryView as? LadderView
         ladderView?.resetSize()
         ladderView?.refresh()
-        primaryView.setNeedsDisplay()
-        secondaryView.setNeedsDisplay()
     }
 
     func drawSeparator(_ rect: CGRect, with color: UIColor) {

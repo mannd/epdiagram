@@ -22,7 +22,7 @@ protocol LadderViewDelegate: AnyObject {
     func deleteMark(_ mark: Mark?)
     func addMark(positionX: CGFloat) -> Mark?
     func linkNearbyMarks(mark: Mark)
-    func moveMark(mark: Mark, position: CGPoint, moveCursor: Bool, cursorViewDelegate: CursorViewDelegate?)
+    func moveMark(mark: Mark, position: CGPoint, moveCursor: Bool)
 }
 
 class LadderView: ScaledView {
@@ -140,6 +140,7 @@ class LadderView: ScaledView {
             regionBoundary += regionHeight
             regions.append(region)
         }
+        activeRegion = ladder.regions[0]
     }
 
     func getRegionUnitHeight(ladder: Ladder) -> CGFloat {
@@ -255,12 +256,13 @@ class LadderView: ScaledView {
                 P("make mark and attach cursor")
                 let mark = makeMark(positionX: positionX)
                 if let mark = mark {
+                    P("mark made")
                     inactivateMarks()
                     mark.attached = true
                     mark.anchor = getAnchor(regionDivision: tapLocationInLadder.regionDivision)
                     selectMark(mark)
                     cursorViewDelegate?.attachMark(mark)
-                    cursorViewDelegate?.moveCursor(positionX: mark.segment.proximal.x)
+                    cursorViewDelegate?.moveCursor(cursorViewPositionX: mark.segment.proximal.x)
                     cursorViewDelegate?.hideCursor(false)
                 }
             }
@@ -278,7 +280,7 @@ class LadderView: ScaledView {
                 if anchor != mark.anchor {
                     mark.anchor = anchor
                     let anchorPositionX = mark.getAnchorPositionX()
-                    cursorViewDelegate?.moveCursor(positionX: anchorPositionX)
+                    cursorViewDelegate?.moveCursor(cursorViewPositionX: anchorPositionX)
                 }
                 else {
                     // Unattach mark and hide cursor
@@ -303,7 +305,7 @@ class LadderView: ScaledView {
                 //                    cursorViewDelegate?.setHeight(height)
                 //                    P("height = \(height)")
                 //                }
-                cursorViewDelegate?.moveCursor(positionX: anchorPosition.x)
+                cursorViewDelegate?.moveCursor(cursorViewPositionX: anchorPosition.x)
                 cursorViewDelegate?.hideCursor(false)
             }
         }
@@ -433,7 +435,7 @@ class LadderView: ScaledView {
     }
 
     @objc func dragging(pan: UIPanGestureRecognizer) {
-        if dragMark(position: pan.location(in: self), state: pan.state, cursorViewDelegate: cursorViewDelegate) {
+        if dragMark(position: pan.location(in: self), state: pan.state) {
             setNeedsDisplay()
         }
     }
@@ -443,7 +445,7 @@ class LadderView: ScaledView {
     ///   - position: CGPoint, position of drag point
     ///   - state: state of dragging
     ///   - cursorViewDelegate: CursorViewDelegate from LadderView
-    func dragMark(position: CGPoint, state: UIPanGestureRecognizer.State, cursorViewDelegate: CursorViewDelegate?) -> Bool {
+    func dragMark(position: CGPoint, state: UIPanGestureRecognizer.State) -> Bool {
         var needsDisplay = false
         if state == .began {
             let locationInLadder = getLocationInLadder(position: position)
@@ -493,7 +495,7 @@ class LadderView: ScaledView {
                 if mark.attached {
                     moveMark(mark: mark, screenPositionX: position.x)
                     let anchorPositionX = mark.getAnchorPositionX()
-                    cursorViewDelegate?.moveCursor(positionX: anchorPositionX)
+                    cursorViewDelegate?.moveCursor(cursorViewPositionX: anchorPositionX)
                     cursorViewDelegate?.refresh()
                 }
             }
@@ -575,11 +577,11 @@ class LadderView: ScaledView {
         }
     }
 
-    func moveMark(mark: Mark, position: CGPoint, moveCursor: Bool, cursorViewDelegate: CursorViewDelegate?) {
+    func moveMark(mark: Mark, position: CGPoint, moveCursor: Bool) {
         moveMark(mark: mark, screenPositionX: position.x)
         if moveCursor {
             let anchorPositionX = mark.getAnchorPositionX()
-            cursorViewDelegate?.moveCursor(positionX: anchorPositionX)
+            cursorViewDelegate?.moveCursor(cursorViewPositionX: anchorPositionX)
             cursorViewDelegate?.refresh()
         }
     }
