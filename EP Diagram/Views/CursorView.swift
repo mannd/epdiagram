@@ -18,16 +18,17 @@ protocol CursorViewDelegate: AnyObject {
 }
 
 final class CursorView: ScaledView {
-    private let rightMargin: CGFloat = 5
+    private let rightMargin: CGFloat = 5 // unused?
     private let alphaValue: CGFloat = 0.8
     private let accuracy: CGFloat = 20 // How close a tap has to be to a cursor to register.
-    private let lineWidth: CGFloat = 2
-    private let color: UIColor = UIColor.systemBlue
+
+    // parameters that will eventually be preferences
+    var lineWidth: CGFloat = 2
+    var color: UIColor = UIColor.systemBlue
 
     private var cursor: Cursor
     private var attachedMark: Mark?
 
-    var cursorHeight: CGFloat = 0
     var leftMargin: CGFloat = 0
 
     weak var ladderViewDelegate: LadderViewDelegate?
@@ -81,11 +82,10 @@ final class CursorView: ScaledView {
 
     override func draw(_ rect: CGRect) {
         if let context = UIGraphicsGetCurrentContext() {
-            guard cursor.visible else { return }
+            guard cursor.visible, let cursorHeight = getCursorHeight(anchor: getAttachedMarkAnchor()) else { return }
 
-            cursorHeight = getCursorHeight(anchor: getAttachedMarkAnchor())
             let cursorDefaultHeight = ladderViewDelegate?.getTopOfLadder(view: self)
-            let position = scale * cursor.position - offsetX
+            let position = scale * cursor.position - offsetX // inlined, for efficiency
             let defaultHeight = cursorDefaultHeight ?? cursorHeight
             let height = (position <= leftMargin) ? defaultHeight : cursorHeight
             let endPoint = CGPoint(x: position, y: height)
@@ -113,8 +113,8 @@ final class CursorView: ScaledView {
         return attachedMark.anchor
     }
 
-    private func getAnchorY(_ anchor: Anchor, _ ladderViewDelegate: LadderViewDelegate) -> CGFloat {
-        let anchorY: CGFloat
+    private func getAnchorPositionY(_ anchor: Anchor, _ ladderViewDelegate: LadderViewDelegate) -> CGFloat? {
+        let anchorY: CGFloat?
         switch anchor {
         case .proximal:
             anchorY = ladderViewDelegate.getRegionProximalBoundary(view: self)
@@ -123,14 +123,14 @@ final class CursorView: ScaledView {
         case .distal:
             anchorY = ladderViewDelegate.getRegionDistalBoundary(view: self)
         case .none:
-            anchorY = ladderViewDelegate.getHeight()
+            anchorY = nil
         }
         return anchorY
     }
 
-    private func getCursorHeight(anchor: Anchor) -> CGFloat {
-        guard let ladderViewDelegate = ladderViewDelegate else { return self.frame.height }
-        return getAnchorY(anchor, ladderViewDelegate)
+    private func getCursorHeight(anchor: Anchor) -> CGFloat? {
+        guard let ladderViewDelegate = ladderViewDelegate else { return nil }
+        return getAnchorPositionY(anchor, ladderViewDelegate)
     }
 
     // MARK: - touches

@@ -8,7 +8,7 @@
 
     import UIKit
 
-    class ViewController: UIViewController {
+    final class ViewController: UIViewController {
         @IBOutlet var imageScrollView: UIScrollView!
         @IBOutlet var imageView: UIImageView!
         @IBOutlet var ladderView: LadderView!
@@ -23,13 +23,14 @@
         override func viewDidLoad() {
             super.viewDidLoad()
 
+            title = L("EP Diagram", comment: "app name")
+
             // Transitions on mac look better without animation.
             UIView.setAnimationsEnabled(!Common.isRunningOnMac())
-            
-            title = L("EP Diagram", comment: "app name")
             if Common.isRunningOnMac() {
                 navigationController?.setNavigationBarHidden(true, animated: false)
             }
+
             // Distinguish the two views using slightly different background colors.
             if #available(iOS 13.0, *) {
                 imageScrollView.backgroundColor = UIColor.secondarySystemBackground
@@ -38,6 +39,7 @@
                 imageScrollView.backgroundColor = UIColor.lightGray
                 ladderView.backgroundColor = UIColor.white
             }
+
             // Ensure there is a space for labels at the left margin.
             imageScrollView.contentInset = UIEdgeInsets(top: 0, left: leftMargin, bottom: 0, right: 0)
             ladderView.leftMargin = leftMargin
@@ -107,9 +109,12 @@
             else {
                 // By getting x in imageScrollView, offset doesn't apply, though zoom does.  See CursorView.putCursor().
                 let positionX = tap.location(in: imageScrollView).x
-                cursorView.putCursor(screenPositionX: positionX)
-                cursorView.hideCursor(false)
-                cursorView.attachMark(screenPositionX: positionX)
+                // imageScrollView still starts at x = 0, contentInset shifts view to right, and the left margin is negative relative to the view.
+                if positionX > 0 {
+                    cursorView.putCursor(screenPositionX: positionX)
+                    cursorView.hideCursor(false)
+                    cursorView.attachMark(screenPositionX: positionX)
+                }
             }
             cursorView.setNeedsDisplay()
             ladderView.setNeedsDisplay()

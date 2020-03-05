@@ -20,32 +20,30 @@ protocol LadderViewDelegate: AnyObject {
     func getTopOfLadder(view: UIView) -> CGFloat
     func unhighlightMarks()
     func deleteMark(_ mark: Mark?)
-    func addMark(positionX: CGFloat) -> Mark?
+    @discardableResult func addMark(positionX: CGFloat) -> Mark?
     func linkNearbyMarks(mark: Mark)
     func moveMark(mark: Mark, position: CGPoint, moveCursor: Bool)
 }
 
-class LadderView: ScaledView {
-    weak var cursorViewDelegate: CursorViewDelegate?
+final class LadderView: ScaledView {
+    private let ladderPaddingMultiplier: CGFloat = 0.5
+    private let accuracy: CGFloat = 20
+    private let lowerLimitMarkHeight: CGFloat = 0.1
+    private let lowerlimitMarkWidth: CGFloat = 20
 
-    override var canBecomeFirstResponder: Bool {
-        get {
-            return true
-        }
-    }
-    var leftMargin: CGFloat = 0 {
-        didSet {
-            margin = leftMargin
-        }
-    }
-    let ladderPaddingMultiplier: CGFloat = 0.5
-    let accuracy: CGFloat = 20
-    let lowerLimitMarkHeight: CGFloat = 0.1
-    let lowerlimitMarkWidth: CGFloat = 20
+    // variables that need to eventually be preferences
+    var lineWidth: CGFloat = 2
+    var red = UIColor.systemRed
+    var blue = UIColor.systemBlue
+    var unselectedColor = UIColor.black
+    var selectedColor = UIColor.magenta
+    var markLineWidth: CGFloat = 2
+    var connectedLineWidth: CGFloat = 4
 
-    var regions: [Region] = []
-    var ladder: Ladder = Ladder.defaultLadder()
-    var activeRegion: Region? {
+//    // ladder acts as a prototype for the region set.
+//    private var regions: [Region] = []
+    private var ladder: Ladder = Ladder.defaultLadder()
+    private var activeRegion: Region? {
         set(value) {
             ladder.activeRegion = value
             activateRegion(region: ladder.activeRegion)
@@ -54,63 +52,46 @@ class LadderView: ScaledView {
             return ladder.activeRegion
         }
     }
-    var attachedMark: Mark?
-    var pressedMark: Mark?
-    var movingMark: Mark?
-    // TODO: activeMark unused
-    var activeMark: Mark?
-    var margin: CGFloat = 0
-    var lineWidth: CGFloat = 2
+    private var attachedMark: Mark?
+    private var pressedMark: Mark?
+    private var movingMark: Mark?
+    private var regionOfDragOrigin: Region?
+    private var regionProxToDragOrigin: Region?
+    private var regionDistalToDragOrigin: Region?
+    private var dragCreatedMark: Mark?
+    private var dragOriginDivision: RegionDivision = .none
 
-    // variables that need to eventually be preferences
-    let red = UIColor.systemRed
-    let blue = UIColor.systemBlue
-    let unselectedColor: UIColor
-    let selectedColor = UIColor.magenta
-    let markLineWidth: CGFloat = 2
-    let connectedLineWidth: CGFloat = 4
+    var leftMargin: CGFloat = 0
+    private var height: CGFloat = 0
+    private var regionUnitHeight: CGFloat = 0
 
-    var height: CGFloat = 0
-    var regionUnitHeight: CGFloat = 0
+    weak var cursorViewDelegate: CursorViewDelegate?
 
-    // All the fields needed to implement dragging in regions.
-    var regionOfDragOrigin: Region? = nil
-    var regionProxToDragOrigin: Region? = nil
-    var regionDistalToDragOrigin: Region? = nil
-    var dragCreatedMark: Mark? = nil
-    var dragOriginDivision: RegionDivision = .none
+    override var canBecomeFirstResponder: Bool { return true }
+
     // MARK: - init
 
     override init(frame: CGRect) {
-        if #available(iOS 13.0, *) {
-            unselectedColor = UIColor.label
-        } else {
-            unselectedColor = UIColor.black
-        }
-        margin = leftMargin
         super.init(frame: frame)
         didLoad()
     }
 
     required init?(coder aDecoder: NSCoder) {
-        if #available(iOS 13.0, *) {
-            unselectedColor = UIColor.label
-        } else {
-            unselectedColor = UIColor.black
-        }
-        margin = leftMargin
         super.init(coder: aDecoder)
         didLoad()
     }
 
     fileprivate func didLoad() {
         height = self.frame.height
+        if #available(iOS 13.0, *) {
+            unselectedColor = UIColor.label
+        }
         initialize()
 
         // Draw border around view.
-        self.layer.masksToBounds = true
-        self.layer.borderColor = UIColor.systemBlue.cgColor
-        self.layer.borderWidth = 2
+        layer.masksToBounds = true
+        layer.borderColor = UIColor.systemBlue.cgColor
+        layer.borderWidth = 2
 
         // Set up touches.
         let singleTapRecognizer = UITapGestureRecognizer(target: self, action: #selector(self.singleTap))
@@ -131,14 +112,14 @@ class LadderView: ScaledView {
 
     func initialize() {
         regionUnitHeight = getRegionUnitHeight(ladder: ladder)
-        regions.removeAll()
+//        regions.removeAll()
         var regionBoundary = regionUnitHeight * ladderPaddingMultiplier
         for region: Region in ladder.regions {
             let regionHeight = getRegionHeight(region: region)
             region.proximalBoundary = regionBoundary
             region.distalBoundary = regionBoundary + regionHeight
             regionBoundary += regionHeight
-            regions.append(region)
+//            regions.append(region)
         }
         activeRegion = ladder.regions[0]
     }
@@ -189,14 +170,14 @@ class LadderView: ScaledView {
         var tappedRegionSection: RegionSection = .markSection
         var tappedRegionDivision: RegionDivision = .none
         var tappedAnchor: Anchor = .none
-        for region in regions {
+        for region in ladder.regions {
             if position.y > region.proximalBoundary && position.y < region.distalBoundary {
                 tappedRegion = region
                 tappedRegionDivision = getTappedRegionDivision(region: region, positionY: position.y)
             }
         }
         if let tappedRegion = tappedRegion {
-            if position.x < margin {
+            if position.x < leftMargin {
                 tappedRegionSection = .labelSection
             }
             else {
@@ -698,9 +679,9 @@ class LadderView: ScaledView {
         context.setLineWidth(1)
         // All horizontal distances are adjusted to scale.
         let ladderWidth: CGFloat = rect.width * scale
-        for (index, region) in regions.enumerated() {
-            let regionRect = CGRect(x: margin, y: region.proximalBoundary, width: ladderWidth, height: region.distalBoundary - region.proximalBoundary)
-            let lastRegion = index == regions.count - 1
+        for (index, region) in ladder.regions.enumerated() {
+            let regionRect = CGRect(x: leftMargin, y: region.proximalBoundary, width: ladderWidth, height: region.distalBoundary - region.proximalBoundary)
+            let lastRegion = index == ladder.regions.count - 1
             drawRegion(rect: regionRect, context: context, region: region, offset: offsetX, scale: scale, lastRegion: lastRegion)
         }
     }
@@ -758,17 +739,17 @@ class LadderView: ScaledView {
     fileprivate func drawMark(mark: Mark, region: Region, context: CGContext) {
         let segment = translateToLadderViewSegment(regionSegment: mark.segment, region: region)
         // Don't bother drawing marks in margin.
-        if segment.proximal.x <= margin && segment.distal.x <= margin {
+        if segment.proximal.x <= leftMargin && segment.distal.x <= leftMargin {
             return
         }
         // The two endpoints of the mark to be drawn
         var p1 = CGPoint()
         var p2 = CGPoint()
-        if segment.proximal.x > margin && segment.distal.x > margin {
+        if segment.proximal.x > leftMargin && segment.distal.x > leftMargin {
             p1 = segment.proximal
             p2 = segment.distal
         }
-        else if segment.proximal.x < margin {
+        else if segment.proximal.x < leftMargin {
             p1 = getTruncatedPosition(position: segment) ?? segment.proximal
             p2 = segment.distal
         }
@@ -806,7 +787,7 @@ class LadderView: ScaledView {
 
     func getTruncatedPosition(position: Segment) -> CGPoint? {
         // TODO: Handle lines slanted backwards, don't draw at all in margin
-        let intersection = getIntersection(ofLineFrom: CGPoint(x: margin, y: 0), to: CGPoint(x: margin, y: height), withLineFrom: position.proximal, to: position.distal)
+        let intersection = getIntersection(ofLineFrom: CGPoint(x: leftMargin, y: 0), to: CGPoint(x: leftMargin, y: height), withLineFrom: position.proximal, to: position.distal)
         return intersection
     }
 
@@ -1033,7 +1014,7 @@ extension LadderView: LadderViewDelegate {
     }
 
     func setActiveRegion(regionNum: Int) {
-        activeRegion = regions[regionNum]
+        activeRegion = ladder.regions[regionNum]
         activeRegion?.selected = true
     }
 
@@ -1050,10 +1031,7 @@ extension LadderView: LadderViewDelegate {
         ladder.setHighlight(highlight: .none)
     }
     
-    // Here we want to add the Mark at the X position on the screen.  This is independent of
-    // the offset.  If the content is offset, the X position is offset too.  However,
-    // the zoomScale does affect the X position.  Say the scale is 2, then what appears to be
-    // the X position is actually 2 * X.  Thus we unscale the position and get an absolute mark X position.
+    @discardableResult
     func addMark(positionX screenPositionX: CGFloat) -> Mark? {
         P("Add mark at \(screenPositionX)")
         return ladder.addMarkAt(unscaledRelativePositionX(relativePositionX: screenPositionX))

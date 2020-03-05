@@ -110,7 +110,7 @@ class SeparatorView: UIView {
     }
 }
 
-class HorizontalSeparatorView: SeparatorView, OnConstraintUpdateProtocol {
+final class HorizontalSeparatorView: SeparatorView, OnConstraintUpdateProtocol {
     override init(primaryView: UIView, secondaryView: UIView) {
         super.init(primaryView: primaryView, secondaryView: secondaryView)
         updateListener = self
@@ -178,7 +178,7 @@ class HorizontalSeparatorView: SeparatorView, OnConstraintUpdateProtocol {
 }
 
 // Vertical separator not used in EP Diagram.
-class VerticalSeparatorView: SeparatorView, OnConstraintUpdateProtocol {
+final class VerticalSeparatorView: SeparatorView, OnConstraintUpdateProtocol {
     override init(primaryView: UIView, secondaryView: UIView) {
            super.init(primaryView: primaryView, secondaryView: secondaryView)
            updateListener = self
