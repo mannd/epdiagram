@@ -26,20 +26,16 @@ enum RegionDivision {
 // vertical, i.e. Y axis.  A Region has a labelSection such as "A" or "AV" and
 // a markSection.
 class Region {
-    public var proximalBoundary: CGFloat = 0
-    public var distalBoundary: CGFloat = 0
-    public var selected: Bool = false
-    public var name: String = ""
-    public var marks: [Mark] = []
-    public var markable: Bool = true
-    public var decremental: Bool = false
-    public var height: CGFloat {
-        get {
-            return distalBoundary - proximalBoundary
-        }
-    }
+    var proximalBoundary: CGFloat = 0
+    var distalBoundary: CGFloat = 0
+    var selected: Bool = false
+    var name: String = ""
+    var marks: [Mark] = []
+    var markable: Bool = true
+    var height: CGFloat { get { return distalBoundary - proximalBoundary } }
+    var unitHeight: Int = 1  // 1 = smallest region height, used to calculate actual height
 
-    public func appendMark(_ mark: Mark) {
+    func appendMark(_ mark: Mark) {
         marks.append(mark)
     }
 

@@ -93,6 +93,10 @@ class Common {
         return numerator / denominator
     }
 
+    static func distance(segment: Segment, point: CGPoint) -> CGFloat {
+        return distance(linePoint1: segment.proximal, linePoint2: segment.distal, point: point)
+    }
+
     static func distance(_ p1: CGPoint, _ p2: CGPoint) -> CGFloat {
         let diffX = p1.x - p2.x
         let diffY = p1.y - p2.y

@@ -40,11 +40,10 @@ final class LadderView: ScaledView {
     var markLineWidth: CGFloat = 2
     var connectedLineWidth: CGFloat = 4
 
-//    // ladder acts as a prototype for the region set.
-//    private var regions: [Region] = []
     private var ladder: Ladder = Ladder.defaultLadder()
     private var activeRegion: Region? {
         set(value) {
+            P("active region = \(activeRegion)")
             ladder.activeRegion = value
             activateRegion(region: ladder.activeRegion)
         }
@@ -81,12 +80,12 @@ final class LadderView: ScaledView {
         didLoad()
     }
 
-    fileprivate func didLoad() {
+    private func didLoad() {
         height = self.frame.height
         if #available(iOS 13.0, *) {
             unselectedColor = UIColor.label
         }
-        initialize()
+        initializeRegions()
 
         // Draw border around view.
         layer.masksToBounds = true
@@ -110,36 +109,27 @@ final class LadderView: ScaledView {
         self.addGestureRecognizer(longPressRecognizer)
     }
 
-    func initialize() {
+    private func initializeRegions() {
         regionUnitHeight = getRegionUnitHeight(ladder: ladder)
-//        regions.removeAll()
         var regionBoundary = regionUnitHeight * ladderPaddingMultiplier
         for region: Region in ladder.regions {
-            let regionHeight = getRegionHeight(region: region)
+            let regionHeight = CGFloat(region.unitHeight) * regionUnitHeight
             region.proximalBoundary = regionBoundary
             region.distalBoundary = regionBoundary + regionHeight
             regionBoundary += regionHeight
-//            regions.append(region)
         }
         activeRegion = ladder.regions[0]
     }
 
-    func getRegionUnitHeight(ladder: Ladder) -> CGFloat {
+    private func getRegionUnitHeight(ladder: Ladder) -> CGFloat {
         var numRegionUnits = 0
-        // Decremental regions are twice as high as regular regions.
-        // FIXME: It might be better to have this be a property of each region, e.g.
-        // Region.heightInRegionUnits.
         for region: Region in ladder.regions {
-            numRegionUnits += region.decremental ? 2 : 1
+            numRegionUnits += region.unitHeight
         }
         // we'll allow padding above and below, so...
         let padding = Int(ladderPaddingMultiplier * 2)
         numRegionUnits += padding
         return height / CGFloat(numRegionUnits)
-    }
-
-    func getRegionHeight(region: Region) -> CGFloat {
-        return region.decremental ? 2 * regionUnitHeight : regionUnitHeight
     }
 
     // MARK: - Touches
@@ -209,7 +199,7 @@ final class LadderView: ScaledView {
         }
     }
 
-    func labelWasTapped(labelRegion: Region) {
+    private func labelWasTapped(labelRegion: Region) {
         if labelRegion.selected {
             labelRegion.selected = false
             activeRegion = nil
@@ -219,7 +209,7 @@ final class LadderView: ScaledView {
         }
     }
 
-    func regionWasTapped(tapLocationInLadder: LocationInLadder, positionX: CGFloat, cursorViewDelegate: CursorViewDelegate?) {
+    private func regionWasTapped(tapLocationInLadder: LocationInLadder, positionX: CGFloat, cursorViewDelegate: CursorViewDelegate?) {
         assert(tapLocationInLadder.region != nil, "Region tapped, but is nil!")
         if let tappedRegion = tapLocationInLadder.region {
             if !tappedRegion.selected {
@@ -253,7 +243,7 @@ final class LadderView: ScaledView {
     /// Response to tapped mark in LadderView.  Returns marks anchor position.x or nil
     /// if no mark tapped.
     /// - Parameter tapLocationInLadder: the tapped LocationInLadder
-    func markWasTapped(mark: Mark?, tapLocationInLadder: LocationInLadder, cursorViewDelegate: CursorViewDelegate?) {
+    private func markWasTapped(mark: Mark?, tapLocationInLadder: LocationInLadder, cursorViewDelegate: CursorViewDelegate?) {
         if let mark = mark {
             if mark.attached {
                 let anchor = tapLocationInLadder.markAnchor
@@ -370,7 +360,7 @@ final class LadderView: ScaledView {
         return anchor
     }
 
-    fileprivate func setMarkSelection(_ mark: Mark?, highlight: Mark.Highlight) {
+    private func setMarkSelection(_ mark: Mark?, highlight: Mark.Highlight) {
         if let mark = mark {
             mark.highlight = highlight
             let attachedMarks = mark.attachedMarks
@@ -533,12 +523,13 @@ final class LadderView: ScaledView {
     }
 
     // TODO: must also highlight nearby marks that are in the same region (and link them too).
-    fileprivate func highlightNearbyMarks(_ mark: Mark?) {
+    private func highlightNearbyMarks(_ mark: Mark?) {
         guard let mark = mark else { return }
         var minimum: CGFloat = 10
         minimum = minimum / scale
         let nearbyProximalMarks: [Mark] = ladder.getNearbyMarks(mark: mark, minimum: minimum).proximalMarks
         let nearbyDistalMarks: [Mark] = ladder.getNearbyMarks(mark: mark, minimum: minimum).distalMarks
+        let nearbyMiddleMarks: [Mark] = ladder.getNearbyMarks(mark: mark, minimum: minimum).middleMarks
         if nearbyProximalMarks.count > 0 {
             for nearbyMark in nearbyProximalMarks {
                 nearbyMark.highlight = .all
@@ -548,8 +539,15 @@ final class LadderView: ScaledView {
             ladder.setHighlight(highlight: .none, region: ladder.getRegionBefore(region: activeRegion))
         }
         if nearbyDistalMarks.count > 0 {
-            P("nearby Marks = \(nearbyDistalMarks)")
             for nearbyMark in nearbyDistalMarks {
+                nearbyMark.highlight = .all
+            }
+        }
+        else {
+            ladder.setHighlight(highlight: .none, region: ladder.getRegionAfter(region: activeRegion))
+        }
+        if nearbyMiddleMarks.count > 0 {
+            for nearbyMark in nearbyMiddleMarks {
                 nearbyMark.highlight = .all
             }
         }
@@ -900,7 +898,7 @@ final class LadderView: ScaledView {
     }
 
     func reinit() {
-        initialize()
+        initializeRegions()
     }
 
     func regionsToCheckForCloseness() -> [Region] {
@@ -1042,12 +1040,12 @@ extension LadderView: LadderViewDelegate {
     }
 
     func linkNearbyMarks(mark: Mark) {
-        P("linkNearbyMarks")
         var minimum: CGFloat = 10
         minimum = minimum / scale
         let nearbyMarks = ladder.getNearbyMarks(mark: mark, minimum: minimum)
         let proxMarks = nearbyMarks.proximalMarks
         let distalMarks = nearbyMarks.distalMarks
+        let middleMarks = nearbyMarks.middleMarks
         for proxMark in proxMarks {
             mark.attachedMarks.proximal.append(proxMark)
             mark.segment.proximal.x = proxMark.segment.distal.x
@@ -1057,6 +1055,12 @@ extension LadderView: LadderViewDelegate {
             mark.attachedMarks.distal.append(distalMark)
             mark.segment.distal.x = distalMark.segment.proximal.x
             distalMark.attachedMarks.proximal.append(mark)
+        }
+        for middleMark in middleMarks {
+            mark.attachedMarks.distal.append(middleMark)
+            P("append middle mark somehow")
+//            mark.segment.distal.x = middleMark.segment.proximal.x
+//            middleMark.attachedMarks.proximal.append(mark)
         }
     }
 }

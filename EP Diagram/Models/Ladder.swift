@@ -10,6 +10,7 @@ import UIKit
 
 struct NearbyMarks {
     var proximalMarks: [Mark] = []
+    var middleMarks: [Mark] = []
     var distalMarks: [Mark] = []
 }
 
@@ -116,6 +117,7 @@ class Ladder {
     func getNearbyMarks(mark: Mark, minimum: CGFloat) -> NearbyMarks {
         var proximalMarks: [Mark] = []
         var distalMarks: [Mark] = []
+        var middleMarks: [Mark] = []
         // check proximal region
         if let proximalRegion = getRegionBefore(region: activeRegion) {
             for neighboringMark in proximalRegion.marks {
@@ -134,7 +136,18 @@ class Ladder {
                 }
             }
         }
-        return NearbyMarks(proximalMarks: proximalMarks, distalMarks: distalMarks)
+        // check in the same region
+        if let region = activeRegion {
+            for neighboringMark in region.marks {
+                // compare distance of 2 line segments here and append
+                if Common.distance(segment: neighboringMark.segment, point: mark.segment.proximal) < minimum ||
+                    Common.distance(segment: neighboringMark.segment, point: mark.segment.distal) < minimum {
+                    middleMarks.append(neighboringMark)
+                    // don't break, can have multiple linked marks in region
+                }
+            }
+        }
+        return NearbyMarks(proximalMarks: proximalMarks, middleMarks: middleMarks, distalMarks: distalMarks)
     }
 
     func setHighlight(highlight: Mark.Highlight, region: Region?) {
@@ -158,7 +171,7 @@ class Ladder {
         aRegion.selected = true
         let avRegion = Region()
         avRegion.name = "AV"
-        avRegion.decremental = true
+        avRegion.unitHeight = 2
         let vRegion = Region()
         vRegion.name = "V"
         ladder.regions = [aRegion, avRegion, vRegion]
