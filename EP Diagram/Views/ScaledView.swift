@@ -9,51 +9,31 @@
 import UIKit
 
 class ScaledView: UIView {
-    // scale determined by pinch to zoom.
-    var scale: CGFloat = 1
-    // offsetX determined by scrolling.
-    var offsetX: CGFloat = 0
-    // DEPRECATED
-    // offsetY is the distance from the top of the cursorView to the top of the ladderView, set by LadderView.
-    var offsetY: CGFloat = 0
+    var scale: CGFloat = 1 // scale determined by pinch to zoom.
+    var offsetX: CGFloat = 0 // offsetX determined by scrolling.
 
-    // Translation functions.  These translate positions from Region coordinates (x = position in unzoomed, unscrolled region, y = 0..1.0 as a fraction of vertical height of region) to LadderView coordinates (the x,y position in the LadderView) and vice versa.
+    // Translation functions.  These translate positions from Region coordinates (x = position in unzoomed, unscrolled region, y = 0..1.0 as a fraction of vertical height of region) to ScaledView (LadderView or CursorView) coordinates (the x,y position in the ScaledView) and vice versa.
 
     // PositionX functions.
-    func translateToRegionPositionX(ladderViewPositionX: CGFloat) -> CGFloat {
-        return Common.translateToRegionPositionX(ladderViewPositionX: ladderViewPositionX, offset: offsetX, scale: scale)
+    func translateToRegionPositionX(scaledViewPositionX: CGFloat) -> CGFloat {
+        return Common.translateToRegionPositionX(scaledViewPositionX: scaledViewPositionX, offset: offsetX, scale: scale)
     }
 
-    func translateToLadderViewPositionX(regionPositionX: CGFloat) -> CGFloat {
-        Common.translateToLadderViewPositionX(regionPositionX: regionPositionX, offset:offsetX, scale: scale)
-    }
-
-    // Position functions using region proximal boundary and height.
-    func translateToRegionPosition(ladderViewPosition: CGPoint, regionProximalBoundary: CGFloat, regionHeight: CGFloat) -> CGPoint {
-        return Common.translateToRegionPosition(ladderViewPosition: ladderViewPosition, regionProximalBoundary: regionProximalBoundary, regionHeight: regionHeight, offsetX: offsetX,scale: scale)
-    }
-
-    func translateToLadderViewPosition(regionPosition: CGPoint, regionProximalBoundary: CGFloat, regionHeight: CGFloat) -> CGPoint {
-        Common.translateToLadderViewPosition(regionPosition: regionPosition, regionProximalBoundary: regionProximalBoundary, regionHeight: regionHeight, offsetX: offsetX, scale: scale)
+    func translateToScaledViewPositionX(regionPositionX: CGFloat) -> CGFloat {
+        Common.translateToScaledViewPositionX(regionPositionX: regionPositionX, offset:offsetX, scale: scale)
     }
 
     // Position functions using region.
-    func translateToRegionPosition(ladderViewPosition: CGPoint, region: Region) -> CGPoint {
-        return Common.translateToRegionPosition(ladderViewPosition: ladderViewPosition, regionProximalBoundary: region.proximalBoundary, regionHeight: region.height, offsetX: offsetX,scale: scale)
+    func translateToRegionPosition(scaledViewPosition: CGPoint, region: Region) -> CGPoint {
+        return Common.translateToRegionPosition(scaledViewPosition: scaledViewPosition, region: region, offsetX: offsetX,scale: scale)
     }
 
-    func translateToLadderViewPosition(regionPosition: CGPoint, region: Region) -> CGPoint {
-        Common.translateToLadderViewPosition(regionPosition: regionPosition, regionProximalBoundary: region.proximalBoundary, regionHeight: region.height, offsetX: offsetX, scale: scale)
+    func translateToScaledViewPosition(regionPosition: CGPoint, region: Region) -> CGPoint {
+        Common.translateToScaledViewPosition(regionPosition: regionPosition, region: region, offsetX: offsetX, scale: scale)
     }
 
     // Segment functions.
-    func translateToLadderViewSegment(regionSegment: Segment, region: Region) -> Segment {
-        Common.translateToLadderViewSegment(regionSegment: regionSegment, regionProximalBoundary: region.proximalBoundary, regionHeight: region.height, offsetX: offsetX, scale: scale)
+    func translateToScaledViewSegment(regionSegment: Segment, region: Region) -> Segment {
+        Common.translateToScaledViewSegment(regionSegment: regionSegment, region: region, offsetX: offsetX, scale: scale)
     }
-
-    // Screen functions.
-    func translateToScreenPosition(regionPosition: CGPoint, regionProximalBoundary: CGFloat, regionHeight: CGFloat) -> CGPoint {
-        Common.translateToScreenPosition(regionPosition: regionPosition, regionProximalBoundary: regionProximalBoundary, regionHeight: regionHeight, offsetX: offsetX, offsetY: offsetY, scale: scale)
-    }
-
 }

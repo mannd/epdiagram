@@ -26,8 +26,8 @@ class LadderViewTests: XCTestCase {
         let positionX: CGFloat = 134.56
         ladderView.scale = 1.78
         ladderView.offsetX = 333.45
-        let absolutePositionX = ladderView.translateToRegionPositionX(ladderViewPositionX: positionX)
-        let relativeLocation = ladderView.translateToLadderViewPositionX(regionPositionX: absolutePositionX)
+        let absolutePositionX = ladderView.translateToRegionPositionX(scaledViewPositionX: positionX)
+        let relativeLocation = ladderView.translateToScaledViewPositionX(regionPositionX: absolutePositionX)
         XCTAssertEqual(positionX, relativeLocation, accuracy: 0.0001)
     }
 
@@ -54,9 +54,11 @@ class LadderViewTests: XCTestCase {
         let markPosition: Segment = Segment(proximal: CGPoint(x: 543.21, y: 99), distal: CGPoint(x: 329.8, y: 55.4))
         let scale: CGFloat = 1.78
         let offset: CGFloat = 333.45
-        let rect: CGRect = CGRect(x: 0, y: 0, width: 800, height: 300)
-        let absolutePosition = Common.translateToRegionSegment(screenSegment: markPosition, inRect: rect, offsetX: offset, scale: scale)
-        let relativePosition = Common.translateToScreenSegment(regionSegment: absolutePosition, inRect: rect, offsetX: offset, scale: scale)
+        let region = Region()
+        region.proximalBoundary = 0
+        region.distalBoundary = 300
+        let absolutePosition = Common.translateToRegionSegment(scaledViewSegment: markPosition, region: region, offsetX: offset, scale: scale)
+        let relativePosition = Common.translateToScaledViewSegment(regionSegment: absolutePosition, region: region, offsetX: offset, scale: scale)
         XCTAssertEqual(markPosition.proximal.x, relativePosition.proximal.x, accuracy: 0.0001)
         XCTAssertEqual(markPosition.proximal.y, relativePosition.proximal.y, accuracy: 0.0001)
         XCTAssertEqual(markPosition.distal.x, relativePosition.distal.x, accuracy: 0.001)

@@ -146,7 +146,7 @@ final class CursorView: ScaledView {
     }
 
     func isNearCursor(positionX: CGFloat, accuracy: CGFloat) -> Bool {
-        return positionX < translateToLadderViewPositionX(regionPositionX: cursor.position) + accuracy && positionX > translateToLadderViewPositionX(regionPositionX: cursor.position) - accuracy
+        return positionX < translateToScaledViewPositionX(regionPositionX: cursor.position) + accuracy && positionX > translateToScaledViewPositionX(regionPositionX: cursor.position) - accuracy
     }
 
     @objc func singleTap(tap: UITapGestureRecognizer) {
@@ -192,7 +192,7 @@ final class CursorView: ScaledView {
 
     private func dragMark(ladderViewDelegate: LadderViewDelegate?) {
         if let attachedMark = attachedMark {
-            ladderViewDelegate?.moveMark(mark: attachedMark, position: CGPoint(x: translateToLadderViewPositionX(regionPositionX: cursor.position), y: 0), moveCursor: false)
+            ladderViewDelegate?.moveMark(mark: attachedMark, position: CGPoint(x: translateToScaledViewPositionX(regionPositionX: cursor.position), y: 0), moveCursor: false)
             ladderViewDelegate?.refresh()
         }
     }

@@ -51,12 +51,15 @@ class MarkTests: XCTestCase {
 
     func testMidpoint() {
         let mark = Mark(Segment(proximal: CGPoint(x: 50, y: 0.21), distal: CGPoint(x:120, y: 0.88)))
-        let relativeMarkPosition = Common.translateToLadderViewSegment(regionSegment: mark.segment, regionProximalBoundary: 100, regionHeight: 400, offsetX: 0, scale: 1)
+        let region = Region()
+        region.proximalBoundary = 100
+        region.distalBoundary = 500
+        let relativeMarkPosition = Common.translateToScaledViewSegment(regionSegment: mark.segment, region: region, offsetX: 0, scale: 1)
         P("relativeMarkPosition = \(relativeMarkPosition)")
-        let midPoint = Common.getMidpoint(relativeMarkPosition)
+        let midPoint = Common.getSegmentMidpoint(relativeMarkPosition)
         XCTAssertEqual(midPoint, CGPoint(x: 85, y: 318))
         let anotherMarkPosition = Segment(proximal: CGPoint(x: -3, y: 5), distal: CGPoint(x: 8, y: -1))
-        let anotherMidPoint = Common.getMidpoint(anotherMarkPosition)
+        let anotherMidPoint = Common.getSegmentMidpoint(anotherMarkPosition)
         XCTAssertEqual(anotherMidPoint, CGPoint(x: 2.5, y: 2))
     }
 
