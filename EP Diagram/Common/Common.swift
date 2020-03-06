@@ -45,6 +45,10 @@ class Common {
         return Segment(proximal: translateToLadderViewPosition(regionPosition: regionSegment.proximal, regionProximalBoundary: proxBoundary, regionHeight: height, offsetX: offset, scale: scale), distal: translateToLadderViewPosition(regionPosition: regionSegment.distal, regionProximalBoundary: proxBoundary, regionHeight: height, offsetX: offset, scale: scale))
     }
 
+    static func translateToLadderViewSegment(regionSegment: Segment, region: Region, offsetX offset: CGFloat, scale: CGFloat) -> Segment {
+        return translateToLadderViewSegment(regionSegment: regionSegment, regionProximalBoundary: region.proximalBoundary, regionHeight: region.height, offsetX: offset, scale: scale)
+    }
+
     static func translateToRegionPosition(ladderViewPosition: CGPoint, regionProximalBoundary proxBoundary: CGFloat, regionHeight height: CGFloat, offsetX offset: CGFloat, scale: CGFloat) -> CGPoint {
         let x = translateToRegionPositionX(ladderViewPositionX: ladderViewPosition.x, offset: offset, scale: scale)
         let y = (ladderViewPosition.y - proxBoundary) / height
@@ -93,10 +97,40 @@ class Common {
         return numerator / denominator
     }
 
+    static func distance(segment: Segment, point: CGPoint) -> CGFloat {
+        return distance(linePoint1: segment.proximal, linePoint2: segment.distal, point: point)
+    }
+
     static func distance(_ p1: CGPoint, _ p2: CGPoint) -> CGFloat {
         let diffX = p1.x - p2.x
         let diffY = p1.y - p2.y
         return sqrt(diffX * diffX + diffY * diffY)
+    }
+
+    // After https://math.stackexchange.com/questions/2193720/find-a-point-on-a-line-segment-which-is-the-closest-to-other-point-not-on-the-li
+    static func closestPoint(segment: Segment, point: CGPoint) -> CGPoint {
+        let a = segment.proximal
+        let b = segment.distal
+        let p = point
+        let v = CGPoint(x: b.x - a.x, y: b.y - a.y)
+        let u = CGPoint(x: a.x - p.x, y: a.y - p.y)
+        let vu = v.x * u.x + v.y * u.y
+        let vv = v.x * v.x + v.y * v.y
+        let t = -vu / vv
+        if t >= 0 && t <= 1 {
+            return vectorToSegment(t: t, p: CGPoint(x: 0, y: 0), a: a, b: b)
+        }
+        let g0 = sqDiag(p: vectorToSegment(t: 0, p: p, a: a, b: b))
+        let g1 = sqDiag(p: vectorToSegment(t: 1, p: p, a: a, b: b))
+        return g0 <= g1 ? a : b
+    }
+
+    static private func vectorToSegment(t: CGFloat, p: CGPoint, a: CGPoint, b: CGPoint) -> CGPoint {
+        return CGPoint(x: (1 - t) * a.x + t * b.x - p.x, y: (1 - t) * a.y + t * b.y - p.y)
+    }
+
+    static private func sqDiag(p: CGPoint) -> CGFloat {
+        return p.x * p.x + p.y * p.y
     }
 }
 
