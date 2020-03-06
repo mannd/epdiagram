@@ -114,41 +114,45 @@ class Ladder {
         return nil
     }
 
-    func getNearbyMarks(mark: Mark, minimum: CGFloat) -> NearbyMarks {
-        var proximalMarks: [Mark] = []
-        var distalMarks: [Mark] = []
-        var middleMarks: [Mark] = []
-        // check proximal region
-        if let proximalRegion = getRegionBefore(region: activeRegion) {
-            for neighboringMark in proximalRegion.marks {
-                if abs(mark.segment.proximal.x - neighboringMark.segment.distal.x) < minimum {
-                    proximalMarks.append(neighboringMark)
-                    break
-                }
-            }
-        }
-        // check distal region
-        if let distalRegion = getRegionAfter(region: activeRegion) {
-            for neighboringMark in distalRegion.marks {
-                if abs(mark.segment.distal.x - neighboringMark.segment.proximal.x) < minimum {
-                    distalMarks.append(neighboringMark)
-                    break
-                }
-            }
-        }
-        // check in the same region
-        if let region = activeRegion {
-            for neighboringMark in region.marks {
-                // compare distance of 2 line segments here and append
-                if Common.distance(segment: neighboringMark.segment, point: mark.segment.proximal) < minimum ||
-                    Common.distance(segment: neighboringMark.segment, point: mark.segment.distal) < minimum {
-                    middleMarks.append(neighboringMark)
-                    // don't break, can have multiple linked marks in region
-                }
-            }
-        }
-        return NearbyMarks(proximalMarks: proximalMarks, middleMarks: middleMarks, distalMarks: distalMarks)
-    }
+//    // FIXME: distance must use screen coordinates, not ladder coordinates.
+//    func getNearbyMarks(mark: Mark, minimum: CGFloat) -> NearbyMarks {
+//        var proximalMarks: [Mark] = []
+//        var distalMarks: [Mark] = []
+//        var middleMarks: [Mark] = []
+//        // check proximal region
+//        if let proximalRegion = getRegionBefore(region: activeRegion) {
+//            for neighboringMark in proximalRegion.marks {
+//                if abs(mark.segment.proximal.x - neighboringMark.segment.distal.x) < minimum {
+//                    proximalMarks.append(neighboringMark)
+//                    break
+//                }
+//            }
+//        }
+//        // check distal region
+//        if let distalRegion = getRegionAfter(region: activeRegion) {
+//            for neighboringMark in distalRegion.marks {
+//                if abs(mark.segment.distal.x - neighboringMark.segment.proximal.x) < minimum {
+//                    distalMarks.append(neighboringMark)
+//                    break
+//                }
+//            }
+//        }
+//        // check in the same region
+//        if let region = activeRegion {
+//            for neighboringMark in region.marks {
+//                if !(neighboringMark === mark) {
+//                    // FIXME: distance must use screen coordinates, not ladder coordinates.
+//                    // compare distance of 2 line segments here and append
+//                    if Common.distance(segment: neighboringMark.segment, point: mark.segment.proximal) < minimum ||
+//                        Common.distance(segment: neighboringMark.segment, point: mark.segment.distal) < minimum {
+//                        middleMarks.append(neighboringMark)
+//                        break
+//                    }
+//                }
+//            }
+//        }
+//        return NearbyMarks(proximalMarks: proximalMarks, middleMarks: middleMarks, distalMarks: distalMarks)
+//    }
 
     func setHighlight(highlight: Mark.Highlight, region: Region?) {
         guard let region = region else { return }

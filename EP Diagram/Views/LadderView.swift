@@ -43,7 +43,6 @@ final class LadderView: ScaledView {
     private var ladder: Ladder = Ladder.defaultLadder()
     private var activeRegion: Region? {
         set(value) {
-            P("active region = \(activeRegion)")
             ladder.activeRegion = value
             activateRegion(region: ladder.activeRegion)
         }
@@ -126,7 +125,7 @@ final class LadderView: ScaledView {
         for region: Region in ladder.regions {
             numRegionUnits += region.unitHeight
         }
-        // we'll allow padding above and below, so...
+        // we need padding above and below, so...
         let padding = Int(ladderPaddingMultiplier * 2)
         numRegionUnits += padding
         return height / CGFloat(numRegionUnits)
@@ -522,14 +521,13 @@ final class LadderView: ScaledView {
         return needsDisplay
     }
 
-    // TODO: must also highlight nearby marks that are in the same region (and link them too).
     private func highlightNearbyMarks(_ mark: Mark?) {
         guard let mark = mark else { return }
         var minimum: CGFloat = 10
         minimum = minimum / scale
-        let nearbyProximalMarks: [Mark] = ladder.getNearbyMarks(mark: mark, minimum: minimum).proximalMarks
-        let nearbyDistalMarks: [Mark] = ladder.getNearbyMarks(mark: mark, minimum: minimum).distalMarks
-        let nearbyMiddleMarks: [Mark] = ladder.getNearbyMarks(mark: mark, minimum: minimum).middleMarks
+        let nearbyProximalMarks: [Mark] = getNearbyMarks(mark: mark, minimum: minimum).proximalMarks
+        let nearbyDistalMarks: [Mark] = getNearbyMarks(mark: mark, minimum: minimum).distalMarks
+        let nearbyMiddleMarks: [Mark] = getNearbyMarks(mark: mark, minimum: minimum).middleMarks
         if nearbyProximalMarks.count > 0 {
             for nearbyMark in nearbyProximalMarks {
                 nearbyMark.highlight = .all
@@ -552,10 +550,53 @@ final class LadderView: ScaledView {
             }
         }
         else {
-            ladder.setHighlight(highlight: .none, region: ladder.getRegionAfter(region: activeRegion))
+            ladder.setHighlight(highlight: .none, region: activeRegion)
         }
     }
 
+    func getNearbyMarks(mark: Mark, minimum: CGFloat) -> NearbyMarks {
+        var proximalMarks: [Mark] = []
+        var distalMarks: [Mark] = []
+        var middleMarks: [Mark] = []
+        // check proximal region.  Note that only marks that abut the neighboring region are checked.
+        if let proximalRegion = ladder.getRegionBefore(region: activeRegion), mark.segment.proximal.y == 0 {
+            for neighboringMark in proximalRegion.marks {
+                let ladderViewPositionXMark = translateToLadderViewPositionX(regionPositionX: mark.segment.proximal.x)
+                let ladderViewPositionNeighboringXMark = translateToLadderViewPositionX(regionPositionX: neighboringMark.segment.distal.x)
+                if abs(ladderViewPositionXMark - ladderViewPositionNeighboringXMark) < minimum {
+                    proximalMarks.append(neighboringMark)
+                }
+            }
+        }
+        // check distal region
+        if let distalRegion = ladder.getRegionAfter(region: activeRegion), mark.segment.distal.y == 1.0 {
+            for neighboringMark in distalRegion.marks {
+                let ladderViewPositionXMark = translateToLadderViewPositionX(regionPositionX: mark.segment.distal.x)
+                let ladderViewPositionNeighboringXMark = translateToLadderViewPositionX(regionPositionX: neighboringMark.segment.proximal.x)
+                if abs(ladderViewPositionXMark - ladderViewPositionNeighboringXMark) < minimum {
+                    distalMarks.append(neighboringMark)
+                }
+            }
+        }
+        // check in the same region
+        if let region = activeRegion {
+            for neighboringMark in region.marks {
+                if !(neighboringMark === mark) {
+                    // FIXME: distance must use screen coordinates, not ladder coordinates.
+                    // compare distance of 2 line segments here and append
+                    let ladderViewPositionNeighboringMarkSegment = translateToLadderViewSegment(regionSegment: neighboringMark.segment, region: region)
+                    let ladderViewPositionMarkProximal = translateToLadderViewPosition(regionPosition: mark.segment.proximal, region: region)
+                    let ladderViewPositionMarkDistal = translateToLadderViewPosition(regionPosition: mark.segment.distal, region: region)
+                    let distanceProximal = Common.distance(segment: ladderViewPositionNeighboringMarkSegment, point: ladderViewPositionMarkProximal)
+                    let distanceDistal = Common.distance(segment: ladderViewPositionNeighboringMarkSegment, point: ladderViewPositionMarkDistal)
+                    if distanceProximal < minimum || distanceDistal < minimum {
+                        middleMarks.append(neighboringMark)
+                    }
+                }
+            }
+        }
+        return NearbyMarks(proximalMarks: proximalMarks, middleMarks: middleMarks, distalMarks: distalMarks)
+    }
     func moveMark(mark: Mark, position: CGPoint, moveCursor: Bool) {
         moveMark(mark: mark, screenPositionX: position.x)
         if moveCursor {
@@ -660,6 +701,8 @@ final class LadderView: ScaledView {
     func nullifyPressedMark() {
         pressedMark = nil
     }
+
+    // MARK: - draw
 
     override func draw(_ rect: CGRect) {
         // Drawing code - note not necessary to call super.draw.
@@ -1042,25 +1085,44 @@ extension LadderView: LadderViewDelegate {
     func linkNearbyMarks(mark: Mark) {
         var minimum: CGFloat = 10
         minimum = minimum / scale
-        let nearbyMarks = ladder.getNearbyMarks(mark: mark, minimum: minimum)
+        let nearbyMarks = getNearbyMarks(mark: mark, minimum: minimum)
         let proxMarks = nearbyMarks.proximalMarks
         let distalMarks = nearbyMarks.distalMarks
         let middleMarks = nearbyMarks.middleMarks
         for proxMark in proxMarks {
             mark.attachedMarks.proximal.append(proxMark)
             mark.segment.proximal.x = proxMark.segment.distal.x
+            if mark.anchor == .proximal {
+                cursorViewDelegate?.moveCursor(cursorViewPositionX: mark.segment.proximal.x / scale)
+            }
+            else if mark.anchor == .middle {
+                cursorViewDelegate?.moveCursor(cursorViewPositionX: mark.midpoint().x / scale)
+            }
             proxMark.attachedMarks.distal.append(mark)
         }
         for distalMark in distalMarks {
             mark.attachedMarks.distal.append(distalMark)
             mark.segment.distal.x = distalMark.segment.proximal.x
+            if mark.anchor == .proximal {
+                cursorViewDelegate?.moveCursor(cursorViewPositionX: mark.segment.proximal.x / scale)
+            }
+            else if mark.anchor == .middle {
+                cursorViewDelegate?.moveCursor(cursorViewPositionX: mark.midpoint().x / scale)
+            }
             distalMark.attachedMarks.proximal.append(mark)
         }
         for middleMark in middleMarks {
+            let distanceToProximal = Common.distance(segment: middleMark.segment, point: mark.segment.proximal)
+            let distanceToDistal = Common.distance(segment: middleMark.segment, point: mark.segment.distal)
+            let closestEnd = distanceToProximal < distanceToDistal ? mark.segment.proximal : mark.segment.distal
+            let closestPoint = Common.closestPoint(segment: middleMark.segment, point:  closestEnd)
+            if distanceToProximal < distanceToDistal {
+                mark.segment.proximal = closestPoint
+            }
+            else {
+                mark.segment.distal = closestPoint
+            }
             mark.attachedMarks.distal.append(middleMark)
-            P("append middle mark somehow")
-//            mark.segment.distal.x = middleMark.segment.proximal.x
-//            middleMark.attachedMarks.proximal.append(mark)
         }
     }
 }
@@ -1097,4 +1159,5 @@ extension LadderView: UIContextMenuInteractionDelegate {
                 return UIMenu(title: "", children: [delete])
             }
         }
-    }}
+    }
+}
