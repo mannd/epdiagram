@@ -136,6 +136,7 @@ final class LadderView: ScaledView {
     @objc func singleTap(tap: UITapGestureRecognizer) {
         let position = tap.location(in: self)
         let tapLocationInLadder = getLocationInLadder(position: position)
+        unhighlightMarks()
         if tapLocationInLadder.labelWasTapped {
             assert(tapLocationInLadder.region != nil, "Label tapped, but region is nil!")
             if let region = tapLocationInLadder.region {
@@ -243,20 +244,20 @@ final class LadderView: ScaledView {
     /// if no mark tapped.
     /// - Parameter tapLocationInLadder: the tapped LocationInLadder
     private func markWasTapped(mark: Mark?, tapLocationInLadder: LocationInLadder, cursorViewDelegate: CursorViewDelegate?) {
-        if let mark = mark {
+        if let mark = mark, let activeRegion = activeRegion {
+            let anchor = tapLocationInLadder.markAnchor
             if mark.attached {
-                let anchor = tapLocationInLadder.markAnchor
                 // Just reanchor cursor
                 if anchor != mark.anchor {
-                    mark.highlight = .all
+                    selectMark(mark)
                     mark.anchor = anchor
-                    let anchorPositionX = mark.getAnchorPositionX()
-                    let anchorPosition = mark.getAnchorPosition()
-                    let scaledAnchorPositionY = translateToScaledViewPosition(regionPosition: anchorPosition, region: activeRegion!).y
-                    cursorViewDelegate?.moveCursor(cursorViewPositionX: anchorPositionX)
-                    cursorViewDelegate?.setCursorHeight(anchorPositionY: scaledAnchorPositionY)
+                    adjustCursor(mark: mark, region: activeRegion)
+//                    let anchorPosition = mark.getAnchorPosition()
+//                    let scaledAnchorPositionY = translateToScaledViewPosition(regionPosition: anchorPosition, region: activeRegion).y
+//                    cursorViewDelegate?.moveCursor(cursorViewPositionX: anchorPosition.x)
+//                    cursorViewDelegate?.setCursorHeight(anchorPositionY: scaledAnchorPositionY)
                 }
-                else {
+                else { // tapped same anchor position.
                     // Unattach mark and hide cursor
                     mark.attached = false
                     mark.highlight = .none
@@ -265,21 +266,29 @@ final class LadderView: ScaledView {
                     cursorViewDelegate?.unattachAttachedMark()
                 }
             }
-            else {
+            else { // mark wasn't already attached.
                 mark.attached = true
-                mark.anchor = tapLocationInLadder.markAnchor
                 selectMark(mark)
+                mark.anchor = anchor
                 cursorViewDelegate?.attachMark(mark)
-                cursorViewDelegate?.setCursorHeight()
-                let anchorPosition = mark.getAnchorPosition()
-                let scaledAnchorPositionY = translateToScaledViewPosition(regionPosition: anchorPosition, region: activeRegion!).y
-                // Pass anchor position to CursorView delegate
-                cursorViewDelegate?.moveCursor(cursorViewPositionX: anchorPosition.x)
-                cursorViewDelegate?.setCursorHeight(anchorPositionY: scaledAnchorPositionY)
+                adjustCursor(mark: mark, region: activeRegion)
+//                let anchorPosition = mark.getAnchorPosition()
+//                let scaledAnchorPositionY = translateToScaledViewPosition(regionPosition: anchorPosition, region: activeRegion).y
+//                cursorViewDelegate?.moveCursor(cursorViewPositionX: anchorPosition.x)
+//                cursorViewDelegate?.setCursorHeight(anchorPositionY: scaledAnchorPositionY)
                 cursorViewDelegate?.hideCursor(false)
             }
         }
     }
+
+    private func adjustCursor(mark: Mark, region: Region) {
+        let anchorPosition = mark.getAnchorPosition()
+        let scaledAnchorPositionY = translateToScaledViewPosition(regionPosition: anchorPosition, region: region).y
+        cursorViewDelegate?.moveCursor(cursorViewPositionX: anchorPosition.x)
+        cursorViewDelegate?.setCursorHeight(anchorPositionY: scaledAnchorPositionY)
+    }
+
+
     /// - Parameters:
     ///   - position: position of, say a tap on the screen
     ///   - mark: mark to check for proximity
@@ -506,6 +515,25 @@ final class LadderView: ScaledView {
                     dragCreatedMark?.swapEnds()
                 }
             }
+            if let dragCreatedMark = dragCreatedMark {
+                if dragCreatedMark.segment.proximal.y != 0 {
+                    dragCreatedMark.block = .proximal
+                }
+                if dragCreatedMark.segment.distal.y != 1.0 {
+                    dragCreatedMark.block = .distal
+                }
+                if dragCreatedMark.attachedMarks.proximal.count == 0 {
+                    if dragCreatedMark.segment.proximal.x < dragCreatedMark.segment.distal.x {
+                        dragCreatedMark.impulseOrigin = .proximal
+                    }
+                }
+                if dragCreatedMark.attachedMarks.distal.count == 0 {
+                    if dragCreatedMark.segment.distal.x < dragCreatedMark.segment.proximal.x {
+                        dragCreatedMark.impulseOrigin = .distal
+                    }
+                }
+            }
+            // TODO: do same for moving mark
             unhighlightMarks()
             movingMark = nil
             dragCreatedMark = nil
@@ -796,6 +824,7 @@ final class LadderView: ScaledView {
             p2 = segment.proximal
         }
         context.setStrokeColor(getMarkColor(mark: mark))
+        context.setFillColor(getMarkColor(mark: mark))
         context.setLineWidth(getMarkLineWidth(mark))
         context.move(to: p1)
         context.addLine(to: p2)
@@ -816,6 +845,7 @@ final class LadderView: ScaledView {
             context.strokePath()
         }
         drawBlock(context: context, mark: mark, position: segment)
+        drawImpulseOrigin(context: context, mark: mark, position: segment)
 
         context.setStrokeColor(getLineColor())
     }
@@ -829,6 +859,16 @@ final class LadderView: ScaledView {
     func drawCircle(context: CGContext, center: CGPoint, radius: CGFloat) {
         context.addArc(center: center, radius: radius, startAngle: 0.0, endAngle: .pi * 2.0, clockwise: true)
         context.strokePath()
+    }
+
+    func drawFilledCircle(context ctx: CGContext, position: CGPoint) {
+//        ctx.setFillColor(UIColor.red.cgColor)
+//        ctx.setStrokeColor(UIColor.green.cgColor)
+//        ctx.setLineWidth(10)
+
+        let rectangle = CGRect(x: position.x, y: position.y, width: 10, height: 10)
+        ctx.addEllipse(in: rectangle)
+        ctx.drawPath(using: .fillStroke)
     }
 
     func drawBlock(context: CGContext, mark: Mark, position: Segment) {
@@ -849,6 +889,18 @@ final class LadderView: ScaledView {
             context.addLine(to: CGPoint(x: position.proximal.x + blockLength / 2, y: position.proximal.y - blockSeparation))
         }
         context.strokePath()
+    }
+
+    func drawImpulseOrigin(context: CGContext, mark: Mark, position: Segment) {
+        let separation: CGFloat = 16
+        switch mark.impulseOrigin {
+        case .none:
+            return
+        case .distal:
+            drawFilledCircle(context: context, position: CGPoint(x: position.distal.x - 5.0, y: position.distal.y + separation))
+        case .proximal:
+            drawFilledCircle(context: context, position: CGPoint(x: position.proximal.x - 5.0, y: position.proximal.y - separation))
+        }
     }
 
     // Algorithm from: https://stackoverflow.com/questions/15690103/intersection-between-two-lines-in-coordinates
