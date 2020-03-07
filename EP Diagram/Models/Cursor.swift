@@ -36,7 +36,8 @@ class Cursor: NSObject {
     }
 
     /// Cursors have one dimensional positions along the x or y axis depending on their direction.
-    var position: CGFloat
+    var positionX: CGFloat
+    var positionY: CGFloat
 
     var anchor = Anchor.middle
     var visible = false
@@ -46,18 +47,20 @@ class Cursor: NSObject {
     let accuracy: CGFloat = 20
     
     init(positionX: CGFloat) {
-        self.position = positionX
+        self.positionX = positionX
+        self.positionY = 0
     }
+
 
     convenience override init() {
         self.init(positionX: 0)
     }
 
     func isNearCursor(point p: CGPoint) -> Bool {
-        return abs(p.x - position) < accuracy
+        return abs(p.x - positionX) < accuracy
     }
 
     func move(delta: CGFloat) {
-        position += delta
+        positionX += delta
     }
 }

@@ -23,7 +23,7 @@ class ScaledView: UIView {
         Common.translateToScaledViewPositionX(regionPositionX: regionPositionX, offset:offsetX, scale: scale)
     }
 
-    // Position functions using region.
+    // Position functions
     func translateToRegionPosition(scaledViewPosition: CGPoint, region: Region) -> CGPoint {
         return Common.translateToRegionPosition(scaledViewPosition: scaledViewPosition, region: region, offsetX: offsetX,scale: scale)
     }
@@ -35,5 +35,9 @@ class ScaledView: UIView {
     // Segment functions.
     func translateToScaledViewSegment(regionSegment: Segment, region: Region) -> Segment {
         Common.translateToScaledViewSegment(regionSegment: regionSegment, region: region, offsetX: offsetX, scale: scale)
+    }
+
+    func translateToRegionSegment(scaledViewSegment: Segment, region: Region) -> Segment {
+        Common.translateToRegionSegment(scaledViewSegment: scaledViewSegment, region: region, offsetX: offsetX, scale: scale)
     }
 }

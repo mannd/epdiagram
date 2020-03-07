@@ -111,9 +111,10 @@
                 let positionX = tap.location(in: imageScrollView).x
                 // imageScrollView still starts at x = 0, contentInset shifts view to right, and the left margin is negative relative to the view.
                 if positionX > 0 {
-                    cursorView.putCursor(screenPositionX: positionX)
+                    cursorView.putCursor(imageScrollViewPositionX: positionX)
                     cursorView.hideCursor(false)
-                    cursorView.attachMark(screenPositionX: positionX)
+                    cursorView.attachMark(imageScrollViewPositionX: positionX)
+                    cursorView.setCursorHeight()
                 }
             }
             cursorView.setNeedsDisplay()
