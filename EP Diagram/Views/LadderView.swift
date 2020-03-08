@@ -24,6 +24,7 @@ protocol LadderViewDelegate: AnyObject {
     func linkNearbyMarks(mark: Mark)
     func moveMark(mark: Mark, position: CGPoint, moveCursor: Bool)
     func assessBlockAndImpulseOrigin(mark: Mark?)
+    func getAttachedMarkPosition() -> CGPoint?
 }
 
 final class LadderView: ScaledView {
@@ -279,7 +280,6 @@ final class LadderView: ScaledView {
         cursorViewDelegate?.moveCursor(cursorViewPositionX: anchorPosition.x)
         cursorViewDelegate?.setCursorHeight(anchorPositionY: scaledAnchorPositionY)
     }
-
 
     /// - Parameters:
     ///   - position: position of, say a tap on the screen
@@ -621,7 +621,7 @@ final class LadderView: ScaledView {
         return NearbyMarks(proximalMarks: proximalMarks, middleMarks: middleMarks, distalMarks: distalMarks)
     }
     func moveMark(mark: Mark, position: CGPoint, moveCursor: Bool) {
-        moveMark(mark: mark, scaledViewPositionX: position.x)
+        moveMark(mark: mark, scaledViewPosition: position)
         if moveCursor {
             let anchorPositionX = mark.getAnchorPositionX()
             cursorViewDelegate?.moveCursor(cursorViewPositionX: anchorPositionX)
@@ -1114,7 +1114,8 @@ extension LadderView: LadderViewDelegate {
     
     @discardableResult
     func addMark(imageScrollViewPositionX positionX: CGFloat) -> Mark? {
-        return ladder.addMarkAt(positionX / scale)
+        attachedMark = ladder.addMarkAt(positionX / scale)
+        return attachedMark
     }
 
     func linkNearbyMarks(mark: Mark) {
@@ -1163,6 +1164,11 @@ extension LadderView: LadderViewDelegate {
     func getPositionYInView(positionY: CGFloat, view: UIView) -> CGFloat {
         let point = CGPoint(x: 0, y: positionY)
         return convert(point, to: view).y
+    }
+
+    func getAttachedMarkPosition() -> CGPoint? {
+        guard let attachedMark = attachedMark, let activeRegion = activeRegion else { return nil }
+        return translateToScaledViewPosition(regionPosition: attachedMark.getAnchorPosition(), region: activeRegion)
     }
 }
 

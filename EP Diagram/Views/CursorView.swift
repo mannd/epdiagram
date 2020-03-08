@@ -37,6 +37,8 @@ final class CursorView: ScaledView {
     private var attachedMark: Mark?
     private var rawCursorHeight: CGFloat?
 
+    private var yTranslation: CGFloat = 0
+
     var leftMargin: CGFloat = 0
 
     weak var ladderViewDelegate: LadderViewDelegate?
@@ -191,9 +193,16 @@ final class CursorView: ScaledView {
     }
 
     @objc func drag(pan: UIPanGestureRecognizer) {
+        if pan.state == .began {
+            let attachment = ladderViewDelegate?.getAttachedMarkPosition()
+            yTranslation = attachment?.y ?? 0
+            P("initial yTranslation = \(yTranslation)")
+        }
         if pan.state == .changed {
             let delta = pan.translation(in: self)
             cursorMove(delta: delta.x)
+            yTranslation += delta.y
+            P("yTranslation = \(yTranslation)x")
             dragMark(ladderViewDelegate: ladderViewDelegate)
             pan.setTranslation(CGPoint(x: 0,y: 0), in: self)
         }
@@ -202,6 +211,7 @@ final class CursorView: ScaledView {
                 ladderViewDelegate?.linkNearbyMarks(mark: attachedMark)
                 ladderViewDelegate?.refresh()
             }
+            yTranslation = 0
         }
         setNeedsDisplay()
     }
@@ -213,7 +223,7 @@ final class CursorView: ScaledView {
 
     private func dragMark(ladderViewDelegate: LadderViewDelegate?) {
         if let attachedMark = attachedMark {
-            ladderViewDelegate?.moveMark(mark: attachedMark, position: CGPoint(x: translateToScaledViewPositionX(regionPositionX: cursor.positionX), y: 0), moveCursor: false)
+            ladderViewDelegate?.moveMark(mark: attachedMark, position: CGPoint(x: translateToScaledViewPositionX(regionPositionX: cursor.positionX), y: yTranslation), moveCursor: false)
             ladderViewDelegate?.refresh()
         }
     }
