@@ -254,6 +254,7 @@ extension CursorView: CursorViewDelegate {
 
     func unattachAttachedMark() {
         guard let mark = attachedMark else { return }
+        ladderViewDelegate?.assessBlockAndImpulseOrigin(mark: mark)
         mark.attached = false
         mark.highlight = .none
         attachedMark = nil

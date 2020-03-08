@@ -26,14 +26,14 @@ class LadderViewTests: XCTestCase {
         let positionX: CGFloat = 134.56
         ladderView.scale = 1.78
         ladderView.offsetX = 333.45
-        let absolutePositionX = ladderView.translateToRegionPositionX(scaledViewPositionX: positionX)
-        let relativeLocation = ladderView.translateToScaledViewPositionX(regionPositionX: absolutePositionX)
-        XCTAssertEqual(positionX, relativeLocation, accuracy: 0.0001)
+        let regionPositionX = ladderView.translateToRegionPositionX(scaledViewPositionX: positionX)
+        let scaledViewPositionX = ladderView.translateToScaledViewPositionX(regionPositionX: regionPositionX)
+        XCTAssertEqual(positionX, scaledViewPositionX, accuracy: 0.0001)
     }
 
     func testLadderViewModelUnitHeight() {
         ladderView.ladder = Ladder.defaultLadder()
-        ladderView.height = 100
+        ladderView.ladderViewHeight = 100
         let height = ladderView.getRegionUnitHeight(ladder: ladderView.ladder)
         XCTAssertEqual(height, 20, accuracy: 0.0001)
     }
@@ -57,11 +57,11 @@ class LadderViewTests: XCTestCase {
         let region = Region()
         region.proximalBoundary = 0
         region.distalBoundary = 300
-        let absolutePosition = Common.translateToRegionSegment(scaledViewSegment: markPosition, region: region, offsetX: offset, scale: scale)
-        let relativePosition = Common.translateToScaledViewSegment(regionSegment: absolutePosition, region: region, offsetX: offset, scale: scale)
-        XCTAssertEqual(markPosition.proximal.x, relativePosition.proximal.x, accuracy: 0.0001)
-        XCTAssertEqual(markPosition.proximal.y, relativePosition.proximal.y, accuracy: 0.0001)
-        XCTAssertEqual(markPosition.distal.x, relativePosition.distal.x, accuracy: 0.001)
-        XCTAssertEqual(markPosition.distal.y, relativePosition.distal.y, accuracy: 0.001)
+        let regionSegment = Common.translateToRegionSegment(scaledViewSegment: markPosition, region: region, offsetX: offset, scale: scale)
+        let scaledViewSegment = Common.translateToScaledViewSegment(regionSegment: regionSegment, region: region, offsetX: offset, scale: scale)
+        XCTAssertEqual(markPosition.proximal.x, scaledViewSegment.proximal.x, accuracy: 0.0001)
+        XCTAssertEqual(markPosition.proximal.y, scaledViewSegment.proximal.y, accuracy: 0.0001)
+        XCTAssertEqual(markPosition.distal.x, scaledViewSegment.distal.x, accuracy: 0.001)
+        XCTAssertEqual(markPosition.distal.y, scaledViewSegment.distal.y, accuracy: 0.001)
     }
 }

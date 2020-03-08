@@ -23,6 +23,7 @@ protocol LadderViewDelegate: AnyObject {
     @discardableResult func addMark(imageScrollViewPositionX: CGFloat) -> Mark?
     func linkNearbyMarks(mark: Mark)
     func moveMark(mark: Mark, position: CGPoint, moveCursor: Bool)
+    func assessBlockAndImpulseOrigin(mark: Mark?)
 }
 
 final class LadderView: ScaledView {
@@ -39,6 +40,8 @@ final class LadderView: ScaledView {
     var selectedColor = UIColor.magenta
     var markLineWidth: CGFloat = 2
     var connectedLineWidth: CGFloat = 4
+    var showImpulseOrigin = true
+    var showBlock = true
 
     internal var ladder: Ladder = Ladder.defaultLadder()
     private var activeRegion: Region? {
@@ -60,7 +63,7 @@ final class LadderView: ScaledView {
     private var dragOriginDivision: RegionDivision = .none
 
     var leftMargin: CGFloat = 0
-    internal var height: CGFloat = 0
+    internal var ladderViewHeight: CGFloat = 0
     private var regionUnitHeight: CGFloat = 0
 
     weak var cursorViewDelegate: CursorViewDelegate?
@@ -80,7 +83,7 @@ final class LadderView: ScaledView {
     }
 
     private func didLoad() {
-        height = self.frame.height
+        ladderViewHeight = self.frame.height
         if #available(iOS 13.0, *) {
             unselectedColor = UIColor.label
         }
@@ -101,7 +104,7 @@ final class LadderView: ScaledView {
         singleTapRecognizer.require(toFail: doubleTapRecognizer)
         self.addGestureRecognizer(doubleTapRecognizer)
 
-        let draggingPanRecognizer = UIPanGestureRecognizer(target: self, action: #selector(self.dragging))
+        let draggingPanRecognizer = UIPanGestureRecognizer(target: self, action: #selector(self.drag))
         self.addGestureRecognizer(draggingPanRecognizer)
 
         let longPressRecognizer = UILongPressGestureRecognizer(target: self, action: #selector(self.longPress))
@@ -128,7 +131,7 @@ final class LadderView: ScaledView {
         // we need padding above and below, so...
         let padding = Int(ladderPaddingMultiplier * 2)
         numRegionUnits += padding
-        return height / CGFloat(numRegionUnits)
+        return ladderViewHeight / CGFloat(numRegionUnits)
     }
 
     // MARK: - Touches
@@ -146,7 +149,7 @@ final class LadderView: ScaledView {
             }
         }
         else if (tapLocationInLadder.regionWasTapped) {
-            regionWasTapped(tapLocationInLadder: tapLocationInLadder, positionX: position.x, cursorViewDelegate: cursorViewDelegate)
+            regionWasTapped(tapLocationInLadder: tapLocationInLadder, positionX: position.x)
         }
         cursorViewDelegate?.refresh()
         setNeedsDisplay()
@@ -204,19 +207,19 @@ final class LadderView: ScaledView {
             labelRegion.selected = false
             activeRegion = nil
         }
-        else { // !tappedRegion.selected
+        else {
             activeRegion = labelRegion
         }
     }
 
-    private func regionWasTapped(tapLocationInLadder: LocationInLadder, positionX: CGFloat, cursorViewDelegate: CursorViewDelegate?) {
+    private func regionWasTapped(tapLocationInLadder: LocationInLadder, positionX: CGFloat) {
         assert(tapLocationInLadder.region != nil, "Region tapped, but is nil!")
         if let tappedRegion = tapLocationInLadder.region {
             if !tappedRegion.selected {
                 activeRegion = tappedRegion
             }
             if let mark = tapLocationInLadder.mark {
-                markWasTapped(mark: mark, tapLocationInLadder: tapLocationInLadder, cursorViewDelegate: cursorViewDelegate)
+                markWasTapped(mark: mark, tapLocationInLadder: tapLocationInLadder)
             }
             else if cursorViewDelegate?.cursorIsVisible() ?? false {
                 unhighlightMarks()
@@ -224,7 +227,7 @@ final class LadderView: ScaledView {
                 cursorViewDelegate?.unattachAttachedMark()
             }
             else { // make mark and attach cursor
-                let mark = makeMark(positionX: positionX)
+                let mark = makeMark(scaledViewPositionX: positionX)
                 if let mark = mark {
                     inactivateMarks()
                     mark.attached = true
@@ -233,17 +236,13 @@ final class LadderView: ScaledView {
                     cursorViewDelegate?.attachMark(mark)
                     cursorViewDelegate?.setCursorHeight()
                     cursorViewDelegate?.moveCursor(cursorViewPositionX: mark.segment.proximal.x)
-                    
                     cursorViewDelegate?.hideCursor(false)
                 }
             }
         }
     }
 
-    /// Response to tapped mark in LadderView.  Returns marks anchor position.x or nil
-    /// if no mark tapped.
-    /// - Parameter tapLocationInLadder: the tapped LocationInLadder
-    private func markWasTapped(mark: Mark?, tapLocationInLadder: LocationInLadder, cursorViewDelegate: CursorViewDelegate?) {
+    private func markWasTapped(mark: Mark?, tapLocationInLadder: LocationInLadder) {
         if let mark = mark, let activeRegion = activeRegion {
             let anchor = tapLocationInLadder.markAnchor
             if mark.attached {
@@ -252,15 +251,12 @@ final class LadderView: ScaledView {
                     selectMark(mark)
                     mark.anchor = anchor
                     adjustCursor(mark: mark, region: activeRegion)
-//                    let anchorPosition = mark.getAnchorPosition()
-//                    let scaledAnchorPositionY = translateToScaledViewPosition(regionPosition: anchorPosition, region: activeRegion).y
-//                    cursorViewDelegate?.moveCursor(cursorViewPositionX: anchorPosition.x)
-//                    cursorViewDelegate?.setCursorHeight(anchorPositionY: scaledAnchorPositionY)
                 }
                 else { // tapped same anchor position.
                     // Unattach mark and hide cursor
                     mark.attached = false
                     mark.highlight = .none
+                    assessBlockAndImpulseOrigin(mark: mark)
                     unselectMark(mark)
                     cursorViewDelegate?.hideCursor(true)
                     cursorViewDelegate?.unattachAttachedMark()
@@ -272,10 +268,6 @@ final class LadderView: ScaledView {
                 mark.anchor = anchor
                 cursorViewDelegate?.attachMark(mark)
                 adjustCursor(mark: mark, region: activeRegion)
-//                let anchorPosition = mark.getAnchorPosition()
-//                let scaledAnchorPositionY = translateToScaledViewPosition(regionPosition: anchorPosition, region: activeRegion).y
-//                cursorViewDelegate?.moveCursor(cursorViewPositionX: anchorPosition.x)
-//                cursorViewDelegate?.setCursorHeight(anchorPositionY: scaledAnchorPositionY)
                 cursorViewDelegate?.hideCursor(false)
             }
         }
@@ -330,12 +322,12 @@ final class LadderView: ScaledView {
         }
     }
 
-    func makeMark(positionX relativePositionX: CGFloat) -> Mark? {
-        return addMark(absolutePositionX: Common.translateToRegionPositionX(scaledViewPositionX: relativePositionX, offset: offsetX, scale: scale))
+    func makeMark(scaledViewPositionX: CGFloat) -> Mark? {
+        return addMark(regionPositionX: Common.translateToRegionPositionX(scaledViewPositionX: scaledViewPositionX, offset: offsetX, scale: scale))
     }
 
-    func addMark(absolutePositionX: CGFloat) -> Mark? {
-        return ladder.addMarkAt(absolutePositionX)
+    func addMark(regionPositionX: CGFloat) -> Mark? {
+        return ladder.addMarkAt(regionPositionX)
     }
 
     func inactivateMarks() {
@@ -407,7 +399,7 @@ final class LadderView: ScaledView {
         return false
     }
 
-    @objc func dragging(pan: UIPanGestureRecognizer) {
+    @objc func drag(pan: UIPanGestureRecognizer) {
         if dragMark(position: pan.location(in: self), state: pan.state) {
             setNeedsDisplay()
         }
@@ -438,24 +430,22 @@ final class LadderView: ScaledView {
                 // reset marks to be unattached and unhighlighted
                 cursorViewDelegate?.unattachAttachedMark()
                 cursorViewDelegate?.hideCursor(true)
-                //                attachedMark?.attached = false
-                //                attachedMark = nil
                 unhighlightMarks()
                 cursorViewDelegate?.refresh()
 
                 dragOriginDivision = locationInLadder.regionDivision
                 switch dragOriginDivision {
                 case .proximal:
-                    dragCreatedMark = makeMark(positionX: position.x)
+                    dragCreatedMark = makeMark(scaledViewPositionX: position.x)
                     dragCreatedMark?.segment.proximal.y = 0
                     dragCreatedMark?.segment.distal.y = 0.5
                 case .middle:
-                    dragCreatedMark = makeMark(positionX: position.x)
+                    dragCreatedMark = makeMark(scaledViewPositionX: position.x)
                     // TODO: REFACTOR
                     dragCreatedMark?.segment.proximal.y = (position.y - regionOfDragOrigin!.proximalBoundary) / (regionOfDragOrigin!.distalBoundary - regionOfDragOrigin!.proximalBoundary)
                     dragCreatedMark?.segment.distal.y = 0.75
                 case .distal:
-                    dragCreatedMark = makeMark(positionX: position.x)
+                    dragCreatedMark = makeMark(scaledViewPositionX: position.x)
                     dragCreatedMark?.segment.proximal.y = 0.5
                     dragCreatedMark?.segment.distal.y = 1
                 case .none:
@@ -467,7 +457,7 @@ final class LadderView: ScaledView {
         if state == .changed {
             if let mark = movingMark {
                 if mark.attached {
-                    moveMark(mark: mark, scaledViewPositionX: position.x)
+                    moveMark(mark: mark, scaledViewPosition: position)
                     let anchorPositionX = mark.getAnchorPositionX()
                     cursorViewDelegate?.moveCursor(cursorViewPositionX: anchorPositionX)
                     cursorViewDelegate?.refresh()
@@ -509,31 +499,13 @@ final class LadderView: ScaledView {
                     linkNearbyMarks(mark: dragCreatedMark)
                 }
             }
-            // FIXME: At this point determine if there are anchors to other marks, anchors to the prox and distal boundaries, which end is the block end, etc.
             if let proximalY = dragCreatedMark?.segment.proximal.y, let distalY = dragCreatedMark?.segment.distal.y {
                 if proximalY > distalY {
                     dragCreatedMark?.swapEnds()
                 }
             }
-            if let dragCreatedMark = dragCreatedMark {
-                if dragCreatedMark.segment.proximal.y != 0 {
-                    dragCreatedMark.block = .proximal
-                }
-                if dragCreatedMark.segment.distal.y != 1.0 {
-                    dragCreatedMark.block = .distal
-                }
-                if dragCreatedMark.attachedMarks.proximal.count == 0 {
-                    if dragCreatedMark.segment.proximal.x < dragCreatedMark.segment.distal.x {
-                        dragCreatedMark.impulseOrigin = .proximal
-                    }
-                }
-                if dragCreatedMark.attachedMarks.distal.count == 0 {
-                    if dragCreatedMark.segment.distal.x < dragCreatedMark.segment.proximal.x {
-                        dragCreatedMark.impulseOrigin = .distal
-                    }
-                }
-            }
-            // TODO: do same for moving mark
+            assessBlockAndImpulseOrigin(mark: dragCreatedMark)
+            assessBlockAndImpulseOrigin(mark: movingMark)
             unhighlightMarks()
             movingMark = nil
             dragCreatedMark = nil
@@ -545,6 +517,32 @@ final class LadderView: ScaledView {
         }
         return needsDisplay
     }
+
+
+    // TODO: expand on this logic.  Reset block and impulseOrigin to .none as necessary.
+    func assessBlockAndImpulseOrigin(mark: Mark?) {
+        if let mark = mark {
+            mark.block = .none
+            mark.impulseOrigin = .none
+            if mark.segment.proximal.y != 0 && mark.segment.proximal.x >= mark.segment.distal.x {
+                mark.block = .proximal
+            }
+            if mark.segment.distal.y != 1.0 && mark.segment.distal.x > mark.segment.proximal.x {
+                mark.block = .distal
+            }
+            if mark.attachedMarks.proximal.count == 0 {
+                if mark.segment.proximal.x <= mark.segment.distal.x {
+                    mark.impulseOrigin = .proximal
+                }
+            }
+            if mark.attachedMarks.distal.count == 0 {
+                if mark.segment.distal.x < mark.segment.proximal.x {
+                    mark.impulseOrigin = .distal
+                }
+            }
+        }
+    }
+
 
     private func highlightNearbyMarks(_ mark: Mark?) {
         guard let mark = mark else { return }
@@ -631,6 +629,37 @@ final class LadderView: ScaledView {
         }
     }
 
+    // FIXME: move mark in 2 dimensions
+    func moveMark(mark: Mark, scaledViewPosition: CGPoint) {
+        guard let activeRegion = activeRegion else { return }
+        let regionPosition = translateToRegionPosition(scaledViewPosition: scaledViewPosition, region: activeRegion)
+        switch mark.anchor {
+        case .proximal:
+            mark.segment.proximal = regionPosition
+        case .middle:
+            // Determine halfway point between proximal and distal.
+            let differenceX = (mark.segment.proximal.x - mark.segment.distal.x) / 2
+            let differenceY = (mark.segment.proximal.y - mark.segment.distal.y) / 2
+            mark.segment.proximal.x = regionPosition.x + differenceX
+            mark.segment.distal.x = regionPosition.x - differenceX
+            mark.segment.proximal.y = regionPosition.y + differenceY
+            mark.segment.distal.y = regionPosition.y - differenceY
+        case .distal:
+            mark.segment.distal = regionPosition
+        case .none:
+            break
+        }
+        for proximalMark in mark.attachedMarks.proximal {
+            proximalMark.segment.distal.x = mark.segment.proximal.x
+        }
+        for distalMark in mark.attachedMarks.distal {
+            distalMark.segment.proximal.x = mark.segment.distal.x
+        }
+        // TODO: handle middleMarks
+        adjustCursor(mark: mark, region: activeRegion)
+        highlightNearbyMarks(mark)
+    }
+
     func moveMark(mark: Mark, scaledViewPositionX: CGFloat) {
         let regionPosition = translateToRegionPositionX(scaledViewPositionX: scaledViewPositionX)
         switch mark.anchor {
@@ -653,6 +682,7 @@ final class LadderView: ScaledView {
         for distalMark in mark.attachedMarks.distal {
             distalMark.segment.proximal.x = mark.segment.distal.x
         }
+        // TODO: handle middleMarks
         highlightNearbyMarks(mark)
     }
 
@@ -816,11 +846,11 @@ final class LadderView: ScaledView {
             p2 = segment.distal
         }
         else if segment.proximal.x < leftMargin {
-            p1 = getTruncatedPosition(position: segment) ?? segment.proximal
+            p1 = getTruncatedPosition(segment: segment) ?? segment.proximal
             p2 = segment.distal
         }
         else {
-            p1 = getTruncatedPosition(position: segment) ?? segment.distal
+            p1 = getTruncatedPosition(segment: segment) ?? segment.distal
             p2 = segment.proximal
         }
         context.setStrokeColor(getMarkColor(mark: mark))
@@ -844,62 +874,55 @@ final class LadderView: ScaledView {
         else { // draw solid line
             context.strokePath()
         }
-        drawBlock(context: context, mark: mark, position: segment)
-        drawImpulseOrigin(context: context, mark: mark, position: segment)
+        drawBlock(context: context, mark: mark, segment: segment)
+        drawImpulseOrigin(context: context, mark: mark, segment: segment)
 
         context.setStrokeColor(getLineColor())
     }
 
-    func getTruncatedPosition(position: Segment) -> CGPoint? {
-        // TODO: Handle lines slanted backwards, don't draw at all in margin
-        let intersection = getIntersection(ofLineFrom: CGPoint(x: leftMargin, y: 0), to: CGPoint(x: leftMargin, y: height), withLineFrom: position.proximal, to: position.distal)
+    func getTruncatedPosition(segment: Segment) -> CGPoint? {
+        let intersection = getIntersection(ofLineFrom: CGPoint(x: leftMargin, y: 0), to: CGPoint(x: leftMargin, y: ladderViewHeight), withLineFrom: segment.proximal, to: segment.distal)
         return intersection
     }
 
-    func drawCircle(context: CGContext, center: CGPoint, radius: CGFloat) {
-        context.addArc(center: center, radius: radius, startAngle: 0.0, endAngle: .pi * 2.0, clockwise: true)
-        context.strokePath()
+    func drawFilledCircle(context: CGContext, position: CGPoint, radius: CGFloat) {
+        let rectangle = CGRect(x: position.x, y: position.y, width: radius, height: radius)
+        context.addEllipse(in: rectangle)
+        context.drawPath(using: .fillStroke)
     }
 
-    func drawFilledCircle(context ctx: CGContext, position: CGPoint) {
-//        ctx.setFillColor(UIColor.red.cgColor)
-//        ctx.setStrokeColor(UIColor.green.cgColor)
-//        ctx.setLineWidth(10)
-
-        let rectangle = CGRect(x: position.x, y: position.y, width: 10, height: 10)
-        ctx.addEllipse(in: rectangle)
-        ctx.drawPath(using: .fillStroke)
-    }
-
-    func drawBlock(context: CGContext, mark: Mark, position: Segment) {
+    func drawBlock(context: CGContext, mark: Mark, segment: Segment) {
+        guard showBlock else { return }
         let blockLength: CGFloat = 20
         let blockSeparation: CGFloat = 5
         switch mark.block {
         case .none:
             return
         case .distal:
-            context.move(to: CGPoint(x: position.distal.x - blockLength / 2, y: position.distal.y))
-            context.addLine(to: CGPoint(x: position.distal.x + blockLength / 2, y: position.distal.y))
-            context.move(to: CGPoint(x: position.distal.x - blockLength / 2, y: position.distal.y + blockSeparation))
-            context.addLine(to: CGPoint(x: position.distal.x + blockLength / 2, y: position.distal.y + blockSeparation))
+            context.move(to: CGPoint(x: segment.distal.x - blockLength / 2, y: segment.distal.y))
+            context.addLine(to: CGPoint(x: segment.distal.x + blockLength / 2, y: segment.distal.y))
+            context.move(to: CGPoint(x: segment.distal.x - blockLength / 2, y: segment.distal.y + blockSeparation))
+            context.addLine(to: CGPoint(x: segment.distal.x + blockLength / 2, y: segment.distal.y + blockSeparation))
         case .proximal:
-            context.move(to: CGPoint(x: position.proximal.x - blockLength / 2, y: position.proximal.y))
-            context.addLine(to: CGPoint(x: position.proximal.x + blockLength / 2, y: position.proximal.y))
-            context.move(to: CGPoint(x: position.proximal.x - blockLength / 2, y: position.proximal.y - blockSeparation))
-            context.addLine(to: CGPoint(x: position.proximal.x + blockLength / 2, y: position.proximal.y - blockSeparation))
+            context.move(to: CGPoint(x: segment.proximal.x - blockLength / 2, y: segment.proximal.y))
+            context.addLine(to: CGPoint(x: segment.proximal.x + blockLength / 2, y: segment.proximal.y))
+            context.move(to: CGPoint(x: segment.proximal.x - blockLength / 2, y: segment.proximal.y - blockSeparation))
+            context.addLine(to: CGPoint(x: segment.proximal.x + blockLength / 2, y: segment.proximal.y - blockSeparation))
         }
         context.strokePath()
     }
 
-    func drawImpulseOrigin(context: CGContext, mark: Mark, position: Segment) {
-        let separation: CGFloat = 16
+    func drawImpulseOrigin(context: CGContext, mark: Mark, segment: Segment) {
+        guard showImpulseOrigin else { return }
+        let separation: CGFloat = 10
+        let radius: CGFloat = 5
         switch mark.impulseOrigin {
         case .none:
             return
         case .distal:
-            drawFilledCircle(context: context, position: CGPoint(x: position.distal.x - 5.0, y: position.distal.y + separation))
+            drawFilledCircle(context: context, position: CGPoint(x: segment.distal.x - radius / 2, y: segment.distal.y + separation - radius), radius: radius)
         case .proximal:
-            drawFilledCircle(context: context, position: CGPoint(x: position.proximal.x - 5.0, y: position.proximal.y - separation))
+            drawFilledCircle(context: context, position: CGPoint(x: segment.proximal.x - radius / 2, y: segment.proximal.y - separation), radius: radius)
         }
     }
 
@@ -986,29 +1009,9 @@ final class LadderView: ScaledView {
         }
     }
 
-    func reinit() {
-        initializeRegions()
-    }
-
-    func regionsToCheckForCloseness() -> [Region] {
-        guard activeRegion != nil else { return [] }
-        // FIXME: temporary
-        return []
-    }
-    // FIXME: test which offsetY works.
     func resetSize() {
-        height = self.frame.height
-        reinit()
-    }
-
-    func addAttachedMark(positionX relativePositionX: CGFloat) {
-        let mark = addMark(imageScrollViewPositionX: relativePositionX)
-        attachedMark = mark
-    }
-
-
-    private func unscaledPositionX(positionX: CGFloat) -> CGFloat {
-        return positionX / scale
+        ladderViewHeight = self.frame.height
+        initializeRegions()
     }
 
     @objc func deletePressedMark() {
@@ -1029,8 +1032,6 @@ final class LadderView: ScaledView {
     func unlinkMarks(mark: Mark) {
         mark.attachedMarks = Mark.AttachedMarks()
     }
-
-
 }
 
 extension LadderView: LadderViewDelegate {
