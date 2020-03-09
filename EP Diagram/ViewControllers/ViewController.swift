@@ -108,10 +108,21 @@
             }
             else {
                 // By getting x in imageScrollView, offset doesn't apply, though zoom does.  See CursorView.putCursor().
-                let positionX = tap.location(in: imageScrollView).x
+                let positionX: CGFloat
+                // FIXME: Mac sometimes malpositions cursor after zooming, and at start of running app, fixed by zooming and unzooming (!).  Also cursor behaves badly when resizing app window.  All these need to be fixed if we release a mac version.
+                if Common.isRunningOnMac() {
+                    positionX = tap.location(in: cursorView).x
+//                    P("positionX = \(positionX)")
+//                    P("tapLocationInImageScrollView = \(tap.location(in: imageScrollView).x)")
+//                    P("imageScrollView.zoomScale = \(imageScrollView.zoomScale)")
+                }
+                else {
+                    positionX = tap.location(in: imageScrollView).x
+                }
+                let positionY: CGFloat = tap.location(in: cursorView).y
                 // imageScrollView still starts at x = 0, contentInset shifts view to right, and the left margin is negative relative to the view.
                 if positionX > 0 {
-                    cursorView.putCursor(imageScrollViewPositionX: positionX)
+                    cursorView.putCursor(imageScrollViewPosition: CGPoint(x: positionX, y: positionY))
                     cursorView.hideCursor(false)
                     cursorView.attachMark(imageScrollViewPositionX: positionX)
                     cursorView.setCursorHeight()
@@ -179,7 +190,6 @@
         // Note that scrollViewDidScroll is also called while zooming.
         func scrollViewDidScroll(_ scrollView: UIScrollView) {
             if scrollView == imageScrollView {
-                P("didScroll")
                 // Only scrolling in the horizontal direction affects ladderView.
                 ladderView.offsetX = scrollView.contentOffset.x
                 cursorView.offsetX = scrollView.contentOffset.x
@@ -192,35 +202,29 @@
 
         func scrollViewDidEndDecelerating(_ scrollView: UIScrollView) {
             if scrollView == imageScrollView {
-                P("End decelerating")
                 scrollFinished()
             }
         }
 
         func scrollViewDidEndDragging(_ scrollView: UIScrollView, willDecelerate decelerate: Bool) {
             if scrollView == imageScrollView && !decelerate {
-                P("End dragging")
                 scrollFinished()
             }
         }
 
         fileprivate func scrollFinished() {
-            P("Scroll finished")
         }
 
         func scrollViewWillBeginZooming(_ scrollView: UIScrollView, with view: UIView?) {
-            P("scrollViewWillBeginZooming")
         }
 
         func scrollViewDidEndZooming(_ scrollView: UIScrollView, with view: UIView?, atScale scale: CGFloat) {
-            P("scrollViewDidEndZooming")
-            //            P("Zoom = \(scale)")
-            //            P("imageView width = \(imageView.frame.width)")
-            //            P("imageScrollView bounds = \(imageScrollView.bounds)")
-            //            P("imageScrollView contentOffset = \(imageScrollView.contentOffset)")
+//            P("Zoom = \(scale)")
+//            P("imageView width = \(imageView.frame.width)")
+//            P("imageScrollView bounds = \(imageScrollView.bounds)")
+//            P("imageScrollView contentOffset = \(imageScrollView.contentOffset)")
         }
 
         func scrollViewDidZoom(_ scrollView: UIScrollView) {
-            P("didZoom")
         }
     }

@@ -16,7 +16,7 @@ import UIKit
 /// A mark is a line segment, defined by its two end points.  Marks may slant in different directions, depending on the origin of an impulse.  So rather than using origin and terminus (which could swap positions if the slant of the mark is changed), we use the same convention as with regions: the two ends are termed *proximal* and *distal*.i
 struct Segment {
     var proximal: CGPoint
-    var distal: CGPoint
+    var distal: CGPoint 
 
     func maxXPoint() -> CGPoint {
         if proximal.x >= distal.x {

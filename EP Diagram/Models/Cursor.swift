@@ -25,6 +25,7 @@ class Cursor: NSObject {
     enum Direction: String, Codable {
         case vertical
         case horizontal
+        case omnidirectional
     }
 
     /// Attachment point for the cursor on a mark.  If there is not attached mark, then this is ignored.
@@ -38,17 +39,19 @@ class Cursor: NSObject {
     /// Cursors have one dimensional positions along the x or y axis depending on their direction.
     var positionX: CGFloat
     var positionY: CGFloat
+    var height: CGFloat
 
     var anchor = Anchor.middle
     var visible = false
-    var direction = Direction.vertical
+    var direction = Direction.horizontal
 
     // Touches +/- accuracy count as touches.
     let accuracy: CGFloat = 20
     
     init(positionX: CGFloat) {
         self.positionX = positionX
-        self.positionY = 0
+        self.positionY = 100 // this is a reasonable default value
+        self.height = 0
     }
 
 
@@ -60,7 +63,8 @@ class Cursor: NSObject {
         return abs(p.x - positionX) < accuracy
     }
 
-    func move(delta: CGFloat) {
-        positionX += delta
+    func move(delta: CGPoint) {
+        positionX += delta.x
+        positionY += delta.y
     }
 }

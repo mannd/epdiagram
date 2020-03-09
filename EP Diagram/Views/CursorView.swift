@@ -16,6 +16,7 @@ protocol CursorViewDelegate: AnyObject {
     func setCursorHeight(anchorPositionY: CGFloat?)
     func hideCursor(_ hide: Bool)
     func cursorIsVisible() -> Bool
+    func cursorIsHorizontal() -> Bool
 }
 
 extension CursorViewDelegate {
@@ -37,7 +38,7 @@ final class CursorView: ScaledView {
     private var attachedMark: Mark?
     private var rawCursorHeight: CGFloat?
 
-    private var yTranslation: CGFloat = 0
+    private var translationY: CGFloat = 0
 
     var leftMargin: CGFloat = 0
 
@@ -97,7 +98,7 @@ final class CursorView: ScaledView {
             let position = scale * cursor.positionX - offsetX // inlined, for efficiency
             let cursorDefaultHeight = ladderViewDelegate?.getTopOfLadder(view: self)
             let defaultHeight = cursorDefaultHeight ?? 0
-            let height = (position <= leftMargin) ? defaultHeight : cursor.positionY
+            let height = (position <= leftMargin) ? defaultHeight : cursor.height
             let endPoint = CGPoint(x: position, y: height)
 
             context.setStrokeColor(color.cgColor)
@@ -109,19 +110,25 @@ final class CursorView: ScaledView {
             if position > leftMargin {
                 drawCircle(context: context, center: endPoint, radius: 5)
             }
+            if cursor.direction == .omnidirectional {
+//                context.move(to: CGPoint(x: 0, y: cursor.positionY))
+//                context.addLine(to: CGPoint(x: frame.width, y: cursor.positionY))
+//                context.strokePath()
+                drawCircle(context: context, center: CGPoint(x: position, y: cursor.positionY), radius: 20)
+            }
         }
     }
 
     func setCursorHeight(anchorPositionY: CGFloat? = nil) {
         if let anchorPositionY = anchorPositionY {
             if let positionY = ladderViewDelegate?.getPositionYInView(positionY: anchorPositionY, view: self) {
-                cursor.positionY = positionY
+                cursor.height = positionY
             }
         }
         else {
             let cursorHeight = getCursorHeight(anchor: getAttachedMarkAnchor())
-            cursor.positionY = cursorHeight ?? 0
-            P("cursor positionY = \(cursor.positionY)")
+            cursor.height = cursorHeight ?? 0
+            P("cursor positionY = \(cursor.height)")
         }
     }
 
@@ -195,14 +202,13 @@ final class CursorView: ScaledView {
     @objc func drag(pan: UIPanGestureRecognizer) {
         if pan.state == .began {
             let attachment = ladderViewDelegate?.getAttachedMarkPosition()
-            yTranslation = attachment?.y ?? 0
-            P("initial yTranslation = \(yTranslation)")
+            translationY = attachment?.y ?? 0
         }
         if pan.state == .changed {
             let delta = pan.translation(in: self)
-            cursorMove(delta: delta.x)
-            yTranslation += delta.y
-            P("yTranslation = \(yTranslation)x")
+            cursorMove(delta: delta)
+            // TODO: make y axis sticky
+            translationY += delta.y
             dragMark(ladderViewDelegate: ladderViewDelegate)
             pan.setTranslation(CGPoint(x: 0,y: 0), in: self)
         }
@@ -211,33 +217,44 @@ final class CursorView: ScaledView {
                 ladderViewDelegate?.linkNearbyMarks(mark: attachedMark)
                 ladderViewDelegate?.refresh()
             }
-            yTranslation = 0
+            translationY = 0
         }
         setNeedsDisplay()
     }
 
-    private func cursorMove(delta: CGFloat) {
+    private func cursorMove(delta: CGPoint) {
         // Movement adjusted to scale.
-        cursor.move(delta: delta / scale)
+//        cursor.move(delta: delta / scale)
+        cursor.move(delta: CGPoint(x: delta.x / scale, y: delta.y))
     }
 
     private func dragMark(ladderViewDelegate: LadderViewDelegate?) {
         if let attachedMark = attachedMark {
-            ladderViewDelegate?.moveMark(mark: attachedMark, position: CGPoint(x: translateToScaledViewPositionX(regionPositionX: cursor.positionX), y: yTranslation), moveCursor: false)
+            ladderViewDelegate?.moveMark(mark: attachedMark, position: CGPoint(x: translateToScaledViewPositionX(regionPositionX: cursor.positionX), y: translationY), moveCursor: false)
             ladderViewDelegate?.refresh()
         }
     }
 
     @objc func longPress(press: UILongPressGestureRecognizer) {
-        P("Long press on cursor")
+        if press.state == .began {
+            if cursor.direction == .horizontal {
+                cursor.direction = .omnidirectional
+            }
+            else if cursor.direction == .omnidirectional {
+                cursor.direction = .horizontal
+            }
+            cursor.positionY = press.location(in: self).y
+            setNeedsDisplay()
+        }
     }
 
     func doCalibration() {
         P("Do calibration")
     }
 
-    func putCursor(imageScrollViewPositionX positionX: CGFloat) {
-        cursor.positionX = positionX / scale
+    func putCursor(imageScrollViewPosition position: CGPoint) {
+        cursor.positionX = position.x / scale
+        cursor.positionY = position.y
     }
 
     func attachMark(imageScrollViewPositionX positionX: CGFloat) {
@@ -280,5 +297,9 @@ extension CursorView: CursorViewDelegate {
 
     func cursorIsVisible() -> Bool {
         return cursor.visible
+    }
+
+    func cursorIsHorizontal() -> Bool {
+        return cursor.direction == .horizontal
     }
 }

@@ -629,10 +629,14 @@ final class LadderView: ScaledView {
         }
     }
 
-    // FIXME: move mark in 2 dimensions
-    func moveMark(mark: Mark, scaledViewPosition: CGPoint) {
-        guard let activeRegion = activeRegion else { return }
-        let regionPosition = translateToRegionPosition(scaledViewPosition: scaledViewPosition, region: activeRegion)
+    private func fixBoundsOfMark(_ mark: Mark) {
+        let proximalY = mark.segment.proximal.y
+        let distalY = mark.segment.distal.y
+        mark.segment.proximal.y = proximalY < 0 ? 0 : proximalY > 1.0 ? 1.0 : proximalY
+        mark.segment.distal.y = distalY < 0 ? 0 : distalY > 1.0 ? 1.0 : distalY
+    }
+
+    private func moveMarkOmnidirectionally(_ mark: Mark, _ regionPosition: CGPoint) {
         switch mark.anchor {
         case .proximal:
             mark.segment.proximal = regionPosition
@@ -649,33 +653,34 @@ final class LadderView: ScaledView {
         case .none:
             break
         }
-        for proximalMark in mark.attachedMarks.proximal {
-            proximalMark.segment.distal.x = mark.segment.proximal.x
-        }
-        for distalMark in mark.attachedMarks.distal {
-            distalMark.segment.proximal.x = mark.segment.distal.x
-        }
-        // TODO: handle middleMarks
-        adjustCursor(mark: mark, region: activeRegion)
-        highlightNearbyMarks(mark)
     }
 
-    func moveMark(mark: Mark, scaledViewPositionX: CGFloat) {
-        let regionPosition = translateToRegionPositionX(scaledViewPositionX: scaledViewPositionX)
+    private func moveMarkHorizontally(_ mark: Mark, _ regionPosition: CGPoint) {
         switch mark.anchor {
         case .proximal:
-            mark.segment.proximal.x = regionPosition
+            mark.segment.proximal.x = regionPosition.x
         case .middle:
             // Determine halfway point between proximal and distal.
-            let difference = (mark.segment.proximal.x - mark.segment.distal.x) / 2
-            mark.segment.proximal.x = regionPosition + difference
-            mark.segment.distal.x = regionPosition - difference
+            let differenceX = (mark.segment.proximal.x - mark.segment.distal.x) / 2
+            mark.segment.proximal.x = regionPosition.x + differenceX
+            mark.segment.distal.x = regionPosition.x - differenceX
         case .distal:
-            mark.segment.distal.x = regionPosition
+            mark.segment.distal.x = regionPosition.x
         case .none:
             break
         }
-        // Move linked marks
+    }
+
+    func moveMark(mark: Mark, scaledViewPosition: CGPoint) {
+        guard let activeRegion = activeRegion, let cursorViewDelegate = cursorViewDelegate else { return }
+        let regionPosition = translateToRegionPosition(scaledViewPosition: scaledViewPosition, region: activeRegion)
+        if cursorViewDelegate.cursorIsVisible() && cursorViewDelegate.cursorIsHorizontal() {
+            moveMarkHorizontally(mark, regionPosition)
+        }
+        else {
+            moveMarkOmnidirectionally(mark, regionPosition)
+        }
+        // adjust ends of mark segment.
         for proximalMark in mark.attachedMarks.proximal {
             proximalMark.segment.distal.x = mark.segment.proximal.x
         }
@@ -683,6 +688,8 @@ final class LadderView: ScaledView {
             distalMark.segment.proximal.x = mark.segment.distal.x
         }
         // TODO: handle middleMarks
+        fixBoundsOfMark(mark)
+        adjustCursor(mark: mark, region: activeRegion)
         highlightNearbyMarks(mark)
     }
 
@@ -1012,6 +1019,7 @@ final class LadderView: ScaledView {
     func resetSize() {
         ladderViewHeight = self.frame.height
         initializeRegions()
+        cursorViewDelegate?.setCursorHeight()
     }
 
     @objc func deletePressedMark() {
