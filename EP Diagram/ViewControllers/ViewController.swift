@@ -41,7 +41,6 @@
             }
 
             // Ensure there is a space for labels at the left margin.
-            imageScrollView.contentInset = UIEdgeInsets(top: 0, left: leftMargin, bottom: 0, right: 0)
             ladderView.leftMargin = leftMargin
             cursorView.leftMargin = leftMargin
             cursorView.ladderViewDelegate = ladderView
@@ -61,6 +60,7 @@
         }
 
         override func viewDidAppear(_ animated: Bool) {
+            imageScrollView.contentInset = UIEdgeInsets(top: 0, left: leftMargin, bottom: 0, right: 0)
             centerImage()
             cursorView.setNeedsDisplay()
             ladderView.setNeedsDisplay()
@@ -102,23 +102,13 @@
             if !ladderView.hasActiveRegion() {
                 ladderView.setActiveRegion(regionNum: 0)
             }
-            cursorView.unattachAttachedMark()
             if cursorView.cursorIsVisible() {
+                cursorView.unattachAttachedMark()
                 cursorView.hideCursor(true)
+                ladderView.unhighlightMarks()
             }
             else {
-                // By getting x in imageScrollView, offset doesn't apply, though zoom does.  See CursorView.putCursor().
-                let positionX: CGFloat
-                // FIXME: Mac sometimes malpositions cursor after zooming, and at start of running app, fixed by zooming and unzooming (!).  Also cursor behaves badly when resizing app window.  All these need to be fixed if we release a mac version.
-                if Common.isRunningOnMac() {
-                    positionX = tap.location(in: cursorView).x
-//                    P("positionX = \(positionX)")
-//                    P("tapLocationInImageScrollView = \(tap.location(in: imageScrollView).x)")
-//                    P("imageScrollView.zoomScale = \(imageScrollView.zoomScale)")
-                }
-                else {
-                    positionX = tap.location(in: imageScrollView).x
-                }
+                let positionX = tap.location(in: imageScrollView).x
                 let positionY: CGFloat = tap.location(in: cursorView).y
                 // imageScrollView still starts at x = 0, contentInset shifts view to right, and the left margin is negative relative to the view.
                 if positionX > 0 {
@@ -190,11 +180,14 @@
         // Note that scrollViewDidScroll is also called while zooming.
         func scrollViewDidScroll(_ scrollView: UIScrollView) {
             if scrollView == imageScrollView {
+                P("scrollViewDidScroll")
                 // Only scrolling in the horizontal direction affects ladderView.
                 ladderView.offsetX = scrollView.contentOffset.x
                 cursorView.offsetX = scrollView.contentOffset.x
                 cursorView.scale = scrollView.zoomScale
                 ladderView.scale = scrollView.zoomScale
+                P("contentOffset.x = \(scrollView.contentOffset.x)")
+                P("zoomScale = \(scrollView.zoomScale)")
                 ladderView.setNeedsDisplay()
                 cursorView.setNeedsDisplay()
             }
@@ -213,12 +206,22 @@
         }
 
         fileprivate func scrollFinished() {
+            P("scroll finished")
         }
 
         func scrollViewWillBeginZooming(_ scrollView: UIScrollView, with view: UIView?) {
         }
 
         func scrollViewDidEndZooming(_ scrollView: UIScrollView, with view: UIView?, atScale scale: CGFloat) {
+            P("scrollViewDidEndZooming")
+            ladderView.offsetX = scrollView.contentOffset.x
+            cursorView.offsetX = scrollView.contentOffset.x
+            cursorView.scale = scrollView.zoomScale
+            ladderView.scale = scrollView.zoomScale
+            P("contentOffset.x = \(scrollView.contentOffset.x)")
+            P("zoomScale = \(scrollView.zoomScale)")
+            ladderView.setNeedsDisplay()
+            cursorView.setNeedsDisplay()
 //            P("Zoom = \(scale)")
 //            P("imageView width = \(imageView.frame.width)")
 //            P("imageScrollView bounds = \(imageScrollView.bounds)")
@@ -226,5 +229,6 @@
         }
 
         func scrollViewDidZoom(_ scrollView: UIScrollView) {
+            P("scrollViewDidZoom")
         }
     }

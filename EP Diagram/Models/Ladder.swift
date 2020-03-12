@@ -52,6 +52,7 @@ class Ladder {
         }
         let mark = Mark(positionX: positionX)
         mark.highlight = .all
+        mark.attached = true
         activeRegion.appendMark(mark)
         return mark
     }
@@ -154,16 +155,16 @@ class Ladder {
 //        return NearbyMarks(proximalMarks: proximalMarks, middleMarks: middleMarks, distalMarks: distalMarks)
 //    }
 
-    func setHighlight(highlight: Mark.Highlight, region: Region?) {
+    func setHighlightForMarks(highlight: Mark.Highlight, inRegion region: Region?) {
         guard let region = region else { return }
         for mark in region.marks {
             mark.highlight = highlight
         }
     }
 
-    func setHighlight(highlight: Mark.Highlight) {
+    func setHighlightForAllMarks(highlight: Mark.Highlight) {
         for region in regions {
-            setHighlight(highlight: highlight, region: region)
+            setHighlightForMarks(highlight: highlight, inRegion: region)
         }
     }
 

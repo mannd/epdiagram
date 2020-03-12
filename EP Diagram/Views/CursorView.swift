@@ -10,7 +10,7 @@ import UIKit
 
 protocol CursorViewDelegate: AnyObject {
     func refresh()
-    func attachMark(_ mark: Mark?)
+    func attachMark(_ mark: Mark)
     func unattachAttachedMark()
     func moveCursor(cursorViewPositionX positionX: CGFloat)
     func setCursorHeight(anchorPositionY: CGFloat?)
@@ -186,6 +186,7 @@ final class CursorView: ScaledView {
         }
         hideCursor(cursor.visible)
         unattachAttachedMark()
+        ladderViewDelegate?.unhighlightMarks()
         ladderViewDelegate?.refresh()
         setNeedsDisplay()
     }
@@ -224,7 +225,6 @@ final class CursorView: ScaledView {
 
     private func cursorMove(delta: CGPoint) {
         // Movement adjusted to scale.
-//        cursor.move(delta: delta / scale)
         cursor.move(delta: CGPoint(x: delta.x / scale, y: delta.y))
     }
 
@@ -260,8 +260,6 @@ final class CursorView: ScaledView {
     func attachMark(imageScrollViewPositionX positionX: CGFloat) {
         guard let mark = ladderViewDelegate?.addMark(imageScrollViewPositionX: positionX) else { return }
         attachMark(mark)
-        mark.attached = true
-        mark.highlight = .all
     }
 }
 
@@ -272,8 +270,7 @@ extension CursorView: CursorViewDelegate {
         setNeedsDisplay()
     }
 
-    func attachMark(_ mark: Mark?) {
-        guard let mark = mark else { return }
+    func attachMark(_ mark: Mark) {
         attachedMark = mark
         mark.attached = true
         mark.highlight = .all
