@@ -36,10 +36,10 @@ class Cursor: NSObject {
         case none
     }
 
-    /// Cursors have one dimensional positions along the x or y axis depending on their direction.
     var positionX: CGFloat
-    var positionY: CGFloat
-    var height: CGFloat
+    var positionY: CGFloat // point along omnidirectional cursor where circle is shown
+    var maxPositionY: CGFloat
+    var endPointPositionY: CGFloat
 
     var anchor = Anchor.middle
     var visible = false
@@ -51,7 +51,8 @@ class Cursor: NSObject {
     init(positionX: CGFloat) {
         self.positionX = positionX
         self.positionY = 100 // this is a reasonable default value
-        self.height = 0
+        self.maxPositionY = 0
+        self.endPointPositionY = 0
     }
 
 
@@ -65,6 +66,8 @@ class Cursor: NSObject {
 
     func move(delta: CGPoint) {
         positionX += delta.x
-        positionY += delta.y
+        if positionY < maxPositionY {
+            positionY += delta.y
+        }
     }
 }

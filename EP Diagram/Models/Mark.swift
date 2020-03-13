@@ -118,6 +118,18 @@ class Mark {
         var proximal: [Mark] = []
         var middle: [Mark] = []
         var distal: [Mark] = []
+
+        func highLight(highlight: Highlight) {
+            for mark in proximal {
+                mark.highlight = highlight
+            }
+            for mark in middle {
+                mark.highlight = highlight
+            }
+            for mark in distal {
+                mark.highlight = highlight
+            }
+        }
     }
     
     var attachedMarks: AttachedMarks
