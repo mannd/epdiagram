@@ -14,7 +14,7 @@
         @IBOutlet var ladderView: LadderView!
         @IBOutlet var cursorView: CursorView!
 
-        var separatorView: SeparatorView? = nil
+        var separatorView: SeparatorView?
         
         // This margin is used for all the views.  As ECGs are always read from left
         // to right, there is no reason to reverse this.
@@ -25,8 +25,7 @@
 
             title = L("EP Diagram", comment: "app name")
 
-            // Transitions on mac look better without animation.
-            UIView.setAnimationsEnabled(!Common.isRunningOnMac())
+            UIView.setAnimationsEnabled(!Common.isRunningOnMac()) // Mac transitions look better without animation.
             if Common.isRunningOnMac() {
                 navigationController?.setNavigationBarHidden(true, animated: false)
             }
@@ -43,6 +42,7 @@
             // Ensure there is a space for labels at the left margin.
             ladderView.leftMargin = leftMargin
             cursorView.leftMargin = leftMargin
+
             cursorView.ladderViewDelegate = ladderView
             ladderView.cursorViewDelegate = cursorView
             imageScrollView.delegate = self
@@ -60,23 +60,25 @@
         }
 
         override func viewDidAppear(_ animated: Bool) {
+            // Need to set this here, after view draw, or Mac malpositions cursor at start of app.
             imageScrollView.contentInset = UIEdgeInsets(top: 0, left: leftMargin, bottom: 0, right: 0)
-            centerImage()
-            cursorView.setNeedsDisplay()
-            ladderView.setNeedsDisplay()
-            // Set up toolbar and buttons.
             let toolbar = navigationController?.toolbar
             let calibrateTitle = L("Calibrate", comment: "calibrate button label title")
             let selectTitle = L("Select", comment: "select button label title")
+            let undoTitle = L("Undo")
+            let redoTitle = L("Redo")
             let calibrateButton = UIBarButtonItem(title: calibrateTitle, style: UIBarButtonItem.Style.plain, target: self, action: #selector(calibrate))
             let selectButton = UIBarButtonItem(title: selectTitle, style: UIBarButtonItem.Style.plain, target: self, action: #selector(selectMarks))
-            // More buttons here.
-            toolbar?.items = [calibrateButton, selectButton]
+            let undoButton = UIBarButtonItem(title: undoTitle, style: UIBarButtonItem.Style.plain, target: self, action: #selector(undo))
+            let redoButton = UIBarButtonItem(title: redoTitle, style: UIBarButtonItem.Style.plain, target: self, action: #selector(redo))
+            toolbar?.items = [calibrateButton, selectButton, undoButton, redoButton]
             navigationController?.setToolbarHidden(false, animated: false)
 
             resetViews()
         }
 
+
+        @available(*, deprecated, message: "This doesn't seem to do anything.")
         private func centerImage() {
             // This centers image, as opposed to starting with it at the upper left
             // hand corner of the screen.
@@ -94,6 +96,13 @@
 
         @objc func selectMarks() {
             P("select")
+        }
+
+        @objc func undo() {
+            ladderView.popLadder()
+        }
+
+        @objc func redo() {
         }
 
         // MARK: - Touches
@@ -118,8 +127,7 @@
                     cursorView.setCursorHeight()
                 }
             }
-            cursorView.setNeedsDisplay()
-            ladderView.setNeedsDisplay()
+            setViewsNeedDisplay()
         }
 
 
@@ -143,10 +151,15 @@
             separatorView = HorizontalSeparatorView.addSeparatorBetweenViews(separatorType: .horizontal, primaryView: imageScrollView, secondaryView: ladderView, parentView: self.view)
             self.ladderView.resetSize()
             // FIXME: save and restore scrollview offset so it is maintained with rotation.
-            self.ladderView.setNeedsDisplay()
             self.imageView.setNeedsDisplay()
-            self.cursorView.setNeedsDisplay()
+            setViewsNeedDisplay()
         }
+
+        private func setViewsNeedDisplay() {
+            cursorView.setNeedsDisplay()
+            ladderView.setNeedsDisplay()
+        }
+
 
         // MARK: - Save and restore views
 
@@ -174,22 +187,10 @@
             }
         }
 
-        // Functions below fire during scrolling of imageView and at end
-        // of scrolling.  Relabeling might best occur at end of scrolling,
-        // while redrawing of ladder can be done during scrolling.
-        // Note that scrollViewDidScroll is also called while zooming.
         func scrollViewDidScroll(_ scrollView: UIScrollView) {
             if scrollView == imageScrollView {
                 P("scrollViewDidScroll")
-                // Only scrolling in the horizontal direction affects ladderView.
-                ladderView.offsetX = scrollView.contentOffset.x
-                cursorView.offsetX = scrollView.contentOffset.x
-                cursorView.scale = scrollView.zoomScale
-                ladderView.scale = scrollView.zoomScale
-                P("contentOffset.x = \(scrollView.contentOffset.x)")
-                P("zoomScale = \(scrollView.zoomScale)")
-                ladderView.setNeedsDisplay()
-                cursorView.setNeedsDisplay()
+                scrollViewAdjustViews(scrollView)
             }
         }
 
@@ -214,21 +215,18 @@
 
         func scrollViewDidEndZooming(_ scrollView: UIScrollView, with view: UIView?, atScale scale: CGFloat) {
             P("scrollViewDidEndZooming")
-            ladderView.offsetX = scrollView.contentOffset.x
-            cursorView.offsetX = scrollView.contentOffset.x
-            cursorView.scale = scrollView.zoomScale
-            ladderView.scale = scrollView.zoomScale
-            P("contentOffset.x = \(scrollView.contentOffset.x)")
-            P("zoomScale = \(scrollView.zoomScale)")
-            ladderView.setNeedsDisplay()
-            cursorView.setNeedsDisplay()
-//            P("Zoom = \(scale)")
-//            P("imageView width = \(imageView.frame.width)")
-//            P("imageScrollView bounds = \(imageScrollView.bounds)")
-//            P("imageScrollView contentOffset = \(imageScrollView.contentOffset)")
+            scrollViewAdjustViews(scrollView)
         }
 
         func scrollViewDidZoom(_ scrollView: UIScrollView) {
             P("scrollViewDidZoom")
+        }
+
+        private func scrollViewAdjustViews(_ scrollView: UIScrollView) {
+            ladderView.offsetX = scrollView.contentOffset.x
+            cursorView.offsetX = scrollView.contentOffset.x
+            cursorView.scale = scrollView.zoomScale
+            ladderView.scale = scrollView.zoomScale
+            setViewsNeedDisplay()
         }
     }

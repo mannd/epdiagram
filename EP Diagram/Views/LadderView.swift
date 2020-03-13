@@ -54,9 +54,31 @@ final class LadderView: ScaledView {
             return ladder.activeRegion
         }
     }
-    private var attachedMark: Mark?
-    private var pressedMark: Mark?
-    private var movingMark: Mark?
+    private var attachedMark: Mark? {
+        get {
+            return ladder.attachedMark
+        }
+        set(newValue) {
+            ladder.attachedMark = newValue
+        }
+    }
+    private var pressedMark: Mark? {
+        get {
+            return ladder.pressedMark
+        }
+        set(newValue) {
+            ladder.pressedMark = newValue
+        }
+    }
+    private var movingMark: Mark? {
+        get {
+            return ladder.movingMark
+        }
+        set(newValue) {
+            ladder.movingMark = newValue
+        }
+    }
+
     private var regionOfDragOrigin: Region?
     private var regionProxToDragOrigin: Region?
     private var regionDistalToDragOrigin: Region?
@@ -66,6 +88,9 @@ final class LadderView: ScaledView {
     var leftMargin: CGFloat = 0
     internal var ladderViewHeight: CGFloat = 0
     private var regionUnitHeight: CGFloat = 0
+
+    // TODO: implement undo, redo.
+    private var ladders: Stack = Stack()
 
     weak var cursorViewDelegate: CursorViewDelegate?
 
@@ -770,6 +795,21 @@ final class LadderView: ScaledView {
         pressedMark = nil
     }
 
+    // TODO: make this work.
+    func pushLadder() {
+        P("push ladder")
+        ladders.push(ladder)
+    }
+
+    func popLadder() {
+        P("pop ladder")
+        guard let poppedLadder = ladders.pop() else { return }
+        ladder = poppedLadder as! Ladder
+        P("popped ladder = \(poppedLadder)")
+        setNeedsDisplay()
+//        cursorViewDelegate?.refresh()
+    }
+
     // MARK: - draw
 
     override func draw(_ rect: CGRect) {
@@ -1122,6 +1162,7 @@ extension LadderView: LadderViewDelegate {
     }
 
     func deleteMark(_ mark: Mark?) {
+        pushLadder()
         ladder.deleteMark(mark)
         ladder.setHighlightForAllMarks(highlight: .none)
     }

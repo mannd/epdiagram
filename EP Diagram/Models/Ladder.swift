@@ -32,8 +32,27 @@ struct LocationInLadder {
     }
 }
 
+struct Stack {
+    private var items: [Any] = []
+
+    mutating func push(_ element: Any) {
+        items.append(element)
+        P("number of elements = \(items.count)")
+    }
+
+    mutating func pop() -> Any? {
+        P("number of elements = \(items.count)")
+        return items.popLast()
+    }
+
+    func peek() -> Any? {
+        guard let top = items.last else { return nil }
+        return top
+    }
+}
+
 // A Ladder is simply a collection of Regions in top bottom order.
-class Ladder {
+class Ladder: NSCopying {
     var regions: [Region] = []
     var numRegions: Int {
         get {
@@ -41,9 +60,15 @@ class Ladder {
         }
     }
     var activeRegion: Region?
-    // For any ladder, only one Mark in only one Region can be active.
-    // TODO: activeMark unused?
-    var activeMark: Mark?
+
+    var attachedMark: Mark?
+    var pressedMark: Mark?
+    var movingMark: Mark?
+
+    func copy(with zone: NSZone? = nil) -> Any {
+        let copy = Ladder()
+        return copy
+    }
 
     // By default, a new mark is vertical and spans the region.
     func addMarkAt(_ positionX: CGFloat) -> Mark? {
