@@ -179,7 +179,7 @@ final class CursorView: ScaledView {
         }
         hideCursor(cursor.visible)
         ladderViewDelegate.unattachAttachedMark()
-        ladderViewDelegate.unhighlightMarks()
+        ladderViewDelegate.unhighlightAllMarks()
         ladderViewDelegate.refresh()
         setNeedsDisplay()
     }
@@ -190,10 +190,13 @@ final class CursorView: ScaledView {
     }
 
     @objc func dragging(pan: UIPanGestureRecognizer) {
+        // Don't drag if no attached mark.
+        guard let attachedMarkPosition = ladderViewDelegate.getAttachedMarkPosition() else { return }
         if pan.state == .began {
-            let attachedMarkPosition = ladderViewDelegate.getAttachedMarkPosition()
-            translationY = attachedMarkPosition?.y ?? 0
+            self.undoManager?.beginUndoGrouping()
+            translationY = attachedMarkPosition.y
             ladderViewDelegate.highlightAttachedMarks(highlight: .all)
+            ladderViewDelegate.moveAttachedMark(position: attachedMarkPosition)
         }
         if pan.state == .changed {
             let delta = pan.translation(in: self)
@@ -205,8 +208,9 @@ final class CursorView: ScaledView {
             pan.setTranslation(CGPoint(x: 0,y: 0), in: self)
         }
         if pan.state == .ended {
-                ladderViewDelegate.linkMarksNearbyAttachedMark()
-                ladderViewDelegate.refresh()
+            self.undoManager?.endUndoGrouping()
+            ladderViewDelegate.linkMarksNearbyAttachedMark()
+            ladderViewDelegate.refresh()
             translationY = 0
         }
     }
@@ -242,7 +246,7 @@ final class CursorView: ScaledView {
     }
 
     func attachMark(imageScrollViewPositionX positionX: CGFloat) {
-        ladderViewDelegate.addMark(imageScrollViewPositionX: positionX)
+        ladderViewDelegate.addAttachedMark(imageScrollViewPositionX: positionX)
     }
 }
 

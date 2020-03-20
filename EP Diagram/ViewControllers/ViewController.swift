@@ -35,8 +35,9 @@
 
             if Common.isRunningOnMac() {
                 navigationController?.setNavigationBarHidden(true, animated: false)
-                UIView.setAnimationsEnabled(false) // Mac transitions look better without animation.
+//                UIView.setAnimationsEnabled(false) // Mac transitions look better without animation.
             }
+            UIView.setAnimationsEnabled(true)
 
             // Distinguish the two views using slightly different background colors.
             if #available(iOS 13.0, *) {
@@ -190,7 +191,7 @@
             if cursorView.cursorIsVisible() {
                 ladderView.unattachAttachedMark()
                 cursorView.hideCursor(true)
-                ladderView.unhighlightMarks()
+                ladderView.unhighlightAllMarks()
             }
             else {
                 let position = tap.location(in: imageScrollView)

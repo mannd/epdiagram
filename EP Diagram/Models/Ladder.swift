@@ -88,6 +88,10 @@ class Ladder {
         }
     }
 
+    func deleteMarksInRegion(_ region: Region) {
+        region.marks.removeAll()
+    }
+
     func getRegionIndex(region: Region?) -> Int? {
         if let index = regions.firstIndex(where: {$0 === region}) {
             return index
