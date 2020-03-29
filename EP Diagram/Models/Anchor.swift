@@ -9,9 +9,9 @@
 import Foundation
 
 /// Used to anchor cursor to a part of a mark.
-enum Anchor {
-    case proximal
+enum Anchor: Int {
     case middle
+    case proximal
     case distal
     case none
 }

@@ -64,6 +64,8 @@
                 let interaction = UIContextMenuInteraction(delegate: ladderView)
                 ladderView.addInteraction(interaction)
             }
+
+            navigationItem.setLeftBarButton(UIBarButtonItem(image: UIImage(named: "hamburger"), style: .plain, target: self, action: nil), animated: true)
         }
 
         @objc func onDidUndoableAction(_ notification: Notification) {

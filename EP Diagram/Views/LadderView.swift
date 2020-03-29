@@ -28,8 +28,9 @@ protocol LadderViewDelegate: AnyObject {
     func moveAttachedMark(position: CGPoint)
     func getAttachedMarkAnchor() -> Anchor
     func assessBlockAndImpulseOrigin(mark: Mark?)
-    func getAttachedMarkPosition() -> CGPoint?
+    func getAttachedMarkScaledAnchorPosition() -> CGPoint?
     func highlightAttachedMarks(highlight: Mark.Highlight)
+    func toggleAttachedMarkAnchor()
 }
 
 final class LadderView: ScaledView {
@@ -50,7 +51,6 @@ final class LadderView: ScaledView {
     var showBlock = true
 
     internal var ladder: Ladder = Ladder.defaultLadder()
-    var oldLadder: Ladder = Ladder()
 
     private var activeRegion: Region? {
         set(value) {
@@ -91,6 +91,7 @@ final class LadderView: ScaledView {
     private var regionDistalToDragOrigin: Region?
     private var dragCreatedMark: Mark?
     private var dragOriginDivision: RegionDivision = .none
+
 
     var leftMargin: CGFloat = 0
     internal var ladderViewHeight: CGFloat = 0
@@ -260,7 +261,6 @@ final class LadderView: ScaledView {
             else { // make mark and attach cursor
                 let mark = makeMark(scaledViewPositionX: positionX)
                 if let mark = mark {
-//                    inactivateMarks()
                     unhighlightAllMarks()
                     mark.attached = true
                     mark.highlight = .all
@@ -279,21 +279,25 @@ final class LadderView: ScaledView {
         if let mark = mark, let activeRegion = activeRegion {
             let anchor = tapLocationInLadder.markAnchor
             if mark.attached {
-                // Just reanchor cursor
-                if anchor != mark.anchor {
-                    selectMark(mark)
-                    mark.anchor = anchor
-                    adjustCursor(mark: mark, region: activeRegion)
-                }
-                else { // tapped same anchor position.
-                    // Unattach mark and hide cursor
-                    mark.attached = false
-                    mark.highlight = .none
-                    assessBlockAndImpulseOrigin(mark: mark)
-                    unselectMark(mark)
-                    cursorViewDelegate.hideCursor(true)
-                    unattachAttachedMark()
-                }
+                mark.highlight = .all
+                toggleAnchor(mark: mark)
+                adjustCursor(mark: mark, region: activeRegion)
+//                // Just reanchor cursor
+//                if anchor != mark.anchor {
+//                    toggleAnchor(mark: mark)
+////                    selectMark(mark)
+////                    mark.anchor = anchor
+//                    adjustCursor(mark: mark, region: activeRegion)
+//                }
+//                else { // tapped same anchor position.
+//                    // Unattach mark and hide cursor
+//                    mark.attached = false
+//                    mark.highlight = .none
+//                    assessBlockAndImpulseOrigin(mark: mark)
+//                    unselectMark(mark)
+//                    cursorViewDelegate.hideCursor(true)
+//                    unattachAttachedMark()
+//                }
             }
             else { // mark wasn't already attached.
                 P(">>> should be seeing cursor")
@@ -378,6 +382,23 @@ final class LadderView: ScaledView {
             anchor = .none
         }
         return anchor
+    }
+
+    private func toggleAnchor(mark: Mark?) {
+        guard let mark = mark else { return }
+        P("toggling anchor")
+        let newAnchor = Anchor(rawValue: mark.anchor.rawValue + 1)
+        if let newAnchor = newAnchor {
+            if newAnchor == .none {
+                mark.anchor = .middle
+            }
+            else {
+                mark.anchor = newAnchor
+            }
+        }
+        else {
+            mark.anchor = .middle
+        }
     }
 
     private func setMarkAndAttachedMarksHighlight(_ mark: Mark?, highlight: Mark.Highlight) {
@@ -478,9 +499,9 @@ final class LadderView: ScaledView {
                 movingMark = mark
                 mark.highlight = .all
                 // need to move it nowhere, to let undo work
-                // FIXME: doesn't work with omnipositional cursor
-                let anchorPosition = mark.getAnchorPosition()
-                moveMark(mark: mark, scaledViewPosition: anchorPosition)
+                if let anchorPosition = getMarkScaledAnchorPosition(mark) {
+                    moveMark(mark: mark, scaledViewPosition: anchorPosition)
+                }
             }
             else {  // We need to make a new mark.
                 // Get rid of cursor.
@@ -512,10 +533,8 @@ final class LadderView: ScaledView {
             }
         }
         if state == .changed {
-            if let mark = movingMark, mark.attached {
+            if let mark = movingMark {
                 moveMark(mark: mark, scaledViewPosition: position)
-//                let anchorPositionX = mark.getAnchorPositionX()
-//                cursorViewDelegate.moveCursor(cursorViewPositionX: anchorPositionX)
             }
             else {
                 if regionProximalToDragOrigin === locationInLadder.region {
@@ -703,11 +722,6 @@ final class LadderView: ScaledView {
         })
         NotificationCenter.default.post(name: .didUndoableAction, object: nil)
         moveMarkOmnidirectionally(mark, regionPosition)
-        let anchorPositionX = mark.getAnchorPositionX()
-//        cursorViewDelegate.moveCursor(cursorViewPositionX: anchorPositionX)
-        adjustCursor(mark: mark, region: activeRegion!)
-        cursorViewDelegate.refresh()
-
     }
 
     private func moveMarkOmnidirectionally(_ mark: Mark, _ regionPosition: CGPoint) {
@@ -727,6 +741,10 @@ final class LadderView: ScaledView {
         case .none:
             break
         }
+        if let activeRegion = activeRegion {
+            adjustCursor(mark: mark, region: activeRegion)
+            cursorViewDelegate.refresh()
+        }
     }
 
     private func undoablyMoveMarkHorizontally(_ mark: Mark, _ regionPosition: CGPoint) {
@@ -735,9 +753,6 @@ final class LadderView: ScaledView {
         })
         NotificationCenter.default.post(name: .didUndoableAction, object: nil)
         moveMarkHorizontally(mark, regionPosition)
-        let anchorPositionX = mark.getAnchorPositionX()
-        cursorViewDelegate.moveCursor(cursorViewPositionX: anchorPositionX)
-        cursorViewDelegate.refresh()
     }
 
     private func moveMarkHorizontally(_ mark: Mark, _ regionPosition: CGPoint) {
@@ -753,6 +768,10 @@ final class LadderView: ScaledView {
             mark.segment.distal.x = regionPosition.x
         case .none:
             break
+        }
+        if let activeRegion = activeRegion {
+            adjustCursor(mark: mark, region: activeRegion)
+            cursorViewDelegate.refresh()
         }
     }
 
@@ -1285,9 +1304,13 @@ extension LadderView: LadderViewDelegate {
         return convert(point, to: view).y
     }
 
-    func getAttachedMarkPosition() -> CGPoint? {
-        guard let attachedMark = attachedMark, let activeRegion = activeRegion else { return nil }
-        return translateToScaledViewPosition(regionPosition: attachedMark.getAnchorPosition(), region: activeRegion)
+    func getAttachedMarkScaledAnchorPosition() -> CGPoint? {
+        return getMarkScaledAnchorPosition(attachedMark)
+    }
+
+    func getMarkScaledAnchorPosition(_ mark: Mark?) -> CGPoint? {
+        guard let mark = mark, let activeRegion = activeRegion else { return nil}
+        return translateToScaledViewPosition(regionPosition: mark.getAnchorPosition(), region: activeRegion)
     }
 
     func getAttachedMarkAnchor() -> Anchor {
@@ -1310,6 +1333,14 @@ extension LadderView: LadderViewDelegate {
     func highlightAttachedMarks(highlight: Mark.Highlight) {
         guard let attachedMark = attachedMark else { return }
         attachedMark.attachedMarks.highLight(highlight: highlight)
+    }
+
+    func toggleAttachedMarkAnchor() {
+        P("toggle attached mark anchor")
+        toggleAnchor(mark: attachedMark)
+        if let attachedMark = attachedMark, let activeRegion = activeRegion {
+            adjustCursor(mark: attachedMark, region: activeRegion)
+        }
     }
 
 }

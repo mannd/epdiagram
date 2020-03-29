@@ -177,9 +177,10 @@ final class CursorView: ScaledView {
             doCalibration()
             return
         }
-        hideCursor(cursor.visible)
-        ladderViewDelegate.unattachAttachedMark()
-        ladderViewDelegate.unhighlightAllMarks()
+        ladderViewDelegate.toggleAttachedMarkAnchor()
+//        hideCursor(cursor.visible)
+//        ladderViewDelegate.unattachAttachedMark()
+//        ladderViewDelegate.unhighlightAllMarks()
         ladderViewDelegate.refresh()
         setNeedsDisplay()
     }
@@ -191,7 +192,7 @@ final class CursorView: ScaledView {
 
     @objc func dragging(pan: UIPanGestureRecognizer) {
         // Don't drag if no attached mark.
-        guard let attachedMarkPosition = ladderViewDelegate.getAttachedMarkPosition() else { return }
+        guard let attachedMarkPosition = ladderViewDelegate.getAttachedMarkScaledAnchorPosition() else { return }
         if pan.state == .began {
             self.undoManager?.beginUndoGrouping()
             translationY = attachedMarkPosition.y

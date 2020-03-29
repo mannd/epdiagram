@@ -168,36 +168,6 @@ class Mark {
         segment.distal = tmp
     }
 
-    func getAnchorPositionX() -> CGFloat {
-        let anchorPositionX: CGFloat
-        switch anchor {
-        case .distal:
-            anchorPositionX = segment.distal.x
-        case .middle:
-            anchorPositionX = midpoint().x
-        case .proximal:
-            anchorPositionX = segment.proximal.x
-        case .none:
-            anchorPositionX = segment.proximal.x
-        }
-        return anchorPositionX
-    }
-
-    func getAnchorPositionY() -> CGFloat {
-        let anchorPositionY: CGFloat
-        switch anchor {
-        case .distal:
-            anchorPositionY = segment.distal.y
-        case .middle:
-            anchorPositionY = midpoint().y
-        case .proximal:
-            anchorPositionY = segment.proximal.y
-        case .none:
-            anchorPositionY = segment.proximal.y
-        }
-        return anchorPositionY
-    }
-
     func getAnchorPosition() -> CGPoint {
         let anchorPosition: CGPoint
         switch anchor {
