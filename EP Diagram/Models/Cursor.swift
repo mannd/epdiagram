@@ -20,12 +20,19 @@ class Cursor: NSObject {
         case null
     }
 
-    // TODO: Use direction to implement cursors that change x vs y.
     // Vertical cursor is vertical and changes x, horizontal changes y position.
     enum Direction: String, Codable {
-        case vertical
         case horizontal
         case omnidirectional
+
+        func movement() -> Movement {
+            switch self {
+            case .horizontal:
+                return .horizontal
+            case .omnidirectional:
+                return .omnidirectional
+            }
+        }
     }
 
     /// Attachment point for the cursor on a mark.  If there is not attached mark, then this is ignored.

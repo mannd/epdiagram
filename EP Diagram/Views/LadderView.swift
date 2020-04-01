@@ -264,7 +264,7 @@ final class LadderView: ScaledView {
                     unhighlightAllMarks()
                     mark.attached = true
                     mark.highlight = .all
-                    mark.anchor = getAnchor(regionDivision: tapLocationInLadder.regionDivision)
+                    mark.anchor = .defaultAnchor
                     selectMark(mark)
                     attachedMark = mark
                     cursorViewDelegate.setCursorHeight()
@@ -277,7 +277,6 @@ final class LadderView: ScaledView {
 
     private func markWasTapped(mark: Mark?, tapLocationInLadder: LocationInLadder) {
         if let mark = mark, let activeRegion = activeRegion {
-            let anchor = tapLocationInLadder.markAnchor
             if mark.attached {
                 mark.highlight = .all
                 toggleAnchor(mark: mark)
@@ -287,7 +286,7 @@ final class LadderView: ScaledView {
                 attachedMark = mark
                 mark.attached = true
                 selectMark(mark)
-                mark.anchor = anchor
+                mark.anchor = .defaultAnchor
                 mark.attached = true
                 mark.highlight = .all
                 adjustCursor(mark: mark, region: activeRegion)
@@ -701,74 +700,56 @@ final class LadderView: ScaledView {
         mark.segment.distal.y = distalY < 0 ? 0 : distalY > 1.0 ? 1.0 : distalY
     }
 
-    private func undoablyMoveMarkOmnidirectionally(_ mark: Mark, _ regionPosition: CGPoint) {
+    private func undoablyMoveMark(movement: Movement, mark: Mark, regionPosition: CGPoint) {
         self.undoManager?.registerUndo(withTarget: self, handler: {target in
-            target.undoablyMoveMarkOmnidirectionally(mark, regionPosition)
+            target.undoablyMoveMark(movement: movement, mark: mark, regionPosition: regionPosition)
         })
         NotificationCenter.default.post(name: .didUndoableAction, object: nil)
-        moveMarkOmnidirectionally(mark, regionPosition)
+        moveMark(movement: movement, mark: mark, regionPosition: regionPosition)
     }
 
-    private func moveMarkOmnidirectionally(_ mark: Mark, _ regionPosition: CGPoint) {
-        switch mark.anchor {
-        case .proximal:
-            mark.segment.proximal = regionPosition
-        case .middle:
-            // Determine halfway point between proximal and distal.
-            let differenceX = (mark.segment.proximal.x - mark.segment.distal.x) / 2
-            let differenceY = (mark.segment.proximal.y - mark.segment.distal.y) / 2
-            mark.segment.proximal.x = regionPosition.x + differenceX
-            mark.segment.distal.x = regionPosition.x - differenceX
-            mark.segment.proximal.y = regionPosition.y + differenceY
-            mark.segment.distal.y = regionPosition.y - differenceY
-        case .distal:
-            mark.segment.distal = regionPosition
-        case .none:
-            break
+    private func moveMark(movement: Movement, mark: Mark, regionPosition: CGPoint) {
+        if movement == .horizontal {
+            switch mark.anchor {
+            case .proximal:
+                mark.segment.proximal.x = regionPosition.x
+            case .middle:
+                // Determine halfway point between proximal and distal.
+                let differenceX = (mark.segment.proximal.x - mark.segment.distal.x) / 2
+                mark.segment.proximal.x = regionPosition.x + differenceX
+                mark.segment.distal.x = regionPosition.x - differenceX
+            case .distal:
+                mark.segment.distal.x = regionPosition.x
+            case .none:
+                break
+            }
         }
+        else if movement == .omnidirectional {
+            switch mark.anchor {
+            case .proximal:
+                mark.segment.proximal = regionPosition
+            case .middle:
+                // Determine halfway point between proximal and distal.
+                let differenceX = (mark.segment.proximal.x - mark.segment.distal.x) / 2
+                let differenceY = (mark.segment.proximal.y - mark.segment.distal.y) / 2
+                mark.segment.proximal.x = regionPosition.x + differenceX
+                mark.segment.distal.x = regionPosition.x - differenceX
+                mark.segment.proximal.y = regionPosition.y + differenceY
+                mark.segment.distal.y = regionPosition.y - differenceY
+            case .distal:
+                mark.segment.distal = regionPosition
+            case .none:
+                break
+            }
+        }
+        moveAttachedMarks(forMark: mark)
         if let activeRegion = activeRegion {
             adjustCursor(mark: mark, region: activeRegion)
             cursorViewDelegate.refresh()
         }
     }
 
-    private func undoablyMoveMarkHorizontally(_ mark: Mark, _ regionPosition: CGPoint) {
-        self.undoManager?.registerUndo(withTarget: self, handler: {target in
-            target.undoablyMoveMarkHorizontally(mark, regionPosition)
-        })
-        NotificationCenter.default.post(name: .didUndoableAction, object: nil)
-        moveMarkHorizontally(mark, regionPosition)
-    }
-
-    private func moveMarkHorizontally(_ mark: Mark, _ regionPosition: CGPoint) {
-        switch mark.anchor {
-        case .proximal:
-            mark.segment.proximal.x = regionPosition.x
-        case .middle:
-            // Determine halfway point between proximal and distal.
-            let differenceX = (mark.segment.proximal.x - mark.segment.distal.x) / 2
-            mark.segment.proximal.x = regionPosition.x + differenceX
-            mark.segment.distal.x = regionPosition.x - differenceX
-        case .distal:
-            mark.segment.distal.x = regionPosition.x
-        case .none:
-            break
-        }
-        if let activeRegion = activeRegion {
-            adjustCursor(mark: mark, region: activeRegion)
-            cursorViewDelegate.refresh()
-        }
-    }
-
-    func moveMark(mark: Mark, scaledViewPosition: CGPoint) {
-        guard let activeRegion = activeRegion else { return }
-        let regionPosition = translateToRegionPosition(scaledViewPosition: scaledViewPosition, region: activeRegion)
-        if cursorViewDelegate.cursorIsVisible() && cursorViewDelegate.cursorDirection() == .horizontal {
-            undoablyMoveMarkHorizontally(mark, regionPosition)
-        }
-        else {
-            undoablyMoveMarkOmnidirectionally(mark, regionPosition)
-        }
+    private func moveAttachedMarks(forMark mark: Mark) {
         // adjust ends of mark segment.
         for proximalMark in mark.attachedMarks.proximal {
             proximalMark.segment.distal.x = mark.segment.proximal.x
@@ -777,8 +758,19 @@ final class LadderView: ScaledView {
             distalMark.segment.proximal.x = mark.segment.distal.x
         }
         // TODO: handle middleMarks
+        for middleMark in mark.attachedMarks.middle {
+            if mark.anchor == .middle {
+            }
+        }
+    }
+
+    func moveMark(mark: Mark, scaledViewPosition: CGPoint) {
+        guard let activeRegion = activeRegion else { return }
+        let regionPosition = translateToRegionPosition(scaledViewPosition: scaledViewPosition, region: activeRegion)
+        if cursorViewDelegate.cursorIsVisible() {
+            undoablyMoveMark(movement: cursorViewDelegate.cursorDirection().movement(), mark: mark, regionPosition: regionPosition)
+        }
         fixBoundsOfMark(mark)
-        adjustCursor(mark: mark, region: activeRegion)
         highlightNearbyMarks(mark)
     }
 
@@ -1329,13 +1321,11 @@ extension LadderView: LadderViewDelegate {
     }
 
     func toggleAttachedMarkAnchor() {
-        P("toggle attached mark anchor")
         toggleAnchor(mark: attachedMark)
         if let attachedMark = attachedMark, let activeRegion = activeRegion {
             adjustCursor(mark: attachedMark, region: activeRegion)
         }
     }
-
 }
 
 @available(iOS 13.0, *)

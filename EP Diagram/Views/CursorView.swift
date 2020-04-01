@@ -43,7 +43,7 @@ final class CursorView: ScaledView {
         }
     }
     var calibrating = false
-    var translationY: CGFloat = 0
+    var cursorEndPointY: CGFloat = 0
 
     weak var ladderViewDelegate: LadderViewDelegate! // Note IUO.
 
@@ -178,9 +178,6 @@ final class CursorView: ScaledView {
             return
         }
         ladderViewDelegate.toggleAttachedMarkAnchor()
-//        hideCursor(cursor.visible)
-//        ladderViewDelegate.unattachAttachedMark()
-//        ladderViewDelegate.unhighlightAllMarks()
         ladderViewDelegate.refresh()
         setNeedsDisplay()
     }
@@ -192,18 +189,18 @@ final class CursorView: ScaledView {
 
     @objc func dragging(pan: UIPanGestureRecognizer) {
         // Don't drag if no attached mark.
-        guard let attachedMarkPosition = ladderViewDelegate.getAttachedMarkScaledAnchorPosition() else { return }
+        guard let attachedMarkAnchorPosition = ladderViewDelegate.getAttachedMarkScaledAnchorPosition() else { return }
         if pan.state == .began {
             self.undoManager?.beginUndoGrouping()
-            translationY = attachedMarkPosition.y
+            cursorEndPointY = attachedMarkAnchorPosition.y
             ladderViewDelegate.highlightAttachedMarks(highlight: .all)
-            ladderViewDelegate.moveAttachedMark(position: attachedMarkPosition)
+            ladderViewDelegate.moveAttachedMark(position: attachedMarkAnchorPosition) // This has to be here for undo to work.
         }
         if pan.state == .changed {
             let delta = pan.translation(in: self)
             cursorMove(delta: delta)
-            translationY += delta.y
-            ladderViewDelegate.moveAttachedMark(position: CGPoint(x: translateToScaledViewPositionX(regionPositionX: cursor.positionX), y: translationY))
+            cursorEndPointY += delta.y
+            ladderViewDelegate.moveAttachedMark(position: CGPoint(x: translateToScaledViewPositionX(regionPositionX: cursor.positionX), y: cursorEndPointY))
             ladderViewDelegate.refresh()
             setNeedsDisplay()
             pan.setTranslation(CGPoint(x: 0,y: 0), in: self)
@@ -212,7 +209,7 @@ final class CursorView: ScaledView {
             self.undoManager?.endUndoGrouping()
             ladderViewDelegate.linkMarksNearbyAttachedMark()
             ladderViewDelegate.refresh()
-            translationY = 0
+            cursorEndPointY = 0
         }
     }
 

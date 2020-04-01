@@ -42,6 +42,11 @@ struct Segment {
     }
 }
 
+// TODO: redundant with Cursor.Direction, use that instead.
+enum Movement {
+    case horizontal
+    case omnidirectional
+}
 
 /**
  The mark is a fundamental component of a ladder diagram.
