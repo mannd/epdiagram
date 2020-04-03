@@ -489,6 +489,7 @@ final class LadderView: ScaledView {
                 if let mark = locationInLadder.mark, mark.attached {
                     movingMark = mark
                     mark.highlight = .all
+                    highlightAttachedMarks(highlight: .all)
                     // need to move it nowhere, to let undo work
                     if let anchorPosition = getMarkScaledAnchorPosition(mark) {
                         moveMark(mark: mark, scaledViewPosition: anchorPosition)
