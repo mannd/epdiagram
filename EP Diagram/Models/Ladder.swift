@@ -9,9 +9,9 @@
 import UIKit
 
 struct NearbyMarks {
-    var proximalMarks: [Mark] = []
-    var middleMarks: [Mark] = []
-    var distalMarks: [Mark] = []
+    var proximal: [Mark] = []
+    var middle: [Mark] = []
+    var distal: [Mark] = []
 }
 
 /// Struct that pinpoints a point in a ladder.  Note that these tapped areas overlap (labels and marks are in regions).
@@ -167,6 +167,14 @@ class Ladder {
     func setHighlightForAllMarks(highlight: Mark.Highlight) {
         for region in regions {
             setHighlightForMarks(highlight: highlight, inRegion: region)
+        }
+    }
+
+    func unattachAllMarks() {
+        for region in regions {
+            for mark in region.marks {
+                mark.attached = false
+            }
         }
     }
 

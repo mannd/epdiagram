@@ -26,6 +26,7 @@ protocol LadderViewDelegate: AnyObject {
     func unattachAttachedMark()
     func linkNearbyMarks(mark: Mark)
     func moveAttachedMark(position: CGPoint)
+    func fixBoundsOfAttachedMark()
     func getAttachedMarkAnchor() -> Anchor
     func assessBlockAndImpulseOrigin(mark: Mark?)
     func getAttachedMarkScaledAnchorPosition() -> CGPoint?
@@ -283,16 +284,20 @@ final class LadderView: ScaledView {
                 adjustCursor(mark: mark, region: activeRegion)
             }
             else { // mark wasn't already attached.
+                unattachMarks()
                 attachedMark = mark
                 mark.attached = true
                 selectMark(mark)
                 mark.anchor = .defaultAnchor
-                mark.attached = true
                 mark.highlight = .all
                 adjustCursor(mark: mark, region: activeRegion)
                 cursorViewDelegate.hideCursor(false)
             }
         }
+    }
+
+    private func unattachMarks() {
+        ladder.unattachAllMarks()
     }
 
     private func adjustCursor(mark: Mark, region: Region) {
@@ -386,9 +391,12 @@ final class LadderView: ScaledView {
     private func setMarkAndAttachedMarksHighlight(_ mark: Mark?, highlight: Mark.Highlight) {
         if let mark = mark {
             mark.highlight = highlight
-            let attachedMarks = mark.attachedMarks
+            let attachedMarks = mark.linkedMarks
             for proximalMark in attachedMarks.proximal {
                 proximalMark.highlight = highlight
+            }
+            for middleMark in attachedMarks.middle {
+                middleMark.highlight = highlight
             }
             for distalMark in attachedMarks.distal {
                 distalMark.highlight = highlight
@@ -586,6 +594,8 @@ final class LadderView: ScaledView {
 
     // TODO: expand on this logic.  Reset block and impulseOrigin to .none as necessary.
     func assessBlockAndImpulseOrigin(mark: Mark?) {
+        // FIXME: remove return
+        return
         if let mark = mark {
             mark.block = .none
             mark.impulseOrigin = .none
@@ -595,12 +605,12 @@ final class LadderView: ScaledView {
             if mark.segment.distal.y != 1.0 && mark.segment.distal.x > mark.segment.proximal.x {
                 mark.block = .distal
             }
-            if mark.attachedMarks.proximal.count == 0 {
+            if mark.linkedMarks.proximal.count == 0 {
                 if mark.segment.proximal.x <= mark.segment.distal.x {
                     mark.impulseOrigin = .proximal
                 }
             }
-            if mark.attachedMarks.distal.count == 0 {
+            if mark.linkedMarks.distal.count == 0 {
                 if mark.segment.distal.x < mark.segment.proximal.x {
                     mark.impulseOrigin = .distal
                 }
@@ -613,9 +623,9 @@ final class LadderView: ScaledView {
         var nearbyDistance: CGFloat = 10
         nearbyDistance = nearbyDistance / scale
         let nearbyMarks = getNearbyMarks(mark: mark, nearbyDistance: nearbyDistance)
-        let nearbyProximalMarks: [Mark] = nearbyMarks.proximalMarks
-        let nearbyDistalMarks: [Mark] = nearbyMarks.distalMarks
-        let nearbyMiddleMarks: [Mark] = nearbyMarks.middleMarks
+        let nearbyProximalMarks: [Mark] = nearbyMarks.proximal
+        let nearbyDistalMarks: [Mark] = nearbyMarks.distal
+        let nearbyMiddleMarks: [Mark] = nearbyMarks.middle
         if nearbyProximalMarks.count > 0 {
             for nearbyMark in nearbyProximalMarks {
                 nearbyMark.highlight = .all
@@ -643,7 +653,7 @@ final class LadderView: ScaledView {
         }
     }
 
-    func getNearbyMarks(mark: Mark, nearbyDistance: CGFloat) -> NearbyMarks {
+    func getNearbyMarks(mark: Mark, nearbyDistance: CGFloat) -> MarkGroup {
         var proximalMarks: [Mark] = []
         var distalMarks: [Mark] = []
         var middleMarks: [Mark] = []
@@ -679,12 +689,14 @@ final class LadderView: ScaledView {
                     let distanceProximal = Common.distanceSegmentToPoint(segment: ladderViewPositionNeighboringMarkSegment, point: ladderViewPositionMarkProximal)
                     let distanceDistal = Common.distanceSegmentToPoint(segment: ladderViewPositionNeighboringMarkSegment, point: ladderViewPositionMarkDistal)
                     if distanceProximal < nearbyDistance || distanceDistal < nearbyDistance {
+                        P("appending middle mark")
                         middleMarks.append(neighboringMark)
+
                     }
                 }
             }
         }
-        return NearbyMarks(proximalMarks: proximalMarks, middleMarks: middleMarks, distalMarks: distalMarks)
+        return MarkGroup(proximal: proximalMarks, middle: middleMarks, distal: distalMarks)
     }
     
     func moveAttachedMark(position: CGPoint) {
@@ -693,11 +705,14 @@ final class LadderView: ScaledView {
         }
     }
 
+    func fixBoundsOfAttachedMark() {
+        if let attachedMark = attachedMark {
+            fixBoundsOfMark(attachedMark)
+        }
+    }
+
     private func fixBoundsOfMark(_ mark: Mark) {
-        let proximalY = mark.segment.proximal.y
-        let distalY = mark.segment.distal.y
-        mark.segment.proximal.y = proximalY < 0 ? 0 : proximalY > 1.0 ? 1.0 : proximalY
-        mark.segment.distal.y = distalY < 0 ? 0 : distalY > 1.0 ? 1.0 : distalY
+        mark.segment = mark.segment.normalized()
     }
 
     private func undoablyMoveMark(movement: Movement, mark: Mark, regionPosition: CGPoint) {
@@ -751,26 +766,37 @@ final class LadderView: ScaledView {
 
     private func moveAttachedMarks(forMark mark: Mark) {
         // adjust ends of mark segment.
-        for proximalMark in mark.attachedMarks.proximal {
+        for proximalMark in mark.linkedMarks.proximal {
             proximalMark.segment.distal.x = mark.segment.proximal.x
         }
-        for distalMark in mark.attachedMarks.distal {
+        for distalMark in mark.linkedMarks.distal {
             distalMark.segment.proximal.x = mark.segment.distal.x
         }
-        // TODO: handle middleMarks
-        for middleMark in mark.attachedMarks.middle {
-            if mark.anchor == .middle {
-            }
-        }
+//        for middleMark in mark.linkedMarks.middle {
+//            P("doing middle mark")
+//            let distanceToProximal = Common.distanceSegmentToPoint(segment: middleMark.segment, point: mark.segment.proximal)
+//            let distanceToDistal = Common.distanceSegmentToPoint(segment: middleMark.segment, point: mark.segment.distal)
+//            let closestEnd = distanceToProximal < distanceToDistal ? mark.segment.proximal : mark.segment.distal
+//            let closestPoint = Common.closestPointOnSegmentToPoint(segment: middleMark.segment, point:  closestEnd)
+//            // TODO: this isn't right.
+//            if distanceToProximal < distanceToDistal {
+//                middleMark.segment.proximal = closestPoint
+//            }
+//            else {
+//                middleMark.segment.distal = closestPoint
+//            }
+//        }
     }
 
     func moveMark(mark: Mark, scaledViewPosition: CGPoint) {
         guard let activeRegion = activeRegion else { return }
         let regionPosition = translateToRegionPosition(scaledViewPosition: scaledViewPosition, region: activeRegion)
+//        if cursorViewDelegate.cursorDirection().movement() == .omnidirectional {
+//            unlinkMarks(mark: mark)
+//        }
         if cursorViewDelegate.cursorIsVisible() {
             undoablyMoveMark(movement: cursorViewDelegate.cursorDirection().movement(), mark: mark, regionPosition: regionPosition)
         }
-        fixBoundsOfMark(mark)
         highlightNearbyMarks(mark)
     }
 
@@ -925,7 +951,9 @@ final class LadderView: ScaledView {
     }
 
     fileprivate func drawMark(mark: Mark, region: Region, context: CGContext) {
-        let segment = translateToScaledViewSegment(regionSegment: mark.segment, region: region)
+        // Don't draw outside bounds of region, fix out of bounds segments at end of mark movement.
+        let normalizedSegment = mark.segment.normalized()
+        let segment = translateToScaledViewSegment(regionSegment: normalizedSegment, region: region)
         // Don't bother drawing marks in margin.
         if segment.proximal.x <= leftMargin && segment.distal.x <= leftMargin {
             return
@@ -1133,7 +1161,7 @@ final class LadderView: ScaledView {
     }
 
     func unlinkMarks(mark: Mark) {
-        mark.attachedMarks = Mark.AttachedMarks()
+        mark.linkedMarks = MarkGroup()
     }
 
     @objc func verticalizeToProximal() {
@@ -1241,11 +1269,12 @@ extension LadderView: LadderViewDelegate {
         var minimum: CGFloat = 15
         minimum = minimum / scale
         let nearbyMarks = getNearbyMarks(mark: mark, nearbyDistance: minimum)
-        let proxMarks = nearbyMarks.proximalMarks
-        let distalMarks = nearbyMarks.distalMarks
-        let middleMarks = nearbyMarks.middleMarks
+        let proxMarks = nearbyMarks.proximal
+        let distalMarks = nearbyMarks.distal
+        let middleMarks = nearbyMarks.middle
         for proxMark in proxMarks {
-            mark.attachedMarks.proximal.append(proxMark)
+            mark.linkedMarks.proximal.append(proxMark)
+            proxMark.linkedMarks.distal.append(mark)
             mark.segment.proximal.x = proxMark.segment.distal.x
             if mark.anchor == .proximal {
                 cursorViewDelegate.moveCursor(cursorViewPositionX: mark.segment.proximal.x)
@@ -1253,10 +1282,11 @@ extension LadderView: LadderViewDelegate {
             else if mark.anchor == .middle {
                 cursorViewDelegate.moveCursor(cursorViewPositionX: mark.midpoint().x)
             }
-            proxMark.attachedMarks.distal.append(mark)
+            proxMark.linkedMarks.distal.append(mark)
         }
         for distalMark in distalMarks {
-            mark.attachedMarks.distal.append(distalMark)
+            mark.linkedMarks.distal.append(distalMark)
+            distalMark.linkedMarks.proximal.append(mark)
             mark.segment.distal.x = distalMark.segment.proximal.x
             if mark.anchor == .proximal {
                 cursorViewDelegate.moveCursor(cursorViewPositionX: mark.segment.proximal.x)
@@ -1264,7 +1294,7 @@ extension LadderView: LadderViewDelegate {
             else if mark.anchor == .middle {
                 cursorViewDelegate.moveCursor(cursorViewPositionX: mark.midpoint().x)
             }
-            distalMark.attachedMarks.proximal.append(mark)
+            distalMark.linkedMarks.proximal.append(mark)
         }
         for middleMark in middleMarks {
             let distanceToProximal = Common.distanceSegmentToPoint(segment: middleMark.segment, point: mark.segment.proximal)
@@ -1280,7 +1310,8 @@ extension LadderView: LadderViewDelegate {
             if let activeRegion = activeRegion {
                 adjustCursor(mark: mark, region: activeRegion)
             }
-            mark.attachedMarks.distal.append(middleMark)
+            mark.linkedMarks.middle.append(middleMark)
+            middleMark.linkedMarks.middle.append(mark)
         }
     }
 
@@ -1317,7 +1348,7 @@ extension LadderView: LadderViewDelegate {
 
     func highlightAttachedMarks(highlight: Mark.Highlight) {
         guard let attachedMark = attachedMark else { return }
-        attachedMark.attachedMarks.highLight(highlight: highlight)
+        attachedMark.linkedMarks.highLight(highlight: highlight)
     }
 
     func toggleAttachedMarkAnchor() {

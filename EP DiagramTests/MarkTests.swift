@@ -63,4 +63,18 @@ class MarkTests: XCTestCase {
         XCTAssertEqual(anotherMidPoint, CGPoint(x: 2.5, y: 2))
     }
 
+    func testNormalization() {
+        let p1 = CGPoint(x: 1, y: 1.5)
+        XCTAssertEqual(p1.normalized().y, 1.0, accuracy: 0.00001)
+        let p2 = CGPoint(x: 2, y: -1.5)
+        XCTAssertEqual(p2.normalized().y, 0, accuracy: 0.00001)
+        let s1 = Segment(proximal: p1, distal: p2)
+        let normalizedS1 = s1.normalized()
+        XCTAssertEqual(normalizedS1.proximal.y, 1.0, accuracy: 0.00001)
+        XCTAssertEqual(normalizedS1.distal.y, 0, accuracy: 0.00001)
+        let p3 = CGPoint(x: 100, y: 0.7)
+        XCTAssertEqual(p3.y, 0.7, accuracy: 0.00001)
+        XCTAssertEqual(p3.x, 100, accuracy: 0.00001)
+    }
+
 }

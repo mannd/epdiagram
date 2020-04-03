@@ -12,11 +12,20 @@ import UIKit
 
 //  See this attempt at a ladder diagram program, the only one I can find: https://epfellow.wordpress.com/2010/11/04/electrocardiogram-ecgekg-ladder-diagrams/
 
+extension CGPoint {
+    func normalized() -> CGPoint {
+        return CGPoint(x: self.x, y: self.y < 0 ? 0 : self.y > 1.0 ? 1.0 : self.y)
+    }
+}
 
 /// A mark is a line segment, defined by its two end points.  Marks may slant in different directions, depending on the origin of an impulse.  So rather than using origin and terminus (which could swap positions if the slant of the mark is changed), we use the same convention as with regions: the two ends are termed *proximal* and *distal*.i
 struct Segment {
     var proximal: CGPoint
-    var distal: CGPoint 
+    var distal: CGPoint
+
+    func normalized() -> Segment {
+        return Segment(proximal: proximal.normalized(), distal: distal.normalized())
+    }
 
     func maxXPoint() -> CGPoint {
         if proximal.x >= distal.x {
@@ -46,6 +55,26 @@ struct Segment {
 enum Movement {
     case horizontal
     case omnidirectional
+}
+
+// A mark may have up to three attachments to marks in the proximal and distal regions
+// and in its own region, i.e. rentry spawning a mark.
+struct MarkGroup {
+    var proximal: [Mark] = []
+    var middle: [Mark] = []
+    var distal: [Mark] = []
+
+    func highLight(highlight: Mark.Highlight) {
+        for mark in proximal {
+            mark.highlight = highlight
+        }
+        for mark in middle {
+            mark.highlight = highlight
+        }
+        for mark in distal {
+            mark.highlight = highlight
+        }
+    }
 }
 
 /**
@@ -117,31 +146,11 @@ class Mark {
     var block: Block = .none
     var impulseOrigin: ImpulseOrigin = .none
 
-    // A mark may have up to three attachments to marks in the proximal and distal regions
-    // and in its own region, i.e. rentry spawning a mark.
-    struct AttachedMarks {
-        var proximal: [Mark] = []
-        var middle: [Mark] = []
-        var distal: [Mark] = []
-
-        func highLight(highlight: Highlight) {
-            for mark in proximal {
-                mark.highlight = highlight
-            }
-            for mark in middle {
-                mark.highlight = highlight
-            }
-            for mark in distal {
-                mark.highlight = highlight
-            }
-        }
-    }
-    
-    var attachedMarks: AttachedMarks
+    var linkedMarks: MarkGroup
 
     init(_ segment: Segment) {
         self.segment = segment
-        attachedMarks = AttachedMarks()
+        linkedMarks = MarkGroup()
         // Default anchor for new marks is middle.
         anchor = .middle
     }
@@ -162,6 +171,7 @@ class Mark {
 
     /// Return midpoint of mark as CGPoint
     func midpoint() -> CGPoint {
+        let segment = self.segment.normalized()
         let x = (segment.distal.x - segment.proximal.x) / 2.0 + segment.proximal.x
         let y = (segment.distal.y - segment.proximal.y) / 2.0 + segment.proximal.y
         return CGPoint(x: x, y: y)
@@ -177,13 +187,13 @@ class Mark {
         let anchorPosition: CGPoint
         switch anchor {
         case .distal:
-            anchorPosition = segment.distal
+            anchorPosition = segment.distal.normalized()
         case .middle:
             anchorPosition = midpoint()
         case .proximal:
-            anchorPosition = segment.proximal
+            anchorPosition = segment.proximal.normalized()
         case .none:
-            anchorPosition = segment.proximal
+            anchorPosition = segment.proximal.normalized()
         }
         return anchorPosition
     }
