@@ -19,7 +19,7 @@ extension CGPoint {
 }
 
 /// A mark is a line segment, defined by its two end points.  Marks may slant in different directions, depending on the origin of an impulse.  So rather than using origin and terminus (which could swap positions if the slant of the mark is changed), we use the same convention as with regions: the two ends are termed *proximal* and *distal*.i
-struct Segment {
+struct Segment: Equatable {
     var proximal: CGPoint
     var distal: CGPoint
 
@@ -57,12 +57,14 @@ enum Movement {
     case omnidirectional
 }
 
+typealias MarkSet = Set<Mark>
+
 // A mark may have up to three attachments to marks in the proximal and distal regions
 // and in its own region, i.e. rentry spawning a mark.
 struct MarkGroup {
-    var proximal: [Mark] = []
-    var middle: [Mark] = []
-    var distal: [Mark] = []
+    var proximal: MarkSet = []
+    var middle: MarkSet = []
+    var distal: MarkSet = []
 
     func highLight(highlight: Mark.Highlight) {
         for mark in proximal {
@@ -78,10 +80,21 @@ struct MarkGroup {
 }
 
 /**
+
  The mark is a fundamental component of a ladder diagram.
 
  A mark can be many things, which makes the concept difficult to pin down.  It can be conduction through a region, with or without decrement.  Conduction can originate  in a region, at the top, bottom, or somewhere in the middle, or may originate in another region.  A mark can block or conduct. It can reenter, spawning another mark.
 */
+extension Mark: Hashable {
+    static func == (lhs: Mark, rhs: Mark) -> Bool {
+        return lhs.id == rhs.id
+    }
+
+    func hash(into hasher: inout Hasher) {
+        hasher.combine(id)
+    }
+}
+
 class Mark {
     /// Draw a solid or dashed line when drawing a mark.
     enum LineStyle {
@@ -148,8 +161,11 @@ class Mark {
 
     var linkedMarks: MarkGroup
 
+    let id: UUID
+
     init(_ segment: Segment) {
         self.segment = segment
+        self.id = UUID()
         linkedMarks = MarkGroup()
         // Default anchor for new marks is middle.
         anchor = .middle

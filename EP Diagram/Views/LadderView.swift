@@ -624,9 +624,9 @@ final class LadderView: ScaledView {
         var nearbyDistance: CGFloat = 10
         nearbyDistance = nearbyDistance / scale
         let nearbyMarks = getNearbyMarks(mark: mark, nearbyDistance: nearbyDistance)
-        let nearbyProximalMarks: [Mark] = nearbyMarks.proximal
-        let nearbyDistalMarks: [Mark] = nearbyMarks.distal
-        let nearbyMiddleMarks: [Mark] = nearbyMarks.middle
+        let nearbyProximalMarks: MarkSet = nearbyMarks.proximal
+        let nearbyDistalMarks: MarkSet = nearbyMarks.distal
+        let nearbyMiddleMarks: MarkSet = nearbyMarks.middle
         if nearbyProximalMarks.count > 0 {
             for nearbyMark in nearbyProximalMarks {
                 nearbyMark.highlight = .all
@@ -655,16 +655,16 @@ final class LadderView: ScaledView {
     }
 
     func getNearbyMarks(mark: Mark, nearbyDistance: CGFloat) -> MarkGroup {
-        var proximalMarks: [Mark] = []
-        var distalMarks: [Mark] = []
-        var middleMarks: [Mark] = []
+        var proximalMarks: MarkSet = []
+        var distalMarks: MarkSet = []
+        var middleMarks: MarkSet = []
         // check proximal region.  Note that only marks that abut the neighboring region are checked.
         if let proximalRegion = ladder.getRegionBefore(region: activeRegion), mark.segment.proximal.y == 0 {
             for neighboringMark in proximalRegion.marks {
                 let ladderViewPositionXMark = translateToScaledViewPositionX(regionPositionX: mark.segment.proximal.x)
                 let ladderViewPositionNeighboringXMark = translateToScaledViewPositionX(regionPositionX: neighboringMark.segment.distal.x)
                 if abs(ladderViewPositionXMark - ladderViewPositionNeighboringXMark) < nearbyDistance {
-                    proximalMarks.append(neighboringMark)
+                    proximalMarks.insert(neighboringMark)
                 }
             }
         }
@@ -674,7 +674,7 @@ final class LadderView: ScaledView {
                 let ladderViewPositionXMark = translateToScaledViewPositionX(regionPositionX: mark.segment.distal.x)
                 let ladderViewPositionNeighboringXMark = translateToScaledViewPositionX(regionPositionX: neighboringMark.segment.proximal.x)
                 if abs(ladderViewPositionXMark - ladderViewPositionNeighboringXMark) < nearbyDistance {
-                    distalMarks.append(neighboringMark)
+                    distalMarks.insert(neighboringMark)
                 }
             }
         }
@@ -682,16 +682,15 @@ final class LadderView: ScaledView {
         if let region = activeRegion {
             for neighboringMark in region.marks {
                 if !(neighboringMark === mark) {
-                    // FIXME: distance must use screen coordinates, not ladder coordinates.
-                    // compare distance of 2 line segments here and append
+                    // compare distance of 2 line segments here and insert
                     let ladderViewPositionNeighboringMarkSegment = translateToScaledViewSegment(regionSegment: neighboringMark.segment, region: region)
                     let ladderViewPositionMarkProximal = translateToScaledViewPosition(regionPosition: mark.segment.proximal, region: region)
                     let ladderViewPositionMarkDistal = translateToScaledViewPosition(regionPosition: mark.segment.distal, region: region)
                     let distanceProximal = Common.distanceSegmentToPoint(segment: ladderViewPositionNeighboringMarkSegment, point: ladderViewPositionMarkProximal)
                     let distanceDistal = Common.distanceSegmentToPoint(segment: ladderViewPositionNeighboringMarkSegment, point: ladderViewPositionMarkDistal)
                     if distanceProximal < nearbyDistance || distanceDistal < nearbyDistance {
-                        P("appending middle mark")
-                        middleMarks.append(neighboringMark)
+                        P("inserting middle mark")
+                        middleMarks.insert(neighboringMark)
 
                     }
                 }
@@ -773,20 +772,20 @@ final class LadderView: ScaledView {
         for distalMark in mark.linkedMarks.distal {
             distalMark.segment.proximal.x = mark.segment.distal.x
         }
-//        for middleMark in mark.linkedMarks.middle {
-//            P("doing middle mark")
-//            let distanceToProximal = Common.distanceSegmentToPoint(segment: middleMark.segment, point: mark.segment.proximal)
-//            let distanceToDistal = Common.distanceSegmentToPoint(segment: middleMark.segment, point: mark.segment.distal)
-//            let closestEnd = distanceToProximal < distanceToDistal ? mark.segment.proximal : mark.segment.distal
-//            let closestPoint = Common.closestPointOnSegmentToPoint(segment: middleMark.segment, point:  closestEnd)
-//            // TODO: this isn't right.
-//            if distanceToProximal < distanceToDistal {
-//                middleMark.segment.proximal = closestPoint
-//            }
-//            else {
-//                middleMark.segment.distal = closestPoint
-//            }
-//        }
+        for middleMark in mark.linkedMarks.middle {
+            P("doing middle mark")
+            let distanceToProximal = Common.distanceSegmentToPoint(segment: mark.segment, point: middleMark.segment.proximal)
+            let distanceToDistal = Common.distanceSegmentToPoint(segment: mark.segment, point: middleMark.segment.distal)
+            let closestEnd = distanceToProximal < distanceToDistal ? middleMark.segment.proximal : middleMark.segment.distal
+            let closestPoint = Common.closestPointOnSegmentToPoint(segment: mark.segment, point:  closestEnd)
+            // TODO: this isn't right.
+            if distanceToProximal < distanceToDistal {
+                middleMark.segment.proximal = closestPoint
+            }
+            else {
+                middleMark.segment.distal = closestPoint
+            }
+        }
     }
 
     func moveMark(mark: Mark, scaledViewPosition: CGPoint) {
@@ -1274,8 +1273,8 @@ extension LadderView: LadderViewDelegate {
         let distalMarks = nearbyMarks.distal
         let middleMarks = nearbyMarks.middle
         for proxMark in proxMarks {
-            mark.linkedMarks.proximal.append(proxMark)
-            proxMark.linkedMarks.distal.append(mark)
+            mark.linkedMarks.proximal.insert(proxMark)
+            proxMark.linkedMarks.distal.insert(mark)
             mark.segment.proximal.x = proxMark.segment.distal.x
             if mark.anchor == .proximal {
                 cursorViewDelegate.moveCursor(cursorViewPositionX: mark.segment.proximal.x)
@@ -1283,11 +1282,11 @@ extension LadderView: LadderViewDelegate {
             else if mark.anchor == .middle {
                 cursorViewDelegate.moveCursor(cursorViewPositionX: mark.midpoint().x)
             }
-            proxMark.linkedMarks.distal.append(mark)
+            proxMark.linkedMarks.distal.insert(mark)
         }
         for distalMark in distalMarks {
-            mark.linkedMarks.distal.append(distalMark)
-            distalMark.linkedMarks.proximal.append(mark)
+            mark.linkedMarks.distal.insert(distalMark)
+            distalMark.linkedMarks.proximal.insert(mark)
             mark.segment.distal.x = distalMark.segment.proximal.x
             if mark.anchor == .proximal {
                 cursorViewDelegate.moveCursor(cursorViewPositionX: mark.segment.proximal.x)
@@ -1295,7 +1294,7 @@ extension LadderView: LadderViewDelegate {
             else if mark.anchor == .middle {
                 cursorViewDelegate.moveCursor(cursorViewPositionX: mark.midpoint().x)
             }
-            distalMark.linkedMarks.proximal.append(mark)
+            distalMark.linkedMarks.proximal.insert(mark)
         }
         for middleMark in middleMarks {
             let distanceToProximal = Common.distanceSegmentToPoint(segment: middleMark.segment, point: mark.segment.proximal)
@@ -1311,8 +1310,8 @@ extension LadderView: LadderViewDelegate {
             if let activeRegion = activeRegion {
                 adjustCursor(mark: mark, region: activeRegion)
             }
-            mark.linkedMarks.middle.append(middleMark)
-            middleMark.linkedMarks.middle.append(mark)
+            mark.linkedMarks.middle.insert(middleMark)
+            middleMark.linkedMarks.middle.insert(mark)
         }
     }
 
