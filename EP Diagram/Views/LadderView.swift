@@ -44,8 +44,9 @@ final class LadderView: ScaledView {
     var lineWidth: CGFloat = 2
     var red = UIColor.systemRed
     var blue = UIColor.systemBlue
-    var unselectedColor = UIColor.black
-    var selectedColor = UIColor.magenta
+    var unattachedColor = UIColor.black
+    var attachedColor = UIColor.magenta
+    var selectedColor = UIColor.red
     var markLineWidth: CGFloat = 2
     var connectedLineWidth: CGFloat = 4
     var showImpulseOrigin = true
@@ -93,6 +94,7 @@ final class LadderView: ScaledView {
     private var dragCreatedMark: Mark?
     private var dragOriginDivision: RegionDivision = .none
 
+    var selectMarkMode: Bool = false
 
     var leftMargin: CGFloat = 0
     internal var ladderViewHeight: CGFloat = 0
@@ -117,7 +119,7 @@ final class LadderView: ScaledView {
     private func didLoad() {
         ladderViewHeight = self.frame.height
         if #available(iOS 13.0, *) {
-            unselectedColor = UIColor.label
+            unattachedColor = UIColor.label
         }
         initializeRegions()
 
@@ -172,6 +174,31 @@ final class LadderView: ScaledView {
         P("single tap on ladderView")
         let position = tap.location(in: self)
         let tapLocationInLadder = getLocationInLadder(position: position)
+        // handle select mark mode
+        if selectMarkMode {
+            if let mark = tapLocationInLadder.mark {
+                // toggle mark selection
+                mark.selected = !mark.selected
+                mark.highlight = mark.selected ? .selected : .none
+                if mark.selected {
+                    ladder.selectedMarks.append(mark)
+                }
+                else {
+                    // TODO: change to map
+                    var n = 0
+                    for m in ladder.selectedMarks {
+                        if m == mark {
+                            ladder.selectedMarks.remove(at: n)
+                            break
+                        }
+                        n += 1
+                    }
+                }
+                P("selected marks = \(ladder.selectedMarks)")
+                setNeedsDisplay()
+            }
+            return
+        }
         unhighlightAllMarks()
         if tapLocationInLadder.labelWasTapped {
             assert(tapLocationInLadder.region != nil, "Label tapped, but region is nil!")
@@ -263,11 +290,9 @@ final class LadderView: ScaledView {
                 let mark = makeMark(scaledViewPositionX: positionX)
                 if let mark = mark {
                     unhighlightAllMarks()
-                    mark.attached = true
                     mark.highlight = .all
                     mark.anchor = .defaultAnchor
-                    selectMark(mark)
-                    attachedMark = mark
+                    attachMark(mark)
                     cursorViewDelegate.setCursorHeight()
                     cursorViewDelegate.moveCursor(cursorViewPositionX: mark.segment.proximal.x)
                     cursorViewDelegate.hideCursor(false)
@@ -285,9 +310,7 @@ final class LadderView: ScaledView {
             }
             else { // mark wasn't already attached.
                 unattachMarks()
-                attachedMark = mark
-                mark.attached = true
-                selectMark(mark)
+                attachMark(mark)
                 mark.anchor = .defaultAnchor
                 mark.highlight = .all
                 adjustCursor(mark: mark, region: activeRegion)
@@ -404,11 +427,9 @@ final class LadderView: ScaledView {
         }
     }
 
-    func unselectMark(_ mark: Mark?) {
-        setMarkAndAttachedMarksHighlight(mark, highlight: .none)
-    }
-
-    func selectMark(_ mark: Mark?) {
+    func attachMark(_ mark: Mark?) {
+        mark?.attached = true
+        attachedMark = mark
         setMarkAndAttachedMarksHighlight(mark, highlight: .all)
     }
 
@@ -778,7 +799,6 @@ final class LadderView: ScaledView {
             let distanceToDistal = Common.distanceSegmentToPoint(segment: mark.segment, point: middleMark.segment.distal)
             let closestEnd = distanceToProximal < distanceToDistal ? middleMark.segment.proximal : middleMark.segment.distal
             let closestPoint = Common.closestPointOnSegmentToPoint(segment: mark.segment, point:  closestEnd)
-            // TODO: this isn't right.
             if distanceToProximal < distanceToDistal {
                 middleMark.segment.proximal = closestPoint
             }
@@ -1078,10 +1098,13 @@ final class LadderView: ScaledView {
 
     private func getMarkColor(mark: Mark) -> CGColor {
         if mark.highlight == .all {
+            return attachedColor.cgColor
+        }
+        else if mark.highlight == .selected {
             return selectedColor.cgColor
         }
         else {
-            return unselectedColor.cgColor
+            return unattachedColor.cgColor
         }
     }
 
@@ -1252,6 +1275,10 @@ extension LadderView: LadderViewDelegate {
 
     func unhighlightAllMarks() {
         ladder.setHighlightForAllMarks(highlight: .none)
+    }
+
+    func unselectAllMarks() {
+        ladder.unselectAllMarks()
     }
 
     func addAttachedMark(imageScrollViewPositionX positionX: CGFloat) {

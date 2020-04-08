@@ -85,7 +85,11 @@ struct MarkGroup {
 
  A mark can be many things, which makes the concept difficult to pin down.  It can be conduction through a region, with or without decrement.  Conduction can originate  in a region, at the top, bottom, or somewhere in the middle, or may originate in another region.  A mark can block or conduct. It can reenter, spawning another mark.
 */
-extension Mark: Hashable {
+extension Mark: Hashable, CustomDebugStringConvertible {
+    var debugDescription: String {
+        return "Mark ID " + id.debugDescription
+    }
+
     static func == (lhs: Mark, rhs: Mark) -> Bool {
         return lhs.id == rhs.id
     }
@@ -147,8 +151,8 @@ class Mark {
     }
 
 
-    // TODO: Need to support multiple selection and copy features from one mark to a group of selected marks.
-    var attached: Bool = false
+    var attached: Bool = false // cursor attached and shown
+    var selected: Bool = false // mark is selected for some action
     var highlight: Highlight = .none
     // Set when one end or another of a mark is close enough to connect, or when there is a chain of marks.
     var potentiallyConnected = false

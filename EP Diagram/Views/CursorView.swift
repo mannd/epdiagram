@@ -39,7 +39,7 @@ final class CursorView: ScaledView {
     var leftMargin: CGFloat = 0
     var maxCursorPositionY: CGFloat = 0 {
         didSet {
-            cursor.maxPositionY = maxCursorPositionY
+            cursor.maxPositionOmniCircleY = maxCursorPositionY
         }
     }
     var calibrating = false
@@ -98,7 +98,7 @@ final class CursorView: ScaledView {
             let position = scale * cursor.positionX - offsetX // inlined, for efficiency
             let cursorDefaultHeight = ladderViewDelegate.getTopOfLadder(view: self)
             let defaultHeight = cursorDefaultHeight
-            let height = (position <= leftMargin) ? defaultHeight : cursor.endPointPositionY
+            let height = (position <= leftMargin) ? defaultHeight : cursor.markIntersectionPositionY
             let endPoint = CGPoint(x: position, y: height)
 
             context.setStrokeColor(color.cgColor)
@@ -111,7 +111,7 @@ final class CursorView: ScaledView {
                 drawCircle(context: context, center: endPoint, radius: 5)
             }
             if cursor.direction == .omnidirectional {
-                drawCircle(context: context, center: CGPoint(x: position, y: cursor.positionY), radius: 20)
+                drawCircle(context: context, center: CGPoint(x: position, y: cursor.positionOmniCircleY), radius: 20)
             }
         }
     }
@@ -119,11 +119,11 @@ final class CursorView: ScaledView {
     func setCursorHeight(anchorPositionY: CGFloat? = nil) {
         if let anchorPositionY = anchorPositionY {
             let positionY = ladderViewDelegate.getPositionYInView(positionY: anchorPositionY, view: self)
-            cursor.endPointPositionY = positionY
+            cursor.markIntersectionPositionY = positionY
         }
         else {
             let cursorHeight = getCursorHeight(anchor: getAttachedMarkAnchor())
-            cursor.endPointPositionY = cursorHeight ?? 0
+            cursor.markIntersectionPositionY = cursorHeight ?? 0
         }
     }
 
@@ -228,8 +228,8 @@ final class CursorView: ScaledView {
             }
             let pressPositionY = press.location(in: self).y
             P("ppy \(pressPositionY),  mcpy \(maxCursorPositionY)")
-            cursor.positionY = pressPositionY > maxCursorPositionY ? maxCursorPositionY : pressPositionY
-            P("cursor.positionY \(cursor.positionY)")
+            cursor.positionOmniCircleY = pressPositionY > maxCursorPositionY ? maxCursorPositionY : pressPositionY
+            P("cursor.positionY \(cursor.positionOmniCircleY)")
             setNeedsDisplay()
         }
     }
@@ -240,7 +240,7 @@ final class CursorView: ScaledView {
 
     func putCursor(imageScrollViewPosition position: CGPoint) {
         cursor.positionX = position.x / scale
-        cursor.positionY = position.y > maxCursorPositionY ? maxCursorPositionY : position.y
+        cursor.positionOmniCircleY = position.y > maxCursorPositionY ? maxCursorPositionY : position.y
     }
 
     func attachMark(imageScrollViewPositionX positionX: CGFloat) {

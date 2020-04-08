@@ -45,6 +45,7 @@ class Ladder {
     var attachedMark: Mark?
     var pressedMark: Mark?
     var movingMark: Mark?
+    var selectedMarks: [Mark] = []
 
     // By default, a new mark is vertical and spans the region.
     func addMarkAt(_ positionX: CGFloat) -> Mark? {
@@ -75,7 +76,7 @@ class Ladder {
 
     func deleteMarkInLadder(mark: Mark) {
         for region in regions {
-            if let index = region.marks.firstIndex(where: {$0 === mark}) {
+            if let index = region.marks.firstIndex(where: {$0 == mark}) {
                 region.marks.remove(at: index)
             }
         }
@@ -83,7 +84,7 @@ class Ladder {
 
     func deleteMark(mark: Mark, region: Region?) {
         guard let region = region else { return }
-        if let index = region.marks.firstIndex(where: {$0 === mark}) {
+        if let index = region.marks.firstIndex(where: {$0 == mark}) {
             region.marks.remove(at: index)
         }
     }
@@ -176,6 +177,15 @@ class Ladder {
                 mark.attached = false
             }
         }
+    }
+
+    func unselectAllMarks() {
+        for region in regions {
+            for mark in region.marks {
+                mark.selected = false
+            }
+        }
+        selectedMarks = []
     }
 
     // Returns a basic ladder (A, AV, V).

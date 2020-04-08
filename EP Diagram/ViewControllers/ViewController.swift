@@ -17,6 +17,8 @@
         var separatorView: SeparatorView?
         var undoButton: UIBarButtonItem = UIBarButtonItem()
         var redoButton: UIBarButtonItem = UIBarButtonItem()
+        var mainMenuButtons: [UIBarButtonItem]?
+        var selectMenuButtons: [UIBarButtonItem]?
         
         // This margin is used for all the views.  As ECGs are always read from left
         // to right, there is no reason to reverse this.
@@ -79,17 +81,7 @@
             assertDelegatesNonNil()
             // Need to set this here, after view draw, or Mac malpositions cursor at start of app.
             imageScrollView.contentInset = UIEdgeInsets(top: 0, left: leftMargin, bottom: 0, right: 0)
-            let toolbar = navigationController?.toolbar
-            let calibrateTitle = L("Calibrate", comment: "calibrate button label title")
-            let selectTitle = L("Select", comment: "select button label title")
-            let undoTitle = L("Undo")
-            let redoTitle = L("Redo")
-            let calibrateButton = UIBarButtonItem(title: calibrateTitle, style: UIBarButtonItem.Style.plain, target: self, action: #selector(calibrate))
-            let selectButton = UIBarButtonItem(title: selectTitle, style: UIBarButtonItem.Style.plain, target: self, action: #selector(selectMarks))
-            undoButton = UIBarButtonItem(title: undoTitle, style: UIBarButtonItem.Style.plain, target: self, action: #selector(undo))
-            redoButton = UIBarButtonItem(title: redoTitle, style: UIBarButtonItem.Style.plain, target: self, action: #selector(redo))
-            toolbar?.items = [calibrateButton, selectButton, undoButton, redoButton]
-            navigationController?.setToolbarHidden(false, animated: false)
+            showMainMenu()
             NotificationCenter.default.addObserver(self, selector: #selector(onDidUndoableAction(_:)), name: .didUndoableAction, object: nil)
             manageButtons()
             resetViews()
@@ -103,6 +95,40 @@
         // Crash program at compile time if IUO delegates are nil.
         private func assertDelegatesNonNil() {
             assert(cursorView.ladderViewDelegate != nil && ladderView.cursorViewDelegate != nil)
+        }
+
+        private func showMainMenu() {
+            if mainMenuButtons == nil {
+                let calibrateTitle = L("Calibrate", comment: "calibrate button label title")
+                let selectTitle = L("Select", comment: "select button label title")
+                let undoTitle = L("Undo")
+                let redoTitle = L("Redo")
+                let calibrateButton = UIBarButtonItem(title: calibrateTitle, style: UIBarButtonItem.Style.plain, target: self, action: #selector(calibrate))
+                let selectButton = UIBarButtonItem(title: selectTitle, style: UIBarButtonItem.Style.plain, target: self, action: #selector(selectMarks))
+                undoButton = UIBarButtonItem(title: undoTitle, style: UIBarButtonItem.Style.plain, target: self, action: #selector(undo))
+                redoButton = UIBarButtonItem(title: redoTitle, style: UIBarButtonItem.Style.plain, target: self, action: #selector(redo))
+                mainMenuButtons = [calibrateButton, selectButton, undoButton, redoButton]
+            }
+            let toolbar = navigationController?.toolbar
+            toolbar?.items = mainMenuButtons
+            navigationController?.setToolbarHidden(false, animated: false)
+        }
+
+        private func showSelectMenu() {
+            if selectMenuButtons == nil {
+                let textLabelText = "Tap marks to select"
+                let textLabel = UILabel()
+                textLabel.text = textLabelText
+                let textLabelButton = UIBarButtonItem(customView: textLabel)
+                let copyTitle = L("Copy", comment: "copy mark button label title")
+                let copyButton = UIBarButtonItem(title: copyTitle, style: UIBarButtonItem.Style.plain, target: self, action: #selector(copyMarks))
+                let cancelTitle = L("Cancel")
+                let cancelButton = UIBarButtonItem(title: cancelTitle, style: UIBarButtonItem.Style.plain, target: self, action: #selector(cancelSelect))
+                selectMenuButtons = [textLabelButton, copyButton, cancelButton]
+            }
+            let toolbar = navigationController?.toolbar
+            toolbar?.items = selectMenuButtons
+            navigationController?.setToolbarHidden(false, animated: false)
         }
 
 
@@ -124,6 +150,21 @@
 
         @objc func selectMarks() {
             P("select")
+            showSelectMenu()
+            ladderView.selectMarkMode = true
+        }
+
+        @objc func copyMarks() {
+            P("copy")
+        }
+
+        @objc func cancelSelect() {
+            P("cancel select")
+            showMainMenu()
+            ladderView.selectMarkMode = false
+            ladderView.unhighlightAllMarks()
+            ladderView.unselectAllMarks()
+            ladderView.setNeedsDisplay()
         }
 
         @objc func undo() {

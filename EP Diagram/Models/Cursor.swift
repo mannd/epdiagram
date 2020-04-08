@@ -13,13 +13,6 @@ import UIKit
 // of a known interval (1000 msec ideally).  Note that calibration is not
 // necessary to draw ladder diagrams.
 class Cursor: NSObject {
-    // TODO: CursorState probably will not be used.  Set to null for now.
-    enum CursorState: String, Codable {
-        case attached
-        case unattached
-        case null
-    }
-
     // Vertical cursor is vertical and changes x, horizontal changes y position.
     enum Direction: String, Codable {
         case horizontal
@@ -35,18 +28,10 @@ class Cursor: NSObject {
         }
     }
 
-    /// Attachment point for the cursor on a mark.  If there is not attached mark, then this is ignored.
-    enum Anchor: String, Codable {
-        case proximal
-        case middle
-        case distal
-        case none
-    }
-
-    var positionX: CGFloat
-    var positionY: CGFloat // point along omnidirectional cursor where circle is shown
-    var maxPositionY: CGFloat
-    var endPointPositionY: CGFloat
+    var positionX: CGFloat // the horizontal position of the cursor using cursor view coordinates
+    var positionOmniCircleY: CGFloat // point along omnidirectional cursor where circle is shown
+    var maxPositionOmniCircleY: CGFloat // lowest point on screen where circle can be draw
+    var markIntersectionPositionY: CGFloat // the end point and thus intersection point with the attached mark
 
     var anchor = Anchor.middle
     var visible = false
@@ -57,9 +42,9 @@ class Cursor: NSObject {
     
     init(positionX: CGFloat) {
         self.positionX = positionX
-        self.positionY = 100 // this is a reasonable default value
-        self.maxPositionY = 0
-        self.endPointPositionY = 0
+        self.positionOmniCircleY = 100 // this is a reasonable default value
+        self.maxPositionOmniCircleY = 0 // this will be calculated by cursor view
+        self.markIntersectionPositionY = 0
     }
 
 
@@ -73,8 +58,8 @@ class Cursor: NSObject {
 
     func move(delta: CGPoint) {
         positionX += delta.x
-        if positionY < maxPositionY {
-            positionY += delta.y
+        if positionOmniCircleY < maxPositionOmniCircleY {
+            positionOmniCircleY += delta.y
         }
     }
 }
