@@ -21,6 +21,7 @@ let margin: CGFloat = (totalSize - visibleSize) / 2
 let minSize: CGFloat = 100
 let indicatorSize: CGFloat = 36  // indicator in middle of separator
 
+
 protocol OnConstraintUpdateProtocol {
     func updateConstraintOnBasisOfTouch(touch: UITouch)
 }

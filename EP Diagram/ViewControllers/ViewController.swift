@@ -9,20 +9,25 @@
     import UIKit
 
     final class ViewController: UIViewController {
+        @IBOutlet var constraintHamburgerWidth: NSLayoutConstraint!
+        @IBOutlet var constraintHamburgerLeft: NSLayoutConstraint!
         @IBOutlet var imageScrollView: UIScrollView!
         @IBOutlet var imageView: UIImageView!
         @IBOutlet var ladderView: LadderView!
         @IBOutlet var cursorView: CursorView!
+        @IBOutlet var blackView: BlackView!
 
-        var separatorView: SeparatorView?
-        var undoButton: UIBarButtonItem = UIBarButtonItem()
-        var redoButton: UIBarButtonItem = UIBarButtonItem()
-        var mainMenuButtons: [UIBarButtonItem]?
-        var selectMenuButtons: [UIBarButtonItem]?
+        private var separatorView: SeparatorView?
+        private var undoButton: UIBarButtonItem = UIBarButtonItem()
+        private var redoButton: UIBarButtonItem = UIBarButtonItem()
+        private var mainMenuButtons: [UIBarButtonItem]?
+        private var selectMenuButtons: [UIBarButtonItem]?
+        internal var hamburgerMenuIsOpen = false
         
         // This margin is used for all the views.  As ECGs are always read from left
         // to right, there is no reason to reverse this.
         let leftMargin: CGFloat = 30
+        let maxBlackAlpha: CGFloat = 0.4
 
         override func viewDidLoad() {
             P("viewDidLoad")
@@ -50,13 +55,16 @@
                 ladderView.backgroundColor = UIColor.white
             }
 
+            blackView.delegate = self
+            blackView.alpha = 0.0
+//            blackView.isUserInteractionEnabled = true
+            constraintHamburgerLeft.constant = -self.constraintHamburgerWidth.constant;
+
             // Ensure there is a space for labels at the left margin.
             ladderView.leftMargin = leftMargin
             cursorView.leftMargin = leftMargin
 
             setMaxCursorPositionY()
-
-            separatorView = HorizontalSeparatorView.addSeparatorBetweenViews(separatorType: .horizontal, primaryView: imageScrollView, secondaryView: ladderView, parentView: self.view)
 
             let singleTapRecognizer = UITapGestureRecognizer(target: self, action: #selector(self.singleTap))
             singleTapRecognizer.numberOfTapsRequired = 1
@@ -67,7 +75,7 @@
                 ladderView.addInteraction(interaction)
             }
 
-            navigationItem.setLeftBarButton(UIBarButtonItem(image: UIImage(named: "hamburger"), style: .plain, target: self, action: nil), animated: true)
+            navigationItem.setLeftBarButton(UIBarButtonItem(image: UIImage(named: "hamburger"), style: .plain, target: self, action: #selector(toggleHamburgerMenu)), animated: true)
         }
 
         @objc func onDidUndoableAction(_ notification: Notification) {
@@ -97,6 +105,13 @@
             assert(cursorView.ladderViewDelegate != nil && ladderView.cursorViewDelegate != nil)
         }
 
+        func showMessage(title: String, message: String) {
+            let alert = UIAlertController(title: title, message: message, preferredStyle: .alert)
+            let okAction = UIAlertAction(title: L("OK"), style: .cancel, handler: nil)
+            alert.addAction(okAction)
+            self.present(alert, animated: true)
+        }
+
         private func showMainMenu() {
             if mainMenuButtons == nil {
                 let calibrateTitle = L("Calibrate", comment: "calibrate button label title")
@@ -109,8 +124,8 @@
                 redoButton = UIBarButtonItem(title: redoTitle, style: UIBarButtonItem.Style.plain, target: self, action: #selector(redo))
                 mainMenuButtons = [calibrateButton, selectButton, undoButton, redoButton]
             }
-            let toolbar = navigationController?.toolbar
-            toolbar?.items = mainMenuButtons
+            // Note: set toolbar items this way, not directly (i.e. toolbar.items = something).
+            setToolbarItems(mainMenuButtons, animated: false)
             navigationController?.setToolbarHidden(false, animated: false)
         }
 
@@ -126,9 +141,44 @@
                 let cancelButton = UIBarButtonItem(title: cancelTitle, style: UIBarButtonItem.Style.plain, target: self, action: #selector(cancelSelect))
                 selectMenuButtons = [textLabelButton, copyButton, cancelButton]
             }
-            let toolbar = navigationController?.toolbar
-            toolbar?.items = selectMenuButtons
+            setToolbarItems(selectMenuButtons, animated: false)
             navigationController?.setToolbarHidden(false, animated: false)
+        }
+
+        @objc func toggleHamburgerMenu() {
+            if hamburgerMenuIsOpen {
+                hideHamburgerMenu()
+            }
+            else {
+                showHamburgerMenu()
+            }
+        }
+
+        func showHamburgerMenu() {
+            constraintHamburgerLeft.constant = 0
+            hamburgerMenuIsOpen = true
+            navigationController?.setToolbarHidden(true, animated: true)
+            separatorView?.isUserInteractionEnabled = false
+            self.cursorView.isUserInteractionEnabled = false
+            self.separatorView?.isHidden = true
+            UIView.animate(withDuration: 0.5, animations: {
+                self.view.layoutIfNeeded()
+                self.blackView.alpha = self.maxBlackAlpha
+            })
+        }
+
+        func hideHamburgerMenu() {
+            self.constraintHamburgerLeft.constant = -self.constraintHamburgerWidth.constant;
+            hamburgerMenuIsOpen = false
+            navigationController?.setToolbarHidden(false, animated: true)
+            separatorView?.isUserInteractionEnabled = true
+//            separatorView?.isHidden = false
+            self.cursorView.isUserInteractionEnabled = true
+            UIView.animate(withDuration: 0.5, animations: {
+                self.view.layoutIfNeeded()
+                self.blackView.alpha = 0
+            }, completion: { (finished:Bool) in
+                self.separatorView?.isHidden = false })
         }
 
 
@@ -273,7 +323,7 @@
             setViewsNeedDisplay()
         }
 
-        private func setViewsNeedDisplay() {
+        func setViewsNeedDisplay() {
             cursorView.setNeedsDisplay()
             ladderView.setNeedsDisplay()
         }
@@ -292,63 +342,9 @@
         }
     }
 
-    // MARK: - Scrolling and zooming
-    extension ViewController: UIScrollViewDelegate {
-
-
-        func viewForZooming(in scrollView: UIScrollView) -> UIView? {
-            if scrollView == imageScrollView {
-                return imageView
-            }
-            else {
-                return nil
-            }
-        }
-
-        func scrollViewDidScroll(_ scrollView: UIScrollView) {
-            if scrollView == imageScrollView {
-                P("scrollViewDidScroll")
-                scrollViewAdjustViews(scrollView)
-            }
-        }
-
-        func scrollViewDidEndDecelerating(_ scrollView: UIScrollView) {
-            if scrollView == imageScrollView {
-                scrollFinished()
-            }
-        }
-
-        func scrollViewDidEndDragging(_ scrollView: UIScrollView, willDecelerate decelerate: Bool) {
-            if scrollView == imageScrollView && !decelerate {
-                scrollFinished()
-            }
-        }
-
-        fileprivate func scrollFinished() {
-            P("scroll finished")
-        }
-
-        func scrollViewWillBeginZooming(_ scrollView: UIScrollView, with view: UIView?) {
-        }
-
-        func scrollViewDidEndZooming(_ scrollView: UIScrollView, with view: UIView?, atScale scale: CGFloat) {
-            P("scrollViewDidEndZooming")
-            scrollViewAdjustViews(scrollView)
-        }
-
-        func scrollViewDidZoom(_ scrollView: UIScrollView) {
-            P("scrollViewDidZoom")
-        }
-
-        private func scrollViewAdjustViews(_ scrollView: UIScrollView) {
-            ladderView.offsetX = scrollView.contentOffset.x
-            cursorView.offsetX = scrollView.contentOffset.x
-            cursorView.scale = scrollView.zoomScale
-            ladderView.scale = scrollView.zoomScale
-            setViewsNeedDisplay()
-        }
-    }
 
     extension Notification.Name {
         static let didUndoableAction = Notification.Name("didUndoableAction")
     }
+
+

@@ -9,9 +9,17 @@
 /* Begin PBXBuildFile section */
 		8E01D9C722849047000F36FC /* CursorView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8E01D9C622849047000F36FC /* CursorView.swift */; };
 		8E1B6CB8240CAE5300EA88A6 /* ScaledView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8E1B6CB7240CAE5300EA88A6 /* ScaledView.swift */; };
+		8E253DD1244A86CB008CC56B /* ViewController+HamburgerTableDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8E253DD0244A86CB008CC56B /* ViewController+HamburgerTableDelegate.swift */; };
+		8E253DD3244A8799008CC56B /* ViewController+UIScrollViewDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8E253DD2244A8799008CC56B /* ViewController+UIScrollViewDelegate.swift */; };
+		8E253DD5244A8B17008CC56B /* Version.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8E253DD4244A8B17008CC56B /* Version.swift */; };
 		8E25A9AF22E54F7200D62E18 /* CursorTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8E25A9AE22E54F7200D62E18 /* CursorTests.swift */; };
 		8E25A9B122E5505200D62E18 /* LadderViewTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8E25A9B022E5505200D62E18 /* LadderViewTests.swift */; };
 		8E25A9B322E5515D00D62E18 /* LadderTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8E25A9B222E5515D00D62E18 /* LadderTests.swift */; };
+		8E4ACA8024478A6E00575538 /* BlackView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8E4ACA7F24478A6E00575538 /* BlackView.swift */; };
+		8E4ACA8224478D7C00575538 /* HamburgerTableViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8E4ACA8124478D7C00575538 /* HamburgerTableViewController.swift */; };
+		8E4ACA842447905E00575538 /* HamburgerCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8E4ACA832447905E00575538 /* HamburgerCell.swift */; };
+		8E4ACA862447935600575538 /* HamburgerLayer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8E4ACA852447935600575538 /* HamburgerLayer.swift */; };
+		8E4ACA8924479C5200575538 /* HamburgerViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8E4ACA8824479C5200575538 /* HamburgerViewModel.swift */; };
 		8E55612922A5FEDC00C4D391 /* Cursor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8E55612822A5FEDC00C4D391 /* Cursor.swift */; };
 		8E7214DE22E95C860062C094 /* Common.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8E7214DD22E95C860062C094 /* Common.swift */; };
 		8E7214E022EB57FC0062C094 /* MarkTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8E7214DF22EB57FC0062C094 /* MarkTests.swift */; };
@@ -52,9 +60,17 @@
 /* Begin PBXFileReference section */
 		8E01D9C622849047000F36FC /* CursorView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CursorView.swift; sourceTree = "<group>"; };
 		8E1B6CB7240CAE5300EA88A6 /* ScaledView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScaledView.swift; sourceTree = "<group>"; };
+		8E253DD0244A86CB008CC56B /* ViewController+HamburgerTableDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "ViewController+HamburgerTableDelegate.swift"; sourceTree = "<group>"; };
+		8E253DD2244A8799008CC56B /* ViewController+UIScrollViewDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "ViewController+UIScrollViewDelegate.swift"; sourceTree = "<group>"; };
+		8E253DD4244A8B17008CC56B /* Version.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Version.swift; sourceTree = "<group>"; };
 		8E25A9AE22E54F7200D62E18 /* CursorTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CursorTests.swift; sourceTree = "<group>"; };
 		8E25A9B022E5505200D62E18 /* LadderViewTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LadderViewTests.swift; sourceTree = "<group>"; };
 		8E25A9B222E5515D00D62E18 /* LadderTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LadderTests.swift; sourceTree = "<group>"; };
+		8E4ACA7F24478A6E00575538 /* BlackView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BlackView.swift; sourceTree = "<group>"; };
+		8E4ACA8124478D7C00575538 /* HamburgerTableViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HamburgerTableViewController.swift; sourceTree = "<group>"; };
+		8E4ACA832447905E00575538 /* HamburgerCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HamburgerCell.swift; sourceTree = "<group>"; };
+		8E4ACA852447935600575538 /* HamburgerLayer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HamburgerLayer.swift; sourceTree = "<group>"; };
+		8E4ACA8824479C5200575538 /* HamburgerViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HamburgerViewModel.swift; sourceTree = "<group>"; };
 		8E55612822A5FEDC00C4D391 /* Cursor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Cursor.swift; sourceTree = "<group>"; };
 		8E689C4F23B498A10042A3F1 /* EP Diagram.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = "EP Diagram.entitlements"; sourceTree = "<group>"; };
 		8E7214DD22E95C860062C094 /* Common.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Common.swift; sourceTree = "<group>"; };
@@ -107,10 +123,19 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		8E4ACA8724479C2500575538 /* ViewModels */ = {
+			isa = PBXGroup;
+			children = (
+				8E4ACA8824479C5200575538 /* HamburgerViewModel.swift */,
+			);
+			path = ViewModels;
+			sourceTree = "<group>";
+		};
 		8E7214DC22E95C630062C094 /* Common */ = {
 			isa = PBXGroup;
 			children = (
 				8E7214DD22E95C860062C094 /* Common.swift */,
+				8E253DD4244A8B17008CC56B /* Version.swift */,
 			);
 			path = Common;
 			sourceTree = "<group>";
@@ -141,6 +166,7 @@
 				8E689C4F23B498A10042A3F1 /* EP Diagram.entitlements */,
 				8E7214DC22E95C630062C094 /* Common */,
 				8E9B804C22834960008873BB /* ViewControllers */,
+				8E4ACA8724479C2500575538 /* ViewModels */,
 				8E9B804B22834944008873BB /* Views */,
 				8E9B8049228348F7008873BB /* Storyboards */,
 				8E9B803F22834431008873BB /* Models */,
@@ -182,6 +208,7 @@
 				8E9B804622834870008873BB /* Ladder.swift */,
 				8E55612822A5FEDC00C4D391 /* Cursor.swift */,
 				8ED3B1B52360DA0D00549381 /* Anchor.swift */,
+				8E4ACA852447935600575538 /* HamburgerLayer.swift */,
 			);
 			path = Models;
 			sourceTree = "<group>";
@@ -203,6 +230,8 @@
 				8E7D24F02277A00C005A1729 /* ImageView.swift */,
 				8E8248DC23B53B55001A85F9 /* SeparatorView.swift */,
 				8E1B6CB7240CAE5300EA88A6 /* ScaledView.swift */,
+				8E4ACA7F24478A6E00575538 /* BlackView.swift */,
+				8E4ACA832447905E00575538 /* HamburgerCell.swift */,
 			);
 			path = Views;
 			sourceTree = "<group>";
@@ -211,6 +240,9 @@
 			isa = PBXGroup;
 			children = (
 				8E7D24C422779DBD005A1729 /* ViewController.swift */,
+				8E253DD2244A8799008CC56B /* ViewController+UIScrollViewDelegate.swift */,
+				8E253DD0244A86CB008CC56B /* ViewController+HamburgerTableDelegate.swift */,
+				8E4ACA8124478D7C00575538 /* HamburgerTableViewController.swift */,
 			);
 			path = ViewControllers;
 			sourceTree = "<group>";
@@ -346,15 +378,23 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				8E4ACA8924479C5200575538 /* HamburgerViewModel.swift in Sources */,
+				8E253DD3244A8799008CC56B /* ViewController+UIScrollViewDelegate.swift in Sources */,
 				8E7D24F12277A00C005A1729 /* ImageView.swift in Sources */,
 				8E7D24C522779DBD005A1729 /* ViewController.swift in Sources */,
+				8E253DD5244A8B17008CC56B /* Version.swift in Sources */,
 				8E1B6CB8240CAE5300EA88A6 /* ScaledView.swift in Sources */,
 				8E8248DD23B53B55001A85F9 /* SeparatorView.swift in Sources */,
 				8E7214DE22E95C860062C094 /* Common.swift in Sources */,
 				8E9B8043228345B5008873BB /* Mark.swift in Sources */,
+				8E4ACA8224478D7C00575538 /* HamburgerTableViewController.swift in Sources */,
 				8E9B804722834870008873BB /* Ladder.swift in Sources */,
 				8E55612922A5FEDC00C4D391 /* Cursor.swift in Sources */,
+				8E253DD1244A86CB008CC56B /* ViewController+HamburgerTableDelegate.swift in Sources */,
+				8E4ACA8024478A6E00575538 /* BlackView.swift in Sources */,
 				8ED3B1B62360DA0D00549381 /* Anchor.swift in Sources */,
+				8E4ACA842447905E00575538 /* HamburgerCell.swift in Sources */,
+				8E4ACA862447935600575538 /* HamburgerLayer.swift in Sources */,
 				8EF9166B227926BC00B51F17 /* LadderView.swift in Sources */,
 				8E01D9C722849047000F36FC /* CursorView.swift in Sources */,
 				8E9B8045228347DE008873BB /* Region.swift in Sources */,
