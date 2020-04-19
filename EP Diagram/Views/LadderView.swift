@@ -47,6 +47,7 @@ final class LadderView: ScaledView {
     var unattachedColor = UIColor.black
     var attachedColor = UIColor.magenta
     var selectedColor = UIColor.red
+    var linkColor = UIColor.green
     var markLineWidth: CGFloat = 2
     var connectedLineWidth: CGFloat = 4
     var showImpulseOrigin = true
@@ -95,6 +96,7 @@ final class LadderView: ScaledView {
     private var dragOriginDivision: RegionDivision = .none
 
     var selectMarkMode: Bool = false
+    var linkMarkMode: Bool = false
 
     var leftMargin: CGFloat = 0
     internal var ladderViewHeight: CGFloat = 0
@@ -179,7 +181,7 @@ final class LadderView: ScaledView {
             if let mark = tapLocationInLadder.mark {
                 // toggle mark selection
                 mark.selected = !mark.selected
-                mark.highlight = mark.selected ? .selected : .none
+                mark.highlight = mark.selected ? .select : .none
                 if mark.selected {
                     ladder.selectedMarks.append(mark)
                 }
@@ -195,6 +197,14 @@ final class LadderView: ScaledView {
                     }
                 }
                 P("selected marks = \(ladder.selectedMarks)")
+                setNeedsDisplay()
+            }
+            return
+        }
+        if linkMarkMode {
+            P("link mark mode")
+            if let mark = tapLocationInLadder.mark {
+                mark.highlight = .link
                 setNeedsDisplay()
             }
             return
@@ -1100,8 +1110,11 @@ final class LadderView: ScaledView {
         if mark.highlight == .all {
             return attachedColor.cgColor
         }
-        else if mark.highlight == .selected {
+        else if mark.highlight == .select {
             return selectedColor.cgColor
+        }
+        else if mark.highlight == .link {
+            return linkColor.cgColor
         }
         else {
             return unattachedColor.cgColor

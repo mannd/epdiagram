@@ -60,7 +60,7 @@ enum Movement {
 typealias MarkSet = Set<Mark>
 
 // A mark may have up to three attachments to marks in the proximal and distal regions
-// and in its own region, i.e. rentry spawning a mark.
+// and in its own region, i.e. reentry spawning a mark.
 struct MarkGroup {
     var proximal: MarkSet = []
     var middle: MarkSet = []
@@ -110,12 +110,10 @@ class Mark {
     /** Highlight is used in association with cursors, selecting marks, and showing connections
      origin - high
      */
-    // TODO: This might not work because we need prox/distal highlights and selection at the same time.
     enum Highlight {
-        case proximal
-        case distal
         case all
-        case selected
+        case select
+        case link
         case none
     }
 

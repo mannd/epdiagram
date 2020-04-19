@@ -9,25 +9,26 @@
     import UIKit
 
     final class ViewController: UIViewController {
-        @IBOutlet var constraintHamburgerWidth: NSLayoutConstraint!
-        @IBOutlet var constraintHamburgerLeft: NSLayoutConstraint!
+        @IBOutlet var _constraintHamburgerWidth: NSLayoutConstraint!
+        @IBOutlet var _constraintHamburgerLeft: NSLayoutConstraint!
         @IBOutlet var imageScrollView: UIScrollView!
         @IBOutlet var imageView: UIImageView!
         @IBOutlet var ladderView: LadderView!
         @IBOutlet var cursorView: CursorView!
         @IBOutlet var blackView: BlackView!
 
-        private var separatorView: SeparatorView?
+        var separatorView: SeparatorView?
         private var undoButton: UIBarButtonItem = UIBarButtonItem()
         private var redoButton: UIBarButtonItem = UIBarButtonItem()
         private var mainMenuButtons: [UIBarButtonItem]?
         private var selectMenuButtons: [UIBarButtonItem]?
+        private var linkMenuButtons: [UIBarButtonItem]?
         internal var hamburgerMenuIsOpen = false
         
         // This margin is used for all the views.  As ECGs are always read from left
         // to right, there is no reason to reverse this.
         let leftMargin: CGFloat = 30
-        let maxBlackAlpha: CGFloat = 0.4
+        let _maxBlackAlpha: CGFloat = 0.4
 
         override func viewDidLoad() {
             P("viewDidLoad")
@@ -58,7 +59,7 @@
             blackView.delegate = self
             blackView.alpha = 0.0
 //            blackView.isUserInteractionEnabled = true
-            constraintHamburgerLeft.constant = -self.constraintHamburgerWidth.constant;
+            constraintHamburgerLeft.constant = -self._constraintHamburgerWidth.constant;
 
             // Ensure there is a space for labels at the left margin.
             ladderView.leftMargin = leftMargin
@@ -116,13 +117,15 @@
             if mainMenuButtons == nil {
                 let calibrateTitle = L("Calibrate", comment: "calibrate button label title")
                 let selectTitle = L("Select", comment: "select button label title")
-                let undoTitle = L("Undo")
-                let redoTitle = L("Redo")
+                let linkTitle = L("Link", comment: "link button label title")
+                let undoTitle = L("Undo", comment: "undo button label title")
+                let redoTitle = L("Redo", comment: "redo button label title")
                 let calibrateButton = UIBarButtonItem(title: calibrateTitle, style: UIBarButtonItem.Style.plain, target: self, action: #selector(calibrate))
-                let selectButton = UIBarButtonItem(title: selectTitle, style: UIBarButtonItem.Style.plain, target: self, action: #selector(selectMarks))
-                undoButton = UIBarButtonItem(title: undoTitle, style: UIBarButtonItem.Style.plain, target: self, action: #selector(undo))
-                redoButton = UIBarButtonItem(title: redoTitle, style: UIBarButtonItem.Style.plain, target: self, action: #selector(redo))
-                mainMenuButtons = [calibrateButton, selectButton, undoButton, redoButton]
+                let selectButton = UIBarButtonItem(title: selectTitle, style: .plain, target: self, action: #selector(selectMarks))
+                let linkButton = UIBarButtonItem(title: linkTitle, style: .plain, target: self, action: #selector(linkMarks))
+                undoButton = UIBarButtonItem(title: undoTitle, style: .plain, target: self, action: #selector(undo))
+                redoButton = UIBarButtonItem(title: redoTitle, style: .plain, target: self, action: #selector(redo))
+                mainMenuButtons = [calibrateButton, selectButton, linkButton, undoButton, redoButton]
             }
             // Note: set toolbar items this way, not directly (i.e. toolbar.items = something).
             setToolbarItems(mainMenuButtons, animated: false)
@@ -131,7 +134,7 @@
 
         private func showSelectMenu() {
             if selectMenuButtons == nil {
-                let textLabelText = "Tap marks to select"
+                let textLabelText = L("Tap marks to select")
                 let textLabel = UILabel()
                 textLabel.text = textLabelText
                 let textLabelButton = UIBarButtonItem(customView: textLabel)
@@ -145,42 +148,19 @@
             navigationController?.setToolbarHidden(false, animated: false)
         }
 
-        @objc func toggleHamburgerMenu() {
-            if hamburgerMenuIsOpen {
-                hideHamburgerMenu()
+        private func showLinkMenu() {
+            if linkMenuButtons == nil {
+                let textLabelText = L("Tap pairs of marks to link them")
+                let textLabel = UILabel()
+                textLabel.text = textLabelText
+                let textLabelButton = UIBarButtonItem(customView: textLabel)
+                let cancelTitle = L("Cancel")
+                let cancelButton = UIBarButtonItem(title: cancelTitle, style: .plain, target: self, action: #selector(cancelLink))
+                linkMenuButtons = [textLabelButton, cancelButton]
             }
-            else {
-                showHamburgerMenu()
-            }
+            setToolbarItems(linkMenuButtons, animated: false)
+            navigationController?.setToolbarHidden(false, animated: false)
         }
-
-        func showHamburgerMenu() {
-            constraintHamburgerLeft.constant = 0
-            hamburgerMenuIsOpen = true
-            navigationController?.setToolbarHidden(true, animated: true)
-            separatorView?.isUserInteractionEnabled = false
-            self.cursorView.isUserInteractionEnabled = false
-            self.separatorView?.isHidden = true
-            UIView.animate(withDuration: 0.5, animations: {
-                self.view.layoutIfNeeded()
-                self.blackView.alpha = self.maxBlackAlpha
-            })
-        }
-
-        func hideHamburgerMenu() {
-            self.constraintHamburgerLeft.constant = -self.constraintHamburgerWidth.constant;
-            hamburgerMenuIsOpen = false
-            navigationController?.setToolbarHidden(false, animated: true)
-            separatorView?.isUserInteractionEnabled = true
-//            separatorView?.isHidden = false
-            self.cursorView.isUserInteractionEnabled = true
-            UIView.animate(withDuration: 0.5, animations: {
-                self.view.layoutIfNeeded()
-                self.blackView.alpha = 0
-            }, completion: { (finished:Bool) in
-                self.separatorView?.isHidden = false })
-        }
-
 
         @available(*, deprecated, message: "This doesn't seem to do anything.")
         private func centerImage() {
@@ -204,6 +184,13 @@
             ladderView.selectMarkMode = true
         }
 
+        @objc func linkMarks() {
+            P("link marks")
+            showLinkMenu()
+            ladderView.linkMarkMode = true
+            // Tap two marks and automatically generate a link between them.  Tap on and then the region in between and generate a blocked link.  Do this by setting link mode in the ladder view and have the ladder view handle the single taps.
+        }
+
         @objc func copyMarks() {
             P("copy")
         }
@@ -214,6 +201,14 @@
             ladderView.selectMarkMode = false
             ladderView.unhighlightAllMarks()
             ladderView.unselectAllMarks()
+            ladderView.setNeedsDisplay()
+        }
+
+        @objc func cancelLink() {
+            P("cancel link")
+            showMainMenu()
+            ladderView.linkMarkMode = false
+            ladderView.unhighlightAllMarks()
             ladderView.setNeedsDisplay()
         }
 

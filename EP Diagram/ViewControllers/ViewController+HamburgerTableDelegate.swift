@@ -7,9 +7,13 @@
 //
 
 import UIKit
+import os.log
 
-protocol HamburgerTableDelegate {
+protocol HamburgerTableDelegate: class {
     var hamburgerMenuIsOpen: Bool { get set }
+    var constraintHamburgerLeft: NSLayoutConstraint { get set }
+    var constraintHamburgerWidth: NSLayoutConstraint { get set }
+    var maxBlackAlpha: CGFloat { get }
     func takePhoto()
     func selectPhoto()
     func about()
@@ -21,6 +25,30 @@ protocol HamburgerTableDelegate {
 }
 
 extension ViewController: HamburgerTableDelegate, UIImagePickerControllerDelegate & UINavigationControllerDelegate {
+    var constraintHamburgerLeft: NSLayoutConstraint {
+        get {
+            return _constraintHamburgerLeft
+        }
+        set(newValue){
+            _constraintHamburgerLeft = newValue
+        }
+    }
+    var constraintHamburgerWidth: NSLayoutConstraint {
+        get {
+            return _constraintHamburgerWidth
+        }
+        set(newValue) {
+            _constraintHamburgerWidth = newValue
+        }
+    }
+    var maxBlackAlpha: CGFloat {
+        get {
+            return _maxBlackAlpha
+        }
+    }
+
+    private static var subsystem = Bundle.main.bundleIdentifier!
+    static let hamburgerCycle = OSLog(subsystem: subsystem, category: "hamburger")
 
     func takePhoto() {
         print("take photo")
@@ -48,12 +76,12 @@ extension ViewController: HamburgerTableDelegate, UIImagePickerControllerDelegat
         let versionBuild = Version.getAppVersion()
         let version = versionBuild.version ?? L("unknown")
         let build = versionBuild.build ?? L("unknown")
-        print("About EP Diagram: version = \(version) build = \(build)")
+        os_log("About EP Diagram: version = %s build = %s", type: .info, version, build)
         showMessage(title: L("About EP Diagram"), message: "Copyright 2020 EP Studios, Inc.\nVersion " + version)
     }
 
     func openDiagram() {
-        print("open diagram")
+        os_log("Open diagram", type: .info)
     }
 
     func saveDiagram() {
@@ -72,6 +100,43 @@ extension ViewController: HamburgerTableDelegate, UIImagePickerControllerDelegat
 
     func imagePickerControllerDidCancel(_ picker: UIImagePickerController) {
         picker.dismiss(animated: true, completion: nil)
+    }
+
+    
+    @objc func toggleHamburgerMenu() {
+        if hamburgerMenuIsOpen {
+            hideHamburgerMenu()
+        }
+        else {
+            showHamburgerMenu()
+        }
+    }
+
+    func showHamburgerMenu() {
+        constraintHamburgerLeft.constant = 0
+        hamburgerMenuIsOpen = true
+        navigationController?.setToolbarHidden(true, animated: true)
+        separatorView?.isUserInteractionEnabled = false
+        self.cursorView.isUserInteractionEnabled = false
+        self.separatorView?.isHidden = true
+        UIView.animate(withDuration: 0.5, animations: {
+            self.view.layoutIfNeeded()
+            self.blackView.alpha = self.maxBlackAlpha
+        })
+    }
+
+    func hideHamburgerMenu() {
+        self.constraintHamburgerLeft.constant = -self.constraintHamburgerWidth.constant;
+        hamburgerMenuIsOpen = false
+        navigationController?.setToolbarHidden(false, animated: true)
+        separatorView?.isUserInteractionEnabled = true
+        //            separatorView?.isHidden = false
+        self.cursorView.isUserInteractionEnabled = true
+        UIView.animate(withDuration: 0.5, animations: {
+            self.view.layoutIfNeeded()
+            self.blackView.alpha = 0
+        }, completion: { (finished:Bool) in
+            self.separatorView?.isHidden = false })
     }
 }
 
