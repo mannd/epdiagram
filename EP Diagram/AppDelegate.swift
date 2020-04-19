@@ -41,6 +41,31 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         // Called when the application is about to terminate. Save data if appropriate. See also applicationDidEnterBackground:.
     }
 
+    func application(_ app: UIApplication, open url: URL, options: [UIApplication.OpenURLOptionsKey : Any] = [:]) -> Bool {
+        let navigationController = self.window?.rootViewController as? UINavigationController
+        let viewController = navigationController?.viewControllers[0] as? ViewController
+        if url.isFileURL {
+            viewController?.launchFromURL = true
+            viewController?.launchURL = url
+            viewController?.openURL(url: url)
+        }
+        return true
+    }
 
-}
+
+//        UINavigationController *navigationController = (UINavigationController *)  self.window.rootViewController;
+//        EPSMainViewController *mainViewController = (EPSMainViewController *) [navigationController.viewControllers objectAtIndex:0];
+//
+//
+//        if (url != nil && [url isFileURL]) {
+//            // Note that openURL won't run the first time program loads, so we pass the relevant info
+//            // to mainViewController which calls openURL in viewDidLoad.
+//            mainViewController.launchFromURL = YES;
+//            mainViewController.launchURL = url;
+//            [mainViewController openURL:url];
+//        }
+//        return YES;
+
+    }
+
 

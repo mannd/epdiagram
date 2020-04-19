@@ -30,6 +30,12 @@
         let leftMargin: CGFloat = 30
         let _maxBlackAlpha: CGFloat = 0.4
 
+        // PDF and launch from URL stuff
+        var pdfRef: CGPDFDocument?
+        var launchFromURL: Bool = false
+        var launchURL: URL?
+        var pageNumber: Int = 1
+
         override func viewDidLoad() {
             P("viewDidLoad")
             super.viewDidLoad()
@@ -38,6 +44,13 @@
             cursorView.ladderViewDelegate = ladderView
             ladderView.cursorViewDelegate = cursorView
             imageScrollView.delegate = self
+
+            if launchFromURL {
+                launchFromURL = false
+                if let launchURL = launchURL {
+                    openURL(url: launchURL)
+                }
+            }
 
             title = L("EP Diagram", comment: "app name")
 
@@ -288,6 +301,77 @@
             setViewsNeedDisplay()
         }
 
+        // MARK: - Handle PDFs, URLs at app startup
+        func openURL(url: URL) {
+            P("open URL")
+            // self.resetImage
+            let ext = url.pathExtension.uppercased()
+            if ext != "PDF" {
+                // self.enablePageButtons = false
+                imageView.image = UIImage(contentsOfFile: url.path)
+            }
+            else {
+                // self.numberOfPages = 0
+                let urlPath = url.path as NSString
+                let tmpPDFRef: CGPDFDocument? = getPDFDocumentRef(urlPath.utf8String)
+                if tmpPDFRef == nil {
+                    return
+                }
+                // self.clearPDF
+                pdfRef = tmpPDFRef
+                // self.numberOfPages = (int)CGPDFDocumentGetNumberOfPages(pdfRef)
+                // always start with page number 1
+                 self.pageNumber = 1
+                // enablePageButtons = (numberOfPages > 1)
+                openPDFPage(pdfRef, atPage: pageNumber)
+            }
+//            [self.imageView setHidden:NO];
+//            [self.scrollView setZoomScale:1.0f];
+//            [self clearCalibration];
+//            [self selectMainToolbar];
+        }
+
+        private func getPDFDocumentRef(_ fileName: UnsafePointer<Int8>?) -> CGPDFDocument? {
+            let path: CFString?
+            let url: CFURL?
+            var document: CGPDFDocument? = nil
+
+            path = CFStringCreateWithCString(nil, fileName, CFStringBuiltInEncodings.UTF8.rawValue)
+            url = CFURLCreateWithFileSystemPath(nil, path, CFURLPathStyle.cfurlposixPathStyle, false)
+            //CFRelease not needed in Swift.
+            if let url = url {
+                document = CGPDFDocument(url)
+            }
+            return document
+        }
+
+        private func openPDFPage(_ documentRef: CGPDFDocument?, atPage pageNum: Int) {
+            guard let documentRef = documentRef else { return }
+            let page: CGPDFPage? = getPDFPage(documentRef, pageNumber: pageNum)
+            if let page = page {
+                let sourceRect: CGRect = page.getBoxRect(.mediaBox)
+                let scaleFactor: CGFloat = 5.0
+//                let sourceRectSize = CGSize(width: sourceRect.size.width, height: sourceRect.size.height)
+                let sourceRectSize = sourceRect.size
+                UIGraphicsBeginImageContextWithOptions(sourceRectSize, false, scaleFactor)
+                let currentContext = UIGraphicsGetCurrentContext()
+                // ensure transparent PDFs have white background in dark mode.
+                currentContext?.setFillColor(UIColor.white.cgColor)
+                currentContext?.fill(sourceRect)
+                currentContext?.translateBy(x: 0, y: sourceRectSize.height)
+                currentContext?.scaleBy(x: 1.0, y: -1.0)
+                currentContext?.drawPDFPage(page)
+                let image: UIImage? = UIGraphicsGetImageFromCurrentImageContext()
+                if image != nil {
+                    imageView.image = image
+                }
+                UIGraphicsEndImageContext()
+            }
+        }
+
+        private func getPDFPage(_ document: CGPDFDocument, pageNumber: Int) -> CGPDFPage? {
+            return document.page(at: pageNumber)
+        }
 
         // MARK: - Rotate view
 
