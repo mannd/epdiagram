@@ -52,7 +52,7 @@ extension ViewController: UIScrollViewDelegate {
     }
 
     func scrollViewDidZoom(_ scrollView: UIScrollView) {
-        os_log("scrollViewDidZoom", log: OSLog.viewCycle, type: .info)
+        //os_log("scrollViewDidZoom", log: OSLog.viewCycle, type: .info)
     }
 
     func scrollViewAdjustViews(_ scrollView: UIScrollView) {

@@ -157,7 +157,7 @@
                 let textLabelButton = UIBarButtonItem(customView: textLabel)
                 let copyTitle = L("Copy", comment: "copy mark button label title")
                 let copyButton = UIBarButtonItem(title: copyTitle, style: UIBarButtonItem.Style.plain, target: self, action: #selector(copyMarks))
-                let cancelTitle = L("Cancel")
+                let cancelTitle = L("Done")
                 let cancelButton = UIBarButtonItem(title: cancelTitle, style: UIBarButtonItem.Style.plain, target: self, action: #selector(cancelSelect))
                 selectMenuButtons = [textLabelButton, copyButton, cancelButton]
             }
@@ -171,7 +171,7 @@
                 let textLabel = UILabel()
                 textLabel.text = textLabelText
                 let textLabelButton = UIBarButtonItem(customView: textLabel)
-                let cancelTitle = L("Cancel")
+                let cancelTitle = L("Done")
                 let cancelButton = UIBarButtonItem(title: cancelTitle, style: .plain, target: self, action: #selector(cancelLink))
                 linkMenuButtons = [textLabelButton, cancelButton]
             }
@@ -203,6 +203,9 @@
 
         @objc func linkMarks() {
             os_log("linkMarks action", log: OSLog.action, type: .info)
+            cursorView.hideCursor(true)
+            ladderView.unhighlightAllMarks()
+            setViewsNeedDisplay()
             showLinkMenu()
             ladderView.linkMarkMode = true
             cursorView.allowTaps = false

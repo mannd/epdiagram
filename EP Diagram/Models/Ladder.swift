@@ -110,6 +110,22 @@ class Ladder {
         return region.index
     }
 
+    func getRegionIndex(ofMark mark: Mark) -> Int? {
+        let index = registry[mark.id]
+        return index
+    }
+
+    func getRegion(index: Int) -> Region? {
+        return regions[index]
+    }
+
+    func getRegion(ofMark mark: Mark) -> Region? {
+        if let index = getRegionIndex(ofMark: mark) {
+            return getRegion(index: index)
+        }
+        else { return nil }
+    }
+
     func getRegionBefore(region: Region?) -> Region? {
         if let index = getRegionIndex(region: region) {
             if index > 0 {

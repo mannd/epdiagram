@@ -7,6 +7,7 @@
 //
 
 import UIKit
+import os.log
 
 protocol LadderViewDelegate: AnyObject {
     func getRegionProximalBoundary(view: UIView) -> CGFloat
@@ -211,10 +212,9 @@ final class LadderView: ScaledView {
         if linkMarkMode {
             P("link mark mode")
             if let mark = tapLocationInLadder.mark {
-                cursorViewDelegate.hideCursor(true)
-                cursorViewDelegate.refresh()
                 if ladder.linkedMarks.count == 0 {
                     ladder.linkedMarks.append(mark)
+                    activeRegion = ladder.getRegion(ofMark: mark)
                     mark.highlight = .linked
                 }
                 else if ladder.linkedMarks.count == 1 {
@@ -224,14 +224,20 @@ final class LadderView: ScaledView {
                         mark.highlight = .none
                     }
                     else {
-                        // new mark tapped
+                        // different mark tapped
+                        // what region is the mark in?
+                        let markRegionIndex = ladder.getRegionIndex(ofMark: mark)
+                        let firstMarkRegionIndex = ladder.getRegionIndex(ofMark: ladder.linkedMarks[0])
+                        os_log("markRegionIndex = %d, firstMarkRegionIndex = %d", log: OSLog.debugging, type: .info, markRegionIndex!, firstMarkRegionIndex!)
                         // TODO: what about create mark with each tap?
                         ladder.linkedMarks.append(mark)
                         mark.highlight = .linked
-                        let linkedMark = addLinkedMarks(marks: ladder.linkedMarks)
-                        activeRegion = ladder.regions[1]
-                        ladder.addMark(mark: linkedMark)
-                        ladder.linkedMarks.append(linkedMark)
+                        if let linkedMark = link(marksToLink: ladder.linkedMarks) {
+                            ladder.linkedMarks.append(linkedMark)
+                            linkedMark.highlight = .linked
+                            groupNearbyMarks(mark: linkedMark)
+
+                        }
                     }
                 }
                 else if ladder.linkedMarks.count >= 2 {
@@ -363,14 +369,35 @@ final class LadderView: ScaledView {
         }
     }
 
-    private func addLinkedMarks(marks: [Mark]) -> Mark {
-        P("add lined marks")
-        // naive implementation
-        let mark = Mark()
-        mark.highlight = .linked
-        mark.segment.proximal = CGPoint(x: marks[0].segment.distal.x, y: 0)
-        mark.segment.distal = CGPoint(x: marks[1].segment.proximal.x, y: 1)
-        return mark
+    private func link(marksToLink marks: [Mark]) -> Mark? {
+        // Should not be called unless two marks to link are in marks.
+        guard marks.count == 2 else { return nil }
+        guard let firstRegionIndex = ladder.getRegionIndex(ofMark: marks[0]) else {
+            return nil
+        }
+        guard let secondRegionIndex = ladder.getRegionIndex(ofMark: marks[1]) else {
+            return nil
+        }
+        let regionDifference = secondRegionIndex - firstRegionIndex
+        // ignore same region for now.  Only allow diff of 2 regions
+        if abs(regionDifference) == 2 {
+            let newMark = Mark()
+            newMark.highlight = .linked
+            if regionDifference > 0 {
+                activeRegion = ladder.getRegion(index: firstRegionIndex + 1)
+                ladder.addMark(mark: newMark)
+                newMark.segment.proximal = CGPoint(x: marks[0].segment.distal.x, y: 0)
+                newMark.segment.distal = CGPoint(x: marks[1].segment.proximal.x, y: 1)
+            }
+            if regionDifference < 0 {
+                activeRegion = ladder.getRegion(index: firstRegionIndex - 1)
+                ladder.addMark(mark: newMark)
+                newMark.segment.proximal = CGPoint(x: marks[1].segment.distal.x, y: 0)
+                newMark.segment.distal = CGPoint(x: marks[0].segment.proximal.x, y: 1)
+            }
+            return newMark
+        }
+        return nil
     }
 
     private func unattachMarks() {
