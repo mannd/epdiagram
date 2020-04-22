@@ -43,6 +43,7 @@ final class CursorView: ScaledView {
         }
     }
     var calibrating = false
+    var allowTaps = true // set false to prevent taps from making marks
     var cursorEndPointY: CGFloat = 0
 
     weak var ladderViewDelegate: LadderViewDelegate! // Note IUO.
@@ -173,6 +174,7 @@ final class CursorView: ScaledView {
     }
 
     @objc func singleTap(tap: UITapGestureRecognizer) {
+        guard allowTaps else { return }
         if calibrating {
             doCalibration()
             return
@@ -207,7 +209,7 @@ final class CursorView: ScaledView {
         }
         if pan.state == .ended {
             self.undoManager?.endUndoGrouping()
-            ladderViewDelegate.linkMarksNearbyAttachedMark()
+            ladderViewDelegate.groupMarksNearbyAttachedMark()
             ladderViewDelegate.refresh()
             cursorEndPointY = 0
         }

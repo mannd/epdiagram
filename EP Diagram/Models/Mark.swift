@@ -6,19 +6,21 @@
 //  Copyright © 2019 EP Studios. All rights reserved.
 //
 
+// See this attempt at a ladder diagram program, the only one I can find: https://epfellow.wordpress.com/2010/11/04/electrocardiogram-ecgekg-ladder-diagrams/
+
 // We import UIKit here and elsewhere to use CGFloat and avoid conversions
 // of Double to CGFloat.
 import UIKit
+import os.log
 
-//  See this attempt at a ladder diagram program, the only one I can find: https://epfellow.wordpress.com/2010/11/04/electrocardiogram-ecgekg-ladder-diagrams/
-
+// We make it easy to normalize the y value of a point to be between 0 and 1.
 extension CGPoint {
     func normalized() -> CGPoint {
         return CGPoint(x: self.x, y: self.y < 0 ? 0 : self.y > 1.0 ? 1.0 : self.y)
     }
 }
 
-/// A mark is a line segment, defined by its two end points.  Marks may slant in different directions, depending on the origin of an impulse.  So rather than using origin and terminus (which could swap positions if the slant of the mark is changed), we use the same convention as with regions: the two ends are termed *proximal* and *distal*.i
+// A line segment represented by 2 points.
 struct Segment: Equatable {
     var proximal: CGPoint
     var distal: CGPoint
@@ -79,12 +81,6 @@ struct MarkGroup {
     }
 }
 
-/**
-
- The mark is a fundamental component of a ladder diagram.
-
- A mark can be many things, which makes the concept difficult to pin down.  It can be conduction through a region, with or without decrement.  Conduction can originate  in a region, at the top, bottom, or somewhere in the middle, or may originate in another region.  A mark can block or conduct. It can reenter, spawning another mark.
-*/
 extension Mark: Hashable, CustomDebugStringConvertible {
     var debugDescription: String {
         return "Mark ID " + id.debugDescription
@@ -99,6 +95,7 @@ extension Mark: Hashable, CustomDebugStringConvertible {
     }
 }
 
+// The mark is a fundamental component of a ladder diagram.
 class Mark {
     /// Draw a solid or dashed line when drawing a mark.
     enum LineStyle {
@@ -107,27 +104,30 @@ class Mark {
         case dotted
     }
 
-    /** Highlight is used in association with cursors, selecting marks, and showing connections
-     origin - high
-     */
+    // Highlight is used to show state of a mark visibly.
     enum Highlight {
         case all
-        case select
-        case link
+        case selected
+        case grouped
+        case linked
         case none
     }
 
+    // Site of block
     enum Block {
         case proximal
         case distal
         case none
     }
 
+    // Site of impulse origin
     enum ImpulseOrigin {
         case proximal
         case distal
         case none
     }
+
+    fileprivate let customLog = OSLog(subsystem: "com.epstudios.ep_diagram", category: "marks")
 
     var segment: Segment
 
@@ -152,8 +152,7 @@ class Mark {
     var attached: Bool = false // cursor attached and shown
     var selected: Bool = false // mark is selected for some action
     var highlight: Highlight = .none
-    // Set when one end or another of a mark is close enough to connect, or when there is a chain of marks.
-    var potentiallyConnected = false
+
     // Anchor point for movement and to attach a cursor
     var anchor: Anchor
     var lineStyle: LineStyle = .solid
@@ -161,14 +160,14 @@ class Mark {
     var block: Block = .none
     var impulseOrigin: ImpulseOrigin = .none
 
-    var linkedMarks: MarkGroup
+    var groupedMarks: MarkGroup
 
-    let id: UUID
+    let id: UUID // each mark as a unique id
 
     init(_ segment: Segment) {
         self.segment = segment
         self.id = UUID()
-        linkedMarks = MarkGroup()
+        groupedMarks = MarkGroup()
         // Default anchor for new marks is middle.
         anchor = .middle
     }
@@ -184,7 +183,7 @@ class Mark {
     }
 
     deinit {
-        P("******Mark deinited******")
+        os_log("Mark deinitied", log: customLog, type: .debug)
     }
 
     /// Return midpoint of mark as CGPoint

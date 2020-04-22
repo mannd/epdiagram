@@ -34,6 +34,10 @@ struct LocationInLadder {
 
 // A Ladder is simply a collection of Regions in top bottom order.
 class Ladder {
+    private typealias Registry = Dictionary<UUID, Int>
+
+    private var registry: Registry = [ : ]
+
     var regions: [Region] = []
     var numRegions: Int {
         get {
@@ -46,6 +50,7 @@ class Ladder {
     var pressedMark: Mark?
     var movingMark: Mark?
     var selectedMarks: [Mark] = []
+    var linkedMarks: [Mark] = []
 
     // By default, a new mark is vertical and spans the region.
     func addMarkAt(_ positionX: CGFloat) -> Mark? {
@@ -56,6 +61,7 @@ class Ladder {
         mark.highlight = .all
         mark.attached = true
         activeRegion.appendMark(mark)
+        registry[mark.id] = activeRegion.index
         return mark
     }
 
@@ -63,6 +69,7 @@ class Ladder {
         guard let activeRegion = activeRegion else { return }
         mark.highlight = .all
         activeRegion.appendMark(mark)
+        registry[mark.id] = activeRegion.index
     }
 
     // Assumes mark is in active region, which is always true when mark has a cursor.
@@ -70,8 +77,8 @@ class Ladder {
         guard let activeRegion = activeRegion, let mark = mark else { return }
         if let index = activeRegion.marks.firstIndex(where: {$0 === mark}) {
             activeRegion.marks.remove(at: index)
-        
         }
+        registry.removeValue(forKey: mark.id)
     }
 
     func deleteMarkInLadder(mark: Mark) {
@@ -80,6 +87,7 @@ class Ladder {
                 region.marks.remove(at: index)
             }
         }
+        registry.removeValue(forKey: mark.id)
     }
 
     func deleteMark(mark: Mark, region: Region?) {
@@ -87,17 +95,19 @@ class Ladder {
         if let index = region.marks.firstIndex(where: {$0 == mark}) {
             region.marks.remove(at: index)
         }
+        registry.removeValue(forKey: mark.id)
     }
 
     func deleteMarksInRegion(_ region: Region) {
         region.marks.removeAll()
+        for mark: Mark in region.marks {
+            registry.removeValue(forKey: mark.id)
+        }
     }
 
     func getRegionIndex(region: Region?) -> Int? {
-        if let index = regions.firstIndex(where: {$0 === region}) {
-            return index
-        }
-        return nil
+        guard let region = region else { return nil }
+        return region.index
     }
 
     func getRegionBefore(region: Region?) -> Region? {
@@ -191,13 +201,13 @@ class Ladder {
     // Returns a basic ladder (A, AV, V).
     static func defaultLadder() -> Ladder {
         let ladder = Ladder()
-        let aRegion = Region()
+        let aRegion = Region(index: 0)
         aRegion.name = "A"
         aRegion.selected = true
-        let avRegion = Region()
+        let avRegion = Region(index: 1)
         avRegion.name = "AV"
         avRegion.unitHeight = 2
-        let vRegion = Region()
+        let vRegion = Region(index: 2)
         vRegion.name = "V"
         ladder.regions = [aRegion, avRegion, vRegion]
         return ladder

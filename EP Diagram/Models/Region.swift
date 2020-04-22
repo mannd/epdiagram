@@ -34,6 +34,11 @@ class Region {
     var markable: Bool = true
     var height: CGFloat { get { return distalBoundary - proximalBoundary } }
     var unitHeight: Int = 1  // 1 = smallest region height, used to calculate actual height
+    var index: Int
+
+    init(index: Int) {
+        self.index = index
+    }
 
     func appendMark(_ mark: Mark) {
         marks.append(mark)

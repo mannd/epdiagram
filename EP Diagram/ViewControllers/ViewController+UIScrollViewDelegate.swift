@@ -7,6 +7,7 @@
 //
 
 import UIKit
+import os.log
 
 extension ViewController: UIScrollViewDelegate {
 
@@ -21,7 +22,6 @@ extension ViewController: UIScrollViewDelegate {
 
     func scrollViewDidScroll(_ scrollView: UIScrollView) {
         if scrollView == imageScrollView {
-            P("scrollViewDidScroll")
             scrollViewAdjustViews(scrollView)
         }
     }
@@ -39,19 +39,20 @@ extension ViewController: UIScrollViewDelegate {
     }
 
     fileprivate func scrollFinished() {
-        P("scroll finished")
+        os_log("scrollFinished", log: OSLog.viewCycle, type: .info)
     }
 
     func scrollViewWillBeginZooming(_ scrollView: UIScrollView, with view: UIView?) {
+        os_log("scrollViewWillBeginZooming", log: OSLog.viewCycle, type: .info)
     }
 
     func scrollViewDidEndZooming(_ scrollView: UIScrollView, with view: UIView?, atScale scale: CGFloat) {
-        P("scrollViewDidEndZooming")
+        os_log("scrollViewDidEndZooming", log: OSLog.viewCycle, type: .info)
         scrollViewAdjustViews(scrollView)
     }
 
     func scrollViewDidZoom(_ scrollView: UIScrollView) {
-        P("scrollViewDidZoom")
+        os_log("scrollViewDidZoom", log: OSLog.viewCycle, type: .info)
     }
 
     func scrollViewAdjustViews(_ scrollView: UIScrollView) {

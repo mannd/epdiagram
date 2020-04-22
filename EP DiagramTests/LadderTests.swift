@@ -15,6 +15,9 @@ class LadderTests: XCTestCase {
     override func setUp() {
         super.setUp()
         ladder = Ladder.defaultLadder()
+        for region: Region in ladder.regions {
+            assert(region.index >= 0, String(format: "region %@ index negative, = %d", region.name, region.index))
+        }
     }
 
     override func tearDown() {

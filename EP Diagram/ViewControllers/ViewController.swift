@@ -7,6 +7,7 @@
     //
 
     import UIKit
+    import os.log
 
     final class ViewController: UIViewController {
         @IBOutlet var _constraintHamburgerWidth: NSLayoutConstraint!
@@ -17,6 +18,12 @@
         @IBOutlet var cursorView: CursorView!
         @IBOutlet var blackView: BlackView!
 
+        // This margin is used for all the views.  As ECGs are always read from left
+        // to right, there is no reason to reverse this.
+        let leftMargin: CGFloat = 30
+        let _maxBlackAlpha: CGFloat = 0.4
+        private let customLog = OSLog(subsystem: OSLog.subsystem, category: "views")
+
         var separatorView: SeparatorView?
         private var undoButton: UIBarButtonItem = UIBarButtonItem()
         private var redoButton: UIBarButtonItem = UIBarButtonItem()
@@ -25,11 +32,6 @@
         private var linkMenuButtons: [UIBarButtonItem]?
         internal var hamburgerMenuIsOpen = false
         
-        // This margin is used for all the views.  As ECGs are always read from left
-        // to right, there is no reason to reverse this.
-        let leftMargin: CGFloat = 30
-        let _maxBlackAlpha: CGFloat = 0.4
-
         // PDF and launch from URL stuff
         var pdfRef: CGPDFDocument?
         var launchFromURL: Bool = false
@@ -37,20 +39,22 @@
         var pageNumber: Int = 1
 
         override func viewDidLoad() {
-            P("viewDidLoad")
+            os_log("viewDidLoad", log: OSLog.viewCycle, type: .info)
             super.viewDidLoad()
+
 
             // These 2 views are guaranteed to exist, so the delegates are IUOs.
             cursorView.ladderViewDelegate = ladderView
             ladderView.cursorViewDelegate = cursorView
             imageScrollView.delegate = self
 
-            if launchFromURL {
-                launchFromURL = false
-                if let launchURL = launchURL {
-                    openURL(url: launchURL)
-                }
-            }
+            // FIXME: Not clear if code below is needed here or in EP Calipers.  App opens external PDF files without it.
+//            if launchFromURL {
+//                launchFromURL = false
+//                if let launchURL = launchURL {
+//                    openURL(url: launchURL)
+//                }
+//            }
 
             title = L("EP Diagram", comment: "app name")
 
@@ -99,7 +103,7 @@
         }
 
         override func viewDidAppear(_ animated: Bool) {
-            P("viewDidAppear")
+            os_log("viewDidAppear", log: OSLog.viewCycle, type: .info)
             assertDelegatesNonNil()
             // Need to set this here, after view draw, or Mac malpositions cursor at start of app.
             imageScrollView.contentInset = UIEdgeInsets(top: 0, left: leftMargin, bottom: 0, right: 0)
@@ -116,7 +120,7 @@
 
         // Crash program at compile time if IUO delegates are nil.
         private func assertDelegatesNonNil() {
-            assert(cursorView.ladderViewDelegate != nil && ladderView.cursorViewDelegate != nil)
+            assert(cursorView.ladderViewDelegate != nil && ladderView.cursorViewDelegate != nil, "LadderViewDelegate and/or CursorViewDelegate are nil")
         }
 
         func showMessage(title: String, message: String) {
@@ -188,28 +192,29 @@
         // MARK: -  Buttons
 
         @objc func calibrate() {
-            P("calibrate")
+            os_log("calibrate action", log: OSLog.action, type: .info)
         }
 
         @objc func selectMarks() {
-            P("select")
+            os_log("selectMarks action", log: OSLog.action, type: .info)
             showSelectMenu()
             ladderView.selectMarkMode = true
         }
 
         @objc func linkMarks() {
-            P("link marks")
+            os_log("linkMarks action", log: OSLog.action, type: .info)
             showLinkMenu()
             ladderView.linkMarkMode = true
+            cursorView.allowTaps = false
             // Tap two marks and automatically generate a link between them.  Tap on and then the region in between and generate a blocked link.  Do this by setting link mode in the ladder view and have the ladder view handle the single taps.
         }
 
         @objc func copyMarks() {
-            P("copy")
+            os_log("copyMarks action", log: OSLog.action, type: .info)
         }
 
         @objc func cancelSelect() {
-            P("cancel select")
+            os_log("cancelSelect action", log: OSLog.action, type: .info)
             showMainMenu()
             ladderView.selectMarkMode = false
             ladderView.unhighlightAllMarks()
@@ -218,9 +223,10 @@
         }
 
         @objc func cancelLink() {
-            P("cancel link")
+            os_log("cancelLink action", log: OSLog.action, type: .info)
             showMainMenu()
             ladderView.linkMarkMode = false
+            cursorView.allowTaps = true
             ladderView.unhighlightAllMarks()
             ladderView.setNeedsDisplay()
         }
@@ -286,6 +292,7 @@
         }
 
         @objc func singleTap(tap: UITapGestureRecognizer) {
+            guard cursorView.allowTaps else { return }
             if !ladderView.hasActiveRegion() {
                 ladderView.setActiveRegion(regionNum: 0)
             }
@@ -303,7 +310,7 @@
 
         // MARK: - Handle PDFs, URLs at app startup
         func openURL(url: URL) {
-            P("open URL")
+            os_log("openURL action", log: OSLog.action, type: .info)
             // self.resetImage
             let ext = url.pathExtension.uppercased()
             if ext != "PDF" {
@@ -376,6 +383,7 @@
         // MARK: - Rotate view
 
         override func viewWillTransition(to size: CGSize, with coordinator: UIViewControllerTransitionCoordinator) {
+            os_log("viewWillTransition", log: OSLog.viewCycle, type: .info)
             super.viewWillTransition(to: size, with: coordinator)
             // Remove separatorView when rotating to let original constraints resume.
             // Otherwise, views are not laid out correctly.
