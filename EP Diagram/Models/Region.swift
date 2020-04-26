@@ -28,7 +28,7 @@ enum RegionDivision {
 class Region {
     var proximalBoundary: CGFloat = 0
     var distalBoundary: CGFloat = 0
-    var selected: Bool = false
+    var activated: Bool = false
     var name: String = ""
     var marks: [Mark] = []
     var markable: Bool = true

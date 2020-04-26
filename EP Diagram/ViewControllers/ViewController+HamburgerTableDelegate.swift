@@ -51,7 +51,7 @@ extension ViewController: HamburgerTableDelegate, UIImagePickerControllerDelegat
     static let hamburgerCycle = OSLog(subsystem: subsystem, category: "hamburger")
 
     func takePhoto() {
-        print("take photo")
+        os_log("takePhoto", log: OSLog.action, type: .info)
         let picker: UIImagePickerController = UIImagePickerController()
         picker.delegate = self
         picker.allowsEditing = true
@@ -64,7 +64,7 @@ extension ViewController: HamburgerTableDelegate, UIImagePickerControllerDelegat
     }
 
     func selectPhoto() {
-        print("select photo")
+        os_log("selectPhoto", log: OSLog.action, type: .info)
         let picker: UIImagePickerController = UIImagePickerController()
         picker.delegate = self
         picker.allowsEditing = true
@@ -76,20 +76,20 @@ extension ViewController: HamburgerTableDelegate, UIImagePickerControllerDelegat
         let versionBuild = Version.getAppVersion()
         let version = versionBuild.version ?? L("unknown")
         let build = versionBuild.build ?? L("unknown")
-        os_log("About EP Diagram: version = %s build = %s", type: .info, version, build)
+        os_log("About EP Diagram: version = %s build = %s", log: OSLog.debugging, type: .info, version, build)
         showMessage(title: L("About EP Diagram"), message: "Copyright 2020 EP Studios, Inc.\nVersion " + version)
     }
 
     func openDiagram() {
-        os_log("Open diagram", type: .info)
+        os_log("Open diagram", log: OSLog.action, type: .info)
     }
 
     func saveDiagram() {
-        print("save diagram")
+        os_log("saveDiagram", log: OSLog.action, type: .info)
     }
 
     func help() {
-        print("help")
+        os_log("help", log: OSLog.action, type: .info)
     }
 
     func imagePickerController(_ picker: UIImagePickerController, didFinishPickingMediaWithInfo info: [UIImagePickerController.InfoKey : Any]) {

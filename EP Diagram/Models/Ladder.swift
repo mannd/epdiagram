@@ -44,7 +44,6 @@ class Ladder {
             return regions.count
         }
     }
-    var activeRegion: Region?
 
     var attachedMark: Mark?
     var pressedMark: Mark?
@@ -53,46 +52,33 @@ class Ladder {
     var linkedMarks: [Mark] = []
 
     // By default, a new mark is vertical and spans the region.
-    func addMarkAt(_ positionX: CGFloat) -> Mark? {
-        guard let activeRegion = activeRegion else {
+    func addMark(at positionX: CGFloat, inRegion region: Region?) -> Mark? {
+        if let region = region {
+            let mark = Mark(positionX: positionX)
+            region.appendMark(mark)
+            registry[mark.id] = region.index
+            return mark
+        }
+        else {
             return nil
         }
-        let mark = Mark(positionX: positionX)
-        mark.highlight = .all
-        mark.attached = true
-        activeRegion.appendMark(mark)
-        registry[mark.id] = activeRegion.index
-        return mark
     }
 
-    func addMark(mark: Mark) {
-        guard let activeRegion = activeRegion else { return }
-        mark.highlight = .all
-        activeRegion.appendMark(mark)
-        registry[mark.id] = activeRegion.index
+    func addMark(inRegion region: Region?) -> Mark? {
+        if let region = region {
+            let mark = Mark()
+            region.appendMark(mark)
+            registry[mark.id] = region.index
+            return mark
+        }
+        else { return nil }
+
     }
 
     // Assumes mark is in active region, which is always true when mark has a cursor.
-    func deleteMark(_ mark: Mark?) {
-        guard let activeRegion = activeRegion, let mark = mark else { return }
-        if let index = activeRegion.marks.firstIndex(where: {$0 === mark}) {
-            activeRegion.marks.remove(at: index)
-        }
-        registry.removeValue(forKey: mark.id)
-    }
-
-    func deleteMarkInLadder(mark: Mark) {
-        for region in regions {
-            if let index = region.marks.firstIndex(where: {$0 == mark}) {
-                region.marks.remove(at: index)
-            }
-        }
-        registry.removeValue(forKey: mark.id)
-    }
-
-    func deleteMark(mark: Mark, region: Region?) {
-        guard let region = region else { return }
-        if let index = region.marks.firstIndex(where: {$0 == mark}) {
+    func deleteMark(_ mark: Mark?, inRegion region: Region?) {
+        guard let mark = mark, let region = region else { return }
+        if let index = region.marks.firstIndex(where: {$0 === mark}) {
             region.marks.remove(at: index)
         }
         registry.removeValue(forKey: mark.id)
@@ -105,7 +91,7 @@ class Ladder {
         }
     }
 
-    func getRegionIndex(region: Region?) -> Int? {
+    func getIndex(ofRegion region: Region?) -> Int? {
         guard let region = region else { return nil }
         return region.index
     }
@@ -127,7 +113,7 @@ class Ladder {
     }
 
     func getRegionBefore(region: Region?) -> Region? {
-        if let index = getRegionIndex(region: region) {
+        if let index = getIndex(ofRegion: region) {
             if index > 0 {
                 return regions[index - 1]
             }
@@ -136,7 +122,7 @@ class Ladder {
     }
 
     func getRegionAfter(region: Region?) -> Region? {
-        if let index = getRegionIndex(region: region) {
+        if let index = getIndex(ofRegion: region) {
             if index < regions.count - 1 {
                 return regions[index + 1]
             }
@@ -219,7 +205,7 @@ class Ladder {
         let ladder = Ladder()
         let aRegion = Region(index: 0)
         aRegion.name = "A"
-        aRegion.selected = true
+        aRegion.activated = true
         let avRegion = Region(index: 1)
         avRegion.name = "AV"
         avRegion.unitHeight = 2

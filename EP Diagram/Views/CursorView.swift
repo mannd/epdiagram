@@ -7,6 +7,7 @@
 //
 
 import UIKit
+import os.log
 
 protocol CursorViewDelegate: AnyObject {
     func refresh()
@@ -174,6 +175,7 @@ final class CursorView: ScaledView {
     }
 
     @objc func singleTap(tap: UITapGestureRecognizer) {
+        os_log("singleTap - CursorView", log: OSLog.touches, type: .info)
         guard allowTaps else { return }
         if calibrating {
             doCalibration()
@@ -185,6 +187,7 @@ final class CursorView: ScaledView {
     }
 
     @objc func doubleTap(tap: UITapGestureRecognizer) {
+        os_log("doubleTap - CursorView", log: OSLog.touches, type: .info)
         ladderViewDelegate.deleteAttachedMark()
         ladderViewDelegate.refresh()
     }

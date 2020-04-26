@@ -15,4 +15,5 @@ extension OSLog {
     static let viewCycle = OSLog(subsystem: OSLog.subsystem, category: "viewcycle")
     static let action = OSLog(subsystem: OSLog.subsystem, category: "actions")
     static let debugging = OSLog(subsystem: OSLog.subsystem, category: "debugging")
+    static let touches = OSLog(subsystem: OSLog.subsystem, category: "touches")
 }

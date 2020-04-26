@@ -7,19 +7,15 @@
 //
 
 import UIKit
+import os.log
 
 class HamburgerTableViewController: UITableViewController {
     var rows: Array<HamburgerLayer> = []
     var delegate: HamburgerTableDelegate?
 
     override func viewDidLoad() {
+        os_log("viewDidLoad - HamburgerView", log: OSLog.viewCycle, type: .info)
         super.viewDidLoad()
-
-        // Uncomment the following line to preserve selection between presentations
-        // self.clearsSelectionOnViewWillAppear = false
-
-        // Uncomment the following line to display an Edit button in the navigation bar for this view controller.
-        // self.navigationItem.rightBarButtonItem = self.editButtonItem
 
         let hamburgerViewModel = HamburgerViewModel()
         rows = hamburgerViewModel.allLayers()
@@ -54,7 +50,6 @@ class HamburgerTableViewController: UITableViewController {
     // MARK: - Table view delegate
 
     override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-        print("selected row")
         delegate?.hideHamburgerMenu()
         let row = rows[indexPath.row]
         switch row.layer {

@@ -39,7 +39,7 @@
         var pageNumber: Int = 1
 
         override func viewDidLoad() {
-            os_log("viewDidLoad", log: OSLog.viewCycle, type: .info)
+            os_log("viewDidLoad - ViewController", log: OSLog.viewCycle, type: .info)
             super.viewDidLoad()
 
 
@@ -103,7 +103,7 @@
         }
 
         override func viewDidAppear(_ animated: Bool) {
-            os_log("viewDidAppear", log: OSLog.viewCycle, type: .info)
+            os_log("viewDidAppear - ViewController", log: OSLog.viewCycle, type: .info)
             assertDelegatesNonNil()
             // Need to set this here, after view draw, or Mac malpositions cursor at start of app.
             imageScrollView.contentInset = UIEdgeInsets(top: 0, left: leftMargin, bottom: 0, right: 0)
@@ -277,7 +277,6 @@
 
 
         private func addMarkWithAttachedCursor(position: CGPoint) {
-            P("add mark with attached cursor")
             // imageScrollView starts at x = 0, contentInset shifts view to right, and the left margin is negative.
             if position.x > 0 {
                 cursorView.putCursor(imageScrollViewPosition: position)
@@ -295,6 +294,7 @@
         }
 
         @objc func singleTap(tap: UITapGestureRecognizer) {
+            os_log("singleTap - ViewController", log: OSLog.touches, type: .info)
             guard cursorView.allowTaps else { return }
             if !ladderView.hasActiveRegion() {
                 ladderView.setActiveRegion(regionNum: 0)

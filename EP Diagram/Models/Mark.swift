@@ -127,8 +127,6 @@ class Mark {
         case none
     }
 
-    fileprivate let customLog = OSLog(subsystem: "com.epstudios.ep_diagram", category: "marks")
-
     var segment: Segment
 
     // Useful to detect marks that are too tiny to keep.
@@ -183,7 +181,7 @@ class Mark {
     }
 
     deinit {
-        os_log("Mark deinitied", log: customLog, type: .debug)
+        os_log("Mark deinitied", log: OSLog.debugging, type: .debug)
     }
 
     /// Return midpoint of mark as CGPoint
