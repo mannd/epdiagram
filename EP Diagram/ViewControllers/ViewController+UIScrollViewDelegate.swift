@@ -63,11 +63,4 @@ extension ViewController: UIScrollViewDelegate {
         setViewsNeedDisplay()
     }
 
-    // MARK: - Segue
-    override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
-        if segue.identifier == "HamburgerSegue" {
-            let hamburgerController = segue.destination as? HamburgerTableViewController
-            hamburgerController?.delegate = self
-        }
-    }
 }

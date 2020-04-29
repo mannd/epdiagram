@@ -12,6 +12,7 @@ import os.log
 class HamburgerTableViewController: UITableViewController {
     var rows: Array<HamburgerLayer> = []
     var delegate: HamburgerTableDelegate?
+    var imageIsLocked: Bool = false
 
     override func viewDidLoad() {
         os_log("viewDidLoad - HamburgerView", log: OSLog.viewCycle, type: .info)
@@ -19,6 +20,17 @@ class HamburgerTableViewController: UITableViewController {
 
         let hamburgerViewModel = HamburgerViewModel()
         rows = hamburgerViewModel.allLayers()
+    }
+
+    override func viewWillAppear(_ animated: Bool) {
+        os_log("viewWillAppear - HamburgerView", log: OSLog.viewCycle, type: .info)
+        super.viewWillAppear(animated)
+        imageIsLocked = delegate?.imageIsLocked ?? false
+    }
+
+    func reloadData() {
+        imageIsLocked = delegate?.imageIsLocked ?? false
+        self.tableView.reloadData()
     }
 
     // MARK: - Table view data source
@@ -36,9 +48,15 @@ class HamburgerTableViewController: UITableViewController {
 
         let row = rows[indexPath.row]
 
-        cell.label?.text = row.name
+        if row.layer == .lock && imageIsLocked {
+            cell.label?.text = row.altName
+            cell.icon?.image = UIImage(named: row.altIconName!)
+        }
+        else {
+            cell.label?.text = row.name
+            cell.icon?.image = UIImage(named: row.iconName!)
+        }
         cell.label?.adjustsFontSizeToFitWidth = true
-        cell.icon?.image = UIImage(named: row.iconName!)
         return cell
     }
 
@@ -57,6 +75,8 @@ class HamburgerTableViewController: UITableViewController {
             delegate?.takePhoto()
         case .photoGallery:
             delegate?.selectPhoto()
+        case .lock:
+            delegate?.lockImage()
         case .open:
             delegate?.openDiagram()
         case .save:

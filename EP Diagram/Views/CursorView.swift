@@ -47,6 +47,8 @@ final class CursorView: ScaledView {
     var allowTaps = true // set false to prevent taps from making marks
     var cursorEndPointY: CGFloat = 0
 
+    var imageIsLocked = false
+
     weak var ladderViewDelegate: LadderViewDelegate! // Note IUO.
 
     // MARK: - init
@@ -94,6 +96,9 @@ final class CursorView: ScaledView {
     // MARK: - draw
 
     override func draw(_ rect: CGRect) {
+        if imageIsLocked {
+            showLockImageWarning(rect: rect)
+        }
         if let context = UIGraphicsGetCurrentContext() {
             guard cursor.visible else { return }
 
@@ -116,6 +121,17 @@ final class CursorView: ScaledView {
                 drawCircle(context: context, center: CGPoint(x: position, y: cursor.positionOmniCircleY), radius: 20)
             }
         }
+    }
+
+    func showLockImageWarning(rect: CGRect) {
+        let text = L("IMAGE LOCK")
+        let paragraphStyle = NSMutableParagraphStyle()
+        let attributes: [NSAttributedString.Key: Any] = [
+            .font: UIFont.systemFont(ofSize: 14.0),
+            .foregroundColor: UIColor.white, .backgroundColor: UIColor.systemRed
+        ]
+        let lockRect = CGRect(x: rect.origin.x + 5, y: rect.origin.y + 5, width: rect.size.width, height: rect.size.height)
+        text.draw(in: lockRect, withAttributes: attributes)
     }
 
     func setCursorHeight(anchorPositionY: CGFloat? = nil) {

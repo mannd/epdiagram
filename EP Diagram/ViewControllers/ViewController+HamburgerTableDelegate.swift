@@ -14,17 +14,34 @@ protocol HamburgerTableDelegate: class {
     var constraintHamburgerLeft: NSLayoutConstraint { get set }
     var constraintHamburgerWidth: NSLayoutConstraint { get set }
     var maxBlackAlpha: CGFloat { get }
+    var imageIsLocked: Bool { get set }
     func takePhoto()
     func selectPhoto()
     func about()
     func openDiagram()
     func saveDiagram()
     func help()
+    func lockImage()
     func hideHamburgerMenu()
     func showHamburgerMenu()
 }
 
 extension ViewController: HamburgerTableDelegate, UIImagePickerControllerDelegate & UINavigationControllerDelegate {
+
+    func lockImage() {
+        _imageIsLocked = !_imageIsLocked
+        // Turn off scrolling and zooming, but allow single taps to generate marks with cursors.
+        imageScrollView.isScrollEnabled = !_imageIsLocked
+        imageScrollView.pinchGestureRecognizer?.isEnabled = !_imageIsLocked
+        cursorView.imageIsLocked = _imageIsLocked
+        cursorView.setNeedsDisplay()
+    }
+
+    var imageIsLocked: Bool {
+        get { return _imageIsLocked }
+        set(newValue) { _imageIsLocked = newValue}
+    }
+
     var constraintHamburgerLeft: NSLayoutConstraint {
         get {
             return _constraintHamburgerLeft
@@ -113,6 +130,7 @@ extension ViewController: HamburgerTableDelegate, UIImagePickerControllerDelegat
     }
 
     func showHamburgerMenu() {
+        hamburgerTableViewController?.reloadData()
         constraintHamburgerLeft.constant = 0
         hamburgerMenuIsOpen = true
         navigationController?.setToolbarHidden(true, animated: true)
@@ -137,6 +155,14 @@ extension ViewController: HamburgerTableDelegate, UIImagePickerControllerDelegat
             self.blackView.alpha = 0
         }, completion: { (finished:Bool) in
             self.separatorView?.isHidden = false })
+    }
+    
+    // MARK: - Segue
+    override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
+        if segue.identifier == "HamburgerSegue" {
+            hamburgerTableViewController = segue.destination as? HamburgerTableViewController
+            hamburgerTableViewController?.delegate = self
+        }
     }
 }
 

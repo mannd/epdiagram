@@ -15,7 +15,7 @@ struct HamburgerViewModel {
         array.append(cameraLayer)
         let selectPhotoLayer = HamburgerLayer(withName: L("Select image"), iconName: "photos", layer: .photoGallery)
         array.append(selectPhotoLayer)
-        let lockImageLayer = HamburgerLayer(withName: L("Lock image"), iconName: "lock", layer: .lock)
+        let lockImageLayer = HamburgerLayer(withName: L("Lock image"), iconName: "lock", layer: .lock, altName: L("Unlock image"), altIconName: "unlock")
         array.append(lockImageLayer)
         let preferencesLayer = HamburgerLayer(withName: L("Preferences"), iconName: "preferences", layer: .preferences)
         array.append(preferencesLayer)

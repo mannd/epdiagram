@@ -576,7 +576,6 @@ final class LadderView: ScaledView {
     }
 
     private func undeleteMark(mark: Mark, region: Region?) {
-//        activeRegion = region
         if let region = region, let mark = deletedMarks.popLast() {
             region.appendMark(mark)
             mark.attached = false
