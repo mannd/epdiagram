@@ -46,25 +46,23 @@ class LadderTests: XCTestCase {
     }
 
     func testAddMark() {
-        ladder.activeRegion = ladder.regions[0]
-        let mark = ladder.addMarkAt(100)
+        let mark = ladder.addMark(at: 100, inRegion: ladder.regions[0])
         XCTAssertEqual(mark?.segment.proximal.x, 100)
     }
 
     func testAddMarkNoActiveRegion() {
-        ladder.activeRegion = nil
-        let mark = ladder.addMarkAt(100)
+        let mark = ladder.addMark(at: 100, inRegion: nil)
         XCTAssertEqual(mark?.segment.proximal.x, nil)
     }
 
     func testGetRegionIndex() {
-        ladder.activeRegion = ladder.regions[1]
-        XCTAssertEqual(ladder.getIndex(region: ladder.activeRegion), 1)
-        XCTAssert(ladder.getRegionAfter(region: ladder.activeRegion) === ladder.regions[2])
-        XCTAssert(ladder.getRegionBefore(region: ladder.activeRegion) === ladder.regions[0])
-        let regionBefore = ladder.getRegionBefore(region: ladder.activeRegion)
+        let region = ladder.regions[1]
+        XCTAssertEqual(ladder.getIndex(ofRegion: region), 1)
+        XCTAssert(ladder.getRegionAfter(region: region) === ladder.regions[2])
+        XCTAssert(ladder.getRegionBefore(region: region) === ladder.regions[0])
+        let regionBefore = ladder.getRegionBefore(region: region)
         XCTAssertNil(ladder.getRegionBefore(region: regionBefore))
-        let regionAfter = ladder.getRegionAfter(region: ladder.activeRegion)
+        let regionAfter = ladder.getRegionAfter(region: region)
         XCTAssertNil(ladder.getRegionAfter(region: regionAfter))
     }
 
@@ -78,7 +76,7 @@ class LadderTests: XCTestCase {
 
     // TODO: move to RegionTests
     func testRelativeYPosition() {
-        let region = Region()
+        let region = Region(index: 0)
         region.proximalBoundary = 200
         region.distalBoundary = 500
         XCTAssertNotNil(region.getRelativeYPosition(y: 300))

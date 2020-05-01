@@ -15,7 +15,7 @@ protocol CursorViewDelegate: AnyObject {
     func setCursorHeight(anchorPositionY: CGFloat?)
     func hideCursor(_ hide: Bool)
     func cursorIsVisible() -> Bool
-    func cursorDirection() -> Cursor.Direction
+    func cursorMovement() -> Movement
 }
 
 extension CursorViewDelegate {
@@ -117,7 +117,7 @@ final class CursorView: ScaledView {
             if position > leftMargin {
                 drawCircle(context: context, center: endPoint, radius: 5)
             }
-            if cursor.direction == .omnidirectional {
+            if cursor.movement == .omnidirectional {
                 drawCircle(context: context, center: CGPoint(x: position, y: cursor.positionOmniCircleY), radius: 20)
             }
         }
@@ -125,7 +125,6 @@ final class CursorView: ScaledView {
 
     func showLockImageWarning(rect: CGRect) {
         let text = L("IMAGE LOCK")
-        let paragraphStyle = NSMutableParagraphStyle()
         let attributes: [NSAttributedString.Key: Any] = [
             .font: UIFont.systemFont(ofSize: 14.0),
             .foregroundColor: UIColor.white, .backgroundColor: UIColor.systemRed
@@ -214,7 +213,7 @@ final class CursorView: ScaledView {
         if pan.state == .began {
             self.undoManager?.beginUndoGrouping()
             cursorEndPointY = attachedMarkAnchorPosition.y
-            ladderViewDelegate.highlightAttachedMarks(highlight: .all)
+            ladderViewDelegate.highlightAttachedMarks(highlight: .grouped)
             ladderViewDelegate.moveAttachedMark(position: attachedMarkAnchorPosition) // This has to be here for undo to work.
         }
         if pan.state == .changed {
@@ -241,11 +240,11 @@ final class CursorView: ScaledView {
 
     @objc func longPress(press: UILongPressGestureRecognizer) {
         if press.state == .began {
-            if cursor.direction == .horizontal {
-                cursor.direction = .omnidirectional
+            if cursor.movement == .horizontal {
+                cursor.movement = .omnidirectional
             }
-            else if cursor.direction == .omnidirectional {
-                cursor.direction = .horizontal
+            else if cursor.movement == .omnidirectional {
+                cursor.movement = .horizontal
             }
             let pressPositionY = press.location(in: self).y
             P("ppy \(pressPositionY),  mcpy \(maxCursorPositionY)")
@@ -288,7 +287,7 @@ extension CursorView: CursorViewDelegate {
         return cursor.visible
     }
 
-    func cursorDirection() -> Cursor.Direction {
-        return cursor.direction
+    func cursorMovement() -> Movement {
+        return cursor.movement
     }
 }

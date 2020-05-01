@@ -47,16 +47,22 @@ class Common {
     }
 
     // Measures shortest distance from a line defined by two points and a point.
-    static private func distanceSegmentEndPointsToPoint(endPoint1: CGPoint, endPoint2: CGPoint, point: CGPoint) -> CGFloat {
-        var numerator = (endPoint2.y - endPoint1.y) * point.x - (endPoint2.x - endPoint1.x) * point.y + endPoint2.x * endPoint1.y - endPoint2.y * endPoint1.x
-        numerator = abs(numerator)
-        var denominator = pow((endPoint2.y - endPoint1.y), 2) + pow((endPoint2.x - endPoint1.x), 2)
-        denominator = sqrt(denominator)
-        return numerator / denominator
-    }
-
-    static func distanceSegmentToPoint(segment: Segment, point: CGPoint) -> CGFloat {
-        return distanceSegmentEndPointsToPoint(endPoint1: segment.proximal, endPoint2: segment.distal, point: point)
+    // See https://stackoverflow.com/questions/849211/shortest-distance-between-a-point-and-a-line-segment
+    static func distanceSegmentToPoint(segment: Segment, point p: CGPoint) -> CGFloat {
+        func sqr(_ x: CGFloat) -> CGFloat { return x * x }
+        func distanceSquared(p1: CGPoint, p2: CGPoint) -> CGFloat {
+            return sqr(p1.x - p2.x) + sqr(p1.y - p2.y)
+        }
+        let v = segment.proximal
+        let w = segment.distal
+        let distSquared = distanceSquared(p1: v, p2: w)
+        if distSquared == 0.0 {
+            return distanceSquared(p1: p, p2: v)
+        }
+        var t = ((p.x - v.x) * (w.x - v.x) + (p.y - v.y) * (w.y - v.y)) / distSquared
+        t = max(0, min(1, t))
+        let resultSquared = distanceSquared(p1: p, p2: CGPoint(x: v.x + t * (w.x - v.x), y: v.y + t * (w.y - v.y)))
+        return sqrt(resultSquared)
     }
 
     static func distanceBetweenPoints(_ p1: CGPoint, _ p2: CGPoint) -> CGFloat {
@@ -89,6 +95,20 @@ class Common {
 
     static private func sqDiag(p: CGPoint) -> CGFloat {
         return p.x * p.x + p.y * p.y
+    }
+
+    // Get x coordinate on segment, knowing endpoints and y coordinate.
+    // See https://math.stackexchange.com/questions/149333/calculate-third-point-with-two-given-point
+    static internal func getX(onSegment segment: Segment, fromY y: CGFloat) -> CGFloat? {
+        let x0 = segment.proximal.x
+        let x1 = segment.distal.x
+        let y0 = segment.proximal.y
+        let y1 = segment.distal.y
+        // Avoid getting close to dividing by zero.
+        guard abs(y1 - y0) > 0.001 else { return nil }
+        // Give up if y is not along segment.
+        guard y < max(y1, y0) && y > min(y1, y0) else { return nil }
+        return ((x1 - x0) * (y - y0)) / (y1 - y0) + x0
     }
 
     // OS functions

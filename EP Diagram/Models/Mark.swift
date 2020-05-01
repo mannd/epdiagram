@@ -68,14 +68,14 @@ struct MarkGroup {
     var middle: MarkSet = []
     var distal: MarkSet = []
 
+    var allMarks: MarkSet {
+        get {
+            proximal.union(middle.union(distal))
+        }
+    }
+
     func highLight(highlight: Mark.Highlight) {
-        for mark in proximal {
-            mark.highlight = highlight
-        }
-        for mark in middle {
-            mark.highlight = highlight
-        }
-        for mark in distal {
+        for mark in allMarks {
             mark.highlight = highlight
         }
     }
@@ -106,9 +106,8 @@ class Mark {
 
     // Highlight is used to show state of a mark visibly.
     enum Highlight {
-        case all
+        case grouped // mark attached to cursor and 
         case selected
-        case grouped
         case linked
         case none
     }
@@ -162,7 +161,7 @@ class Mark {
 
     let id: UUID // each mark as a unique id
 
-    init(_ segment: Segment) {
+    init(segment: Segment) {
         self.segment = segment
         self.id = UUID()
         groupedMarks = MarkGroup()
@@ -171,13 +170,13 @@ class Mark {
     }
 
     convenience init() {
-        self.init(Segment(proximal: CGPoint.zero, distal: CGPoint.zero))
+        self.init(segment: Segment(proximal: CGPoint.zero, distal: CGPoint.zero))
     }
 
     // init a mark that is vertical and spans a region.
     convenience init(positionX: CGFloat) {
-        let position = Segment(proximal: CGPoint(x: positionX, y: 0), distal: CGPoint(x: positionX, y:1.0))
-        self.init(position)
+        let segment = Segment(proximal: CGPoint(x: positionX, y: 0), distal: CGPoint(x: positionX, y:1.0))
+        self.init(segment: segment)
     }
 
     deinit {

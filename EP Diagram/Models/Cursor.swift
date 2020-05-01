@@ -13,21 +13,6 @@ import UIKit
 // of a known interval (1000 msec ideally).  Note that calibration is not
 // necessary to draw ladder diagrams.
 class Cursor: NSObject {
-    // Vertical cursor is vertical and changes x, horizontal changes y position.
-    enum Direction: String, Codable {
-        case horizontal
-        case omnidirectional
-
-        func movement() -> Movement {
-            switch self {
-            case .horizontal:
-                return .horizontal
-            case .omnidirectional:
-                return .omnidirectional
-            }
-        }
-    }
-
     var positionX: CGFloat // the horizontal position of the cursor using cursor view coordinates
     var positionOmniCircleY: CGFloat // point along omnidirectional cursor where circle is shown
     var maxPositionOmniCircleY: CGFloat // lowest point on screen where circle can be draw
@@ -35,7 +20,7 @@ class Cursor: NSObject {
 
     var anchor = Anchor.middle
     var visible = false
-    var direction = Direction.horizontal
+    var movement = Movement.horizontal
 
     // Touches +/- accuracy count as touches.
     let accuracy: CGFloat = 20

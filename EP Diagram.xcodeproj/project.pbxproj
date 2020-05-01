@@ -9,12 +9,14 @@
 /* Begin PBXBuildFile section */
 		8E01D9C722849047000F36FC /* CursorView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8E01D9C622849047000F36FC /* CursorView.swift */; };
 		8E1B6CB8240CAE5300EA88A6 /* ScaledView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8E1B6CB7240CAE5300EA88A6 /* ScaledView.swift */; };
+		8E217D98245B306200CD0CBF /* MathTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8E217D97245B306200CD0CBF /* MathTests.swift */; };
 		8E253DD1244A86CB008CC56B /* ViewController+HamburgerTableDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8E253DD0244A86CB008CC56B /* ViewController+HamburgerTableDelegate.swift */; };
 		8E253DD3244A8799008CC56B /* ViewController+UIScrollViewDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8E253DD2244A8799008CC56B /* ViewController+UIScrollViewDelegate.swift */; };
 		8E253DD5244A8B17008CC56B /* Version.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8E253DD4244A8B17008CC56B /* Version.swift */; };
 		8E25A9AF22E54F7200D62E18 /* CursorTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8E25A9AE22E54F7200D62E18 /* CursorTests.swift */; };
 		8E25A9B122E5505200D62E18 /* LadderViewTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8E25A9B022E5505200D62E18 /* LadderViewTests.swift */; };
 		8E25A9B322E5515D00D62E18 /* LadderTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8E25A9B222E5515D00D62E18 /* LadderTests.swift */; };
+		8E3AD1372459CABF0085BDD4 /* LocationInLadder.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8E3AD1362459CABF0085BDD4 /* LocationInLadder.swift */; };
 		8E4ACA8024478A6E00575538 /* BlackView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8E4ACA7F24478A6E00575538 /* BlackView.swift */; };
 		8E4ACA8224478D7C00575538 /* HamburgerTableViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8E4ACA8124478D7C00575538 /* HamburgerTableViewController.swift */; };
 		8E4ACA842447905E00575538 /* HamburgerCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8E4ACA832447905E00575538 /* HamburgerCell.swift */; };
@@ -62,12 +64,14 @@
 /* Begin PBXFileReference section */
 		8E01D9C622849047000F36FC /* CursorView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CursorView.swift; sourceTree = "<group>"; };
 		8E1B6CB7240CAE5300EA88A6 /* ScaledView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScaledView.swift; sourceTree = "<group>"; };
+		8E217D97245B306200CD0CBF /* MathTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MathTests.swift; sourceTree = "<group>"; };
 		8E253DD0244A86CB008CC56B /* ViewController+HamburgerTableDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "ViewController+HamburgerTableDelegate.swift"; sourceTree = "<group>"; };
 		8E253DD2244A8799008CC56B /* ViewController+UIScrollViewDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "ViewController+UIScrollViewDelegate.swift"; sourceTree = "<group>"; };
 		8E253DD4244A8B17008CC56B /* Version.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Version.swift; sourceTree = "<group>"; };
 		8E25A9AE22E54F7200D62E18 /* CursorTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CursorTests.swift; sourceTree = "<group>"; };
 		8E25A9B022E5505200D62E18 /* LadderViewTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LadderViewTests.swift; sourceTree = "<group>"; };
 		8E25A9B222E5515D00D62E18 /* LadderTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LadderTests.swift; sourceTree = "<group>"; };
+		8E3AD1362459CABF0085BDD4 /* LocationInLadder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocationInLadder.swift; sourceTree = "<group>"; };
 		8E4ACA7F24478A6E00575538 /* BlackView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BlackView.swift; sourceTree = "<group>"; };
 		8E4ACA8124478D7C00575538 /* HamburgerTableViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HamburgerTableViewController.swift; sourceTree = "<group>"; };
 		8E4ACA832447905E00575538 /* HamburgerCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HamburgerCell.swift; sourceTree = "<group>"; };
@@ -192,6 +196,7 @@
 				8E7214DF22EB57FC0062C094 /* MarkTests.swift */,
 				8E9A466623005A600037AEAB /* CursorViewTests.swift */,
 				8EF8B5B62330739F00ADB77A /* ViewControllerTests.swift */,
+				8E217D97245B306200CD0CBF /* MathTests.swift */,
 			);
 			path = "EP DiagramTests";
 			sourceTree = "<group>";
@@ -214,6 +219,7 @@
 				8E55612822A5FEDC00C4D391 /* Cursor.swift */,
 				8ED3B1B52360DA0D00549381 /* Anchor.swift */,
 				8E4ACA852447935600575538 /* HamburgerLayer.swift */,
+				8E3AD1362459CABF0085BDD4 /* LocationInLadder.swift */,
 			);
 			path = Models;
 			sourceTree = "<group>";
@@ -389,6 +395,7 @@
 				8E253DD3244A8799008CC56B /* ViewController+UIScrollViewDelegate.swift in Sources */,
 				8E7D24F12277A00C005A1729 /* ImageView.swift in Sources */,
 				8E7D24C522779DBD005A1729 /* ViewController.swift in Sources */,
+				8E3AD1372459CABF0085BDD4 /* LocationInLadder.swift in Sources */,
 				8E253DD5244A8B17008CC56B /* Version.swift in Sources */,
 				8E1B6CB8240CAE5300EA88A6 /* ScaledView.swift in Sources */,
 				8E8248DD23B53B55001A85F9 /* SeparatorView.swift in Sources */,
@@ -420,6 +427,7 @@
 				8E25A9AF22E54F7200D62E18 /* CursorTests.swift in Sources */,
 				8E9A466723005A600037AEAB /* CursorViewTests.swift in Sources */,
 				8E25A9B322E5515D00D62E18 /* LadderTests.swift in Sources */,
+				8E217D98245B306200CD0CBF /* MathTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

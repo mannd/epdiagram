@@ -14,24 +14,6 @@ struct NearbyMarks {
     var distal: [Mark] = []
 }
 
-/// Struct that pinpoints a point in a ladder.  Note that these tapped areas overlap (labels and marks are in regions).
-struct LocationInLadder {
-    var region: Region?
-    var mark: Mark?
-    var regionSection: RegionSection
-    var regionDivision: RegionDivision
-    var markAnchor: Anchor
-    var regionWasTapped: Bool {
-        region != nil
-    }
-    var labelWasTapped: Bool {
-        regionSection == .labelSection
-    }
-    var markWasTapped: Bool {
-        mark != nil
-    }
-}
-
 // A Ladder is simply a collection of Regions in top bottom order.
 class Ladder {
     private typealias Registry = Dictionary<UUID, Int>
@@ -55,27 +37,35 @@ class Ladder {
     func addMark(at positionX: CGFloat, inRegion region: Region?) -> Mark? {
         if let region = region {
             let mark = Mark(positionX: positionX)
-            region.appendMark(mark)
-            registry[mark.id] = region.index
+            registerMark(mark, inRegion: region)
             return mark
         }
-        else {
-            return nil
+        else { return nil }
+    }
+
+    func addMark(fromSegment segment: Segment, inRegion region: Region?) -> Mark? {
+        if let region = region {
+            let mark = Mark(segment: segment)
+            registerMark(mark, inRegion: region)
+            return mark
         }
+        else { return nil }
     }
 
     func addMark(inRegion region: Region?) -> Mark? {
         if let region = region {
             let mark = Mark()
-            region.appendMark(mark)
-            registry[mark.id] = region.index
+            registerMark(mark, inRegion: region)
             return mark
         }
         else { return nil }
-
     }
 
-    // Assumes mark is in active region, which is always true when mark has a cursor.
+    private func registerMark(_ mark: Mark, inRegion region: Region) {
+        region.appendMark(mark)
+        registry[mark.id] = region.index
+    }
+
     func deleteMark(_ mark: Mark?, inRegion region: Region?) {
         guard let mark = mark, let region = region else { return }
         if let index = region.marks.firstIndex(where: {$0 === mark}) {
@@ -112,69 +102,23 @@ class Ladder {
         else { return nil }
     }
 
-    func getRegionBefore(region: Region?) -> Region? {
-        if let index = getIndex(ofRegion: region) {
-            if index > 0 {
-                return regions[index - 1]
-            }
+    func getRegionBefore(region: Region) -> Region? {
+        if region.index > 0 {
+            return regions[region.index - 1]
         }
-        return nil
+        else { return nil }
     }
 
-    func getRegionAfter(region: Region?) -> Region? {
-        if let index = getIndex(ofRegion: region) {
-            if index < regions.count - 1 {
-                return regions[index + 1]
-            }
+    func getRegionAfter(region: Region) -> Region? {
+        if region.index < regions.count - 1 {
+            return regions[region.index + 1]
         }
-        return nil
+        else { return nil }
     }
-
-//    // FIXME: distance must use screen coordinates, not ladder coordinates.
-//    func getNearbyMarks(mark: Mark, minimum: CGFloat) -> NearbyMarks {
-//        var proximalMarks: [Mark] = []
-//        var distalMarks: [Mark] = []
-//        var middleMarks: [Mark] = []
-//        // check proximal region
-//        if let proximalRegion = getRegionBefore(region: activeRegion) {
-//            for neighboringMark in proximalRegion.marks {
-//                if abs(mark.segment.proximal.x - neighboringMark.segment.distal.x) < minimum {
-//                    proximalMarks.append(neighboringMark)
-//                    break
-//                }
-//            }
-//        }
-//        // check distal region
-//        if let distalRegion = getRegionAfter(region: activeRegion) {
-//            for neighboringMark in distalRegion.marks {
-//                if abs(mark.segment.distal.x - neighboringMark.segment.proximal.x) < minimum {
-//                    distalMarks.append(neighboringMark)
-//                    break
-//                }
-//            }
-//        }
-//        // check in the same region
-//        if let region = activeRegion {
-//            for neighboringMark in region.marks {
-//                if !(neighboringMark === mark) {
-//                    // FIXME: distance must use screen coordinates, not ladder coordinates.
-//                    // compare distance of 2 line segments here and append
-//                    if Common.distance(segment: neighboringMark.segment, point: mark.segment.proximal) < minimum ||
-//                        Common.distance(segment: neighboringMark.segment, point: mark.segment.distal) < minimum {
-//                        middleMarks.append(neighboringMark)
-//                        break
-//                    }
-//                }
-//            }
-//        }
-//        return NearbyMarks(proximalMarks: proximalMarks, middleMarks: middleMarks, distalMarks: distalMarks)
-//    }
 
     func setHighlightForMarks(highlight: Mark.Highlight, inRegion region: Region?) {
         guard let region = region else { return }
-        for mark in region.marks {
-            mark.highlight = highlight
-        }
+        region.marks.forEach { item in item.highlight = highlight }
     }
 
     func setHighlightForAllMarks(highlight: Mark.Highlight) {
@@ -185,17 +129,19 @@ class Ladder {
 
     func unattachAllMarks() {
         for region in regions {
-            for mark in region.marks {
-                mark.attached = false
-            }
+            region.marks.forEach { item in item.attached = false }
+//            for mark in region.marks {
+//                mark.attached = false
+//            }
         }
     }
 
     func unselectAllMarks() {
         for region in regions {
-            for mark in region.marks {
-                mark.selected = false
-            }
+            region.marks.forEach { item in item.selected = false }
+//            for mark in region.marks {
+//                mark.selected = false
+//            }
         }
         selectedMarks = []
     }

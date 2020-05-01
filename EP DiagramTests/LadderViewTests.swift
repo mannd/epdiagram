@@ -54,7 +54,7 @@ class LadderViewTests: XCTestCase {
         let markPosition: Segment = Segment(proximal: CGPoint(x: 543.21, y: 99), distal: CGPoint(x: 329.8, y: 55.4))
         let scale: CGFloat = 1.78
         let offset: CGFloat = 333.45
-        let region = Region()
+        let region = Region(index: 0)
         region.proximalBoundary = 0
         region.distalBoundary = 300
         let regionSegment = Common.translateToRegionSegment(scaledViewSegment: markPosition, region: region, offsetX: offset, scale: scale)
