@@ -460,7 +460,7 @@ final class LadderView: ScaledView {
         return distance < accuracy
     }
 
-    func markWasTapped(position: CGPoint) -> Bool {
+    func positionIsNearMark(position: CGPoint) -> Bool {
         return getLocationInLadder(position: position).markWasTapped
     }
 
@@ -537,15 +537,7 @@ final class LadderView: ScaledView {
         if let mark = mark {
             mark.highlight = highlight
             let attachedMarks = mark.groupedMarks
-            for proximalMark in attachedMarks.proximal {
-                proximalMark.highlight = highlight
-            }
-            for middleMark in attachedMarks.middle {
-                middleMark.highlight = highlight
-            }
-            for distalMark in attachedMarks.distal {
-                distalMark.highlight = highlight
-            }
+            attachedMarks.highLight(highlight: highlight)
         }
     }
 
@@ -644,9 +636,7 @@ final class LadderView: ScaledView {
                     }
                 }
                 else {  // We need to make a new mark.
-                    // Get rid of cursor.
                     cursorViewDelegate.hideCursor(true)
-                    // Reset marks to be unattached and unhighlighted.
                     unattachAttachedMark()
                     unhighlightAllMarks()
                     // Get the third of region for endpoint of new mark.
@@ -677,27 +667,19 @@ final class LadderView: ScaledView {
             if let mark = movingMark {
                 moveMark(mark: mark, scaledViewPosition: position)
             }
-            else {
-                if regionProximalToDragOrigin === locationInLadder.region {
-                    // TODO: need this? Maybe overlap some into next region to allow for finger slips?
+            else if regionOfDragOrigin == locationInLadder.region, let regionOfDragOrigin = regionOfDragOrigin {
+                switch dragOriginDivision {
+                case .proximal:
+                    dragCreatedMark?.segment.distal = translateToRegionPosition(scaledViewPosition: position, region: regionOfDragOrigin)
+                case .distal:
+                    dragCreatedMark?.segment.proximal = translateToRegionPosition(scaledViewPosition: position, region: regionOfDragOrigin)
+                case .middle:
+                    dragCreatedMark?.segment.distal = translateToRegionPosition(scaledViewPosition: position, region: regionOfDragOrigin)
+                default:
+                    break
                 }
-                else if regionDistalToDragOrigin === locationInLadder.region {
-                    // TODO: need this?
-                }
-                else if regionOfDragOrigin === locationInLadder.region, let regionOfDragOrigin = regionOfDragOrigin {
-                    switch dragOriginDivision {
-                    case .proximal:
-                        dragCreatedMark?.segment.distal = translateToRegionPosition(scaledViewPosition: position, region: regionOfDragOrigin)
-                    case .distal:
-                        dragCreatedMark?.segment.proximal = translateToRegionPosition(scaledViewPosition: position, region: regionOfDragOrigin)
-                    case .middle:
-                        dragCreatedMark?.segment.distal = translateToRegionPosition(scaledViewPosition: position, region: regionOfDragOrigin)
-                    default:
-                        break
-                    }
-                }
+                highlightNearbyMarks(dragCreatedMark)
             }
-            highlightNearbyMarks(dragCreatedMark)
         }
         if state == .ended {
             self.undoManager?.endUndoGrouping()
@@ -775,10 +757,8 @@ final class LadderView: ScaledView {
         // unhighlight marks except for mark passed in
         ladder.setHighlightForAllMarks(highlight: .none)
         mark.highlight = .grouped
-        let allMarks = nearbyMarks.allMarks
-        for nearbyMark in allMarks {
-            nearbyMark.highlight = .grouped
-        }
+        mark.groupedMarks.highLight(highlight: .grouped)
+        nearbyMarks.highLight(highlight: .grouped)
     }
 
     func getNearbyMarks(mark: Mark, nearbyDistance: CGFloat) -> MarkGroup {
@@ -897,16 +877,20 @@ final class LadderView: ScaledView {
             distalMark.segment.proximal.x = mark.segment.distal.x
         }
         for middleMark in mark.groupedMarks.middle {
-            P("doing middle mark")
+            if mark == middleMark { break }
             let distanceToProximal = Common.distanceSegmentToPoint(segment: mark.segment, point: middleMark.segment.proximal)
             let distanceToDistal = Common.distanceSegmentToPoint(segment: mark.segment, point: middleMark.segment.distal)
-            let closestEnd = distanceToProximal < distanceToDistal ? middleMark.segment.proximal : middleMark.segment.distal
-            let closestPoint = Common.closestPointOnSegmentToPoint(segment: mark.segment, point:  closestEnd)
             if distanceToProximal < distanceToDistal {
-                middleMark.segment.proximal = closestPoint
+                let x = Common.getX(onSegment: mark.segment, fromY: middleMark.segment.proximal.y)
+                if let x = x {
+                    middleMark.segment.proximal.x = x
+                }
             }
             else {
-                middleMark.segment.distal = closestPoint
+                    let x = Common.getX(onSegment: mark.segment, fromY: middleMark.segment.distal.y)
+                    if let x = x {
+                        middleMark.segment.distal.x = x
+                }
             }
         }
     }
@@ -1393,8 +1377,6 @@ extension LadderView: LadderViewDelegate {
     }
 
     func groupNearbyMarks(mark: Mark) {
-        // FIXME:
-        return
         var minimum: CGFloat = 15
         minimum = minimum / scale
         let nearbyMarks = getNearbyMarks(mark: mark, nearbyDistance: minimum)
@@ -1428,8 +1410,6 @@ extension LadderView: LadderViewDelegate {
         for middleMark in middleMarks {
             let distanceToProximal = Common.distanceSegmentToPoint(segment: middleMark.segment, point: mark.segment.proximal)
             let distanceToDistal = Common.distanceSegmentToPoint(segment: middleMark.segment, point: mark.segment.distal)
-//            let closestEnd = distanceToProximal < distanceToDistal ? mark.segment.proximal : mark.segment.distal
-//            let closestPoint = Common.closestPointOnSegmentToPoint(segment: middleMark.segment, point:  closestEnd)
             if distanceToProximal < distanceToDistal {
                 let x = Common.getX(onSegment: middleMark.segment, fromY: mark.segment.proximal.y)
                 if let x = x {

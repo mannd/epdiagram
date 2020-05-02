@@ -12,7 +12,7 @@ import UIKit
 @available(iOS 13.0, *)
 extension LadderView: UIContextMenuInteractionDelegate {
     func contextMenuInteraction(_ interaction: UIContextMenuInteraction, configurationForMenuAtLocation location: CGPoint) -> UIContextMenuConfiguration? {
-        let markFound = markWasTapped(position: location)
+        let markWasTapped = positionIsNearMark(position: location)
         setPressedMark(position: location)
         return UIContextMenuConfiguration(identifier: nil, previewProvider: nil) { suggestedActions in
             let solid = UIAction(title: L("Solid")) { action in
@@ -43,7 +43,7 @@ extension LadderView: UIContextMenuInteractionDelegate {
                 self.verticalizeToDistal()
             }
             // Create and return a UIMenu with all of the actions as children
-            if markFound {
+            if markWasTapped {
                 return UIMenu(title: L("Edit mark"), children: [style, verticalizeToProximal, verticalizeToDistal, unlink, delete, deleteAll])
             }
             else {

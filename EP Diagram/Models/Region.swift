@@ -25,7 +25,7 @@ enum RegionDivision {
 // A Region is a collection of Marks, in left to right order.  Positions are
 // vertical, i.e. Y axis.  A Region has a labelSection such as "A" or "AV" and
 // a markSection.  Region boundaries are set by the calling ScaledView.
-class Region {
+class Region: Equatable {
     var proximalBoundary: CGFloat = 0
     var distalBoundary: CGFloat = 0
     var activated: Bool = false
@@ -38,6 +38,10 @@ class Region {
 
     init(index: Int) {
         self.index = index
+    }
+
+    static func == (lhs: Region, rhs: Region) -> Bool {
+        return lhs.index == rhs.index
     }
 
     func appendMark(_ mark: Mark) {
