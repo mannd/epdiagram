@@ -147,7 +147,8 @@ final class ViewController: UIViewController {
             let linkButton = UIBarButtonItem(title: linkTitle, style: .plain, target: self, action: #selector(linkMarks))
             undoButton = UIBarButtonItem(title: undoTitle, style: .plain, target: self, action: #selector(undo))
             redoButton = UIBarButtonItem(title: redoTitle, style: .plain, target: self, action: #selector(redo))
-            mainMenuButtons = [calibrateButton, selectButton, linkButton, undoButton, redoButton]
+            let spacer = UIBarButtonItem(barButtonSystemItem: .flexibleSpace, target: nil, action: nil)
+            mainMenuButtons = [calibrateButton, spacer, selectButton, spacer, linkButton, spacer, undoButton, spacer, redoButton]
         }
         // Note: set toolbar items this way, not directly (i.e. toolbar.items = something).
         setToolbarItems(mainMenuButtons, animated: false)
@@ -240,6 +241,7 @@ final class ViewController: UIViewController {
     }
 
     @objc func undo() {
+        os_log("undo action", log: OSLog.action, type: .info)
         if self.undoManager?.canUndo ?? false {
             self.undoManager?.undo()
             ladderView.setNeedsDisplay()
@@ -247,6 +249,7 @@ final class ViewController: UIViewController {
     }
 
     @objc func redo() {
+        os_log("redo action", log: OSLog.action, type: .info)
         if self.undoManager?.canRedo ?? false {
             self.undoManager?.redo()
             ladderView.setNeedsDisplay()

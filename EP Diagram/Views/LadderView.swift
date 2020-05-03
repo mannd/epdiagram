@@ -369,7 +369,7 @@ final class LadderView: ScaledView {
                     ladder.linkedMarks.append(linkedMark)
                     linkedMark.highlight = .linked
                     groupNearbyMarks(mark: linkedMark)
-
+                    addGroupedMiddleMarks(ofMark: linkedMark)
                 }
             }
         }
@@ -659,13 +659,13 @@ final class LadderView: ScaledView {
                         assert(false, "Making a mark with a .none regionDivision!")
                     }
                     dragCreatedMark?.highlight = .grouped
-                    highlightNearbyMarks(dragCreatedMark)
                 }
             }
         }
         if state == .changed {
             if let mark = movingMark {
                 moveMark(mark: mark, scaledViewPosition: position)
+                highlightNearbyMarks(movingMark)
             }
             else if regionOfDragOrigin == locationInLadder.region, let regionOfDragOrigin = regionOfDragOrigin {
                 switch dragOriginDivision {
@@ -686,6 +686,7 @@ final class LadderView: ScaledView {
             if let movingMark = movingMark {
                 swapEndsIfNeeded(mark: movingMark)
                 groupNearbyMarks(mark: movingMark)
+                addGroupedMiddleMarks(ofMark: movingMark)
                 assessBlockAndImpulseOrigin(mark: movingMark)
             }
             else if let dragCreatedMark = dragCreatedMark {
@@ -695,6 +696,7 @@ final class LadderView: ScaledView {
                 else {
                     swapEndsIfNeeded(mark: dragCreatedMark)
                     groupNearbyMarks(mark: dragCreatedMark)
+                    addGroupedMiddleMarks(ofMark: dragCreatedMark)
                     assessBlockAndImpulseOrigin(mark: dragCreatedMark)
                 }
             }
@@ -784,6 +786,7 @@ final class LadderView: ScaledView {
         for neighboringMark in activeRegion.marks {
             if assessCloseness(ofMark: mark, inRegion: activeRegion, toNeighboringMark: neighboringMark, inNeighboringRegion: activeRegion, usingNearbyDistance: nearbyDistance) {
                 middleMarks.insert(neighboringMark)
+                P("found middle mark")
             }
         }
         return MarkGroup(proximal: proximalMarks, middle: middleMarks, distal: distalMarks)
@@ -792,12 +795,24 @@ final class LadderView: ScaledView {
     private func assessCloseness(ofMark mark: Mark, inRegion region: Region, toNeighboringMark neighboringMark: Mark, inNeighboringRegion neighboringRegion: Region, usingNearbyDistance nearbyDistance: CGFloat) -> Bool {
         guard mark != neighboringMark else { return false }
         var isClose = false
+        // To get minimum distance between two line segments, must get minimum distances between each segment and each endpoint of the other segment, and take minimum of all those.
         let ladderViewPositionNeighboringMarkSegment = translateToScaledViewSegment(regionSegment: neighboringMark.segment, region: neighboringRegion)
         let ladderViewPositionMarkProximal = translateToScaledViewPosition(regionPosition: mark.segment.proximal, region: region)
         let ladderViewPositionMarkDistal = translateToScaledViewPosition(regionPosition: mark.segment.distal, region: region)
-        let distanceProximal = Common.distanceSegmentToPoint(segment: ladderViewPositionNeighboringMarkSegment, point: ladderViewPositionMarkProximal)
-        let distanceDistal = Common.distanceSegmentToPoint(segment: ladderViewPositionNeighboringMarkSegment, point: ladderViewPositionMarkDistal)
-        if distanceProximal < nearbyDistance || distanceDistal < nearbyDistance {
+        let distanceToNeighboringMarkSegmentProximal = Common.distanceSegmentToPoint(segment: ladderViewPositionNeighboringMarkSegment, point: ladderViewPositionMarkProximal)
+        let distanceToNeighboringMarkSegmentDistal = Common.distanceSegmentToPoint(segment: ladderViewPositionNeighboringMarkSegment, point: ladderViewPositionMarkDistal)
+
+        let ladderViewPositionMarkSegment = translateToScaledViewSegment(regionSegment: mark.segment, region: region)
+        let ladderViewPositionNeighboringMarkProximal = translateToScaledViewPosition(regionPosition: neighboringMark.segment.proximal, region: neighboringRegion)
+        let ladderViewPositionNeighboringMarkDistal = translateToScaledViewPosition(regionPosition: neighboringMark.segment.distal, region: neighboringRegion)
+        let distanceToMarkSegmentProximal = Common.distanceSegmentToPoint(segment: ladderViewPositionMarkSegment, point: ladderViewPositionNeighboringMarkProximal)
+        let distanceToMarkSegmentDistal = Common.distanceSegmentToPoint(segment: ladderViewPositionMarkSegment, point: ladderViewPositionNeighboringMarkDistal)
+
+        P("distanceProximal = \(distanceToNeighboringMarkSegmentProximal) distanceDistal = \(distanceToNeighboringMarkSegmentDistal)")
+        if distanceToNeighboringMarkSegmentProximal < nearbyDistance
+            || distanceToNeighboringMarkSegmentDistal < nearbyDistance
+            || distanceToMarkSegmentProximal < nearbyDistance
+            || distanceToMarkSegmentDistal < nearbyDistance {
             isClose = true
         }
         return isClose
@@ -1374,6 +1389,7 @@ extension LadderView: LadderViewDelegate {
     func groupMarksNearbyAttachedMark() {
         guard let attachedMark = attachedMark else { return }
         groupNearbyMarks(mark: attachedMark)
+        addGroupedMiddleMarks(ofMark: attachedMark)
     }
 
     func groupNearbyMarks(mark: Mark) {
@@ -1408,28 +1424,46 @@ extension LadderView: LadderViewDelegate {
             distalMark.groupedMarks.proximal.insert(mark)
         }
         for middleMark in middleMarks {
-            let distanceToProximal = Common.distanceSegmentToPoint(segment: middleMark.segment, point: mark.segment.proximal)
-            let distanceToDistal = Common.distanceSegmentToPoint(segment: middleMark.segment, point: mark.segment.distal)
+            // FIXME: this doesn't work for vertical mark.
+            var distanceToProximal = Common.distanceSegmentToPoint(segment: middleMark.segment, point: mark.segment.proximal)
+            distanceToProximal = min(distanceToProximal, Common.distanceSegmentToPoint(segment: mark.segment, point: middleMark.segment.proximal))
+            var distanceToDistal = Common.distanceSegmentToPoint(segment: middleMark.segment, point: mark.segment.distal)
+            distanceToDistal = min(distanceToDistal, Common.distanceSegmentToPoint(segment: mark.segment, point: middleMark.segment.distal))
             if distanceToProximal < distanceToDistal {
                 let x = Common.getX(onSegment: middleMark.segment, fromY: mark.segment.proximal.y)
                 if let x = x {
                     mark.segment.proximal.x = x
-                    mark.groupedMarks.middle.insert(middleMark)
-                    middleMark.groupedMarks.middle.insert(mark)
+                }
+                else { // vertical mark
+                    mark.segment.proximal.x = middleMark.segment.proximal.x
+                    mark.segment.distal.x = middleMark.segment.proximal.x
                 }
             }
             else {
                 let x = Common.getX(onSegment: middleMark.segment, fromY: mark.segment.distal.y)
                 if let x = x {
                     mark.segment.distal.x = x
-                    mark.groupedMarks.middle.insert(middleMark)
-                    middleMark.groupedMarks.middle.insert(mark)
+                }
+                else { // vertical mark
+                    mark.segment.proximal.x = middleMark.segment.distal.x
+                    mark.segment.distal.x = middleMark.segment.distal.x
                 }
             }
+            mark.groupedMarks.middle.insert(middleMark)
+            middleMark.groupedMarks.middle.insert(mark)
             if let activeRegion = activeRegion {
                 adjustCursor(mark: mark, region: activeRegion)
             }
         }
+    }
+
+    // FIXME: this should add all grouped middle marks together, but doesn't seem to work.
+    func addGroupedMiddleMarks(ofMark mark: Mark) {
+        var middleMarks = mark.groupedMarks.middle
+        for m in middleMarks {
+            middleMarks = middleMarks.union(m.groupedMarks.middle)
+        }
+        mark.groupedMarks.middle = middleMarks
     }
 
     func getPositionYInView(positionY: CGFloat, view: UIView) -> CGFloat {
