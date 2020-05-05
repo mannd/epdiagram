@@ -58,12 +58,12 @@ class LadderTests: XCTestCase {
     func testGetRegionIndex() {
         let region = ladder.regions[1]
         XCTAssertEqual(ladder.getIndex(ofRegion: region), 1)
-        XCTAssert(ladder.getRegionAfter(region: region) === ladder.regions[2])
-        XCTAssert(ladder.getRegionBefore(region: region) === ladder.regions[0])
+        XCTAssert(ladder.getRegionAfter(region: region) == ladder.regions[2])
+        XCTAssert(ladder.getRegionBefore(region: region) == ladder.regions[0])
         let regionBefore = ladder.getRegionBefore(region: region)
-        XCTAssertNil(ladder.getRegionBefore(region: regionBefore))
+        XCTAssertNil(ladder.getRegionBefore(region: regionBefore!))
         let regionAfter = ladder.getRegionAfter(region: region)
-        XCTAssertNil(ladder.getRegionAfter(region: regionAfter))
+        XCTAssertNil(ladder.getRegionAfter(region: regionAfter!))
     }
 
     func testRegionsEqual() {

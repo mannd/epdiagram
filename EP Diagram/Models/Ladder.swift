@@ -63,6 +63,7 @@ class Ladder {
 
     private func registerMark(_ mark: Mark, inRegion region: Region) {
         region.appendMark(mark)
+        mark.anchor = defaultAnchor(forMark: mark)
         registry[mark.id] = region.index
     }
 
@@ -130,20 +131,26 @@ class Ladder {
     func unattachAllMarks() {
         for region in regions {
             region.marks.forEach { item in item.attached = false }
-//            for mark in region.marks {
-//                mark.attached = false
-//            }
         }
     }
 
     func unselectAllMarks() {
         for region in regions {
             region.marks.forEach { item in item.selected = false }
-//            for mark in region.marks {
-//                mark.selected = false
-//            }
         }
         selectedMarks = []
+    }
+
+    func availableAnchors(forMark mark: Mark) -> [Anchor] {
+        return defaultAnchors()
+    }
+
+    private func defaultAnchors() -> [Anchor] {
+        return [.middle, .proximal, .distal]
+    }
+
+    func defaultAnchor(forMark mark: Mark) -> Anchor {
+        return availableAnchors(forMark: mark)[0]
     }
 
     // Returns a basic ladder (A, AV, V).

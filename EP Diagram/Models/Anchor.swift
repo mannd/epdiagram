@@ -15,5 +15,5 @@ enum Anchor: Int {
     case distal
     case none
 
-    static let defaultAnchor = Anchor.middle
+//    static let defaultAnchor = Anchor.middle
 }

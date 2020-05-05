@@ -65,6 +65,18 @@ class Common {
         return sqrt(resultSquared)
     }
 
+    static func distance(fromSegment s1: Segment, toSegment s2: Segment) -> CGFloat {
+        let min1 = min(distanceSegmentToPoint(segment: s1, point: s2.proximal),
+                       distanceSegmentToPoint(segment: s1, point: s2.distal))
+        let min2 = min(distanceSegmentToPoint(segment: s2, point: s1.proximal),
+                       distanceSegmentToPoint(segment: s2, point: s1.distal))
+        return min(min1, min2)
+    }
+
+//    private func cross(s1: Segment, s2: Segment) -> CGFloat {
+//        return (s1.)
+//    }
+
     static func distanceBetweenPoints(_ p1: CGPoint, _ p2: CGPoint) -> CGFloat {
         let diffX = p1.x - p2.x
         let diffY = p1.y - p2.y

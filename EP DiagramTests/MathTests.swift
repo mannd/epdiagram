@@ -41,8 +41,20 @@ class MathTests: XCTestCase {
         XCTAssertTrue(Common.getX(onSegment: testSegment3, fromY: 0.90) == nil, "x should be constant but this y is still out of range and should be nil")
         let testSegment4 = Segment(proximal: CGPoint(x: 0, y: 0), distal: CGPoint(x: 1.0, y: 1.0))
         XCTAssertTrue(Common.getX(onSegment: testSegment4, fromY: 0.5) == 0.5, "slope is 1, points should be equal x and y")
-        
-        
+    }
+
+    func testSegmentDistances() {
+        // parallel lines
+        let s1 = Segment(proximal: CGPoint(x: 0, y: 100), distal: CGPoint(x: 0, y: 50))
+        let s2 = Segment(proximal: CGPoint(x: 50, y: 100), distal: CGPoint(x: 50, y: 50))
+        XCTAssertTrue(Common.distance(fromSegment: s1, toSegment: s2) == 50, "should be 50")
+        let s3 = s1
+        XCTAssertTrue(Common.distance(fromSegment: s1, toSegment: s3) == 0, "segments are equal")
+        // segments intersect
+        let s4 = Segment(proximal: CGPoint(x: 0, y: 0), distal: CGPoint(x: 1, y: 1))
+        let s5 = Segment(proximal: CGPoint(x: 1, y: 0), distal: CGPoint(x: 0, y: 1))
+        P("distance = \(Common.distance(fromSegment: s4, toSegment: s5))")
+        XCTAssertTrue(Common.distance(fromSegment: s4, toSegment: s5) == 0, "segments intersect")
     }
 
 }
