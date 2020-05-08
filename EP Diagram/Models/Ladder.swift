@@ -19,7 +19,6 @@ class Ladder {
     private typealias Registry = Dictionary<UUID, Int>
 
     private var registry: Registry = [:]
-    private var deletedRegistry: Registry = [:]
 
     var regions: [Region] = []
     var numRegions: Int {
@@ -36,6 +35,7 @@ class Ladder {
 
     // TODO: Does region have to be optional?  Consider refactor away optionality.
     // addMark() functions.  All require a Region in which to add the mark.  Each new mark is registered to that region.  All return addedMark or nil if region is nil.
+    // FIXME: should undo, redo be in ladder, and not in the super classes?
     func addMark(at positionX: CGFloat, inRegion region: Region?) -> Mark? {
         return registerAndAppendMark(Mark(positionX: positionX), toRegion: region)
     }

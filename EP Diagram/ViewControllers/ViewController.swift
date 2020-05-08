@@ -270,44 +270,6 @@ final class ViewController: UIViewController {
 
     // MARK: - Touches
 
-    func undoablyAddMarkWithAttachedCursor(position: CGPoint) {
-        os_log("undoablyAddMarkWithAttachedCursro(CGPoint) - ViewController", log: OSLog.debugging, type: .debug)
-        self.undoManager?.registerUndo(withTarget: self, handler: { target in
-            target.redoablyUnAddMarkWithAttachedCursor(position: position)
-        })
-        NotificationCenter.default.post(name: .didUndoableAction, object: nil)
-        addMarkWithAttachedCursor(position: position)
-    }
-
-    func redoablyUnAddMarkWithAttachedCursor(position: CGPoint) {
-        os_log("redoablyUnAddMarkWithAttachedCursro(CGPoint) - ViewController", log: OSLog.debugging, type: .debug)
-        self.undoManager?.registerUndo(withTarget: self, handler: { target in
-            target.undoablyAddMarkWithAttachedCursor(position: position)
-        })
-        NotificationCenter.default.post(name: .didUndoableAction, object: nil)
-        unAddMarkWithAttachedCursor(position: position)
-    }
-
-
-    private func addMarkWithAttachedCursor(position: CGPoint) {
-        os_log("addMarkWithAttachedCursor(CGPoint) - ViewController", log: OSLog.debugging, type: .debug)
-        // imageScrollView starts at x = 0, contentInset shifts view to right, and the left margin is negative.
-        if position.x > 0 {
-            cursorView.putCursor(imageScrollViewPosition: position)
-            cursorView.hideCursor(false)
-            cursorView.attachMark(imageScrollViewPositionX: position.x)
-            cursorView.setCursorHeight()
-            cursorView.setNeedsDisplay()
-        }
-    }
-
-    private func unAddMarkWithAttachedCursor(position: CGPoint) {
-        os_log("unAddMarkWithAttachedCursor(CGPoint) - ViewController", log: OSLog.debugging, type: .debug)
-        ladderView.deleteAttachedMark()
-        cursorView.hideCursor(true)
-        cursorView.setNeedsDisplay()
-    }
-
     @objc func singleTap(tap: UITapGestureRecognizer) {
         os_log("singleTap - ViewController", log: OSLog.touches, type: .info)
         guard cursorView.allowTaps else { return }
@@ -322,6 +284,7 @@ final class ViewController: UIViewController {
         else {
             let position = tap.location(in: imageScrollView)
             cursorView.undoablyAddMarkWithAttachedCursor(position: position)
+//            undoablyAddMarkWithAttachedCursor(position: position)
         }
         setViewsNeedDisplay()
     }

@@ -22,8 +22,9 @@ protocol LadderViewDelegate: AnyObject {
     func hasActiveRegion() -> Bool
     func unhighlightAllMarks()
     func deleteAttachedMark()
+    func deleteAttachedMarkWithoutUndo()
     func groupMarksNearbyAttachedMark()
-    func addAttachedMark(imageScrollViewPositionX: CGFloat)
+    func addAttachedMark(scaledViewPositionX: CGFloat)
     func unattachAttachedMark()
     func groupNearbyMarks(mark: Mark)
     func moveAttachedMark(position: CGPoint)
@@ -297,6 +298,7 @@ final class LadderView: ScaledView {
             else { // make mark and attach cursor
                 let mark = addMark(scaledViewPositionX: positionX)
                 if let mark = mark {
+                    undoablyAddMark(mark: mark, region: activeRegion)
                     unhighlightAllMarks()
                     mark.highlight = .attached
                     mark.anchor = ladder.defaultAnchor(forMark: mark)
@@ -343,16 +345,22 @@ final class LadderView: ScaledView {
             if regionDifference > 0 {
                 activeRegion = ladder.getRegion(index: firstRegionIndex + 1)
                 let segment = Segment(proximal: CGPoint(x: marks[0].segment.distal.x, y: 0), distal: CGPoint(x: marks[1].segment.proximal.x, y: 1.0))
-                let newMark = ladder.addMark(fromSegment: segment, inRegion: activeRegion)
-                newMark?.highlight = .linked
-                return newMark
+                let mark = ladder.addMark(fromSegment: segment, inRegion: activeRegion)
+                if let mark = mark {
+                    undoablyAddMark(mark: mark, region: activeRegion)
+                }
+                mark?.highlight = .linked
+                return mark
             }
             if regionDifference < 0 {
                 activeRegion = ladder.getRegion(index: firstRegionIndex - 1)
                 let segment = Segment(proximal: CGPoint(x: marks[1].segment.distal.x, y: 0), distal: CGPoint(x: marks[0].segment.proximal.x, y: 1.0))
-                let newMark = ladder.addMark(fromSegment: segment, inRegion: activeRegion)
-                newMark?.highlight = .linked
-                return newMark
+                let mark = ladder.addMark(fromSegment: segment, inRegion: activeRegion)
+                if let mark = mark {
+                    undoablyAddMark(mark: mark, region: activeRegion)
+                }
+                mark?.highlight = .linked
+                return mark
             }
         }
         return nil
@@ -411,6 +419,7 @@ final class LadderView: ScaledView {
                     if firstTappedMarkRegionIndex < regionIndex {
                         P("add mark and link to distal end of linked mark")
                         P("tapRegionPosition = \(tapRegionPosition)")
+                        // FIXME: need to undoablyAddMark() here
                         let newMark = addMark(regionPositionX: firstTappedMark.segment.distal.x)
                         newMark?.segment.distal = tapRegionPosition
                     }
@@ -597,7 +606,7 @@ final class LadderView: ScaledView {
 
     // See https://stackoverflow.com/questions/36491789/using-nsundomanager-how-to-register-undos-using-swift-closures/36492619#36492619
     private func undoablyDeleteMark(mark: Mark, region: Region?) {
-        os_log("undoablyUndeleteMark(Mark:Region?)", log: OSLog.debugging, type: .debug)
+        os_log("undoablyDeleteMark(Mark:Region?)", log: OSLog.debugging, type: .debug)
         self.undoManager?.registerUndo(withTarget: self, handler: { target in
             target.redoablyUndeleteMark(mark: mark, region: region)
         })
@@ -612,6 +621,14 @@ final class LadderView: ScaledView {
         })
         NotificationCenter.default.post(name: .didUndoableAction, object: nil)
         undeleteMark(mark: mark, region: region)
+    }
+
+    private func undoablyAddMark(mark: Mark, region: Region?) {
+        os_log("undoablyAddMark(mark:region:)", log: OSLog.debugging, type: .debug)
+        self.undoManager?.registerUndo(withTarget: self, handler: { target in
+            target.undoablyDeleteMark(mark: mark, region: region)
+        })
+        NotificationCenter.default.post(name: .didUndoableAction, object: nil)
     }
 
     private func deleteMark(mark: Mark, region: Region?) {
@@ -637,8 +654,7 @@ final class LadderView: ScaledView {
     private func deleteMark(_ mark: Mark?) {
         os_log("deleteMark(_:) - LadderView", log: OSLog.debugging, type: .debug)
         if let mark = mark {
-//            undoablyDeleteMark(mark: mark, region: activeRegion)
-            deleteMark(mark: mark, region: activeRegion)
+            undoablyDeleteMark(mark: mark, region: activeRegion)
         }
     }
 
@@ -674,6 +690,7 @@ final class LadderView: ScaledView {
                     dragOriginDivision = locationInLadder.regionDivision
                     switch dragOriginDivision {
                     case .proximal:
+                        // FIXME: undoablyAddMark()???
                         dragCreatedMark = addMark(scaledViewPositionX: position.x)
                         dragCreatedMark?.segment.proximal.y = 0
                         dragCreatedMark?.segment.distal.y = 0.5
@@ -688,6 +705,9 @@ final class LadderView: ScaledView {
                         dragCreatedMark?.segment.distal.y = 1
                     case .none:
                         assert(false, "Making a mark with a .none regionDivision!")
+                    }
+                    if let dragCreatedMark = dragCreatedMark {
+                        undoablyAddMark(mark: dragCreatedMark, region: activeRegion)
                     }
                     dragCreatedMark?.highlight = .attached
                 }
@@ -837,7 +857,6 @@ final class LadderView: ScaledView {
         let distanceToMarkSegmentProximal = Common.distanceSegmentToPoint(segment: ladderViewPositionMarkSegment, point: ladderViewPositionNeighboringMarkProximal)
         let distanceToMarkSegmentDistal = Common.distanceSegmentToPoint(segment: ladderViewPositionMarkSegment, point: ladderViewPositionNeighboringMarkDistal)
 
-        P("distanceProximal = \(distanceToNeighboringMarkSegmentProximal) distanceDistal = \(distanceToNeighboringMarkSegmentDistal)")
         if distanceToNeighboringMarkSegmentProximal < nearbyDistance
             || distanceToNeighboringMarkSegmentDistal < nearbyDistance
             || distanceToMarkSegmentProximal < nearbyDistance
@@ -1450,7 +1469,7 @@ extension LadderView: LadderViewDelegate {
         ladder.unselectAllMarks()
     }
 
-    func addAttachedMark(imageScrollViewPositionX positionX: CGFloat) {
+    func addAttachedMark(scaledViewPositionX positionX: CGFloat) {
         attachedMark = ladder.addMark(at: positionX / scale, inRegion: activeRegion)
         attachedMark?.attached = true
         attachedMark?.highlight = .attached
@@ -1568,6 +1587,10 @@ extension LadderView: LadderViewDelegate {
         deleteMark(attachedMark)
     }
 
+    func deleteAttachedMarkWithoutUndo() {
+        os_log("deleteAttachedMarkWithoutUndo() - LadderView", log: OSLog.debugging, type: .debug)
+        ladder.deleteMark(attachedMark, inRegion: activeRegion)
+    }
 
     func highlightGroupedMarks(highlight: Mark.Highlight) {
         guard let attachedMark = attachedMark else { return }
