@@ -28,7 +28,7 @@ extension LadderView: UIContextMenuInteractionDelegate {
             // Use .displayInline option to show menu inline with separator.
             //           let style = UIMenu(title: L("Style..."), options: .displayInline,  children: [solid, dashed, dotted])
             let unlink = UIAction(title: L("Unlink")) { action in
-                self.unlinkPressedMark()
+                self.ungroupPressedMark()
             }
             let delete = UIAction(title: L("Delete"), image: UIImage(systemName: "trash"), attributes: .destructive) { action in
                 self.deletePressedMark()
@@ -36,15 +36,16 @@ extension LadderView: UIContextMenuInteractionDelegate {
             let deleteAll = UIAction(title: L("Delete all in region"), image: UIImage(systemName: "trash"), attributes: .destructive) { action in
                 self.deleteAllInRegion()
             }
-            let verticalizeToProximal = UIAction(title: L("Straighten mark to proximal endpoint")) { action in
-                self.verticalizeToProximal()
+            // FIXME: make sure we won't move grouped marks, or disconnect them when straightening.
+            let straightenToProximal = UIAction(title: L("Straighten mark to proximal endpoint")) { action in
+                self.straightenToProximal()
             }
-            let verticalizeToDistal = UIAction(title: L("Straighten mark to distal endpoint")) { action in
-                self.verticalizeToDistal()
+            let straightenToDistal = UIAction(title: L("Straighten mark to distal endpoint")) { action in
+                self.straightenToDistal()
             }
             // Create and return a UIMenu with all of the actions as children
             if markWasTapped {
-                return UIMenu(title: L("Edit mark"), children: [style, verticalizeToProximal, verticalizeToDistal, unlink, delete, deleteAll])
+                return UIMenu(title: L("Edit mark"), children: [style, straightenToProximal, straightenToDistal, unlink, delete, deleteAll])
             }
             else {
                 return UIMenu(title: "", children: [delete, deleteAll])

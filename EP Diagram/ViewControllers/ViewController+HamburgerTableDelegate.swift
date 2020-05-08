@@ -78,6 +78,7 @@ extension ViewController: HamburgerTableDelegate, UIImagePickerControllerDelegat
         }
         picker.sourceType = .camera
         present(picker, animated: true, completion: nil)
+        resetLadder()
     }
 
     func selectPhoto() {
@@ -87,6 +88,7 @@ extension ViewController: HamburgerTableDelegate, UIImagePickerControllerDelegat
         picker.allowsEditing = true
         picker.sourceType = .photoLibrary
         present(picker, animated: true, completion: nil)
+        resetLadder()
     }
 
     func about() {
@@ -99,6 +101,14 @@ extension ViewController: HamburgerTableDelegate, UIImagePickerControllerDelegat
 
     func openDiagram() {
         os_log("Open diagram", log: OSLog.action, type: .info)
+        resetLadder()
+    }
+
+    private func resetLadder() {
+        ladderView.resetLadder()
+        undoManager?.removeAllActions()
+        updateUndoRedoButtons()
+        setViewsNeedDisplay()
     }
 
     func saveDiagram() {
@@ -129,7 +139,12 @@ extension ViewController: HamburgerTableDelegate, UIImagePickerControllerDelegat
         }
     }
 
+    @objc func addMarks() {
+        os_log("addMarks", log: OSLog.action, type: .info)
+    }
+
     func showHamburgerMenu() {
+        os_log("showHamburgerMenu", log: OSLog.action, type: .info)
         hamburgerTableViewController?.reloadData()
         constraintHamburgerLeft.constant = 0
         hamburgerMenuIsOpen = true
@@ -144,6 +159,7 @@ extension ViewController: HamburgerTableDelegate, UIImagePickerControllerDelegat
     }
 
     func hideHamburgerMenu() {
+        os_log("hideHamburgerMenu", log: OSLog.action, type: .info)
         self.constraintHamburgerLeft.constant = -self.constraintHamburgerWidth.constant;
         hamburgerMenuIsOpen = false
         navigationController?.setToolbarHidden(false, animated: true)
