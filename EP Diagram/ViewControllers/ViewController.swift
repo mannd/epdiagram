@@ -99,11 +99,14 @@ final class ViewController: UIViewController {
         }
 
         navigationItem.setLeftBarButton(UIBarButtonItem(image: UIImage(named: "hamburger"), style: .plain, target: self, action: #selector(toggleHamburgerMenu)), animated: true)
+        // FIXME: right button maybe to toggle adding marks quickly?
+        navigationItem.setRightBarButton(UIBarButtonItem(barButtonSystemItem: .add, target: self, action: #selector(addMarks)), animated: true)
+
     }
 
     @objc func onDidUndoableAction(_ notification: Notification) {
         if notification.name == .didUndoableAction {
-            manageButtons()
+            updateUndoRedoButtons()
         }
     }
 
@@ -114,7 +117,7 @@ final class ViewController: UIViewController {
         imageScrollView.contentInset = UIEdgeInsets(top: 0, left: leftMargin, bottom: 0, right: 0)
         showMainMenu()
         NotificationCenter.default.addObserver(self, selector: #selector(onDidUndoableAction(_:)), name: .didUndoableAction, object: nil)
-        manageButtons()
+        updateUndoRedoButtons()
         resetViews()
     }
 
@@ -256,7 +259,7 @@ final class ViewController: UIViewController {
         }
     }
 
-    func manageButtons() {
+    func updateUndoRedoButtons() {
         // DispatchQueue here forces UI to finish up its tasks before performing below on the main thread.
         // If not used, undoManager.canUndo/Redo is not updated before this is called.
         DispatchQueue.main.async {
@@ -266,40 +269,6 @@ final class ViewController: UIViewController {
     }
 
     // MARK: - Touches
-
-    private func undoablyAddMarkWithAttachedCursor(position: CGPoint) {
-        self.undoManager?.registerUndo(withTarget: self, handler: { target in
-            target.redoablyUnAddMarkWithAttachedCursor(position: position)
-        })
-        NotificationCenter.default.post(name: .didUndoableAction, object: nil)
-        addMarkWithAttachedCursor(position: position)
-    }
-
-    private func redoablyUnAddMarkWithAttachedCursor(position: CGPoint) {
-        self.undoManager?.registerUndo(withTarget: self, handler: { target in
-            target.undoablyAddMarkWithAttachedCursor(position: position)
-        })
-        NotificationCenter.default.post(name: .didUndoableAction, object: nil)
-        unAddMarkWithAttachedCursor(position: position)
-    }
-
-
-    private func addMarkWithAttachedCursor(position: CGPoint) {
-        // imageScrollView starts at x = 0, contentInset shifts view to right, and the left margin is negative.
-        if position.x > 0 {
-            cursorView.putCursor(imageScrollViewPosition: position)
-            cursorView.hideCursor(false)
-            cursorView.attachMark(imageScrollViewPositionX: position.x)
-            cursorView.setCursorHeight()
-            cursorView.setNeedsDisplay()
-        }
-    }
-
-    private func unAddMarkWithAttachedCursor(position: CGPoint) {
-        ladderView.deleteAttachedMark()
-        cursorView.hideCursor(true)
-        cursorView.setNeedsDisplay()
-    }
 
     @objc func singleTap(tap: UITapGestureRecognizer) {
         os_log("singleTap - ViewController", log: OSLog.touches, type: .info)
@@ -314,7 +283,8 @@ final class ViewController: UIViewController {
         }
         else {
             let position = tap.location(in: imageScrollView)
-            undoablyAddMarkWithAttachedCursor(position: position)
+            cursorView.undoablyAddMarkWithAttachedCursor(position: position)
+//            undoablyAddMarkWithAttachedCursor(position: position)
         }
         setViewsNeedDisplay()
     }

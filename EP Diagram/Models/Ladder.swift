@@ -18,7 +18,7 @@ struct NearbyMarks {
 class Ladder {
     private typealias Registry = Dictionary<UUID, Int>
 
-    private var registry: Registry = [ : ]
+    private var registry: Registry = [:]
 
     var regions: [Region] = []
     var numRegions: Int {
@@ -33,38 +33,22 @@ class Ladder {
     var selectedMarks: [Mark] = []
     var linkedMarks: [Mark] = []
 
-    // By default, a new mark is vertical and spans the region.
+    // TODO: Does region have to be optional?  Consider refactor away optionality.
+    // addMark() functions.  All require a Region in which to add the mark.  Each new mark is registered to that region.  All return addedMark or nil if region is nil.
+    // FIXME: should undo, redo be in ladder, and not in the super classes?
     func addMark(at positionX: CGFloat, inRegion region: Region?) -> Mark? {
-        if let region = region {
-            let mark = Mark(positionX: positionX)
-            registerMark(mark, inRegion: region)
-            return mark
-        }
-        else { return nil }
+        return registerAndAppendMark(Mark(positionX: positionX), toRegion: region)
     }
 
     func addMark(fromSegment segment: Segment, inRegion region: Region?) -> Mark? {
-        if let region = region {
-            let mark = Mark(segment: segment)
-            registerMark(mark, inRegion: region)
-            return mark
-        }
-        else { return nil }
+        return registerAndAppendMark(Mark(segment: segment), toRegion: region)
     }
 
-    func addMark(inRegion region: Region?) -> Mark? {
-        if let region = region {
-            let mark = Mark()
-            registerMark(mark, inRegion: region)
-            return mark
-        }
-        else { return nil }
-    }
-
-    private func registerMark(_ mark: Mark, inRegion region: Region) {
+    private func registerAndAppendMark(_ mark: Mark, toRegion region: Region?) -> Mark? {
+        guard let region = region else { return nil }
         region.appendMark(mark)
-        mark.anchor = defaultAnchor(forMark: mark)
         registry[mark.id] = region.index
+        return mark
     }
 
     func deleteMark(_ mark: Mark?, inRegion region: Region?) {
@@ -72,13 +56,24 @@ class Ladder {
         if let index = region.marks.firstIndex(where: {$0 === mark}) {
             region.marks.remove(at: index)
         }
+        removeMarkReferences(toMark: mark)
         registry.removeValue(forKey: mark.id)
     }
 
     func deleteMarksInRegion(_ region: Region) {
-        region.marks.removeAll()
         for mark: Mark in region.marks {
             registry.removeValue(forKey: mark.id)
+            removeMarkReferences(toMark: mark)
+        }
+        region.marks.removeAll()
+    }
+
+    // Remove references to this mark in neighboring marks groupedMarks.
+    func removeMarkReferences(toMark mark: Mark) {
+        for region in regions {
+            for m in region.marks {
+                m.groupedMarks.remove(mark: mark)
+            }
         }
     }
 
@@ -142,7 +137,14 @@ class Ladder {
     }
 
     func availableAnchors(forMark mark: Mark) -> [Anchor] {
-        return defaultAnchors()
+        let groupedMarks = mark.groupedMarks
+        // FIXME: if attachment is in middle, only allow other end to move
+        if groupedMarks.count < 2 {
+            return defaultAnchors()
+        }
+        else {
+            return [.proximal, .distal]
+        }
     }
 
     private func defaultAnchors() -> [Anchor] {
@@ -151,6 +153,25 @@ class Ladder {
 
     func defaultAnchor(forMark mark: Mark) -> Anchor {
         return availableAnchors(forMark: mark)[0]
+    }
+
+    // Pivot points are really fixed points (rename?) that can't move during mark movement.
+    func pivotPoints(forMark mark: Mark) -> [Anchor] {
+        // No pivot points, i.e. full freedom of movement if no grouped marks.
+        if mark.groupedMarks.count == 0 {
+            return []
+        }
+        if mark.groupedMarks.proximal.count > 0 && mark.groupedMarks.distal.count > 0 {
+            return [.proximal, .distal]
+        }
+        else if mark.groupedMarks.proximal.count > 0 {
+            return [.distal]
+        }
+        else if mark.groupedMarks.distal.count > 0 {
+            return [.proximal]
+        }
+        // TODO: deal with middle marks
+        return []
     }
 
     // Returns a basic ladder (A, AV, V).

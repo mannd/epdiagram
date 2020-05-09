@@ -74,6 +74,14 @@ struct MarkGroup {
         }
     }
 
+    mutating func remove(mark: Mark) {
+        proximal.remove(mark)
+        middle.remove(mark)
+        distal.remove(mark)
+    }
+
+    var count: Int { allMarks.count }
+
     func highLight(highlight: Mark.Highlight) {
         for mark in allMarks {
             mark.highlight = highlight
@@ -106,6 +114,7 @@ class Mark {
 
     // Highlight is used to show state of a mark visibly.
     enum Highlight {
+        case attached // cursor attached
         case grouped // mark attached to cursor and 
         case selected
         case linked
@@ -165,7 +174,6 @@ class Mark {
         self.segment = segment
         self.id = UUID()
         groupedMarks = MarkGroup()
-        // Default anchor for new marks is middle.
         anchor = .middle
     }
 

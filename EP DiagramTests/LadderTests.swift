@@ -66,20 +66,20 @@ class LadderTests: XCTestCase {
         XCTAssertNil(ladder.getRegionAfter(region: regionAfter!))
     }
 
+    func testRegionIndicesUniqueInLadder() {
+        var lastIndex = 0
+        for region in ladder.regions {
+            XCTAssert(region.index == lastIndex)
+            lastIndex += 1
+        }
+    }
+
     func testRegionsEqual() {
         let region1 = ladder.regions[0]
         let region2 = ladder.regions[1]
-        XCTAssert(!(region1 === region2))
+        XCTAssert(!(region1 == region2))
         let region3 = region1
-        XCTAssert(region1 === region3)
+        XCTAssert(region1 == region3)
     }
 
-    // TODO: move to RegionTests
-    func testRelativeYPosition() {
-        let region = Region(index: 0)
-        region.proximalBoundary = 200
-        region.distalBoundary = 500
-        XCTAssertNotNil(region.getRelativeYPosition(y: 300))
-        XCTAssertEqual(region.getRelativeYPosition(y: 300)!, 0.3333, accuracy: 0.001)
-    }
 }

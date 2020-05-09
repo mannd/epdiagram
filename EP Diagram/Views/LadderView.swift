@@ -22,8 +22,9 @@ protocol LadderViewDelegate: AnyObject {
     func hasActiveRegion() -> Bool
     func unhighlightAllMarks()
     func deleteAttachedMark()
+    func deleteAttachedMarkWithoutUndo()
     func groupMarksNearbyAttachedMark()
-    func addAttachedMark(imageScrollViewPositionX: CGFloat)
+    func addAttachedMark(scaledViewPositionX: CGFloat)
     func unattachAttachedMark()
     func groupNearbyMarks(mark: Mark)
     func moveAttachedMark(position: CGPoint)
@@ -31,7 +32,7 @@ protocol LadderViewDelegate: AnyObject {
     func getAttachedMarkAnchor() -> Anchor
     func assessBlockAndImpulseOrigin(mark: Mark?)
     func getAttachedMarkScaledAnchorPosition() -> CGPoint?
-    func highlightAttachedMarks(highlight: Mark.Highlight)
+    func highlightGroupedMarks(highlight: Mark.Highlight)
     func toggleAttachedMarkAnchor()
 }
 
@@ -47,14 +48,16 @@ final class LadderView: ScaledView {
     var lineWidth: CGFloat = 2
     var red = UIColor.systemRed
     var blue = UIColor.systemBlue
-    var unattachedColor = UIColor.black
-    var attachedColor = UIColor.magenta
+    var unhighlightedColor = UIColor.black
+    var attachedColor = UIColor.orange
+    var groupedColor = UIColor.magenta
     var selectedColor = UIColor.red
     var linkColor = UIColor.green
     var markLineWidth: CGFloat = 2
     var connectedLineWidth: CGFloat = 4
-    var showImpulseOrigin = true
-    var showBlock = true
+    var showImpulseOrigin = false
+    var showBlock = false
+    var showPivots = true
 
     internal var ladder: Ladder
 
@@ -122,7 +125,11 @@ final class LadderView: ScaledView {
     private func didLoad() {
         ladderViewHeight = self.frame.height
         if #available(iOS 13.0, *) {
-            unattachedColor = UIColor.label
+            unhighlightedColor = UIColor.label
+            attachedColor = UIColor.systemOrange
+            linkColor = UIColor.systemGreen
+            selectedColor = UIColor.systemRed
+            groupedColor = UIColor.systemPurple
         }
         assertLadderIsGood()
         initializeRegions()
@@ -179,6 +186,13 @@ final class LadderView: ScaledView {
         return ladderViewHeight / CGFloat(numRegionUnits)
     }
 
+    func resetLadder() {
+        ladder = Ladder.defaultLadder()
+        activeRegion = ladder.regions[0]
+        cursorViewDelegate.hideCursor(true)
+        didLoad()
+    }
+    
     // MARK: - Touches
 
     @objc func singleTap(tap: UITapGestureRecognizer) {
@@ -282,10 +296,11 @@ final class LadderView: ScaledView {
                 unattachAttachedMark()
             }
             else { // make mark and attach cursor
-                let mark = makeMark(scaledViewPositionX: positionX)
+                let mark = addMark(scaledViewPositionX: positionX)
                 if let mark = mark {
+                    undoablyAddMark(mark: mark, region: activeRegion)
                     unhighlightAllMarks()
-                    mark.highlight = .grouped
+                    mark.highlight = .attached
                     mark.anchor = ladder.defaultAnchor(forMark: mark)
                     attachMark(mark)
                     cursorViewDelegate.setCursorHeight()
@@ -299,7 +314,7 @@ final class LadderView: ScaledView {
     private func markWasTapped(mark: Mark?, tapLocationInLadder: LocationInLadder) {
         if let mark = mark, let activeRegion = activeRegion {
             if mark.attached {
-                mark.highlight = .grouped
+                mark.highlight = .attached
                 toggleAnchor(mark: mark)
                 adjustCursor(mark: mark, region: activeRegion)
                 cursorViewDelegate.hideCursor(false)
@@ -308,7 +323,7 @@ final class LadderView: ScaledView {
                 unattachMarks()
                 attachMark(mark)
                 mark.anchor = ladder.defaultAnchor(forMark: mark)
-                mark.highlight = .grouped
+                mark.highlight = .attached
                 adjustCursor(mark: mark, region: activeRegion)
                 cursorViewDelegate.hideCursor(false)
             }
@@ -330,16 +345,22 @@ final class LadderView: ScaledView {
             if regionDifference > 0 {
                 activeRegion = ladder.getRegion(index: firstRegionIndex + 1)
                 let segment = Segment(proximal: CGPoint(x: marks[0].segment.distal.x, y: 0), distal: CGPoint(x: marks[1].segment.proximal.x, y: 1.0))
-                let newMark = ladder.addMark(fromSegment: segment, inRegion: activeRegion)
-                newMark?.highlight = .linked
-                return newMark
+                let mark = ladder.addMark(fromSegment: segment, inRegion: activeRegion)
+                if let mark = mark {
+                    undoablyAddMark(mark: mark, region: activeRegion)
+                }
+                mark?.highlight = .linked
+                return mark
             }
             if regionDifference < 0 {
                 activeRegion = ladder.getRegion(index: firstRegionIndex - 1)
                 let segment = Segment(proximal: CGPoint(x: marks[1].segment.distal.x, y: 0), distal: CGPoint(x: marks[0].segment.proximal.x, y: 1.0))
-                let newMark = ladder.addMark(fromSegment: segment, inRegion: activeRegion)
-                newMark?.highlight = .linked
-                return newMark
+                let mark = ladder.addMark(fromSegment: segment, inRegion: activeRegion)
+                if let mark = mark {
+                    undoablyAddMark(mark: mark, region: activeRegion)
+                }
+                mark?.highlight = .linked
+                return mark
             }
         }
         return nil
@@ -398,6 +419,7 @@ final class LadderView: ScaledView {
                     if firstTappedMarkRegionIndex < regionIndex {
                         P("add mark and link to distal end of linked mark")
                         P("tapRegionPosition = \(tapRegionPosition)")
+                        // FIXME: need to undoablyAddMark() here
                         let newMark = addMark(regionPositionX: firstTappedMark.segment.distal.x)
                         newMark?.segment.distal = tapRegionPosition
                     }
@@ -424,14 +446,8 @@ final class LadderView: ScaledView {
                 ladder.selectedMarks.append(mark)
             }
             else {
-                // TODO: change to map
-                var n = 0
-                for m in ladder.selectedMarks {
-                    if m == mark {
-                        ladder.selectedMarks.remove(at: n)
-                        break
-                    }
-                    n += 1
+                if let index = ladder.selectedMarks.firstIndex(of: mark) {
+                    ladder.selectedMarks.remove(at: index)
                 }
             }
             setNeedsDisplay()
@@ -490,13 +506,13 @@ final class LadderView: ScaledView {
         }
     }
 
-    func makeMark(scaledViewPositionX: CGFloat) -> Mark? {
-        return addMark(regionPositionX: Common.translateToRegionPositionX(scaledViewPositionX: scaledViewPositionX, offset: offsetX, scale: scale))
+    func addMark(scaledViewPositionX: CGFloat) -> Mark? {
+        return addMark(regionPositionX: translateToRegionPositionX(scaledViewPositionX: scaledViewPositionX))
     }
 
     func addMark(regionPositionX: CGFloat) -> Mark? {
         let mark = ladder.addMark(at: regionPositionX, inRegion: activeRegion)
-        mark?.highlight = .grouped
+        mark?.highlight = .attached
         mark?.attached = true
         return mark
     }
@@ -552,7 +568,7 @@ final class LadderView: ScaledView {
 
     private func setMarkAndAttachedMarksHighlight(_ mark: Mark?, highlight: Mark.Highlight) {
         if let mark = mark {
-            mark.highlight = highlight
+            mark.highlight = .attached
             let attachedMarks = mark.groupedMarks
             attachedMarks.highLight(highlight: highlight)
         }
@@ -575,6 +591,7 @@ final class LadderView: ScaledView {
     /// Deletes mark if there is one at position.  Returns true if position corresponded to a mark.
     /// - Parameter position: position of potential mark
     func deleteMark(position: CGPoint, cursorViewDelegate: CursorViewDelegate) -> Bool {
+        os_log("deleteMark(CGPoint:CursorViewDelegate) - LadderView", log: OSLog.debugging, type: .debug)
         let tapLocationInLadder = getLocationInLadder(position: position)
         activeRegion = tapLocationInLadder.region
         if tapLocationInLadder.markWasTapped {
@@ -589,6 +606,7 @@ final class LadderView: ScaledView {
 
     // See https://stackoverflow.com/questions/36491789/using-nsundomanager-how-to-register-undos-using-swift-closures/36492619#36492619
     private func undoablyDeleteMark(mark: Mark, region: Region?) {
+        os_log("undoablyDeleteMark(Mark:Region?)", log: OSLog.debugging, type: .debug)
         self.undoManager?.registerUndo(withTarget: self, handler: { target in
             target.redoablyUndeleteMark(mark: mark, region: region)
         })
@@ -597,6 +615,7 @@ final class LadderView: ScaledView {
     }
 
     private func redoablyUndeleteMark(mark: Mark, region: Region?) {
+        os_log("redoablyUndeleteMark(Mark:Region?)", log: OSLog.debugging, type: .debug)
         self.undoManager?.registerUndo(withTarget: self, handler: { target in
             target.undoablyDeleteMark(mark: mark, region: region)
         })
@@ -604,7 +623,16 @@ final class LadderView: ScaledView {
         undeleteMark(mark: mark, region: region)
     }
 
+    private func undoablyAddMark(mark: Mark, region: Region?) {
+        os_log("undoablyAddMark(mark:region:)", log: OSLog.debugging, type: .debug)
+        self.undoManager?.registerUndo(withTarget: self, handler: { target in
+            target.undoablyDeleteMark(mark: mark, region: region)
+        })
+        NotificationCenter.default.post(name: .didUndoableAction, object: nil)
+    }
+
     private func deleteMark(mark: Mark, region: Region?) {
+        os_log("deleteMark(Mark:Region?) - LadderView", log: OSLog.debugging, type: .debug)
         mark.attached = false
         deletedMarks.append(mark)
         ladder.deleteMark(mark, inRegion: region)
@@ -613,6 +641,7 @@ final class LadderView: ScaledView {
     }
 
     private func undeleteMark(mark: Mark, region: Region?) {
+        os_log("undeleteMark(Mark:Region?) - LadderView", log: OSLog.debugging, type: .debug)
         if let region = region, let mark = deletedMarks.popLast() {
             region.appendMark(mark)
             mark.attached = false
@@ -623,6 +652,7 @@ final class LadderView: ScaledView {
     }
 
     private func deleteMark(_ mark: Mark?) {
+        os_log("deleteMark(_:) - LadderView", log: OSLog.debugging, type: .debug)
         if let mark = mark {
             undoablyDeleteMark(mark: mark, region: activeRegion)
         }
@@ -645,8 +675,8 @@ final class LadderView: ScaledView {
                 // We're about to move the attached mark.
                 if let mark = locationInLadder.mark, mark.attached {
                     movingMark = mark
-                    mark.highlight = .grouped
-                    highlightAttachedMarks(highlight: .grouped)
+                    mark.highlight = .attached
+                    highlightGroupedMarks(highlight: .grouped)
                     // need to move it nowhere, to let undo work
                     if let anchorPosition = getMarkScaledAnchorPosition(mark) {
                         moveMark(mark: mark, scaledViewPosition: anchorPosition)
@@ -660,22 +690,26 @@ final class LadderView: ScaledView {
                     dragOriginDivision = locationInLadder.regionDivision
                     switch dragOriginDivision {
                     case .proximal:
-                        dragCreatedMark = makeMark(scaledViewPositionX: position.x)
+                        // FIXME: undoablyAddMark()???
+                        dragCreatedMark = addMark(scaledViewPositionX: position.x)
                         dragCreatedMark?.segment.proximal.y = 0
                         dragCreatedMark?.segment.distal.y = 0.5
                     case .middle:
-                        dragCreatedMark = makeMark(scaledViewPositionX: position.x)
+                        dragCreatedMark = addMark(scaledViewPositionX: position.x)
                         // TODO: REFACTOR
                         dragCreatedMark?.segment.proximal.y = (position.y - regionOfDragOrigin.proximalBoundary) / (regionOfDragOrigin.distalBoundary - regionOfDragOrigin.proximalBoundary)
                         dragCreatedMark?.segment.distal.y = 0.75
                     case .distal:
-                        dragCreatedMark = makeMark(scaledViewPositionX: position.x)
+                        dragCreatedMark = addMark(scaledViewPositionX: position.x)
                         dragCreatedMark?.segment.proximal.y = 0.5
                         dragCreatedMark?.segment.distal.y = 1
                     case .none:
                         assert(false, "Making a mark with a .none regionDivision!")
                     }
-                    dragCreatedMark?.highlight = .grouped
+                    if let dragCreatedMark = dragCreatedMark {
+                        undoablyAddMark(mark: dragCreatedMark, region: activeRegion)
+                    }
+                    dragCreatedMark?.highlight = .attached
                 }
             }
         }
@@ -744,8 +778,6 @@ final class LadderView: ScaledView {
 
     // TODO: expand on this logic.  Reset block and impulseOrigin to .none as necessary.
     func assessBlockAndImpulseOrigin(mark: Mark?) {
-        // FIXME: remove return
-        return
         if let mark = mark {
             mark.block = .none
             mark.impulseOrigin = .none
@@ -775,7 +807,7 @@ final class LadderView: ScaledView {
         let nearbyMarks = getNearbyMarks(mark: mark, nearbyDistance: nearbyDistance)
         // unhighlight marks except for mark passed in
         ladder.setHighlightForAllMarks(highlight: .none)
-        mark.highlight = .grouped
+        mark.highlight = .attached
         mark.groupedMarks.highLight(highlight: .grouped)
         nearbyMarks.highLight(highlight: .grouped)
     }
@@ -825,7 +857,6 @@ final class LadderView: ScaledView {
         let distanceToMarkSegmentProximal = Common.distanceSegmentToPoint(segment: ladderViewPositionMarkSegment, point: ladderViewPositionNeighboringMarkProximal)
         let distanceToMarkSegmentDistal = Common.distanceSegmentToPoint(segment: ladderViewPositionMarkSegment, point: ladderViewPositionNeighboringMarkDistal)
 
-        P("distanceProximal = \(distanceToNeighboringMarkSegmentProximal) distanceDistal = \(distanceToNeighboringMarkSegmentDistal)")
         if distanceToNeighboringMarkSegmentProximal < nearbyDistance
             || distanceToNeighboringMarkSegmentDistal < nearbyDistance
             || distanceToMarkSegmentProximal < nearbyDistance
@@ -980,7 +1011,7 @@ final class LadderView: ScaledView {
         let solidMenuItem = UIMenuItem(title: L("Solid"), action: #selector(setSolid))
         let dashedMenuItem = UIMenuItem(title: L("Dashed"), action: #selector(setDashed))
         let dottedMenuItem = UIMenuItem(title: L("Dotted"), action: #selector(setDotted))
-        let unlinkMenuItem = UIMenuItem(title: L("Unlink"), action: #selector(unlinkPressedMark))
+        let unlinkMenuItem = UIMenuItem(title: L("Unlink"), action: #selector(ungroupPressedMark))
         let deleteMenuItem = UIMenuItem(title: L("Delete"), action: #selector(deletePressedMark))
         UIMenuController.shared.menuItems = [solidMenuItem, dashedMenuItem, dottedMenuItem, unlinkMenuItem, deleteMenuItem]
         let rect = CGRect(x: position.x, y: position.y, width: 0, height: 0)
@@ -1120,20 +1151,21 @@ final class LadderView: ScaledView {
         if mark.lineStyle == .dashed {
             let dashes: [CGFloat] = [5, 5]
             context.setLineDash(phase: 0, lengths: dashes)
-            context.strokePath()
-            context.setLineDash(phase: 0, lengths: [])
         }
         else if mark.lineStyle == .dotted {
             let dots: [CGFloat] = [2, 2]
             context.setLineDash(phase: 0, lengths: dots)
-            context.strokePath()
-            context.setLineDash(phase: 0, lengths: [])
         }
         else { // draw solid line
-            context.strokePath()
+            context.setLineDash(phase: 0, lengths: [])
         }
+        context.strokePath()
+        context.setLineDash(phase: 0, lengths: [])
+
         drawBlock(context: context, mark: mark, segment: segment)
         drawImpulseOrigin(context: context, mark: mark, segment: segment)
+        // FIXME: this is just a sample pivot point.  Pivots need to be determined by ladder.
+        drawPivots(forMark: mark, segment: Segment(proximal: p1, distal: p2), context: context)
 
         context.setStrokeColor(getLineColor())
     }
@@ -1147,6 +1179,43 @@ final class LadderView: ScaledView {
         let rectangle = CGRect(x: position.x, y: position.y, width: radius, height: radius)
         context.addEllipse(in: rectangle)
         context.drawPath(using: .fillStroke)
+    }
+
+    func drawPivots(forMark mark: Mark, segment: Segment, context:CGContext) {
+        guard showPivots else { return }
+        // We only show pivots when cursor is attached.
+        guard mark.attached else { return }
+        let pivots = ladder.pivotPoints(forMark: mark)
+        guard pivots.count > 0 else { return }
+        var position: CGPoint = CGPoint.zero
+        for pivot in pivots {
+            switch pivot {
+            case .proximal:
+                position = segment.proximal
+            case .distal:
+                position = segment.distal
+            default:
+                assert(false, "pivot != .proximal or .distal!")
+            }
+            if (position.x > leftMargin) {
+                drawPivot(context: context, position: position)
+            }
+        }
+    }
+
+    func drawPivot(context: CGContext, position: CGPoint) {
+        let radius: CGFloat = 5.0
+        drawX(context: context, position: position, radius: radius)
+    }
+
+    private func drawX(context: CGContext, position: CGPoint, radius: CGFloat) {
+        let x = position.x
+        let y = position.y
+        context.move(to: CGPoint(x: x - radius, y: y - radius))
+        context.addLine(to: CGPoint(x: x + radius, y: y + radius))
+        context.move(to: CGPoint(x: x + radius, y: y - radius))
+        context.addLine(to: CGPoint(x: x - radius, y: y + radius))
+        context.strokePath()
     }
 
     func drawBlock(context: CGContext, mark: Mark, segment: Segment) {
@@ -1210,17 +1279,17 @@ final class LadderView: ScaledView {
     }
 
     private func getMarkColor(mark: Mark) -> CGColor {
-        if mark.highlight == .grouped {
+        switch mark.highlight {
+        case .grouped:
+            return groupedColor.cgColor
+        case .attached:
             return attachedColor.cgColor
-        }
-        else if mark.highlight == .selected {
+        case .selected:
             return selectedColor.cgColor
-        }
-        else if mark.highlight == .linked {
+        case .linked:
             return linkColor.cgColor
-        }
-        else {
-            return unattachedColor.cgColor
+        case .none:
+            return unhighlightedColor.cgColor
         }
     }
 
@@ -1275,6 +1344,7 @@ final class LadderView: ScaledView {
     }
 
     @objc func deletePressedMark() {
+        os_log("deletePressedMark() - LadderView", log: OSLog.debugging, type: .debug)
         if let pressedMark = pressedMark {
             ladder.deleteMark(pressedMark, inRegion: activeRegion)
             ladder.setHighlightForAllMarks(highlight: .none)
@@ -1285,6 +1355,7 @@ final class LadderView: ScaledView {
     }
 
     @objc func deleteAllInRegion() {
+        os_log("deleteAllInRegion() - LadderView", log: OSLog.debugging, type: .debug)
         if let activeRegion = activeRegion {
             ladder.deleteMarksInRegion(activeRegion)
             cursorViewDelegate.hideCursor(true)
@@ -1293,17 +1364,18 @@ final class LadderView: ScaledView {
         }
     }
 
-    @objc func unlinkPressedMark() {
+    @objc func ungroupPressedMark() {
         if let pressedMark = pressedMark {
-            unlinkMarks(mark: pressedMark)
+            ungroupMarks(mark: pressedMark)
         }
     }
 
-    func unlinkMarks(mark: Mark) {
+    func ungroupMarks(mark: Mark) {
+        ladder.setHighlightForAllMarks(highlight: .none)
         mark.groupedMarks = MarkGroup()
     }
 
-    @objc func verticalizeToProximal() {
+    @objc func straightenToProximal() {
         if let pressedMark = pressedMark {
             pressedMark.segment.distal.x = pressedMark.segment.proximal.x
             cursorViewDelegate.moveCursor(cursorViewPositionX: pressedMark.segment.proximal.x)
@@ -1311,7 +1383,7 @@ final class LadderView: ScaledView {
         }
     }
 
-    @objc func verticalizeToDistal() {
+    @objc func straightenToDistal() {
         if let pressedMark = pressedMark {
             pressedMark.segment.proximal.x = pressedMark.segment.distal.x
             cursorViewDelegate.moveCursor(cursorViewPositionX: pressedMark.segment.proximal.x)
@@ -1397,10 +1469,10 @@ extension LadderView: LadderViewDelegate {
         ladder.unselectAllMarks()
     }
 
-    func addAttachedMark(imageScrollViewPositionX positionX: CGFloat) {
+    func addAttachedMark(scaledViewPositionX positionX: CGFloat) {
         attachedMark = ladder.addMark(at: positionX / scale, inRegion: activeRegion)
         attachedMark?.attached = true
-        attachedMark?.highlight = .grouped
+        attachedMark?.highlight = .attached
     }
 
     func groupMarksNearbyAttachedMark() {
@@ -1410,6 +1482,7 @@ extension LadderView: LadderViewDelegate {
     }
 
     func groupNearbyMarks(mark: Mark) {
+        os_log("groupNearbyMarks(mark:) - LadderView", log: OSLog.debugging, type: .debug)
         var minimum: CGFloat = 15
         minimum = minimum / scale
         let nearbyMarks = getNearbyMarks(mark: mark, nearbyDistance: minimum)
@@ -1510,12 +1583,18 @@ extension LadderView: LadderViewDelegate {
     }
 
     func deleteAttachedMark() {
+        os_log("deleteAttachedMark() - LadderView", log: OSLog.debugging, type: .debug)
         deleteMark(attachedMark)
     }
 
+    func deleteAttachedMarkWithoutUndo() {
+        os_log("deleteAttachedMarkWithoutUndo() - LadderView", log: OSLog.debugging, type: .debug)
+        ladder.deleteMark(attachedMark, inRegion: activeRegion)
+    }
 
-    func highlightAttachedMarks(highlight: Mark.Highlight) {
+    func highlightGroupedMarks(highlight: Mark.Highlight) {
         guard let attachedMark = attachedMark else { return }
+        attachedMark.highlight = .attached
         attachedMark.groupedMarks.highLight(highlight: highlight)
     }
 

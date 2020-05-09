@@ -203,6 +203,7 @@ final class CursorView: ScaledView {
 
     @objc func doubleTap(tap: UITapGestureRecognizer) {
         os_log("doubleTap - CursorView", log: OSLog.touches, type: .info)
+//        redoablyUnAddMarkWithAttachedCursor(position: tap.location(in: self))
         ladderViewDelegate.deleteAttachedMark()
         ladderViewDelegate.refresh()
     }
@@ -213,7 +214,7 @@ final class CursorView: ScaledView {
         if pan.state == .began {
             self.undoManager?.beginUndoGrouping()
             cursorEndPointY = attachedMarkAnchorPosition.y
-            ladderViewDelegate.highlightAttachedMarks(highlight: .grouped)
+            ladderViewDelegate.highlightGroupedMarks(highlight: .grouped)
             ladderViewDelegate.moveAttachedMark(position: attachedMarkAnchorPosition) // This has to be here for undo to work.
         }
         if pan.state == .changed {
@@ -259,12 +260,49 @@ final class CursorView: ScaledView {
     }
 
     func putCursor(imageScrollViewPosition position: CGPoint) {
-        cursor.positionX = position.x / scale
+        cursor.positionX = position.x
         cursor.positionOmniCircleY = position.y > maxCursorPositionY ? maxCursorPositionY : position.y
     }
 
-    func attachMark(imageScrollViewPositionX positionX: CGFloat) {
-        ladderViewDelegate.addAttachedMark(imageScrollViewPositionX: positionX)
+    func undoablyAddMarkWithAttachedCursor(position: CGPoint) {
+        os_log("undoablyAddMarkWithAttachedCursor(position:) - CursorView", log: OSLog.debugging, type: .debug)
+        self.undoManager?.registerUndo(withTarget: self, handler: { target in
+            target.redoablyUnAddMarkWithAttachedCursor(position: position)
+        })
+        NotificationCenter.default.post(name: .didUndoableAction, object: nil)
+        addMarkWithAttachedCursor(position: position)
+    }
+
+    func redoablyUnAddMarkWithAttachedCursor(position: CGPoint) {
+        os_log("redoablyUnAddMarkWithAttachedCursor(position:) - CursorView", log: OSLog.debugging, type: .debug)
+        self.undoManager?.registerUndo(withTarget: self, handler: { target in
+            target.undoablyAddMarkWithAttachedCursor(position: position)
+        })
+        NotificationCenter.default.post(name: .didUndoableAction, object: nil)
+        unAddMarkWithAttachedCursor(position: position)
+    }
+
+
+    private func addMarkWithAttachedCursor(position: CGPoint) {
+        os_log("addMarkWithAttachedCursor(position:) - CursorView", log: OSLog.debugging, type: .debug)
+        P(">>> addMarkWithAttachedCursor - CursorView position = \(position)")
+        // imageScrollView starts at x = 0, contentInset shifts view to right, and the left margin is negative.
+        if position.x > 0 {
+            putCursor(imageScrollViewPosition: position)
+            hideCursor(false)
+            ladderViewDelegate.addAttachedMark(scaledViewPositionX: position.x * scale)
+            setCursorHeight()
+            setNeedsDisplay()
+        }
+    }
+
+    private func unAddMarkWithAttachedCursor(position: CGPoint) {
+        os_log("unAddMarkWithAttachedCursor(position:) - CursorView", log: OSLog.debugging, type: .debug)
+        P(">>> unAddMarkWithAttachedCursor - CursorView position = \(position)")
+        // imageScrollView starts at x = 0, contentInset shifts view to right, and the left margin is negative.
+        ladderViewDelegate.deleteAttachedMarkWithoutUndo()
+        hideCursor(true)
+        setNeedsDisplay()
     }
 }
 

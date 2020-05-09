@@ -51,10 +51,11 @@ class MathTests: XCTestCase {
         let s3 = s1
         XCTAssertTrue(Common.distance(fromSegment: s1, toSegment: s3) == 0, "segments are equal")
         // segments intersect
-        let s4 = Segment(proximal: CGPoint(x: 0, y: 0), distal: CGPoint(x: 1, y: 1))
-        let s5 = Segment(proximal: CGPoint(x: 1, y: 0), distal: CGPoint(x: 0, y: 1))
-        P("distance = \(Common.distance(fromSegment: s4, toSegment: s5))")
-        XCTAssertTrue(Common.distance(fromSegment: s4, toSegment: s5) == 0, "segments intersect")
+        // Right now not testing for segment intersection, as intersecting segments are not considered to be nearby segments.  I.e. we don't want to group together intersecting segments.
+//        let s4 = Segment(proximal: CGPoint(x: 0, y: 0), distal: CGPoint(x: 1, y: 1))
+//        let s5 = Segment(proximal: CGPoint(x: 1, y: 0), distal: CGPoint(x: 0, y: 1))
+//        P("distance = \(Common.distance(fromSegment: s4, toSegment: s5))")
+//        XCTAssertTrue(Common.distance(fromSegment: s4, toSegment: s5) == 0, "segments intersect")
     }
 
 }
