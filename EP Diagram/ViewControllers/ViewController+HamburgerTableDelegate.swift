@@ -139,10 +139,6 @@ extension ViewController: HamburgerTableDelegate, UIImagePickerControllerDelegat
         }
     }
 
-    @objc func addMarks() {
-        os_log("addMarks", log: OSLog.action, type: .info)
-    }
-
     func showHamburgerMenu() {
         os_log("showHamburgerMenu", log: OSLog.action, type: .info)
         hamburgerTableViewController?.reloadData()

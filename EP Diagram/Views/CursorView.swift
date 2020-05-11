@@ -264,45 +264,18 @@ final class CursorView: ScaledView {
         cursor.positionOmniCircleY = position.y > maxCursorPositionY ? maxCursorPositionY : position.y
     }
 
-    func undoablyAddMarkWithAttachedCursor(position: CGPoint) {
-        os_log("undoablyAddMarkWithAttachedCursor(position:) - CursorView", log: OSLog.debugging, type: .debug)
-        self.undoManager?.registerUndo(withTarget: self, handler: { target in
-            target.redoablyUnAddMarkWithAttachedCursor(position: position)
-        })
-        NotificationCenter.default.post(name: .didUndoableAction, object: nil)
-        addMarkWithAttachedCursor(position: position)
-    }
-
-    func redoablyUnAddMarkWithAttachedCursor(position: CGPoint) {
-        os_log("redoablyUnAddMarkWithAttachedCursor(position:) - CursorView", log: OSLog.debugging, type: .debug)
-        self.undoManager?.registerUndo(withTarget: self, handler: { target in
-            target.undoablyAddMarkWithAttachedCursor(position: position)
-        })
-        NotificationCenter.default.post(name: .didUndoableAction, object: nil)
-        unAddMarkWithAttachedCursor(position: position)
-    }
-
-
-    private func addMarkWithAttachedCursor(position: CGPoint) {
+    func addMarkWithAttachedCursor(position: CGPoint) {
         os_log("addMarkWithAttachedCursor(position:) - CursorView", log: OSLog.debugging, type: .debug)
-        P(">>> addMarkWithAttachedCursor - CursorView position = \(position)")
         // imageScrollView starts at x = 0, contentInset shifts view to right, and the left margin is negative.
         if position.x > 0 {
-            putCursor(imageScrollViewPosition: position)
+            os_log("scale = %f", log: OSLog.debugging, type: .debug, scale)
+            P(">>> scale = \(scale)")
+            putCursor(imageScrollViewPosition: CGPoint(x: position.x / scale, y: position.y))
             hideCursor(false)
-            ladderViewDelegate.addAttachedMark(scaledViewPositionX: position.x * scale)
+            ladderViewDelegate.addAttachedMark(scaledViewPositionX: position.x)
             setCursorHeight()
             setNeedsDisplay()
         }
-    }
-
-    private func unAddMarkWithAttachedCursor(position: CGPoint) {
-        os_log("unAddMarkWithAttachedCursor(position:) - CursorView", log: OSLog.debugging, type: .debug)
-        P(">>> unAddMarkWithAttachedCursor - CursorView position = \(position)")
-        // imageScrollView starts at x = 0, contentInset shifts view to right, and the left margin is negative.
-        ladderViewDelegate.deleteAttachedMarkWithoutUndo()
-        hideCursor(true)
-        setNeedsDisplay()
     }
 }
 

@@ -22,7 +22,6 @@ protocol LadderViewDelegate: AnyObject {
     func hasActiveRegion() -> Bool
     func unhighlightAllMarks()
     func deleteAttachedMark()
-    func deleteAttachedMarkWithoutUndo()
     func groupMarksNearbyAttachedMark()
     func addAttachedMark(scaledViewPositionX: CGFloat)
     func unattachAttachedMark()
@@ -300,7 +299,6 @@ final class LadderView: ScaledView {
                 if let mark = mark {
                     undoablyAddMark(mark: mark, region: activeRegion)
                     unhighlightAllMarks()
-                    mark.highlight = .attached
                     mark.anchor = ladder.defaultAnchor(forMark: mark)
                     attachMark(mark)
                     cursorViewDelegate.setCursorHeight()
@@ -315,6 +313,7 @@ final class LadderView: ScaledView {
         if let mark = mark, let activeRegion = activeRegion {
             if mark.attached {
                 mark.highlight = .attached
+                // TODO: Consider using RegionDivision to position Anchor.  Tapping on cursor it makes sense to just toggle the anchor, but tapping on the mark itself it might be better to position anchor near where you tap.  On other hand, it might be easy to miss the mark division zone.  Also, if not all anchors are available (say the .middle anchor is missing), which anchor do you switch to?  Maybe default to toggleAnchor() if anchor not available.
                 toggleAnchor(mark: mark)
                 adjustCursor(mark: mark, region: activeRegion)
                 cursorViewDelegate.hideCursor(false)
@@ -323,7 +322,6 @@ final class LadderView: ScaledView {
                 unattachMarks()
                 attachMark(mark)
                 mark.anchor = ladder.defaultAnchor(forMark: mark)
-                mark.highlight = .attached
                 adjustCursor(mark: mark, region: activeRegion)
                 cursorViewDelegate.hideCursor(false)
             }
@@ -606,7 +604,7 @@ final class LadderView: ScaledView {
 
     // See https://stackoverflow.com/questions/36491789/using-nsundomanager-how-to-register-undos-using-swift-closures/36492619#36492619
     private func undoablyDeleteMark(mark: Mark, region: Region?) {
-        os_log("undoablyDeleteMark(Mark:Region?)", log: OSLog.debugging, type: .debug)
+        os_log("undoablyDeleteMark(mark:region:) - LadderView", log: OSLog.debugging, type: .debug)
         self.undoManager?.registerUndo(withTarget: self, handler: { target in
             target.redoablyUndeleteMark(mark: mark, region: region)
         })
@@ -615,7 +613,7 @@ final class LadderView: ScaledView {
     }
 
     private func redoablyUndeleteMark(mark: Mark, region: Region?) {
-        os_log("redoablyUndeleteMark(Mark:Region?)", log: OSLog.debugging, type: .debug)
+        os_log("redoablyUndeleteMark(mark:region:) - LadderView", log: OSLog.debugging, type: .debug)
         self.undoManager?.registerUndo(withTarget: self, handler: { target in
             target.undoablyDeleteMark(mark: mark, region: region)
         })
@@ -624,15 +622,16 @@ final class LadderView: ScaledView {
     }
 
     private func undoablyAddMark(mark: Mark, region: Region?) {
-        os_log("undoablyAddMark(mark:region:)", log: OSLog.debugging, type: .debug)
+        os_log("undoablyAddMark(mark:region:) - LadderView", log: OSLog.debugging, type: .debug)
         self.undoManager?.registerUndo(withTarget: self, handler: { target in
             target.undoablyDeleteMark(mark: mark, region: region)
         })
         NotificationCenter.default.post(name: .didUndoableAction, object: nil)
+        // Note no call here because calling function needs to actually add the mark.
     }
 
     private func deleteMark(mark: Mark, region: Region?) {
-        os_log("deleteMark(Mark:Region?) - LadderView", log: OSLog.debugging, type: .debug)
+        os_log("deleteMark(mark:region:) - LadderView", log: OSLog.debugging, type: .debug)
         mark.attached = false
         deletedMarks.append(mark)
         ladder.deleteMark(mark, inRegion: region)
@@ -641,7 +640,7 @@ final class LadderView: ScaledView {
     }
 
     private func undeleteMark(mark: Mark, region: Region?) {
-        os_log("undeleteMark(Mark:Region?) - LadderView", log: OSLog.debugging, type: .debug)
+        os_log("undeleteMark(mark:region:) - LadderView", log: OSLog.debugging, type: .debug)
         if let region = region, let mark = deletedMarks.popLast() {
             region.appendMark(mark)
             mark.attached = false
@@ -1171,7 +1170,7 @@ final class LadderView: ScaledView {
     }
 
     func getTruncatedPosition(segment: Segment) -> CGPoint? {
-        let intersection = getIntersection(ofLineFrom: CGPoint(x: leftMargin, y: 0), to: CGPoint(x: leftMargin, y: ladderViewHeight), withLineFrom: segment.proximal, to: segment.distal)
+        let intersection = Common.getIntersection(ofLineFrom: CGPoint(x: leftMargin, y: 0), to: CGPoint(x: leftMargin, y: ladderViewHeight), withLineFrom: segment.proximal, to: segment.distal)
         return intersection
     }
 
@@ -1251,27 +1250,6 @@ final class LadderView: ScaledView {
         case .proximal:
             drawFilledCircle(context: context, position: CGPoint(x: segment.proximal.x - radius / 2, y: segment.proximal.y - separation), radius: radius)
         }
-    }
-
-    // Algorithm from: https://stackoverflow.com/questions/15690103/intersection-between-two-lines-in-coordinates
-    // Returns intersection point of two line segments, nil if no intersection.
-    func getIntersection(ofLineFrom p1: CGPoint, to p2: CGPoint, withLineFrom p3: CGPoint, to p4: CGPoint) -> CGPoint? {
-        let d: CGFloat = (p2.x - p1.x) * (p4.y - p3.y) - (p2.y - p1.y) * (p4.x - p3.x)
-        if d == 0 {
-            return nil; // parallel lines
-        }
-        let u: CGFloat = ((p3.x - p1.x)*(p4.y - p3.y) - (p3.y - p1.y)*(p4.x - p3.x))/d
-        let v: CGFloat = ((p3.x - p1.x)*(p2.y - p1.y) - (p3.y - p1.y)*(p2.x - p1.x))/d
-        if u < 0.0 || u > 1.0 {
-            return nil; // intersection point not between p1 and p2
-        }
-        if v < 0.0 || v > 1.0 {
-            return nil; // intersection point not between p3 and p4
-        }
-        var intersection = CGPoint()
-        intersection.x = p1.x + u * (p2.x - p1.x)
-        intersection.y = p1.y + u * (p2.y - p1.y)
-        return intersection
     }
 
     private func getMarkLineWidth(_ mark: Mark) -> CGFloat {
@@ -1471,8 +1449,11 @@ extension LadderView: LadderViewDelegate {
 
     func addAttachedMark(scaledViewPositionX positionX: CGFloat) {
         attachedMark = ladder.addMark(at: positionX / scale, inRegion: activeRegion)
-        attachedMark?.attached = true
-        attachedMark?.highlight = .attached
+        if let attachedMark = attachedMark {
+            undoablyAddMark(mark: attachedMark, region: activeRegion)
+            attachedMark.attached = true
+            attachedMark.highlight = .attached
+        }
     }
 
     func groupMarksNearbyAttachedMark() {
@@ -1585,11 +1566,6 @@ extension LadderView: LadderViewDelegate {
     func deleteAttachedMark() {
         os_log("deleteAttachedMark() - LadderView", log: OSLog.debugging, type: .debug)
         deleteMark(attachedMark)
-    }
-
-    func deleteAttachedMarkWithoutUndo() {
-        os_log("deleteAttachedMarkWithoutUndo() - LadderView", log: OSLog.debugging, type: .debug)
-        ladder.deleteMark(attachedMark, inRegion: activeRegion)
     }
 
     func highlightGroupedMarks(highlight: Mark.Highlight) {

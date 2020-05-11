@@ -100,7 +100,7 @@ final class ViewController: UIViewController {
 
         navigationItem.setLeftBarButton(UIBarButtonItem(image: UIImage(named: "hamburger"), style: .plain, target: self, action: #selector(toggleHamburgerMenu)), animated: true)
         // FIXME: right button maybe to toggle adding marks quickly?
-        navigationItem.setRightBarButton(UIBarButtonItem(barButtonSystemItem: .add, target: self, action: #selector(addMarks)), animated: true)
+        navigationItem.setRightBarButton(UIBarButtonItem(barButtonSystemItem: .edit, target: self, action: #selector(editDiagram)), animated: true)
 
     }
 
@@ -186,6 +186,24 @@ final class ViewController: UIViewController {
         }
         setToolbarItems(linkMenuButtons, animated: false)
         navigationController?.setToolbarHidden(false, animated: false)
+    }
+
+    @objc func editDiagram() {
+        os_log("editDiagram", log: OSLog.action, type: .info)
+        let alert = UIAlertController(title: L("Edit Diagram"), message: L("Create new diagram or edit this one"), preferredStyle: .actionSheet)
+        let newAction = UIAlertAction(title: L("Create new diagram"), style: .default, handler: nil)
+        let duplicateAction = UIAlertAction(title: L("Duplicate this diagram"), style: .default, handler: nil)
+        let editAction = UIAlertAction(title: L("Edit this diagram"), style: .default, handler: editLadder)
+        let cancelAction = UIAlertAction(title: L("Cancel"), style: .cancel, handler: nil)
+        alert.addAction(newAction)
+        alert.addAction(duplicateAction)
+        alert.addAction(editAction)
+        alert.addAction(cancelAction)
+        present(alert, animated: true, completion: nil)
+    }
+
+    @objc func editLadder(action: UIAlertAction) {
+        os_log("editLadder()", log: OSLog.action, type: .info)
     }
 
     @available(*, deprecated, message: "This doesn't seem to do anything.")
@@ -283,8 +301,7 @@ final class ViewController: UIViewController {
         }
         else {
             let position = tap.location(in: imageScrollView)
-            cursorView.undoablyAddMarkWithAttachedCursor(position: position)
-//            undoablyAddMarkWithAttachedCursor(position: position)
+            cursorView.addMarkWithAttachedCursor(position: position)
         }
         setViewsNeedDisplay()
     }
