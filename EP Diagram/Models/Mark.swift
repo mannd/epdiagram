@@ -82,7 +82,7 @@ struct MarkGroup {
 
     var count: Int { allMarks.count }
 
-    func highLight(highlight: Mark.Highlight) {
+    func highlight(highlight: Mark.Highlight) {
         for mark in allMarks {
             mark.highlight = highlight
         }

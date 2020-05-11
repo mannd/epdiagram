@@ -312,7 +312,7 @@ final class LadderView: ScaledView {
     private func markWasTapped(mark: Mark?, tapLocationInLadder: LocationInLadder) {
         if let mark = mark, let activeRegion = activeRegion {
             if mark.attached {
-                mark.highlight = .attached
+                attachMark(mark)
                 // TODO: Consider using RegionDivision to position Anchor.  Tapping on cursor it makes sense to just toggle the anchor, but tapping on the mark itself it might be better to position anchor near where you tap.  On other hand, it might be easy to miss the mark division zone.  Also, if not all anchors are available (say the .middle anchor is missing), which anchor do you switch to?  Maybe default to toggleAnchor() if anchor not available.
                 toggleAnchor(mark: mark)
                 adjustCursor(mark: mark, region: activeRegion)
@@ -566,9 +566,9 @@ final class LadderView: ScaledView {
 
     private func setMarkAndAttachedMarksHighlight(_ mark: Mark?, highlight: Mark.Highlight) {
         if let mark = mark {
-            mark.highlight = .attached
             let attachedMarks = mark.groupedMarks
-            attachedMarks.highLight(highlight: highlight)
+            attachedMarks.highlight(highlight: highlight)
+            mark.highlight = .attached
         }
     }
 
@@ -804,11 +804,10 @@ final class LadderView: ScaledView {
         var nearbyDistance: CGFloat = 10
         nearbyDistance = nearbyDistance / scale
         let nearbyMarks = getNearbyMarks(mark: mark, nearbyDistance: nearbyDistance)
-        // unhighlight marks except for mark passed in
         ladder.setHighlightForAllMarks(highlight: .none)
+        mark.groupedMarks.highlight(highlight: .grouped)
+        nearbyMarks.highlight(highlight: .grouped)
         mark.highlight = .attached
-        mark.groupedMarks.highLight(highlight: .grouped)
-        nearbyMarks.highLight(highlight: .grouped)
     }
 
     func getNearbyMarks(mark: Mark, nearbyDistance: CGFloat) -> MarkGroup {
@@ -1570,8 +1569,8 @@ extension LadderView: LadderViewDelegate {
 
     func highlightGroupedMarks(highlight: Mark.Highlight) {
         guard let attachedMark = attachedMark else { return }
+        attachedMark.groupedMarks.highlight(highlight: highlight)
         attachedMark.highlight = .attached
-        attachedMark.groupedMarks.highLight(highlight: highlight)
     }
 
     func toggleAttachedMarkAnchor() {

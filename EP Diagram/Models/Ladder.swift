@@ -53,6 +53,7 @@ class Ladder {
 
     func deleteMark(_ mark: Mark?, inRegion region: Region?) {
         guard let mark = mark, let region = region else { return }
+        setHighlightForAllMarks(highlight: .none)
         if let index = region.marks.firstIndex(where: {$0 === mark}) {
             region.marks.remove(at: index)
         }
@@ -61,6 +62,7 @@ class Ladder {
     }
 
     func deleteMarksInRegion(_ region: Region) {
+        setHighlightForAllMarks(highlight: .none)
         for mark: Mark in region.marks {
             registry.removeValue(forKey: mark.id)
             removeMarkReferences(toMark: mark)
