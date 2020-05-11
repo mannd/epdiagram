@@ -214,7 +214,8 @@ final class CursorView: ScaledView {
         if pan.state == .began {
             self.undoManager?.beginUndoGrouping()
             cursorEndPointY = attachedMarkAnchorPosition.y
-            ladderViewDelegate.highlightGroupedMarks(highlight: .grouped)
+            ladderViewDelegate.setAttachedMarkAndGroupedMarksHighlights()
+//            ladderViewDelegate.highlightGroupedMarks(highlight: .grouped)
             ladderViewDelegate.moveAttachedMark(position: attachedMarkAnchorPosition) // This has to be here for undo to work.
         }
         if pan.state == .changed {

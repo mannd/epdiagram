@@ -31,7 +31,8 @@ protocol LadderViewDelegate: AnyObject {
     func getAttachedMarkAnchor() -> Anchor
     func assessBlockAndImpulseOrigin(mark: Mark?)
     func getAttachedMarkScaledAnchorPosition() -> CGPoint?
-    func highlightGroupedMarks(highlight: Mark.Highlight)
+    func setAttachedMarkAndGroupedMarksHighlights()
+//    func highlightGroupedMarks(highlight: Mark.Highlight)
     func toggleAttachedMarkAnchor()
 }
 
@@ -564,18 +565,19 @@ final class LadderView: ScaledView {
         }
     }
 
-    private func setMarkAndAttachedMarksHighlight(_ mark: Mark?, highlight: Mark.Highlight) {
-        if let mark = mark {
-            let attachedMarks = mark.groupedMarks
-            attachedMarks.highlight(highlight: highlight)
-            mark.highlight = .attached
+    func setAttachedMarkAndGroupedMarksHighlights() {
+        if let attachedMark = attachedMark {
+            let groupedMarks = attachedMark.groupedMarks
+            // Note that the order below is important.  An attached mark can be in its own groupedMarks.  But we always want the attached mark to have an .attached highlight.
+            groupedMarks.highlight(highlight: .grouped)
+            attachedMark.highlight = .attached
         }
     }
 
     func attachMark(_ mark: Mark?) {
         mark?.attached = true
         attachedMark = mark
-        setMarkAndAttachedMarksHighlight(mark, highlight: .grouped)
+        setAttachedMarkAndGroupedMarksHighlights()
     }
 
 
@@ -674,8 +676,7 @@ final class LadderView: ScaledView {
                 // We're about to move the attached mark.
                 if let mark = locationInLadder.mark, mark.attached {
                     movingMark = mark
-                    mark.highlight = .attached
-                    highlightGroupedMarks(highlight: .grouped)
+                    setAttachedMarkAndGroupedMarksHighlights()
                     // need to move it nowhere, to let undo work
                     if let anchorPosition = getMarkScaledAnchorPosition(mark) {
                         moveMark(mark: mark, scaledViewPosition: anchorPosition)
@@ -805,9 +806,8 @@ final class LadderView: ScaledView {
         nearbyDistance = nearbyDistance / scale
         let nearbyMarks = getNearbyMarks(mark: mark, nearbyDistance: nearbyDistance)
         ladder.setHighlightForAllMarks(highlight: .none)
-        mark.groupedMarks.highlight(highlight: .grouped)
         nearbyMarks.highlight(highlight: .grouped)
-        mark.highlight = .attached
+        setAttachedMarkAndGroupedMarksHighlights()
     }
 
     func getNearbyMarks(mark: Mark, nearbyDistance: CGFloat) -> MarkGroup {
@@ -1567,11 +1567,11 @@ extension LadderView: LadderViewDelegate {
         deleteMark(attachedMark)
     }
 
-    func highlightGroupedMarks(highlight: Mark.Highlight) {
-        guard let attachedMark = attachedMark else { return }
-        attachedMark.groupedMarks.highlight(highlight: highlight)
-        attachedMark.highlight = .attached
-    }
+//    func highlightGroupedMarks(highlight: Mark.Highlight) {
+//        guard let attachedMark = attachedMark else { return }
+//        attachedMark.groupedMarks.highlight(highlight: highlight)
+//        attachedMark.highlight = .attached
+//    }
 
     func toggleAttachedMarkAnchor() {
         toggleAnchor(mark: attachedMark)
