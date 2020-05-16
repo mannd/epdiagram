@@ -24,6 +24,7 @@
 		8E4ACA8924479C5200575538 /* HamburgerViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8E4ACA8824479C5200575538 /* HamburgerViewModel.swift */; };
 		8E55612922A5FEDC00C4D391 /* Cursor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8E55612822A5FEDC00C4D391 /* Cursor.swift */; };
 		8E5D0ABD2464F2CD00FE78A2 /* RegionTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8E5D0ABC2464F2CD00FE78A2 /* RegionTests.swift */; };
+		8E6A0298246DFB3700A10C9F /* LadderEditor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8E6A0297246DFB3700A10C9F /* LadderEditor.swift */; };
 		8E7214DE22E95C860062C094 /* Common.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8E7214DD22E95C860062C094 /* Common.swift */; };
 		8E7214E022EB57FC0062C094 /* MarkTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8E7214DF22EB57FC0062C094 /* MarkTests.swift */; };
 		8E74D58E244FBE2500641E0A /* LadderView+UIContextMenuInteractionDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8E74D58D244FBE2500641E0A /* LadderView+UIContextMenuInteractionDelegate.swift */; };
@@ -81,6 +82,7 @@
 		8E55612822A5FEDC00C4D391 /* Cursor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Cursor.swift; sourceTree = "<group>"; };
 		8E5D0ABC2464F2CD00FE78A2 /* RegionTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RegionTests.swift; sourceTree = "<group>"; };
 		8E689C4F23B498A10042A3F1 /* EP Diagram.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = "EP Diagram.entitlements"; sourceTree = "<group>"; };
+		8E6A0297246DFB3700A10C9F /* LadderEditor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LadderEditor.swift; sourceTree = "<group>"; };
 		8E7214DD22E95C860062C094 /* Common.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Common.swift; sourceTree = "<group>"; };
 		8E7214DF22EB57FC0062C094 /* MarkTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MarkTests.swift; sourceTree = "<group>"; };
 		8E74D58D244FBE2500641E0A /* LadderView+UIContextMenuInteractionDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "LadderView+UIContextMenuInteractionDelegate.swift"; sourceTree = "<group>"; };
@@ -177,6 +179,7 @@
 				8E689C4F23B498A10042A3F1 /* EP Diagram.entitlements */,
 				8E7214DC22E95C630062C094 /* Common */,
 				8E9B804C22834960008873BB /* ViewControllers */,
+				8EBC2B41246F718000CFC04D /* SwuitUI */,
 				8E4ACA8724479C2500575538 /* ViewModels */,
 				8E9B804B22834944008873BB /* Views */,
 				8E9B8049228348F7008873BB /* Storyboards */,
@@ -260,6 +263,14 @@
 				8E4ACA8124478D7C00575538 /* HamburgerTableViewController.swift */,
 			);
 			path = ViewControllers;
+			sourceTree = "<group>";
+		};
+		8EBC2B41246F718000CFC04D /* SwuitUI */ = {
+			isa = PBXGroup;
+			children = (
+				8E6A0297246DFB3700A10C9F /* LadderEditor.swift */,
+			);
+			path = SwuitUI;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -400,6 +411,7 @@
 				8E7D24C522779DBD005A1729 /* ViewController.swift in Sources */,
 				8E3AD1372459CABF0085BDD4 /* LocationInLadder.swift in Sources */,
 				8E253DD5244A8B17008CC56B /* Version.swift in Sources */,
+				8E6A0298246DFB3700A10C9F /* LadderEditor.swift in Sources */,
 				8E1B6CB8240CAE5300EA88A6 /* ScaledView.swift in Sources */,
 				8E8248DD23B53B55001A85F9 /* SeparatorView.swift in Sources */,
 				8E7214DE22E95C860062C094 /* Common.swift in Sources */,
@@ -603,6 +615,7 @@
 				DERIVE_MACCATALYST_PRODUCT_BUNDLE_IDENTIFIER = YES;
 				DEVELOPMENT_TEAM = W74NPJXYEG;
 				INFOPLIST_FILE = "EP Diagram/Info.plist";
+				IPHONEOS_DEPLOYMENT_TARGET = 13.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -624,6 +637,7 @@
 				DERIVE_MACCATALYST_PRODUCT_BUNDLE_IDENTIFIER = YES;
 				DEVELOPMENT_TEAM = W74NPJXYEG;
 				INFOPLIST_FILE = "EP Diagram/Info.plist";
+				IPHONEOS_DEPLOYMENT_TARGET = 13.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",

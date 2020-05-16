@@ -30,18 +30,20 @@ class Region: Equatable {
     var distalBoundary: CGFloat = 0
     var activated: Bool = false
     var name: String = ""
+    var description: String = ""
     var marks: [Mark] = []
     var markable: Bool = true
     var height: CGFloat { get { return distalBoundary - proximalBoundary } }
     var unitHeight: Int = 1  // 1 = smallest region height, used to calculate actual height
     var index: Int
+    let id = UUID()
 
     init(index: Int) {
         self.index = index
     }
 
     static func == (lhs: Region, rhs: Region) -> Bool {
-        return lhs.index == rhs.index
+        return lhs.id == rhs.id
     }
 
     func appendMark(_ mark: Mark) {

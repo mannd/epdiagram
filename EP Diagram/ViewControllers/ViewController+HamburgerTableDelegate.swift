@@ -169,12 +169,5 @@ extension ViewController: HamburgerTableDelegate, UIImagePickerControllerDelegat
             self.separatorView?.isHidden = false })
     }
     
-    // MARK: - Segue
-    override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
-        if segue.identifier == "HamburgerSegue" {
-            hamburgerTableViewController = segue.destination as? HamburgerTableViewController
-            hamburgerTableViewController?.delegate = self
-        }
-    }
 }
 

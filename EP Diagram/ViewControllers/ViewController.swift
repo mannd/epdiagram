@@ -7,6 +7,7 @@
 //
 
 import UIKit
+import SwiftUI
 import os.log
 
 final class ViewController: UIViewController {
@@ -17,6 +18,7 @@ final class ViewController: UIViewController {
     @IBOutlet var ladderView: LadderView!
     @IBOutlet var cursorView: CursorView!
     @IBOutlet var blackView: BlackView!
+
 
     // We get this view via its embed segue!  See prepareForSegue().
     var hamburgerTableViewController: HamburgerTableViewController?
@@ -143,13 +145,9 @@ final class ViewController: UIViewController {
             let calibrateTitle = L("Calibrate", comment: "calibrate button label title")
             let selectTitle = L("Select", comment: "select button label title")
             let linkTitle = L("Link", comment: "link button label title")
-            let undoTitle = L("Undo", comment: "undo button label title")
-            let redoTitle = L("Redo", comment: "redo button label title")
             let calibrateButton = UIBarButtonItem(title: calibrateTitle, style: UIBarButtonItem.Style.plain, target: self, action: #selector(calibrate))
             let selectButton = UIBarButtonItem(title: selectTitle, style: .plain, target: self, action: #selector(selectMarks))
             let linkButton = UIBarButtonItem(title: linkTitle, style: .plain, target: self, action: #selector(linkMarks))
-            undoButton = UIBarButtonItem(title: undoTitle, style: .plain, target: self, action: #selector(undo))
-            redoButton = UIBarButtonItem(title: redoTitle, style: .plain, target: self, action: #selector(redo))
             let spacer = UIBarButtonItem(barButtonSystemItem: .flexibleSpace, target: nil, action: nil)
             mainMenuButtons = [calibrateButton, spacer, selectButton, spacer, linkButton, spacer, undoButton, spacer, redoButton]
         }
@@ -204,6 +202,7 @@ final class ViewController: UIViewController {
 
     @objc func editLadder(action: UIAlertAction) {
         os_log("editLadder()", log: OSLog.action, type: .info)
+        performSegue(withIdentifier: "EditLadderSegue", sender: self)
     }
 
     @available(*, deprecated, message: "This doesn't seem to do anything.")
@@ -411,6 +410,22 @@ final class ViewController: UIViewController {
     func setViewsNeedDisplay() {
         cursorView.setNeedsDisplay()
         ladderView.setNeedsDisplay()
+    }
+
+    // MARK: - Segue
+    override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
+        if segue.identifier == "HamburgerSegue" {
+            hamburgerTableViewController = segue.destination as? HamburgerTableViewController
+            hamburgerTableViewController?.delegate = self
+        }
+    }
+
+    @IBSegueAction func createLadderEditor(_ coder: NSCoder) -> UIViewController? {
+        let ladderEditor = LadderEditor()
+        // FIXME: Pass a clean empty copy of current ladder.  Also, need a select ladder based on ladder names.
+        ladderEditor.ladder = ladderView.ladder.clone()
+        let hostingController = UIHostingController(coder: coder, rootView: ladderEditor)
+        return hostingController
     }
 
     // MARK: - Save and restore views

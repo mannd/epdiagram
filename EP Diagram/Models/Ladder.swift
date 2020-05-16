@@ -20,6 +20,7 @@ class Ladder {
 
     private var registry: Registry = [:]
 
+    var name: String = ""
     var regions: [Region] = []
     var numRegions: Int {
         get {
@@ -32,6 +33,17 @@ class Ladder {
     var movingMark: Mark?
     var selectedMarks: [Mark] = []
     var linkedMarks: [Mark] = []
+
+    let id = UUID()
+
+    // returns a "clean" clone of this ladder (clean meaning without marks).
+    func clone() -> Ladder {
+        let ladder = Ladder()
+        for region in self.regions {
+            ladder.regions.append(region)
+        }
+        return ladder
+    }
 
     // TODO: Does region have to be optional?  Consider refactor away optionality.
     // addMark() functions.  All require a Region in which to add the mark.  Each new mark is registered to that region.  All return addedMark or nil if region is nil.
@@ -179,14 +191,18 @@ class Ladder {
     // Returns a basic ladder (A, AV, V).
     static func defaultLadder() -> Ladder {
         let ladder = Ladder()
+        ladder.name = "Default Ladder Diagram"
         let aRegion = Region(index: 0)
         aRegion.name = "A"
+        aRegion.description = "atrium"
         aRegion.activated = true
         let avRegion = Region(index: 1)
         avRegion.name = "AV"
+        avRegion.description = "atrio-ventricular"
         avRegion.unitHeight = 2
         let vRegion = Region(index: 2)
         vRegion.name = "V"
+        vRegion.description = "ventricle"
         ladder.regions = [aRegion, avRegion, vRegion]
         return ladder
     }

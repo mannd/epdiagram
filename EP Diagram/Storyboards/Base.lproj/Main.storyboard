@@ -2,8 +2,7 @@
 <document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="16096" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES" initialViewController="en3-9x-pbF">
     <device id="retina6_1" orientation="portrait" appearance="light"/>
     <dependencies>
-        <deployment identifier="iOS"/>
-        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="16086"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="16087"/>
         <capability name="Safe area layout guides" minToolsVersion="9.0"/>
         <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
     </dependencies>
@@ -85,11 +84,12 @@
                         <outlet property="imageScrollView" destination="QhZ-gG-IcS" id="Jhd-Sa-e44"/>
                         <outlet property="imageView" destination="Z9T-Bh-sBD" id="6GT-g9-IHr"/>
                         <outlet property="ladderView" destination="rq1-PC-4iG" id="IAX-Gu-2b0"/>
+                        <segue destination="gVN-cB-Xrp" kind="show" identifier="EditLadderSegue" destinationCreationSelector="createLadderEditor:" id="07p-Ga-V8c"/>
                     </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="dkx-z0-nzr" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="1240" y="93"/>
+            <point key="canvasLocation" x="801" y="121"/>
         </scene>
         <!--Hamburger Table View Controller-->
         <scene sceneID="jj1-pa-l5s">
@@ -141,7 +141,17 @@
                 </tableViewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="qCE-BD-hD2" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="2142" y="92"/>
+            <point key="canvasLocation" x="680" y="773"/>
+        </scene>
+        <!--Hosting Controller-->
+        <scene sceneID="XVW-HG-aoH">
+            <objects>
+                <hostingController id="gVN-cB-Xrp" sceneMemberID="viewController">
+                    <navigationItem key="navigationItem" id="VvI-lK-Mwh"/>
+                </hostingController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="SDO-eu-m8t" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="1694" y="121"/>
         </scene>
         <!--Navigation Controller-->
         <scene sceneID="krg-YB-oDF">
