@@ -35,11 +35,18 @@ class Region: Equatable {
     var markable: Bool = true
     var height: CGFloat { get { return distalBoundary - proximalBoundary } }
     var unitHeight: Int = 1  // 1 = smallest region height, used to calculate actual height
-    var index: Int
+//    var index: Int
     let id = UUID()
 
-    init(index: Int) {
-        self.index = index
+//    init(index: Int) {
+//        self.index = index
+//    }
+    init() { }
+
+    init(regionTemplate: RegionTemplate) {
+        name = regionTemplate.name
+        description = regionTemplate.description
+        unitHeight = regionTemplate.unitHeight
     }
 
     static func == (lhs: Region, rhs: Region) -> Bool {

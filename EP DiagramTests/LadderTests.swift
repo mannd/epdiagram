@@ -16,7 +16,7 @@ class LadderTests: XCTestCase {
         super.setUp()
         ladder = Ladder.defaultLadder()
         for region: Region in ladder.regions {
-            assert(region.index >= 0, String(format: "region %@ index negative, = %d", region.name, region.index))
+            assert(ladder.getIndex(ofRegion: region)! >= 0, String(format: "region %@ index negative, = %d", region.name, ladder.getIndex(ofRegion: region)!))
         }
     }
 
@@ -69,7 +69,7 @@ class LadderTests: XCTestCase {
     func testRegionIndicesUniqueInLadder() {
         var lastIndex = 0
         for region in ladder.regions {
-            XCTAssert(region.index == lastIndex)
+            XCTAssert(ladder.getIndex(ofRegion: region) == lastIndex)
             lastIndex += 1
         }
     }

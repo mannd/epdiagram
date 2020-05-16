@@ -131,7 +131,6 @@ final class LadderView: ScaledView {
             selectedColor = UIColor.systemRed
             groupedColor = UIColor.systemPurple
         }
-        assertLadderIsGood()
         initializeRegions()
 
         // Draw border around view.
@@ -156,12 +155,12 @@ final class LadderView: ScaledView {
         self.addGestureRecognizer(longPressRecognizer)
     }
 
-    private func assertLadderIsGood() {
-        assert(ladder.regions.count >= 1, "ladder has no regions")
-        for i in 0..<ladder.regions.count {
-            assert(i == ladder.regions[i].index, "Region index doesn't match place in ladder.regions array")
-        }
-    }
+//    private func assertLadderIsGood() {
+//        assert(ladder.regions.count >= 1, "ladder has no regions")
+//        for i in 0..<ladder.regions.count {
+//            assert(i == ladder.regions[i].index, "Region index doesn't match place in ladder.regions array")
+//        }
+//    }
 
     private func initializeRegions() {
         regionUnitHeight = getRegionUnitHeight(ladder: ladder)

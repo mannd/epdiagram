@@ -21,6 +21,7 @@ class Ladder {
     private var registry: Registry = [:]
 
     var name: String = ""
+    var description: String = ""
     var regions: [Region] = []
     var numRegions: Int {
         get {
@@ -35,6 +36,17 @@ class Ladder {
     var linkedMarks: [Mark] = []
 
     let id = UUID()
+
+    init() {}
+
+    init(ladderTemplate: LadderTemplate) {
+        name = ladderTemplate.name
+        description = ladderTemplate.description
+        for regionTemplate in ladderTemplate.regionTemplates {
+            let region = Region(regionTemplate: regionTemplate)
+            regions.append(region)
+        }
+    }
 
     // returns a "clean" clone of this ladder (clean meaning without marks).
     func clone() -> Ladder {
@@ -59,7 +71,7 @@ class Ladder {
     private func registerAndAppendMark(_ mark: Mark, toRegion region: Region?) -> Mark? {
         guard let region = region else { return nil }
         region.appendMark(mark)
-        registry[mark.id] = region.index
+        registry[mark.id] = getIndex(ofRegion: region)
         return mark
     }
 
@@ -93,7 +105,8 @@ class Ladder {
 
     func getIndex(ofRegion region: Region?) -> Int? {
         guard let region = region else { return nil }
-        return region.index
+        return regions.firstIndex(of: region)
+//        return region.index
     }
 
     func getRegionIndex(ofMark mark: Mark) -> Int? {
@@ -113,15 +126,17 @@ class Ladder {
     }
 
     func getRegionBefore(region: Region) -> Region? {
-        if region.index > 0 {
-            return regions[region.index - 1]
+        guard let index = getIndex(ofRegion: region) else { return nil }
+        if index > 0 {
+            return regions[index - 1]
         }
         else { return nil }
     }
 
     func getRegionAfter(region: Region) -> Region? {
-        if region.index < regions.count - 1 {
-            return regions[region.index + 1]
+        guard let index = getIndex(ofRegion: region) else { return nil}
+        if index < regions.count - 1 {
+            return regions[index + 1]
         }
         else { return nil }
     }
@@ -190,20 +205,6 @@ class Ladder {
 
     // Returns a basic ladder (A, AV, V).
     static func defaultLadder() -> Ladder {
-        let ladder = Ladder()
-        ladder.name = "Default Ladder Diagram"
-        let aRegion = Region(index: 0)
-        aRegion.name = "A"
-        aRegion.description = "atrium"
-        aRegion.activated = true
-        let avRegion = Region(index: 1)
-        avRegion.name = "AV"
-        avRegion.description = "atrio-ventricular"
-        avRegion.unitHeight = 2
-        let vRegion = Region(index: 2)
-        vRegion.name = "V"
-        vRegion.description = "ventricle"
-        ladder.regions = [aRegion, avRegion, vRegion]
-        return ladder
+        return Ladder(ladderTemplate: LadderTemplate.defaultLadder())
     }
 }

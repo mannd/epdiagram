@@ -23,7 +23,7 @@ struct LadderEditor: View {
                 ForEach(ladder.regions, id: \.id) {
                     region in
                     NavigationLink(
-                    destination: RegionEditor(name: region.name)) {
+                    destination: RegionEditor(region: region)) {
                         HStack {
                             Text(region.name).bold()
                             Spacer()
@@ -63,13 +63,6 @@ struct LadderEditor: View {
 }
 
 
-struct RegionEditor: View {
-    let name: String
-    var body: some View {
-        Text(name)
-            .navigationBarTitle(Text("Edit Region " + name), displayMode: .inline)
-    }
-}
 
 struct LadderEditor_Previews: PreviewProvider {
     static var previews: some View {

@@ -32,7 +32,7 @@ class RegionTests: XCTestCase {
     }
 
     func testRelativeYPosition() {
-        let region = Region(index: 0)
+        let region = Region()
         region.proximalBoundary = 200
         region.distalBoundary = 500
         XCTAssertNotNil(region.getRelativeYPosition(y: 300))

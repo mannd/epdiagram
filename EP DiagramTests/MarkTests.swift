@@ -51,7 +51,7 @@ class MarkTests: XCTestCase {
 
     func testMidpoint() {
         let mark = Mark(segment: Segment(proximal: CGPoint(x: 50, y: 0.21), distal: CGPoint(x:120, y: 0.88)))
-        let region = Region(index: 0)
+        let region = Region()
         region.proximalBoundary = 100
         region.distalBoundary = 500
         let relativeMarkPosition = Common.translateToScaledViewSegment(regionSegment: mark.segment, region: region, offsetX: 0, scale: 1)
