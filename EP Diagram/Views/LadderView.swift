@@ -42,7 +42,7 @@ final class LadderView: ScaledView {
     private let lowerLimitMarkHeight: CGFloat = 0.1
     private let lowerLimitMarkWidth: CGFloat = 20
 
-    private var deletedMarks: [Mark] = []
+    private var deletedMarks = [Mark]()
 
     // variables that need to eventually be preferences
     var lineWidth: CGFloat = 2
@@ -56,8 +56,8 @@ final class LadderView: ScaledView {
     var markLineWidth: CGFloat = 2
     var connectedLineWidth: CGFloat = 4
     var showImpulseOrigin = false
-    var showBlock = false
-    var showPivots = true
+    var showBlock = true
+    var showPivots = false
 
     internal var ladder: Ladder
 
@@ -811,9 +811,9 @@ final class LadderView: ScaledView {
 
     func getNearbyMarks(mark: Mark, nearbyDistance: CGFloat) -> MarkGroup {
         guard let activeRegion = activeRegion else { return MarkGroup() }
-        var proximalMarks: MarkSet = []
-        var distalMarks: MarkSet = []
-        var middleMarks: MarkSet = []
+        var proximalMarks = MarkSet()
+        var distalMarks = MarkSet()
+        var middleMarks = MarkSet()
         if let proximalRegion = ladder.getRegionBefore(region: activeRegion) {
             for neighboringMark in proximalRegion.marks {
                 if assessCloseness(ofMark: mark, inRegion: activeRegion, toNeighboringMark: neighboringMark, inNeighboringRegion: proximalRegion, usingNearbyDistance: nearbyDistance) {

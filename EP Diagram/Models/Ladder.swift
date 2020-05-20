@@ -9,9 +9,9 @@
 import UIKit
 
 struct NearbyMarks {
-    var proximal: [Mark] = []
-    var middle: [Mark] = []
-    var distal: [Mark] = []
+    var proximal = [Mark]()
+    var middle = [Mark]()
+    var distal = [Mark]()
 }
 
 // A Ladder is simply a collection of Regions in top bottom order.
@@ -22,7 +22,7 @@ class Ladder {
 
     var name: String = ""
     var description: String = ""
-    var regions: [Region] = []
+    var regions = [Region]()
     var numRegions: Int {
         get {
             return regions.count
@@ -32,8 +32,8 @@ class Ladder {
     var attachedMark: Mark?
     var pressedMark: Mark?
     var movingMark: Mark?
-    var selectedMarks: [Mark] = []
-    var linkedMarks: [Mark] = []
+    var selectedMarks = [Mark]()
+    var linkedMarks = [Mark]()
 
     let id = UUID()
 

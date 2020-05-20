@@ -64,9 +64,9 @@ typealias MarkSet = Set<Mark>
 // A mark may have up to three attachments to marks in the proximal and distal regions
 // and in its own region, i.e. reentry spawning a mark.
 struct MarkGroup {
-    var proximal: MarkSet = []
-    var middle: MarkSet = []
-    var distal: MarkSet = []
+    var proximal = MarkSet()
+    var middle = MarkSet()
+    var distal = MarkSet()
 
     var allMarks: MarkSet {
         get {

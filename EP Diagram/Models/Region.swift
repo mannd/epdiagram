@@ -31,7 +31,7 @@ class Region: Equatable {
     var activated: Bool = false
     var name: String = ""
     var description: String = ""
-    var marks: [Mark] = []
+    var marks = [Mark]()
     var markable: Bool = true
     var height: CGFloat { get { return distalBoundary - proximalBoundary } }
     var unitHeight: Int = 1  // 1 = smallest region height, used to calculate actual height
@@ -65,7 +65,7 @@ class Region: Equatable {
     // Two functions to use while moving marks to see is we are close to another mark
     // for purposes of highlighting them for connection.
     func getMarkProximalXPositions() -> [CGFloat] {
-        var points: [CGFloat] = []
+        var points = [CGFloat]()
         for mark in marks {
             points.append(mark.segment.proximal.x)
         }
@@ -73,7 +73,7 @@ class Region: Equatable {
     }
 
     func getMarkDistalXPositions() -> [CGFloat] {
-        var points: [CGFloat] = []
+        var points = [CGFloat]()
         for mark in marks {
             points.append(mark.segment.distal.x)
         }

@@ -8,10 +8,10 @@
 
 import Foundation
 
-struct LadderTemplate {
+struct LadderTemplate: Codable {
     var name: String = ""
     var description: String = ""
-    var regionTemplates: [RegionTemplate] = []
+    var regionTemplates = [RegionTemplate]()
     let id = UUID()
 
     // Returns a basic ladder (A, AV, V).

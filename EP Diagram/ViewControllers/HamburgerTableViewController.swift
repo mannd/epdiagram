@@ -10,7 +10,7 @@ import UIKit
 import os.log
 
 class HamburgerTableViewController: UITableViewController {
-    var rows: Array<HamburgerLayer> = []
+    var rows = [HamburgerLayer]()
     var delegate: HamburgerTableDelegate?
     var imageIsLocked: Bool = false
 

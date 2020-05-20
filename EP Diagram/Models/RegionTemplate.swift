@@ -8,7 +8,7 @@
 
 import UIKit
 
-struct RegionTemplate {
+struct RegionTemplate: Codable {
     var name: String
     var description: String
     var unitHeight: Int

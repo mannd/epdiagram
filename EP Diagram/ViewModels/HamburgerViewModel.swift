@@ -10,7 +10,7 @@ import UIKit
 
 struct HamburgerViewModel {
     func allLayers() -> [HamburgerLayer] {
-        var array: Array<HamburgerLayer> = []
+        var array = [HamburgerLayer]()
         let cameraLayer = HamburgerLayer(withName: L("Take photo"), iconName: "camera", layer: .camera)
         array.append(cameraLayer)
         let selectPhotoLayer = HamburgerLayer(withName: L("Select image"), iconName: "photos", layer: .photoGallery)
