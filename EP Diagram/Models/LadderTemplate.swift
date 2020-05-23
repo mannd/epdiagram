@@ -15,7 +15,7 @@ struct LadderTemplate: Codable {
     let id = UUID()
 
     // Returns a basic ladder (A, AV, V).
-    static func defaultLadder() -> LadderTemplate {
+    static func defaultTemplate() -> LadderTemplate {
         var ladderTemplate = LadderTemplate(name: "Default Ladder Template", description: "default ladder template")
         let aRegionTemplate = RegionTemplate(name: "A", description: "atrium", unitHeight: 1)
         let avRegionTemplate = RegionTemplate(name: "AV", description: "atrioventricular", unitHeight: 2)

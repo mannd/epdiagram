@@ -195,7 +195,7 @@ final class LadderView: ScaledView {
     // MARK: - Touches
 
     @objc func singleTap(tap: UITapGestureRecognizer) {
-        os_log("singleTap - LadderView", log: OSLog.touches, type: .info)
+        os_log("singleTap(tap:) - LadderView", log: OSLog.touches, type: .info)
         let position = tap.location(in: self)
         let tapLocationInLadder = getLocationInLadder(position: position)
         if selectMarkMode {
@@ -581,7 +581,7 @@ final class LadderView: ScaledView {
 
 
     @objc func doubleTap(tap: UITapGestureRecognizer) {
-        os_log("doubleTap - LadderView", log: OSLog.touches, type: .info)
+        os_log("doubleTap(tap:) - LadderView", log: OSLog.touches, type: .info)
         if deleteMark(position: tap.location(in: self), cursorViewDelegate: cursorViewDelegate) {
             setNeedsDisplay()
         }
@@ -590,7 +590,7 @@ final class LadderView: ScaledView {
     /// Deletes mark if there is one at position.  Returns true if position corresponded to a mark.
     /// - Parameter position: position of potential mark
     func deleteMark(position: CGPoint, cursorViewDelegate: CursorViewDelegate) -> Bool {
-        os_log("deleteMark(CGPoint:CursorViewDelegate) - LadderView", log: OSLog.debugging, type: .debug)
+        os_log("deleteMark(position:cursofViewDelegate:) - LadderView", log: OSLog.debugging, type: .debug)
         let tapLocationInLadder = getLocationInLadder(position: position)
         activeRegion = tapLocationInLadder.region
         if tapLocationInLadder.markWasTapped {

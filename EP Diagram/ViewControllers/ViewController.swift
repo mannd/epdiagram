@@ -10,7 +10,9 @@ import UIKit
 import SwiftUI
 import os.log
 
+// TODO: refactor out the delegates to an extension.
 final class ViewController: UIViewController {
+
     @IBOutlet var _constraintHamburgerWidth: NSLayoutConstraint!
     @IBOutlet var _constraintHamburgerLeft: NSLayoutConstraint!
     @IBOutlet var imageScrollView: UIScrollView!
@@ -45,8 +47,9 @@ final class ViewController: UIViewController {
 
     var _imageIsLocked: Bool = false
 
+
     override func viewDidLoad() {
-        os_log("viewDidLoad - ViewController", log: OSLog.viewCycle, type: .info)
+        os_log("viewDidLoad() - ViewController", log: OSLog.viewCycle, type: .info)
         super.viewDidLoad()
 
 
@@ -102,7 +105,9 @@ final class ViewController: UIViewController {
 
         navigationItem.setLeftBarButton(UIBarButtonItem(image: UIImage(named: "hamburger"), style: .plain, target: self, action: #selector(toggleHamburgerMenu)), animated: true)
         // FIXME: right button maybe to toggle adding marks quickly?
-        navigationItem.setRightBarButton(UIBarButtonItem(barButtonSystemItem: .edit, target: self, action: #selector(editDiagram)), animated: true)
+        let ladderButton = UIBarButtonItem(image: UIImage(named: "ladder"), style: .plain, target: self, action: #selector(selectLadder))
+        navigationItem.rightBarButtonItem = ladderButton
+//        navigationItem.setRightBarButton(UIBarButtonItem(barButtonSystemItem: .action , target: self, action: #selector(editDiagram)), animated: true)
 
     }
 
@@ -113,7 +118,7 @@ final class ViewController: UIViewController {
     }
 
     override func viewDidAppear(_ animated: Bool) {
-        os_log("viewDidAppear - ViewController", log: OSLog.viewCycle, type: .info)
+        os_log("viewDidAppear() - ViewController", log: OSLog.viewCycle, type: .info)
         assertDelegatesNonNil()
         // Need to set this here, after view draw, or Mac malpositions cursor at start of app.
         imageScrollView.contentInset = UIEdgeInsets(top: 0, left: leftMargin, bottom: 0, right: 0)
@@ -131,13 +136,6 @@ final class ViewController: UIViewController {
     // Crash program at compile time if IUO delegates are nil.
     private func assertDelegatesNonNil() {
         assert(cursorView.ladderViewDelegate != nil && ladderView.cursorViewDelegate != nil, "LadderViewDelegate and/or CursorViewDelegate are nil")
-    }
-
-    func showMessage(title: String, message: String) {
-        let alert = UIAlertController(title: title, message: message, preferredStyle: .alert)
-        let okAction = UIAlertAction(title: L("OK"), style: .cancel, handler: nil)
-        alert.addAction(okAction)
-        self.present(alert, animated: true)
     }
 
     private func showMainMenu() {
@@ -186,8 +184,14 @@ final class ViewController: UIViewController {
         navigationController?.setToolbarHidden(false, animated: false)
     }
 
+    @objc func selectLadder() {
+        os_log("selectLadder()", log: .action, type: .info)
+        performSegue(withIdentifier: "selectLadderSegue", sender: self)
+        
+    }
+
     @objc func editDiagram() {
-        os_log("editDiagram", log: OSLog.action, type: .info)
+        os_log("editDiagram()", log: OSLog.action, type: .info)
         let alert = UIAlertController(title: L("Edit Diagram"), message: L("Create new diagram or edit this one"), preferredStyle: .actionSheet)
         let newAction = UIAlertAction(title: L("Create new diagram"), style: .default, handler: nil)
         let duplicateAction = UIAlertAction(title: L("Duplicate this diagram"), style: .default, handler: nil)
@@ -201,7 +205,7 @@ final class ViewController: UIViewController {
     }
 
     @objc func editLadder(action: UIAlertAction) {
-        os_log("editLadder()", log: OSLog.action, type: .info)
+        os_log("editLadder(action:)", log: OSLog.action, type: .info)
         performSegue(withIdentifier: "EditLadderSegue", sender: self)
     }
 
@@ -306,6 +310,7 @@ final class ViewController: UIViewController {
     }
 
     // MARK: - Handle PDFs, URLs at app startup
+
     func openURL(url: URL) {
         os_log("openURL action", log: OSLog.action, type: .info)
         // self.resetImage
@@ -413,6 +418,7 @@ final class ViewController: UIViewController {
     }
 
     // MARK: - Segue
+    
     override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
         if segue.identifier == "HamburgerSegue" {
             hamburgerTableViewController = segue.destination as? HamburgerTableViewController
@@ -420,11 +426,25 @@ final class ViewController: UIViewController {
         }
     }
 
+    @IBSegueAction func createTemplateEditor(_ coder: NSCoder) -> UIViewController? {
+        let templateEditor = TemplateEditor()
+        let hostingController = UIHostingController(coder: coder, rootView: templateEditor)
+        return hostingController
+    }
+
     @IBSegueAction func createLadderEditor(_ coder: NSCoder) -> UIViewController? {
         let ladderEditor = LadderEditor()
-        // FIXME: Pass a clean empty copy of current ladder.  Also, need a select ladder based on ladder names.
+        // FIXME: We are now selecting/editing LadderTemplates, not Ladders.
         ladderEditor.ladder = ladderView.ladder.clone()
         let hostingController = UIHostingController(coder: coder, rootView: ladderEditor)
+        return hostingController
+    }
+
+    @IBSegueAction func showLadderSelector(_ coder: NSCoder) -> UIViewController? {
+        os_log("showladderselector")
+        let ladderSelector = LadderSelector()
+        ladderSelector.ladderTemplates = Persistance.retrieve("user_ladder_templates", from: .documents, as: [LadderTemplate].self) ?? [LadderTemplate.defaultTemplate()]
+        let hostingController = UIHostingController(coder: coder, rootView: ladderSelector)
         return hostingController
     }
 

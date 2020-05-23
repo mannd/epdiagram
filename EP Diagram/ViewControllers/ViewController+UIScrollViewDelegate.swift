@@ -39,15 +39,15 @@ extension ViewController: UIScrollViewDelegate {
     }
 
     fileprivate func scrollFinished() {
-        os_log("scrollFinished", log: OSLog.viewCycle, type: .info)
+        os_log("scrollFinished()", log: OSLog.viewCycle, type: .info)
     }
 
     func scrollViewWillBeginZooming(_ scrollView: UIScrollView, with view: UIView?) {
-        os_log("scrollViewWillBeginZooming", log: OSLog.viewCycle, type: .info)
+        os_log("scrollViewWillBeginZooming()", log: OSLog.viewCycle, type: .info)
     }
 
     func scrollViewDidEndZooming(_ scrollView: UIScrollView, with view: UIView?, atScale scale: CGFloat) {
-        os_log("scrollViewDidEndZooming", log: OSLog.viewCycle, type: .info)
+        os_log("scrollViewDidEndZooming()", log: OSLog.viewCycle, type: .info)
         scrollViewAdjustViews(scrollView)
     }
 

@@ -20,6 +20,7 @@ struct LadderEditor: View {
     var body: some View {
         NavigationView {
             List {
+                TextField(ladder.name, text: $ladder.name)
                 ForEach(ladder.regions, id: \.id) {
                     region in
                     NavigationLink(
@@ -32,9 +33,9 @@ struct LadderEditor: View {
                     }
                 }
                 .onMove(perform: onMove)
-            .onDelete(perform: onDelete)
+                .onDelete(perform: onDelete)
             }
-            .navigationBarTitle("Diagram Regions")
+            .navigationBarTitle(L("Ladder Regions"))
             .navigationBarItems(leading: EditButton(), trailing: addButton)
             .environment(\.editMode, $editMode)
         }
@@ -50,7 +51,7 @@ struct LadderEditor: View {
     }
 
     private func onAdd() {
-        os_log("onAdd - LadderEditor", log: OSLog.action, type: .info)
+        os_log("onAdd() - LadderEditor", log: OSLog.action, type: .info)
     }
 
     private func onDelete(offsets: IndexSet) {

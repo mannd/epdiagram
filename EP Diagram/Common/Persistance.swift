@@ -37,7 +37,7 @@ final class Persistance {
 
     static func store<T: Encodable>(_ object: T, to directory: Directory, withFileName fileName: String) throws {
         guard let url = getURL(for: directory) else {
-            os_log("Search directory not found", log: OSLog.default, type: .error)
+            os_log("Search directory not found", log: .default, type: .fault)
             throw PersistanceError.searchDirectoryNotFound
         }
         let encoder = JSONEncoder()

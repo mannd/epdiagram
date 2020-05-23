@@ -20,6 +20,7 @@ protocol HamburgerTableDelegate: class {
     func about()
     func openDiagram()
     func saveDiagram()
+    func templates()
     func help()
     func lockImage()
     func hideHamburgerMenu()
@@ -68,12 +69,12 @@ extension ViewController: HamburgerTableDelegate, UIImagePickerControllerDelegat
     static let hamburgerCycle = OSLog(subsystem: subsystem, category: "hamburger")
 
     func takePhoto() {
-        os_log("takePhoto", log: OSLog.action, type: .info)
+        os_log("takePhoto()", log: OSLog.action, type: .info)
         let picker: UIImagePickerController = UIImagePickerController()
         picker.delegate = self
         picker.allowsEditing = true
         if !UIImagePickerController.isSourceTypeAvailable(.camera) {
-            showMessage(title: L("Camera error"), message: "Camera not available")
+            Common.showMessage(viewController: self, title: L("Camera error"), message: "Camera not available")
             return
         }
         picker.sourceType = .camera
@@ -82,7 +83,7 @@ extension ViewController: HamburgerTableDelegate, UIImagePickerControllerDelegat
     }
 
     func selectPhoto() {
-        os_log("selectPhoto", log: OSLog.action, type: .info)
+        os_log("selectPhoto()", log: OSLog.action, type: .info)
         let picker: UIImagePickerController = UIImagePickerController()
         picker.delegate = self
         picker.allowsEditing = true
@@ -96,7 +97,7 @@ extension ViewController: HamburgerTableDelegate, UIImagePickerControllerDelegat
         let version = versionBuild.version ?? L("unknown")
         let build = versionBuild.build ?? L("unknown")
         os_log("About EP Diagram: version = %s build = %s", log: OSLog.debugging, type: .info, version, build)
-        showMessage(title: L("About EP Diagram"), message: "Copyright 2020 EP Studios, Inc.\nVersion " + version)
+        Common.showMessage(viewController: self, title: L("About EP Diagram"), message: "Copyright 2020 EP Studios, Inc.\nVersion " + version)
     }
 
     func openDiagram() {
@@ -112,11 +113,16 @@ extension ViewController: HamburgerTableDelegate, UIImagePickerControllerDelegat
     }
 
     func saveDiagram() {
-        os_log("saveDiagram", log: OSLog.action, type: .info)
+        os_log("saveDiagram()", log: OSLog.action, type: .info)
+    }
+
+    func templates() {
+        os_log("templates()", log: OSLog.action, type: .info)
+        performSegue(withIdentifier: "showTemplateEditorSegue", sender: self)
     }
 
     func help() {
-        os_log("help", log: OSLog.action, type: .info)
+        os_log("help()", log: OSLog.action, type: .info)
     }
 
     func imagePickerController(_ picker: UIImagePickerController, didFinishPickingMediaWithInfo info: [UIImagePickerController.InfoKey : Any]) {
@@ -140,7 +146,7 @@ extension ViewController: HamburgerTableDelegate, UIImagePickerControllerDelegat
     }
 
     func showHamburgerMenu() {
-        os_log("showHamburgerMenu", log: OSLog.action, type: .info)
+        os_log("showHamburgerMenu()", log: OSLog.action, type: .info)
         hamburgerTableViewController?.reloadData()
         constraintHamburgerLeft.constant = 0
         hamburgerMenuIsOpen = true
@@ -155,7 +161,7 @@ extension ViewController: HamburgerTableDelegate, UIImagePickerControllerDelegat
     }
 
     func hideHamburgerMenu() {
-        os_log("hideHamburgerMenu", log: OSLog.action, type: .info)
+        os_log("hideHamburgerMenu()", log: OSLog.action, type: .info)
         self.constraintHamburgerLeft.constant = -self.constraintHamburgerWidth.constant;
         hamburgerMenuIsOpen = false
         navigationController?.setToolbarHidden(false, animated: true)

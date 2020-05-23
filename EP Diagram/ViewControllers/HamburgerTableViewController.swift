@@ -15,7 +15,7 @@ class HamburgerTableViewController: UITableViewController {
     var imageIsLocked: Bool = false
 
     override func viewDidLoad() {
-        os_log("viewDidLoad - HamburgerView", log: OSLog.viewCycle, type: .info)
+        os_log("viewDidLoad() - HamburgerView", log: OSLog.viewCycle, type: .info)
         super.viewDidLoad()
 
         let hamburgerViewModel = HamburgerViewModel()
@@ -23,7 +23,7 @@ class HamburgerTableViewController: UITableViewController {
     }
 
     override func viewWillAppear(_ animated: Bool) {
-        os_log("viewWillAppear - HamburgerView", log: OSLog.viewCycle, type: .info)
+        os_log("viewWillAppear() - HamburgerView", log: OSLog.viewCycle, type: .info)
         super.viewWillAppear(animated)
         imageIsLocked = delegate?.imageIsLocked ?? false
     }
@@ -81,6 +81,8 @@ class HamburgerTableViewController: UITableViewController {
             delegate?.openDiagram()
         case .save:
             delegate?.saveDiagram()
+        case .templates:
+            delegate?.templates()
         case .help:
             delegate?.help()
         case .about:

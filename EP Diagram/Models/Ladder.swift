@@ -205,6 +205,6 @@ class Ladder {
 
     // Returns a basic ladder (A, AV, V).
     static func defaultLadder() -> Ladder {
-        return Ladder(ladderTemplate: LadderTemplate.defaultLadder())
+        return Ladder(ladderTemplate: LadderTemplate.defaultTemplate())
     }
 }

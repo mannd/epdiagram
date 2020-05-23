@@ -85,6 +85,8 @@
                         <outlet property="imageView" destination="Z9T-Bh-sBD" id="6GT-g9-IHr"/>
                         <outlet property="ladderView" destination="rq1-PC-4iG" id="IAX-Gu-2b0"/>
                         <segue destination="gVN-cB-Xrp" kind="show" identifier="EditLadderSegue" destinationCreationSelector="createLadderEditor:" id="07p-Ga-V8c"/>
+                        <segue destination="d3o-XH-zgX" kind="show" identifier="showTemplateEditorSegue" destinationCreationSelector="createTemplateEditor:" id="9nP-Qy-q3G"/>
+                        <segue destination="LJm-2p-ngb" kind="show" identifier="selectLadderSegue" destinationCreationSelector="showLadderSelector:" id="4Gf-Q1-Gss"/>
                     </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="dkx-z0-nzr" sceneMemberID="firstResponder"/>
@@ -141,7 +143,27 @@
                 </tableViewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="qCE-BD-hD2" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="680" y="773"/>
+            <point key="canvasLocation" x="580" y="821"/>
+        </scene>
+        <!--Hosting Controller-->
+        <scene sceneID="qbv-DT-RXU">
+            <objects>
+                <hostingController id="d3o-XH-zgX" sceneMemberID="viewController">
+                    <navigationItem key="navigationItem" id="3a4-ua-KXu"/>
+                </hostingController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="dQP-Qz-jOp" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="1693" y="850"/>
+        </scene>
+        <!--Hosting Controller-->
+        <scene sceneID="QVs-n6-kdo">
+            <objects>
+                <hostingController id="LJm-2p-ngb" sceneMemberID="viewController">
+                    <navigationItem key="navigationItem" id="cal-BW-zoO"/>
+                </hostingController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="SXR-j0-LQJ" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="1684" y="-528"/>
         </scene>
         <!--Hosting Controller-->
         <scene sceneID="XVW-HG-aoH">
