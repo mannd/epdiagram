@@ -437,14 +437,14 @@ final class ViewController: UIViewController {
     @IBSegueAction func createLadderEditor(_ coder: NSCoder) -> UIViewController? {
         let ladderEditor = LadderEditor()
         // FIXME: We are now selecting/editing LadderTemplates, not Ladders.
-        ladderEditor.ladder = ladderView.ladder.clone()
+//        ladderEditor.ladder = ladderView.ladder.clone()
         let hostingController = UIHostingController(coder: coder, rootView: ladderEditor)
         return hostingController
     }
 
     @IBSegueAction func showLadderSelector(_ coder: NSCoder) -> UIViewController? {
         os_log("showladderselector")
-        let ladderTemplates = Persistance.retrieve("user_ladder_templates", from: .documents, as: [LadderTemplate].self) ?? [LadderTemplate.defaultTemplate()]
+        let ladderTemplates = Persistance.retrieve("user_ladder_templates", from: .documents, as: [LadderTemplate].self) ?? [LadderTemplate.defaultTemplate(), LadderTemplate.defaultTemplate2()]
         let ladderSelector = LadderSelector(ladderTemplates: ladderTemplates)
         let hostingController = UIHostingController(coder: coder, rootView: ladderSelector)
         return hostingController

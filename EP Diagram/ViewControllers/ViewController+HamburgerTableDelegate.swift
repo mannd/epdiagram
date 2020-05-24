@@ -20,7 +20,6 @@ protocol HamburgerTableDelegate: class {
     func about()
     func openDiagram()
     func saveDiagram()
-    func templates()
     func help()
     func lockImage()
     func hideHamburgerMenu()
@@ -114,11 +113,6 @@ extension ViewController: HamburgerTableDelegate, UIImagePickerControllerDelegat
 
     func saveDiagram() {
         os_log("saveDiagram()", log: OSLog.action, type: .info)
-    }
-
-    func templates() {
-        os_log("templates()", log: OSLog.action, type: .info)
-        performSegue(withIdentifier: "showTemplateEditorSegue", sender: self)
     }
 
     func help() {

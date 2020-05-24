@@ -13,30 +13,35 @@ struct RegionEditor: View {
     @State var newText: String = ""
     @State var newDescription: String = ""
     @State var unitHeight: Int = 1
-    @State var region: Region
+    @State var region: RegionTemplate
     var body: some View {
-        VStack {
-            HStack {
-                Text(L("Label:"))
-                TextField(region.name, text: $region.name)
-            }
-            HStack {
-                Text(L("Description:"))
-                TextField(region.description, text: $region.description)
-            }
-            Stepper(value: $unitHeight, in: 1...4, step: 1) {
-                Text(L("Region height = \(unitHeight) unit") + (unitHeight > 1 ? "s" : "")) }
-            HStack {
-                Button(action: { saveAction() }) {
-                    Text(L("Save"))
+        NavigationView {
+            VStack {
+                HStack {
+                    Text("Label:").bold()
+                    TextField(region.name, text: $region.name)
                 }
+                HStack {
+                    Text("Description:").bold()
+                    TextField(region.description, text: $region.description)
+                }
+                Stepper(value: $unitHeight, in: 1...4, step: 1) {
+                    HStack {
+                        Text("Height:").bold()
+                        Text("\(unitHeight) unit" + (unitHeight > 1 ? "s" : ""))
+                    } }
                 Spacer()
-                Button(action: { saveAction() }) {
-                    Text(L("Cancel"))
+                HStack {
+                    Button(action: { saveAction() }) {
+                        Text(L("Cancel"))
+                    }
+                    Spacer()
+                    Button(action: { saveAction() }) {
+                        Text(L("Save"))
+                    }
                 }
-            }
-        }.padding(10)
-            .navigationBarTitle(Text(L("Edit Region ") + region.name), displayMode: .inline)
+                }.navigationBarTitle(Text(L("Edit ") + region.description), displayMode: .inline).padding()
+        }
     }
 }
 
@@ -45,8 +50,8 @@ private func saveAction() {
 }
 
 struct RegionEditor_Previews: PreviewProvider {
-    static let testLadder = Ladder.defaultLadder()
+    static let testLadder = LadderTemplate.defaultTemplate()
     static var previews: some View {
-        RegionEditor(region: testLadder.regions[0])
+        RegionEditor(region: testLadder.regionTemplates[0])
     }
 }

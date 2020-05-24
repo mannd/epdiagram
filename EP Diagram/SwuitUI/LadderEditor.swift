@@ -10,32 +10,37 @@ import SwiftUI
 import UIKit
 import os.log
 
-extension Region: Identifiable { }
+extension RegionTemplate: Identifiable {}
 
 struct LadderEditor: View {
     //    var regions: [String] = []
-    @State var ladder: Ladder = Ladder.defaultLadder()
+    @State var ladder: LadderTemplate = LadderTemplate.defaultTemplate()
     @State private var editMode = EditMode.inactive
 
     var body: some View {
         NavigationView {
-            List {
-                TextField(ladder.name, text: $ladder.name)
-                ForEach(ladder.regions) {
-                    region in
-                    NavigationLink(
-                    destination: RegionEditor(region: region)) {
-                        HStack {
-                            Text(region.name).bold()
-                            Spacer()
-                            Text(region.description)
+            VStack {
+                Text("Name").bold()
+                TextField(ladder.name, text: $ladder.name).padding()
+                Text("Description").bold()
+                TextField(ladder.name, text: $ladder.description).padding()
+                List {
+                    ForEach(ladder.regionTemplates) {
+                        region in
+                        NavigationLink(
+                        destination: RegionEditor(region: region)) {
+                            HStack {
+                                Text(region.name).bold()
+                                Spacer()
+                                Text(region.description)
+                            }
                         }
                     }
+                    .onMove(perform: onMove)
+                    .onDelete(perform: onDelete)
                 }
-                .onMove(perform: onMove)
-                .onDelete(perform: onDelete)
             }
-            .navigationBarTitle(L("Ladder Regions"))
+            .navigationBarTitle("Ladder")
             .navigationBarItems(leading: EditButton(), trailing: addButton)
             .environment(\.editMode, $editMode)
         }
@@ -55,11 +60,11 @@ struct LadderEditor: View {
     }
 
     private func onDelete(offsets: IndexSet) {
-        ladder.regions.remove(atOffsets: offsets)
+        ladder.regionTemplates.remove(atOffsets: offsets)
     }
 
     private func onMove(source: IndexSet, destination: Int) {
-        ladder.regions.move(fromOffsets: source, toOffset: destination)
+        ladder.regionTemplates.move(fromOffsets: source, toOffset: destination)
     }
 }
 
