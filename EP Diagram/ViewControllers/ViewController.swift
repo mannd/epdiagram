@@ -147,6 +147,8 @@ final class ViewController: UIViewController {
             let selectButton = UIBarButtonItem(title: selectTitle, style: .plain, target: self, action: #selector(selectMarks))
             let linkButton = UIBarButtonItem(title: linkTitle, style: .plain, target: self, action: #selector(linkMarks))
             let spacer = UIBarButtonItem(barButtonSystemItem: .flexibleSpace, target: nil, action: nil)
+            undoButton = UIBarButtonItem(barButtonSystemItem: .undo, target: self, action: #selector(undo))
+            redoButton = UIBarButtonItem(barButtonSystemItem: .redo, target: self, action: #selector(redo))
             mainMenuButtons = [calibrateButton, spacer, selectButton, spacer, linkButton, spacer, undoButton, spacer, redoButton]
         }
         // Note: set toolbar items this way, not directly (i.e. toolbar.items = something).
@@ -442,8 +444,8 @@ final class ViewController: UIViewController {
 
     @IBSegueAction func showLadderSelector(_ coder: NSCoder) -> UIViewController? {
         os_log("showladderselector")
-        let ladderSelector = LadderSelector()
-        ladderSelector.ladderTemplates = Persistance.retrieve("user_ladder_templates", from: .documents, as: [LadderTemplate].self) ?? [LadderTemplate.defaultTemplate()]
+        let ladderTemplates = Persistance.retrieve("user_ladder_templates", from: .documents, as: [LadderTemplate].self) ?? [LadderTemplate.defaultTemplate()]
+        let ladderSelector = LadderSelector(ladderTemplates: ladderTemplates)
         let hostingController = UIHostingController(coder: coder, rootView: ladderSelector)
         return hostingController
     }

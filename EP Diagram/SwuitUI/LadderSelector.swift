@@ -9,8 +9,10 @@
 import SwiftUI
 import os.log
 
+extension LadderTemplate: Identifiable { }
+
 struct LadderSelector: View {
-    @State var ladderTemplates: [LadderTemplate] = [LadderTemplate.defaultTemplate(), LadderTemplate.defaultTemplate()]
+    var ladderTemplates: [LadderTemplate] = [LadderTemplate.defaultTemplate(), LadderTemplate.defaultTemplate()]
     @State private var selectedLadderIndex: Int = 0
     @State private var showingAlert: Bool = false
     @Environment(\.presentationMode) var presentationMode: Binding<PresentationMode>
@@ -18,32 +20,35 @@ struct LadderSelector: View {
     var body: some View {
         NavigationView {
             VStack {
-                Picker(selection: $selectedLadderIndex, label: Text(L("Select:"))) {
+                Picker(selection: $selectedLadderIndex, label: Text("")) {
                     ForEach(0 ..< ladderTemplates.count) {
                         Text(self.ladderTemplates[$0].name)
                     }
+                    }.padding().labelsHidden()
+                Spacer()
+                Text(ladderTemplates[selectedLadderIndex].name).bold()
+                Text(ladderTemplates[selectedLadderIndex].description).foregroundColor(.secondary)
+                Spacer()
+//                Spacer(minLength: 50)
+                Text("Regions").font(.headline)
+                HStack {
+                    Text("Labels").foregroundColor(.primary)
+                    Spacer()
+                    Text("Description").foregroundColor(.primary)
+                }.padding()
+                    .font(.headline)
+                List(0 ..< ladderTemplates[selectedLadderIndex].regionTemplates.count) { item in
+                    HStack {
+                        Text(self.ladderTemplates[self.selectedLadderIndex].regionTemplates[item].name).fontWeight(.bold).foregroundColor(.red)
+                        Spacer()
+                        Text(self.ladderTemplates[self.selectedLadderIndex].regionTemplates[item].description)
+                    }
                 }
-            }
-            .padding()
-            .navigationBarTitle(L("Select Ladder"))
-            .foregroundColor(.purple)
-            .navigationBarItems(
-                leading: Button(action: {
-                    self.presentationMode.wrappedValue.dismiss()
+            }.animation(.default)
+                .navigationBarTitle("Select Ladder")
+                .navigationBarItems(
+                    trailing: Button(action: { self.showingAlert = true }) { Text("Save")
                 })
-                { Text("Cancel") }
-                    .alert(isPresented: $showingAlert)
-                    { Alert(
-                        title: Text(L("Change Ladder?")),
-                        message: Text(L("Previous ladder data will be lost.  If you wish to keep the data, save the diagram first.")),
-                        primaryButton: .destructive(Text("Do it")) {
-                            self.selectLadder()
-                            self.presentationMode.wrappedValue.dismiss()
-                        },
-                        secondaryButton: .cancel(Text("Cancel"))) },
-
-                trailing: Button(action: { self.showingAlert = true }) { Text("Save")
-            })
         }
     }
 
@@ -66,8 +71,10 @@ private func cancelAction() {
 
 }
 
+fileprivate let testData: [LadderTemplate] = [LadderTemplate.defaultTemplate(), LadderTemplate.defaultTemplate2(), LadderTemplate.defaultTemplate()]
+
 struct LadderSelector_Previews: PreviewProvider {
     static var previews: some View {
-        LadderSelector()
+        LadderSelector(ladderTemplates: testData)
     }
 }

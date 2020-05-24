@@ -6,7 +6,7 @@
 //  Copyright © 2020 EP Studios. All rights reserved.
 //
 
-import Foundation
+import UIKit
 
 struct LadderTemplate: Codable {
     var name: String = ""
@@ -16,11 +16,21 @@ struct LadderTemplate: Codable {
 
     // Returns a basic ladder (A, AV, V).
     static func defaultTemplate() -> LadderTemplate {
-        var ladderTemplate = LadderTemplate(name: "Default Ladder Template", description: "default ladder template")
-        let aRegionTemplate = RegionTemplate(name: "A", description: "atrium", unitHeight: 1)
-        let avRegionTemplate = RegionTemplate(name: "AV", description: "atrioventricular", unitHeight: 2)
-        let vRegionTemplate = RegionTemplate(name: "V", description: "ventricular", unitHeight: 1)
+        var ladderTemplate = LadderTemplate(name: "A-AV-V Ladder", description: "Basic ladder with commonly used regions")
+        let aRegionTemplate = RegionTemplate(name: "A", description: "Atrium", unitHeight: 1)
+        let avRegionTemplate = RegionTemplate(name: "AV", description: "Atrioventricular", unitHeight: 2)
+        let vRegionTemplate = RegionTemplate(name: "V", description: "Ventricular", unitHeight: 1)
         ladderTemplate.regionTemplates.append(contentsOf: [aRegionTemplate, avRegionTemplate, vRegionTemplate])
+        return ladderTemplate
+    }
+
+    static func defaultTemplate2() -> LadderTemplate {
+        var ladderTemplate = LadderTemplate(name: "SA-A-AVN-V Ladder", description: "Ladder that includes SA region")
+        let saRegionTemplate = RegionTemplate(name: "SA", description: "Sino-atrium", unitHeight: 1)
+        let aRegionTemplate = RegionTemplate(name: "A", description: "Atrium", unitHeight: 2)
+        let avnRegionTemplate = RegionTemplate(name: "AVN", description: "AV node", unitHeight: 2)
+        let vRegionTemplate = RegionTemplate(name: "V", description: "Ventricular", unitHeight: 1)
+        ladderTemplate.regionTemplates.append(contentsOf: [saRegionTemplate, aRegionTemplate, avnRegionTemplate, vRegionTemplate])
         return ladderTemplate
     }
 }

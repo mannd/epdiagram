@@ -21,7 +21,7 @@ struct LadderEditor: View {
         NavigationView {
             List {
                 TextField(ladder.name, text: $ladder.name)
-                ForEach(ladder.regions, id: \.id) {
+                ForEach(ladder.regions) {
                     region in
                     NavigationLink(
                     destination: RegionEditor(region: region)) {
