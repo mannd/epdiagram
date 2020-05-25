@@ -13,26 +13,25 @@ import os.log
 extension RegionTemplate: Identifiable {}
 
 struct LadderEditor: View {
-    //    var regions: [String] = []
-    @State var ladder: LadderTemplate = LadderTemplate.defaultTemplate()
+    @State var ladderTemplate: LadderTemplate = LadderTemplate.defaultTemplate()
     @State private var editMode = EditMode.inactive
 
     var body: some View {
         NavigationView {
             VStack {
                 Text("Name").bold()
-                TextField(ladder.name, text: $ladder.name).padding()
+                TextField(ladderTemplate.name, text: $ladderTemplate.name).padding()
                 Text("Description").bold()
-                TextField(ladder.name, text: $ladder.description).padding()
+                TextField(ladderTemplate.name, text: $ladderTemplate.description).padding()
                 List {
-                    ForEach(ladder.regionTemplates) {
-                        region in
+                    ForEach(ladderTemplate.regionTemplates) {
+                        regionTemplate in
                         NavigationLink(
-                        destination: RegionEditor(region: region)) {
+                        destination: RegionEditor(regionTemplate: regionTemplate)) {
                             HStack {
-                                Text(region.name).bold()
+                                Text(regionTemplate.name).bold()
                                 Spacer()
-                                Text(region.description)
+                                Text(regionTemplate.description)
                             }
                         }
                     }
@@ -60,18 +59,20 @@ struct LadderEditor: View {
     }
 
     private func onDelete(offsets: IndexSet) {
-        ladder.regionTemplates.remove(atOffsets: offsets)
+        os_log("onDelete() - LadderEditor", log: OSLog.action, type: .info)
+        ladderTemplate.regionTemplates.remove(atOffsets: offsets)
     }
 
     private func onMove(source: IndexSet, destination: Int) {
-        ladder.regionTemplates.move(fromOffsets: source, toOffset: destination)
+        os_log("onMove() - LadderEditor", log: OSLog.action, type: .info)
+        ladderTemplate.regionTemplates.move(fromOffsets: source, toOffset: destination)
     }
 }
 
-
-
+#if DEBUG
 struct LadderEditor_Previews: PreviewProvider {
     static var previews: some View {
         LadderEditor()
     }
 }
+#endif

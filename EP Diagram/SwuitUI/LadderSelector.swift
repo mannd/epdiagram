@@ -11,34 +11,33 @@ import os.log
 
 extension LadderTemplate: Identifiable {}
 
+// Ladder selector is really selecting a ladder template.
 struct LadderSelector: View {
-    @State var ladderTemplates: [LadderTemplate] = [LadderTemplate.defaultTemplate(), LadderTemplate.defaultTemplate()]
-    @State private var selectedLadderIndex: Int = 0
+    @State var ladderTemplates: [LadderTemplate] = []
+    @State private var selectedIndex: Int = 0
     @State private var showingAlert: Bool = false
     @Environment(\.presentationMode) var presentationMode: Binding<PresentationMode>
 
     var body: some View {
         NavigationView {
             VStack {
-                VStack {
-                    Divider()
-                    Picker(selection: $selectedLadderIndex, label: Text("")) {
-                        ForEach(0 ..< ladderTemplates.count) {
-                            Text(self.ladderTemplates[$0].name)
-                        }
-                    }.labelsHidden()
-                    Divider()
-                    Text(ladderTemplates[selectedLadderIndex].name).bold().foregroundColor(.green)
-                    Text(ladderTemplates[selectedLadderIndex].description).foregroundColor(.secondary)
-                    List(ladderTemplates[selectedLadderIndex].regionTemplates) { item in
-                        HStack {
-                            Text(item.name).fontWeight(.bold).foregroundColor(.red)
-                            Spacer()
-                            Text(item.description).foregroundColor(.secondary)
-                        }
-                    }.animation(.default)
-                }
-                .navigationBarTitle("Select Ladder")
+                Divider()
+                Picker(selection: $selectedIndex, label: Text("")) {
+                    ForEach(0 ..< ladderTemplates.count) {
+                        Text(self.ladderTemplates[$0].name)
+                    }
+                }.labelsHidden()
+                Divider()
+                Text(ladderTemplates[selectedIndex].name).bold().foregroundColor(.green)
+                Text(ladderTemplates[selectedIndex].description).foregroundColor(.secondary)
+                List(ladderTemplates[selectedIndex].regionTemplates) { item in
+                    HStack {
+                        Text(item.name).fontWeight(.bold).foregroundColor(.red)
+                        Spacer()
+                        Text(item.description).foregroundColor(.secondary)
+                    }
+                }.animation(.default)
+                    .navigationBarTitle("Select Ladder")
                 HStack {
                     Button(action: { self.showingAlert = true }) {
                         Text("Select Ladder")
@@ -52,7 +51,7 @@ struct LadderSelector: View {
                         },
                         secondaryButton: .cancel(Text("Cancel"))) }
                     Spacer()
-                    NavigationLink(destination: LadderEditor(ladder: ladderTemplates[selectedLadderIndex])) {
+                    NavigationLink(destination: LadderEditor(ladderTemplate: ladderTemplates[selectedIndex])) {
                         Text("Edit Ladder")
                     }
                 }.padding()
@@ -62,7 +61,7 @@ struct LadderSelector: View {
 
     private func selectLadder() {
         os_log("selectLadder()", log: OSLog.action, type: .info)
-        let pickerIndex = selectedLadderIndex
+        let pickerIndex = selectedIndex
         let selectedLadderTemplate = ladderTemplates[pickerIndex]
         os_log("selected ladder = %@", selectedLadderTemplate.name)
     }

@@ -20,15 +20,11 @@ class Ladder {
 
     private var registry: Registry = [:]
 
-    var name: String = ""
-    var description: String = ""
+    var template: LadderTemplate
+    var name: String { template.name }
+    var description: String { template.description }
     var regions = [Region]()
-    var numRegions: Int {
-        get {
-            return regions.count
-        }
-    }
-
+    var numRegions: Int { regions.count }
     var attachedMark: Mark?
     var pressedMark: Mark?
     var movingMark: Mark?
@@ -37,24 +33,12 @@ class Ladder {
 
     let id = UUID()
 
-    init() {}
-
-    init(ladderTemplate: LadderTemplate) {
-        name = ladderTemplate.name
-        description = ladderTemplate.description
-        for regionTemplate in ladderTemplate.regionTemplates {
-            let region = Region(regionTemplate: regionTemplate)
+    init(template: LadderTemplate) {
+        self.template = template
+        for regionTemplate in template.regionTemplates {
+            let region = Region(template: regionTemplate)
             regions.append(region)
         }
-    }
-
-    // returns a "clean" clone of this ladder (clean meaning without marks).
-    func clone() -> Ladder {
-        let ladder = Ladder()
-        for region in self.regions {
-            ladder.regions.append(region)
-        }
-        return ladder
     }
 
     // TODO: Does region have to be optional?  Consider refactor away optionality.
@@ -205,6 +189,6 @@ class Ladder {
 
     // Returns a basic ladder (A, AV, V).
     static func defaultLadder() -> Ladder {
-        return Ladder(ladderTemplate: LadderTemplate.defaultTemplate())
+        return Ladder(template: LadderTemplate.defaultTemplate())
     }
 }

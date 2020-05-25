@@ -26,27 +26,21 @@ enum RegionDivision {
 // vertical, i.e. Y axis.  A Region has a labelSection such as "A" or "AV" and
 // a markSection.  Region boundaries are set by the calling ScaledView.
 class Region: Equatable {
+    var template: RegionTemplate
+    var name: String { template.name }
+    var description: String { template.description }
+    var unitHeight: Int { template.unitHeight }
     var proximalBoundary: CGFloat = 0
     var distalBoundary: CGFloat = 0
     var activated: Bool = false
-    var name: String = ""
-    var description: String = ""
     var marks = [Mark]()
     var markable: Bool = true
-    var height: CGFloat { get { return distalBoundary - proximalBoundary } }
-    var unitHeight: Int = 1  // 1 = smallest region height, used to calculate actual height
-//    var index: Int
+    var height: CGFloat { distalBoundary - proximalBoundary }
+
     let id = UUID()
 
-//    init(index: Int) {
-//        self.index = index
-//    }
-    init() { }
-
-    init(regionTemplate: RegionTemplate) {
-        name = regionTemplate.name
-        description = regionTemplate.description
-        unitHeight = regionTemplate.unitHeight
+    init(template: RegionTemplate) {
+        self.template = template
     }
 
     static func == (lhs: Region, rhs: Region) -> Bool {
