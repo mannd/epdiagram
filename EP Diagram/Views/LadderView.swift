@@ -61,6 +61,8 @@ final class LadderView: ScaledView {
 
     internal var ladder: Ladder
 
+    
+
     private var activeRegion: Region? {
         didSet { activateRegion(region: activeRegion)}
     }
@@ -776,6 +778,8 @@ final class LadderView: ScaledView {
     }
 
     // TODO: expand on this logic.  Reset block and impulseOrigin to .none as necessary.
+    // Also, consider adding arrows to marks indicating direction of flow (arrow will be added
+    // to whichever end of the mark is later in time.  Opposite of impluse origin.
     func assessBlockAndImpulseOrigin(mark: Mark?) {
         if let mark = mark {
             mark.block = .none

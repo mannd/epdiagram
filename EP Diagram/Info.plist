@@ -40,7 +40,7 @@
 		</dict>
 	</array>
 	<key>LSSupportsOpeningDocumentsInPlace</key>
-	<false/>
+	<true/>
 	<key>CFBundleShortVersionString</key>
 	<string>1.0</string>
 	<key>CFBundleVersion</key>

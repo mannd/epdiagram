@@ -7,39 +7,49 @@
 //
 
 import SwiftUI
-import UIKit
 import os.log
 
 extension RegionTemplate: Identifiable {}
 
 struct LadderEditor: View {
-    @State var ladderTemplate: LadderTemplate = LadderTemplate.defaultTemplate()
+    @Binding var ladderTemplate: LadderTemplate
     @State private var editMode = EditMode.inactive
 
     var body: some View {
         NavigationView {
-            VStack {
-                Text("Name").bold()
-                TextField(ladderTemplate.name, text: $ladderTemplate.name).padding()
-                Text("Description").bold()
-                TextField(ladderTemplate.name, text: $ladderTemplate.description).padding()
-                List {
-                    ForEach(ladderTemplate.regionTemplates) {
-                        regionTemplate in
-                        NavigationLink(
-                        destination: RegionEditor(regionTemplate: regionTemplate)) {
-                            HStack {
-                                Text(regionTemplate.name).bold()
-                                Spacer()
-                                Text(regionTemplate.description)
+            Form {
+                Section(header: Text("Name")) {
+                    TextField(ladderTemplate.name, text: $ladderTemplate.name).padding()
+                }
+                Section(header: Text("Description")) {
+                    TextField(ladderTemplate.description, text: $ladderTemplate.description).padding()
+                }
+                Section(header: Text("Regions")) {
+                    List {
+                        // Thanks to https://stackoverflow.com/questions/57836990/swiftui-dynamic-list-with-binding-controls for figuring out how to do this!
+                        ForEach(ladderTemplate.regionTemplates.indices) {
+                            index in
+                            VStack {
+                                HStack {
+                                    Text("Name:").bold()
+                                    TextField("Name", text: self.$ladderTemplate.regionTemplates[index].name)
+                                }
+                                HStack {
+                                    Text("Description:").bold()
+                                    TextField("Description", text: self.$ladderTemplate.regionTemplates[index].description)
+                                }
+                                Stepper(value: self.$ladderTemplate.regionTemplates[index].unitHeight, in: 1...4, step: 1) {
+                                    HStack {
+                                        Text("Height:").bold()
+                                        Text("\(self.ladderTemplate.regionTemplates[index].unitHeight) unit" + (self.ladderTemplate.regionTemplates[index].unitHeight > 1 ? "s" : ""))
+                                    } }
                             }
                         }
+                        .onMove(perform: onMove)
+                        .onDelete(perform: onDelete)
                     }
-                    .onMove(perform: onMove)
-                    .onDelete(perform: onDelete)
                 }
             }
-            .navigationBarTitle("Ladder")
             .navigationBarItems(leading: EditButton(), trailing: addButton)
             .environment(\.editMode, $editMode)
         }
@@ -72,7 +82,7 @@ struct LadderEditor: View {
 #if DEBUG
 struct LadderEditor_Previews: PreviewProvider {
     static var previews: some View {
-        LadderEditor()
+        LadderEditor(ladderTemplate: .constant(LadderTemplate.defaultTemplate()))
     }
 }
 #endif

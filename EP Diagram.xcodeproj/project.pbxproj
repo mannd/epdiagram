@@ -44,7 +44,6 @@
 		8E9B8045228347DE008873BB /* Region.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8E9B8044228347DE008873BB /* Region.swift */; };
 		8E9B804722834870008873BB /* Ladder.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8E9B804622834870008873BB /* Ladder.swift */; };
 		8EA444C02476E471005B5452 /* LadderSelector.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8EA444BF2476E471005B5452 /* LadderSelector.swift */; };
-		8ECA9FB324704B990016D939 /* RegionEditor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8ECA9FB224704B990016D939 /* RegionEditor.swift */; };
 		8ECA9FB52470A07B0016D939 /* RegionTemplate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8ECA9FB42470A07B0016D939 /* RegionTemplate.swift */; };
 		8ECA9FB72470A1020016D939 /* LadderTemplate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8ECA9FB62470A1020016D939 /* LadderTemplate.swift */; };
 		8ED3B1B62360DA0D00549381 /* Anchor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8ED3B1B52360DA0D00549381 /* Anchor.swift */; };
@@ -114,7 +113,6 @@
 		8E9B8044228347DE008873BB /* Region.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Region.swift; sourceTree = "<group>"; };
 		8E9B804622834870008873BB /* Ladder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Ladder.swift; sourceTree = "<group>"; };
 		8EA444BF2476E471005B5452 /* LadderSelector.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LadderSelector.swift; sourceTree = "<group>"; };
-		8ECA9FB224704B990016D939 /* RegionEditor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RegionEditor.swift; sourceTree = "<group>"; };
 		8ECA9FB42470A07B0016D939 /* RegionTemplate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RegionTemplate.swift; sourceTree = "<group>"; };
 		8ECA9FB62470A1020016D939 /* LadderTemplate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LadderTemplate.swift; sourceTree = "<group>"; };
 		8ED3B1B52360DA0D00549381 /* Anchor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Anchor.swift; sourceTree = "<group>"; };
@@ -285,7 +283,6 @@
 			isa = PBXGroup;
 			children = (
 				8E6A0297246DFB3700A10C9F /* LadderEditor.swift */,
-				8ECA9FB224704B990016D939 /* RegionEditor.swift */,
 				8EA444BF2476E471005B5452 /* LadderSelector.swift */,
 			);
 			path = SwuitUI;
@@ -422,7 +419,6 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				8ECA9FB324704B990016D939 /* RegionEditor.swift in Sources */,
 				8ECA9FB52470A07B0016D939 /* RegionTemplate.swift in Sources */,
 				8E4ACA8924479C5200575538 /* HamburgerViewModel.swift in Sources */,
 				8E74D590244FD55E00641E0A /* Logging.swift in Sources */,

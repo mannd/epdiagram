@@ -14,48 +14,71 @@ extension LadderTemplate: Identifiable {}
 // Ladder selector is really selecting a ladder template.
 struct LadderSelector: View {
     @State var ladderTemplates: [LadderTemplate] = []
-    @State private var selectedIndex: Int = 0
+    @State var selectedIndex: Int = 0
+    @State var selectedTemplate: LadderTemplate? = nil
     @State private var showingAlert: Bool = false
     @Environment(\.presentationMode) var presentationMode: Binding<PresentationMode>
 
     var body: some View {
         NavigationView {
-            VStack {
-                Divider()
-                Picker(selection: $selectedIndex, label: Text("")) {
-                    ForEach(0 ..< ladderTemplates.count) {
-                        Text(self.ladderTemplates[$0].name)
+            TabView {
+                Form {
+                    Section(header: Text("Select ladder")) {
+                        Picker(selection: $selectedIndex, label: Text("Ladder")) {
+                            ForEach(0 ..< ladderTemplates.count) {
+                                Text(self.ladderTemplates[$0].name)
+                            }
+                        }
                     }
-                }.labelsHidden()
-                Divider()
-                Text(ladderTemplates[selectedIndex].name).bold().foregroundColor(.green)
-                Text(ladderTemplates[selectedIndex].description).foregroundColor(.secondary)
-                List(ladderTemplates[selectedIndex].regionTemplates) { item in
-                    HStack {
-                        Text(item.name).fontWeight(.bold).foregroundColor(.red)
-                        Spacer()
-                        Text(item.description).foregroundColor(.secondary)
+                    Section(header: Text("Current ladder")) {
+                        HStack {
+                            Text("Name")
+                            Spacer()
+                            Text(ladderTemplates[selectedIndex].name).bold().foregroundColor(.green)
+                        }
+                        HStack {
+                            Text("Description")
+                            Spacer()
+                            Text(ladderTemplates[selectedIndex].description).foregroundColor(.secondary)
+                        }
+                        List(ladderTemplates[selectedIndex].regionTemplates) { item in
+                            HStack {
+                                Text(item.name).fontWeight(.bold).foregroundColor(.red)
+                                Spacer()
+                                Text(item.description).foregroundColor(.secondary)
+                            }
+                        }
                     }
-                }.animation(.default)
-                    .navigationBarTitle("Select Ladder")
-                HStack {
-                    Button(action: { self.showingAlert = true }) {
-                        Text("Select Ladder")
-                    }.alert(isPresented: $showingAlert)
-                    { Alert(
-                        title: Text(L("Select Ladder?")),
-                        message: Text(L("Previous ladder data will be lost.  If you wish to keep the data, save the diagram first.")),
-                        primaryButton: .destructive(Text("Select Ladder")) {
+                }.tabItem {
+                    Image(systemName: "eye")
+                    Text("View")
+                }
+                LadderEditor(ladderTemplate: $ladderTemplates[selectedIndex]).tabItem {
+                    Image(systemName: "square.and.pencil")
+                    Text("Edit")
+                }
+                Text("New").tabItem {
+                    Image(systemName: "plus")
+                    Text("New")
+                }
+            }.onAppear() {
+                os_log("onAppear() - LadderSelector", log: OSLog.viewCycle, type: .info)
+            }
+            .navigationBarTitle("Ladder", displayMode: .inline)
+            .navigationBarItems(trailing: Button(action: { self.showingAlert = true }) {
+                Text("Save") }
+                .alert(isPresented: $showingAlert) {
+                    Alert(
+                        // TODO: Don't bother with warning dialog if same ladder is selected and it has not been edited.  Need an "edited" flag for each ladder, and need to track original ladder.
+                        title: Text("Use Selected Ladder?"),
+                        message: Text("If you have marked up previous ladder this data will be lost unless you first save it.  Choose Cancel to return to your diagram, or Select to change ladders."),
+                        primaryButton: .destructive(Text("Select")) {
                             self.selectLadder()
                             self.presentationMode.wrappedValue.dismiss()
                         },
-                        secondaryButton: .cancel(Text("Cancel"))) }
-                    Spacer()
-                    NavigationLink(destination: LadderEditor(ladderTemplate: ladderTemplates[selectedIndex])) {
-                        Text("Edit Ladder")
-                    }
-                }.padding()
-            }
+                        secondaryButton: .cancel(Text("Cancel"))
+                    )
+            })
         }
     }
 
