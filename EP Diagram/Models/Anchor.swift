@@ -9,7 +9,7 @@
 import Foundation
 
 /// Used to anchor cursor to a part of a mark.
-enum Anchor: Int {
+enum Anchor: Int, Codable {
     case middle
     case proximal
     case distal

@@ -24,6 +24,7 @@
 		8E4ACA8924479C5200575538 /* HamburgerViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8E4ACA8824479C5200575538 /* HamburgerViewModel.swift */; };
 		8E55612922A5FEDC00C4D391 /* Cursor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8E55612822A5FEDC00C4D391 /* Cursor.swift */; };
 		8E5D0ABD2464F2CD00FE78A2 /* RegionTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8E5D0ABC2464F2CD00FE78A2 /* RegionTests.swift */; };
+		8E671D5224814BB700784EB7 /* LadderTemplatesEditor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8E671D5124814BB700784EB7 /* LadderTemplatesEditor.swift */; };
 		8E6A0298246DFB3700A10C9F /* LadderEditor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8E6A0297246DFB3700A10C9F /* LadderEditor.swift */; };
 		8E7214DE22E95C860062C094 /* Common.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8E7214DD22E95C860062C094 /* Common.swift */; };
 		8E7214E022EB57FC0062C094 /* MarkTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8E7214DF22EB57FC0062C094 /* MarkTests.swift */; };
@@ -86,6 +87,7 @@
 		8E4ACA8824479C5200575538 /* HamburgerViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HamburgerViewModel.swift; sourceTree = "<group>"; };
 		8E55612822A5FEDC00C4D391 /* Cursor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Cursor.swift; sourceTree = "<group>"; };
 		8E5D0ABC2464F2CD00FE78A2 /* RegionTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RegionTests.swift; sourceTree = "<group>"; };
+		8E671D5124814BB700784EB7 /* LadderTemplatesEditor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LadderTemplatesEditor.swift; sourceTree = "<group>"; };
 		8E689C4F23B498A10042A3F1 /* EP Diagram.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = "EP Diagram.entitlements"; sourceTree = "<group>"; };
 		8E6A0297246DFB3700A10C9F /* LadderEditor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LadderEditor.swift; sourceTree = "<group>"; };
 		8E7214DD22E95C860062C094 /* Common.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Common.swift; sourceTree = "<group>"; };
@@ -284,6 +286,7 @@
 			children = (
 				8E6A0297246DFB3700A10C9F /* LadderEditor.swift */,
 				8EA444BF2476E471005B5452 /* LadderSelector.swift */,
+				8E671D5124814BB700784EB7 /* LadderTemplatesEditor.swift */,
 			);
 			path = SwuitUI;
 			sourceTree = "<group>";
@@ -431,6 +434,7 @@
 				8E6A0298246DFB3700A10C9F /* LadderEditor.swift in Sources */,
 				8E1B6CB8240CAE5300EA88A6 /* ScaledView.swift in Sources */,
 				8E8248DD23B53B55001A85F9 /* SeparatorView.swift in Sources */,
+				8E671D5224814BB700784EB7 /* LadderTemplatesEditor.swift in Sources */,
 				8E7214DE22E95C860062C094 /* Common.swift in Sources */,
 				8E9B8043228345B5008873BB /* Mark.swift in Sources */,
 				8E4ACA8224478D7C00575538 /* HamburgerTableViewController.swift in Sources */,

@@ -20,6 +20,7 @@ protocol HamburgerTableDelegate: class {
     func about()
     func openDiagram()
     func saveDiagram()
+    func editTemplates()
     func help()
     func lockImage()
     func hideHamburgerMenu()
@@ -115,6 +116,11 @@ extension ViewController: HamburgerTableDelegate, UIImagePickerControllerDelegat
         os_log("saveDiagram()", log: OSLog.action, type: .info)
     }
 
+    func editTemplates() {
+        os_log("editTemplates()", log: OSLog.action, type: .info)
+        performSegue(withIdentifier: "showTemplateEditorSegue", sender: self)
+    }
+
     func help() {
         os_log("help()", log: OSLog.action, type: .info)
     }
@@ -160,8 +166,6 @@ extension ViewController: HamburgerTableDelegate, UIImagePickerControllerDelegat
         hamburgerMenuIsOpen = false
         navigationController?.setToolbarHidden(false, animated: true)
         separatorView?.isUserInteractionEnabled = true
-        //            separatorView?.isHidden = false
-        self.cursorView.isUserInteractionEnabled = true
         UIView.animate(withDuration: 0.5, animations: {
             self.view.layoutIfNeeded()
             self.blackView.alpha = 0

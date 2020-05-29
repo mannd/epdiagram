@@ -428,6 +428,18 @@ final class ViewController: UIViewController {
         }
     }
 
+
+    @IBSegueAction func showTemplateEditor(_ coder: NSCoder) -> UIViewController? {
+        navigationController?.setToolbarHidden(true, animated: true)
+        // FIXME: This is setup like this just for testing.
+        let ladderTemplates = Persistance.retrieve("user_ladder_templates", from: .documents, as: [LadderTemplate].self) ?? [LadderTemplate.defaultTemplate(), LadderTemplate.defaultTemplate2()]
+//        let index = ladderTemplates.firstIndex(of: ladderView.ladder.template)
+        let templateEditor = LadderTemplatesEditor(ladderTemplates: ladderTemplates)
+        let hostingController = UIHostingController(coder: coder, rootView: templateEditor)
+        return hostingController
+    }
+    
+
     @IBSegueAction func showLadderSelector(_ coder: NSCoder) -> UIViewController? {
         os_log("showLadderSelector")
         navigationController?.setToolbarHidden(true, animated: true)

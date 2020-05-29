@@ -15,7 +15,7 @@ struct NearbyMarks {
 }
 
 // A Ladder is simply a collection of Regions in top bottom order.
-class Ladder {
+class Ladder: Codable {
     private typealias Registry = Dictionary<UUID, Int>
 
     private var registry: Registry = [:]

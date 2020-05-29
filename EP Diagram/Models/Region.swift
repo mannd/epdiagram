@@ -25,7 +25,7 @@ enum RegionDivision {
 // A Region is a collection of Marks, in left to right order.  Positions are
 // vertical, i.e. Y axis.  A Region has a labelSection such as "A" or "AV" and
 // a markSection.  Region boundaries are set by the calling ScaledView.
-class Region: Equatable {
+class Region: Codable, Equatable {
     var template: RegionTemplate
     var name: String { template.name }
     var description: String { template.description }

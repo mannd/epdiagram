@@ -17,6 +17,8 @@ struct HamburgerViewModel {
         array.append(selectPhotoLayer)
         let lockImageLayer = HamburgerLayer(withName: L("Lock image"), iconName: "lock", layer: .lock, altName: L("Unlock image"), altIconName: "unlock")
         array.append(lockImageLayer)
+        let templatesLayer = HamburgerLayer(withName: L("Ladder editor"), iconName: "templates", layer: .templates)
+        array.append(templatesLayer)
         let preferencesLayer = HamburgerLayer(withName: L("Preferences"), iconName: "preferences", layer: .preferences)
         array.append(preferencesLayer)
         let openLayer = HamburgerLayer(withName: L("Open diagram"), iconName: "open", layer: .open)

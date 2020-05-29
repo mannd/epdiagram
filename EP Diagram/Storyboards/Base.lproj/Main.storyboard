@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="16096" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES" initialViewController="en3-9x-pbF">
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="16097" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES" initialViewController="en3-9x-pbF">
     <device id="retina6_1" orientation="portrait" appearance="light"/>
     <dependencies>
         <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="16087"/>
@@ -85,6 +85,7 @@
                         <outlet property="imageView" destination="Z9T-Bh-sBD" id="6GT-g9-IHr"/>
                         <outlet property="ladderView" destination="rq1-PC-4iG" id="IAX-Gu-2b0"/>
                         <segue destination="LJm-2p-ngb" kind="show" identifier="selectLadderSegue" destinationCreationSelector="showLadderSelector:" id="4Gf-Q1-Gss"/>
+                        <segue destination="lYc-7T-fo8" kind="show" identifier="showTemplateEditorSegue" destinationCreationSelector="showTemplateEditor:" id="yOM-cF-bRp"/>
                     </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="dkx-z0-nzr" sceneMemberID="firstResponder"/>
@@ -152,6 +153,16 @@
                 <placeholder placeholderIdentifier="IBFirstResponder" id="SXR-j0-LQJ" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
             </objects>
             <point key="canvasLocation" x="1491" y="121"/>
+        </scene>
+        <!--Hosting Controller-->
+        <scene sceneID="KIe-xf-6Pi">
+            <objects>
+                <hostingController id="lYc-7T-fo8" sceneMemberID="viewController">
+                    <navigationItem key="navigationItem" id="BoX-PI-HyI"/>
+                </hostingController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="LlP-FI-RPV" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="1490" y="849"/>
         </scene>
         <!--Navigation Controller-->
         <scene sceneID="krg-YB-oDF">

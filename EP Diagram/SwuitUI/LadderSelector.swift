@@ -21,50 +21,35 @@ struct LadderSelector: View {
 
     var body: some View {
         NavigationView {
-            TabView {
-                Form {
-                    Section(header: Text("Select ladder")) {
-                        Picker(selection: $selectedIndex, label: Text("Ladder")) {
-                            ForEach(0 ..< ladderTemplates.count) {
-                                Text(self.ladderTemplates[$0].name)
-                            }
+            Form {
+                Section(header: Text("Select ladder")) {
+                    Picker(selection: $selectedIndex, label: Text("")) {
+                        ForEach(0 ..< ladderTemplates.count) {
+                            Text(self.ladderTemplates[$0].name)
+                        }
+                        }.pickerStyle(WheelPickerStyle()).padding()
+                }
+                Section(header: Text("Ledder details")) {
+                    HStack {
+                        Text("Name")
+                        Spacer()
+                        Text(ladderTemplates[selectedIndex].name).bold().foregroundColor(.green)
+                    }
+                    HStack {
+                        Text("Description")
+                        Spacer()
+                        Text(ladderTemplates[selectedIndex].description).foregroundColor(.secondary)
+                    }
+                    List(ladderTemplates[selectedIndex].regionTemplates) { item in
+                        HStack {
+                            Text(item.name).fontWeight(.bold).foregroundColor(.red)
+                            Spacer()
+                            Text(item.description).foregroundColor(.secondary)
                         }
                     }
-                    Section(header: Text("Current ladder")) {
-                        HStack {
-                            Text("Name")
-                            Spacer()
-                            Text(ladderTemplates[selectedIndex].name).bold().foregroundColor(.green)
-                        }
-                        HStack {
-                            Text("Description")
-                            Spacer()
-                            Text(ladderTemplates[selectedIndex].description).foregroundColor(.secondary)
-                        }
-                        List(ladderTemplates[selectedIndex].regionTemplates) { item in
-                            HStack {
-                                Text(item.name).fontWeight(.bold).foregroundColor(.red)
-                                Spacer()
-                                Text(item.description).foregroundColor(.secondary)
-                            }
-                        }
-                    }
-                }.tabItem {
-                    Image(systemName: "eye")
-                    Text("View")
                 }
-                LadderEditor(ladderTemplate: $ladderTemplates[selectedIndex]).tabItem {
-                    Image(systemName: "square.and.pencil")
-                    Text("Edit")
-                }
-                Text("New").tabItem {
-                    Image(systemName: "plus")
-                    Text("New")
-                }
-            }.onAppear() {
-                os_log("onAppear() - LadderSelector", log: OSLog.viewCycle, type: .info)
             }
-            .navigationBarTitle("Ladder", displayMode: .inline)
+            .navigationBarTitle(Text("Select Ladder"), displayMode: .inline)
             .navigationBarItems(trailing: Button(action: { self.showingAlert = true }) {
                 Text("Save") }
                 .alert(isPresented: $showingAlert) {

@@ -21,7 +21,7 @@ extension CGPoint {
 }
 
 // A line segment represented by 2 points.
-struct Segment: Equatable {
+struct Segment: Codable, Equatable {
     var proximal: CGPoint
     var distal: CGPoint
 
@@ -63,7 +63,7 @@ typealias MarkSet = Set<Mark>
 
 // A mark may have up to three attachments to marks in the proximal and distal regions
 // and in its own region, i.e. reentry spawning a mark.
-struct MarkGroup {
+struct MarkGroup: Codable {
     var proximal = MarkSet()
     var middle = MarkSet()
     var distal = MarkSet()
@@ -104,16 +104,16 @@ extension Mark: Hashable, CustomDebugStringConvertible {
 }
 
 // The mark is a fundamental component of a ladder diagram.
-class Mark {
+class Mark: Codable {
     /// Draw a solid or dashed line when drawing a mark.
-    enum LineStyle {
+    enum LineStyle: Int, Codable {
         case solid
         case dashed
         case dotted
     }
 
     // Highlight is used to show state of a mark visibly.
-    enum Highlight {
+    enum Highlight: Int, Codable {
         case attached // cursor attached
         case grouped // mark attached to cursor and 
         case selected
@@ -122,14 +122,14 @@ class Mark {
     }
 
     // Site of block
-    enum Block {
+    enum Block: Int, Codable {
         case proximal
         case distal
         case none
     }
 
     // Site of impulse origin
-    enum ImpulseOrigin {
+    enum ImpulseOrigin: Int, Codable {
         case proximal
         case distal
         case none

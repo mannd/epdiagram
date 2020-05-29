@@ -42,7 +42,8 @@ struct LadderEditor: View {
                                     HStack {
                                         Text("Height:").bold()
                                         Text("\(self.ladderTemplate.regionTemplates[index].unitHeight) unit" + (self.ladderTemplate.regionTemplates[index].unitHeight > 1 ? "s" : ""))
-                                    } }
+                                    }
+                                }
                             }
                         }
                         .onMove(perform: onMove)
@@ -50,6 +51,7 @@ struct LadderEditor: View {
                     }
                 }
             }
+            .navigationBarTitle(Text("Edit Ladder"), displayMode: .inline)
             .navigationBarItems(leading: EditButton(), trailing: addButton)
             .environment(\.editMode, $editMode)
         }
