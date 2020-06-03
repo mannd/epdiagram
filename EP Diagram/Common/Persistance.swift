@@ -68,6 +68,24 @@ final class Persistance {
             return nil
         }
     }
+    
+    static func remove(_ fileName: String, from directory: Directory) {
+        if let url = getURL(for: directory)?.appendingPathComponent(fileName, isDirectory: false) {
+            if FileManager.default.fileExists(atPath: url.path) {
+                do {
+                    try FileManager.default.removeItem(at: url)
+                } catch {
+                    fatalError(error.localizedDescription)
+                }
+            }
+        }
+    }
+
+    static func fileExists(_ fileName: String, in directory: Directory) -> Bool {
+        if let url = getURL(for: directory)?.appendingPathComponent(fileName, isDirectory: false) {
+             return FileManager.default.fileExists(atPath: url.path)
+        } else { return false }
+     }
 
 }
 

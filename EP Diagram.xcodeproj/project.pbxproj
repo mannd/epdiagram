@@ -26,6 +26,8 @@
 		8E5D0ABD2464F2CD00FE78A2 /* RegionTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8E5D0ABC2464F2CD00FE78A2 /* RegionTests.swift */; };
 		8E671D5224814BB700784EB7 /* LadderTemplatesEditor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8E671D5124814BB700784EB7 /* LadderTemplatesEditor.swift */; };
 		8E6A0298246DFB3700A10C9F /* LadderEditor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8E6A0297246DFB3700A10C9F /* LadderEditor.swift */; };
+		8E6EB6C02484778E00E5F883 /* Notification+didUndoableAction.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8E6EB6BF2484778E00E5F883 /* Notification+didUndoableAction.swift */; };
+		8E6EB6C2248477D500E5F883 /* ViewController+ViewControllerDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8E6EB6C1248477D500E5F883 /* ViewController+ViewControllerDelegate.swift */; };
 		8E7214DE22E95C860062C094 /* Common.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8E7214DD22E95C860062C094 /* Common.swift */; };
 		8E7214E022EB57FC0062C094 /* MarkTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8E7214DF22EB57FC0062C094 /* MarkTests.swift */; };
 		8E74D58E244FBE2500641E0A /* LadderView+UIContextMenuInteractionDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8E74D58D244FBE2500641E0A /* LadderView+UIContextMenuInteractionDelegate.swift */; };
@@ -90,6 +92,8 @@
 		8E671D5124814BB700784EB7 /* LadderTemplatesEditor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LadderTemplatesEditor.swift; sourceTree = "<group>"; };
 		8E689C4F23B498A10042A3F1 /* EP Diagram.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = "EP Diagram.entitlements"; sourceTree = "<group>"; };
 		8E6A0297246DFB3700A10C9F /* LadderEditor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LadderEditor.swift; sourceTree = "<group>"; };
+		8E6EB6BF2484778E00E5F883 /* Notification+didUndoableAction.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Notification+didUndoableAction.swift"; sourceTree = "<group>"; };
+		8E6EB6C1248477D500E5F883 /* ViewController+ViewControllerDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "ViewController+ViewControllerDelegate.swift"; sourceTree = "<group>"; };
 		8E7214DD22E95C860062C094 /* Common.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Common.swift; sourceTree = "<group>"; };
 		8E7214DF22EB57FC0062C094 /* MarkTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MarkTests.swift; sourceTree = "<group>"; };
 		8E74D58D244FBE2500641E0A /* LadderView+UIContextMenuInteractionDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "LadderView+UIContextMenuInteractionDelegate.swift"; sourceTree = "<group>"; };
@@ -155,6 +159,14 @@
 			path = ViewModels;
 			sourceTree = "<group>";
 		};
+		8E6EB6BE2484707300E5F883 /* Extensions */ = {
+			isa = PBXGroup;
+			children = (
+				8E6EB6BF2484778E00E5F883 /* Notification+didUndoableAction.swift */,
+			);
+			path = Extensions;
+			sourceTree = "<group>";
+		};
 		8E7214DC22E95C630062C094 /* Common */ = {
 			isa = PBXGroup;
 			children = (
@@ -191,8 +203,9 @@
 			children = (
 				8E689C4F23B498A10042A3F1 /* EP Diagram.entitlements */,
 				8E7214DC22E95C630062C094 /* Common */,
+				8E6EB6BE2484707300E5F883 /* Extensions */,
 				8E9B804C22834960008873BB /* ViewControllers */,
-				8EBC2B41246F718000CFC04D /* SwuitUI */,
+				8EBC2B41246F718000CFC04D /* SwiftUI */,
 				8E4ACA8724479C2500575538 /* ViewModels */,
 				8E9B804B22834944008873BB /* Views */,
 				8E9B8049228348F7008873BB /* Storyboards */,
@@ -277,18 +290,19 @@
 				8E253DD2244A8799008CC56B /* ViewController+UIScrollViewDelegate.swift */,
 				8E253DD0244A86CB008CC56B /* ViewController+HamburgerTableDelegate.swift */,
 				8E4ACA8124478D7C00575538 /* HamburgerTableViewController.swift */,
+				8E6EB6C1248477D500E5F883 /* ViewController+ViewControllerDelegate.swift */,
 			);
 			path = ViewControllers;
 			sourceTree = "<group>";
 		};
-		8EBC2B41246F718000CFC04D /* SwuitUI */ = {
+		8EBC2B41246F718000CFC04D /* SwiftUI */ = {
 			isa = PBXGroup;
 			children = (
+				8E671D5124814BB700784EB7 /* LadderTemplatesEditor.swift */,
 				8E6A0297246DFB3700A10C9F /* LadderEditor.swift */,
 				8EA444BF2476E471005B5452 /* LadderSelector.swift */,
-				8E671D5124814BB700784EB7 /* LadderTemplatesEditor.swift */,
 			);
-			path = SwuitUI;
+			path = SwiftUI;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -426,11 +440,13 @@
 				8E4ACA8924479C5200575538 /* HamburgerViewModel.swift in Sources */,
 				8E74D590244FD55E00641E0A /* Logging.swift in Sources */,
 				8E253DD3244A8799008CC56B /* ViewController+UIScrollViewDelegate.swift in Sources */,
+				8E6EB6C02484778E00E5F883 /* Notification+didUndoableAction.swift in Sources */,
 				8E9550BD2474B22000E1B125 /* Persistance.swift in Sources */,
 				8E7D24F12277A00C005A1729 /* ImageView.swift in Sources */,
 				8E7D24C522779DBD005A1729 /* ViewController.swift in Sources */,
 				8E3AD1372459CABF0085BDD4 /* LocationInLadder.swift in Sources */,
 				8E253DD5244A8B17008CC56B /* Version.swift in Sources */,
+				8E6EB6C2248477D500E5F883 /* ViewController+ViewControllerDelegate.swift in Sources */,
 				8E6A0298246DFB3700A10C9F /* LadderEditor.swift in Sources */,
 				8E1B6CB8240CAE5300EA88A6 /* ScaledView.swift in Sources */,
 				8E8248DD23B53B55001A85F9 /* SeparatorView.swift in Sources */,

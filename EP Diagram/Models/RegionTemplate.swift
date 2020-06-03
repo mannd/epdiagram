@@ -8,9 +8,12 @@
 
 import UIKit
 
-struct RegionTemplate: Codable, Equatable {
-    var name: String
-    var description: String
-    var unitHeight: Int
+struct RegionTemplate: Codable, Equatable, Hashable {
+    var name: String = ""
+    var description: String = ""
+    var unitHeight: Int = 1
+    var deletionFlag: Bool = false
     let id = UUID()
+
+
 }

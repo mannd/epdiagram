@@ -18,6 +18,7 @@ struct LadderSelector: View {
     @State var selectedTemplate: LadderTemplate? = nil
     @State private var showingAlert: Bool = false
     @Environment(\.presentationMode) var presentationMode: Binding<PresentationMode>
+    weak var delegate: ViewControllerDelegate?
 
     var body: some View {
         NavigationView {
@@ -72,6 +73,7 @@ struct LadderSelector: View {
         let pickerIndex = selectedIndex
         let selectedLadderTemplate = ladderTemplates[pickerIndex]
         os_log("selected ladder = %@", selectedLadderTemplate.name)
+        delegate?.selectLadderTemplate(ladderTemplate: selectedLadderTemplate)
     }
 }
 

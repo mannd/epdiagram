@@ -12,6 +12,7 @@ import os.log
 
 // TODO: refactor out the delegates to an extension.
 final class ViewController: UIViewController {
+    let templateFileName = "user_ladder_templates"
 
     @IBOutlet var _constraintHamburgerWidth: NSLayoutConstraint!
     @IBOutlet var _constraintHamburgerLeft: NSLayoutConstraint!
@@ -46,7 +47,6 @@ final class ViewController: UIViewController {
     var pageNumber: Int = 1
 
     var _imageIsLocked: Bool = false
-
 
     override func viewDidLoad() {
         os_log("viewDidLoad() - ViewController", log: OSLog.viewCycle, type: .info)
@@ -432,8 +432,8 @@ final class ViewController: UIViewController {
     @IBSegueAction func showTemplateEditor(_ coder: NSCoder) -> UIViewController? {
         navigationController?.setToolbarHidden(true, animated: true)
         // FIXME: This is setup like this just for testing.
-        let ladderTemplates = Persistance.retrieve("user_ladder_templates", from: .documents, as: [LadderTemplate].self) ?? [LadderTemplate.defaultTemplate(), LadderTemplate.defaultTemplate2()]
-//        let index = ladderTemplates.firstIndex(of: ladderView.ladder.template)
+//        Persistance.remove("user_ladder_templates", from: .documents)
+        let ladderTemplates = Persistance.retrieve(templateFileName, from: .documents, as: [LadderTemplate].self) ?? [LadderTemplate.defaultTemplate(), LadderTemplate.defaultTemplate2()]
         let templateEditor = LadderTemplatesEditor(ladderTemplates: ladderTemplates)
         let hostingController = UIHostingController(coder: coder, rootView: templateEditor)
         return hostingController
@@ -444,9 +444,10 @@ final class ViewController: UIViewController {
         os_log("showLadderSelector")
         navigationController?.setToolbarHidden(true, animated: true)
         // FIXME: This is setup like this just for testing.
-        let ladderTemplates = Persistance.retrieve("user_ladder_templates", from: .documents, as: [LadderTemplate].self) ?? [LadderTemplate.defaultTemplate(), LadderTemplate.defaultTemplate2()]
+        let ladderTemplates = Persistance.retrieve(templateFileName, from: .documents, as: [LadderTemplate].self) ?? [LadderTemplate.defaultTemplate(), LadderTemplate.defaultTemplate2()]
         let index = ladderTemplates.firstIndex(of: ladderView.ladder.template)
-        let ladderSelector = LadderSelector(ladderTemplates: ladderTemplates, selectedIndex: index ?? 0)
+        var ladderSelector = LadderSelector(ladderTemplates: ladderTemplates, selectedIndex: index ?? 0)
+        ladderSelector.delegate = self
         let hostingController = UIHostingController(coder: coder, rootView: ladderSelector)
         return hostingController
     }
@@ -465,8 +466,5 @@ final class ViewController: UIViewController {
 }
 
 
-extension Notification.Name {
-    static let didUndoableAction = Notification.Name("didUndoableAction")
-}
 
 
