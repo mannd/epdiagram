@@ -8,7 +8,7 @@
 
 import UIKit
 
-/// Namespace for global static functions.
+/// Namespace for global static functions, variables.
 class Common {
     // PositionX translation
     static func translateToRegionPositionX(scaledViewPositionX: CGFloat, offset: CGFloat, scale: CGFloat) -> CGFloat {
@@ -169,6 +169,23 @@ class Common {
 
     }
 
+    static func showTextAlert(viewController vc: ViewController, title: String, message: String, placeholder: String? = nil, preferredStyle: UIAlertController.Style, handler: ((String) -> Void)?) {
+        let alert = UIAlertController(title: title, message: message, preferredStyle: preferredStyle)
+        alert.addAction(UIAlertAction(title: L("Cancel"), style: .cancel, handler: nil))
+        alert.addTextField { textField in
+            if let placeholder = placeholder {
+                textField.placeholder = placeholder
+            }
+        }
+        alert.addAction(UIAlertAction(title: L("Save"), style: .default) { action in
+            if let text = alert.textFields?.first?.text {
+                if let handler = handler {
+                    handler(text)
+                }
+            }
+        })
+        vc.present(alert, animated: true)
+    }
 }
 
 // MARK: - Global namespace functions

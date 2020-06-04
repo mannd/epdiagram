@@ -12,8 +12,6 @@ import os.log
 
 // TODO: refactor out the delegates to an extension.
 final class ViewController: UIViewController {
-    let templateFileName = "user_ladder_templates"
-
     @IBOutlet var _constraintHamburgerWidth: NSLayoutConstraint!
     @IBOutlet var _constraintHamburgerLeft: NSLayoutConstraint!
     @IBOutlet var imageScrollView: UIScrollView!
@@ -28,11 +26,10 @@ final class ViewController: UIViewController {
 
     // This margin is used for all the views.  As ECGs are always read from left
     // to right, there is no reason to reverse this.
-    let leftMargin: CGFloat = 30
-    let _maxBlackAlpha: CGFloat = 0.4
-    private let customLog = OSLog(subsystem: OSLog.subsystem, category: "views")
+    private let leftMargin: CGFloat = 30
+    internal let _maxBlackAlpha: CGFloat = 0.4
 
-    var separatorView: SeparatorView?
+    internal var separatorView: SeparatorView?
     private var undoButton: UIBarButtonItem = UIBarButtonItem()
     private var redoButton: UIBarButtonItem = UIBarButtonItem()
     private var mainMenuButtons: [UIBarButtonItem]?
@@ -48,10 +45,11 @@ final class ViewController: UIViewController {
 
     var _imageIsLocked: Bool = false
 
+    var diagramFilenames: [String] = []
+    
     override func viewDidLoad() {
         os_log("viewDidLoad() - ViewController", log: OSLog.viewCycle, type: .info)
         super.viewDidLoad()
-
 
         // These 2 views are guaranteed to exist, so the delegates are IUOs.
         cursorView.ladderViewDelegate = ladderView
@@ -70,18 +68,12 @@ final class ViewController: UIViewController {
 
         if Common.isRunningOnMac() {
             navigationController?.setNavigationBarHidden(true, animated: false)
-            //                UIView.setAnimationsEnabled(false) // Mac transitions look better without animation.
         }
         UIView.setAnimationsEnabled(true)
 
         // Distinguish the two views using slightly different background colors.
-        if #available(iOS 13.0, *) {
-            imageScrollView.backgroundColor = UIColor.secondarySystemBackground
-            ladderView.backgroundColor = UIColor.tertiarySystemBackground
-        } else {
-            imageScrollView.backgroundColor = UIColor.lightGray
-            ladderView.backgroundColor = UIColor.white
-        }
+        imageScrollView.backgroundColor = UIColor.secondarySystemBackground
+        ladderView.backgroundColor = UIColor.tertiarySystemBackground
 
         blackView.delegate = self
         blackView.alpha = 0.0
@@ -98,10 +90,8 @@ final class ViewController: UIViewController {
         singleTapRecognizer.numberOfTapsRequired = 1
         imageScrollView.addGestureRecognizer(singleTapRecognizer)
 
-        if #available(iOS 13.0, *) {
-            let interaction = UIContextMenuInteraction(delegate: ladderView)
-            ladderView.addInteraction(interaction)
-        }
+        let interaction = UIContextMenuInteraction(delegate: ladderView)
+        ladderView.addInteraction(interaction)
 
         navigationItem.setLeftBarButton(UIBarButtonItem(image: UIImage(named: "hamburger"), style: .plain, target: self, action: #selector(toggleHamburgerMenu)), animated: true)
         // FIXME: right button maybe to toggle adding marks quickly?
@@ -392,6 +382,7 @@ final class ViewController: UIViewController {
         // Remove separatorView when rotating to let original constraints resume.
         // Otherwise, views are not laid out correctly.
         if let separatorView = separatorView {
+            // Note separatorView is released when removed from superview.
             separatorView.removeFromSuperview()
         }
         coordinator.animate(alongsideTransition: nil, completion: {
@@ -406,7 +397,9 @@ final class ViewController: UIViewController {
 
     private func resetViews() {
         // Add back in separatorView after rotation.
+        if (separatorView == nil) {
         separatorView = HorizontalSeparatorView.addSeparatorBetweenViews(separatorType: .horizontal, primaryView: imageScrollView, secondaryView: ladderView, parentView: self.view)
+        }
         self.ladderView.resetSize()
         // FIXME: save and restore scrollview offset so it is maintained with rotation.
         self.imageView.setNeedsDisplay()
@@ -433,7 +426,7 @@ final class ViewController: UIViewController {
         navigationController?.setToolbarHidden(true, animated: true)
         // FIXME: This is setup like this just for testing.
 //        Persistance.remove("user_ladder_templates", from: .documents)
-        let ladderTemplates = Persistance.retrieve(templateFileName, from: .documents, as: [LadderTemplate].self) ?? [LadderTemplate.defaultTemplate(), LadderTemplate.defaultTemplate2()]
+        let ladderTemplates = FileIO.retrieve(FileIO.userTemplateFile, from: .documents, as: [LadderTemplate].self) ?? [LadderTemplate.defaultTemplate(), LadderTemplate.defaultTemplate2()]
         let templateEditor = LadderTemplatesEditor(ladderTemplates: ladderTemplates)
         let hostingController = UIHostingController(coder: coder, rootView: templateEditor)
         return hostingController
@@ -444,13 +437,23 @@ final class ViewController: UIViewController {
         os_log("showLadderSelector")
         navigationController?.setToolbarHidden(true, animated: true)
         // FIXME: This is setup like this just for testing.
-        let ladderTemplates = Persistance.retrieve(templateFileName, from: .documents, as: [LadderTemplate].self) ?? [LadderTemplate.defaultTemplate(), LadderTemplate.defaultTemplate2()]
+        let ladderTemplates = FileIO.retrieve(FileIO.userTemplateFile, from: .documents, as: [LadderTemplate].self) ?? [LadderTemplate.defaultTemplate(), LadderTemplate.defaultTemplate2()]
         let index = ladderTemplates.firstIndex(of: ladderView.ladder.template)
         var ladderSelector = LadderSelector(ladderTemplates: ladderTemplates, selectedIndex: index ?? 0)
         ladderSelector.delegate = self
         let hostingController = UIHostingController(coder: coder, rootView: ladderSelector)
         return hostingController
     }
+
+
+    @IBSegueAction func showDiagramSelector(_ coder: NSCoder) -> UIViewController? {
+        os_log("showDiagramSelector() - ViewController", log: OSLog.action, type: .info)
+        let diagramSelector = DiagramSelector(names: diagramFilenames, delegate: self)
+        let hostingController = UIHostingController(coder: coder, rootView: diagramSelector)
+        return hostingController
+    }
+
+
 
     // MARK: - Save and restore views
 

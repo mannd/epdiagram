@@ -11,15 +11,22 @@ import os.log
 
 // Based on this info from Apple: https://developer.apple.com/videos/play/tech-talks/204/ and this example class https://medium.com/@sdrzn/swift-4-codable-lets-make-things-even-easier-c793b6cf29e1
 
-final class Persistance {
+final class FileIO {
+    // Where ladder templates are stored.
+    static let userTemplateFile = "user_ladder_templates"
+    // Directory where save diagrams.
+    static let epdiagramDir = "epdiagram"
+
     enum Directory {
         case documents
         case cache
         case applicationSupport
     }
 
-    enum PersistanceError: Error {
+    enum FileIOError: Error {
         case searchDirectoryNotFound
+        case documentDirectoryNotFound
+        case diagramDirectoryNotFound
     }
 
     internal static func getURL(for directory: Directory) -> URL? {
@@ -38,7 +45,7 @@ final class Persistance {
     static func store<T: Encodable>(_ object: T, to directory: Directory, withFileName fileName: String) throws {
         guard let url = getURL(for: directory) else {
             os_log("Search directory not found", log: .default, type: .fault)
-            throw PersistanceError.searchDirectoryNotFound
+            throw FileIOError.searchDirectoryNotFound
         }
         let encoder = JSONEncoder()
         do {

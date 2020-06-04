@@ -52,6 +52,7 @@ struct LadderEditor: View {
                         }
                     }
                 }
+                Button(action: { self.onUndo() }, label: { Text("Undo") }).disabled(self.editMode == .active || !self.itemsToBeDeleted())
             }
             .navigationBarTitle(Text("Edit Ladder"), displayMode: .inline)
             .navigationBarItems(leading: EditButton(), trailing: addButton)
@@ -86,12 +87,27 @@ struct LadderEditor: View {
         ladderTemplate.regionTemplates.move(fromOffsets: source, toOffset: destination)
     }
 
+    private func onUndo() {
+        for i in 0..<ladderTemplate.regionTemplates.count {
+            ladderTemplate.regionTemplates[i].deletionFlag = false
+        }
+    }
+
+    private func itemsToBeDeleted() -> Bool {
+        var flag = false
+        for i in 0..<ladderTemplate.regionTemplates.count {
+            if ladderTemplate.regionTemplates[i].deletionFlag == true {
+                flag = true
+            }
+        }
+        return flag
+    }
 }
 
 #if DEBUG
 struct LadderEditor_Previews: PreviewProvider {
     static var previews: some View {
         LadderEditor(ladderTemplate: .constant(LadderTemplate.defaultTemplate()))
-    }
+        }
 }
 #endif

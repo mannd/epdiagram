@@ -17,6 +17,7 @@
 		8E25A9B122E5505200D62E18 /* LadderViewTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8E25A9B022E5505200D62E18 /* LadderViewTests.swift */; };
 		8E25A9B322E5515D00D62E18 /* LadderTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8E25A9B222E5515D00D62E18 /* LadderTests.swift */; };
 		8E3AD1372459CABF0085BDD4 /* LocationInLadder.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8E3AD1362459CABF0085BDD4 /* LocationInLadder.swift */; };
+		8E4A52EF24886B16007406F5 /* Diagram.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8E4A52EE24886B16007406F5 /* Diagram.swift */; };
 		8E4ACA8024478A6E00575538 /* BlackView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8E4ACA7F24478A6E00575538 /* BlackView.swift */; };
 		8E4ACA8224478D7C00575538 /* HamburgerTableViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8E4ACA8124478D7C00575538 /* HamburgerTableViewController.swift */; };
 		8E4ACA842447905E00575538 /* HamburgerCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8E4ACA832447905E00575538 /* HamburgerCell.swift */; };
@@ -32,6 +33,8 @@
 		8E7214E022EB57FC0062C094 /* MarkTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8E7214DF22EB57FC0062C094 /* MarkTests.swift */; };
 		8E74D58E244FBE2500641E0A /* LadderView+UIContextMenuInteractionDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8E74D58D244FBE2500641E0A /* LadderView+UIContextMenuInteractionDelegate.swift */; };
 		8E74D590244FD55E00641E0A /* Logging.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8E74D58F244FD55E00641E0A /* Logging.swift */; };
+		8E7CCC29248C1A9C00018D2C /* DiagramSelector.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8E7CCC28248C1A9C00018D2C /* DiagramSelector.swift */; };
+		8E7CCC2B248C30A300018D2C /* Preferences.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8E7CCC2A248C30A300018D2C /* Preferences.swift */; };
 		8E7D24C322779DBD005A1729 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8E7D24C222779DBD005A1729 /* AppDelegate.swift */; };
 		8E7D24C522779DBD005A1729 /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8E7D24C422779DBD005A1729 /* ViewController.swift */; };
 		8E7D24C822779DBD005A1729 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 8E7D24C622779DBD005A1729 /* Main.storyboard */; };
@@ -40,7 +43,7 @@
 		8E7D24E322779DBF005A1729 /* EP_DiagramUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8E7D24E222779DBF005A1729 /* EP_DiagramUITests.swift */; };
 		8E7D24F12277A00C005A1729 /* ImageView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8E7D24F02277A00C005A1729 /* ImageView.swift */; };
 		8E8248DD23B53B55001A85F9 /* SeparatorView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8E8248DC23B53B55001A85F9 /* SeparatorView.swift */; };
-		8E9550BD2474B22000E1B125 /* Persistance.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8E9550BC2474B22000E1B125 /* Persistance.swift */; };
+		8E9550BD2474B22000E1B125 /* FileIO.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8E9550BC2474B22000E1B125 /* FileIO.swift */; };
 		8E9550BF2474B69900E1B125 /* PersistanceTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8E9550BE2474B69900E1B125 /* PersistanceTests.swift */; };
 		8E9A466723005A600037AEAB /* CursorViewTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8E9A466623005A600037AEAB /* CursorViewTests.swift */; };
 		8E9B8043228345B5008873BB /* Mark.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8E9B8042228345B5008873BB /* Mark.swift */; };
@@ -82,6 +85,7 @@
 		8E25A9B022E5505200D62E18 /* LadderViewTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LadderViewTests.swift; sourceTree = "<group>"; };
 		8E25A9B222E5515D00D62E18 /* LadderTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LadderTests.swift; sourceTree = "<group>"; };
 		8E3AD1362459CABF0085BDD4 /* LocationInLadder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocationInLadder.swift; sourceTree = "<group>"; };
+		8E4A52EE24886B16007406F5 /* Diagram.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Diagram.swift; sourceTree = "<group>"; };
 		8E4ACA7F24478A6E00575538 /* BlackView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BlackView.swift; sourceTree = "<group>"; };
 		8E4ACA8124478D7C00575538 /* HamburgerTableViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HamburgerTableViewController.swift; sourceTree = "<group>"; };
 		8E4ACA832447905E00575538 /* HamburgerCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HamburgerCell.swift; sourceTree = "<group>"; };
@@ -98,6 +102,8 @@
 		8E7214DF22EB57FC0062C094 /* MarkTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MarkTests.swift; sourceTree = "<group>"; };
 		8E74D58D244FBE2500641E0A /* LadderView+UIContextMenuInteractionDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "LadderView+UIContextMenuInteractionDelegate.swift"; sourceTree = "<group>"; };
 		8E74D58F244FD55E00641E0A /* Logging.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Logging.swift; sourceTree = "<group>"; };
+		8E7CCC28248C1A9C00018D2C /* DiagramSelector.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DiagramSelector.swift; sourceTree = "<group>"; };
+		8E7CCC2A248C30A300018D2C /* Preferences.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Preferences.swift; sourceTree = "<group>"; };
 		8E7D24BF22779DBD005A1729 /* EP Diagram.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "EP Diagram.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		8E7D24C222779DBD005A1729 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		8E7D24C422779DBD005A1729 /* ViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ViewController.swift; sourceTree = "<group>"; };
@@ -112,7 +118,7 @@
 		8E7D24E422779DBF005A1729 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		8E7D24F02277A00C005A1729 /* ImageView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImageView.swift; sourceTree = "<group>"; };
 		8E8248DC23B53B55001A85F9 /* SeparatorView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SeparatorView.swift; sourceTree = "<group>"; };
-		8E9550BC2474B22000E1B125 /* Persistance.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Persistance.swift; sourceTree = "<group>"; };
+		8E9550BC2474B22000E1B125 /* FileIO.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FileIO.swift; sourceTree = "<group>"; };
 		8E9550BE2474B69900E1B125 /* PersistanceTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PersistanceTests.swift; sourceTree = "<group>"; };
 		8E9A466623005A600037AEAB /* CursorViewTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CursorViewTests.swift; sourceTree = "<group>"; };
 		8E9B8042228345B5008873BB /* Mark.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Mark.swift; sourceTree = "<group>"; };
@@ -173,7 +179,7 @@
 				8E7214DD22E95C860062C094 /* Common.swift */,
 				8E253DD4244A8B17008CC56B /* Version.swift */,
 				8E74D58F244FD55E00641E0A /* Logging.swift */,
-				8E9550BC2474B22000E1B125 /* Persistance.swift */,
+				8E9550BC2474B22000E1B125 /* FileIO.swift */,
 			);
 			path = Common;
 			sourceTree = "<group>";
@@ -255,6 +261,8 @@
 				8E3AD1362459CABF0085BDD4 /* LocationInLadder.swift */,
 				8ECA9FB42470A07B0016D939 /* RegionTemplate.swift */,
 				8ECA9FB62470A1020016D939 /* LadderTemplate.swift */,
+				8E4A52EE24886B16007406F5 /* Diagram.swift */,
+				8E7CCC2A248C30A300018D2C /* Preferences.swift */,
 			);
 			path = Models;
 			sourceTree = "<group>";
@@ -289,8 +297,8 @@
 				8E7D24C422779DBD005A1729 /* ViewController.swift */,
 				8E253DD2244A8799008CC56B /* ViewController+UIScrollViewDelegate.swift */,
 				8E253DD0244A86CB008CC56B /* ViewController+HamburgerTableDelegate.swift */,
-				8E4ACA8124478D7C00575538 /* HamburgerTableViewController.swift */,
 				8E6EB6C1248477D500E5F883 /* ViewController+ViewControllerDelegate.swift */,
+				8E4ACA8124478D7C00575538 /* HamburgerTableViewController.swift */,
 			);
 			path = ViewControllers;
 			sourceTree = "<group>";
@@ -301,6 +309,7 @@
 				8E671D5124814BB700784EB7 /* LadderTemplatesEditor.swift */,
 				8E6A0297246DFB3700A10C9F /* LadderEditor.swift */,
 				8EA444BF2476E471005B5452 /* LadderSelector.swift */,
+				8E7CCC28248C1A9C00018D2C /* DiagramSelector.swift */,
 			);
 			path = SwiftUI;
 			sourceTree = "<group>";
@@ -441,12 +450,13 @@
 				8E74D590244FD55E00641E0A /* Logging.swift in Sources */,
 				8E253DD3244A8799008CC56B /* ViewController+UIScrollViewDelegate.swift in Sources */,
 				8E6EB6C02484778E00E5F883 /* Notification+didUndoableAction.swift in Sources */,
-				8E9550BD2474B22000E1B125 /* Persistance.swift in Sources */,
+				8E9550BD2474B22000E1B125 /* FileIO.swift in Sources */,
 				8E7D24F12277A00C005A1729 /* ImageView.swift in Sources */,
 				8E7D24C522779DBD005A1729 /* ViewController.swift in Sources */,
 				8E3AD1372459CABF0085BDD4 /* LocationInLadder.swift in Sources */,
 				8E253DD5244A8B17008CC56B /* Version.swift in Sources */,
 				8E6EB6C2248477D500E5F883 /* ViewController+ViewControllerDelegate.swift in Sources */,
+				8E4A52EF24886B16007406F5 /* Diagram.swift in Sources */,
 				8E6A0298246DFB3700A10C9F /* LadderEditor.swift in Sources */,
 				8E1B6CB8240CAE5300EA88A6 /* ScaledView.swift in Sources */,
 				8E8248DD23B53B55001A85F9 /* SeparatorView.swift in Sources */,
@@ -457,6 +467,7 @@
 				8E9B804722834870008873BB /* Ladder.swift in Sources */,
 				8E55612922A5FEDC00C4D391 /* Cursor.swift in Sources */,
 				8E253DD1244A86CB008CC56B /* ViewController+HamburgerTableDelegate.swift in Sources */,
+				8E7CCC2B248C30A300018D2C /* Preferences.swift in Sources */,
 				8E4ACA8024478A6E00575538 /* BlackView.swift in Sources */,
 				8ED3B1B62360DA0D00549381 /* Anchor.swift in Sources */,
 				8E4ACA842447905E00575538 /* HamburgerCell.swift in Sources */,
@@ -467,6 +478,7 @@
 				8EA444C02476E471005B5452 /* LadderSelector.swift in Sources */,
 				8E74D58E244FBE2500641E0A /* LadderView+UIContextMenuInteractionDelegate.swift in Sources */,
 				8E9B8045228347DE008873BB /* Region.swift in Sources */,
+				8E7CCC29248C1A9C00018D2C /* DiagramSelector.swift in Sources */,
 				8E7D24C322779DBD005A1729 /* AppDelegate.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

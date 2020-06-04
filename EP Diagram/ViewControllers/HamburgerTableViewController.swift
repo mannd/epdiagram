@@ -81,6 +81,8 @@ class HamburgerTableViewController: UITableViewController {
             delegate?.openDiagram()
         case .save:
             delegate?.saveDiagram()
+        case .sample:
+            delegate?.sampleDiagrams()
         case .templates:
             delegate?.editTemplates()
         case .help:

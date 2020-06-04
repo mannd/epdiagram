@@ -52,7 +52,7 @@ struct LadderSelector: View {
             }
             .navigationBarTitle(Text("Select Ladder"), displayMode: .inline)
             .navigationBarItems(trailing: Button(action: { self.showingAlert = true }) {
-                Text("Save") }
+                Text("Select") }
                 .alert(isPresented: $showingAlert) {
                     Alert(
                         // TODO: Don't bother with warning dialog if same ladder is selected and it has not been edited.  Need an "edited" flag for each ladder, and need to track original ladder.

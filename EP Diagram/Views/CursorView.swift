@@ -178,7 +178,7 @@ final class CursorView: ScaledView {
     // This function passes touch events to the views below if the point is not
     // near the cursor.
     override func point(inside point: CGPoint, with event: UIEvent?) -> Bool {
-        guard cursor.visible, let ladderViewDelegate = ladderViewDelegate else { return false }
+        guard cursor.visible else { return false }
         if isNearCursor(positionX: point.x, accuracy: accuracy) && point.y < ladderViewDelegate.getRegionProximalBoundary(view: self) {
             return true
         }

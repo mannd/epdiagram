@@ -48,11 +48,11 @@ final class LadderView: ScaledView {
     var lineWidth: CGFloat = 2
     var red = UIColor.systemRed
     var blue = UIColor.systemBlue
-    var unhighlightedColor = UIColor.black
-    var attachedColor = UIColor.orange
-    var groupedColor = UIColor.magenta
-    var selectedColor = UIColor.red
-    var linkColor = UIColor.green
+    var unhighlightedColor = UIColor.label
+    var attachedColor = UIColor.systemOrange
+    var linkColor = UIColor.systemGreen
+    var selectedColor = UIColor.systemRed
+    var groupedColor = UIColor.systemPurple
     var markLineWidth: CGFloat = 2
     var connectedLineWidth: CGFloat = 4
     var showImpulseOrigin = false
@@ -126,13 +126,6 @@ final class LadderView: ScaledView {
 
     private func didLoad() {
         ladderViewHeight = self.frame.height
-        if #available(iOS 13.0, *) {
-            unhighlightedColor = UIColor.label
-            attachedColor = UIColor.systemOrange
-            linkColor = UIColor.systemGreen
-            selectedColor = UIColor.systemRed
-            groupedColor = UIColor.systemPurple
-        }
         initializeRegions()
 
         // Draw border around view.
@@ -976,16 +969,6 @@ final class LadderView: ScaledView {
         let position = press.location(in: self)
         let locationInLadder = getLocationInLadder(position: position)
         P("long press at \(locationInLadder) ")
-        if locationInLadder.markWasTapped {
-            P("you pressed a mark")
-            if #available(iOS 13.0, *) {
-                // use LadderView extensions
-            }
-            else {
-                setPressedMark(position: position)
-                longPressMarkOldOS(position)
-            }
-        }
     }
 
     func setPressedMark(position: CGPoint) {
@@ -1002,25 +985,6 @@ final class LadderView: ScaledView {
     func setPressedMarkStyle(style: Mark.LineStyle) {
         if let pressedMark = pressedMark {
             pressedMark.lineStyle = style
-        }
-    }
-
-
-    fileprivate func longPressMarkOldOS(_ position: CGPoint) {
-        // Note: it doesn't look like you can add a submenu to a UIMenuController like
-        // you can do with context menus available in iOS 13.
-        let solidMenuItem = UIMenuItem(title: L("Solid"), action: #selector(setSolid))
-        let dashedMenuItem = UIMenuItem(title: L("Dashed"), action: #selector(setDashed))
-        let dottedMenuItem = UIMenuItem(title: L("Dotted"), action: #selector(setDotted))
-        let unlinkMenuItem = UIMenuItem(title: L("Unlink"), action: #selector(ungroupPressedMark))
-        let deleteMenuItem = UIMenuItem(title: L("Delete"), action: #selector(deletePressedMark))
-        UIMenuController.shared.menuItems = [solidMenuItem, dashedMenuItem, dottedMenuItem, unlinkMenuItem, deleteMenuItem]
-        let rect = CGRect(x: position.x, y: position.y, width: 0, height: 0)
-        if #available(iOS 13.0, *) {
-            UIMenuController.shared.showMenu(from: self, rect: rect)
-        } else {
-            UIMenuController.shared.setTargetRect(rect, in: self)
-            UIMenuController.shared.setMenuVisible(true, animated: true)
         }
     }
 

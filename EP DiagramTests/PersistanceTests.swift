@@ -33,15 +33,15 @@ class PersistanceTests: XCTestCase {
 
     func testGetURL() {
         // these aren't tests, just used for debuggin
-        var url = Persistance.getURL(for: .documents)
+        var url = FileIO.getURL(for: .documents)
         P("url.documents = \(String(describing: url))")
-        url = Persistance.getURL(for: .cache)
+        url = FileIO.getURL(for: .cache)
         P("url.cache = \(String(describing: url))")
-        url = Persistance.getURL(for: .applicationSupport)
+        url = FileIO.getURL(for: .applicationSupport)
         P("url.applicationSupport = \(String(describing: url))")
         let s = "This is a test"
-        try! Persistance.store(s, to: .documents, withFileName: "test1")
-        let returnedS: String?  = Persistance.retrieve("test1", from: .documents, as: String.self)
+        try! FileIO.store(s, to: .documents, withFileName: "test1")
+        let returnedS: String?  = FileIO.retrieve("test1", from: .documents, as: String.self)
         XCTAssertEqual(s, returnedS!)
     }
 
