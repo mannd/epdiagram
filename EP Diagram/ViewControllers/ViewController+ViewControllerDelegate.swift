@@ -66,5 +66,18 @@ extension ViewController: ViewControllerDelegate {
     func deleteDiagram(diagramName: String) {
         os_log("deleteDiagram %s", log: .action, type: .info, diagramName)
         // actually delete diagram files here
+        do {
+            let diagramDirURL = try getDiagramDirURL(for: diagramName)
+            //P("\(epDiagramsDirURL.path)")
+            let diagramDirContents = try FileManager.default.contentsOfDirectory(atPath: diagramDirURL.path)
+            P("diagramDirContents = \(diagramDirContents)")
+            for path in diagramDirContents {
+                let pathURL = diagramDirURL.appendingPathComponent(path, isDirectory: false)
+                try FileManager.default.removeItem(atPath: pathURL.path)
+            }
+            try FileManager.default.removeItem(atPath: diagramDirURL.path)
+        } catch {
+            os_log("Could not delete diagram %s, error: %s", log: .action, type: .error, diagramName, error.localizedDescription)
+        }
     }
 }

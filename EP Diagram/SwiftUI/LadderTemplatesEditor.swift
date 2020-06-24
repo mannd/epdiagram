@@ -32,8 +32,8 @@ struct LadderTemplatesEditor: View {
                         }.listRowBackground(self.ladderTemplates[index].deletionFlag ? Color.red : Color.clear)
                             .disabled(self.ladderTemplates[index].deletionFlag)
                     }.onMove(perform: onMove)
-                        .onDelete(perform: { indexs in
-                            for index in indexs.sorted().reversed() {
+                        .onDelete(perform: { indices in
+                            for index in indices.sorted().reversed() {
                                 self.ladderTemplates.remove(at: index)
                             }
                         })

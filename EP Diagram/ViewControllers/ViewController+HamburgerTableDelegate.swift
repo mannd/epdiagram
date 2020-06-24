@@ -105,16 +105,8 @@ extension ViewController: HamburgerTableDelegate, UIImagePickerControllerDelegat
         os_log("Open diagram", log: OSLog.action, type: .info)
         // Open list of saved diagrams
         do {
-            guard let documentDirURL = FileIO.getURL(for: .documents) else {
-                os_log("File error: user document directory not found!", log: .errors, type: .error)
-                Common.showMessage(viewController: self, title: L("File Error"), message: "User document directory not found!")
-                throw FileIO.FileIOError.documentDirectoryNotFound
-            }
-            let diagramDirURL = documentDirURL.appendingPathComponent(FileIO.epdiagramDir, isDirectory: true)
-            if !FileManager.default.fileExists(atPath: diagramDirURL.path) {
-                throw FileIO.FileIOError.diagramDirectoryNotFound
-            }
-            let fileURLs = try FileManager.default.contentsOfDirectory(at: diagramDirURL, includingPropertiesForKeys: nil, options: .skipsHiddenFiles)
+            let epDiagramsDirURL = try getEPDiagramsDirURL()
+            let fileURLs = try FileManager.default.contentsOfDirectory(at: epDiagramsDirURL, includingPropertiesForKeys: nil, options: .skipsHiddenFiles)
             if fileURLs.count < 1 {
                 Common.showMessage(viewController: self, title: "No Saved Diagrams", message: "No previously saved diagrams found.")
                 return
@@ -127,16 +119,29 @@ extension ViewController: HamburgerTableDelegate, UIImagePickerControllerDelegat
         }
     }
 
-    private func resetLadder() {
-        ladderView.resetLadder()
-        undoManager?.removeAllActions()
-        updateUndoRedoButtons()
-        setViewsNeedDisplay()
-    }
+//    #if DEBUG
+//    func clearDiagrams() {
+//        os_log("clearDiagrams()", log: .action, type: .debug)
+//        do {
+//            let epDiagramsDirURL = try getEPDiagramsDirURL()
+//            P("\(epDiagramsDirURL.path)")
+//            let directoryContents = try FileManager.default.contentsOfDirectory(atPath: epDiagramsDirURL.path)
+//            for path in directoryContents {
+//                try FileManager.default.removeItem(atPath: epDiagramsDirURL.path + path)
+//            }
+//        } catch {
+//            P("Failed to clear diagrams from epdiagrams directory.")
+//        }
+//    }
+//    #endif
 
     func saveDiagram() {
         os_log("saveDiagram()", log: OSLog.action, type: .info)
         showSaveDiagramAlert()
+    }
+
+    func showSaveDiagramAlert() {
+        Common.showTextAlert(viewController: self, title: L("Save Diagram"), message: L("Enter a unique name for this diagram"), preferredStyle: .alert, handler: { name in self.handleSaveDiagram(filename: name) })
     }
 
     fileprivate func saveDiagramFiles(diagramDirURL: URL) {
@@ -155,6 +160,7 @@ extension ViewController: HamburgerTableDelegate, UIImagePickerControllerDelegat
     }
 
     func getEPDiagramsDirURL() throws -> URL {
+//        P("\(FileIO.getURL(for: .documents))")
         guard let documentDirURL = FileIO.getURL(for: .documents) else {
             throw FileIO.FileIOError.documentDirectoryNotFound
         }
@@ -198,8 +204,7 @@ extension ViewController: HamburgerTableDelegate, UIImagePickerControllerDelegat
             else {
                 os_log("diagram file already exists", log: OSLog.action, type: .info)
                 Common.ShowWarning(viewController: self, title: "File Already Exists", message: "A diagram named \(filename) already exists.  Overwrite?") { _ in
-                    let diagramDirURL = self.getDiagramDirURLNonThrowing(for: filename)
-                    if let diagramDirURL = diagramDirURL {
+                    if let diagramDirURL = self.getDiagramDirURLNonThrowing(for: filename) {
                         self.saveDiagramFiles(diagramDirURL: diagramDirURL)
                     }
                 }
@@ -211,15 +216,17 @@ extension ViewController: HamburgerTableDelegate, UIImagePickerControllerDelegat
         } catch {
             os_log("File error: %s", log: OSLog.errors, type: .error, error.localizedDescription)
         }
-
-    }
-
-    func showSaveDiagramAlert() {
-        Common.showTextAlert(viewController: self, title: L("Save Diagram"), message: L("Enter a unique name for this diagram"), preferredStyle: .alert, handler: { name in self.handleSaveDiagram(filename: name) })
     }
 
     func sampleDiagrams() {
         os_log("sampleDiagrams()", log: OSLog.action, type: .info)
+    }
+
+    private func resetLadder() {
+        ladderView.resetLadder()
+        undoManager?.removeAllActions()
+        updateUndoRedoButtons()
+        setViewsNeedDisplay()
     }
 
     func editTemplates() {

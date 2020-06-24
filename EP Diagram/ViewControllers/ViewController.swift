@@ -12,6 +12,10 @@ import os.log
 
 // TODO: refactor out the delegates to an extension.
 final class ViewController: UIViewController {
+//    #if DEBUG
+//    let CLEAR_DIAGRAMS = true
+//    #endif
+
     @IBOutlet var _constraintHamburgerWidth: NSLayoutConstraint!
     @IBOutlet var _constraintHamburgerLeft: NSLayoutConstraint!
     @IBOutlet var imageScrollView: UIScrollView!
@@ -50,6 +54,12 @@ final class ViewController: UIViewController {
     override func viewDidLoad() {
         os_log("viewDidLoad() - ViewController", log: OSLog.viewCycle, type: .info)
         super.viewDidLoad()
+
+//       #if DEBUG
+//        if CLEAR_DIAGRAMS {
+//            clearDiagrams()
+//        }
+//        #endif
 
         // These 2 views are guaranteed to exist, so the delegates are IUOs.
         cursorView.ladderViewDelegate = ladderView

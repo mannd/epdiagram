@@ -11,26 +11,31 @@ import SwiftUI
 struct DiagramSelector: View {
     @State var names: [String] = []
     weak var delegate: ViewControllerDelegate?
+    @State private var editMode = EditMode.inactive
     @Environment(\.presentationMode) var presentationMode: Binding<PresentationMode>
 
     var body: some View {
         NavigationView {
-            List() {
-                ForEach(names, id:\.self) {
-                    name in
-                    Text(name).onTapGesture {
-                        P("tap")
-                        self.delegate?.selectDiagram(diagramName: name)
-                        self.presentationMode.wrappedValue.dismiss()
-                    }.padding().navigationBarTitle("Select Diagram", displayMode: .inline)
-                }.onDelete {
-                    indices in
-                    for index in indices {
-                        self.delegate?.deleteDiagram(diagramName: self.names[index])
-                        self.names.remove(at: index)
+            VStack {
+                List() {
+                    ForEach(names, id:\.self) {
+                        name in
+                        Text(name).onTapGesture {
+                            P("tap")
+                            self.delegate?.selectDiagram(diagramName: name)
+                            self.presentationMode.wrappedValue.dismiss()
+                        }.padding().navigationBarTitle("Select Diagram", displayMode: .inline)
+                    }.onDelete {
+                        indices in
+                        for index in indices {
+                            self.delegate?.deleteDiagram(diagramName: self.names[index])
+                            self.names.remove(at: index)
+                        }
                     }
                 }
-        }
+                .navigationBarItems(leading: EditButton())
+                .environment(\.editMode, $editMode)
+            }
     }
 }
 }
