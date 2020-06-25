@@ -13,6 +13,7 @@ protocol ViewControllerDelegate: class {
     func selectLadderTemplate(ladderTemplate: LadderTemplate?)
     func selectDiagram(diagramName: String?)
     func deleteDiagram(diagramName: String)
+    func savePreferences()
 }
 
 extension ViewController: ViewControllerDelegate {
@@ -20,6 +21,7 @@ extension ViewController: ViewControllerDelegate {
         os_log("selecteLadderTemplate - ViewController", log: OSLog.action, type: .info)
         if let ladderTemplate = ladderTemplate {
             let ladder = Ladder(template: ladderTemplate)
+            diagram?.name = nil
             ladderView.ladder = ladder
             setViewsNeedDisplay()
         }
@@ -46,13 +48,13 @@ extension ViewController: ViewControllerDelegate {
             let imageURL = ultimateDirURL.appendingPathComponent("image.png", isDirectory: false)
             P("imageURL.path = \(imageURL.path)")
             let image = UIImage(contentsOfFile: imageURL.path)
-            self.imageView.image = image
-            self.setViewsNeedDisplay()
+//            self.imageView.image = image
+//            self.setViewsNeedDisplay()
             let ladderURL = ultimateDirURL.appendingPathComponent("ladder.json", isDirectory: false)
             let decoder = JSONDecoder()
-            if let data = FileManager.default.contents(atPath: ladderURL.path) {
+            if let data = FileManager.default.contents(atPath: ladderURL.path), let image = image {
                 if let ladder = try? decoder.decode(Ladder.self, from: data) {
-
+                    self.diagram = Diagram(name: diagramName, image: image, ladder: ladder)
                     self.imageView.image = image
                     self.ladderView.ladder = ladder
                     self.setViewsNeedDisplay()
@@ -79,5 +81,9 @@ extension ViewController: ViewControllerDelegate {
         } catch {
             os_log("Could not delete diagram %s, error: %s", log: .action, type: .error, diagramName, error.localizedDescription)
         }
+    }
+
+    func savePreferences() {
+        os_log("savePreferences()", log: .action, type: .info)
     }
 }

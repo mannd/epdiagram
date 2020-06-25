@@ -16,6 +16,7 @@
 		8E25A9AF22E54F7200D62E18 /* CursorTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8E25A9AE22E54F7200D62E18 /* CursorTests.swift */; };
 		8E25A9B122E5505200D62E18 /* LadderViewTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8E25A9B022E5505200D62E18 /* LadderViewTests.swift */; };
 		8E25A9B322E5515D00D62E18 /* LadderTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8E25A9B222E5515D00D62E18 /* LadderTests.swift */; };
+		8E2BA1D024A3BDD7002D997F /* PreferencesView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8E2BA1CF24A3BDD7002D997F /* PreferencesView.swift */; };
 		8E3AD1372459CABF0085BDD4 /* LocationInLadder.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8E3AD1362459CABF0085BDD4 /* LocationInLadder.swift */; };
 		8E4A52EF24886B16007406F5 /* Diagram.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8E4A52EE24886B16007406F5 /* Diagram.swift */; };
 		8E4ACA8024478A6E00575538 /* BlackView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8E4ACA7F24478A6E00575538 /* BlackView.swift */; };
@@ -84,6 +85,7 @@
 		8E25A9AE22E54F7200D62E18 /* CursorTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CursorTests.swift; sourceTree = "<group>"; };
 		8E25A9B022E5505200D62E18 /* LadderViewTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LadderViewTests.swift; sourceTree = "<group>"; };
 		8E25A9B222E5515D00D62E18 /* LadderTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LadderTests.swift; sourceTree = "<group>"; };
+		8E2BA1CF24A3BDD7002D997F /* PreferencesView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PreferencesView.swift; sourceTree = "<group>"; };
 		8E3AD1362459CABF0085BDD4 /* LocationInLadder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocationInLadder.swift; sourceTree = "<group>"; };
 		8E4A52EE24886B16007406F5 /* Diagram.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Diagram.swift; sourceTree = "<group>"; };
 		8E4ACA7F24478A6E00575538 /* BlackView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BlackView.swift; sourceTree = "<group>"; };
@@ -310,6 +312,7 @@
 				8E6A0297246DFB3700A10C9F /* LadderEditor.swift */,
 				8EA444BF2476E471005B5452 /* LadderSelector.swift */,
 				8E7CCC28248C1A9C00018D2C /* DiagramSelector.swift */,
+				8E2BA1CF24A3BDD7002D997F /* PreferencesView.swift */,
 			);
 			path = SwiftUI;
 			sourceTree = "<group>";
@@ -458,6 +461,7 @@
 				8E6EB6C2248477D500E5F883 /* ViewController+ViewControllerDelegate.swift in Sources */,
 				8E4A52EF24886B16007406F5 /* Diagram.swift in Sources */,
 				8E6A0298246DFB3700A10C9F /* LadderEditor.swift in Sources */,
+				8E2BA1D024A3BDD7002D997F /* PreferencesView.swift in Sources */,
 				8E1B6CB8240CAE5300EA88A6 /* ScaledView.swift in Sources */,
 				8E8248DD23B53B55001A85F9 /* SeparatorView.swift in Sources */,
 				8E671D5224814BB700784EB7 /* LadderTemplatesEditor.swift in Sources */,

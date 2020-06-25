@@ -55,7 +55,6 @@ struct LadderSelector: View {
                 Text("Select") }
                 .alert(isPresented: $showingAlert) {
                     Alert(
-                        // TODO: Don't bother with warning dialog if same ladder is selected and it has not been edited.  Need an "edited" flag for each ladder, and need to track original ladder.
                         title: Text("Use Selected Ladder?"),
                         message: Text("If you have marked up previous ladder this data will be lost unless you first save it.  Choose Cancel to return to your diagram, or Select to change ladders."),
                         primaryButton: .destructive(Text("Select")) {

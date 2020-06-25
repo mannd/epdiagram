@@ -10,8 +10,10 @@ import SwiftUI
 
 struct DiagramSelector: View {
     @State var names: [String] = []
+    @State var selectedName: String = ""
     weak var delegate: ViewControllerDelegate?
     @State private var editMode = EditMode.inactive
+    @State private var showingAlert: Bool = false
     @Environment(\.presentationMode) var presentationMode: Binding<PresentationMode>
 
     var body: some View {
@@ -21,12 +23,22 @@ struct DiagramSelector: View {
                     ForEach(names, id:\.self) {
                         name in
                         Text(name).onTapGesture {
-                            P("tap")
-                            self.delegate?.selectDiagram(diagramName: name)
-                            self.presentationMode.wrappedValue.dismiss()
-                        }.padding().navigationBarTitle("Select Diagram", displayMode: .inline)
-                    }.onDelete {
-                        indices in
+                            self.showingAlert = true
+                            self.selectedName = name
+                        }.alert(isPresented: self.$showingAlert) {
+                            Alert(
+                                title: Text("Open Selected Diagram?"),
+                                message: Text("If you have marked up previous ladder this data will be lost unless you first save it.  Choose Cancel to return to your diagram, or Select to open this diagram."),
+                                primaryButton: .destructive(Text("Select")) {
+                                    self.delegate?.selectDiagram(diagramName: self.selectedName)
+                                    self.presentationMode.wrappedValue.dismiss() },
+                                secondaryButton: .cancel(Text("Cancel")) {
+                                    self.presentationMode.wrappedValue.dismiss()
+                                }
+                            )}
+                                .padding().navigationBarTitle("Select Diagram", displayMode: .inline)
+                        }.onDelete {
+                            indices in
                         for index in indices {
                             self.delegate?.deleteDiagram(diagramName: self.names[index])
                             self.names.remove(at: index)

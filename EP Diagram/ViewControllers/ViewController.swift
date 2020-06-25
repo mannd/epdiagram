@@ -10,11 +10,7 @@ import UIKit
 import SwiftUI
 import os.log
 
-// TODO: refactor out the delegates to an extension.
 final class ViewController: UIViewController {
-//    #if DEBUG
-//    let CLEAR_DIAGRAMS = true
-//    #endif
 
     @IBOutlet var _constraintHamburgerWidth: NSLayoutConstraint!
     @IBOutlet var _constraintHamburgerLeft: NSLayoutConstraint!
@@ -24,14 +20,13 @@ final class ViewController: UIViewController {
     @IBOutlet var cursorView: CursorView!
     @IBOutlet var blackView: BlackView!
 
-
     // We get this view via its embed segue!  See prepareForSegue().
     var hamburgerTableViewController: HamburgerTableViewController?
 
     // This margin is used for all the views.  As ECGs are always read from left
     // to right, there is no reason to reverse this.
+    // TODO: Possibly change this to property of ladder, since it might depend on label width (# of chars)?
     private let leftMargin: CGFloat = 30
-    internal let _maxBlackAlpha: CGFloat = 0.4
 
     internal var separatorView: SeparatorView?
     private var undoButton: UIBarButtonItem = UIBarButtonItem()
@@ -47,19 +42,15 @@ final class ViewController: UIViewController {
     var launchURL: URL?
     var pageNumber: Int = 1
 
-    var _imageIsLocked: Bool = false
+    internal var _imageIsLocked: Bool = false
+    internal let _maxBlackAlpha: CGFloat = 0.4
 
     var diagramFilenames: [String] = []
+    var diagram: Diagram?
     
     override func viewDidLoad() {
         os_log("viewDidLoad() - ViewController", log: OSLog.viewCycle, type: .info)
         super.viewDidLoad()
-
-//       #if DEBUG
-//        if CLEAR_DIAGRAMS {
-//            clearDiagrams()
-//        }
-//        #endif
 
         // These 2 views are guaranteed to exist, so the delegates are IUOs.
         cursorView.ladderViewDelegate = ladderView
@@ -87,7 +78,6 @@ final class ViewController: UIViewController {
 
         blackView.delegate = self
         blackView.alpha = 0.0
-        //            blackView.isUserInteractionEnabled = true
         constraintHamburgerLeft.constant = -self._constraintHamburgerWidth.constant;
 
         // Ensure there is a space for labels at the left margin.
@@ -104,11 +94,22 @@ final class ViewController: UIViewController {
         ladderView.addInteraction(interaction)
 
         navigationItem.setLeftBarButton(UIBarButtonItem(image: UIImage(named: "hamburger"), style: .plain, target: self, action: #selector(toggleHamburgerMenu)), animated: true)
-        // FIXME: right button maybe to toggle adding marks quickly?
         let ladderButton = UIBarButtonItem(image: UIImage(named: "ladder"), style: .plain, target: self, action: #selector(selectLadder))
         navigationItem.rightBarButtonItem = ladderButton
-//        navigationItem.setRightBarButton(UIBarButtonItem(barButtonSystemItem: .action , target: self, action: #selector(editDiagram)), animated: true)
 
+        if diagram == nil {
+            P("restoring default diagram")
+            diagram = getDefaultDiagram()
+        }
+        guard let diagram = diagram else {
+            fatalError("Could not find default diagram!")
+        }
+        imageView.image = diagram.image
+        ladderView.ladder = diagram.ladder
+    }
+
+    func getDefaultDiagram() -> Diagram {
+        return Diagram(name: nil, image: UIImage(named: "SampleECG")!, ladder: Ladder.defaultLadder())
     }
 
     @objc func onDidUndoableAction(_ notification: Notification) {
@@ -434,8 +435,6 @@ final class ViewController: UIViewController {
 
     @IBSegueAction func showTemplateEditor(_ coder: NSCoder) -> UIViewController? {
         navigationController?.setToolbarHidden(true, animated: true)
-        // FIXME: This is setup like this just for testing.
-//        Persistance.remove("user_ladder_templates", from: .documents)
         let ladderTemplates = FileIO.retrieve(FileIO.userTemplateFile, from: .documents, as: [LadderTemplate].self) ?? [LadderTemplate.defaultTemplate(), LadderTemplate.defaultTemplate2()]
         let templateEditor = LadderTemplatesEditor(ladderTemplates: ladderTemplates)
         let hostingController = UIHostingController(coder: coder, rootView: templateEditor)
@@ -464,7 +463,12 @@ final class ViewController: UIViewController {
     }
 
 
-
+    @IBSegueAction func showPreferences(_ coder: NSCoder) -> UIViewController? {
+        let preferencesView = PreferencesView(preferences: Preferences())
+        let hostingController = UIHostingController(coder: coder, rootView: preferencesView)
+        return hostingController
+    }
+    
     // MARK: - Save and restore views
 
     // TODO: Need to implement this functionality.

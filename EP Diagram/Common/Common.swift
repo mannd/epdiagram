@@ -159,9 +159,9 @@ class Common {
         viewController.present(alert, animated: true)
     }
 
-    static func ShowWarning(viewController: ViewController, title: String, message: String, action: ((UIAlertAction) -> Void)?) {
+    static func ShowWarning(viewController: ViewController, title: String, message: String, okActionButtonTitle: String = L("OK"), action: ((UIAlertAction) -> Void)?) {
         let alert = UIAlertController(title: title, message: message, preferredStyle: .alert)
-        let okAction = UIAlertAction(title: L("OK"), style: .default, handler: action)
+        let okAction = UIAlertAction(title: okActionButtonTitle, style: .destructive, handler: action)
         let cancelAction = UIAlertAction(title: L("Cancel"), style: .cancel, handler: nil)
         alert.addAction(okAction)
         alert.addAction(cancelAction)

@@ -21,6 +21,7 @@ protocol HamburgerTableDelegate: class {
     func openDiagram()
     func saveDiagram()
     func sampleDiagrams()
+    func showPreferences()
     func editTemplates()
     func help()
     func lockImage()
@@ -119,25 +120,14 @@ extension ViewController: HamburgerTableDelegate, UIImagePickerControllerDelegat
         }
     }
 
-//    #if DEBUG
-//    func clearDiagrams() {
-//        os_log("clearDiagrams()", log: .action, type: .debug)
-//        do {
-//            let epDiagramsDirURL = try getEPDiagramsDirURL()
-//            P("\(epDiagramsDirURL.path)")
-//            let directoryContents = try FileManager.default.contentsOfDirectory(atPath: epDiagramsDirURL.path)
-//            for path in directoryContents {
-//                try FileManager.default.removeItem(atPath: epDiagramsDirURL.path + path)
-//            }
-//        } catch {
-//            P("Failed to clear diagrams from epdiagrams directory.")
-//        }
-//    }
-//    #endif
-
     func saveDiagram() {
         os_log("saveDiagram()", log: OSLog.action, type: .info)
-        showSaveDiagramAlert()
+        if let name = diagram?.name {
+            handleSaveDiagram(filename: name)
+        }
+        else {
+            showSaveDiagramAlert()
+        }
     }
 
     func showSaveDiagramAlert() {
@@ -159,7 +149,7 @@ extension ViewController: HamburgerTableDelegate, UIImagePickerControllerDelegat
         }
     }
 
-    func getEPDiagramsDirURL() throws -> URL {
+    private func getEPDiagramsDirURL() throws -> URL {
 //        P("\(FileIO.getURL(for: .documents))")
         guard let documentDirURL = FileIO.getURL(for: .documents) else {
             throw FileIO.FileIOError.documentDirectoryNotFound
@@ -181,21 +171,22 @@ extension ViewController: HamburgerTableDelegate, UIImagePickerControllerDelegat
     }
 
     // non-throwing version of above
-    func getDiagramDirURLNonThrowing(for filename: String) -> URL? {
+    private func getDiagramDirURLNonThrowing(for filename: String) -> URL? {
         return try? getDiagramDirURL(for: filename)
     }
 
-    func diagramDirURLExists(for filename: String) throws -> Bool {
+    private func diagramDirURLExists(for filename: String) throws -> Bool {
         let epDiagramsDirURL = try getEPDiagramsDirURL()
         let diagramDirURL = epDiagramsDirURL.appendingPathComponent(filename, isDirectory: true)
         return FileManager.default.fileExists(atPath: diagramDirURL.path)
     }
 
-    func handleSaveDiagram(filename: String?) {
+    private func handleSaveDiagram(filename: String?) {
         os_log("handleSaveDiagram()", log: OSLog.action, type: .info)
         guard let filename = filename, !filename.isEmpty else {
             Common.showMessage(viewController: self, title: L("Name is Required"), message: L("You must enter a name for this diagram"))
             return }
+        diagram?.name = filename
         do {
             if try !diagramDirURLExists(for: filename) {
                 let diagramDirURL = try getDiagramDirURL(for: filename)
@@ -203,7 +194,7 @@ extension ViewController: HamburgerTableDelegate, UIImagePickerControllerDelegat
             }
             else {
                 os_log("diagram file already exists", log: OSLog.action, type: .info)
-                Common.ShowWarning(viewController: self, title: "File Already Exists", message: "A diagram named \(filename) already exists.  Overwrite?") { _ in
+                Common.ShowWarning(viewController: self, title: "File Already Exists", message: "A diagram named \(filename) already exists.  Overwrite?", okActionButtonTitle: L("Overwrite")) { _ in
                     if let diagramDirURL = self.getDiagramDirURLNonThrowing(for: filename) {
                         self.saveDiagramFiles(diagramDirURL: diagramDirURL)
                     }
@@ -220,6 +211,11 @@ extension ViewController: HamburgerTableDelegate, UIImagePickerControllerDelegat
 
     func sampleDiagrams() {
         os_log("sampleDiagrams()", log: OSLog.action, type: .info)
+    }
+
+    func showPreferences() {
+        os_log("showPreferences()", log: OSLog.action, type: .info)
+        performSegue(withIdentifier: "showPreferencesSegue", sender: self)
     }
 
     private func resetLadder() {

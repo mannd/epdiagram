@@ -111,6 +111,7 @@ final class LadderView: ScaledView {
     // MARK: - init
 
     override init(frame: CGRect) {
+        os_log("init(frame:) - LadderView", log: .viewCycle, type: .info)
         self.ladder = Ladder.defaultLadder()
         activeRegion = ladder.regions[0]
         super.init(frame: frame)
@@ -118,6 +119,7 @@ final class LadderView: ScaledView {
     }
 
     required init?(coder aDecoder: NSCoder) {
+        os_log("init(coder:) - LadderView", log: .viewCycle, type: .info)
         self.ladder = Ladder.defaultLadder()
         activeRegion = ladder.regions[0]
         super.init(coder: aDecoder)
@@ -125,6 +127,7 @@ final class LadderView: ScaledView {
     }
 
     private func didLoad() {
+        os_log("didLoad() - LadderView", log: .action, type: .info)
         ladderViewHeight = self.frame.height
         initializeRegions()
 
