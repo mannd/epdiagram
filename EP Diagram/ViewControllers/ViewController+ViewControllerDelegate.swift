@@ -13,7 +13,7 @@ protocol ViewControllerDelegate: class {
     func selectLadderTemplate(ladderTemplate: LadderTemplate?)
     func selectDiagram(diagramName: String?)
     func deleteDiagram(diagramName: String)
-    func savePreferences()
+    func savePreferences(preferences: Preferences)
 }
 
 extension ViewController: ViewControllerDelegate {
@@ -83,7 +83,12 @@ extension ViewController: ViewControllerDelegate {
         }
     }
 
-    func savePreferences() {
+    func savePreferences(preferences: Preferences) {
         os_log("savePreferences()", log: .action, type: .info)
+        self.preferences = preferences
+        self.preferences.save()
+        ladderView.lineWidth = CGFloat(preferences.lineWidth)
+//        loadUserDefaults()
+        setViewsNeedDisplay()
     }
 }

@@ -9,6 +9,11 @@
 import UIKit
 
 struct Preferences {
+    // keys
+    let defaultLineWidthKey = "defaultLineWidthKey"
+    let defaultShowImpulseOriginKey = "defaultShowImpuseOriginKey"
+    let defaultShowBlockKey = "defaultShowBlockKey"
+
     // Stored as Int, converted to CGFloat when used.
     var lineWidth: Int = 2
     var showImpulseOrigin = false
@@ -26,12 +31,20 @@ struct Preferences {
 
     // TODO: write preferences to shared preferences.
     func save() {
+        let userDefaults = UserDefaults.standard
+        userDefaults.set(lineWidth, forKey: defaultLineWidthKey)
+        userDefaults.set(showImpulseOrigin, forKey: defaultShowImpulseOriginKey)
+        userDefaults.set(defaultShowBlockKey, forKey: defaultShowBlockKey)
+
 
     }
 
     // TODO: retrieve preferences from shared preferences.
-    func retrieve() {
-
+    mutating func retrieve() {
+        let userDefaults = UserDefaults.standard
+        lineWidth = userDefaults.integer(forKey: defaultLineWidthKey)
+//        showImpulseOrigin = (userDefaults.object(forKey: defaultShowImpulseOriginKey) ?? false) as! Bool
+//        showBlock = (userDefaults.object(forKey: defaultShowBlockKey) ?? false) as! Bool
     }
     
 }

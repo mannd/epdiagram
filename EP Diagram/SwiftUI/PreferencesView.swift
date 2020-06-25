@@ -17,9 +17,7 @@ struct PreferencesView: View {
     var body: some View {
         NavigationView {
         VStack {
-            Stepper(value: $preferences.lineWidth, in: 1...6, step: 1) {
-                Text("Base line width = \(preferences.lineWidth)")
-            }
+            Stepper(L("Mark line width = \(preferences.lineWidth)"), value: $preferences.lineWidth, in: 1...6, step: 1)
             Toggle(isOn: $preferences.showImpulseOrigin) {
                 Text("Show impulse origin")
             }
@@ -33,8 +31,8 @@ struct PreferencesView: View {
     }
 
     func onSave() {
-        preferences.save()
-        //self.presentationMode.wrappedValue.dismiss()
+        delegate?.savePreferences(preferences: preferences)
+        self.presentationMode.wrappedValue.dismiss()
     }
 }
 

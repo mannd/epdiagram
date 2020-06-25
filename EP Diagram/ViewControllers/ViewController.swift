@@ -47,6 +47,8 @@ final class ViewController: UIViewController {
 
     var diagramFilenames: [String] = []
     var diagram: Diagram?
+
+    var preferences: Preferences = Preferences()
     
     override func viewDidLoad() {
         os_log("viewDidLoad() - ViewController", log: OSLog.viewCycle, type: .info)
@@ -126,6 +128,7 @@ final class ViewController: UIViewController {
         showMainMenu()
         NotificationCenter.default.addObserver(self, selector: #selector(onDidUndoableAction(_:)), name: .didUndoableAction, object: nil)
         updateUndoRedoButtons()
+        loadUserDefaults()
         resetViews()
     }
 
@@ -137,6 +140,16 @@ final class ViewController: UIViewController {
     // Crash program at compile time if IUO delegates are nil.
     private func assertDelegatesNonNil() {
         assert(cursorView.ladderViewDelegate != nil && ladderView.cursorViewDelegate != nil, "LadderViewDelegate and/or CursorViewDelegate are nil")
+    }
+
+    func loadUserDefaults() {
+        os_log("loadUserDefaults() - ViewController", log: .action, type: .info)
+        preferences.retrieve()
+        P(">>>>> preferences.lineWidth = \(preferences.lineWidth)")
+        ladderView.lineWidth = CGFloat(preferences.lineWidth)
+        ladderView.showBlock = preferences.showBlock
+        ladderView.showImpulseOrigin = preferences.showImpulseOrigin
+        P(">>>>> ladderView.lineWidth = \(ladderView.lineWidth)")
     }
 
     private func showMainMenu() {
@@ -464,7 +477,9 @@ final class ViewController: UIViewController {
 
 
     @IBSegueAction func showPreferences(_ coder: NSCoder) -> UIViewController? {
-        let preferencesView = PreferencesView(preferences: Preferences())
+        preferences.retrieve()
+        var preferencesView = PreferencesView(preferences: preferences)
+        preferencesView.delegate = self
         let hostingController = UIHostingController(coder: coder, rootView: preferencesView)
         return hostingController
     }

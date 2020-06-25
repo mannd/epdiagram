@@ -1112,7 +1112,8 @@ final class LadderView: ScaledView {
         }
         context.setStrokeColor(getMarkColor(mark: mark))
         context.setFillColor(getMarkColor(mark: mark))
-        context.setLineWidth(getMarkLineWidth(mark))
+        context.setLineWidth(lineWidth)
+//        context.setLineWidth(getMarkLineWidth(mark))
         context.move(to: p1)
         context.addLine(to: p2)
         // Draw dashed line
