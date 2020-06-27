@@ -15,11 +15,15 @@ protocol HamburgerTableDelegate: class {
     var constraintHamburgerWidth: NSLayoutConstraint { get set }
     var maxBlackAlpha: CGFloat { get }
     var imageIsLocked: Bool { get set }
+    var diagramIsLocked: Bool { get set }
     func takePhoto()
     func selectPhoto()
     func about()
     func openDiagram()
     func saveDiagram()
+    func renameDiagram()
+    func duplicateDiagram()
+    func lockLadder()
     func sampleDiagrams()
     func showPreferences()
     func editTemplates()
@@ -43,6 +47,11 @@ extension ViewController: HamburgerTableDelegate, UIImagePickerControllerDelegat
     var imageIsLocked: Bool {
         get { return _imageIsLocked }
         set(newValue) { _imageIsLocked = newValue}
+    }
+
+    var diagramIsLocked: Bool {
+        get { return _diagramIsLocked }
+        set(newValue) { _diagramIsLocked = newValue }
     }
 
     var constraintHamburgerLeft: NSLayoutConstraint {
@@ -123,11 +132,38 @@ extension ViewController: HamburgerTableDelegate, UIImagePickerControllerDelegat
     func saveDiagram() {
         os_log("saveDiagram()", log: OSLog.action, type: .info)
         if let name = diagram?.name {
-            handleSaveDiagram(filename: name)
+            handleSaveDiagram(filename: name, overwrite: true)
         }
         else {
             showSaveDiagramAlert()
         }
+    }
+
+    func renameDiagram() {
+        os_log("renameDiagram()", log: .action, type: .info)
+        if let name = diagram?.name {
+            handleRenameDiagram(filename: name)
+        }
+        // if there is no name, handle as just save diagram
+        else {
+            showSaveDiagramAlert()
+        }
+    }
+
+    func duplicateDiagram() {
+        os_log("duplicateDiagram()", log: .action, type: .info)
+    }
+
+    func lockLadder() {
+        os_log("lockDiagram()", log: .action, type: .info)
+        _diagramIsLocked = !_diagramIsLocked
+        // Turn off scrolling and zooming, but allow single taps to generate marks with cursors.
+        ladderView.ladderIsLocked = _diagramIsLocked
+        cursorView.allowTaps = !_diagramIsLocked
+        // Always hide cursor when changing this lock.
+        cursorView.hideCursor(true)
+        ladderView.isUserInteractionEnabled = !_diagramIsLocked
+        setViewsNeedDisplay()
     }
 
     func showSaveDiagramAlert() {
@@ -181,14 +217,18 @@ extension ViewController: HamburgerTableDelegate, UIImagePickerControllerDelegat
         return FileManager.default.fileExists(atPath: diagramDirURL.path)
     }
 
-    private func handleSaveDiagram(filename: String?) {
+    private func handleRenameDiagram(filename: String?) {
+        
+    }
+
+    private func handleSaveDiagram(filename: String?, overwrite: Bool = false) {
         os_log("handleSaveDiagram()", log: OSLog.action, type: .info)
         guard let filename = filename, !filename.isEmpty else {
             Common.showMessage(viewController: self, title: L("Name is Required"), message: L("You must enter a name for this diagram"))
             return }
         diagram?.name = filename
         do {
-            if try !diagramDirURLExists(for: filename) {
+            if try !diagramDirURLExists(for: filename) || overwrite {
                 let diagramDirURL = try getDiagramDirURL(for: filename)
                 saveDiagramFiles(diagramDirURL: diagramDirURL)
             }

@@ -43,6 +43,7 @@ final class ViewController: UIViewController {
     var pageNumber: Int = 1
 
     internal var _imageIsLocked: Bool = false
+    internal var _diagramIsLocked: Bool = false
     internal let _maxBlackAlpha: CGFloat = 0.4
 
     var diagramFilenames: [String] = []

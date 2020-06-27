@@ -8,11 +8,12 @@
 
 import UIKit
 
+// TODO: remember to register each new user default in AppDelegate()!
 struct Preferences {
     // keys
-    let defaultLineWidthKey = "defaultLineWidthKey"
-    let defaultShowImpulseOriginKey = "defaultShowImpuseOriginKey"
-    let defaultShowBlockKey = "defaultShowBlockKey"
+    static let defaultLineWidthKey = "defaultLineWidthKey"
+    static let defaultShowImpulseOriginKey = "defaultShowImpuseOriginKey"
+    static let defaultShowBlockKey = "defaultShowBlockKey"
 
     // Stored as Int, converted to CGFloat when used.
     var lineWidth: Int = 2
@@ -29,22 +30,20 @@ struct Preferences {
 //    var connectedLineWidth: CGFloat = 4
 //    var showPivots = false
 
-    // TODO: write preferences to shared preferences.
     func save() {
         let userDefaults = UserDefaults.standard
-        userDefaults.set(lineWidth, forKey: defaultLineWidthKey)
-        userDefaults.set(showImpulseOrigin, forKey: defaultShowImpulseOriginKey)
-        userDefaults.set(defaultShowBlockKey, forKey: defaultShowBlockKey)
+        userDefaults.set(lineWidth, forKey: Preferences.defaultLineWidthKey)
+        userDefaults.set(showImpulseOrigin, forKey: Preferences.defaultShowImpulseOriginKey)
+        userDefaults.set(showBlock, forKey: Preferences.defaultShowBlockKey)
 
 
     }
 
-    // TODO: retrieve preferences from shared preferences.
     mutating func retrieve() {
         let userDefaults = UserDefaults.standard
-        lineWidth = userDefaults.integer(forKey: defaultLineWidthKey)
-//        showImpulseOrigin = (userDefaults.object(forKey: defaultShowImpulseOriginKey) ?? false) as! Bool
-//        showBlock = (userDefaults.object(forKey: defaultShowBlockKey) ?? false) as! Bool
+        lineWidth = userDefaults.integer(forKey: Preferences.defaultLineWidthKey)
+        showImpulseOrigin = userDefaults.bool(forKey: Preferences.defaultShowImpulseOriginKey)
+        showBlock = userDefaults.bool(forKey: Preferences.defaultShowBlockKey)
     }
     
 }

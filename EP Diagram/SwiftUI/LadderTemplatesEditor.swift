@@ -46,10 +46,12 @@ struct LadderTemplatesEditor: View {
                     Button(action: { self.onUndo() }, label: { Text("Undo") }).disabled(!self.itemsToBeDeleted())
                     Spacer()
                     Button(action: { self.onSave() }, label: {Text("Save")}).alert(isPresented: $fileSaveError) {
-                        Alert(title: Text("Error Saving Ladders"), message: Text("Changes to ladders could not be saved.  \(errorMessage)"), dismissButton: .default(Text("OK")))
+                        Alert(title: Text("Error Saving Ladders"), message: Text("Changes to ladders could not be saved. \(errorMessage)"), dismissButton: .default(Text("OK")))
                     }
                 }.disabled(self.editMode == .active)
             }.padding()
+                // See https://stackoverflow.com/questions/57888032/swiftui-navigation-on-ipad-how-to-show-master-list as to why this is necessary on iPad.
+            .navigationViewStyle(StackNavigationViewStyle())
                 .navigationBarTitle(Text("Ladder Editor"), displayMode: .inline)
                 .navigationBarItems(leading: EditButton(), trailing: addButton)
                 .environment(\.editMode, $editMode)

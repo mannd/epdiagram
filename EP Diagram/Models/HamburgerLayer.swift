@@ -13,9 +13,12 @@ enum Layer {
     case photoGallery
     case open
     case save
+    case rename
+    case duplicate
     case sample
     case templates
-    case lock
+    case lockImage
+    case lockLadder
     case preferences
     case help
     case about

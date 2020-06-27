@@ -36,7 +36,7 @@ struct DiagramSelector: View {
                                     self.presentationMode.wrappedValue.dismiss()
                                 }
                             )}
-                                .padding().navigationBarTitle("Select Diagram", displayMode: .inline)
+                                .padding()
                         }.onDelete {
                             indices in
                         for index in indices {
@@ -45,6 +45,7 @@ struct DiagramSelector: View {
                         }
                     }
                 }
+                .navigationBarTitle(Text("Select diagram"), displayMode: .inline)
                 .navigationBarItems(leading: EditButton())
                 .environment(\.editMode, $editMode)
             }

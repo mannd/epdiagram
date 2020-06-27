@@ -88,7 +88,8 @@ extension ViewController: ViewControllerDelegate {
         self.preferences = preferences
         self.preferences.save()
         ladderView.lineWidth = CGFloat(preferences.lineWidth)
-//        loadUserDefaults()
+        ladderView.showBlock = preferences.showBlock
+        ladderView.showImpulseOrigin = preferences.showImpulseOrigin
         setViewsNeedDisplay()
     }
 }

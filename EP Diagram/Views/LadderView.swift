@@ -44,8 +44,12 @@ final class LadderView: ScaledView {
 
     private var deletedMarks = [Mark]()
 
+    // TODO: lineWidth vs markLineWidth??????
     // variables that need to eventually be preferences
     var lineWidth: CGFloat = 2
+    var markLineWidth: CGFloat = 2
+    var connectedLineWidth: CGFloat = 4
+
     var red = UIColor.systemRed
     var blue = UIColor.systemBlue
     var unhighlightedColor = UIColor.label
@@ -53,15 +57,14 @@ final class LadderView: ScaledView {
     var linkColor = UIColor.systemGreen
     var selectedColor = UIColor.systemRed
     var groupedColor = UIColor.systemPurple
-    var markLineWidth: CGFloat = 2
-    var connectedLineWidth: CGFloat = 4
+
     var showImpulseOrigin = false
     var showBlock = true
     var showPivots = false
 
-    internal var ladder: Ladder
+    var ladderIsLocked = false
 
-    
+    internal var ladder: Ladder
 
     private var activeRegion: Region? {
         didSet { activateRegion(region: activeRegion)}
@@ -1023,11 +1026,10 @@ final class LadderView: ScaledView {
     }
 
     func draw(rect: CGRect, context: CGContext) {
-        if #available(iOS 13.0, *) {
-            context.setStrokeColor(UIColor.label.cgColor)
-        } else {
-            context.setStrokeColor(UIColor.black.cgColor)
+        if ladderIsLocked {
+            showLockLadderWarning(rect: rect)
         }
+        context.setStrokeColor(UIColor.label.cgColor)
         context.setLineWidth(1)
         // All horizontal distances are adjusted to scale.
         let ladderWidth: CGFloat = rect.width * scale
@@ -1137,6 +1139,16 @@ final class LadderView: ScaledView {
         drawPivots(forMark: mark, segment: Segment(proximal: p1, distal: p2), context: context)
 
         context.setStrokeColor(getLineColor())
+    }
+
+    func showLockLadderWarning(rect: CGRect) {
+        let text = L("LADDER LOCK")
+        let attributes: [NSAttributedString.Key: Any] = [
+            .font: UIFont.systemFont(ofSize: 14.0),
+            .foregroundColor: UIColor.white, .backgroundColor: UIColor.systemRed
+        ]
+        let lockRect = CGRect(x: rect.origin.x + 5, y: rect.origin.y + 5, width: rect.size.width, height: rect.size.height)
+        text.draw(in: lockRect, withAttributes: attributes)
     }
 
     func getTruncatedPosition(segment: Segment) -> CGPoint? {

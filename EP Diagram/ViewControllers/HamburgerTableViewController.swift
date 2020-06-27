@@ -13,6 +13,7 @@ class HamburgerTableViewController: UITableViewController {
     var rows = [HamburgerLayer]()
     var delegate: HamburgerTableDelegate?
     var imageIsLocked: Bool = false
+    var diagramIsLocked: Bool = false
 
     override func viewDidLoad() {
         os_log("viewDidLoad() - HamburgerView", log: OSLog.viewCycle, type: .info)
@@ -26,10 +27,13 @@ class HamburgerTableViewController: UITableViewController {
         os_log("viewWillAppear() - HamburgerView", log: OSLog.viewCycle, type: .info)
         super.viewWillAppear(animated)
         imageIsLocked = delegate?.imageIsLocked ?? false
+        diagramIsLocked = delegate?.diagramIsLocked ?? false
+
     }
 
     func reloadData() {
         imageIsLocked = delegate?.imageIsLocked ?? false
+        diagramIsLocked = delegate?.diagramIsLocked ?? false
         self.tableView.reloadData()
     }
 
@@ -48,7 +52,7 @@ class HamburgerTableViewController: UITableViewController {
 
         let row = rows[indexPath.row]
 
-        if row.layer == .lock && imageIsLocked {
+        if (row.layer == .lockImage && imageIsLocked) || (row.layer == .lockLadder && diagramIsLocked) {
             cell.label?.text = row.altName
             cell.icon?.image = UIImage(named: row.altIconName!)
         }
@@ -75,12 +79,18 @@ class HamburgerTableViewController: UITableViewController {
             delegate?.takePhoto()
         case .photoGallery:
             delegate?.selectPhoto()
-        case .lock:
+        case .lockImage:
             delegate?.lockImage()
         case .open:
             delegate?.openDiagram()
         case .save:
             delegate?.saveDiagram()
+        case .rename:
+            delegate?.renameDiagram()
+        case .duplicate:
+            delegate?.duplicateDiagram()
+        case .lockLadder:
+            delegate?.lockLadder()
         case .sample:
             delegate?.sampleDiagrams()
         case .preferences:
