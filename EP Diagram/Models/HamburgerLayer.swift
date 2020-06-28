@@ -15,7 +15,7 @@ enum Layer {
     case save
     case rename
     case duplicate
-    case saveImage
+    case snapshot
     case sample
     case templates
     case lockImage

@@ -7,6 +7,7 @@
 //
 
 import UIKit
+import AudioToolbox
 import os.log
 
 protocol HamburgerTableDelegate: class {
@@ -22,6 +23,7 @@ protocol HamburgerTableDelegate: class {
     func test()
     func openDiagram()
     func saveDiagram()
+    func snapshotDiagram()
     func renameDiagram()
     func duplicateDiagram()
     func lockLadder()
@@ -43,6 +45,7 @@ extension ViewController: HamburgerTableDelegate, UIImagePickerControllerDelegat
         imageScrollView.pinchGestureRecognizer?.isEnabled = !_imageIsLocked
         cursorView.imageIsLocked = _imageIsLocked
         cursorView.setNeedsDisplay()
+        AudioServicesPlaySystemSoundWithCompletion(SystemSoundID(1100), nil)
     }
 
     var imageIsLocked: Bool {
@@ -116,41 +119,6 @@ extension ViewController: HamburgerTableDelegate, UIImagePickerControllerDelegat
     // Use to test features during development
     func test() {
         os_log("test()", log: .debugging, type: .debug)
-        // FIXME: below fails with zoom, none of the methods work.
-        var visibleRect = CGRect(origin: imageScrollView.contentOffset, size: imageView.bounds.size)
-
-        let theScale = 1.0 / imageScrollView.zoomScale
-
-        // TODO: This is close, but need to adjust left margin.  See how left margin is adjusted with zooming and emulate that.
-
-//        visibleRect.origin.x *= theScale
-//        visibleRect.origin.y *= theScale
-        visibleRect.size.width *= theScale
-        visibleRect.size.height *= theScale
-
-
-//        let visibleRect = imageScrollView.convert(imageScrollView.bounds, to: imageView)
-        let topRenderer = UIGraphicsImageRenderer(size: visibleRect.size)
-//        let topRenderer = UIGraphicsImageRenderer(size: imageScrollView.bounds.size)
-        let topImage = topRenderer.image { ctx in
-            imageScrollView.drawHierarchy(in: visibleRect, afterScreenUpdates: true)
-        }
-        let bottomRenderer = UIGraphicsImageRenderer(size: ladderView.bounds.size)
-        let bottomImage = bottomRenderer.image { ctx in
-            ladderView.drawHierarchy(in: ladderView.bounds, afterScreenUpdates: true)
-        }
-        let size = CGSize(width: ladderView.bounds.size.width, height: imageScrollView.bounds.size.height + ladderView.bounds.size.height)
-        UIGraphicsBeginImageContext(size)
-        let topRect = CGRect(x: 0, y: 0, width: ladderView.bounds.size.width, height: imageScrollView.bounds.size.height)
-        topImage.draw(in: topRect)
-        let bottomRect = CGRect(x: 0, y: imageScrollView.bounds.size.height, width: ladderView.bounds.size.width, height: ladderView.bounds.size.height)
-        bottomImage.draw(in: bottomRect)
-        let newImage = UIGraphicsGetImageFromCurrentImageContext()
-        UIGraphicsEndImageContext()
-        if let newImage = newImage {
-            // FIXME: see https://www.hackingwithswift.com/books/ios-swiftui/how-to-save-images-to-the-users-photo-library
-            UIImageWriteToSavedPhotosAlbum(newImage, nil, nil, nil)
-        }
     }
 
     func openDiagram() {
@@ -181,6 +149,36 @@ extension ViewController: HamburgerTableDelegate, UIImagePickerControllerDelegat
         }
     }
 
+    func snapshotDiagram() {
+        let topRenderer = UIGraphicsImageRenderer(size: imageScrollView.bounds.size)
+        let originX = imageScrollView.bounds.minX - imageScrollView.contentOffset.x
+        let originY = imageScrollView.bounds.minY - imageScrollView.contentOffset.y
+        let bounds = CGRect(x: originX, y: originY, width: imageScrollView.bounds.width, height: imageScrollView.bounds.height)
+        let topImage = topRenderer.image { ctx in
+            imageScrollView.drawHierarchy(in: bounds, afterScreenUpdates: true)
+        }
+        let bottomRenderer = UIGraphicsImageRenderer(size: ladderView.bounds.size)
+        let bottomImage = bottomRenderer.image { ctx in
+            ladderView.drawHierarchy(in: ladderView.bounds, afterScreenUpdates: true)
+        }
+        let size = CGSize(width: ladderView.bounds.size.width, height: imageScrollView.bounds.size.height + ladderView.bounds.size.height)
+        UIGraphicsBeginImageContext(size)
+        let topRect = CGRect(x: 0, y: 0, width: ladderView.bounds.size.width, height: imageScrollView.bounds.size.height)
+        topImage.draw(in: topRect)
+        let bottomRect = CGRect(x: 0, y: imageScrollView.bounds.size.height, width: ladderView.bounds.size.width, height: ladderView.bounds.size.height)
+        bottomImage.draw(in: bottomRect)
+        let newImage = UIGraphicsGetImageFromCurrentImageContext()
+        UIGraphicsEndImageContext()
+        if let newImage = newImage {
+            // Magic code to play system shutter sound.
+            AudioServicesPlaySystemSoundWithCompletion(SystemSoundID(1108), nil)
+
+            // FIXME: see https://www.hackingwithswift.com/books/ios-swiftui/how-to-save-images-to-the-users-photo-library
+            UIImageWriteToSavedPhotosAlbum(newImage, nil, nil, nil)
+
+        }
+    }
+
     func renameDiagram() {
         os_log("renameDiagram()", log: .action, type: .info)
         if let name = diagram?.name {
@@ -204,6 +202,7 @@ extension ViewController: HamburgerTableDelegate, UIImagePickerControllerDelegat
         cursorView.allowTaps = !_ladderIsLocked
         ladderView.isUserInteractionEnabled = !_ladderIsLocked
         setViewsNeedDisplay()
+        AudioServicesPlaySystemSoundWithCompletion(SystemSoundID(1100), nil)
     }
 
     func showSaveDiagramAlert() {

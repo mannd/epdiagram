@@ -26,7 +26,7 @@ final class ViewController: UIViewController {
     // This margin is used for all the views.  As ECGs are always read from left
     // to right, there is no reason to reverse this.
     // TODO: Possibly change this to property of ladder, since it might depend on label width (# of chars)?
-    private let leftMargin: CGFloat = 30
+    let leftMargin: CGFloat = 30
     var scale: CGFloat = 1.0
 
     internal var separatorView: SeparatorView?
