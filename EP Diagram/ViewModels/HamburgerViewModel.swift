@@ -13,7 +13,7 @@ struct HamburgerViewModel {
         var array = [HamburgerLayer]()
         let cameraLayer = HamburgerLayer(withName: L("Take photo"), iconName: "camera", layer: .camera)
         array.append(cameraLayer)
-        let selectPhotoLayer = HamburgerLayer(withName: L("Select image"), iconName: "photos", layer: .photoGallery)
+        let selectPhotoLayer = HamburgerLayer(withName: L("Select image"), iconName: "photogallery", layer: .photoGallery)
         array.append(selectPhotoLayer)
         let lockImageLayer = HamburgerLayer(withName: L("Lock image"), iconName: "lock", layer: .lockImage, altName: L("Unlock image"), altIconName: "unlock")
         array.append(lockImageLayer)
@@ -33,10 +33,16 @@ struct HamburgerViewModel {
         array.append(lockLadderLayer)
         let sampleLayer = HamburgerLayer(withName: L("Sample diagrams"), iconName: "ecg", layer: .sample)
         array.append(sampleLayer)
+        let saveImageLayer = HamburgerLayer(withName: L("Save image"), iconName: "save_image", layer: .saveImage)
+        array.append(saveImageLayer)
         let helpLayer = HamburgerLayer(withName: L("Help"), iconName: "help", layer: .help)
         array.append(helpLayer)
         let aboutLayer = HamburgerLayer(withName: L("About EP Diagram"), iconName: "about", layer: .about)
         array.append(aboutLayer)
+        // TODO: remove for release
+        let testLayer = HamburgerLayer(withName: "TEST", iconName: "test", layer: .test)
+        array.append(testLayer)
+
 
         return array
     }

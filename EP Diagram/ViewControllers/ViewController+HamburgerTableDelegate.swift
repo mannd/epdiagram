@@ -19,6 +19,7 @@ protocol HamburgerTableDelegate: class {
     func takePhoto()
     func selectPhoto()
     func about()
+    func test()
     func openDiagram()
     func saveDiagram()
     func renameDiagram()
@@ -50,8 +51,8 @@ extension ViewController: HamburgerTableDelegate, UIImagePickerControllerDelegat
     }
 
     var diagramIsLocked: Bool {
-        get { return _diagramIsLocked }
-        set(newValue) { _diagramIsLocked = newValue }
+        get { return _ladderIsLocked }
+        set(newValue) { _ladderIsLocked = newValue }
     }
 
     var constraintHamburgerLeft: NSLayoutConstraint {
@@ -107,8 +108,49 @@ extension ViewController: HamburgerTableDelegate, UIImagePickerControllerDelegat
         let versionBuild = Version.getAppVersion()
         let version = versionBuild.version ?? L("unknown")
         let build = versionBuild.build ?? L("unknown")
-        os_log("About EP Diagram: version = %s build = %s", log: OSLog.debugging, type: .info, version, build)
-        Common.showMessage(viewController: self, title: L("About EP Diagram"), message: "Copyright 2020 EP Studios, Inc.\nVersion " + version)
+        os_log("EP Diagram: version = %s build = %s", log: OSLog.debugging, type: .info, version, build)
+        Common.showMessage(viewController: self, title: L("EP Diagram"), message: L("Copyright 2020 EP Studios, Inc.\nVersion \(version)"))
+    }
+
+    // FIXME: remove before release!!!!!
+    // Use to test features during development
+    func test() {
+        os_log("test()", log: .debugging, type: .debug)
+        // FIXME: below fails with zoom, none of the methods work.
+        var visibleRect = CGRect(origin: imageScrollView.contentOffset, size: imageView.bounds.size)
+
+        let theScale = 1.0 / imageScrollView.zoomScale
+
+        // TODO: This is close, but need to adjust left margin.  See how left margin is adjusted with zooming and emulate that.
+
+//        visibleRect.origin.x *= theScale
+//        visibleRect.origin.y *= theScale
+        visibleRect.size.width *= theScale
+        visibleRect.size.height *= theScale
+
+
+//        let visibleRect = imageScrollView.convert(imageScrollView.bounds, to: imageView)
+        let topRenderer = UIGraphicsImageRenderer(size: visibleRect.size)
+//        let topRenderer = UIGraphicsImageRenderer(size: imageScrollView.bounds.size)
+        let topImage = topRenderer.image { ctx in
+            imageScrollView.drawHierarchy(in: visibleRect, afterScreenUpdates: true)
+        }
+        let bottomRenderer = UIGraphicsImageRenderer(size: ladderView.bounds.size)
+        let bottomImage = bottomRenderer.image { ctx in
+            ladderView.drawHierarchy(in: ladderView.bounds, afterScreenUpdates: true)
+        }
+        let size = CGSize(width: ladderView.bounds.size.width, height: imageScrollView.bounds.size.height + ladderView.bounds.size.height)
+        UIGraphicsBeginImageContext(size)
+        let topRect = CGRect(x: 0, y: 0, width: ladderView.bounds.size.width, height: imageScrollView.bounds.size.height)
+        topImage.draw(in: topRect)
+        let bottomRect = CGRect(x: 0, y: imageScrollView.bounds.size.height, width: ladderView.bounds.size.width, height: ladderView.bounds.size.height)
+        bottomImage.draw(in: bottomRect)
+        let newImage = UIGraphicsGetImageFromCurrentImageContext()
+        UIGraphicsEndImageContext()
+        if let newImage = newImage {
+            // FIXME: see https://www.hackingwithswift.com/books/ios-swiftui/how-to-save-images-to-the-users-photo-library
+            UIImageWriteToSavedPhotosAlbum(newImage, nil, nil, nil)
+        }
     }
 
     func openDiagram() {
@@ -156,13 +198,11 @@ extension ViewController: HamburgerTableDelegate, UIImagePickerControllerDelegat
 
     func lockLadder() {
         os_log("lockDiagram()", log: .action, type: .info)
-        _diagramIsLocked = !_diagramIsLocked
+        _ladderIsLocked = !_ladderIsLocked
         // Turn off scrolling and zooming, but allow single taps to generate marks with cursors.
-        ladderView.ladderIsLocked = _diagramIsLocked
-        cursorView.allowTaps = !_diagramIsLocked
-        // Always hide cursor when changing this lock.
-        cursorView.hideCursor(true)
-        ladderView.isUserInteractionEnabled = !_diagramIsLocked
+        ladderView.ladderIsLocked = _ladderIsLocked
+        cursorView.allowTaps = !_ladderIsLocked
+        ladderView.isUserInteractionEnabled = !_ladderIsLocked
         setViewsNeedDisplay()
     }
 
@@ -301,6 +341,9 @@ extension ViewController: HamburgerTableDelegate, UIImagePickerControllerDelegat
         hamburgerMenuIsOpen = true
         self.separatorView?.removeFromSuperview()
         navigationController?.setToolbarHidden(true, animated: true)
+        // Always hide cursor when opening hamburger menu.
+        cursorView.hideCursor(true)
+        cursorView.setNeedsDisplay()
         UIView.animate(withDuration: 0.5, animations: {
             self.view.layoutIfNeeded()
             self.blackView.alpha = self.maxBlackAlpha

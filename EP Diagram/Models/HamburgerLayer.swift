@@ -15,6 +15,7 @@ enum Layer {
     case save
     case rename
     case duplicate
+    case saveImage
     case sample
     case templates
     case lockImage
@@ -22,6 +23,7 @@ enum Layer {
     case preferences
     case help
     case about
+    case test
 }
 
 struct HamburgerLayer {

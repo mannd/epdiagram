@@ -101,6 +101,8 @@ class HamburgerTableViewController: UITableViewController {
             delegate?.help()
         case .about:
             delegate?.about()
+        case .test:
+            delegate?.test()
         default:
             break
         }

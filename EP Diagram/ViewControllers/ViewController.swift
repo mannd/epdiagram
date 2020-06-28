@@ -27,6 +27,7 @@ final class ViewController: UIViewController {
     // to right, there is no reason to reverse this.
     // TODO: Possibly change this to property of ladder, since it might depend on label width (# of chars)?
     private let leftMargin: CGFloat = 30
+    var scale: CGFloat = 1.0
 
     internal var separatorView: SeparatorView?
     private var undoButton: UIBarButtonItem = UIBarButtonItem()
@@ -43,7 +44,7 @@ final class ViewController: UIViewController {
     var pageNumber: Int = 1
 
     internal var _imageIsLocked: Bool = false
-    internal var _diagramIsLocked: Bool = false
+    internal var _ladderIsLocked: Bool = false
     internal let _maxBlackAlpha: CGFloat = 0.4
 
     var diagramFilenames: [String] = []
