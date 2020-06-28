@@ -152,14 +152,14 @@ class Common {
     }
 
     // UI alerts
-    static func showMessage(viewController: ViewController, title: String, message: String) {
+    static func showMessage(viewController: UIViewController, title: String, message: String) {
         let alert = UIAlertController(title: title, message: message, preferredStyle: .alert)
         let okAction = UIAlertAction(title: L("OK"), style: .cancel, handler: nil)
         alert.addAction(okAction)
         viewController.present(alert, animated: true)
     }
 
-    static func ShowWarning(viewController: ViewController, title: String, message: String, okActionButtonTitle: String = L("OK"), action: ((UIAlertAction) -> Void)?) {
+    static func ShowWarning(viewController: UIViewController, title: String, message: String, okActionButtonTitle: String = L("OK"), action: ((UIAlertAction) -> Void)?) {
         let alert = UIAlertController(title: title, message: message, preferredStyle: .alert)
         let okAction = UIAlertAction(title: okActionButtonTitle, style: .destructive, handler: action)
         let cancelAction = UIAlertAction(title: L("Cancel"), style: .cancel, handler: nil)
@@ -169,7 +169,7 @@ class Common {
 
     }
 
-    static func showTextAlert(viewController vc: ViewController, title: String, message: String, placeholder: String? = nil, preferredStyle: UIAlertController.Style, handler: ((String) -> Void)?) {
+    static func showTextAlert(viewController vc: UIViewController, title: String, message: String, placeholder: String? = nil, preferredStyle: UIAlertController.Style, handler: ((String) -> Void)?) {
         let alert = UIAlertController(title: title, message: message, preferredStyle: preferredStyle)
         alert.addAction(UIAlertAction(title: L("Cancel"), style: .cancel, handler: nil))
         alert.addTextField { textField in

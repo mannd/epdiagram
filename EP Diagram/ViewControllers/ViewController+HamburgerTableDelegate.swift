@@ -36,6 +36,33 @@ protocol HamburgerTableDelegate: class {
     func showHamburgerMenu()
 }
 
+class ImageSaver: NSObject {
+    var viewController: UIViewController?
+
+    func writeToPhotoAlbum(image: UIImage, viewController: UIViewController) {
+        self.viewController = viewController
+        UIImageWriteToSavedPhotosAlbum(image, self, #selector(saveError), nil)
+    }
+
+    @objc func saveError(_ image: UIImage, didFinishSavingWithError error: Error?, contextInfo: UnsafeRawPointer) {
+        if let error = error {
+            os_log("Error saving snapshot:  %s", error.localizedDescription)
+            if let viewController = viewController {
+                Common.showMessage(viewController: viewController, title: L("Error Saving Snapshot"), message: error.localizedDescription)
+            }
+        }
+        else {
+            // Magic code to play system shutter sound.  We link AudioToolbox framework to make this work.  See http://iphonedevwiki.net/index.php/AudioServices for complete list os system sounds.  Note unlock sound (1101) doesn't seem to work.
+            AudioServicesPlaySystemSoundWithCompletion(SystemSoundID(1108), nil)
+            // See https://www.hackingwithswift.com/books/ios-swiftui/how-to-save-images-to-the-users-photo-library
+            os_log("Snapshot successfully saved")
+            if let viewController = viewController {
+                Common.showMessage(viewController: viewController, title: L("Success"), message: L("Diagram snapshot saved to Photo Library."))
+            }
+        }
+    }
+}
+
 extension ViewController: HamburgerTableDelegate, UIImagePickerControllerDelegate & UINavigationControllerDelegate {
 
     func lockImage() {
@@ -170,12 +197,8 @@ extension ViewController: HamburgerTableDelegate, UIImagePickerControllerDelegat
         let newImage = UIGraphicsGetImageFromCurrentImageContext()
         UIGraphicsEndImageContext()
         if let newImage = newImage {
-            // Magic code to play system shutter sound.
-            AudioServicesPlaySystemSoundWithCompletion(SystemSoundID(1108), nil)
-
-            // FIXME: see https://www.hackingwithswift.com/books/ios-swiftui/how-to-save-images-to-the-users-photo-library
-            UIImageWriteToSavedPhotosAlbum(newImage, nil, nil, nil)
-
+            let imageSaver = ImageSaver()
+            imageSaver.writeToPhotoAlbum(image: newImage, viewController: self)
         }
     }
 
