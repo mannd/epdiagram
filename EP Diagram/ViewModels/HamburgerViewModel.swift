@@ -9,6 +9,9 @@
 import UIKit
 
 struct HamburgerViewModel {
+    // Only set to true for testing.
+    let showTestLayer = false
+
     func allLayers() -> [HamburgerLayer] {
         var array = [HamburgerLayer]()
         let cameraLayer = HamburgerLayer(withName: L("Take photo"), iconName: "camera", layer: .camera)
@@ -17,10 +20,6 @@ struct HamburgerViewModel {
         array.append(selectPhotoLayer)
         let lockImageLayer = HamburgerLayer(withName: L("Lock image"), iconName: "lock", layer: .lockImage, altName: L("Unlock image"), altIconName: "unlock")
         array.append(lockImageLayer)
-        let templatesLayer = HamburgerLayer(withName: L("Ladder editor"), iconName: "templates", layer: .templates)
-        array.append(templatesLayer)
-        let preferencesLayer = HamburgerLayer(withName: L("Preferences"), iconName: "preferences", layer: .preferences)
-        array.append(preferencesLayer)
         let openLayer = HamburgerLayer(withName: L("Open diagram"), iconName: "open", layer: .open)
         array.append(openLayer)
         let saveLayer = HamburgerLayer(withName: L("Save diagram"), iconName: "save", layer: .save)
@@ -35,13 +34,21 @@ struct HamburgerViewModel {
         array.append(sampleLayer)
         let lockLadderLayer = HamburgerLayer(withName: L("Lock ladder"), iconName: "lock", layer: .lockLadder, altName: L("Unlock ladder"), altIconName: "unlock")
         array.append(lockLadderLayer)
+        let templatesLayer = HamburgerLayer(withName: L("Ladder editor"), iconName: "templates", layer: .templates)
+        array.append(templatesLayer)
+        let preferencesLayer = HamburgerLayer(withName: L("Preferences"), iconName: "preferences", layer: .preferences)
+        array.append(preferencesLayer)
         let helpLayer = HamburgerLayer(withName: L("Help"), iconName: "help", layer: .help)
         array.append(helpLayer)
         let aboutLayer = HamburgerLayer(withName: L("About EP Diagram"), iconName: "about", layer: .about)
         array.append(aboutLayer)
-        // TODO: remove for release
-        let testLayer = HamburgerLayer(withName: "TEST", iconName: "test", layer: .test)
-        array.append(testLayer)
+        // Never show test layer with release build configuration.
+        #if DEBUG
+        if showTestLayer {
+            let testLayer = HamburgerLayer(withName: "TEST", iconName: "test", layer: .test)
+            array.append(testLayer)
+        }
+        #endif
 
 
         return array

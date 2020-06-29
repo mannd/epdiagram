@@ -26,6 +26,7 @@
 		8E4ACA8924479C5200575538 /* HamburgerViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8E4ACA8824479C5200575538 /* HamburgerViewModel.swift */; };
 		8E55612922A5FEDC00C4D391 /* Cursor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8E55612822A5FEDC00C4D391 /* Cursor.swift */; };
 		8E5D0ABD2464F2CD00FE78A2 /* RegionTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8E5D0ABC2464F2CD00FE78A2 /* RegionTests.swift */; };
+		8E6570FB24A99B8A001358F6 /* FileTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8E6570FA24A99B8A001358F6 /* FileTests.swift */; };
 		8E671D5224814BB700784EB7 /* LadderTemplatesEditor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8E671D5124814BB700784EB7 /* LadderTemplatesEditor.swift */; };
 		8E6A0298246DFB3700A10C9F /* LadderEditor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8E6A0297246DFB3700A10C9F /* LadderEditor.swift */; };
 		8E6EB6C02484778E00E5F883 /* Notification+didUndoableAction.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8E6EB6BF2484778E00E5F883 /* Notification+didUndoableAction.swift */; };
@@ -96,6 +97,7 @@
 		8E4ACA8824479C5200575538 /* HamburgerViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HamburgerViewModel.swift; sourceTree = "<group>"; };
 		8E55612822A5FEDC00C4D391 /* Cursor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Cursor.swift; sourceTree = "<group>"; };
 		8E5D0ABC2464F2CD00FE78A2 /* RegionTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RegionTests.swift; sourceTree = "<group>"; };
+		8E6570FA24A99B8A001358F6 /* FileTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FileTests.swift; sourceTree = "<group>"; };
 		8E671D5124814BB700784EB7 /* LadderTemplatesEditor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LadderTemplatesEditor.swift; sourceTree = "<group>"; };
 		8E689C4F23B498A10042A3F1 /* EP Diagram.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = "EP Diagram.entitlements"; sourceTree = "<group>"; };
 		8E6A0297246DFB3700A10C9F /* LadderEditor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LadderEditor.swift; sourceTree = "<group>"; };
@@ -242,6 +244,7 @@
 				8E217D97245B306200CD0CBF /* MathTests.swift */,
 				8E5D0ABC2464F2CD00FE78A2 /* RegionTests.swift */,
 				8E9550BE2474B69900E1B125 /* PersistanceTests.swift */,
+				8E6570FA24A99B8A001358F6 /* FileTests.swift */,
 			);
 			path = "EP DiagramTests";
 			sourceTree = "<group>";
@@ -504,6 +507,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				8EF8B5B72330739F00ADB77A /* ViewControllerTests.swift in Sources */,
+				8E6570FB24A99B8A001358F6 /* FileTests.swift in Sources */,
 				8E7214E022EB57FC0062C094 /* MarkTests.swift in Sources */,
 				8E25A9B122E5505200D62E18 /* LadderViewTests.swift in Sources */,
 				8E5D0ABD2464F2CD00FE78A2 /* RegionTests.swift in Sources */,

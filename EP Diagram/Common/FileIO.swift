@@ -9,24 +9,39 @@
 import UIKit
 import os.log
 
+enum FileIOError: Error {
+    case searchDirectoryNotFound
+    case documentDirectoryNotFound
+    case diagramDirectoryNotFound
+}
+
+extension FileIOError: LocalizedError {
+    public var errorDescription: String? {
+        switch self {
+        case .searchDirectoryNotFound:
+            return L("Search directory not found.")
+        case .documentDirectoryNotFound:
+            return L("User document directory not found.")
+        case .diagramDirectoryNotFound:
+            return L("epdiagram directory not found.")
+        }
+    }
+}
+
 // Based on this info from Apple: https://developer.apple.com/videos/play/tech-talks/204/ and this example class https://medium.com/@sdrzn/swift-4-codable-lets-make-things-even-easier-c793b6cf29e1
 
 final class FileIO {
     // Where ladder templates are stored.
-    static let userTemplateFile = "user_ladder_templates"
+    static let userTemplateFile = "epdiagram_ladder_templates"
     // Directory where save diagrams.
     static let epdiagramDir = "epdiagram"
+    static let imageFilename = "image.png"
+    static let ladderFilename = "ladder.json"
 
     enum Directory {
         case documents
         case cache
         case applicationSupport
-    }
-
-    enum FileIOError: Error {
-        case searchDirectoryNotFound
-        case documentDirectoryNotFound
-        case diagramDirectoryNotFound
     }
 
     internal static func getURL(for directory: Directory) -> URL? {
@@ -47,14 +62,15 @@ final class FileIO {
             os_log("Search directory not found", log: .default, type: .fault)
             throw FileIOError.searchDirectoryNotFound
         }
+        let fileURL = url.appendingPathComponent(fileName)
         let encoder = JSONEncoder()
         do {
             let data = try encoder.encode(object)
             // replace file with new data
-            if FileManager.default.fileExists(atPath: url.path) {
-                try FileManager.default.removeItem(at: url)
+            if FileManager.default.fileExists(atPath: fileURL.path) {
+                try FileManager.default.removeItem(at: fileURL)
             }
-            FileManager.default.createFile(atPath: url.path, contents: data, attributes: nil)
+            FileManager.default.createFile(atPath: fileURL.path, contents: data, attributes: nil)
         }
         catch let error {
             os_log("Encoding error %s", log: OSLog.default, type: .error, error.localizedDescription)
@@ -65,8 +81,9 @@ final class FileIO {
     // TODO: maybe make this throw errors rather than just return nil on error?
     static func retrieve<T: Decodable>(_ fileName: String, from directory: Directory, as type: T.Type) -> T? {
         guard let url = getURL(for: directory) else { return nil }
-        if !FileManager.default.fileExists(atPath: url.path) { return nil }
-        if let data = FileManager.default.contents(atPath: url.path) {
+        let fileURL = url.appendingPathComponent(fileName)
+        if !FileManager.default.fileExists(atPath: fileURL.path) { return nil }
+        if let data = FileManager.default.contents(atPath: fileURL.path) {
             let decoder = JSONDecoder()
             let model = try? decoder.decode(type, from: data)
             return model

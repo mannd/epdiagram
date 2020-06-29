@@ -18,6 +18,7 @@ struct LadderTemplatesEditor: View {
     @State private var fileSaveError = false
     @State private var errorMessage = String()
     @Environment(\.presentationMode) private var presentationMode: Binding<PresentationMode>
+    weak var delegate: ViewControllerDelegate?
     
     var body: some View {
         NavigationView {
@@ -86,6 +87,7 @@ struct LadderTemplatesEditor: View {
         ladderTemplates.move(fromOffsets: source, toOffset: destination)
     }
 
+    // FIXME: bug, this methods writes a Documents file to the user directory and kills the Documents dir.
     private func onSave() {
         os_log("onSave() - LadderTemplatesEditor", log: OSLog.action, type: .info)
         // Filter out deleted ladder templates and region templates.
@@ -93,15 +95,8 @@ struct LadderTemplatesEditor: View {
         for i in 0..<filteredTemplates.count {
             filteredTemplates[i].regionTemplates = filteredTemplates[i].regionTemplates.filter { $0.deletionFlag == false }
         }
-        do {
-            try FileIO.store(filteredTemplates, to: .documents, withFileName: FileIO.userTemplateFile)
-            self.presentationMode.wrappedValue.dismiss()
-        }
-        catch let error {
-            os_log("Save error %s", log: OSLog.default, type: .error, error.localizedDescription)
-            fileSaveError = true
-            errorMessage = error.localizedDescription
-        }
+        delegate?.saveTemplates(ladderTemplates)
+        self.presentationMode.wrappedValue.dismiss()
     }
 
     private func onUndo() {

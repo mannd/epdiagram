@@ -41,24 +41,27 @@ class ImageSaver: NSObject {
 
     func writeToPhotoAlbum(image: UIImage, viewController: UIViewController) {
         self.viewController = viewController
-        UIImageWriteToSavedPhotosAlbum(image, self, #selector(saveError), nil)
+        UIImageWriteToSavedPhotosAlbum(image, self, #selector(saveImageError), nil)
     }
 
-    @objc func saveError(_ image: UIImage, didFinishSavingWithError error: Error?, contextInfo: UnsafeRawPointer) {
+    @objc func saveImageError(_ image: UIImage, didFinishSavingWithError error: Error?, contextInfo: UnsafeRawPointer) {
+        var title: String = ""
+        var message: String = ""
         if let error = error {
-            os_log("Error saving snapshot:  %s", error.localizedDescription)
-            if let viewController = viewController {
-                Common.showMessage(viewController: viewController, title: L("Error Saving Snapshot"), message: error.localizedDescription)
-            }
+            os_log("Error saving snapshot:  %s", log: .errors, type: .error,   error.localizedDescription)
+            title = L("Error Saving Snapshot")
+            message = L("Make sure you have allowed EP Diagram to save to the Photos Library in the Settings app.  Error message: \(error.localizedDescription)")
         }
         else {
             // Magic code to play system shutter sound.  We link AudioToolbox framework to make this work.  See http://iphonedevwiki.net/index.php/AudioServices for complete list os system sounds.  Note unlock sound (1101) doesn't seem to work.
             AudioServicesPlaySystemSoundWithCompletion(SystemSoundID(1108), nil)
             // See https://www.hackingwithswift.com/books/ios-swiftui/how-to-save-images-to-the-users-photo-library
-            os_log("Snapshot successfully saved")
-            if let viewController = viewController {
-                Common.showMessage(viewController: viewController, title: L("Success"), message: L("Diagram snapshot saved to Photo Library."))
-            }
+            os_log("Snapshot successfully saved.", log: .action, type: .info)
+            title = L("Success!")
+            message = L("Diagram snapshot saved to Photo Library.")
+        }
+        if let viewController = viewController {
+            Common.showMessage(viewController: viewController, title: title, message: message)
         }
     }
 }
@@ -172,7 +175,7 @@ extension ViewController: HamburgerTableDelegate, UIImagePickerControllerDelegat
             handleSaveDiagram(filename: name, overwrite: true)
         }
         else {
-            showSaveDiagramAlert()
+            showNameDiagramAlert()
         }
     }
 
@@ -206,15 +209,29 @@ extension ViewController: HamburgerTableDelegate, UIImagePickerControllerDelegat
         os_log("renameDiagram()", log: .action, type: .info)
         if let name = diagram?.name {
             handleRenameDiagram(filename: name)
+            if fileOpSuccessfullFlag {
+                deleteDiagram(diagramName: name)
+                fileOpSuccessfullFlag = false
+            }
         }
         // if there is no name, handle as just save diagram
         else {
-            showSaveDiagramAlert()
+            // Modify this to note that this diagram has not been saved at all yet.
+            showNameDiagramAlert()
         }
     }
 
     func duplicateDiagram() {
         os_log("duplicateDiagram()", log: .action, type: .info)
+        if let name = diagram?.name {
+            handleRenameDiagram(filename: name) // send option not to delete original file, e.g.:
+            // handleRenameDiagram(filename: name, deleteOriginal: false)
+        }
+            // if there is no name, handle as just save diagram
+        else {
+            // Modify this to note that this diagram has not been saved at all yet.
+            showNameDiagramAlert()
+        }
     }
 
     func lockLadder() {
@@ -228,30 +245,32 @@ extension ViewController: HamburgerTableDelegate, UIImagePickerControllerDelegat
         AudioServicesPlaySystemSoundWithCompletion(SystemSoundID(1100), nil)
     }
 
-    func showSaveDiagramAlert() {
+    func showNameDiagramAlert() {
         Common.showTextAlert(viewController: self, title: L("Save Diagram"), message: L("Enter a unique name for this diagram"), preferredStyle: .alert, handler: { name in self.handleSaveDiagram(filename: name) })
     }
 
     fileprivate func saveDiagramFiles(diagramDirURL: URL) {
+        os_log("saveDiagramFiles()", log: .action, type: .info)
         do {
             let imageData = self.imageView.image?.pngData()
-            let imageURL = diagramDirURL.appendingPathComponent("image.png", isDirectory: false)
+            let imageURL = diagramDirURL.appendingPathComponent(FileIO.imageFilename, isDirectory: false)
             try imageData?.write(to: imageURL)
             let encoder = JSONEncoder()
             let ladderData = try? encoder.encode(self.ladderView.ladder)
-            let ladderURL = diagramDirURL.appendingPathComponent("ladder.json", isDirectory: false)
+            let ladderURL = diagramDirURL.appendingPathComponent(FileIO.ladderFilename, isDirectory: false)
             FileManager.default.createFile(atPath: ladderURL.path, contents: ladderData, attributes: nil)
+            fileOpSuccessfullFlag = true
         } catch {
             os_log("Error: %s", log: .errors, type: .error, error.localizedDescription)
-            Common.showMessage(viewController: self, title: L("File Error"), message: "Error: \(error.localizedDescription)")
+            Common.ShowFileError(viewController: self, error: error)
         }
     }
 
     private func getEPDiagramsDirURL() throws -> URL {
-//        P("\(FileIO.getURL(for: .documents))")
         guard let documentDirURL = FileIO.getURL(for: .documents) else {
-            throw FileIO.FileIOError.documentDirectoryNotFound
+            throw FileIOError.documentDirectoryNotFound
         }
+        P("documentDirURL = \(documentDirURL)")
         let epDiagramsDirURL = documentDirURL.appendingPathComponent(FileIO.epdiagramDir, isDirectory: true)
         if !FileManager.default.fileExists(atPath: epDiagramsDirURL.path) {
             try FileManager.default.createDirectory(atPath: epDiagramsDirURL.path, withIntermediateDirectories: true, attributes: nil)
@@ -279,15 +298,16 @@ extension ViewController: HamburgerTableDelegate, UIImagePickerControllerDelegat
         return FileManager.default.fileExists(atPath: diagramDirURL.path)
     }
 
-    private func handleRenameDiagram(filename: String?) {
-        
+    private func handleRenameDiagram(filename: String) {
+        Common.showTextAlert(viewController: self, title: L("Rename Diagram"), message: L("Enter a new name for this diagram (old name is \(filename)"), preferredStyle: .alert, handler: { name in self.handleSaveDiagram(filename: name, overwrite: false) })
     }
 
     private func handleSaveDiagram(filename: String?, overwrite: Bool = false) {
         os_log("handleSaveDiagram()", log: OSLog.action, type: .info)
-        guard let filename = filename, !filename.isEmpty else {
-            Common.showMessage(viewController: self, title: L("Name is Required"), message: L("You must enter a name for this diagram"))
+        guard var filename = filename, !filename.isEmpty else {
+            Common.showMessage(viewController: self, title: L("Name is Required"), message: L("You must enter a name for this diagram."))
             return }
+        filename = cleanupFilename(filename)
         diagram?.name = filename
         do {
             if try !diagramDirURLExists(for: filename) || overwrite {
@@ -302,13 +322,22 @@ extension ViewController: HamburgerTableDelegate, UIImagePickerControllerDelegat
                     }
                 }
             }
-        } catch FileIO.FileIOError.documentDirectoryNotFound {
-            os_log("FileIOError.documentDirectoryNotFound", log: OSLog.errors, type: .error)
-        } catch FileIO.FileIOError.diagramDirectoryNotFound {
-            os_log("FileIOError.diagramDirectoryNotFound", log: OSLog.errors, type: .error)
         } catch {
             os_log("File error: %s", log: OSLog.errors, type: .error, error.localizedDescription)
+            Common.ShowFileError(viewController: self, error: error)
         }
+    }
+
+    func cleanupFilename(_ filename: String) -> String {
+        var invalidCharacters = CharacterSet(charactersIn: ":/")
+        invalidCharacters.formUnion(.newlines)
+        invalidCharacters.formUnion(.illegalCharacters)
+        invalidCharacters.formUnion(.controlCharacters)
+
+        let newFilename = filename
+            .components(separatedBy: invalidCharacters)
+            .joined(separator: "_")
+        return newFilename
     }
 
     func sampleDiagrams() {

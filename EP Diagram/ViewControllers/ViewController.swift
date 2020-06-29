@@ -49,6 +49,11 @@ final class ViewController: UIViewController {
 
     var diagramFilenames: [String] = []
     var diagram: Diagram?
+    var fileOpSuccessfullFlag: Bool = false {
+        didSet {
+            P("fileOpSuccessfulFlag = \(fileOpSuccessfullFlag)")
+        }
+    }
 
     var preferences: Preferences = Preferences()
     
@@ -451,7 +456,8 @@ final class ViewController: UIViewController {
     @IBSegueAction func showTemplateEditor(_ coder: NSCoder) -> UIViewController? {
         navigationController?.setToolbarHidden(true, animated: true)
         let ladderTemplates = FileIO.retrieve(FileIO.userTemplateFile, from: .documents, as: [LadderTemplate].self) ?? [LadderTemplate.defaultTemplate(), LadderTemplate.defaultTemplate2()]
-        let templateEditor = LadderTemplatesEditor(ladderTemplates: ladderTemplates)
+        var templateEditor = LadderTemplatesEditor(ladderTemplates: ladderTemplates)
+        templateEditor.delegate = self
         let hostingController = UIHostingController(coder: coder, rootView: templateEditor)
         return hostingController
     }

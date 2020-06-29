@@ -166,7 +166,10 @@ class Common {
         alert.addAction(okAction)
         alert.addAction(cancelAction)
         viewController.present(alert, animated: true)
+    }
 
+    static func ShowFileError(viewController: UIViewController, error: Error) {
+        showMessage(viewController: viewController, title: L("File Error"), message: L("Error: \(error.localizedDescription)"))
     }
 
     static func showTextAlert(viewController vc: UIViewController, title: String, message: String, placeholder: String? = nil, preferredStyle: UIAlertController.Style, handler: ((String) -> Void)?) {
