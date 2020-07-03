@@ -8,7 +8,7 @@
 
 import UIKit
 
-class Caliper {
+struct Caliper {
     enum Component {
         case bar1, bar2, crossbar
     }
@@ -36,7 +36,7 @@ class Caliper {
         return nil
     }
 
-    func move(delta: CGPoint, component: Component) {
+    mutating func move(delta: CGPoint, component: Component) {
         switch component {
         case .bar1:
             bar1Position += delta.x

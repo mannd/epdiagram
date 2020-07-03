@@ -13,6 +13,7 @@ protocol CursorViewDelegate: AnyObject {
     func refresh()
     func moveCursor(cursorViewPositionX positionX: CGFloat)
     func setCursorHeight(anchorPositionY: CGFloat?)
+    func setCaliperMaxY(_ maxY: CGFloat)
     func hideCursor(_ hide: Bool)
     func cursorIsVisible() -> Bool
     func cursorMovement() -> Movement
@@ -37,6 +38,9 @@ final class CursorView: ScaledView {
     private var cursor: Cursor
     private var rawCursorHeight: CGFloat?
 
+    private var caliper: Caliper = Caliper()
+    var caliperMaxY: CGFloat = 0
+
     var leftMargin: CGFloat = 0
     var maxCursorPositionY: CGFloat = 0 {
         didSet {
@@ -44,6 +48,7 @@ final class CursorView: ScaledView {
         }
     }
     var isCalibrating = false
+
     var allowTaps = true // set false to prevent taps from making marks
     var cursorEndPointY: CGFloat = 0
 
@@ -102,7 +107,7 @@ final class CursorView: ScaledView {
             showLockImageWarning(rect: rect)
         }
         if isCalibrating {
-            drawCalibration(rect)
+            drawCaliper(rect)
             return
         }
         if let context = UIGraphicsGetCurrentContext() {
@@ -129,21 +134,48 @@ final class CursorView: ScaledView {
         }
     }
 
-    func drawCalibration(_ rect: CGRect) {
+    func drawCaliper(_ rect: CGRect) {
         if let context = UIGraphicsGetCurrentContext() {
-//            let height = ladderViewDelegate.getTopOfLadder(view: self)
-//            let endPointA = CGPoint(x: positionA, y: height)
-//            let endPointB = CGPoint(x: positionB, y: height)
-//            context.setStrokeColor(color.cgColor)
-//            context.setLineWidth(lineWidth)
-//            context.setAlpha(alphaValue)
-//            context.move(to: CGPoint(x: positionA, y: 0))
-//            context.addLine(to: endPointA)
-//            context.move(to: CGPoint(x: positionB, y: 0))
-//            context.addLine(to: endPointB)
-//            context.strokePath()
+            context.setStrokeColor(color.cgColor)
+            context.setLineWidth(lineWidth)
+            context.setAlpha(alphaValue)
+            context.move(to: CGPoint(x: caliper.bar1Position, y: 0))
+            context.addLine(to: CGPoint(x: caliper.bar1Position, y: caliperMaxY))
+            context.move(to: CGPoint(x: caliper.bar2Position, y: 0))
+            context.addLine(to: CGPoint(x: caliper.bar2Position, y: caliperMaxY))
+            context.move(to: CGPoint(x: caliper.bar1Position, y: caliper.crossbarPosition))
+            context.addLine(to: CGPoint(x: caliper.bar2Position, y: caliper.crossbarPosition))
+            let text = caliper.text
+            var attributes = [NSAttributedString.Key: Any]()
+            let textFont = UIFont(name: "Helvetica Neue Medium", size: 14.0) ?? UIFont.systemFont(ofSize: 14, weight: UIFont.Weight.medium)
+            let paragraphStyle = NSParagraphStyle.default.mutableCopy() as! NSMutableParagraphStyle
+            attributes = [
+                NSAttributedString.Key.font: textFont,
+                NSAttributedString.Key.paragraphStyle: paragraphStyle,
+                NSAttributedString.Key.foregroundColor: color
+            ]
+            let size = text.size(withAttributes: attributes)
+            let textRect = CGRect(origin: CGPoint(x: caliper.bar1Position + (caliper.value - size.width) / 2, y: caliper.crossbarPosition), size: size)
+            text.draw(in: textRect, withAttributes: attributes)
+            context.strokePath()
         }
     }
+
+
+//    func caliperText(rect: CGRect, textPosition: TextPosition, optimizeTextPosition: Bool) {
+//        let text = measurement()
+//        paragraphStyle.lineBreakMode = .byTruncatingTail
+//        paragraphStyle.alignment = .center
+//        var attributes = [NSAttributedString.Key: Any]()
+//        attributes = [
+//            NSAttributedString.Key.font: textFont,
+//            NSAttributedString.Key.paragraphStyle: paragraphStyle,
+//            NSAttributedString.Key.foregroundColor: color
+//        ]
+//        let size = text.size(withAttributes: attributes)
+//        let textRect = caliperTextPosition(left: fmin(bar1Position, bar2Position), right: fmax(bar1Position, bar2Position), center: crossBarPosition, size: size, rect: rect, textPosition: textPosition, optimizeTextPosition: optimizeTextPosition)
+//        text.draw(in: textRect, withAttributes: attributes)
+//    }
 
     func showLockImageWarning(rect: CGRect) {
         let text = L("IMAGE LOCK")
@@ -164,6 +196,10 @@ final class CursorView: ScaledView {
             let cursorHeight = getCursorHeight(anchor: getAttachedMarkAnchor())
             cursor.markIntersectionPositionY = cursorHeight ?? 0
         }
+    }
+
+    func setCaliperMaxY(_ maxY: CGFloat) {
+        caliperMaxY = maxY
     }
 
     // Add tiny circle around intersection of cursor and mark.
@@ -281,11 +317,11 @@ final class CursorView: ScaledView {
     func doCalibration() {
         os_log("doCalibration()", log: .action, type: .info)
         isCalibrating = true
-        let cursorA = Cursor()
-        let cursorB = Cursor()
         let width = self.frame.width
-        cursorA.positionX = width / 3
-        cursorB.positionX = cursorA.positionX + width / 3
+        caliper.bar1Position = width / 3
+        caliper.bar2Position = caliper.bar1Position + width / 3
+        caliper.crossbarPosition = caliperMaxY / 2
+        setNeedsDisplay()
     }
 
     func putCursor(imageScrollViewPosition position: CGPoint) {

@@ -99,6 +99,7 @@ final class ViewController: UIViewController {
         cursorView.leftMargin = leftMargin
 
         setMaxCursorPositionY()
+        cursorView.caliperMaxY = imageScrollView.frame.height
 
         let singleTapRecognizer = UITapGestureRecognizer(target: self, action: #selector(self.singleTap))
         singleTapRecognizer.numberOfTapsRequired = 1
@@ -252,20 +253,18 @@ final class ViewController: UIViewController {
     @objc func calibrate() {
         os_log("calibrate()", log: OSLog.action, type: .info)
         // Hide regular cursor.
-        cursorView.hideCursor(true)
-        cursorView.isCalibrating = true
-        cursorView.setNeedsDisplay()
+        cursorView.doCalibration()
         // assuming now all calibration is 1000 msec
-        let calibrationValue: CGFloat = 1000
-        var calibration = Calibration()
-        calibration.originalZoom = imageScrollView.zoomScale
-        calibration.currentZoom = calibration.originalZoom
-        // replace this with number obtained from cursor distance apart
-        let dummy: CGFloat = 50
-        let measuredDistance = dummy
-        calibration.originalCalFactor = calibrationValue / measuredDistance
-        calibration.isCalibrated = true
-        ladderView.calibration = calibration
+//        let calibrationValue: CGFloat = 1000
+//        var calibration = Calibration()
+//        calibration.originalZoom = imageScrollView.zoomScale
+//        calibration.currentZoom = calibration.originalZoom
+//        // replace this with number obtained from cursor distance apart
+//        let dummy: CGFloat = 50
+//        let measuredDistance = dummy
+//        calibration.originalCalFactor = calibrationValue / measuredDistance
+//        calibration.isCalibrated = true
+//        ladderView.calibration = calibration
     }
 
     @objc func selectMarks() {
@@ -447,6 +446,7 @@ final class ViewController: UIViewController {
     }
 
     private func resetViews() {
+        os_log("resetView() - ViewController", log: .action, type: .info)
         // Add back in separatorView after rotation.
         if (separatorView == nil) {
         separatorView = HorizontalSeparatorView.addSeparatorBetweenViews(separatorType: .horizontal, primaryView: imageScrollView, secondaryView: ladderView, parentView: self.view)
@@ -455,6 +455,7 @@ final class ViewController: UIViewController {
         // FIXME: save and restore scrollview offset so it is maintained with rotation.
         self.imageView.setNeedsDisplay()
         setMaxCursorPositionY()
+        cursorView.caliperMaxY = imageScrollView.frame.height
         setViewsNeedDisplay()
     }
 

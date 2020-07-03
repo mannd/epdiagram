@@ -92,7 +92,9 @@ class SeparatorView: UIView {
         updateListener?.updateConstraintOnBasisOfTouch(touch: touch)
         // redraw views.
         let ladderView = secondaryView as? LadderView
+        let caliperMaxY = primaryView.frame.height
         ladderView?.resetSize()
+        ladderView?.setCaliperMaxY(caliperMaxY)
         ladderView?.refresh()
     }
 

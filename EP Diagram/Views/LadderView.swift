@@ -1304,9 +1304,14 @@ final class LadderView: ScaledView {
     }
 
     func resetSize() {
+        os_log("resetSize() - LadderView", log: .action, type: .info)
         ladderViewHeight = self.frame.height
         initializeRegions()
         cursorViewDelegate.setCursorHeight()
+    }
+
+    func setCaliperMaxY(_ maxY: CGFloat) {
+        cursorViewDelegate.setCaliperMaxY(maxY)
     }
 
     @objc func deletePressedMark() {
