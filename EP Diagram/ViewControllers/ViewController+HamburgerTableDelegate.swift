@@ -224,10 +224,8 @@ extension ViewController: HamburgerTableDelegate, UIImagePickerControllerDelegat
     func duplicateDiagram() {
         os_log("duplicateDiagram()", log: .action, type: .info)
         if let name = diagram?.name {
-            handleRenameDiagram(filename: name) // send option not to delete original file, e.g.:
-            // handleRenameDiagram(filename: name, deleteOriginal: false)
+            handleRenameDiagram(filename: name)
         }
-            // if there is no name, handle as just save diagram
         else {
             // Modify this to note that this diagram has not been saved at all yet.
             showNameDiagramAlert()
@@ -271,7 +269,7 @@ extension ViewController: HamburgerTableDelegate, UIImagePickerControllerDelegat
             throw FileIOError.documentDirectoryNotFound
         }
         P("documentDirURL = \(documentDirURL)")
-        let epDiagramsDirURL = documentDirURL.appendingPathComponent(FileIO.epdiagramDir, isDirectory: true)
+        let epDiagramsDirURL = documentDirURL.appendingPathComponent(FileIO.epDiagramDir, isDirectory: true)
         if !FileManager.default.fileExists(atPath: epDiagramsDirURL.path) {
             try FileManager.default.createDirectory(atPath: epDiagramsDirURL.path, withIntermediateDirectories: true, attributes: nil)
         }
@@ -299,7 +297,7 @@ extension ViewController: HamburgerTableDelegate, UIImagePickerControllerDelegat
     }
 
     private func handleRenameDiagram(filename: String) {
-        Common.showTextAlert(viewController: self, title: L("Rename Diagram"), message: L("Enter a new name for this diagram (old name is \(filename)"), preferredStyle: .alert, handler: { name in self.handleSaveDiagram(filename: name, overwrite: false) })
+        Common.showTextAlert(viewController: self, title: L("Rename Diagram"), message: L("Enter a new name for diagram \(filename)"), preferredStyle: .alert, handler: { name in self.handleSaveDiagram(filename: name, overwrite: false) })
     }
 
     private func handleSaveDiagram(filename: String?, overwrite: Bool = false) {

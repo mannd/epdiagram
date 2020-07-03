@@ -43,7 +43,7 @@ final class CursorView: ScaledView {
             cursor.maxPositionOmniCircleY = maxCursorPositionY
         }
     }
-    var calibrating = false
+    var isCalibrating = false
     var allowTaps = true // set false to prevent taps from making marks
     var cursorEndPointY: CGFloat = 0
 
@@ -56,6 +56,7 @@ final class CursorView: ScaledView {
     required init?(coder: NSCoder) {
         self.cursor = Cursor()
         self.cursor.visible = false
+        self.cursor.accuracy = accuracy
         super.init(coder: coder)
         didLoad()
     }
@@ -63,6 +64,7 @@ final class CursorView: ScaledView {
     override init(frame: CGRect) {
         self.cursor = Cursor()
         self.cursor.visible = false
+        self.cursor.accuracy = accuracy
         super.init(frame: frame)
         didLoad()
     }
@@ -99,6 +101,10 @@ final class CursorView: ScaledView {
         if imageIsLocked {
             showLockImageWarning(rect: rect)
         }
+        if isCalibrating {
+            drawCalibration(rect)
+            return
+        }
         if let context = UIGraphicsGetCurrentContext() {
             guard cursor.visible else { return }
 
@@ -120,6 +126,22 @@ final class CursorView: ScaledView {
             if cursor.movement == .omnidirectional {
                 drawCircle(context: context, center: CGPoint(x: position, y: cursor.positionOmniCircleY), radius: 20)
             }
+        }
+    }
+
+    func drawCalibration(_ rect: CGRect) {
+        if let context = UIGraphicsGetCurrentContext() {
+//            let height = ladderViewDelegate.getTopOfLadder(view: self)
+//            let endPointA = CGPoint(x: positionA, y: height)
+//            let endPointB = CGPoint(x: positionB, y: height)
+//            context.setStrokeColor(color.cgColor)
+//            context.setLineWidth(lineWidth)
+//            context.setAlpha(alphaValue)
+//            context.move(to: CGPoint(x: positionA, y: 0))
+//            context.addLine(to: endPointA)
+//            context.move(to: CGPoint(x: positionB, y: 0))
+//            context.addLine(to: endPointB)
+//            context.strokePath()
         }
     }
 
@@ -192,7 +214,7 @@ final class CursorView: ScaledView {
     @objc func singleTap(tap: UITapGestureRecognizer) {
         os_log("singleTap(tap:) - CursorView", log: OSLog.touches, type: .info)
         guard allowTaps else { return }
-        if calibrating {
+        if isCalibrating {
             doCalibration()
             return
         }
@@ -257,7 +279,13 @@ final class CursorView: ScaledView {
     }
 
     func doCalibration() {
-        P("Do calibration")
+        os_log("doCalibration()", log: .action, type: .info)
+        isCalibrating = true
+        let cursorA = Cursor()
+        let cursorB = Cursor()
+        let width = self.frame.width
+        cursorA.positionX = width / 3
+        cursorB.positionX = cursorA.positionX + width / 3
     }
 
     func putCursor(imageScrollViewPosition position: CGPoint) {

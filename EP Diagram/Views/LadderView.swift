@@ -64,6 +64,8 @@ final class LadderView: ScaledView {
 
     var ladderIsLocked = false
 
+    var calibration: Calibration?
+    
     internal var ladder: Ladder
 
     private var activeRegion: Region? {
@@ -1014,6 +1016,10 @@ final class LadderView: ScaledView {
 
     func nullifyPressedMark() {
         pressedMark = nil
+    }
+
+    func updateCalibration() {
+        calibration?.currentZoom = scale
     }
 
     // MARK: - draw

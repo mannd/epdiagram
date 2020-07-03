@@ -32,23 +32,10 @@ extension ViewController: ViewControllerDelegate {
         guard let diagramName = diagramName else { return }
         P("diagram name = \(diagramName)")
         do {
-            guard let documentDirURL = FileIO.getURL(for: .documents) else {
-                throw FileIOError.documentDirectoryNotFound
-            }
-            let diagramDirURL = documentDirURL.appendingPathComponent(FileIO.epdiagramDir, isDirectory: true)
-            if !FileManager.default.fileExists(atPath: diagramDirURL.path) {
-                throw FileIOError.diagramDirectoryNotFound
-            }
-            let ultimateDirURL = diagramDirURL.appendingPathComponent(diagramName, isDirectory: true)
-            if !FileManager.default.fileExists(atPath: ultimateDirURL.path) {
-                throw FileIOError.diagramDirectoryNotFound
-            }
-            // TODO: check if image and json files exist
-            let imageURL = ultimateDirURL.appendingPathComponent(FileIO.imageFilename, isDirectory: false)
+            let diagramDirURL = try getDiagramDirURL(for: diagramName)
+            let imageURL = diagramDirURL.appendingPathComponent(FileIO.imageFilename, isDirectory: false)
             let image = UIImage(contentsOfFile: imageURL.path)
-//            self.imageView.image = image
-//            self.setViewsNeedDisplay()
-            let ladderURL = ultimateDirURL.appendingPathComponent(FileIO.ladderFilename, isDirectory: false)
+            let ladderURL = diagramDirURL.appendingPathComponent(FileIO.ladderFilename, isDirectory: false)
             let decoder = JSONDecoder()
             if let data = FileManager.default.contents(atPath: ladderURL.path), let image = image {
                 if let ladder = try? decoder.decode(Ladder.self, from: data) {
@@ -58,13 +45,9 @@ extension ViewController: ViewControllerDelegate {
                     self.setViewsNeedDisplay()
                 }
             }
-        } catch FileIOError.documentDirectoryNotFound   {
-            os_log("File error: user document directory not found!", log: .errors, type: .error)
-            Common.showMessage(viewController: self, title: L("File Error"), message: "User document directory not found!")
-        } catch FileIOError.diagramDirectoryNotFound {
-
         } catch {
             os_log("Error: %s", error.localizedDescription)
+            Common.ShowFileError(viewController: self, error: error)
         }
     }
 
@@ -73,9 +56,7 @@ extension ViewController: ViewControllerDelegate {
         // actually delete diagram files here
         do {
             let diagramDirURL = try getDiagramDirURL(for: diagramName)
-//            P("\(epDiagramsDirURL.path)")
             let diagramDirContents = try FileManager.default.contentsOfDirectory(atPath: diagramDirURL.path)
-            P("diagramDirContents = \(diagramDirContents)")
             for path in diagramDirContents {
                 let pathURL = diagramDirURL.appendingPathComponent(path, isDirectory: false)
                 try FileManager.default.removeItem(atPath: pathURL.path)
@@ -83,6 +64,7 @@ extension ViewController: ViewControllerDelegate {
             try FileManager.default.removeItem(atPath: diagramDirURL.path)
         } catch {
             os_log("Could not delete diagram %s, error: %s", log: .action, type: .error, diagramName, error.localizedDescription)
+            Common.ShowFileError(viewController: self, error: error)
         }
     }
 
@@ -99,14 +81,7 @@ extension ViewController: ViewControllerDelegate {
     func saveTemplates(_ templates: [LadderTemplate]) {
         os_log("saveTemplates()", log: .action, type: .info)
         do {
-            guard let documentDirURL = FileIO.getURL(for: .documents) else { throw FileIOError.documentDirectoryNotFound }
-            let templateURL = documentDirURL.appendingPathComponent(FileIO.userTemplateFile, isDirectory: false)
-            let encoder = JSONEncoder()
-            let data = try encoder.encode(templates)
-            if FileManager.default.fileExists(atPath: templateURL.path) {
-                try FileManager.default.removeItem(at: templateURL)
-            }
-            FileManager.default.createFile(atPath: templateURL.path, contents: data, attributes: nil)
+            try FileIO.store(templates, to: .documents, withFileName: FileIO.userTemplateFile)
         } catch {
             os_log("File error: %s", log: .errors, type: .error, error.localizedDescription)
             Common.ShowFileError(viewController: self, error: error)

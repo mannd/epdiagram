@@ -85,6 +85,11 @@ final class ViewController: UIViewController {
         imageScrollView.backgroundColor = UIColor.secondarySystemBackground
         ladderView.backgroundColor = UIColor.tertiarySystemBackground
 
+        imageScrollView.maximumZoomScale = 7.0
+        // FIXME: zoom < 1.0 makes truncates ladder.
+        //imageScrollView.minimumZoomScale = 0.25
+        imageScrollView.minimumZoomScale = 1.0
+
         blackView.delegate = self
         blackView.alpha = 0.0
         constraintHamburgerLeft.constant = -self._constraintHamburgerWidth.constant;
@@ -245,17 +250,32 @@ final class ViewController: UIViewController {
     // MARK: -  Buttons
 
     @objc func calibrate() {
-        os_log("calibrate action", log: OSLog.action, type: .info)
+        os_log("calibrate()", log: OSLog.action, type: .info)
+        // Hide regular cursor.
+        cursorView.hideCursor(true)
+        cursorView.isCalibrating = true
+        cursorView.setNeedsDisplay()
+        // assuming now all calibration is 1000 msec
+        let calibrationValue: CGFloat = 1000
+        var calibration = Calibration()
+        calibration.originalZoom = imageScrollView.zoomScale
+        calibration.currentZoom = calibration.originalZoom
+        // replace this with number obtained from cursor distance apart
+        let dummy: CGFloat = 50
+        let measuredDistance = dummy
+        calibration.originalCalFactor = calibrationValue / measuredDistance
+        calibration.isCalibrated = true
+        ladderView.calibration = calibration
     }
 
     @objc func selectMarks() {
-        os_log("selectMarks action", log: OSLog.action, type: .info)
+        os_log("selectMarks()", log: OSLog.action, type: .info)
         showSelectMenu()
         ladderView.selectMarkMode = true
     }
 
     @objc func linkMarks() {
-        os_log("linkMarks action", log: OSLog.action, type: .info)
+        os_log("linkMarks()", log: OSLog.action, type: .info)
         cursorView.hideCursor(true)
         ladderView.unhighlightAllMarks()
         setViewsNeedDisplay()
@@ -266,11 +286,11 @@ final class ViewController: UIViewController {
     }
 
     @objc func copyMarks() {
-        os_log("copyMarks action", log: OSLog.action, type: .info)
+        os_log("copyMarks()", log: OSLog.action, type: .info)
     }
 
     @objc func cancelSelect() {
-        os_log("cancelSelect action", log: OSLog.action, type: .info)
+        os_log("cancelSelect()", log: OSLog.action, type: .info)
         showMainMenu()
         ladderView.selectMarkMode = false
         ladderView.unhighlightAllMarks()

@@ -9,10 +9,7 @@
 import UIKit
 
 // Cursor is a vertical line that is used to move and set Marks.
-// It is also used to calibrate: a Cursor is set at the beginning and end
-// of a known interval (1000 msec ideally).  Note that calibration is not
-// necessary to draw ladder diagrams.
-class Cursor: NSObject {
+class Cursor  {
     var positionX: CGFloat // the horizontal position of the cursor using cursor view coordinates
     var positionOmniCircleY: CGFloat // point along omnidirectional cursor where circle is shown
     var maxPositionOmniCircleY: CGFloat // lowest point on screen where circle can be draw
@@ -23,7 +20,7 @@ class Cursor: NSObject {
     var movement = Movement.horizontal
 
     // Touches +/- accuracy count as touches.
-    let accuracy: CGFloat = 20
+    var accuracy: CGFloat = 20
     
     init(positionX: CGFloat) {
         self.positionX = positionX
@@ -32,8 +29,7 @@ class Cursor: NSObject {
         self.markIntersectionPositionY = 0
     }
 
-
-    convenience override init() {
+    convenience init() {
         self.init(positionX: 0)
     }
 

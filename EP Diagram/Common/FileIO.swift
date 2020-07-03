@@ -12,6 +12,7 @@ import os.log
 enum FileIOError: Error {
     case searchDirectoryNotFound
     case documentDirectoryNotFound
+    case epDiagramDirectoryNotFound
     case diagramDirectoryNotFound
 }
 
@@ -22,8 +23,10 @@ extension FileIOError: LocalizedError {
             return L("Search directory not found.")
         case .documentDirectoryNotFound:
             return L("User document directory not found.")
+        case .epDiagramDirectoryNotFound:
+            return L("EP Diagram directory not found.")
         case .diagramDirectoryNotFound:
-            return L("epdiagram directory not found.")
+            return (L("Diagram directory not found."))
         }
     }
 }
@@ -34,7 +37,7 @@ final class FileIO {
     // Where ladder templates are stored.
     static let userTemplateFile = "epdiagram_ladder_templates"
     // Directory where save diagrams.
-    static let epdiagramDir = "epdiagram"
+    static let epDiagramDir = "epdiagram"
     static let imageFilename = "image.png"
     static let ladderFilename = "ladder.json"
 
@@ -57,10 +60,13 @@ final class FileIO {
         return FileManager.default.urls(for: searchDirectory, in: .userDomainMask).first
     }
 
-    static func store<T: Encodable>(_ object: T, to directory: Directory, withFileName fileName: String) throws {
-        guard let url = getURL(for: directory) else {
+    static func store<T: Encodable>(_ object: T, to directory: Directory, withFileName fileName: String, subDirectory: String? = nil) throws {
+        guard var url = getURL(for: directory) else {
             os_log("Search directory not found", log: .default, type: .fault)
             throw FileIOError.searchDirectoryNotFound
+        }
+        if let subDirectory = subDirectory {
+            url = url.appendingPathComponent(subDirectory)
         }
         let fileURL = url.appendingPathComponent(fileName)
         let encoder = JSONEncoder()
@@ -78,9 +84,11 @@ final class FileIO {
         }
     }
 
-    // TODO: maybe make this throw errors rather than just return nil on error?
-    static func retrieve<T: Decodable>(_ fileName: String, from directory: Directory, as type: T.Type) -> T? {
-        guard let url = getURL(for: directory) else { return nil }
+    static func retrieve<T: Decodable>(_ fileName: String, from directory: Directory, subDirectory: String? = nil, as type: T.Type) -> T? {
+        guard var url = getURL(for: directory) else { return nil }
+        if let subDirectory = subDirectory {
+            url = url.appendingPathComponent(subDirectory)
+        }
         let fileURL = url.appendingPathComponent(fileName)
         if !FileManager.default.fileExists(atPath: fileURL.path) { return nil }
         if let data = FileManager.default.contents(atPath: fileURL.path) {

@@ -154,7 +154,6 @@ class Mark: Codable {
         }
     }
 
-
     var attached: Bool = false // cursor attached and shown
     var selected: Bool = false // mark is selected for some action
     var highlight: Highlight = .none
