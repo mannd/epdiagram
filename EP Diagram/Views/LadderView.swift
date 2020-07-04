@@ -60,7 +60,7 @@ final class LadderView: ScaledView {
 
     var showImpulseOrigin = false
     var showBlock = true
-    var showPivots = false
+    var showPivots = true
 
     var ladderIsLocked = false
 
@@ -1143,6 +1143,7 @@ final class LadderView: ScaledView {
         drawImpulseOrigin(context: context, mark: mark, segment: segment)
         // FIXME: this is just a sample pivot point.  Pivots need to be determined by ladder.
         drawPivots(forMark: mark, segment: Segment(proximal: p1, distal: p2), context: context)
+        drawMarkText(forMark: mark, segment: segment, context: context)
 
         context.setStrokeColor(getLineColor())
     }
@@ -1168,7 +1169,7 @@ final class LadderView: ScaledView {
         context.drawPath(using: .fillStroke)
     }
 
-    func drawPivots(forMark mark: Mark, segment: Segment, context:CGContext) {
+    func drawPivots(forMark mark: Mark, segment: Segment, context: CGContext) {
         guard showPivots else { return }
         // We only show pivots when cursor is attached.
         guard mark.attached else { return }
@@ -1188,6 +1189,27 @@ final class LadderView: ScaledView {
                 drawPivot(context: context, position: position)
             }
         }
+    }
+
+    func drawMarkText(forMark mark: Mark, segment: Segment, context: CGContext) {
+        guard mark.showText, mark.text.count > 0 else { return }
+        let text = mark.text
+        var origin = Common.getSegmentMidpoint(segment)
+        var attributes = [NSAttributedString.Key: Any]()
+        let textFont = UIFont(name: "Helvetica Neue Medium", size: 14.0) ?? UIFont.systemFont(ofSize: 14, weight: UIFont.Weight.medium)
+        let paragraphStyle = NSParagraphStyle.default.mutableCopy() as! NSMutableParagraphStyle
+        // FIXME: foreground color?  Crashes app???
+        attributes = [
+            NSAttributedString.Key.font: textFont,
+            NSAttributedString.Key.paragraphStyle: paragraphStyle,
+        ]
+        let size = text.size(withAttributes: attributes)
+        // Center the origin.
+        origin = CGPoint(x: origin.x + 5, y: origin.y - size.height / 2)
+        let textRect = CGRect(origin: origin, size: size)
+        text.draw(in: textRect, withAttributes: attributes)
+        context.strokePath()
+
     }
 
     func drawPivot(context: CGContext, position: CGPoint) {

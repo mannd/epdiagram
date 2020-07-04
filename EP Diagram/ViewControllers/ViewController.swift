@@ -317,7 +317,8 @@ final class ViewController: UIViewController {
 
     @objc func setCalibration() {
         os_log("setCalibration()", log: .action, type: .info)
-        cursorView.doCalibration()
+//        cursorView.doCalibration()
+        cursorView.setCalibration(zoom: imageScrollView.zoomScale)
         cursorView.isCalibrating = false
         cursorView.setNeedsDisplay()
         showMainMenu()

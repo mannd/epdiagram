@@ -18,6 +18,11 @@ struct Calibration {
         (originalZoom * originalCalFactor) / currentZoom
     }
 
+    mutating func set(zoom: CGFloat) {
+        originalZoom = zoom
+        currentZoom = zoom
+    }
+
     mutating func reset() {
         originalZoom = 1
         currentZoom = 1

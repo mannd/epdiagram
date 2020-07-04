@@ -46,6 +46,8 @@ final class CursorView: ScaledView {
         }
     }
 
+    private var calibration = Calibration()
+
     var leftMargin: CGFloat = 0
     var maxCursorPositionY: CGFloat = 0 {
         didSet {
@@ -139,7 +141,7 @@ final class CursorView: ScaledView {
 
     func drawCaliper(_ rect: CGRect) {
         if let context = UIGraphicsGetCurrentContext() {
-            context.setStrokeColor(color.cgColor)
+            context.setStrokeColor(caliper.color.cgColor)
             context.setLineWidth(lineWidth)
             context.setAlpha(alphaValue)
             context.move(to: CGPoint(x: caliper.bar1Position, y: 0))
@@ -149,14 +151,14 @@ final class CursorView: ScaledView {
             context.move(to: CGPoint(x: caliper.bar1Position, y: caliper.crossbarPosition))
             context.addLine(to: CGPoint(x: caliper.bar2Position, y: caliper.crossbarPosition))
             let text = caliper.text
-            let measureText = caliper.measureText
+            let measureText = "\(caliper.value) points"
             var attributes = [NSAttributedString.Key: Any]()
             let textFont = UIFont(name: "Helvetica Neue Medium", size: 14.0) ?? UIFont.systemFont(ofSize: 14, weight: UIFont.Weight.medium)
             let paragraphStyle = NSParagraphStyle.default.mutableCopy() as! NSMutableParagraphStyle
             attributes = [
                 NSAttributedString.Key.font: textFont,
                 NSAttributedString.Key.paragraphStyle: paragraphStyle,
-                NSAttributedString.Key.foregroundColor: color
+                NSAttributedString.Key.foregroundColor: caliper.color
             ]
             let size = text.size(withAttributes: attributes)
             let measureSize = measureText.size(withAttributes: attributes)
@@ -314,17 +316,21 @@ final class CursorView: ScaledView {
         // No undo for calibration.
         if pan.state == .began {
             draggedComponent = caliper.isNearCaliperComponent(point: pan.location(in: self), accuracy: accuracy)
+            caliper.color = UIColor.systemBlue
         }
         else if pan.state == .changed {
             guard let draggedComponent = draggedComponent else { return }
             let delta = pan.translation(in: self)
             caliper.move(delta: delta, component: draggedComponent)
-            setNeedsDisplay()
             pan.setTranslation(CGPoint(x: 0,y: 0), in: self)
         }
         else if pan.state == .ended {
             draggedComponent = nil
+            caliper.color = UIColor.systemRed
+            P("caliper.value = \(caliper.value)")
         }
+        setNeedsDisplay()
+
     }
 
     private func cursorMove(delta: CGPoint) {
@@ -356,6 +362,10 @@ final class CursorView: ScaledView {
         caliper.bar2Position = caliper.bar1Position + width / 3
         caliper.crossbarPosition = caliperMaxY / 2
         setNeedsDisplay()
+    }
+
+    func setCalibration(zoom: CGFloat) {
+        calibration.set(zoom: zoom)
     }
 
     func putCursor(imageScrollViewPosition position: CGPoint) {

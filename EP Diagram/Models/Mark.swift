@@ -29,31 +29,13 @@ struct Segment: Codable, Equatable {
         return Segment(proximal: proximal.normalized(), distal: distal.normalized())
     }
 
-    func maxXPoint() -> CGPoint {
-        if proximal.x >= distal.x {
-            return proximal
-        }
-        return distal
-    }
-
-    func maxX() -> CGFloat {
-        return max(proximal.x, distal.x)
-    }
-
-    func maxY() -> CGFloat {
-        return max(proximal.y, distal.y)
-    }
-
-    func minX() -> CGFloat {
-        return min(proximal.x, distal.x)
-    }
-
-    func minY() -> CGFloat {
-        return min(proximal.y, distal.y)
-    }
+//    static func midPoint(_ s: Segment) -> CGPoint {
+//        let x = abs(s.proximal.x - s.distal.x) + min(s.proximal.x, s.distal.x)
+//        let y = abs(s.proximal.y - s.distal.y) + min(s.proximal.y, s.distal.y)
+//        return CGPoint(x: x, y: y)
+//    }
 }
 
-// TODO: redundant with Cursor.Direction, use that instead.
 enum Movement {
     case horizontal
     case omnidirectional
@@ -164,6 +146,9 @@ class Mark: Codable {
 
     var block: Block = .none
     var impulseOrigin: ImpulseOrigin = .none
+
+    var text: String = "test"
+    var showText: Bool = true
 
     var groupedMarks: MarkGroup
 
