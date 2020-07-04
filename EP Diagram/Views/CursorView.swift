@@ -17,6 +17,8 @@ protocol CursorViewDelegate: AnyObject {
     func hideCursor(_ hide: Bool)
     func cursorIsVisible() -> Bool
     func cursorMovement() -> Movement
+    func isCalibrated() -> Bool
+    func markMeasurement(segment: Segment) -> CGFloat
 }
 
 extension CursorViewDelegate {
@@ -365,7 +367,10 @@ final class CursorView: ScaledView {
     }
 
     func setCalibration(zoom: CGFloat) {
-        calibration.set(zoom: zoom)
+        // FIXME: hardcoded value
+        calibration.set(zoom: zoom, calFactor: 1000 / caliper.value)
+        calibration.isCalibrated = true
+        ladderViewDelegate.refresh()
     }
 
     func putCursor(imageScrollViewPosition position: CGPoint) {
@@ -409,5 +414,13 @@ extension CursorView: CursorViewDelegate {
 
     func cursorMovement() -> Movement {
         return cursor.movement
+    }
+
+    func isCalibrated() -> Bool {
+        return calibration.isCalibrated
+    }
+
+    func markMeasurement(segment: Segment) -> CGFloat {
+        return abs(segment.proximal.x - segment.distal.x) * calibration.currentCalFactor
     }
 }

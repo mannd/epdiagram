@@ -1192,8 +1192,9 @@ final class LadderView: ScaledView {
     }
 
     func drawMarkText(forMark mark: Mark, segment: Segment, context: CGContext) {
-        guard mark.showText, mark.text.count > 0 else { return }
-        let text = mark.text
+        guard cursorViewDelegate.isCalibrated(), mark.showText, mark.text.count > 0 else { return }
+        let value = lround(Double(cursorViewDelegate.markMeasurement(segment: segment)))
+        let text = "\(value)"
         var origin = Common.getSegmentMidpoint(segment)
         var attributes = [NSAttributedString.Key: Any]()
         let textFont = UIFont(name: "Helvetica Neue Medium", size: 14.0) ?? UIFont.systemFont(ofSize: 14, weight: UIFont.Weight.medium)
@@ -1205,7 +1206,7 @@ final class LadderView: ScaledView {
         ]
         let size = text.size(withAttributes: attributes)
         // Center the origin.
-        origin = CGPoint(x: origin.x + 5, y: origin.y - size.height / 2)
+        origin = CGPoint(x: origin.x + 10, y: origin.y - size.height / 2)
         let textRect = CGRect(origin: origin, size: size)
         text.draw(in: textRect, withAttributes: attributes)
         context.strokePath()
