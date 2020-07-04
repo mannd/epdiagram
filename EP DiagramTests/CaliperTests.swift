@@ -15,7 +15,6 @@ class CaliperTests: XCTestCase {
     override func setUp() {
         super.setUp()
         caliper = Caliper()
-        caliper.accuracy = 10
         caliper.maxY = 100
     }
 
@@ -28,10 +27,13 @@ class CaliperTests: XCTestCase {
         caliper.bar1Position = 50
         caliper.bar2Position = 100
         caliper.crossbarPosition = 50
-        XCTAssertEqual(Caliper.Component.bar1, caliper.isNearCaliperComponent(point: CGPoint(x: 50, y: 50)))
-        XCTAssertEqual(Caliper.Component.bar2, caliper.isNearCaliperComponent(point: CGPoint(x: 100, y: 50)))
-        XCTAssertEqual(Caliper.Component.crossbar, caliper.isNearCaliperComponent(point: CGPoint(x: 0, y: 50)))
-        XCTAssertEqual(nil, caliper.isNearCaliperComponent(point: CGPoint(x: 80, y: 80)))
+        let accuracy: CGFloat = 10
+        XCTAssertEqual(Caliper.Component.bar1, caliper.isNearCaliperComponent(point: CGPoint(x: 50, y: 50), accuracy: accuracy))
+        XCTAssertEqual(Caliper.Component.bar2, caliper.isNearCaliperComponent(point: CGPoint(x: 100, y: 50), accuracy: accuracy))
+        XCTAssertEqual(Caliper.Component.crossbar, caliper.isNearCaliperComponent(point: CGPoint(x: 0, y: 50), accuracy: accuracy))
+        XCTAssertEqual(true, caliper.isNearCaliper(point: CGPoint(x: 0, y: 50), accuracy: accuracy))
+        XCTAssertEqual(nil, caliper.isNearCaliperComponent(point: CGPoint(x: 80, y: 80), accuracy: accuracy))
+        XCTAssertEqual(false, caliper.isNearCaliper(point: CGPoint(x: 80, y: 80), accuracy: accuracy))
     }
 
     func testCaliperMovement() {

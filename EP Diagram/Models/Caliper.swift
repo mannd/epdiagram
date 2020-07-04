@@ -21,19 +21,22 @@ struct Caliper {
     var minY: CGFloat = 0
     var maxY: CGFloat?
 
-    var accuracy: CGFloat = 0
-
+    let measureText: String = L("Measure")
     let text: String = L("1000 msec")
 
     var isVisible: Bool = false
 
-    func isNearCaliperComponent(point p: CGPoint) -> Component? {
+    func isNearCaliperComponent(point p: CGPoint, accuracy: CGFloat) -> Component? {
         guard let maxY = maxY else { return nil }
         guard p.y >= minY && p.y <= maxY else { return nil }
         if abs(p.x - bar1Position) < accuracy { return .bar1 }
         if abs(p.x - bar2Position) < accuracy { return .bar2}
         if abs(p.y - crossbarPosition) < accuracy { return .crossbar }
         return nil
+    }
+
+    func isNearCaliper(point p: CGPoint, accuracy: CGFloat) -> Bool {
+        return isNearCaliperComponent(point: p, accuracy: accuracy) != nil
     }
 
     mutating func move(delta: CGPoint, component: Component) {

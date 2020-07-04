@@ -35,6 +35,8 @@ final class ViewController: UIViewController {
     private var mainMenuButtons: [UIBarButtonItem]?
     private var selectMenuButtons: [UIBarButtonItem]?
     private var linkMenuButtons: [UIBarButtonItem]?
+    private var calibrateMenuButtons: [UIBarButtonItem]?
+
     internal var hamburgerMenuIsOpen = false
 
     // PDF and launch from URL stuff
@@ -213,6 +215,24 @@ final class ViewController: UIViewController {
         navigationController?.setToolbarHidden(false, animated: false)
     }
 
+    private func showCalibrateMenu() {
+        if calibrateMenuButtons == nil {
+            let textLabelText = L("Set caliper to 1000 msec")
+            let textLabel = UILabel()
+            textLabel.text = textLabelText
+            let textLabelButton = UIBarButtonItem(customView: textLabel)
+            let setTitle = L("Set")
+            let setButton = UIBarButtonItem(title: setTitle, style: .plain, target: self, action: #selector(setCalibration))
+            let clearTitle = L("Clear")
+            let clearButton = UIBarButtonItem(title:clearTitle, style: .plain, target: self, action: nil)
+            let cancelTitle = L("Cancel")
+            let cancelButton = UIBarButtonItem(title: cancelTitle, style: .plain, target: self, action: #selector(cancelCalibration))
+            calibrateMenuButtons = [textLabelButton, setButton, clearButton, cancelButton]
+        }
+        setToolbarItems(calibrateMenuButtons, animated: false)
+        navigationController?.setToolbarHidden(false, animated: false)
+    }
+
     @objc func selectLadder() {
         os_log("selectLadder()", log: .action, type: .info)
         performSegue(withIdentifier: "selectLadderSegue", sender: self)
@@ -252,19 +272,8 @@ final class ViewController: UIViewController {
 
     @objc func calibrate() {
         os_log("calibrate()", log: OSLog.action, type: .info)
-        // Hide regular cursor.
+        showCalibrateMenu()
         cursorView.doCalibration()
-        // assuming now all calibration is 1000 msec
-//        let calibrationValue: CGFloat = 1000
-//        var calibration = Calibration()
-//        calibration.originalZoom = imageScrollView.zoomScale
-//        calibration.currentZoom = calibration.originalZoom
-//        // replace this with number obtained from cursor distance apart
-//        let dummy: CGFloat = 50
-//        let measuredDistance = dummy
-//        calibration.originalCalFactor = calibrationValue / measuredDistance
-//        calibration.isCalibrated = true
-//        ladderView.calibration = calibration
     }
 
     @objc func selectMarks() {
@@ -298,12 +307,38 @@ final class ViewController: UIViewController {
     }
 
     @objc func cancelLink() {
-        os_log("cancelLink action", log: OSLog.action, type: .info)
+        os_log("cancelLink()", log: OSLog.action, type: .info)
         showMainMenu()
         ladderView.linkMarkMode = false
         cursorView.allowTaps = true
         ladderView.unhighlightAllMarks()
         ladderView.setNeedsDisplay()
+    }
+
+    @objc func setCalibration() {
+        os_log("setCalibration()", log: .action, type: .info)
+        cursorView.doCalibration()
+        cursorView.isCalibrating = false
+        cursorView.setNeedsDisplay()
+        showMainMenu()
+        // assuming now all calibration is 1000 msec
+        //        let calibrationValue: CGFloat = 1000
+        //        var calibration = Calibration()
+        //        calibration.originalZoom = imageScrollView.zoomScale
+        //        calibration.currentZoom = calibration.originalZoom
+        //        // replace this with number obtained from cursor distance apart
+        //        let dummy: CGFloat = 50
+        //        let measuredDistance = dummy
+        //        calibration.originalCalFactor = calibrationValue / measuredDistance
+        //        calibration.isCalibrated = true
+        //        ladderView.calibration = calibration
+    }
+
+    @objc func cancelCalibration() {
+        os_log("cancelCalibration()", log: .action, type: .info)
+        showMainMenu()
+        cursorView.isCalibrating = false
+        setViewsNeedDisplay()
     }
 
     @objc func undo() {
@@ -335,6 +370,10 @@ final class ViewController: UIViewController {
 
     @objc func singleTap(tap: UITapGestureRecognizer) {
         os_log("singleTap - ViewController", log: OSLog.touches, type: .info)
+        if cursorView.isCalibrating {
+            P("is Calibrating")
+            return
+        }
         guard cursorView.allowTaps else { return }
         if !ladderView.hasActiveRegion() {
             ladderView.setActiveRegion(regionNum: 0)

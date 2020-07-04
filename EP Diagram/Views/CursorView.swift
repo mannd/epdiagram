@@ -39,7 +39,12 @@ final class CursorView: ScaledView {
     private var rawCursorHeight: CGFloat?
 
     private var caliper: Caliper = Caliper()
-    var caliperMaxY: CGFloat = 0
+    private var draggedComponent: Caliper.Component?
+    var caliperMaxY: CGFloat = 0 {
+        didSet {
+            caliper.maxY = caliperMaxY
+        }
+    }
 
     var leftMargin: CGFloat = 0
     var maxCursorPositionY: CGFloat = 0 {
@@ -61,7 +66,6 @@ final class CursorView: ScaledView {
     required init?(coder: NSCoder) {
         self.cursor = Cursor()
         self.cursor.visible = false
-        self.cursor.accuracy = accuracy
         super.init(coder: coder)
         didLoad()
     }
@@ -69,7 +73,6 @@ final class CursorView: ScaledView {
     override init(frame: CGRect) {
         self.cursor = Cursor()
         self.cursor.visible = false
-        self.cursor.accuracy = accuracy
         super.init(frame: frame)
         didLoad()
     }
@@ -146,6 +149,7 @@ final class CursorView: ScaledView {
             context.move(to: CGPoint(x: caliper.bar1Position, y: caliper.crossbarPosition))
             context.addLine(to: CGPoint(x: caliper.bar2Position, y: caliper.crossbarPosition))
             let text = caliper.text
+            let measureText = caliper.measureText
             var attributes = [NSAttributedString.Key: Any]()
             let textFont = UIFont(name: "Helvetica Neue Medium", size: 14.0) ?? UIFont.systemFont(ofSize: 14, weight: UIFont.Weight.medium)
             let paragraphStyle = NSParagraphStyle.default.mutableCopy() as! NSMutableParagraphStyle
@@ -155,8 +159,14 @@ final class CursorView: ScaledView {
                 NSAttributedString.Key.foregroundColor: color
             ]
             let size = text.size(withAttributes: attributes)
-            let textRect = CGRect(origin: CGPoint(x: caliper.bar1Position + (caliper.value - size.width) / 2, y: caliper.crossbarPosition), size: size)
-            text.draw(in: textRect, withAttributes: attributes)
+            let measureSize = measureText.size(withAttributes: attributes)
+            let maxWidth = max(size.width, measureSize.width)
+            if maxWidth < caliper.value {
+                let textRect = CGRect(origin: CGPoint(x: caliper.bar1Position + (caliper.value - size.width) / 2, y: caliper.crossbarPosition), size: size)
+                text.draw(in: textRect, withAttributes: attributes)
+                let measureTextRect = CGRect(origin: CGPoint(x: caliper.bar1Position + (caliper.value - measureSize.width) / 2, y: caliper.crossbarPosition - measureSize.height), size: measureSize)
+                measureText.draw(in: measureTextRect, withAttributes: attributes)
+            }
             context.strokePath()
         }
     }
@@ -236,6 +246,9 @@ final class CursorView: ScaledView {
     // This function passes touch events to the views below if the point is not
     // near the cursor.
     override func point(inside point: CGPoint, with event: UIEvent?) -> Bool {
+        if isCalibrating {
+            return caliper.isNearCaliper(point: point, accuracy: accuracy)
+        }
         guard cursor.visible else { return false }
         if isNearCursor(positionX: point.x, accuracy: accuracy) && point.y < ladderViewDelegate.getRegionProximalBoundary(view: self) {
             return true
@@ -268,6 +281,10 @@ final class CursorView: ScaledView {
 
     @objc func dragging(pan: UIPanGestureRecognizer) {
         // Don't drag if no attached mark.
+        if isCalibrating {
+            dragCaliper(pan: pan)
+            return
+        }
         guard let attachedMarkAnchorPosition = ladderViewDelegate.getAttachedMarkScaledAnchorPosition() else { return }
         if pan.state == .began {
             self.undoManager?.beginUndoGrouping()
@@ -290,6 +307,23 @@ final class CursorView: ScaledView {
             ladderViewDelegate.groupMarksNearbyAttachedMark()
             ladderViewDelegate.refresh()
             cursorEndPointY = 0
+        }
+    }
+
+    private func dragCaliper(pan: UIPanGestureRecognizer) {
+        // No undo for calibration.
+        if pan.state == .began {
+            draggedComponent = caliper.isNearCaliperComponent(point: pan.location(in: self), accuracy: accuracy)
+        }
+        else if pan.state == .changed {
+            guard let draggedComponent = draggedComponent else { return }
+            let delta = pan.translation(in: self)
+            caliper.move(delta: delta, component: draggedComponent)
+            setNeedsDisplay()
+            pan.setTranslation(CGPoint(x: 0,y: 0), in: self)
+        }
+        else if pan.state == .ended {
+            draggedComponent = nil
         }
     }
 

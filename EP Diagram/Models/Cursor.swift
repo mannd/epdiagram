@@ -19,9 +19,6 @@ class Cursor  {
     var visible = false
     var movement = Movement.horizontal
 
-    // Touches +/- accuracy count as touches.
-    var accuracy: CGFloat = 20
-    
     init(positionX: CGFloat) {
         self.positionX = positionX
         self.positionOmniCircleY = 100 // this is a reasonable default value
@@ -33,7 +30,7 @@ class Cursor  {
         self.init(positionX: 0)
     }
 
-    func isNearCursor(point p: CGPoint) -> Bool {
+    func isNearCursor(point p: CGPoint, accuracy: CGFloat) -> Bool {
         return abs(p.x - positionX) < accuracy
     }
 
