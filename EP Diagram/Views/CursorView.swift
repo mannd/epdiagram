@@ -19,6 +19,7 @@ protocol CursorViewDelegate: AnyObject {
     func cursorMovement() -> Movement
     func isCalibrated() -> Bool
     func markMeasurement(segment: Segment) -> CGFloat
+    func intervalMeasurement(value: CGFloat) -> CGFloat
 }
 
 extension CursorViewDelegate {
@@ -422,5 +423,9 @@ extension CursorView: CursorViewDelegate {
 
     func markMeasurement(segment: Segment) -> CGFloat {
         return abs(segment.proximal.x - segment.distal.x) * calibration.currentCalFactor
+    }
+
+    func intervalMeasurement(value: CGFloat) -> CGFloat {
+        return value * calibration.currentCalFactor
     }
 }

@@ -8,10 +8,10 @@
 
 /* Begin PBXBuildFile section */
 		8E01D9C722849047000F36FC /* CursorView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8E01D9C622849047000F36FC /* CursorView.swift */; };
-		8E033CE824AC104A00BE6D6F /* Interval.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8E033CE724AC104A00BE6D6F /* Interval.swift */; };
 		8E033CEA24AC10A300BE6D6F /* Calibration.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8E033CE924AC10A300BE6D6F /* Calibration.swift */; };
 		8E1B6CB8240CAE5300EA88A6 /* ScaledView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8E1B6CB7240CAE5300EA88A6 /* ScaledView.swift */; };
 		8E217D98245B306200CD0CBF /* MathTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8E217D97245B306200CD0CBF /* MathTests.swift */; };
+		8E2439F624B14F770044AEAB /* Interval.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8E2439F524B14F770044AEAB /* Interval.swift */; };
 		8E253DD1244A86CB008CC56B /* ViewController+HamburgerTableDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8E253DD0244A86CB008CC56B /* ViewController+HamburgerTableDelegate.swift */; };
 		8E253DD3244A8799008CC56B /* ViewController+UIScrollViewDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8E253DD2244A8799008CC56B /* ViewController+UIScrollViewDelegate.swift */; };
 		8E253DD5244A8B17008CC56B /* Version.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8E253DD4244A8B17008CC56B /* Version.swift */; };
@@ -83,10 +83,10 @@
 
 /* Begin PBXFileReference section */
 		8E01D9C622849047000F36FC /* CursorView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CursorView.swift; sourceTree = "<group>"; };
-		8E033CE724AC104A00BE6D6F /* Interval.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Interval.swift; sourceTree = "<group>"; };
 		8E033CE924AC10A300BE6D6F /* Calibration.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Calibration.swift; sourceTree = "<group>"; };
 		8E1B6CB7240CAE5300EA88A6 /* ScaledView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScaledView.swift; sourceTree = "<group>"; };
 		8E217D97245B306200CD0CBF /* MathTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MathTests.swift; sourceTree = "<group>"; };
+		8E2439F524B14F770044AEAB /* Interval.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Interval.swift; sourceTree = "<group>"; };
 		8E253DD0244A86CB008CC56B /* ViewController+HamburgerTableDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "ViewController+HamburgerTableDelegate.swift"; sourceTree = "<group>"; };
 		8E253DD2244A8799008CC56B /* ViewController+UIScrollViewDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "ViewController+UIScrollViewDelegate.swift"; sourceTree = "<group>"; };
 		8E253DD4244A8B17008CC56B /* Version.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Version.swift; sourceTree = "<group>"; };
@@ -175,7 +175,6 @@
 		8E033CE624AC101400BE6D6F /* Protocols */ = {
 			isa = PBXGroup;
 			children = (
-				8E033CE724AC104A00BE6D6F /* Interval.swift */,
 			);
 			path = Protocols;
 			sourceTree = "<group>";
@@ -292,6 +291,7 @@
 				8E7CCC2A248C30A300018D2C /* Preferences.swift */,
 				8E033CE924AC10A300BE6D6F /* Calibration.swift */,
 				8E5918BB24AEAB0B00D8ABA3 /* Caliper.swift */,
+				8E2439F524B14F770044AEAB /* Interval.swift */,
 			);
 			path = Models;
 			sourceTree = "<group>";
@@ -495,7 +495,6 @@
 				8E253DD5244A8B17008CC56B /* Version.swift in Sources */,
 				8E6EB6C2248477D500E5F883 /* ViewController+ViewControllerDelegate.swift in Sources */,
 				8E4A52EF24886B16007406F5 /* Diagram.swift in Sources */,
-				8E033CE824AC104A00BE6D6F /* Interval.swift in Sources */,
 				8E6A0298246DFB3700A10C9F /* LadderEditor.swift in Sources */,
 				8E2BA1D024A3BDD7002D997F /* PreferencesView.swift in Sources */,
 				8E1B6CB8240CAE5300EA88A6 /* ScaledView.swift in Sources */,
@@ -513,6 +512,7 @@
 				8E4ACA842447905E00575538 /* HamburgerCell.swift in Sources */,
 				8E4ACA862447935600575538 /* HamburgerLayer.swift in Sources */,
 				8EF9166B227926BC00B51F17 /* LadderView.swift in Sources */,
+				8E2439F624B14F770044AEAB /* Interval.swift in Sources */,
 				8ECA9FB72470A1020016D939 /* LadderTemplate.swift in Sources */,
 				8E01D9C722849047000F36FC /* CursorView.swift in Sources */,
 				8EA444C02476E471005B5452 /* LadderSelector.swift in Sources */,

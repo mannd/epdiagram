@@ -28,12 +28,6 @@ struct Segment: Codable, Equatable {
     func normalized() -> Segment {
         return Segment(proximal: proximal.normalized(), distal: distal.normalized())
     }
-
-//    static func midPoint(_ s: Segment) -> CGPoint {
-//        let x = abs(s.proximal.x - s.distal.x) + min(s.proximal.x, s.distal.x)
-//        let y = abs(s.proximal.y - s.distal.y) + min(s.proximal.y, s.distal.y)
-//        return CGPoint(x: x, y: y)
-//    }
 }
 
 enum Movement {
@@ -86,7 +80,11 @@ extension Mark: Hashable, CustomDebugStringConvertible {
 }
 
 // The mark is a fundamental component of a ladder diagram.
-class Mark: Codable {
+class Mark: Codable, Comparable {
+    static func < (lhs: Mark, rhs: Mark) -> Bool {
+        return lhs.segment.proximal.x < rhs.segment.proximal.x && lhs.segment.distal.x < rhs.segment.distal.x
+    }
+
     /// Draw a solid or dashed line when drawing a mark.
     enum LineStyle: Int, Codable {
         case solid

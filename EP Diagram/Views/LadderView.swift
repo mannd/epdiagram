@@ -58,9 +58,11 @@ final class LadderView: ScaledView {
     var selectedColor = UIColor.systemRed
     var groupedColor = UIColor.systemPurple
 
-    var showImpulseOrigin = false
+    var showImpulseOrigin = true
     var showBlock = true
     var showPivots = true
+    var showIntervals = true
+    var showMarkText = true
 
     var ladderIsLocked = false
 
@@ -1025,7 +1027,6 @@ final class LadderView: ScaledView {
     // MARK: - draw
 
     override func draw(_ rect: CGRect) {
-        // Drawing code - note not necessary to call super.draw.
         if let context = UIGraphicsGetCurrentContext() {
             draw(rect: rect, context: context)
         }
@@ -1148,6 +1149,59 @@ final class LadderView: ScaledView {
         context.setStrokeColor(getLineColor())
     }
 
+    func drawIntervals(region: Region, context: CGContext) {
+        guard showIntervals, cursorViewDelegate.isCalibrated() else { return }
+        let marks = region.marks
+        let intervals = Interval.createIntervals(marks: marks)
+        for interval in intervals {
+            if let firstProximalX = interval.proximalBoundary?.first, let secondProximalX = interval.proximalBoundary?.second {
+                let scaledFirstProximalX = translateToScaledViewPositionX(regionPositionX: firstProximalX)
+                let scaledSecondProximalX = translateToScaledViewPositionX(regionPositionX: secondProximalX)
+                let halfwayPosition = (scaledFirstProximalX + scaledSecondProximalX) / 2.0
+                let value = lround(Double(cursorViewDelegate.intervalMeasurement(value: interval.proximalValue ?? 0)))
+                let text = "\(value)"
+                var origin = CGPoint(x: halfwayPosition, y: region.proximalBoundary)
+                var attributes = [NSAttributedString.Key: Any]()
+                let textFont = UIFont(name: "Helvetica Neue Medium", size: 14.0) ?? UIFont.systemFont(ofSize: 14, weight: UIFont.Weight.medium)
+                let paragraphStyle = NSParagraphStyle.default.mutableCopy() as! NSMutableParagraphStyle
+                // FIXME: foreground color?  Crashes app???
+                attributes = [
+                    NSAttributedString.Key.font: textFont,
+                    NSAttributedString.Key.paragraphStyle: paragraphStyle,
+                ]
+                let size = text.size(withAttributes: attributes)
+                // Center the origin.
+                origin = CGPoint(x: origin.x - size.width / 2, y: origin.y)
+                let textRect = CGRect(origin: origin, size: size)
+                text.draw(in: textRect, withAttributes: attributes)
+                context.strokePath()
+            }
+            if let firstDistalX = interval.distalBoundary?.first, let secondDistalX = interval.distalBoundary?.second {
+                let scaledFirstDistalX = translateToScaledViewPositionX(regionPositionX: firstDistalX)
+                let scaledSecondDistalX = translateToScaledViewPositionX(regionPositionX: secondDistalX)
+                let halfwayPosition = (scaledFirstDistalX + scaledSecondDistalX) / 2.0
+                let value = lround(Double(cursorViewDelegate.intervalMeasurement(value: interval.distalValue ?? 0)))
+                let text = "\(value)"
+                var origin = CGPoint(x: halfwayPosition, y: region.distalBoundary)
+                var attributes = [NSAttributedString.Key: Any]()
+                let textFont = UIFont(name: "Helvetica Neue Medium", size: 14.0) ?? UIFont.systemFont(ofSize: 14, weight: UIFont.Weight.medium)
+                let paragraphStyle = NSParagraphStyle.default.mutableCopy() as! NSMutableParagraphStyle
+                // FIXME: foreground color?  Crashes app???
+                attributes = [
+                    NSAttributedString.Key.font: textFont,
+                    NSAttributedString.Key.paragraphStyle: paragraphStyle,
+                ]
+                let size = text.size(withAttributes: attributes)
+                // Center the origin.
+                origin = CGPoint(x: origin.x - size.width / 2, y: origin.y - size.height)
+                let textRect = CGRect(origin: origin, size: size)
+                text.draw(in: textRect, withAttributes: attributes)
+                context.strokePath()
+            }
+        }
+
+    }
+
     func showLockLadderWarning(rect: CGRect) {
         let text = L("LADDER LOCK")
         let attributes: [NSAttributedString.Key: Any] = [
@@ -1192,7 +1246,7 @@ final class LadderView: ScaledView {
     }
 
     func drawMarkText(forMark mark: Mark, segment: Segment, context: CGContext) {
-        guard cursorViewDelegate.isCalibrated(), mark.showText, mark.text.count > 0 else { return }
+        guard cursorViewDelegate.isCalibrated(), showMarkText, mark.showText, mark.text.count > 0 else { return }
         let value = lround(Double(cursorViewDelegate.markMeasurement(segment: segment)))
         let text = "\(value)"
         var origin = Common.getSegmentMidpoint(segment)
@@ -1295,6 +1349,7 @@ final class LadderView: ScaledView {
         for mark: Mark in region.marks {
             drawMark(mark: mark, region: region, context: context)
         }
+        drawIntervals(region: region, context: context)
     }
 
     fileprivate func drawBottomLine(context: CGContext, lastRegion: Bool, rect: CGRect) {
@@ -1331,6 +1386,7 @@ final class LadderView: ScaledView {
         ladderViewHeight = self.frame.height
         initializeRegions()
         cursorViewDelegate.setCursorHeight()
+        
     }
 
     func setCaliperMaxY(_ maxY: CGFloat) {

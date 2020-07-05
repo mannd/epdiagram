@@ -10,7 +10,7 @@ import UIKit
 
 struct HamburgerViewModel {
     // Only set to true for testing.
-    let showTestLayer = false
+    let showTestLayer = true
 
     func allLayers() -> [HamburgerLayer] {
         var array = [HamburgerLayer]()

@@ -187,15 +187,12 @@ final class ViewController: UIViewController {
 
     private func showSelectMenu() {
         if selectMenuButtons == nil {
-            let textLabelText = L("Tap marks to select")
-            let textLabel = UILabel()
-            textLabel.text = textLabelText
-            let textLabelButton = UIBarButtonItem(customView: textLabel)
+            let promptButton = makePrompt(text: L("Tap marks to select"))
             let copyTitle = L("Copy", comment: "copy mark button label title")
             let copyButton = UIBarButtonItem(title: copyTitle, style: UIBarButtonItem.Style.plain, target: self, action: #selector(copyMarks))
             let cancelTitle = L("Done")
             let cancelButton = UIBarButtonItem(title: cancelTitle, style: UIBarButtonItem.Style.plain, target: self, action: #selector(cancelSelect))
-            selectMenuButtons = [textLabelButton, copyButton, cancelButton]
+            selectMenuButtons = [promptButton, copyButton, cancelButton]
         }
         setToolbarItems(selectMenuButtons, animated: false)
         navigationController?.setToolbarHidden(false, animated: false)
@@ -203,13 +200,10 @@ final class ViewController: UIViewController {
 
     private func showLinkMenu() {
         if linkMenuButtons == nil {
-            let textLabelText = L("Tap pairs of marks to link them")
-            let textLabel = UILabel()
-            textLabel.text = textLabelText
-            let textLabelButton = UIBarButtonItem(customView: textLabel)
+            let promptButton = makePrompt(text: L("Tap pairs of marks to link them"))
             let cancelTitle = L("Done")
             let cancelButton = UIBarButtonItem(title: cancelTitle, style: .plain, target: self, action: #selector(cancelLink))
-            linkMenuButtons = [textLabelButton, cancelButton]
+            linkMenuButtons = [promptButton, cancelButton]
         }
         setToolbarItems(linkMenuButtons, animated: false)
         navigationController?.setToolbarHidden(false, animated: false)
@@ -217,20 +211,23 @@ final class ViewController: UIViewController {
 
     private func showCalibrateMenu() {
         if calibrateMenuButtons == nil {
-            let textLabelText = L("Set caliper to 1000 msec")
-            let textLabel = UILabel()
-            textLabel.text = textLabelText
-            let textLabelButton = UIBarButtonItem(customView: textLabel)
+            let promptButton = makePrompt(text: L("Set caliper to 1000 msec"))
             let setTitle = L("Set")
             let setButton = UIBarButtonItem(title: setTitle, style: .plain, target: self, action: #selector(setCalibration))
             let clearTitle = L("Clear")
             let clearButton = UIBarButtonItem(title:clearTitle, style: .plain, target: self, action: nil)
             let cancelTitle = L("Cancel")
             let cancelButton = UIBarButtonItem(title: cancelTitle, style: .plain, target: self, action: #selector(cancelCalibration))
-            calibrateMenuButtons = [textLabelButton, setButton, clearButton, cancelButton]
+            calibrateMenuButtons = [promptButton, setButton, clearButton, cancelButton]
         }
         setToolbarItems(calibrateMenuButtons, animated: false)
         navigationController?.setToolbarHidden(false, animated: false)
+    }
+
+    private func makePrompt(text: String) -> UIBarButtonItem {
+        let prompt = UILabel()
+        prompt.text = text
+        return UIBarButtonItem(customView: prompt)
     }
 
     @objc func selectLadder() {
@@ -317,22 +314,10 @@ final class ViewController: UIViewController {
 
     @objc func setCalibration() {
         os_log("setCalibration()", log: .action, type: .info)
-//        cursorView.doCalibration()
         cursorView.setCalibration(zoom: imageScrollView.zoomScale)
         cursorView.isCalibrating = false
         cursorView.setNeedsDisplay()
         showMainMenu()
-        // assuming now all calibration is 1000 msec
-        //        let calibrationValue: CGFloat = 1000
-        //        var calibration = Calibration()
-        //        calibration.originalZoom = imageScrollView.zoomScale
-        //        calibration.currentZoom = calibration.originalZoom
-        //        // replace this with number obtained from cursor distance apart
-        //        let dummy: CGFloat = 50
-        //        let measuredDistance = dummy
-        //        calibration.originalCalFactor = calibrationValue / measuredDistance
-        //        calibration.isCalibrated = true
-        //        ladderView.calibration = calibration
     }
 
     @objc func cancelCalibration() {
@@ -474,12 +459,14 @@ final class ViewController: UIViewController {
         if let separatorView = separatorView {
             // Note separatorView is released when removed from superview.
             separatorView.removeFromSuperview()
+            self.separatorView = nil
         }
         coordinator.animate(alongsideTransition: nil, completion: {
             _ in
             self.resetViews()
         })
     }
+
 
     func setMaxCursorPositionY() {
         cursorView.maxCursorPositionY = imageScrollView.frame.height
@@ -489,7 +476,7 @@ final class ViewController: UIViewController {
         os_log("resetView() - ViewController", log: .action, type: .info)
         // Add back in separatorView after rotation.
         if (separatorView == nil) {
-        separatorView = HorizontalSeparatorView.addSeparatorBetweenViews(separatorType: .horizontal, primaryView: imageScrollView, secondaryView: ladderView, parentView: self.view)
+            separatorView = HorizontalSeparatorView.addSeparatorBetweenViews(separatorType: .horizontal, primaryView: imageScrollView, secondaryView: ladderView, parentView: self.view)
         }
         self.ladderView.resetSize()
         // FIXME: save and restore scrollview offset so it is maintained with rotation.

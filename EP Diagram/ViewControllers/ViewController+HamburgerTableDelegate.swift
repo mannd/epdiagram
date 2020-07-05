@@ -149,6 +149,12 @@ extension ViewController: HamburgerTableDelegate, UIImagePickerControllerDelegat
     // Use to test features during development
     func test() {
         os_log("test()", log: .debugging, type: .debug)
+        P("marks \(ladderView.ladder.regions[0].marks)")
+        let intervals = Interval.createIntervals(marks: ladderView.ladder.regions[0].marks)
+        for interval in intervals {
+            P("interval = \(interval.proximalValue)")
+            P("interval prox boundary = \(interval.proximalBoundary)")
+        }
     }
 
     func openDiagram() {
