@@ -50,7 +50,6 @@ extension ViewController: UIScrollViewDelegate {
         os_log("scrollViewDidEndZooming()", log: OSLog.viewCycle, type: .info)
         scrollViewAdjustViews(scrollView)
         self.scale = scale
-        P(">>>> scale = \(self.scale)")
     }
 
     func scrollViewDidZoom(_ scrollView: UIScrollView) {

@@ -24,6 +24,9 @@ struct PreferencesView: View {
             Toggle(isOn: $preferences.showBlock) {
                 Text("Show block")
             }
+            Toggle(isOn: $preferences.showIntervals) {
+                Text("Show intervals")
+            }
         }.padding()
             .navigationBarTitle("Preferences")
             .navigationBarItems(trailing: Button(action: { self.onSave() }, label: { Text("Save") }))

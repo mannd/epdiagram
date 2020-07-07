@@ -7,6 +7,7 @@
 //
 
 import UIKit
+import os.log
 
 struct NearbyMarks {
     var proximal = [Mark]()
@@ -43,17 +44,19 @@ class Ladder: Codable {
 
     // TODO: Does region have to be optional?  Consider refactor away optionality.
     // addMark() functions.  All require a Region in which to add the mark.  Each new mark is registered to that region.  All return addedMark or nil if region is nil.
-    // FIXME: should undo, redo be in ladder, and not in the super classes?
     func addMark(at positionX: CGFloat, inRegion region: Region?) -> Mark? {
         return registerAndAppendMark(Mark(positionX: positionX), toRegion: region)
     }
 
     func addMark(fromSegment segment: Segment, inRegion region: Region?) -> Mark? {
-        return registerAndAppendMark(Mark(segment: segment), toRegion: region)
+        let mark = Mark(segment: segment)
+        return registerAndAppendMark(mark, toRegion: region)
     }
 
     private func registerAndAppendMark(_ mark: Mark, toRegion region: Region?) -> Mark? {
+        os_log("registerAndAppendMark(_:toRegion:) - Ladder", log: .action, type: .info)
         guard let region = region else { return nil }
+        mark.lineStyle = region.lineStyle
         region.appendMark(mark)
         registry[mark.id] = getIndex(ofRegion: region)
         return mark

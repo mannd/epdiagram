@@ -13,6 +13,7 @@ struct RegionTemplate: Codable, Equatable, Hashable {
     var description: String = ""
     var unitHeight: Int = 1
     var deletionFlag: Bool = false
+    var lineStyle: Mark.LineStyle = .solid
     let id = UUID()
 
 

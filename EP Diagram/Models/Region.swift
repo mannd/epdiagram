@@ -36,6 +36,11 @@ class Region: Codable, Equatable {
     var marks = [Mark]()
     var markable: Bool = true
     var height: CGFloat { distalBoundary - proximalBoundary }
+    // TODO: Add style to region, which can be overrident, and set as a default in preferences
+    // TODO: We can init lineStyle with the template lineStyle, but we need to be able to set it as well.
+    var lineStyle: Mark.LineStyle {
+        template.lineStyle
+    }
 
     let id = UUID()
 
@@ -49,23 +54,6 @@ class Region: Codable, Equatable {
 
     func appendMark(_ mark: Mark) {
         marks.append(mark)
-        // TODO: need to get add Interval to this mark, and hook previous interval to this mark.
-        /* Thus
-         Mark -- Interval -- nil
-         Mark -- Interval -- Mark -- Interval -- nil
-         etc.
-         Thus each Mark has an Interval attached to it, an each Interval has at least one Mark (the prior Mark),
-         with possibly another Mark after it.
-         Must deal with deleted Marks and Marks added  in between Marks.
-
-         See https://stackoverflow.com/questions/45340536/get-next-or-previous-item-to-an-object-in-a-swift-collection-or-array
-
-         Consider an Array of [Any] (must use Any for structs, AnyObject is for classes only).
-         Problem is the Array of Marks is not ordered, but in the order that the Marks are added.  So above won't
-         work.  It looks like we will need to sort the Mark array based on proximal and distal x and add intervals
-         on the fly in each region.  Only need to do with each addition and deletion and only in the affected region.
-         */
-//        let sortedMarks = marks.sort 
     }
 
     func getRelativeYPosition(y: CGFloat) -> CGFloat? {

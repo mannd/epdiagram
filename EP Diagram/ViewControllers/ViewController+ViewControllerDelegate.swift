@@ -75,6 +75,7 @@ extension ViewController: ViewControllerDelegate {
         ladderView.lineWidth = CGFloat(preferences.lineWidth)
         ladderView.showBlock = preferences.showBlock
         ladderView.showImpulseOrigin = preferences.showImpulseOrigin
+        ladderView.showIntervals = preferences.showIntervals
         setViewsNeedDisplay()
     }
 

@@ -46,10 +46,8 @@ final class LadderView: ScaledView {
 
     // TODO: lineWidth vs markLineWidth??????
     // variables that need to eventually be preferences
-    var lineWidth: CGFloat = 2
     var markLineWidth: CGFloat = 2
     var connectedLineWidth: CGFloat = 4
-
     var red = UIColor.systemRed
     var blue = UIColor.systemBlue
     var unhighlightedColor = UIColor.label
@@ -58,6 +56,8 @@ final class LadderView: ScaledView {
     var selectedColor = UIColor.systemRed
     var groupedColor = UIColor.systemPurple
 
+    // Controlled by Preferences at present.
+    var lineWidth: CGFloat = 2
     var showImpulseOrigin = true
     var showBlock = true
     var showPivots = true
@@ -443,7 +443,7 @@ final class LadderView: ScaledView {
     private func performMarkSelecting(_ tapLocationInLadder: LocationInLadder) {
         if let mark = tapLocationInLadder.mark {
             // toggle mark selection
-            mark.selected = !mark.selected
+            mark.selected.toggle()
             mark.highlight = mark.selected ? .selected : .none
             if mark.selected {
                 ladder.selectedMarks.append(mark)
@@ -1033,9 +1033,6 @@ final class LadderView: ScaledView {
     }
 
     func draw(rect: CGRect, context: CGContext) {
-        if ladderIsLocked {
-            showLockLadderWarning(rect: rect)
-        }
         context.setStrokeColor(UIColor.label.cgColor)
         context.setLineWidth(1)
         // All horizontal distances are adjusted to scale.
@@ -1045,11 +1042,15 @@ final class LadderView: ScaledView {
             let lastRegion = index == ladder.regions.count - 1
             drawRegion(rect: regionRect, context: context, region: region, offset: offsetX, scale: scale, lastRegion: lastRegion)
         }
+        if ladderIsLocked {
+            showLockLadderWarning(rect: rect)
+        }
     }
 
 
     fileprivate func drawLabel(rect: CGRect, region: Region, context: CGContext) {
         let stringRect = CGRect(x: 0, y: rect.origin.y, width: rect.origin.x, height: rect.height)
+        // TODO: refactor out constant attributes.
         let paragraphStyle = NSMutableParagraphStyle()
         paragraphStyle.alignment = .center
         let attributes: [NSAttributedString.Key: Any] = [
@@ -1149,7 +1150,7 @@ final class LadderView: ScaledView {
         context.setStrokeColor(getLineColor())
     }
 
-    func drawIntervals(region: Region, context: CGContext) {
+    fileprivate func drawIntervals(region: Region, context: CGContext) {
         guard showIntervals, cursorViewDelegate.isCalibrated() else { return }
         let marks = region.marks
         let intervals = Interval.createIntervals(marks: marks)
@@ -1206,7 +1207,8 @@ final class LadderView: ScaledView {
         let text = L("LADDER LOCK")
         let attributes: [NSAttributedString.Key: Any] = [
             .font: UIFont.systemFont(ofSize: 14.0),
-            .foregroundColor: UIColor.white, .backgroundColor: UIColor.systemRed
+            .foregroundColor: UIColor.white, .backgroundColor: UIColor.systemRed,
+        
         ]
         let lockRect = CGRect(x: rect.origin.x + 5, y: rect.origin.y + 5, width: rect.size.width, height: rect.size.height)
         text.draw(in: lockRect, withAttributes: attributes)

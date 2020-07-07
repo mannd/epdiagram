@@ -160,11 +160,10 @@ final class ViewController: UIViewController {
     func loadUserDefaults() {
         os_log("loadUserDefaults() - ViewController", log: .action, type: .info)
         preferences.retrieve()
-        P(">>>>> preferences.lineWidth = \(preferences.lineWidth)")
         ladderView.lineWidth = CGFloat(preferences.lineWidth)
         ladderView.showBlock = preferences.showBlock
         ladderView.showImpulseOrigin = preferences.showImpulseOrigin
-        P(">>>>> ladderView.lineWidth = \(ladderView.lineWidth)")
+        ladderView.showIntervals = preferences.showIntervals
     }
 
     private func showMainMenu() {

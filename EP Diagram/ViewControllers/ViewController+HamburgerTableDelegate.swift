@@ -69,7 +69,7 @@ class ImageSaver: NSObject {
 extension ViewController: HamburgerTableDelegate, UIImagePickerControllerDelegate & UINavigationControllerDelegate {
 
     func lockImage() {
-        _imageIsLocked = !_imageIsLocked
+        _imageIsLocked.toggle()
         // Turn off scrolling and zooming, but allow single taps to generate marks with cursors.
         imageScrollView.isScrollEnabled = !_imageIsLocked
         imageScrollView.pinchGestureRecognizer?.isEnabled = !_imageIsLocked
@@ -149,12 +149,6 @@ extension ViewController: HamburgerTableDelegate, UIImagePickerControllerDelegat
     // Use to test features during development
     func test() {
         os_log("test()", log: .debugging, type: .debug)
-        P("marks \(ladderView.ladder.regions[0].marks)")
-        let intervals = Interval.createIntervals(marks: ladderView.ladder.regions[0].marks)
-        for interval in intervals {
-            P("interval = \(interval.proximalValue)")
-            P("interval prox boundary = \(interval.proximalBoundary)")
-        }
     }
 
     func openDiagram() {
@@ -240,7 +234,7 @@ extension ViewController: HamburgerTableDelegate, UIImagePickerControllerDelegat
 
     func lockLadder() {
         os_log("lockDiagram()", log: .action, type: .info)
-        _ladderIsLocked = !_ladderIsLocked
+        _ladderIsLocked.toggle()
         // Turn off scrolling and zooming, but allow single taps to generate marks with cursors.
         ladderView.ladderIsLocked = _ladderIsLocked
         cursorView.allowTaps = !_ladderIsLocked
@@ -395,6 +389,7 @@ extension ViewController: HamburgerTableDelegate, UIImagePickerControllerDelegat
         constraintHamburgerLeft.constant = 0
         hamburgerMenuIsOpen = true
         self.separatorView?.removeFromSuperview()
+        self.separatorView = nil
         navigationController?.setToolbarHidden(true, animated: true)
         // Always hide cursor when opening hamburger menu.
         cursorView.hideCursor(true)

@@ -86,7 +86,20 @@ class Mark: Codable, Comparable {
     }
 
     /// Draw a solid or dashed line when drawing a mark.
-    enum LineStyle: Int, Codable {
+    enum LineStyle: Int, Codable, CustomStringConvertible, CaseIterable, Identifiable {
+        var id: LineStyle { self  }
+
+        var description: String {
+            switch self {
+            case .solid:
+                return "Solid"
+            case .dashed:
+                return "Dashed"
+            case .dotted:
+                return "Dotted"
+            }
+        }
+
         case solid
         case dashed
         case dotted

@@ -13,7 +13,9 @@ extension RegionTemplate: Identifiable {}
 
 struct LadderEditor: View {
     @Binding var ladderTemplate: LadderTemplate
+    @State var selection: Mark.LineStyle = .solid
     @State private var editMode = EditMode.inactive
+    var lineStyles = ["Solid", "Dashed", "Dotted"]
     @Environment(\.presentationMode) var presentationMode: Binding<PresentationMode>
 
     var body: some View {
@@ -38,14 +40,21 @@ struct LadderEditor: View {
                                     HStack {
                                         Text("Description:").bold()
                                         TextField("Description", text: self.$ladderTemplate.regionTemplates[index].description)
-                                    }.foregroundColor(self.ladderTemplate.regionTemplates[index].deletionFlag ? .white : .primary)
+                                    }
+                                    .foregroundColor(self.ladderTemplate.regionTemplates[index].deletionFlag ? .white : .primary)
                                     Stepper(value: self.$ladderTemplate.regionTemplates[index].unitHeight, in: 1...4, step: 1) {
                                         HStack {
                                             Text("Height:").bold()
                                             Text("\(self.ladderTemplate.regionTemplates[index].unitHeight) unit" + (self.ladderTemplate.regionTemplates[index].unitHeight > 1 ? "s" : ""))
                                         }
-                                    }.foregroundColor(self.ladderTemplate.regionTemplates[index].deletionFlag ? .white : .primary)
-                                }.listRowBackground(self.ladderTemplate.regionTemplates[index].deletionFlag ? Color.red : Color.clear).disabled(self.ladderTemplate.regionTemplates[index].deletionFlag)
+                                    }
+                                    // TODO: Need to get array of indices on load from ladderTemplate.regionTemplates and then pass this back to the delegate after the form is saved.
+                                    Picker(selection: self.$ladderTemplate.regionTemplates[index].lineStyle, label: Text("Line style"), content: {
+                                        ForEach(Mark.LineStyle.allCases) { style in
+                                            Text(style.description)
+                                        }
+                                    })
+                                }.foregroundColor(self.ladderTemplate.regionTemplates[index].deletionFlag ? .white : .primary).listRowBackground(self.ladderTemplate.regionTemplates[index].deletionFlag ? Color.red : Color.clear).disabled(self.ladderTemplate.regionTemplates[index].deletionFlag)
                             }
                             .onMove(perform: onMove)
                             .onDelete(perform: onDelete)
@@ -108,6 +117,6 @@ struct LadderEditor: View {
 struct LadderEditor_Previews: PreviewProvider {
     static var previews: some View {
         LadderEditor(ladderTemplate: .constant(LadderTemplate.defaultTemplate()))
-        }
+    }
 }
 #endif
