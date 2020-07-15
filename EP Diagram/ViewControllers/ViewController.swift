@@ -116,6 +116,7 @@ final class ViewController: UIViewController {
 
         if diagram == nil {
             P("restoring default diagram")
+            // TODO: Use last selected ladder for new diagrams.
             diagram = getDefaultDiagram()
         }
         guard let diagram = diagram else {
@@ -231,8 +232,11 @@ final class ViewController: UIViewController {
 
     @objc func selectLadder() {
         os_log("selectLadder()", log: .action, type: .info)
+        if ladderView.ladderIsDirty {
+            saveDiagram()
+        }
+        // FIXME: This segue is not being performed when saving diagram
         performSegue(withIdentifier: "selectLadderSegue", sender: self)
-        
     }
 
     @objc func editDiagram() {

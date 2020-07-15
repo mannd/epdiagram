@@ -31,6 +31,8 @@ class Ladder: Codable {
     var movingMark: Mark?
     var selectedMarks = [Mark]()
     var linkedMarks = [Mark]()
+    // isDirty will be true if f any changes made to ladder, even if they are reverted back.
+    var isDirty: Bool = false
 
     let id = UUID()
 
@@ -42,6 +44,15 @@ class Ladder: Codable {
         }
     }
 
+    func hasMarks() -> Bool {
+        for region in regions {
+            if region.marks.count > 0 {
+                return true
+            }
+        }
+        return false
+    }
+    
     // TODO: Does region have to be optional?  Consider refactor away optionality.
     // addMark() functions.  All require a Region in which to add the mark.  Each new mark is registered to that region.  All return addedMark or nil if region is nil.
     func addMark(at positionX: CGFloat, inRegion region: Region?) -> Mark? {
@@ -59,6 +70,7 @@ class Ladder: Codable {
         mark.lineStyle = region.lineStyle
         region.appendMark(mark)
         registry[mark.id] = getIndex(ofRegion: region)
+        isDirty = true
         return mark
     }
 

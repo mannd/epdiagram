@@ -21,8 +21,8 @@ protocol HamburgerTableDelegate: class {
     func selectPhoto()
     func about()
     func test()
-    func openDiagram()
-    func saveDiagram()
+    func selectDiagram()
+    func saveDiagram(completion: (()->())?)
     func snapshotDiagram()
     func renameDiagram()
     func duplicateDiagram()
@@ -34,6 +34,12 @@ protocol HamburgerTableDelegate: class {
     func lockImage()
     func hideHamburgerMenu()
     func showHamburgerMenu()
+}
+
+extension HamburgerTableDelegate {
+    func saveDiagram(completion: (()->())? = nil) {
+        saveDiagram(completion: completion)
+    }
 }
 
 class ImageSaver: NSObject {
@@ -67,7 +73,6 @@ class ImageSaver: NSObject {
 }
 
 extension ViewController: HamburgerTableDelegate, UIImagePickerControllerDelegate & UINavigationControllerDelegate {
-
     func lockImage() {
         _imageIsLocked.toggle()
         // Turn off scrolling and zooming, but allow single taps to generate marks with cursors.
@@ -120,6 +125,7 @@ extension ViewController: HamburgerTableDelegate, UIImagePickerControllerDelegat
         picker.allowsEditing = true
         if !UIImagePickerController.isSourceTypeAvailable(.camera) {
             Common.showMessage(viewController: self, title: L("Camera error"), message: "Camera not available")
+            os_log("Camera not available", log: .debugging, type: .debug)
             return
         }
         picker.sourceType = .camera
@@ -127,14 +133,43 @@ extension ViewController: HamburgerTableDelegate, UIImagePickerControllerDelegat
         resetLadder()
     }
 
-    func selectPhoto() {
-        os_log("selectPhoto()", log: OSLog.action, type: .info)
+    fileprivate func handleSelectPhoto() {
+        if !UIImagePickerController.isSourceTypeAvailable(.photoLibrary) {
+            Common.showMessage(viewController: self, title: L("Photo Library Not Available"), message: L("Make sure you have enabled permission for EP Diagram to use the Photo Library in the Settings app."))
+            os_log("Photo library not available", log: .debugging, type: .debug)
+            return
+        }
+        // By default picker.mediaTypes == ["public.image"], i.e. videos aren't shown.  So no need to check UIImagePickerController.availableMediaTypes(for:) or set picker.mediaTypes.
         let picker: UIImagePickerController = UIImagePickerController()
         picker.delegate = self
-        picker.allowsEditing = true
         picker.sourceType = .photoLibrary
-        present(picker, animated: true, completion: nil)
+        // TODO: Test editing on real devices (doesn't work on simulator).
+        // Must allow editing because edited image is used by UIImagePickerController delegate.
+        picker.allowsEditing = true
+        // Need to use popover for iPads.  See
+        if UIDevice.current.userInterfaceIdiom == .pad {
+            picker.modalPresentationStyle = .popover
+            picker.popoverPresentationController?.barButtonItem = navigationItem.leftBarButtonItem
+        }
+        present(picker, animated: true, completion: { P("completed")})
         resetLadder()
+    }
+
+    func selectPhoto() {
+        os_log("selectPhoto()", log: OSLog.action, type: .info)
+        P("isDirty = \(ladderView.ladderIsDirty)")
+        if ladderView.ladderIsDirty {
+            Common.ShowWarning(viewController: self, title: L("Save Diagram?"), message: L("Diagram has been modified. Save it before loading new image?"), action: { _ in
+                // FIXME: make select photo a completion passed to saveDiagram, etc.
+                self.saveDiagram()
+                P("In middle of saving diagram")
+                return
+//                self.selectPhoto()
+            })
+        }
+        else {
+            handleSelectPhoto()
+        }
     }
 
     func about() {
@@ -149,13 +184,14 @@ extension ViewController: HamburgerTableDelegate, UIImagePickerControllerDelegat
     // Use to test features during development
     func test() {
         os_log("test()", log: .debugging, type: .debug)
+        getDiagramName()
     }
 
-    func openDiagram() {
-        os_log("Open diagram", log: OSLog.action, type: .info)
+    func selectDiagram() {
+        os_log("Select diagram", log: OSLog.action, type: .info)
         // Open list of saved diagrams
         do {
-            let epDiagramsDirURL = try getEPDiagramsDirURL()
+            let epDiagramsDirURL = try DiagramIO.getEPDiagramsDirURL()
             let fileURLs = try FileManager.default.contentsOfDirectory(at: epDiagramsDirURL, includingPropertiesForKeys: nil, options: .skipsHiddenFiles)
             if fileURLs.count < 1 {
                 Common.showMessage(viewController: self, title: "No Saved Diagrams", message: "No previously saved diagrams found.")
@@ -169,14 +205,9 @@ extension ViewController: HamburgerTableDelegate, UIImagePickerControllerDelegat
         }
     }
 
-    func saveDiagram() {
+    func saveDiagram(completion: (() ->())?) {
         os_log("saveDiagram()", log: OSLog.action, type: .info)
-        if let name = diagram?.name {
-            handleSaveDiagram(filename: name, overwrite: true)
-        }
-        else {
-            showNameDiagramAlert()
-        }
+        handleSaveDiagram(filename: diagram?.name)
     }
 
     func snapshotDiagram() {
@@ -217,7 +248,7 @@ extension ViewController: HamburgerTableDelegate, UIImagePickerControllerDelegat
         // if there is no name, handle as just save diagram
         else {
             // Modify this to note that this diagram has not been saved at all yet.
-            showNameDiagramAlert()
+            handleSaveDiagram(filename: diagram?.name)
         }
     }
 
@@ -228,7 +259,7 @@ extension ViewController: HamburgerTableDelegate, UIImagePickerControllerDelegat
         }
         else {
             // Modify this to note that this diagram has not been saved at all yet.
-            showNameDiagramAlert()
+            handleSaveDiagram(filename: diagram?.name)
         }
     }
 
@@ -243,11 +274,11 @@ extension ViewController: HamburgerTableDelegate, UIImagePickerControllerDelegat
         AudioServicesPlaySystemSoundWithCompletion(SystemSoundID(1100), nil)
     }
 
-    func showNameDiagramAlert() {
+    func showNameDiagramAlert(completion: (()->())? = nil) {
         Common.showTextAlert(viewController: self, title: L("Save Diagram"), message: L("Enter a unique name for this diagram"), preferredStyle: .alert, handler: { name in self.handleSaveDiagram(filename: name) })
     }
 
-    fileprivate func saveDiagramFiles(diagramDirURL: URL) {
+    fileprivate func saveDiagramFiles(diagramDirURL: URL, showConfirmationMessage: Bool = true) {
         os_log("saveDiagramFiles()", log: .action, type: .info)
         do {
             let imageData = self.imageView.image?.pngData()
@@ -258,64 +289,69 @@ extension ViewController: HamburgerTableDelegate, UIImagePickerControllerDelegat
             let ladderURL = diagramDirURL.appendingPathComponent(FileIO.ladderFilename, isDirectory: false)
             FileManager.default.createFile(atPath: ladderURL.path, contents: ladderData, attributes: nil)
             fileOpSuccessfullFlag = true
+            ladderView.ladderIsDirty = false
+            if showConfirmationMessage {
+                Common.showMessage(viewController: self, title: L("Diagram Saved"), message: L("The diagram was saved successfully."))
+            }
         } catch {
             os_log("Error: %s", log: .errors, type: .error, error.localizedDescription)
             Common.ShowFileError(viewController: self, error: error)
         }
     }
 
-    private func getEPDiagramsDirURL() throws -> URL {
-        guard let documentDirURL = FileIO.getURL(for: .documents) else {
-            throw FileIOError.documentDirectoryNotFound
-        }
-        P("documentDirURL = \(documentDirURL)")
-        let epDiagramsDirURL = documentDirURL.appendingPathComponent(FileIO.epDiagramDir, isDirectory: true)
-        if !FileManager.default.fileExists(atPath: epDiagramsDirURL.path) {
-            try FileManager.default.createDirectory(atPath: epDiagramsDirURL.path, withIntermediateDirectories: true, attributes: nil)
-        }
-        return epDiagramsDirURL
-    }
-
-    func getDiagramDirURL(for filename: String) throws -> URL {
-        let epDiagramsDirURL = try getEPDiagramsDirURL()
-        let diagramDirURL = epDiagramsDirURL.appendingPathComponent(filename, isDirectory: true)
-        if !FileManager.default.fileExists(atPath: diagramDirURL.path) {
-            try FileManager.default.createDirectory(atPath: diagramDirURL.path, withIntermediateDirectories: true, attributes: nil)
-        }
-        return diagramDirURL
-    }
-
-    // non-throwing version of above
-    private func getDiagramDirURLNonThrowing(for filename: String) -> URL? {
-        return try? getDiagramDirURL(for: filename)
-    }
-
-    private func diagramDirURLExists(for filename: String) throws -> Bool {
-        let epDiagramsDirURL = try getEPDiagramsDirURL()
-        let diagramDirURL = epDiagramsDirURL.appendingPathComponent(filename, isDirectory: true)
-        return FileManager.default.fileExists(atPath: diagramDirURL.path)
-    }
-
     private func handleRenameDiagram(filename: String) {
         Common.showTextAlert(viewController: self, title: L("Rename Diagram"), message: L("Enter a new name for diagram \(filename)"), preferredStyle: .alert, handler: { name in self.handleSaveDiagram(filename: name, overwrite: false) })
     }
 
-    private func handleSaveDiagram(filename: String?, overwrite: Bool = false) {
+    private func handleSaveDiagram() {
+        os_log("handleSaveDiagram() new", log: .action, type: .info)
+        guard let diagramName = diagram?.name, diagramName.count > 0 else {
+            Common.showMessage(viewController: self, title: L("Operation Not Allowed"), message: L("Diagram name can't be blank."))
+            return
+        }
+        do {
+            // TODO: fix overwrite logic here.
+            if try !DiagramIO.diagramDirURLExists(for: diagramName) {
+                let diagramDirURL = try DiagramIO.getDiagramDirURL(for: diagramName)
+                saveDiagramFiles(diagramDirURL: diagramDirURL)
+            }
+            else {
+                os_log("diagram file already exists", log: OSLog.action, type: .info)
+                Common.ShowWarning(viewController: self, title: "File Already Exists", message: "A diagram named \(diagramName) already exists.  Overwrite?", okActionButtonTitle: L("Overwrite")) { _ in
+                    if let diagramDirURL = DiagramIO.getDiagramDirURLNonThrowing(for: diagramName) {
+                        self.saveDiagramFiles(diagramDirURL: diagramDirURL)
+                    }
+                }
+            }
+        } catch {
+            os_log("File error: %s", log: OSLog.errors, type: .error, error.localizedDescription)
+            Common.ShowFileError(viewController: self, error: error)
+        }
+
+
+    }
+
+    private func handleSaveDiagram(filename: String?, overwrite: Bool = false, completion: (()->())? = nil) {
         os_log("handleSaveDiagram()", log: OSLog.action, type: .info)
         guard var filename = filename, !filename.isEmpty else {
-            Common.showMessage(viewController: self, title: L("Name is Required"), message: L("You must enter a name for this diagram."))
-            return }
-        filename = cleanupFilename(filename)
+
+            let alert = UIAlertController(title: L("Name is Required"), message: L("You must enter a name for this diagram"), preferredStyle: .alert)
+            let okAction = UIAlertAction(title: L("OK"), style: .default, handler: { _ in self.showNameDiagramAlert() })
+            alert.addAction(okAction)
+            self.present(alert, animated: true)
+            return
+        }
+        filename = DiagramIO.cleanupFilename(filename)
         diagram?.name = filename
         do {
-            if try !diagramDirURLExists(for: filename) || overwrite {
-                let diagramDirURL = try getDiagramDirURL(for: filename)
+            if try !DiagramIO.diagramDirURLExists(for: filename) || overwrite {
+                let diagramDirURL = try DiagramIO.getDiagramDirURL(for: filename)
                 saveDiagramFiles(diagramDirURL: diagramDirURL)
             }
             else {
                 os_log("diagram file already exists", log: OSLog.action, type: .info)
                 Common.ShowWarning(viewController: self, title: "File Already Exists", message: "A diagram named \(filename) already exists.  Overwrite?", okActionButtonTitle: L("Overwrite")) { _ in
-                    if let diagramDirURL = self.getDiagramDirURLNonThrowing(for: filename) {
+                    if let diagramDirURL = DiagramIO.getDiagramDirURLNonThrowing(for: filename) {
                         self.saveDiagramFiles(diagramDirURL: diagramDirURL)
                     }
                 }
@@ -326,16 +362,34 @@ extension ViewController: HamburgerTableDelegate, UIImagePickerControllerDelegat
         }
     }
 
-    func cleanupFilename(_ filename: String) -> String {
-        var invalidCharacters = CharacterSet(charactersIn: ":/")
-        invalidCharacters.formUnion(.newlines)
-        invalidCharacters.formUnion(.illegalCharacters)
-        invalidCharacters.formUnion(.controlCharacters)
+    func getDiagramName() {
+        getDiagramNameAlert(title: L("Save Diagram"), message: L("Enter a name for this diagram"), placeholder: L("diagram name"), preferredStyle: .alert, handler: {self.handleSaveDiagram()})
+    }
 
-        let newFilename = filename
-            .components(separatedBy: invalidCharacters)
-            .joined(separator: "_")
-        return newFilename
+
+    func getDiagramNameAlert(title: String, message: String, placeholder: String? = nil, preferredStyle: UIAlertController.Style, handler: (()->Void)? = nil) {
+        let alert = UIAlertController(title: title, message: message, preferredStyle: preferredStyle)
+        alert.addAction(UIAlertAction(title: L("Cancel"), style: .cancel, handler: nil))
+        alert.addTextField { textField in
+            textField.text = self.diagram?.name
+            if let placeholder = placeholder {
+                textField.placeholder = placeholder
+            }
+        }
+        alert.addAction(UIAlertAction(title: L("Save"), style: .default) { action in
+            if let text = alert.textFields?.first?.text {
+                if text.isEmpty {
+                    Common.showMessage(viewController: self, title: L("Operation Cancelled"), message: L("The name of the diagram can't be blank."))
+                }
+                else {
+                    self.diagram?.name = DiagramIO.cleanupFilename(text)
+                    if let handler = handler {
+                        handler()
+                    }
+                }
+            }
+        })
+        present(alert, animated: true)
     }
 
     func sampleDiagrams() {
@@ -364,6 +418,7 @@ extension ViewController: HamburgerTableDelegate, UIImagePickerControllerDelegat
     }
 
     func imagePickerController(_ picker: UIImagePickerController, didFinishPickingMediaWithInfo info: [UIImagePickerController.InfoKey : Any]) {
+//        let chosenImage = info[.originalImage] as? UIImage
         let chosenImage = info[.editedImage] as? UIImage
         imageView.image = chosenImage
         picker.dismiss(animated: true, completion: nil)

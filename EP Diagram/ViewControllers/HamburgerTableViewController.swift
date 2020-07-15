@@ -82,7 +82,7 @@ class HamburgerTableViewController: UITableViewController {
         case .lockImage:
             delegate?.lockImage()
         case .open:
-            delegate?.openDiagram()
+            delegate?.selectDiagram()
         case .save:
             delegate?.saveDiagram()
         case .rename:

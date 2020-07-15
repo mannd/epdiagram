@@ -51,19 +51,10 @@ struct LadderSelector: View {
                 }
             }
             .navigationBarTitle(Text("Select Ladder"), displayMode: .inline)
-            .navigationBarItems(trailing: Button(action: { self.showingAlert = true }) {
-                Text("Select") }
-                .alert(isPresented: $showingAlert) {
-                    Alert(
-                        title: Text("Use Selected Ladder?"),
-                        message: Text("If you have marked up previous ladder this data will be lost unless you first save it.  Choose Cancel to return to your diagram, or Select to change ladders."),
-                        primaryButton: .destructive(Text("Select")) {
-                            self.selectLadder()
-                            self.presentationMode.wrappedValue.dismiss()
-                        },
-                        secondaryButton: .cancel(Text("Cancel"))
-                    )
-            })
+            .navigationBarItems(trailing: Button(action: {
+                self.selectLadder()
+                self.presentationMode.wrappedValue.dismiss() }) {
+                Text("Select") })
         }
     }
 

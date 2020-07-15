@@ -67,8 +67,18 @@ final class LadderView: ScaledView {
     var ladderIsLocked = false
 
     var calibration: Calibration?
+
+    var ladderIsDirty: Bool {
+        get {
+            ladder.isDirty
+        }
+        set(newValue) {
+            ladder.isDirty = newValue
+        }
+    }
     
     internal var ladder: Ladder
+
 
     private var activeRegion: Region? {
         didSet { activateRegion(region: activeRegion)}
@@ -159,13 +169,6 @@ final class LadderView: ScaledView {
         let longPressRecognizer = UILongPressGestureRecognizer(target: self, action: #selector(self.longPress))
         self.addGestureRecognizer(longPressRecognizer)
     }
-
-//    private func assertLadderIsGood() {
-//        assert(ladder.regions.count >= 1, "ladder has no regions")
-//        for i in 0..<ladder.regions.count {
-//            assert(i == ladder.regions[i].index, "Region index doesn't match place in ladder.regions array")
-//        }
-//    }
 
     private func initializeRegions() {
         regionUnitHeight = getRegionUnitHeight(ladder: ladder)

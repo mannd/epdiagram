@@ -189,6 +189,7 @@ class Common {
         })
         vc.present(alert, animated: true)
     }
+
 }
 
 // MARK: - Global namespace functions

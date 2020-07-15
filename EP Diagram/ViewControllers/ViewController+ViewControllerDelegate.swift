@@ -20,6 +20,7 @@ protocol ViewControllerDelegate: class {
 extension ViewController: ViewControllerDelegate {
     func selectLadderTemplate(ladderTemplate: LadderTemplate?) {
         os_log("selecteLadderTemplate - ViewController", log: OSLog.action, type: .info)
+        P("ladder is dirty = \(ladderView.ladderIsDirty)")
         if let ladderTemplate = ladderTemplate {
             let ladder = Ladder(template: ladderTemplate)
             diagram?.name = nil
@@ -32,7 +33,7 @@ extension ViewController: ViewControllerDelegate {
         guard let diagramName = diagramName else { return }
         P("diagram name = \(diagramName)")
         do {
-            let diagramDirURL = try getDiagramDirURL(for: diagramName)
+            let diagramDirURL = try DiagramIO.getDiagramDirURL(for: diagramName)
             let imageURL = diagramDirURL.appendingPathComponent(FileIO.imageFilename, isDirectory: false)
             let image = UIImage(contentsOfFile: imageURL.path)
             let ladderURL = diagramDirURL.appendingPathComponent(FileIO.ladderFilename, isDirectory: false)
@@ -55,7 +56,7 @@ extension ViewController: ViewControllerDelegate {
         os_log("deleteDiagram %s", log: .action, type: .info, diagramName)
         // actually delete diagram files here
         do {
-            let diagramDirURL = try getDiagramDirURL(for: diagramName)
+            let diagramDirURL = try DiagramIO.getDiagramDirURL(for: diagramName)
             let diagramDirContents = try FileManager.default.contentsOfDirectory(atPath: diagramDirURL.path)
             for path in diagramDirContents {
                 let pathURL = diagramDirURL.appendingPathComponent(path, isDirectory: false)

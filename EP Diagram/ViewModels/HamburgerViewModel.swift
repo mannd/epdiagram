@@ -10,7 +10,7 @@ import UIKit
 
 struct HamburgerViewModel {
     // Only set to true for testing.  Note it will be ignored anyway for release version.
-    let showTestLayer = false
+    let showTestLayer = true
 
     func allLayers() -> [HamburgerLayer] {
         var array = [HamburgerLayer]()
@@ -20,14 +20,14 @@ struct HamburgerViewModel {
         array.append(selectPhotoLayer)
         let lockImageLayer = HamburgerLayer(withName: L("Lock image"), iconName: "lock", layer: .lockImage, altName: L("Unlock image"), altIconName: "unlock")
         array.append(lockImageLayer)
-        let openLayer = HamburgerLayer(withName: L("Open diagram"), iconName: "open", layer: .open)
-        array.append(openLayer)
-        let saveLayer = HamburgerLayer(withName: L("Save diagram"), iconName: "save", layer: .save)
-        array.append(saveLayer)
-        let renameLayer = HamburgerLayer(withName: L("Rename diagram"), iconName: "write", layer: .rename)
-        array.append(renameLayer)
-        let duplicateLayer = HamburgerLayer(withName: L("Duplicate diagram"), iconName: "duplicate", layer: .duplicate)
-        array.append(duplicateLayer)
+        let selectDiagramLayer = HamburgerLayer(withName: L("Select diagram"), iconName: "open", layer: .open)
+        array.append(selectDiagramLayer)
+        let saveDiagramLayer = HamburgerLayer(withName: L("Save diagram"), iconName: "save", layer: .save)
+        array.append(saveDiagramLayer)
+        let renameDiagramLayer = HamburgerLayer(withName: L("Rename diagram"), iconName: "write", layer: .rename)
+        array.append(renameDiagramLayer)
+        let duplicateDiagramLayer = HamburgerLayer(withName: L("Duplicate diagram"), iconName: "duplicate", layer: .duplicate)
+        array.append(duplicateDiagramLayer)
         let saveImageLayer = HamburgerLayer(withName: L("Snapshot diagram"), iconName: "save_image", layer: .snapshot)
         array.append(saveImageLayer)
         let sampleLayer = HamburgerLayer(withName: L("Sample diagrams"), iconName: "ecg", layer: .sample)
