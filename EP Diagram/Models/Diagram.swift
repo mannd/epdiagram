@@ -13,4 +13,7 @@ struct Diagram {
     var name: String?
     var image: UIImage
     var ladder: Ladder
+    var isSaved: Bool {
+        !name.isBlank
+    }
 }

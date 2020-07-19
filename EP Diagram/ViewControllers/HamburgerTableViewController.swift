@@ -10,6 +10,7 @@ import UIKit
 import os.log
 
 class HamburgerTableViewController: UITableViewController {
+    var hamburgerViewModel: HamburgerViewModel = HamburgerViewModel()
     var rows = [HamburgerLayer]()
     var delegate: HamburgerTableDelegate?
     var imageIsLocked: Bool = false
@@ -18,23 +19,24 @@ class HamburgerTableViewController: UITableViewController {
     override func viewDidLoad() {
         os_log("viewDidLoad() - HamburgerView", log: OSLog.viewCycle, type: .info)
         super.viewDidLoad()
-
-        let hamburgerViewModel = HamburgerViewModel()
-        rows = hamburgerViewModel.allLayers()
     }
 
     override func viewWillAppear(_ animated: Bool) {
         os_log("viewWillAppear() - HamburgerView", log: OSLog.viewCycle, type: .info)
         super.viewWillAppear(animated)
-        imageIsLocked = delegate?.imageIsLocked ?? false
-        diagramIsLocked = delegate?.diagramIsLocked ?? false
-
+        loadData()
     }
 
     func reloadData() {
+        loadData()
+        self.tableView.reloadData()
+    }
+
+    private func loadData() {
         imageIsLocked = delegate?.imageIsLocked ?? false
         diagramIsLocked = delegate?.diagramIsLocked ?? false
-        self.tableView.reloadData()
+        hamburgerViewModel.diagramNotSaved = !(delegate?.diagramSaved ?? true)
+        rows = hamburgerViewModel.allLayers()
     }
 
     // MARK: - Table view data source
@@ -58,7 +60,10 @@ class HamburgerTableViewController: UITableViewController {
         }
         else {
             cell.label?.text = row.name
+            cell.label?.isEnabled = row.isEnabled
+            cell.icon?.alpha = row.isEnabled ? 1.0 : 0.4
             cell.icon?.image = UIImage(named: row.iconName!)
+
         }
         cell.label?.adjustsFontSizeToFitWidth = true
         return cell
@@ -86,9 +91,19 @@ class HamburgerTableViewController: UITableViewController {
         case .save:
             delegate?.saveDiagram()
         case .rename:
-            delegate?.renameDiagram()
+            if !row.isEnabled{
+                delegate?.showNeedToSaveMessage()
+                return
+            } else {
+                delegate?.renameDiagram()
+            }
         case .duplicate:
-            delegate?.duplicateDiagram()
+            if !row.isEnabled{
+                delegate?.showNeedToSaveMessage()
+                return
+            } else {
+                delegate?.duplicateDiagram()
+            }
         case .lockLadder:
             delegate?.lockLadder()
         case .sample:

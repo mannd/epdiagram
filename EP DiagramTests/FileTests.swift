@@ -12,14 +12,11 @@ import XCTest
 class FileTests: XCTestCase {
 
     func testCleanupFilename() {
-        let sb = UIStoryboard(name: "Main", bundle: nil)
-        let sut = sb.instantiateViewController(withIdentifier: String(describing: ViewController.self)) as! ViewController
-        sut.loadViewIfNeeded()
-        var filename = sut.cleanupFilename("x:x/y:z")
+        var filename = DiagramIO.cleanupFilename("x:x/y:z")
         XCTAssertEqual("x_x_y_z", filename)
-        filename = sut.cleanupFilename("abcde.tmp")
+        filename = DiagramIO.cleanupFilename("abcde.tmp")
         XCTAssertEqual("abcde.tmp", filename)
-        filename = sut.cleanupFilename("abcde\ntmp")
+        filename = DiagramIO.cleanupFilename("abcde\ntmp")
         XCTAssertEqual("abcde_tmp", filename)
     }
 

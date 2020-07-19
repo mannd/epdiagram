@@ -32,6 +32,7 @@ struct HamburgerLayer {
     var layer: Layer?
     var altName: String?
     var altIconName: String?
+    var isEnabled: Bool = true
 
     init(withName name: String, iconName: String, layer: Layer) {
         self.name = name
