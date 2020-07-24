@@ -50,7 +50,7 @@ final class ViewController: UIViewController {
     internal let _maxBlackAlpha: CGFloat = 0.4
 
     var diagramFilenames: [String] = []
-    var diagram: Diagram?
+    var diagram: Diagram = Diagram.getDefaultDiagram()
     var fileOpSuccessfullFlag: Bool = false {
         didSet {
             P("fileOpSuccessfulFlag = \(fileOpSuccessfullFlag)")
@@ -114,20 +114,8 @@ final class ViewController: UIViewController {
         let ladderButton = UIBarButtonItem(image: UIImage(named: "ladder"), style: .plain, target: self, action: #selector(selectLadder))
         navigationItem.rightBarButtonItem = ladderButton
 
-        if diagram == nil {
-            P("restoring default diagram")
-            // TODO: Use last selected ladder for new diagrams.
-            diagram = getDefaultDiagram()
-        }
-        guard let diagram = diagram else {
-            fatalError("Could not find default diagram!")
-        }
         imageView.image = diagram.image
         ladderView.ladder = diagram.ladder
-    }
-
-    func getDefaultDiagram() -> Diagram {
-        return Diagram(name: nil, image: UIImage(named: "SampleECG")!, ladder: Ladder.defaultLadder())
     }
 
     @objc func onDidUndoableAction(_ notification: Notification) {
@@ -457,6 +445,8 @@ final class ViewController: UIViewController {
     override func viewWillTransition(to size: CGSize, with coordinator: UIViewControllerTransitionCoordinator) {
         os_log("viewWillTransition", log: OSLog.viewCycle, type: .info)
         super.viewWillTransition(to: size, with: coordinator)
+        // Hide cursor with rotation, to avoid redrawing it.
+        cursorView.hideCursor(true)
         // Remove separatorView when rotating to let original constraints resume.
         // Otherwise, views are not laid out correctly.
         if let separatorView = separatorView {

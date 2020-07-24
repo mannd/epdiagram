@@ -23,7 +23,7 @@ extension ViewController: ViewControllerDelegate {
         P("ladder is dirty = \(ladderView.ladderIsDirty)")
         if let ladderTemplate = ladderTemplate {
             let ladder = Ladder(template: ladderTemplate)
-            diagram?.name = nil
+            diagram.name = nil
             ladderView.ladder = ladder
             setViewsNeedDisplay()
         }

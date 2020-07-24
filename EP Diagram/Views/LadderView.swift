@@ -538,6 +538,7 @@ final class LadderView: ScaledView {
         return anchor
     }
 
+    // FIXME: When cursor goes from hidden to visible, mark anchor should reset to middle of mark.
     private func toggleAnchor(mark: Mark?) {
         guard let mark = mark else { return }
         let availableAnchors = ladder.availableAnchors(forMark: mark)

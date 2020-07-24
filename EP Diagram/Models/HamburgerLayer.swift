@@ -15,6 +15,7 @@ enum Layer {
     case save
     case rename
     case duplicate
+    case getInfo
     case snapshot
     case sample
     case templates

@@ -14,6 +14,7 @@ enum FileIOError: Error {
     case documentDirectoryNotFound
     case epDiagramDirectoryNotFound
     case diagramDirectoryNotFound
+    case diagramIsUnnamed
 }
 
 extension FileIOError: LocalizedError {
@@ -26,7 +27,9 @@ extension FileIOError: LocalizedError {
         case .epDiagramDirectoryNotFound:
             return L("EP Diagram directory not found.")
         case .diagramDirectoryNotFound:
-            return (L("Diagram directory not found."))
+            return L("Diagram directory not found.")
+        case .diagramIsUnnamed:
+            return L("Diagram has no name.")
         }
     }
 }

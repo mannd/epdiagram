@@ -35,7 +35,7 @@ class HamburgerTableViewController: UITableViewController {
     private func loadData() {
         imageIsLocked = delegate?.imageIsLocked ?? false
         diagramIsLocked = delegate?.diagramIsLocked ?? false
-        hamburgerViewModel.diagramNotSaved = !(delegate?.diagramSaved ?? true)
+        hamburgerViewModel.diagramSaved = delegate?.diagramSaved ?? false
         rows = hamburgerViewModel.allLayers()
     }
 
@@ -104,6 +104,8 @@ class HamburgerTableViewController: UITableViewController {
             } else {
                 delegate?.duplicateDiagram()
             }
+        case .getInfo:
+            delegate?.getDiagramInfo()
         case .lockLadder:
             delegate?.lockLadder()
         case .sample:

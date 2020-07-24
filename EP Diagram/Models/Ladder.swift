@@ -23,7 +23,9 @@ class Ladder: Codable {
 
     var template: LadderTemplate
     var name: String { template.name }
-    var description: String { template.description }
+    // This holds the optional description for the diagram.  It is stored here rather than in Diagram because Diagram is not Codable while Ladder is and so it is easier to serialize the description via Ladder.
+    var description: String = ""
+    var templateDescription: String { template.description }
     var regions = [Region]()
     var numRegions: Int { regions.count }
     var attachedMark: Mark?
@@ -51,6 +53,22 @@ class Ladder: Codable {
             }
         }
         return false
+    }
+
+    // TODO: Need editing facility of ladder: add, delete Regions, edit labels, edit region parameters.  This is important because rather than starting a ladder over from a new blank template, someone may just want to add a region.  Thus, eg.:
+    func addRegion() {
+        os_log("addRegion()", log: .action, type: .info)
+        fatalError("not implemented")
+    }
+
+    func deleteRegion(region: Region) {
+        os_log("deleteRegion(region:)", log: .action, type: .info)
+        fatalError("not implemented")
+    }
+
+    func editRegion(region: Region) {
+        os_log("editRegion(region:)", log: .action, type: .info)
+        fatalError("not implemented")
     }
     
     // TODO: Does region have to be optional?  Consider refactor away optionality.

@@ -190,6 +190,29 @@ class Common {
         vc.present(alert, animated: true)
     }
 
+    static func showNameDiagramAlert(viewController vc: UIViewController, diagram: Diagram, handler: ((String, String) -> Void)?) {
+        let alert = UIAlertController(title: L("Name Diagram"), message: L("Give a name and optional description to this diagram"), preferredStyle: .alert)
+        alert.addAction(UIAlertAction(title: L("Cancel"), style: .cancel, handler: nil))
+        alert.addTextField { textField in
+            textField.placeholder = L("Diagram name")
+            textField.text = diagram.name
+        }
+        alert.addTextField { textField in
+            textField.placeholder = L("Diagram description")
+            textField.text = diagram.description
+        }
+        alert.addAction(UIAlertAction(title: L("Save"), style: .default) { action in
+            if let name = alert.textFields?.first?.text, let description = alert.textFields?[1].text {
+                if let handler = handler {
+                    handler(name, description)
+                }
+                else {
+                    P("name = \(name), description = \(description)")
+                }
+            }
+        })
+        vc.present(alert, animated: true)
+    }
 }
 
 // MARK: - Global namespace functions

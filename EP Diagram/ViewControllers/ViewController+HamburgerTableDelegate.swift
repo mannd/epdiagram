@@ -29,6 +29,7 @@ protocol HamburgerTableDelegate: class {
     func snapshotDiagram()
     func renameDiagram()
     func duplicateDiagram()
+    func getDiagramInfo()
     func lockLadder()
     func sampleDiagrams()
     func showPreferences()
@@ -41,6 +42,7 @@ protocol HamburgerTableDelegate: class {
 
 extension HamburgerTableDelegate {
     func saveDiagram(completion: (()->())? = nil) {
+        os_log("saveDiagram(completion:) - HamburgerTableDelegate", log: .action, type: .info)
         saveDiagram(completion: completion)
     }
 }
@@ -97,9 +99,8 @@ extension ViewController: HamburgerTableDelegate, UIImagePickerControllerDelegat
     }
 
     var diagramSaved: Bool {
-        return diagram?.isSaved ?? false
+        return diagram.isSaved
     }
-
 
     var constraintHamburgerLeft: NSLayoutConstraint {
         get {
@@ -196,7 +197,10 @@ extension ViewController: HamburgerTableDelegate, UIImagePickerControllerDelegat
     // Use to test features during development
     func test() {
         os_log("test()", log: .debugging, type: .debug)
-        getDiagramName()
+        Common.showNameDiagramAlert(viewController: self, diagram: diagram) { (name, description) in
+            self.diagram.name = name
+            self.diagram.description = description
+        }
     }
 
     func selectDiagram() {
@@ -250,7 +254,7 @@ extension ViewController: HamburgerTableDelegate, UIImagePickerControllerDelegat
 
     func renameDiagram() {
         os_log("renameDiagram()", log: .action, type: .info)
-        if let name = diagram?.name {
+        if let name = diagram.name {
             handleRenameDiagram(filename: name)
             if fileOpSuccessfullFlag {
                 deleteDiagram(diagramName: name)
@@ -266,13 +270,18 @@ extension ViewController: HamburgerTableDelegate, UIImagePickerControllerDelegat
 
     func duplicateDiagram() {
         os_log("duplicateDiagram()", log: .action, type: .info)
-        if let name = diagram?.name {
+        if let name = diagram.name {
             handleRenameDiagram(filename: name)
         }
         else {
             // Modify this to note that this diagram has not been saved at all yet.
-            handleSaveDiagram(diagramName: diagram?.name)
+            handleSaveDiagram(diagramName: diagram.name)
         }
+    }
+
+    func getDiagramInfo() {
+        os_log("getDiagramInfo()", log: .action, type: .info)
+        // show dialog with diagram info here.
     }
 
     func lockLadder() {
@@ -340,15 +349,17 @@ extension ViewController: HamburgerTableDelegate, UIImagePickerControllerDelegat
 
     private func handleSaveDiagram() {
         os_log("handleSaveDiagram()", log: .action, type: .info)
-        assert(diagram != nil, "Diagram is nil!  Shouldn't've happened!")
-        guard let diagram = diagram else {
-            return
-        }
-        guard let diagramName = diagram.name, !diagramName.isEmpty else {
+        guard let diagramName = diagram.name, !diagramName.isBlank else {
             showNameDiagramAlert()
             return
         }
-        saveDiagramFiles(diagramName: diagramName)
+        do {
+            try diagram.save()
+        }
+        catch {
+            os_log("Error: %s", log: .errors, type: .error, error.localizedDescription)
+            Common.ShowFileError(viewController: self, error: error)
+        }
     }
 
     private func handleSaveDiagram(diagramName: String?, overwrite: Bool = false, completion: (()->())? = nil) {
@@ -362,7 +373,7 @@ extension ViewController: HamburgerTableDelegate, UIImagePickerControllerDelegat
             return
         }
         filename = DiagramIO.cleanupFilename(filename)
-        diagram?.name = filename
+        diagram.name = filename
         do {
             if try !DiagramIO.diagramDirURLExists(for: filename) || overwrite {
                 saveDiagramFiles(diagramName: filename)
@@ -390,7 +401,7 @@ extension ViewController: HamburgerTableDelegate, UIImagePickerControllerDelegat
         let alert = UIAlertController(title: title, message: message, preferredStyle: preferredStyle)
         alert.addAction(UIAlertAction(title: L("Cancel"), style: .cancel, handler: nil))
         alert.addTextField { textField in
-            textField.text = self.diagram?.name
+            textField.text = self.diagram.name
             if let placeholder = placeholder {
                 textField.placeholder = placeholder
             }
@@ -401,7 +412,7 @@ extension ViewController: HamburgerTableDelegate, UIImagePickerControllerDelegat
                     Common.showMessage(viewController: self, title: L("Operation Cancelled"), message: L("The name of the diagram can't be blank."))
                 }
                 else {
-                    self.diagram?.name = DiagramIO.cleanupFilename(text)
+                    self.diagram.name = DiagramIO.cleanupFilename(text)
                     if let handler = handler {
                         handler()
                     }

@@ -11,7 +11,7 @@ import UIKit
 struct HamburgerViewModel {
     // Only set to true for testing.  Note it will be ignored anyway for release version.
     let showTestLayer = true
-    var diagramNotSaved = true
+    var diagramSaved = false
 
     func allLayers() -> [HamburgerLayer] {
         var array = [HamburgerLayer]()
@@ -26,11 +26,13 @@ struct HamburgerViewModel {
         let saveDiagramLayer = HamburgerLayer(withName: L("Save diagram"), iconName: "save", layer: .save)
         array.append(saveDiagramLayer)
         var renameDiagramLayer = HamburgerLayer(withName: L("Rename diagram"), iconName: "write", layer: .rename)
-        renameDiagramLayer.isEnabled = !diagramNotSaved
+        renameDiagramLayer.isEnabled = diagramSaved
         array.append(renameDiagramLayer)
         var duplicateDiagramLayer = HamburgerLayer(withName: L("Duplicate diagram"), iconName: "duplicate", layer: .duplicate)
-        duplicateDiagramLayer.isEnabled = !diagramNotSaved
+        duplicateDiagramLayer.isEnabled = diagramSaved
         array.append(duplicateDiagramLayer)
+        let getInfoLayer = HamburgerLayer(withName: L("Diagram info"), iconName: "diagramInfo", layer: .getInfo)
+        array.append(getInfoLayer)
         let saveImageLayer = HamburgerLayer(withName: L("Snapshot diagram"), iconName: "save_image", layer: .snapshot)
         array.append(saveImageLayer)
         let sampleLayer = HamburgerLayer(withName: L("Sample diagrams"), iconName: "ecg", layer: .sample)
