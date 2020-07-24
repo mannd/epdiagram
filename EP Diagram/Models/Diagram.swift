@@ -13,22 +13,34 @@ import os.log
 
 struct Diagram {
     var name: String?
-    var description: String {
-        get {
-            ladder.description
-        }
-        set(newValue) {
-            ladder.description = newValue
-        }
-    }
     var image: UIImage
-    var ladder: Ladder
+    var description: String {
+        get { diagramData.description }
+        set(newValue) { diagramData.description = newValue }
+    }
+    var ladder: Ladder {
+        get { diagramData.ladder }
+        set(newValue) { diagramData.ladder = newValue }
+    }
     // Future use?
-    var creationDate: Date?
-    var lastSavedDate: Date?
+//    var creationDate: Date?
+//    var lastSavedDate: Date?
     // A diagram does not get a name until it is saved.
     var isSaved: Bool {
         !name.isBlank
+    }
+
+    private var diagramData: DiagramData = DiagramData()
+    private struct DiagramData: Codable {
+         var description: String = ""
+         var ladder: Ladder = Ladder.defaultLadder()
+        // creationDate, lastSavedDate?
+    }
+
+    init(name: String?, image: UIImage, ladder: Ladder) {
+        self.name = name
+        self.image = image
+        self.ladder = ladder
     }
 
     func save() throws {
@@ -39,9 +51,9 @@ struct Diagram {
         let imageURL = diagramDirURL.appendingPathComponent(FileIO.imageFilename, isDirectory: false)
         try imageData?.write(to: imageURL)
         let encoder = JSONEncoder()
-        let ladderData = try encoder.encode(ladder)
+        let diagramData = try encoder.encode(self.diagramData)
         let ladderURL = diagramDirURL.appendingPathComponent(FileIO.ladderFilename, isDirectory: false)
-        FileManager.default.createFile(atPath: ladderURL.path, contents: ladderData, attributes: nil)
+        FileManager.default.createFile(atPath: ladderURL.path, contents: diagramData, attributes: nil)
         ladder.isDirty = false
     }
 
@@ -54,9 +66,9 @@ struct Diagram {
         let ladderURL = diagramDirURL.appendingPathComponent(FileIO.ladderFilename, isDirectory: false)
         let decoder = JSONDecoder()
         if let data = FileManager.default.contents(atPath: ladderURL.path), let image = image {
-            let ladder = try decoder.decode(Ladder.self, from: data)
+            let diagramData = try decoder.decode(DiagramData.self, from: data)
             self.image = image
-            self.ladder = ladder
+            self.diagramData = diagramData
         }
         else {
             throw FileIOError.diagramDirectoryNotFound
