@@ -15,6 +15,8 @@ enum FileIOError: Error {
     case epDiagramDirectoryNotFound
     case diagramDirectoryNotFound
     case diagramIsUnnamed
+    case duplicateDiagramName
+    case diagramNameIsBlank
 }
 
 extension FileIOError: LocalizedError {
@@ -30,6 +32,10 @@ extension FileIOError: LocalizedError {
             return L("Diagram directory not found.")
         case .diagramIsUnnamed:
             return L("Diagram has no name.")
+        case .duplicateDiagramName:
+            return L("Diagram name is a duplicate.")
+        case .diagramNameIsBlank:
+            return L("Diagram name can't be blank.")
         }
     }
 }

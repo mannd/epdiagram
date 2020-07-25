@@ -25,7 +25,7 @@ protocol HamburgerTableDelegate: class {
     func about()
     func test()
     func selectDiagram()
-    func saveDiagram(completion: (()->())?)
+    func saveDiagram()
     func snapshotDiagram()
     func renameDiagram()
     func duplicateDiagram()
@@ -38,13 +38,6 @@ protocol HamburgerTableDelegate: class {
     func lockImage()
     func hideHamburgerMenu()
     func showHamburgerMenu()
-}
-
-extension HamburgerTableDelegate {
-    func saveDiagram(completion: (()->())? = nil) {
-        os_log("saveDiagram(completion:) - HamburgerTableDelegate", log: .action, type: .info)
-        saveDiagram(completion: completion)
-    }
 }
 
 class ImageSaver: NSObject {
@@ -197,9 +190,10 @@ extension ViewController: HamburgerTableDelegate, UIImagePickerControllerDelegat
     // Use to test features during development
     func test() {
         os_log("test()", log: .debugging, type: .debug)
-        Common.showNameDiagramAlert(viewController: self, diagram: diagram) { (name, description) in
-            self.diagram.name = name
-            self.diagram.description = description
+        do {
+        try diagram.rename(newName: "test999")
+        } catch {
+            Common.ShowFileError(viewController: self, error: error)
         }
     }
 
@@ -221,10 +215,6 @@ extension ViewController: HamburgerTableDelegate, UIImagePickerControllerDelegat
         }
     }
 
-    func saveDiagram(completion: (() ->())?) {
-        os_log("saveDiagram()", log: OSLog.action, type: .info)
-        handleSaveDiagram()
-    }
 
     func snapshotDiagram() {
         let topRenderer = UIGraphicsImageRenderer(size: imageScrollView.bounds.size)
@@ -249,33 +239,6 @@ extension ViewController: HamburgerTableDelegate, UIImagePickerControllerDelegat
         if let newImage = newImage {
             let imageSaver = ImageSaver()
             imageSaver.writeToPhotoAlbum(image: newImage, viewController: self)
-        }
-    }
-
-    func renameDiagram() {
-        os_log("renameDiagram()", log: .action, type: .info)
-        if let name = diagram.name {
-            handleRenameDiagram(filename: name)
-            if fileOpSuccessfullFlag {
-                deleteDiagram(diagramName: name)
-                fileOpSuccessfullFlag = false
-            }
-        }
-        // if there is no name, handle as just save diagram
-        else {
-            // Modify this to note that this diagram has not been saved at all yet.
-            handleSaveDiagram()
-        }
-    }
-
-    func duplicateDiagram() {
-        os_log("duplicateDiagram()", log: .action, type: .info)
-        if let name = diagram.name {
-            handleRenameDiagram(filename: name)
-        }
-        else {
-            // Modify this to note that this diagram has not been saved at all yet.
-            handleSaveDiagram(diagramName: diagram.name)
         }
     }
 
@@ -343,14 +306,33 @@ extension ViewController: HamburgerTableDelegate, UIImagePickerControllerDelegat
         }
     }
 
-    private func handleRenameDiagram(filename: String) {
-        Common.showTextAlert(viewController: self, title: L("Rename Diagram"), message: L("Enter a new name for diagram \(filename)"), preferredStyle: .alert, handler: { name in self.handleSaveDiagram(diagramName: name, overwrite: false) })
+    private func handleRenameDiagram(newName name: String) {
+        Common.showTextAlert(viewController: self, title: L("Rename Diagram"), message: L("Enter a new name for diagram \(name)"), preferredStyle: .alert, handler: { name in self.handleSaveDiagram(diagramName: name, overwrite: false) })
     }
 
-    private func handleSaveDiagram() {
-        os_log("handleSaveDiagram()", log: .action, type: .info)
+    func saveDiagram() {
+        os_log("saveDiagram()", log: OSLog.action, type: .info)
         guard let diagramName = diagram.name, !diagramName.isBlank else {
-            showNameDiagramAlert()
+            let alert = UIAlertController(title: L("Name Diagram"), message: L("Give a name and optional description to this diagram"), preferredStyle: .alert)
+            alert.addAction(UIAlertAction(title: L("Cancel"), style: .cancel, handler: nil))
+            alert.addTextField { textField in
+                textField.placeholder = L("Diagram name")
+                textField.text = self.diagram.name
+            }
+            alert.addTextField { textField in
+                textField.placeholder = L("Diagram description")
+                textField.text = self.diagram.description
+            }
+            alert.addAction(UIAlertAction(title: L("Save"), style: .default) { action in
+                if let name = alert.textFields?.first?.text, let description = alert.textFields?[1].text {
+                    self.diagram.name = name
+                    self.diagram.description = description
+                    if let error = self.diagram.saveNoThrow() {
+                        Common.ShowFileError(viewController: self, error: error)
+                    }
+                }
+            })
+            present(alert, animated: true)
             return
         }
         do {
@@ -360,6 +342,44 @@ extension ViewController: HamburgerTableDelegate, UIImagePickerControllerDelegat
             os_log("Error: %s", log: .errors, type: .error, error.localizedDescription)
             Common.ShowFileError(viewController: self, error: error)
         }
+    }
+
+    func renameDiagram() {
+        os_log("renameDiagram()", log: .action, type: .info)
+        // Just fail gracefully if name is nil, renameDiagram should not be available if name is nil.
+        guard let name = diagram.name, !name.isBlank else { return }
+        let alert = UIAlertController(title: L("Rename Diagram"), message: L("Enter a new name for diagram \(name)"), preferredStyle: .alert)
+        alert.addAction(UIAlertAction(title: L("Cancel"), style: .cancel, handler: nil))
+        alert.addTextField { textField in
+            textField.placeholder = L("New diagram name")
+        }
+        alert.addAction(UIAlertAction(title: L("Rename"), style: .default) { action in
+            if let name = alert.textFields?.first?.text {
+                if let error = self.diagram.renameNoThrow(newName: name) {
+                    Common.ShowFileError(viewController: self, error: error)
+                }
+            }
+        })
+        present(alert, animated: true)
+    }
+
+    func duplicateDiagram() {
+        os_log("duplicateDiagram()", log: .action, type: .info)
+        // Just fail gracefully if name is nil, renameDiagram should not be available if name is nil.
+        guard let name = diagram.name, !name.isBlank else { return }
+        let alert = UIAlertController(title: L("Duplicate Diagram"), message: L("Enter a name for duplicate diagram of \(name)"), preferredStyle: .alert)
+        alert.addAction(UIAlertAction(title: L("Cancel"), style: .cancel, handler: nil))
+        alert.addTextField { textField in
+            textField.placeholder = L("Duplicate diagram name")
+        }
+        alert.addAction(UIAlertAction(title: L("Duplicate"), style: .default) { action in
+            if let name = alert.textFields?.first?.text {
+                if let error = self.diagram.duplicateNoThrow(duplicateName: name) {
+                    Common.ShowFileError(viewController: self, error: error)
+                }
+            }
+        })
+        present(alert, animated: true)
     }
 
     private func handleSaveDiagram(diagramName: String?, overwrite: Bool = false, completion: (()->())? = nil) {
@@ -391,11 +411,6 @@ extension ViewController: HamburgerTableDelegate, UIImagePickerControllerDelegat
             Common.ShowFileError(viewController: self, error: error)
         }
     }
-
-    func getDiagramName() {
-        getDiagramNameAlert(title: L("Save Diagram"), message: L("Enter a name for this diagram"), placeholder: L("diagram name"), preferredStyle: .alert, handler: {self.handleSaveDiagram()})
-    }
-
 
     func getDiagramNameAlert(title: String, message: String, placeholder: String? = nil, preferredStyle: UIAlertController.Style, handler: (()->Void)? = nil) {
         let alert = UIAlertController(title: title, message: message, preferredStyle: preferredStyle)
