@@ -9,8 +9,6 @@
 import UIKit
 import os.log
 
-
-
 struct Diagram {
     var name: String?
     var image: UIImage
@@ -29,21 +27,30 @@ struct Diagram {
     var isSaved: Bool {
         !name.isBlank
     }
+    var isDirty: Bool {
+        ladder.isDirty
+    }
 
-    private var diagramData: DiagramData = DiagramData()
-    private struct DiagramData: Codable {
+    var diagramData: DiagramData = DiagramData()
+    struct DiagramData: Codable {
          var description: String = ""
          var ladder: Ladder = Ladder.defaultLadder()
         // creationDate, lastSavedDate?
     }
 
-    init(name: String?, image: UIImage, ladder: Ladder) {
+//    init(name: String?, image: UIImage, ladder: Ladder) {
+//        self.name = name
+//        self.image = image
+//        self.ladder = ladder
+//    }
+
+    init(name: String?, image: UIImage, diagramData: DiagramData) {
         self.name = name
         self.image = image
-        self.ladder = ladder
+        self.diagramData = diagramData
     }
 
-    // TODO: validate legal file name
+    // Will overwrite without asking.  Calling method should check if file exists and query for overwrite if appropriate.
     func save() throws {
         os_log("save() - Diagram", log: .action, type: .info)
         guard var name = name else { throw FileIOError.diagramIsUnnamed }
@@ -58,17 +65,6 @@ struct Diagram {
         let ladderURL = diagramDirURL.appendingPathComponent(FileIO.ladderFilename, isDirectory: false)
         FileManager.default.createFile(atPath: ladderURL.path, contents: diagramData, attributes: nil)
         ladder.isDirty = false
-    }
-
-    // Non-throwing version of save().
-    func saveNoThrow() -> Error? {
-        os_log("saveNoThrow() - Diagram", log: .action, type: .info)
-        do {
-            try save()
-            return nil
-        } catch {
-            return error
-        }
     }
 
     mutating func retrieve() throws {
@@ -90,6 +86,27 @@ struct Diagram {
         }
     }
 
+    static func retrieve(name: String) throws -> Diagram {
+        if name.isBlank { throw FileIOError.diagramNameIsBlank }
+        let diagramDirURL = try DiagramIO.getDiagramDirURL(for: name)
+        let imageURL = diagramDirURL.appendingPathComponent(FileIO.imageFilename, isDirectory: false)
+        let image = UIImage(contentsOfFile: imageURL.path)
+        let ladderURL = diagramDirURL.appendingPathComponent(FileIO.ladderFilename, isDirectory: false)
+        let decoder = JSONDecoder()
+        if let data = FileManager.default.contents(atPath: ladderURL.path), let image = image {
+            let diagramData = try decoder.decode(DiagramData.self, from: data)
+            let diagram = Diagram(name: name, image: image, diagramData: diagramData)
+            return diagram
+        }
+        else {
+            throw FileIOError.diagramDirectoryNotFound
+        }
+    }
+
+    static func retrieveNoThrow(name: String) -> Diagram? {
+        return try? retrieve(name: name)
+    }
+
     mutating func rename(newName: String) throws {
         os_log("rename() - Diagram", log: .action, type: .info)
         guard let oldName = name else { throw FileIOError.diagramIsUnnamed }
@@ -102,17 +119,7 @@ struct Diagram {
         let epDiagramDirURL = try DiagramIO.getEPDiagramsDirURL()
         let newDiagramURLPath = epDiagramDirURL.appendingPathComponent(cleanedUpNewName, isDirectory: true).path
         try FileManager.default.moveItem(atPath: diagramDirURLPath, toPath: newDiagramURLPath)
-        self.name = cleanedUpNewName
-    }
-
-    mutating func renameNoThrow(newName: String) -> Error? {
-        os_log("renameNoThrow() - Diagram", log: .action, type: .info)
-        do {
-            try rename(newName: newName)
-            return nil
-        } catch {
-            return error
-        }
+        name = cleanedUpNewName
     }
 
     mutating func duplicate(duplicateName: String) throws {
@@ -122,24 +129,11 @@ struct Diagram {
         let cleanedUpDuplicateName = DiagramIO.cleanupFilename(duplicateName)
         if originalName == cleanedUpDuplicateName { throw FileIOError.duplicateDiagramName }
         name = cleanedUpDuplicateName
-        if let error = saveNoThrow() {
-            // Don't rename if save doesn't work
-            name = originalName
-            throw error
-        }
-    }
-
-    mutating func duplicateNoThrow(duplicateName: String) -> Error? {
-        os_log("duplicateNoThrow() - Diagram", log: .action, type: .info)
-        do {
-            try duplicate(duplicateName: duplicateName)
-            return nil
-        } catch {
-            return error
-        }
+        try save()
     }
 
     static func getDefaultDiagram() -> Diagram {
-        return Diagram(name: nil, image: UIImage(named: "SampleECG")!, ladder: Ladder.defaultLadder())
+        let diagramData = DiagramData(description: "", ladder: Ladder.defaultLadder())
+        return Diagram(name: nil, image: UIImage(named: "SampleECG")!, diagramData: diagramData)
     }
 }

@@ -25,7 +25,7 @@ protocol HamburgerTableDelegate: class {
     func about()
     func test()
     func selectDiagram()
-    func saveDiagram()
+    func saveDiagram(completion: (()->Void)?)
     func snapshotDiagram()
     func renameDiagram()
     func duplicateDiagram()
@@ -38,6 +38,12 @@ protocol HamburgerTableDelegate: class {
     func lockImage()
     func hideHamburgerMenu()
     func showHamburgerMenu()
+}
+
+extension HamburgerTableDelegate {
+    func saveDiagram(completion: (()->Void)? = nil) {
+        saveDiagram(completion: completion)
+    }
 }
 
 class ImageSaver: NSObject {
@@ -158,14 +164,15 @@ extension ViewController: HamburgerTableDelegate, UIImagePickerControllerDelegat
             picker.popoverPresentationController?.barButtonItem = navigationItem.leftBarButtonItem
         }
         present(picker, animated: true, completion: { P("completed")})
-        resetLadder()
+        newDiagram()
+//        resetLadder()
     }
 
     func selectPhoto() {
         os_log("selectPhoto()", log: OSLog.action, type: .info)
         P("isDirty = \(ladderView.ladderIsDirty)")
         if ladderView.ladderIsDirty {
-            Common.ShowWarning(viewController: self, title: L("Save Diagram?"), message: L("Diagram has been modified. Save it before loading new image?"), action: { _ in
+            Common.showWarning(viewController: self, title: L("Save Diagram?"), message: L("Diagram has been modified. Save it before loading new image?"), action: { _ in
                 // FIXME: make select photo a completion passed to saveDiagram, etc.
                 self.saveDiagram()
                 P("In middle of saving diagram")
@@ -190,11 +197,8 @@ extension ViewController: HamburgerTableDelegate, UIImagePickerControllerDelegat
     // Use to test features during development
     func test() {
         os_log("test()", log: .debugging, type: .debug)
-        do {
-        try diagram.rename(newName: "test999")
-        } catch {
-            Common.ShowFileError(viewController: self, error: error)
-        }
+        saveDiagram(completion: { P("completed save diagram s")})
+//        DiagramIO.deleteEPDiagramDir()
     }
 
     func selectDiagram() {
@@ -258,59 +262,7 @@ extension ViewController: HamburgerTableDelegate, UIImagePickerControllerDelegat
         AudioServicesPlaySystemSoundWithCompletion(SystemSoundID(1100), nil)
     }
 
-    func showNameDiagramAlert(completion: (()->())? = nil) {
-        Common.showTextAlert(viewController: self, title: L("Save Diagram"), message: L("Enter a unique name for this diagram"), preferredStyle: .alert, handler: { name in self.handleSaveDiagram(diagramName: name) })
-    }
-
-    fileprivate func saveDiagramFiles(diagramDirURL: URL, showConfirmationMessage: Bool = true) {
-        os_log("saveDiagramFiles()", log: .action, type: .info)
-        do {
-            let imageData = self.imageView.image?.pngData()
-            let imageURL = diagramDirURL.appendingPathComponent(FileIO.imageFilename, isDirectory: false)
-            try imageData?.write(to: imageURL)
-            let encoder = JSONEncoder()
-            let ladderData = try? encoder.encode(self.ladderView.ladder)
-            let ladderURL = diagramDirURL.appendingPathComponent(FileIO.ladderFilename, isDirectory: false)
-            FileManager.default.createFile(atPath: ladderURL.path, contents: ladderData, attributes: nil)
-            fileOpSuccessfullFlag = true
-            ladderView.ladderIsDirty = false
-            if showConfirmationMessage {
-                Common.showMessage(viewController: self, title: L("Diagram Saved"), message: L("The diagram was saved successfully."))
-            }
-        } catch {
-            os_log("Error: %s", log: .errors, type: .error, error.localizedDescription)
-            Common.ShowFileError(viewController: self, error: error)
-        }
-    }
-
-
-    fileprivate func saveDiagramFiles(diagramName: String, showConfirmationMessage: Bool = true) {
-        os_log("saveDiagramFiles()", log: .action, type: .info)
-        do {
-            let diagramDirURL = try DiagramIO.getDiagramDirURL(for: diagramName)
-            let imageData = self.imageView.image?.pngData()
-            let imageURL = diagramDirURL.appendingPathComponent(FileIO.imageFilename, isDirectory: false)
-            try imageData?.write(to: imageURL)
-            let encoder = JSONEncoder()
-            let ladderData = try? encoder.encode(self.ladderView.ladder)
-            let ladderURL = diagramDirURL.appendingPathComponent(FileIO.ladderFilename, isDirectory: false)
-            FileManager.default.createFile(atPath: ladderURL.path, contents: ladderData, attributes: nil)
-            fileOpSuccessfullFlag = true
-            ladderView.ladderIsDirty = false
-            if showConfirmationMessage {
-                Common.showMessage(viewController: self, title: L("Diagram Saved"), message: L("The diagram \(diagramName) was saved successfully."))
-            }
-        } catch {
-            os_log("Error: %s", log: .errors, type: .error, error.localizedDescription)
-            Common.ShowFileError(viewController: self, error: error)
-        }
-    }
-
-    private func handleRenameDiagram(newName name: String) {
-        Common.showTextAlert(viewController: self, title: L("Rename Diagram"), message: L("Enter a new name for diagram \(name)"), preferredStyle: .alert, handler: { name in self.handleSaveDiagram(diagramName: name, overwrite: false) })
-    }
-
-    func saveDiagram() {
+    func saveDiagram(completion: (()->Void)? = nil) {
         os_log("saveDiagram()", log: OSLog.action, type: .info)
         guard let diagramName = diagram.name, !diagramName.isBlank else {
             let alert = UIAlertController(title: L("Name Diagram"), message: L("Give a name and optional description to this diagram"), preferredStyle: .alert)
@@ -325,10 +277,22 @@ extension ViewController: HamburgerTableDelegate, UIImagePickerControllerDelegat
             }
             alert.addAction(UIAlertAction(title: L("Save"), style: .default) { action in
                 if let name = alert.textFields?.first?.text, let description = alert.textFields?[1].text {
-                    self.diagram.name = name
-                    self.diagram.description = description
-                    if let error = self.diagram.saveNoThrow() {
-                        Common.ShowFileError(viewController: self, error: error)
+                    do {
+                        if try DiagramIO.diagramDirURLExists(for: name) {
+                            throw FileIOError.duplicateDiagramName
+                        }
+                        self.diagram.name = name
+                        self.diagram.description = description
+                        try self.doSaveDiagram()
+                        if let completion = completion {
+                            completion()
+                        }
+                    } catch FileIOError.duplicateDiagramName {
+                        Common.showMessage(viewController: self, title: L("Duplicate Diagram Name"), message: L("Please choose a different name.  This name is a duplicate and would overwrite the diagram with this name."))
+                    } catch {
+                        Common.showFileError(viewController: self, error: error)
+                        self.diagram.name = nil
+                        self.diagram.description = ""
                     }
                 }
             })
@@ -336,12 +300,21 @@ extension ViewController: HamburgerTableDelegate, UIImagePickerControllerDelegat
             return
         }
         do {
-            try diagram.save()
+            try doSaveDiagram()
+            if let completion = completion {
+                completion()
+            }
         }
         catch {
             os_log("Error: %s", log: .errors, type: .error, error.localizedDescription)
-            Common.ShowFileError(viewController: self, error: error)
+            Common.showFileError(viewController: self, error: error)
         }
+    }
+
+    private func doSaveDiagram() throws {
+        try diagram.save()
+        DiagramIO.saveLastDiagram(name: diagram.name)
+        setTitle()
     }
 
     func renameDiagram() {
@@ -355,8 +328,11 @@ extension ViewController: HamburgerTableDelegate, UIImagePickerControllerDelegat
         }
         alert.addAction(UIAlertAction(title: L("Rename"), style: .default) { action in
             if let name = alert.textFields?.first?.text {
-                if let error = self.diagram.renameNoThrow(newName: name) {
-                    Common.ShowFileError(viewController: self, error: error)
+                do {
+                    try self.diagram.rename(newName: name)
+                    self.setTitle()
+                } catch {
+                    Common.showFileError(viewController: self, error: error)
                 }
             }
         })
@@ -374,63 +350,11 @@ extension ViewController: HamburgerTableDelegate, UIImagePickerControllerDelegat
         }
         alert.addAction(UIAlertAction(title: L("Duplicate"), style: .default) { action in
             if let name = alert.textFields?.first?.text {
-                if let error = self.diagram.duplicateNoThrow(duplicateName: name) {
-                    Common.ShowFileError(viewController: self, error: error)
-                }
-            }
-        })
-        present(alert, animated: true)
-    }
-
-    private func handleSaveDiagram(diagramName: String?, overwrite: Bool = false, completion: (()->())? = nil) {
-        os_log("handleSaveDiagram(diagramName:overwrite:completion:)", log: OSLog.action, type: .info)
-        guard var filename = diagramName, !filename.isEmpty else {
-
-            let alert = UIAlertController(title: L("Name is Required"), message: L("You must enter a name for this diagram"), preferredStyle: .alert)
-            let okAction = UIAlertAction(title: L("OK"), style: .default, handler: { _ in self.showNameDiagramAlert() })
-            alert.addAction(okAction)
-            self.present(alert, animated: true)
-            return
-        }
-        filename = DiagramIO.cleanupFilename(filename)
-        diagram.name = filename
-        do {
-            if try !DiagramIO.diagramDirURLExists(for: filename) || overwrite {
-                saveDiagramFiles(diagramName: filename)
-            }
-            else {
-                os_log("diagram file already exists", log: OSLog.action, type: .info)
-                Common.ShowWarning(viewController: self, title: "File Already Exists", message: "A diagram named \(filename) already exists.  Overwrite?", okActionButtonTitle: L("Overwrite")) { _ in
-                    if let diagramDirURL = DiagramIO.getDiagramDirURLNonThrowing(for: filename) {
-                        self.saveDiagramFiles(diagramDirURL: diagramDirURL)
-                    }
-                }
-            }
-        } catch {
-            os_log("File error: %s", log: OSLog.errors, type: .error, error.localizedDescription)
-            Common.ShowFileError(viewController: self, error: error)
-        }
-    }
-
-    func getDiagramNameAlert(title: String, message: String, placeholder: String? = nil, preferredStyle: UIAlertController.Style, handler: (()->Void)? = nil) {
-        let alert = UIAlertController(title: title, message: message, preferredStyle: preferredStyle)
-        alert.addAction(UIAlertAction(title: L("Cancel"), style: .cancel, handler: nil))
-        alert.addTextField { textField in
-            textField.text = self.diagram.name
-            if let placeholder = placeholder {
-                textField.placeholder = placeholder
-            }
-        }
-        alert.addAction(UIAlertAction(title: L("Save"), style: .default) { action in
-            if let text = alert.textFields?.first?.text {
-                if text.isEmpty {
-                    Common.showMessage(viewController: self, title: L("Operation Cancelled"), message: L("The name of the diagram can't be blank."))
-                }
-                else {
-                    self.diagram.name = DiagramIO.cleanupFilename(text)
-                    if let handler = handler {
-                        handler()
-                    }
+                do {
+                    try self.diagram.duplicate(duplicateName: name)
+                    self.setTitle()
+                } catch {
+                    Common.showFileError(viewController: self, error: error)
                 }
             }
         })
@@ -451,6 +375,15 @@ extension ViewController: HamburgerTableDelegate, UIImagePickerControllerDelegat
         undoManager?.removeAllActions()
         updateUndoRedoButtons()
         setViewsNeedDisplay()
+    }
+
+    func newDiagram() {
+        os_log("newDiagram()", log: .action, type: .info)
+        if diagram.isDirty {
+            saveDiagram() {
+                P("Completed save Diagram")
+            }
+        }
     }
 
     func editTemplates() {

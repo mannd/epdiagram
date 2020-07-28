@@ -51,11 +51,6 @@ final class ViewController: UIViewController {
 
     var diagramFilenames: [String] = []
     var diagram: Diagram = Diagram.getDefaultDiagram()
-    var fileOpSuccessfullFlag: Bool = false {
-        didSet {
-            P("fileOpSuccessfulFlag = \(fileOpSuccessfullFlag)")
-        }
-    }
 
     var preferences: Preferences = Preferences()
     
@@ -76,7 +71,6 @@ final class ViewController: UIViewController {
         //                }
         //            }
 
-        title = L("EP Diagram", comment: "app name")
 
         if Common.isRunningOnMac() {
             navigationController?.setNavigationBarHidden(true, animated: false)
@@ -114,8 +108,30 @@ final class ViewController: UIViewController {
         let ladderButton = UIBarButtonItem(image: UIImage(named: "ladder"), style: .plain, target: self, action: #selector(selectLadder))
         navigationItem.rightBarButtonItem = ladderButton
 
+        loadUserDefaults()
+
+        if let lastDiagramName = preferences.lastDiagramName, let lastDiagram = Diagram.retrieveNoThrow(name: lastDiagramName) {
+            diagram = lastDiagram
+        }
+
         imageView.image = diagram.image
         ladderView.ladder = diagram.ladder
+
+        setTitle()
+
+        DiagramIO.saveLastDiagram(name: diagram.name)
+    }
+
+    func getTitle() -> String {
+        guard let name = diagram.name else { return L("EP Diagram", comment: "app name") }
+        if Common.isRunningOnMac() || Common.isIPad() {
+            return L("EP Diagram - \(name)")
+        }
+        return name
+    }
+
+    func setTitle() {
+        title = getTitle()
     }
 
     @objc func onDidUndoableAction(_ notification: Notification) {
@@ -132,7 +148,6 @@ final class ViewController: UIViewController {
         showMainMenu()
         NotificationCenter.default.addObserver(self, selector: #selector(onDidUndoableAction(_:)), name: .didUndoableAction, object: nil)
         updateUndoRedoButtons()
-        loadUserDefaults()
         resetViews()
     }
 
@@ -221,7 +236,9 @@ final class ViewController: UIViewController {
     @objc func selectLadder() {
         os_log("selectLadder()", log: .action, type: .info)
         if ladderView.ladderIsDirty {
-            saveDiagram()
+            saveDiagram() {
+                P("Completed save Diagram")
+            }
         }
         // FIXME: This segue is not being performed when saving diagram
         performSegue(withIdentifier: "selectLadderSegue", sender: self)

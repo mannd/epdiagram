@@ -29,26 +29,20 @@ extension ViewController: ViewControllerDelegate {
         }
     }
 
+    // TODO: make sure data is getting loaded correctly.
     func selectDiagram(diagramName: String?) {
         guard let diagramName = diagramName else { return }
         P("diagram name = \(diagramName)")
         do {
-            let diagramDirURL = try DiagramIO.getDiagramDirURL(for: diagramName)
-            let imageURL = diagramDirURL.appendingPathComponent(FileIO.imageFilename, isDirectory: false)
-            let image = UIImage(contentsOfFile: imageURL.path)
-            let ladderURL = diagramDirURL.appendingPathComponent(FileIO.ladderFilename, isDirectory: false)
-            let decoder = JSONDecoder()
-            if let data = FileManager.default.contents(atPath: ladderURL.path), let image = image {
-                if let ladder = try? decoder.decode(Ladder.self, from: data) {
-                    self.diagram = Diagram(name: diagramName, image: image, ladder: ladder)
-                    self.imageView.image = image
-                    self.ladderView.ladder = ladder
-                    self.setViewsNeedDisplay()
-                }
-            }
+            diagram = try Diagram.retrieve(name: diagramName)
+            imageView.image = diagram.image
+            ladderView.ladder = diagram.ladder
+            setTitle()
+            DiagramIO.saveLastDiagram(name: diagram.name)
+            setViewsNeedDisplay()
         } catch {
-            os_log("Error: %s", error.localizedDescription)
-            Common.ShowFileError(viewController: self, error: error)
+            os_log("Error: %s", log: .errors, type: .error, error.localizedDescription)
+            Common.showFileError(viewController: self, error: error)
         }
     }
 
@@ -65,7 +59,7 @@ extension ViewController: ViewControllerDelegate {
             try FileManager.default.removeItem(atPath: diagramDirURL.path)
         } catch {
             os_log("Could not delete diagram %s, error: %s", log: .action, type: .error, diagramName, error.localizedDescription)
-            Common.ShowFileError(viewController: self, error: error)
+            Common.showFileError(viewController: self, error: error)
         }
     }
 
@@ -86,7 +80,7 @@ extension ViewController: ViewControllerDelegate {
             try FileIO.store(templates, to: .documents, withFileName: FileIO.userTemplateFile)
         } catch {
             os_log("File error: %s", log: .errors, type: .error, error.localizedDescription)
-            Common.ShowFileError(viewController: self, error: error)
+            Common.showFileError(viewController: self, error: error)
         }
     }
 }

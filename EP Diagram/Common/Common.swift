@@ -151,6 +151,10 @@ class Common {
         #endif
     }
 
+    static func isIPad() -> Bool {
+        return UIDevice.current.userInterfaceIdiom == .pad
+    }
+    
     // UI alerts
     static func showMessage(viewController: UIViewController, title: String, message: String) {
         let alert = UIAlertController(title: title, message: message, preferredStyle: .alert)
@@ -159,7 +163,7 @@ class Common {
         viewController.present(alert, animated: true)
     }
 
-    static func ShowWarning(viewController: UIViewController, title: String, message: String, okActionButtonTitle: String = L("OK"), action: ((UIAlertAction) -> Void)?) {
+    static func showWarning(viewController: UIViewController, title: String, message: String, okActionButtonTitle: String = L("OK"), action: ((UIAlertAction) -> Void)?) {
         let alert = UIAlertController(title: title, message: message, preferredStyle: .alert)
         let okAction = UIAlertAction(title: okActionButtonTitle, style: .destructive, handler: action)
         let cancelAction = UIAlertAction(title: L("Cancel"), style: .cancel, handler: nil)
@@ -168,7 +172,7 @@ class Common {
         viewController.present(alert, animated: true)
     }
 
-    static func ShowFileError(viewController: UIViewController, error: Error) {
+    static func showFileError(viewController: UIViewController, error: Error) {
         showMessage(viewController: viewController, title: L("File Error"), message: L("Error: \(error.localizedDescription)"))
     }
 

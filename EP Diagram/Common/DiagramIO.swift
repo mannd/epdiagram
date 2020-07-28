@@ -7,6 +7,7 @@
 //
 
 import Foundation
+import os.log
 
 class DiagramIO {
     static func getEPDiagramsDirURL() throws -> URL {
@@ -51,5 +52,20 @@ class DiagramIO {
             .components(separatedBy: invalidCharacters)
             .joined(separator: "_")
         return newFilename
+    }
+
+    static func saveLastDiagram(name: String?) {
+        let preferences = UserDefaults.standard
+        preferences.set(name, forKey: Preferences.defaultLastDiagramKey)
+    }
+
+    // for debugging only!
+    static func deleteEPDiagramDir() {
+        do {
+            let url = try getEPDiagramsDirURL()
+            try FileManager.default.removeItem(at: url)
+        } catch {
+            os_log("deleteEPDiagramDir() error %s", log: .errors, type: .error, error.localizedDescription)
+        }
     }
 }

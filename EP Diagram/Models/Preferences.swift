@@ -15,12 +15,14 @@ struct Preferences {
     static let defaultShowImpulseOriginKey = "defaultShowImpuseOriginKey"
     static let defaultShowBlockKey = "defaultShowBlockKey"
     static let defaultShowIntervalsKey = "defaultShowIntervalsKey"
+    static let defaultLastDiagramKey = "defaultLastDiagramKey"
 
     // Stored as Int, converted to CGFloat when used.
     var lineWidth: Int = 2
     var showImpulseOrigin = false
     var showBlock = false
     var showIntervals = false
+    var lastDiagramName: String? = nil
 //    var red = UIColor.systemRed
 //    var blue = UIColor.systemBlue
 //    var unhighlightedColor = UIColor.label
@@ -38,6 +40,7 @@ struct Preferences {
         userDefaults.set(showImpulseOrigin, forKey: Preferences.defaultShowImpulseOriginKey)
         userDefaults.set(showBlock, forKey: Preferences.defaultShowBlockKey)
         userDefaults.set(showIntervals, forKey: Preferences.defaultShowIntervalsKey)
+        userDefaults.set(lastDiagramName, forKey: Preferences.defaultLastDiagramKey)
 
 
     }
@@ -48,6 +51,7 @@ struct Preferences {
         showImpulseOrigin = userDefaults.bool(forKey: Preferences.defaultShowImpulseOriginKey)
         showBlock = userDefaults.bool(forKey: Preferences.defaultShowBlockKey)
         showIntervals = userDefaults.bool(forKey: Preferences.defaultShowIntervalsKey)
+        lastDiagramName = userDefaults.string(forKey: Preferences.defaultLastDiagramKey)
     }
     
 }
