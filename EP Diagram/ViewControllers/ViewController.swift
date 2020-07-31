@@ -82,9 +82,7 @@ final class ViewController: UIViewController {
         ladderView.backgroundColor = UIColor.tertiarySystemBackground
 
         imageScrollView.maximumZoomScale = 7.0
-        // FIXME: zoom < 1.0 makes truncates ladder.
-        //imageScrollView.minimumZoomScale = 0.25
-        imageScrollView.minimumZoomScale = 1.0
+        imageScrollView.minimumZoomScale = 0.25
 
         blackView.delegate = self
         blackView.alpha = 0.0

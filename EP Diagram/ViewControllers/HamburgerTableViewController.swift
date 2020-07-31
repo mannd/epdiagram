@@ -80,24 +80,26 @@ class HamburgerTableViewController: UITableViewController {
         delegate?.hideHamburgerMenu()
         let row = rows[indexPath.row]
         switch row.layer {
-        case .camera:
+        case .takePhoto:
             delegate?.takePhoto()
-        case .photoGallery:
+        case .selectImage:
             delegate?.selectPhoto()
         case .lockImage:
             delegate?.lockImage()
-        case .open:
+        case .newDiagram:
+            delegate?.newDiagram()
+        case .openDiagram:
             delegate?.selectDiagram()
-        case .save:
+        case .saveDiagram:
             delegate?.saveDiagram()
-        case .rename:
+        case .renameDiagram:
             if !row.isEnabled{
                 delegate?.showNeedToSaveMessage()
                 return
             } else {
                 delegate?.renameDiagram()
             }
-        case .duplicate:
+        case .duplicateDiagram:
             if !row.isEnabled{
                 delegate?.showNeedToSaveMessage()
                 return
@@ -122,7 +124,7 @@ class HamburgerTableViewController: UITableViewController {
             delegate?.about()
         case .test:
             delegate?.test()
-        default:
+        case .none:
             break
         }
     }

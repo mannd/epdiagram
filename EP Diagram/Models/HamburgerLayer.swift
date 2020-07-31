@@ -9,12 +9,13 @@
 import UIKit
 
 enum Layer {
-    case camera
-    case photoGallery
-    case open
-    case save
-    case rename
-    case duplicate
+    case takePhoto
+    case selectImage
+    case newDiagram
+    case openDiagram
+    case saveDiagram
+    case renameDiagram
+    case duplicateDiagram
     case getInfo
     case snapshot
     case sample

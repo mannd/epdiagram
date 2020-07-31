@@ -143,6 +143,10 @@ final class LadderView: ScaledView {
         didLoad()
     }
 
+    func reset() {
+        os_log("reset() - LadderView", log: .action, type: .info)
+    }
+
     private func didLoad() {
         os_log("didLoad() - LadderView", log: .action, type: .info)
         ladderViewHeight = self.frame.height
@@ -1039,8 +1043,7 @@ final class LadderView: ScaledView {
     func draw(rect: CGRect, context: CGContext) {
         context.setStrokeColor(UIColor.label.cgColor)
         context.setLineWidth(1)
-        // All horizontal distances are adjusted to scale.
-        let ladderWidth: CGFloat = rect.width * scale
+        let ladderWidth: CGFloat = rect.width
         for (index, region) in ladder.regions.enumerated() {
             let regionRect = CGRect(x: leftMargin, y: region.proximalBoundary, width: ladderWidth, height: region.distalBoundary - region.proximalBoundary)
             let lastRegion = index == ladder.regions.count - 1

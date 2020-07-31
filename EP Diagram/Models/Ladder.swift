@@ -36,7 +36,7 @@ class Ladder: Codable {
     // isDirty will be true if f any changes made to ladder, even if they are reverted back.
     var isDirty: Bool = false
 
-    let id = UUID()
+    var id = UUID()
 
     init(template: LadderTemplate) {
         self.template = template

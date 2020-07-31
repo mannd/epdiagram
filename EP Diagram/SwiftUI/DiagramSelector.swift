@@ -27,9 +27,9 @@ struct DiagramSelector: View {
                             self.selectedName = name
                         }.alert(isPresented: self.$showingAlert) {
                             Alert(
-                                title: Text("Open Selected Diagram?"),
-                                message: Text("If you have marked up previous ladder this data will be lost unless you first save it.  Choose Cancel to return to your diagram, or Select to open this diagram."),
-                                primaryButton: .destructive(Text("Select")) {
+                                title: Text("Open Diagram \"\(self.selectedName)\"?"),
+                                message: Text("Old diagram will be automatically saved first."),
+                                primaryButton: .default(Text("Open")) {
                                     self.delegate?.selectDiagram(diagramName: self.selectedName)
                                     self.presentationMode.wrappedValue.dismiss() },
                                 secondaryButton: .cancel(Text("Cancel")) {

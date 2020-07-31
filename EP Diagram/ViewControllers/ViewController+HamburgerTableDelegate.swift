@@ -24,6 +24,7 @@ protocol HamburgerTableDelegate: class {
     func selectPhoto()
     func about()
     func test()
+    func newDiagram()
     func selectDiagram()
     func saveDiagram(completion: (()->Void)?)
     func snapshotDiagram()
@@ -164,6 +165,7 @@ extension ViewController: HamburgerTableDelegate, UIImagePickerControllerDelegat
             picker.popoverPresentationController?.barButtonItem = navigationItem.leftBarButtonItem
         }
         present(picker, animated: true, completion: { P("completed")})
+        // TODO: Now
         newDiagram()
 //        resetLadder()
     }
@@ -195,14 +197,25 @@ extension ViewController: HamburgerTableDelegate, UIImagePickerControllerDelegat
 
     // FIXME: remove before release!!!!!
     // Use to test features during development
+    #if DEBUG
     func test() {
         os_log("test()", log: .debugging, type: .debug)
-        saveDiagram(completion: { P("completed save diagram s")})
-//        DiagramIO.deleteEPDiagramDir()
+        DiagramIO.deleteEPDiagramDir()
+    }
+    #endif
+
+    // Save old diagram, keep image, clear ladder.
+    func newDiagram() {
+        os_log("newDiagram()", log: .action, type: .info)
+        if diagram.isDirty {
+            saveDiagram()
+        }
+        ladderView.reset()
     }
 
+    // Save old diagram, load selected image and ladder.
     func selectDiagram() {
-        os_log("Select diagram", log: OSLog.action, type: .info)
+        os_log("selectDiagram()", log: OSLog.action, type: .info)
         // Open list of saved diagrams
         do {
             let epDiagramsDirURL = try DiagramIO.getEPDiagramsDirURL()
@@ -375,15 +388,6 @@ extension ViewController: HamburgerTableDelegate, UIImagePickerControllerDelegat
         undoManager?.removeAllActions()
         updateUndoRedoButtons()
         setViewsNeedDisplay()
-    }
-
-    func newDiagram() {
-        os_log("newDiagram()", log: .action, type: .info)
-        if diagram.isDirty {
-            saveDiagram() {
-                P("Completed save Diagram")
-            }
-        }
     }
 
     func editTemplates() {
