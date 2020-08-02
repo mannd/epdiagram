@@ -1,0 +1,24 @@
+#+TITLE:     
+#+AUTHOR:    David Mann
+#+EMAIL:     mannd@epstudiossoftware.com
+#+DATE:      [2020-07-31 Fri]
+#+DESCRIPTION: EP Diagram Help
+#+KEYWORDS:
+#+LANGUAGE:  en
+#+OPTIONS:   H:3 num:nil toc:t \n:nil ::t |:t ^:t -:t f:t *:t <:t
+#+OPTIONS:   d:nil todo:t pri:nil tags:not-in-toc
+#+INFOJS_OPT: view:nil toc:nil ltoc:t mouse:underline buttons:0 path:http://orgmode.org/org-info.js
+#+EXPORT_SELECT_TAGS: export
+#+EXPORT_EXCLUDE_TAGS: noexport
+#+LINK_UP:   
+#+LINK_HOME: 
+#+XSLT:
+#+HTML_HEAD: <style media="screen" type="text/css"> img {max-width: 100%; height: auto;} </style>
+#+HTML_HEAD: <style  type="text/css">:root { color-scheme: light dark; }</style>
+* What makes up a Diagram?
+A Diagram has two components: an (optional) image, and a ladder.  If you select a new image,
+ or if you change ladders, you will need to save the diagram or your changes will be lost.  [
+Exception: if the ladder has no marks and if you have not customized the ladder, you will not be prompted to save the diagram.]  Thus your workflow can be any of the examples that follow:
+1. Select New diagram.  You will be prompted to save the current diagram, then a new diagram will be presented with a blank image, and the last ladder used.  You can then take a photo or select an image, and select a different ladder if you like.
+2. While working on a diagram, if you select a new image you will be prompted to save the diagram.  A new diagram will be created with the selected image and the ladder will be cleared (marks removed).
+3. While working on a diagram, if you select a new ladder, you will be prompted to save the diagram.  A new diagram will be created with the selected image and the ladder will be cleared (marks removed).

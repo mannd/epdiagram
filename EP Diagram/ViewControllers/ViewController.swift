@@ -53,7 +53,10 @@ final class ViewController: UIViewController {
     var diagram: Diagram = Diagram.getDefaultDiagram()
 
     var preferences: Preferences = Preferences()
-    
+
+    // Speed up appearance of image picker by initializing it here.
+    let imagePicker: UIImagePickerController = UIImagePickerController()
+
     override func viewDidLoad() {
         os_log("viewDidLoad() - ViewController", log: OSLog.viewCycle, type: .info)
         super.viewDidLoad()
@@ -108,11 +111,11 @@ final class ViewController: UIViewController {
 
         loadUserDefaults()
 
-        if let lastDiagramName = preferences.lastDiagramName, let lastDiagram = Diagram.retrieveNoThrow(name: lastDiagramName) {
-            diagram = lastDiagram
-        }
+//        if let lastDiagramName = preferences.lastDiagramName, let lastDiagram = Diagram.retrieveNoThrow(name: lastDiagramName) {
+//            diagram = lastDiagram
+//        }
 
-        imageView.image = diagram.image
+        imageView.image = nil
         ladderView.ladder = diagram.ladder
 
         setTitle()
@@ -129,7 +132,7 @@ final class ViewController: UIViewController {
     }
 
     func setTitle() {
-        title = getTitle()
+        title = diagram.isDirty ? getTitle() + "*" : getTitle()
     }
 
     @objc func onDidUndoableAction(_ notification: Notification) {

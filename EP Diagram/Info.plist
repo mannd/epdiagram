@@ -58,7 +58,11 @@
 	<key>UIMainStoryboardFile</key>
 	<string>Main</string>
 	<key>NSPhotoLibraryAddUsageDescription</key>
-	<string>We&apos;d like to save diagram images to your Photo Library.</string>
+	<string>EP Diagram would like to save diagram images to your Photo Library.</string>
+	<key>NSCameraUsageDescription</key>
+	<string>EP Diagram needs to use your camera to take photos that can be diagramed.</string>
+	<key>NSAppleMusicUsageDescription</key>
+	<string>EP Diagram would like to import images from your Photo Library so they can be diagramed.</string>
 	<key>UIRequiredDeviceCapabilities</key>
 	<array>
 		<string>armv7</string>

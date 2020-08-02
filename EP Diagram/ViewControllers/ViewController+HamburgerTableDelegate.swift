@@ -21,7 +21,7 @@ protocol HamburgerTableDelegate: class {
 
     func showNeedToSaveMessage()
     func takePhoto()
-    func selectPhoto()
+    func selectImage()
     func about()
     func test()
     func newDiagram()
@@ -133,57 +133,86 @@ extension ViewController: HamburgerTableDelegate, UIImagePickerControllerDelegat
 
     func takePhoto() {
         os_log("takePhoto()", log: OSLog.action, type: .info)
-        let picker: UIImagePickerController = UIImagePickerController()
-        picker.delegate = self
-        picker.allowsEditing = true
+        if ladderView.ladderIsDirty {
+            let alert = UIAlertController(title: L("Take Photo"), message: L("Diagram has changes.  You can save it and then take a photo, or abandon the changes and take a photo."), preferredStyle: .alert)
+            let cancelAction = UIAlertAction(title: L("Cancel"), style: .cancel, handler: nil)
+            let selectWithSaveAction = UIAlertAction(title: L("Save Diagram First"), style: .default, handler: { action in
+                self.dismiss(animated: true, completion: nil)
+                self.saveDiagram(completion: { self.handleTakePhoto() })
+            })
+            let selectWithoutSaveAction = UIAlertAction(title: L("Don't Save Diagram"), style: .destructive, handler: { action in
+                self.dismiss(animated: true, completion: nil)
+                self.handleTakePhoto() })
+            alert.addAction(cancelAction)
+            alert.addAction(selectWithSaveAction)
+            alert.addAction(selectWithoutSaveAction)
+            present(alert, animated: true)
+        }
+        else {
+            handleTakePhoto()
+        }
+
+    }
+
+    func handleTakePhoto() {
+        os_log("takePhoto()", log: OSLog.action, type: .info)
+        imagePicker.delegate = self
+        imagePicker.allowsEditing = true
+        imagePicker.modalPresentationStyle = .fullScreen
         if !UIImagePickerController.isSourceTypeAvailable(.camera) {
             Common.showMessage(viewController: self, title: L("Camera error"), message: "Camera not available")
             os_log("Camera not available", log: .debugging, type: .debug)
             return
         }
-        picker.sourceType = .camera
-        present(picker, animated: true, completion: nil)
-        resetLadder()
+        imagePicker.sourceType = .camera
+        present(imagePicker, animated: true)
+        newDiagram()
+        // TODO: need to reset ladder as below?  
+        //resetLadder()
     }
 
-    fileprivate func handleSelectPhoto() {
+    fileprivate func handleSelectImage() {
+        os_log("handleSelectImage()", log: .action, type: .info)
         if !UIImagePickerController.isSourceTypeAvailable(.photoLibrary) {
             Common.showMessage(viewController: self, title: L("Photo Library Not Available"), message: L("Make sure you have enabled permission for EP Diagram to use the Photo Library in the Settings app."))
             os_log("Photo library not available", log: .debugging, type: .debug)
             return
         }
         // By default picker.mediaTypes == ["public.image"], i.e. videos aren't shown.  So no need to check UIImagePickerController.availableMediaTypes(for:) or set picker.mediaTypes.
-        let picker: UIImagePickerController = UIImagePickerController()
-        picker.delegate = self
-        picker.sourceType = .photoLibrary
+        imagePicker.delegate = self
+        imagePicker.sourceType = .photoLibrary
         // TODO: Test editing on real devices (doesn't work on simulator).
         // Must allow editing because edited image is used by UIImagePickerController delegate.
-        picker.allowsEditing = true
+        imagePicker.allowsEditing = true
         // Need to use popover for iPads.  See
         if UIDevice.current.userInterfaceIdiom == .pad {
-            picker.modalPresentationStyle = .popover
-            picker.popoverPresentationController?.barButtonItem = navigationItem.leftBarButtonItem
+            imagePicker.modalPresentationStyle = .popover
+            imagePicker.popoverPresentationController?.barButtonItem = navigationItem.leftBarButtonItem
         }
-        present(picker, animated: true, completion: { P("completed")})
-        // TODO: Now
+        present(imagePicker, animated: true)
         newDiagram()
 //        resetLadder()
     }
 
-    func selectPhoto() {
-        os_log("selectPhoto()", log: OSLog.action, type: .info)
-        P("isDirty = \(ladderView.ladderIsDirty)")
+    func selectImage() {
+        os_log("selectImage()", log: OSLog.action, type: .info)
         if ladderView.ladderIsDirty {
-            Common.showWarning(viewController: self, title: L("Save Diagram?"), message: L("Diagram has been modified. Save it before loading new image?"), action: { _ in
-                // FIXME: make select photo a completion passed to saveDiagram, etc.
-                self.saveDiagram()
-                P("In middle of saving diagram")
-                return
-//                self.selectPhoto()
+            let alert = UIAlertController(title: L("Select Image"), message: L("Diagram has changes.  You can save it and then select an image, or abandon the changes and select an image."), preferredStyle: .alert)
+            let cancelAction = UIAlertAction(title: L("Cancel"), style: .cancel, handler: nil)
+            let selectWithSaveAction = UIAlertAction(title: L("Save Diagram First"), style: .default, handler: { action in
+                self.dismiss(animated: true, completion: nil)
+                self.saveDiagram(completion: { self.handleSelectImage() })
             })
+            let selectWithoutSaveAction = UIAlertAction(title: L("Don't Save Diagram"), style: .destructive, handler: { action in
+                self.dismiss(animated: true, completion: nil)
+                self.handleSelectImage() })
+            alert.addAction(cancelAction)
+            alert.addAction(selectWithSaveAction)
+            alert.addAction(selectWithoutSaveAction)
+            present(alert, animated: true)
         }
         else {
-            handleSelectPhoto()
+            handleSelectImage()
         }
     }
 
@@ -275,11 +304,12 @@ extension ViewController: HamburgerTableDelegate, UIImagePickerControllerDelegat
         AudioServicesPlaySystemSoundWithCompletion(SystemSoundID(1100), nil)
     }
 
+    // see https://stackoverflow.com/questions/38579679/warning-attempt-to-present-uiimagepickercontroller-on-which-is-alread
     func saveDiagram(completion: (()->Void)? = nil) {
         os_log("saveDiagram()", log: OSLog.action, type: .info)
         guard let diagramName = diagram.name, !diagramName.isBlank else {
-            let alert = UIAlertController(title: L("Name Diagram"), message: L("Give a name and optional description to this diagram"), preferredStyle: .alert)
-            alert.addAction(UIAlertAction(title: L("Cancel"), style: .cancel, handler: nil))
+            let alert = UIAlertController(title: L("Save Diagram"), message: L("Give a name and optional description to this diagram"), preferredStyle: .alert)
+            alert.addAction(UIAlertAction(title: L("Cancel"), style: .cancel))
             alert.addTextField { textField in
                 textField.placeholder = L("Diagram name")
                 textField.text = self.diagram.name
@@ -397,6 +427,10 @@ extension ViewController: HamburgerTableDelegate, UIImagePickerControllerDelegat
 
     func help() {
         os_log("help()", log: OSLog.action, type: .info)
+        performSegue(withIdentifier: "showHelpSegue", sender: self)
+
+//        guard let url = Bundle.main.url(forResource: "help", withExtension: "html"), UIApplication.shared.canOpenURL(url) else { return }
+//        UIApplication.shared.open(url, options: [:], completionHandler: nil)
     }
 
     func imagePickerController(_ picker: UIImagePickerController, didFinishPickingMediaWithInfo info: [UIImagePickerController.InfoKey : Any]) {

@@ -9,6 +9,10 @@
 /* Begin PBXBuildFile section */
 		8E01D9C722849047000F36FC /* CursorView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8E01D9C622849047000F36FC /* CursorView.swift */; };
 		8E033CEA24AC10A300BE6D6F /* Calibration.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8E033CE924AC10A300BE6D6F /* Calibration.swift */; };
+		8E1276DB24D46C2000AC4B8F /* help.org in Resources */ = {isa = PBXBuildFile; fileRef = 8E1276DA24D46C2000AC4B8F /* help.org */; };
+		8E1276DD24D46F4200AC4B8F /* help.html in Resources */ = {isa = PBXBuildFile; fileRef = 8E1276DC24D46F4200AC4B8F /* help.html */; };
+		8E1276DF24D4734E00AC4B8F /* HelpViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8E1276DE24D4734E00AC4B8F /* HelpViewController.swift */; };
+		8E1276E124D4758B00AC4B8F /* WebKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 8E1276E024D4758A00AC4B8F /* WebKit.framework */; };
 		8E1B6CB8240CAE5300EA88A6 /* ScaledView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8E1B6CB7240CAE5300EA88A6 /* ScaledView.swift */; };
 		8E217D98245B306200CD0CBF /* MathTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8E217D97245B306200CD0CBF /* MathTests.swift */; };
 		8E2439F624B14F770044AEAB /* Interval.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8E2439F524B14F770044AEAB /* Interval.swift */; };
@@ -88,6 +92,10 @@
 /* Begin PBXFileReference section */
 		8E01D9C622849047000F36FC /* CursorView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CursorView.swift; sourceTree = "<group>"; };
 		8E033CE924AC10A300BE6D6F /* Calibration.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Calibration.swift; sourceTree = "<group>"; };
+		8E1276DA24D46C2000AC4B8F /* help.org */ = {isa = PBXFileReference; lastKnownFileType = text; path = help.org; sourceTree = "<group>"; };
+		8E1276DC24D46F4200AC4B8F /* help.html */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.html; path = help.html; sourceTree = "<group>"; };
+		8E1276DE24D4734E00AC4B8F /* HelpViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HelpViewController.swift; sourceTree = "<group>"; };
+		8E1276E024D4758A00AC4B8F /* WebKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = WebKit.framework; path = Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.15.sdk/System/Library/Frameworks/WebKit.framework; sourceTree = DEVELOPER_DIR; };
 		8E1B6CB7240CAE5300EA88A6 /* ScaledView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScaledView.swift; sourceTree = "<group>"; };
 		8E217D97245B306200CD0CBF /* MathTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MathTests.swift; sourceTree = "<group>"; };
 		8E2439F524B14F770044AEAB /* Interval.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Interval.swift; sourceTree = "<group>"; };
@@ -159,6 +167,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				8E1276E124D4758B00AC4B8F /* WebKit.framework in Frameworks */,
 				8EE311E624A8FE01003C7AF6 /* AudioToolbox.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -185,6 +194,15 @@
 			children = (
 			);
 			path = Protocols;
+			sourceTree = "<group>";
+		};
+		8E1276D924D46BEF00AC4B8F /* Help */ = {
+			isa = PBXGroup;
+			children = (
+				8E1276DC24D46F4200AC4B8F /* help.html */,
+				8E1276DA24D46C2000AC4B8F /* help.org */,
+			);
+			path = Help;
 			sourceTree = "<group>";
 		};
 		8E4ACA8724479C2500575538 /* ViewModels */ = {
@@ -240,6 +258,7 @@
 		8E7D24C122779DBD005A1729 /* EP Diagram */ = {
 			isa = PBXGroup;
 			children = (
+				8E1276D924D46BEF00AC4B8F /* Help */,
 				8E689C4F23B498A10042A3F1 /* EP Diagram.entitlements */,
 				8E7214DC22E95C630062C094 /* Common */,
 				8E6EB6BE2484707300E5F883 /* Extensions */,
@@ -340,6 +359,7 @@
 				8E253DD0244A86CB008CC56B /* ViewController+HamburgerTableDelegate.swift */,
 				8E6EB6C1248477D500E5F883 /* ViewController+ViewControllerDelegate.swift */,
 				8E4ACA8124478D7C00575538 /* HamburgerTableViewController.swift */,
+				8E1276DE24D4734E00AC4B8F /* HelpViewController.swift */,
 			);
 			path = ViewControllers;
 			sourceTree = "<group>";
@@ -359,6 +379,7 @@
 		8EE311E424A8FE01003C7AF6 /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				8E1276E024D4758A00AC4B8F /* WebKit.framework */,
 				8EE311E524A8FE01003C7AF6 /* AudioToolbox.framework */,
 			);
 			name = Frameworks;
@@ -469,8 +490,10 @@
 			buildActionMask = 2147483647;
 			files = (
 				8E7D24CD22779DBF005A1729 /* LaunchScreen.storyboard in Resources */,
+				8E1276DD24D46F4200AC4B8F /* help.html in Resources */,
 				8E7D24CA22779DBF005A1729 /* Assets.xcassets in Resources */,
 				8E7D24C822779DBD005A1729 /* Main.storyboard in Resources */,
+				8E1276DB24D46C2000AC4B8F /* help.org in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -502,6 +525,7 @@
 				8E6EB6C02484778E00E5F883 /* Notification+didUndoableAction.swift in Sources */,
 				8E9550BD2474B22000E1B125 /* FileIO.swift in Sources */,
 				8E973F9B24C4BF0800AB41C3 /* String+isBlank.swift in Sources */,
+				8E1276DF24D4734E00AC4B8F /* HelpViewController.swift in Sources */,
 				8E7D24F12277A00C005A1729 /* ImageView.swift in Sources */,
 				8E7D24C522779DBD005A1729 /* ViewController.swift in Sources */,
 				8E3AD1372459CABF0085BDD4 /* LocationInLadder.swift in Sources */,

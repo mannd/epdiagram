@@ -163,13 +163,13 @@ class Common {
         viewController.present(alert, animated: true)
     }
 
-    static func showWarning(viewController: UIViewController, title: String, message: String, okActionButtonTitle: String = L("OK"), action: ((UIAlertAction) -> Void)?) {
+    static func showWarning(viewController: UIViewController, title: String, message: String, okActionButtonTitle: String = L("OK"), action: ((UIAlertAction) -> Void)?, completion: (()->Void)? = nil) {
         let alert = UIAlertController(title: title, message: message, preferredStyle: .alert)
-        let okAction = UIAlertAction(title: okActionButtonTitle, style: .destructive, handler: action)
+        let okAction = UIAlertAction(title: okActionButtonTitle, style: .default, handler: action)
         let cancelAction = UIAlertAction(title: L("Cancel"), style: .cancel, handler: nil)
         alert.addAction(okAction)
         alert.addAction(cancelAction)
-        viewController.present(alert, animated: true)
+        viewController.present(alert, animated: true, completion: completion)
     }
 
     static func showFileError(viewController: UIViewController, error: Error) {
