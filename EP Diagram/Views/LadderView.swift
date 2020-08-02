@@ -76,6 +76,14 @@ final class LadderView: ScaledView {
             ladder.isDirty = newValue
         }
     }
+    var marksAreVisible: Bool {
+        get {
+            ladder.marksAreVisible
+        }
+        set(newValue) {
+            ladder.marksAreVisible = newValue
+        }
+    }
     
     internal var ladder: Ladder
 
@@ -1052,6 +1060,9 @@ final class LadderView: ScaledView {
         if ladderIsLocked {
             showLockLadderWarning(rect: rect)
         }
+        if !marksAreVisible {
+            showMarksAreHiddenWarning(rect: rect)
+        }
     }
 
 
@@ -1221,6 +1232,19 @@ final class LadderView: ScaledView {
         text.draw(in: lockRect, withAttributes: attributes)
     }
 
+
+    func showMarksAreHiddenWarning(rect: CGRect) {
+        let text = L("MARKS ARE HIDDEN")
+        let attributes: [NSAttributedString.Key: Any] = [
+            .font: UIFont.systemFont(ofSize: 14.0),
+            .foregroundColor: UIColor.white, .backgroundColor: UIColor.systemRed,
+
+        ]
+        let size = text.size(withAttributes: attributes)
+        let hiddenMarksRect = CGRect(x: rect.size.width - size.width - 5, y: rect.origin.y + 5, width: rect.size.width, height: rect.size.height)
+        text.draw(in: hiddenMarksRect, withAttributes: attributes)
+    }
+
     func getTruncatedPosition(segment: Segment) -> CGPoint? {
         let intersection = Common.getIntersection(ofLineFrom: CGPoint(x: leftMargin, y: 0), to: CGPoint(x: leftMargin, y: ladderViewHeight), withLineFrom: segment.proximal, to: segment.distal)
         return intersection
@@ -1374,7 +1398,9 @@ final class LadderView: ScaledView {
     func drawRegion(rect: CGRect, context: CGContext, region: Region, offset: CGFloat, scale: CGFloat, lastRegion: Bool) {
         drawLabel(rect: rect, region: region, context: context)
         drawRegionArea(context: context, rect: rect, region: region)
-        drawMarks(region: region, context: context, rect: rect)
+        if ladder.marksAreVisible {
+            drawMarks(region: region, context: context, rect: rect)
+        }
         drawBottomLine(context: context, lastRegion: lastRegion, rect: rect)
     }
 

@@ -132,8 +132,8 @@ struct Diagram {
         try save()
     }
 
-    static func getDefaultDiagram() -> Diagram {
-        let diagramData = DiagramData(description: "", ladder: Ladder.defaultLadder())
-        return Diagram(name: nil, image: UIImage(named: "SampleECG")!, diagramData: diagramData)
+    static func defaultDiagram(name: String? = nil) -> Diagram {
+        let diagramData = DiagramData(description: "Normal ECG", ladder: Ladder.defaultLadder())
+        return Diagram(name: name, image: UIImage(named: "SampleECG")!, diagramData: diagramData)
     }
 }

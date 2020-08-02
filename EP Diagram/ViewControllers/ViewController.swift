@@ -50,7 +50,7 @@ final class ViewController: UIViewController {
     internal let _maxBlackAlpha: CGFloat = 0.4
 
     var diagramFilenames: [String] = []
-    var diagram: Diagram = Diagram.getDefaultDiagram()
+    var diagram: Diagram = Diagram.defaultDiagram()
 
     var preferences: Preferences = Preferences()
 
@@ -551,6 +551,17 @@ final class ViewController: UIViewController {
         return hostingController
     }
     
+    @IBSegueAction func showSampleSelector(_ coder: NSCoder) -> UIViewController? {
+        let sampleDiagrams: [Diagram] = [
+            Diagram(name: L("Normal ECG"), image: UIImage(named: "SampleECG")!, diagramData: Diagram.DiagramData(description: L("Just a normal ECG"), ladder: Ladder.defaultLadder())),
+            Diagram(name: L("AV Block"), image: UIImage(named: "AVBlock")!, diagramData: Diagram.DiagramData(description: "High grade AV block", ladder: Ladder.defaultLadder()))
+            // TODO: add others here.
+        ]
+        let sampleSelector = SampleSelector(sampleDiagrams: sampleDiagrams, delegate: self)
+        let hostingController = UIHostingController(coder: coder, rootView: sampleSelector)
+        return hostingController
+    }
+
     // MARK: - Save and restore views
 
     // TODO: Need to implement this functionality.

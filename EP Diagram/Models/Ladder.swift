@@ -35,6 +35,8 @@ class Ladder: Codable {
     var linkedMarks = [Mark]()
     // isDirty will be true if f any changes made to ladder, even if they are reverted back.
     var isDirty: Bool = false
+    // marksAreVisible shows and hides all the marks.  You can toggle this for teaching purposes.
+    var marksAreVisible: Bool = true
 
     var id = UUID()
 

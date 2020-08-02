@@ -16,20 +16,25 @@ struct PreferencesView: View {
 
     var body: some View {
         NavigationView {
-        VStack {
-            Stepper(L("Mark line width = \(preferences.lineWidth)"), value: $preferences.lineWidth, in: 1...6, step: 1)
-            Toggle(isOn: $preferences.showImpulseOrigin) {
-                Text("Show impulse origin")
+            VStack{
+                Form {
+                    Section(header: Text("Mark preferences")) {
+                        Stepper(L("Mark line width = \(preferences.lineWidth)"), value: $preferences.lineWidth, in: 1...6, step: 1)
+                        Toggle(isOn: $preferences.showImpulseOrigin) {
+                            Text("Show impulse origin")
+                        }
+                        Toggle(isOn: $preferences.showBlock) {
+                            Text("Show block")
+                        }
+                        Toggle(isOn: $preferences.showIntervals) {
+                            Text("Show intervals")
+                        }
+                    }
+                }
+                Button(action: { self.onSave() }, label: { Text("Save Changes") })
             }
-            Toggle(isOn: $preferences.showBlock) {
-                Text("Show block")
-            }
-            Toggle(isOn: $preferences.showIntervals) {
-                Text("Show intervals")
-            }
-        }.padding()
-            .navigationBarTitle("Preferences")
-            .navigationBarItems(trailing: Button(action: { self.onSave() }, label: { Text("Save") }))
+            .padding()
+            .navigationBarTitle("Preferences", displayMode: .inline)
         }
     }
 

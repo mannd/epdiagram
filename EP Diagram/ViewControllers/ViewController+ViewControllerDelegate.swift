@@ -15,6 +15,7 @@ protocol ViewControllerDelegate: class {
     func deleteDiagram(diagramName: String)
     func savePreferences(preferences: Preferences)
     func saveTemplates(_ templates: [LadderTemplate])
+    func selectSampleDiagram(_ diagram: Diagram?)
 }
 
 extension ViewController: ViewControllerDelegate {
@@ -85,4 +86,15 @@ extension ViewController: ViewControllerDelegate {
             Common.showFileError(viewController: self, error: error)
         }
     }
+
+    func selectSampleDiagram(_ diagram: Diagram?) {
+        os_log("selectSampleDiagram()", log: .action, type: .info)
+        guard let diagram = diagram else { return }
+        self.diagram = diagram
+        self.imageView.image = self.diagram.image
+        self.ladderView.ladder = self.diagram.ladder
+        setTitle()
+        setViewsNeedDisplay()
+    }
+
 }

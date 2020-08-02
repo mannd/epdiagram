@@ -229,7 +229,11 @@ extension ViewController: HamburgerTableDelegate, UIImagePickerControllerDelegat
     #if DEBUG
     func test() {
         os_log("test()", log: .debugging, type: .debug)
+        // delete all old diagrams
         DiagramIO.deleteEPDiagramDir()
+        // toggle mark visibility
+//        ladderView.marksAreVisible.toggle()
+//        ladderView.setNeedsDisplay()
     }
     #endif
 
@@ -406,6 +410,7 @@ extension ViewController: HamburgerTableDelegate, UIImagePickerControllerDelegat
 
     func sampleDiagrams() {
         os_log("sampleDiagrams()", log: OSLog.action, type: .info)
+        performSegue(withIdentifier: "showSampleSelectorSegue", sender: self)
     }
 
     func showPreferences() {
