@@ -50,6 +50,7 @@ final class ViewController: UIViewController {
     internal let _maxBlackAlpha: CGFloat = 0.4
 
     var diagramFilenames: [String] = []
+    // TODO: Should be blank diagram, Diagram.blankDiagram()
     var diagram: Diagram = Diagram.defaultDiagram()
 
     var preferences: Preferences = Preferences()
@@ -115,7 +116,8 @@ final class ViewController: UIViewController {
 //            diagram = lastDiagram
 //        }
 
-        imageView.image = nil
+        diagram.image = nil
+        imageView.image = diagram.image
         ladderView.ladder = diagram.ladder
 
         setTitle()

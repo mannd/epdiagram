@@ -20,6 +20,7 @@ protocol HamburgerTableDelegate: class {
     var diagramSaved: Bool { get }
 
     func showNeedToSaveMessage()
+
     func takePhoto()
     func selectImage()
     func about()
@@ -240,10 +241,39 @@ extension ViewController: HamburgerTableDelegate, UIImagePickerControllerDelegat
     // Save old diagram, keep image, clear ladder.
     func newDiagram() {
         os_log("newDiagram()", log: .action, type: .info)
+        if ladderView.ladderIsDirty {
+            let alert = UIAlertController(title: L("New Diagram"), message: L("Diagram has changes.  You can save it before starting a new diagram, or abandon the changes and start a new diagram."), preferredStyle: .alert)
+            let cancelAction = UIAlertAction(title: L("Cancel"), style: .cancel, handler: nil)
+            let selectWithSaveAction = UIAlertAction(title: L("Save Diagram First"), style: .default, handler: { action in
+                self.dismiss(animated: true, completion: nil)
+                self.saveDiagram(completion: { self.handleNewDiagram() })
+            })
+            let selectWithoutSaveAction = UIAlertAction(title: L("Don't Save Diagram"), style: .destructive, handler: { action in
+                self.dismiss(animated: true, completion: nil)
+                self.handleNewDiagram()
+            })
+            alert.addAction(cancelAction)
+            alert.addAction(selectWithSaveAction)
+            alert.addAction(selectWithoutSaveAction)
+            present(alert, animated: true)
+        }
+        else {
+            handleNewDiagram()
+        }
         if diagram.isDirty {
             saveDiagram()
         }
         ladderView.reset()
+    }
+
+    // TODO: Need to do other things here, e.g. reset zoom to 1.0, etc.
+    func handleNewDiagram() {
+        os_log("handleNewDiagram()", log: .action, type: .info)
+        // Use same ladder, blank out image.
+        diagram = Diagram.defaultDiagram()
+        imageView.image = diagram.image
+        ladderView.ladder = diagram.ladder
+        setViewsNeedDisplay()
     }
 
     // Save old diagram, load selected image and ladder.
@@ -410,7 +440,24 @@ extension ViewController: HamburgerTableDelegate, UIImagePickerControllerDelegat
 
     func sampleDiagrams() {
         os_log("sampleDiagrams()", log: OSLog.action, type: .info)
-        performSegue(withIdentifier: "showSampleSelectorSegue", sender: self)
+        if ladderView.ladderIsDirty {
+            let alert = UIAlertController(title: L("Select Sample Diagram"), message: L("Diagram has changes.  You can save it and then select a sample diagram, or abandon the changes and select a sample diagram."), preferredStyle: .alert)
+            let cancelAction = UIAlertAction(title: L("Cancel"), style: .cancel, handler: nil)
+            let selectWithSaveAction = UIAlertAction(title: L("Save Diagram First"), style: .default, handler: { action in
+                self.dismiss(animated: true, completion: nil)
+                self.saveDiagram(completion: { self.performSegue(withIdentifier: "showSampleSelectorSegue", sender: self) })
+            })
+            let selectWithoutSaveAction = UIAlertAction(title: L("Don't Save Diagram"), style: .destructive, handler: { action in
+                self.dismiss(animated: true, completion: nil)
+                self.performSegue(withIdentifier: "showSampleSelectorSegue", sender: self) })
+            alert.addAction(cancelAction)
+            alert.addAction(selectWithSaveAction)
+            alert.addAction(selectWithoutSaveAction)
+            present(alert, animated: true)
+        }
+        else {
+            performSegue(withIdentifier: "showSampleSelectorSegue", sender: self)
+        }
     }
 
     func showPreferences() {

@@ -11,7 +11,7 @@ import os.log
 
 struct Diagram {
     var name: String?
-    var image: UIImage
+    var image: UIImage? // nil image is blank.
     var description: String {
         get { diagramData.description }
         set(newValue) { diagramData.description = newValue }
@@ -44,7 +44,7 @@ struct Diagram {
 //        self.ladder = ladder
 //    }
 
-    init(name: String?, image: UIImage, diagramData: DiagramData) {
+    init(name: String?, image: UIImage?, diagramData: DiagramData) {
         self.name = name
         self.image = image
         self.diagramData = diagramData
@@ -57,9 +57,11 @@ struct Diagram {
         if name.isBlank { throw FileIOError.diagramNameIsBlank }
         name = DiagramIO.cleanupFilename(name)
         let diagramDirURL = try DiagramIO.getDiagramDirURL(for: name)
-        let imageData = image.pngData()
-        let imageURL = diagramDirURL.appendingPathComponent(FileIO.imageFilename, isDirectory: false)
-        try imageData?.write(to: imageURL)
+        if let image = image {
+            let imageData = image.pngData()
+            let imageURL = diagramDirURL.appendingPathComponent(FileIO.imageFilename, isDirectory: false)
+            try imageData?.write(to: imageURL)
+        }
         let encoder = JSONEncoder()
         let diagramData = try encoder.encode(self.diagramData)
         let ladderURL = diagramDirURL.appendingPathComponent(FileIO.ladderFilename, isDirectory: false)
@@ -73,10 +75,13 @@ struct Diagram {
         if name.isBlank { throw FileIOError.diagramNameIsBlank }
         let diagramDirURL = try DiagramIO.getDiagramDirURL(for: name)
         let imageURL = diagramDirURL.appendingPathComponent(FileIO.imageFilename, isDirectory: false)
-        let image = UIImage(contentsOfFile: imageURL.path)
+        var image: UIImage? = nil
+        if FileManager.default.fileExists(atPath: imageURL.path) {
+            image = UIImage(contentsOfFile: imageURL.path)
+        }
         let ladderURL = diagramDirURL.appendingPathComponent(FileIO.ladderFilename, isDirectory: false)
         let decoder = JSONDecoder()
-        if let data = FileManager.default.contents(atPath: ladderURL.path), let image = image {
+        if let data = FileManager.default.contents(atPath: ladderURL.path) {
             let diagramData = try decoder.decode(DiagramData.self, from: data)
             self.image = image
             self.diagramData = diagramData
@@ -90,10 +95,13 @@ struct Diagram {
         if name.isBlank { throw FileIOError.diagramNameIsBlank }
         let diagramDirURL = try DiagramIO.getDiagramDirURL(for: name)
         let imageURL = diagramDirURL.appendingPathComponent(FileIO.imageFilename, isDirectory: false)
-        let image = UIImage(contentsOfFile: imageURL.path)
+        var image: UIImage? = nil
+        if FileManager.default.fileExists(atPath: imageURL.path) {
+            image = UIImage(contentsOfFile: imageURL.path)
+        }
         let ladderURL = diagramDirURL.appendingPathComponent(FileIO.ladderFilename, isDirectory: false)
         let decoder = JSONDecoder()
-        if let data = FileManager.default.contents(atPath: ladderURL.path), let image = image {
+        if let data = FileManager.default.contents(atPath: ladderURL.path) {
             let diagramData = try decoder.decode(DiagramData.self, from: data)
             let diagram = Diagram(name: name, image: image, diagramData: diagramData)
             return diagram
