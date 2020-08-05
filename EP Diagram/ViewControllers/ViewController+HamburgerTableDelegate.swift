@@ -260,9 +260,9 @@ extension ViewController: HamburgerTableDelegate, UIImagePickerControllerDelegat
         else {
             handleNewDiagram()
         }
-        if diagram.isDirty {
-            saveDiagram()
-        }
+//        if diagram.isDirty {
+//            saveDiagram()
+//        }
         ladderView.reset()
     }
 
@@ -289,11 +289,12 @@ extension ViewController: HamburgerTableDelegate, UIImagePickerControllerDelegat
             }
             let filenames = fileURLs.map { $0.lastPathComponent }.sorted()
             diagramFilenames = filenames
-            performSegue(withIdentifier: "showDiagramSelectorSegue", sender: self)
+            performShowDiagramSelectorSegue()
         } catch {
             os_log("Error: %s", error.localizedDescription)
         }
     }
+
 
 
     func snapshotDiagram() {
@@ -445,24 +446,24 @@ extension ViewController: HamburgerTableDelegate, UIImagePickerControllerDelegat
             let cancelAction = UIAlertAction(title: L("Cancel"), style: .cancel, handler: nil)
             let selectWithSaveAction = UIAlertAction(title: L("Save Diagram First"), style: .default, handler: { action in
                 self.dismiss(animated: true, completion: nil)
-                self.saveDiagram(completion: { self.performSegue(withIdentifier: "showSampleSelectorSegue", sender: self) })
+                self.saveDiagram(completion: { self.performShowSampleSelectorSegue() })
             })
             let selectWithoutSaveAction = UIAlertAction(title: L("Don't Save Diagram"), style: .destructive, handler: { action in
                 self.dismiss(animated: true, completion: nil)
-                self.performSegue(withIdentifier: "showSampleSelectorSegue", sender: self) })
+                self.performShowSampleSelectorSegue() })
             alert.addAction(cancelAction)
             alert.addAction(selectWithSaveAction)
             alert.addAction(selectWithoutSaveAction)
             present(alert, animated: true)
         }
         else {
-            performSegue(withIdentifier: "showSampleSelectorSegue", sender: self)
+            performShowSampleSelectorSegue()
         }
     }
 
     func showPreferences() {
         os_log("showPreferences()", log: OSLog.action, type: .info)
-        performSegue(withIdentifier: "showPreferencesSegue", sender: self)
+        performShowPreferencesSegue()
     }
 
     private func resetLadder() {
@@ -474,19 +475,16 @@ extension ViewController: HamburgerTableDelegate, UIImagePickerControllerDelegat
 
     func editTemplates() {
         os_log("editTemplates()", log: OSLog.action, type: .info)
-        performSegue(withIdentifier: "showTemplateEditorSegue", sender: self)
+        performShowTemplateEditorSegue()
     }
 
     func help() {
         os_log("help()", log: OSLog.action, type: .info)
-        performSegue(withIdentifier: "showHelpSegue", sender: self)
-
-//        guard let url = Bundle.main.url(forResource: "help", withExtension: "html"), UIApplication.shared.canOpenURL(url) else { return }
-//        UIApplication.shared.open(url, options: [:], completionHandler: nil)
+        performShowHelpSegue()
     }
 
+
     func imagePickerController(_ picker: UIImagePickerController, didFinishPickingMediaWithInfo info: [UIImagePickerController.InfoKey : Any]) {
-//        let chosenImage = info[.originalImage] as? UIImage
         let chosenImage = info[.editedImage] as? UIImage
         imageView.image = chosenImage
         picker.dismiss(animated: true, completion: nil)
@@ -496,7 +494,6 @@ extension ViewController: HamburgerTableDelegate, UIImagePickerControllerDelegat
         picker.dismiss(animated: true, completion: nil)
     }
 
-    
     @objc func toggleHamburgerMenu() {
         if hamburgerMenuIsOpen {
             hideHamburgerMenu()

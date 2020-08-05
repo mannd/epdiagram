@@ -50,8 +50,7 @@ final class ViewController: UIViewController {
     internal let _maxBlackAlpha: CGFloat = 0.4
 
     var diagramFilenames: [String] = []
-    // TODO: Should be blank diagram, Diagram.blankDiagram()
-    var diagram: Diagram = Diagram.defaultDiagram()
+    var diagram: Diagram = Diagram.blankDiagram()
 
     var preferences: Preferences = Preferences()
 
@@ -116,7 +115,6 @@ final class ViewController: UIViewController {
 //            diagram = lastDiagram
 //        }
 
-        diagram.image = nil
         imageView.image = diagram.image
         ladderView.ladder = diagram.ladder
 
@@ -239,12 +237,22 @@ final class ViewController: UIViewController {
     @objc func selectLadder() {
         os_log("selectLadder()", log: .action, type: .info)
         if ladderView.ladderIsDirty {
-            saveDiagram() {
-                P("Completed save Diagram")
-            }
+            let alert = UIAlertController(title: L("Select Ladder"), message: L("Diagram has changes.  You can save it before selecting a new ladder, or abandon the changes and select a new ladder."), preferredStyle: .alert)
+            let cancelAction = UIAlertAction(title: L("Cancel"), style: .cancel, handler: nil)
+            let selectWithSaveAction = UIAlertAction(title: L("Save Diagram First"), style: .default, handler: { action in
+                self.dismiss(animated: true, completion: nil)
+                self.saveDiagram(completion: { self.performSelectLadderSegue() })
+            })
+            let selectWithoutSaveAction = UIAlertAction(title: L("Don't Save Diagram"), style: .destructive, handler: { action in
+                self.dismiss(animated: true, completion: nil)
+                self.performSelectLadderSegue()
+            })
+            alert.addAction(cancelAction)
+            alert.addAction(selectWithSaveAction)
+            alert.addAction(selectWithoutSaveAction)
+            present(alert, animated: true)
         }
-        // FIXME: This segue is not being performed when saving diagram
-        performSegue(withIdentifier: "selectLadderSegue", sender: self)
+        performSelectLadderSegue()
     }
 
     @objc func editDiagram() {
@@ -263,8 +271,9 @@ final class ViewController: UIViewController {
 
     @objc func editLadder(action: UIAlertAction) {
         os_log("editLadder(action:)", log: OSLog.action, type: .info)
-        performSegue(withIdentifier: "EditLadderSegue", sender: self)
+        performEditLadderSegue()
     }
+
 
     @available(*, deprecated, message: "This doesn't seem to do anything.")
     private func centerImage() {
@@ -564,6 +573,34 @@ final class ViewController: UIViewController {
         return hostingController
     }
 
+    func performSelectLadderSegue() {
+        performSegue(withIdentifier: "selectLadderSegue", sender: self)
+    }
+
+    func performEditLadderSegue() {
+        performSegue(withIdentifier: "EditLadderSegue", sender: self)
+    }
+    
+    func performShowDiagramSelectorSegue() {
+        performSegue(withIdentifier: "showDiagramSelectorSegue", sender: self)
+    }
+
+    func performShowSampleSelectorSegue() {
+        performSegue(withIdentifier: "showSampleSelectorSegue", sender: self)
+    }
+
+    func performShowHelpSegue() {
+        performSegue(withIdentifier: "showHelpSegue", sender: self)
+    }
+
+    func performShowPreferencesSegue() {
+        performSegue(withIdentifier: "showPreferencesSegue", sender: self)
+    }
+
+    func performShowTemplateEditorSegue() {
+        performSegue(withIdentifier: "showTemplateEditorSegue", sender: self)
+    }
+    
     // MARK: - Save and restore views
 
     // TODO: Need to implement this functionality.
@@ -575,6 +612,7 @@ final class ViewController: UIViewController {
     override func decodeRestorableState(with coder: NSCoder) {
         os_log("decodeRestorableState(with:) - ViewController", log: .viewCycle, type: .info)
     }
+
 }
 
 

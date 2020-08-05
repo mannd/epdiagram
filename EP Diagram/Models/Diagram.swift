@@ -27,6 +27,7 @@ struct Diagram {
     var isSaved: Bool {
         !name.isBlank
     }
+    // TODO: make diagram dirty when any marks are added or deleted.
     var isDirty: Bool {
         ladder.isDirty
     }
@@ -143,5 +144,10 @@ struct Diagram {
     static func defaultDiagram(name: String? = nil) -> Diagram {
         let diagramData = DiagramData(description: "Normal ECG", ladder: Ladder.defaultLadder())
         return Diagram(name: name, image: UIImage(named: "SampleECG")!, diagramData: diagramData)
+    }
+
+    static func blankDiagram(name: String? = nil) -> Diagram {
+        let diagramData = DiagramData(description: "Blank diagram", ladder: Ladder.defaultLadder())
+        return Diagram(name: name, image: nil, diagramData: diagramData)
     }
 }
