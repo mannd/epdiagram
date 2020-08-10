@@ -279,7 +279,30 @@ extension ViewController: HamburgerTableDelegate, UIImagePickerControllerDelegat
     // Save old diagram, load selected image and ladder.
     func selectDiagram() {
         os_log("selectDiagram()", log: OSLog.action, type: .info)
-        // Open list of saved diagrams
+        // TODO: change all ladderView.isDirty to diagram.isDirty.
+        if diagram.isDirty {
+            let alert = UIAlertController(title: L("Select Diagram"), message: L("Diagram has changes.  You can save it before selecting a new diagram, or abandon the changes and select a new diagram."), preferredStyle: .alert)
+            let cancelAction = UIAlertAction(title: L("Cancel"), style: .cancel, handler: nil)
+            let selectWithSaveAction = UIAlertAction(title: L("Save Diagram First"), style: .default, handler: { action in
+                self.dismiss(animated: true, completion: nil)
+                self.saveDiagram(completion: { self.handleSelectDiagram() })
+            })
+            let selectWithoutSaveAction = UIAlertAction(title: L("Don't Save Diagram"), style: .destructive, handler: { action in
+                self.dismiss(animated: true, completion: nil)
+                self.handleSelectDiagram()
+            })
+            alert.addAction(cancelAction)
+            alert.addAction(selectWithSaveAction)
+            alert.addAction(selectWithoutSaveAction)
+            present(alert, animated: true)
+        }
+        else {
+            handleSelectDiagram()
+        }
+        ladderView.reset()
+    }
+
+    private func handleSelectDiagram() {
         do {
             let epDiagramsDirURL = try DiagramIO.getEPDiagramsDirURL()
             let fileURLs = try FileManager.default.contentsOfDirectory(at: epDiagramsDirURL, includingPropertiesForKeys: nil, options: .skipsHiddenFiles)
@@ -294,8 +317,6 @@ extension ViewController: HamburgerTableDelegate, UIImagePickerControllerDelegat
             os_log("Error: %s", error.localizedDescription)
         }
     }
-
-
 
     func snapshotDiagram() {
         let topRenderer = UIGraphicsImageRenderer(size: imageScrollView.bounds.size)
@@ -325,7 +346,12 @@ extension ViewController: HamburgerTableDelegate, UIImagePickerControllerDelegat
 
     func getDiagramInfo() {
         os_log("getDiagramInfo()", log: .action, type: .info)
+        // TODO: If there are more fields, then include this and add SwiftUI view.
         // show dialog with diagram info here.
+        P("Name = \(diagram.name ?? "unnamed")")
+        P("Description = \(diagram.description)")
+        P("isDirty = \(diagram.isDirty)")
+        P("isSaved = \(diagram.isSaved)")
     }
 
     func lockLadder() {

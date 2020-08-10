@@ -34,18 +34,16 @@ extension ViewController: ViewControllerDelegate {
     func selectDiagram(diagramName: String?) {
         guard let diagramName = diagramName else { return }
         P("diagram name = \(diagramName)")
-        saveDiagram() {
-            do {
-                self.diagram = try Diagram.retrieve(name: diagramName)
-                self.imageView.image = self.diagram.image
-                self.ladderView.ladder = self.diagram.ladder
-                self.setTitle()
-                DiagramIO.saveLastDiagram(name: self.diagram.name)
-                self.setViewsNeedDisplay()
-            } catch {
-                os_log("Error: %s", log: .errors, type: .error, error.localizedDescription)
-                Common.showFileError(viewController: self, error: error)
-            }
+        do {
+            self.diagram = try Diagram.retrieve(name: diagramName)
+            self.imageView.image = self.diagram.image
+            self.ladderView.ladder = self.diagram.ladder
+            self.setTitle()
+            DiagramIO.saveLastDiagram(name: self.diagram.name)
+            self.setViewsNeedDisplay()
+        } catch {
+            os_log("Error: %s", log: .errors, type: .error, error.localizedDescription)
+            Common.showFileError(viewController: self, error: error)
         }
     }
 

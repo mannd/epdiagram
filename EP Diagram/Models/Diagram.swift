@@ -20,6 +20,7 @@ struct Diagram {
         get { diagramData.ladder }
         set(newValue) { diagramData.ladder = newValue }
     }
+    
     // Future use?
 //    var creationDate: Date?
 //    var lastSavedDate: Date?
