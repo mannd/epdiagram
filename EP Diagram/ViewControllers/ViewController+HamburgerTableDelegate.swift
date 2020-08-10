@@ -23,6 +23,7 @@ protocol HamburgerTableDelegate: class {
 
     func takePhoto()
     func selectImage()
+    func selectLadder()
     func about()
     func test()
     func newDiagram()

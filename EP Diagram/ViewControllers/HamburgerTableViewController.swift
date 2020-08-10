@@ -84,6 +84,8 @@ class HamburgerTableViewController: UITableViewController {
             delegate?.takePhoto()
         case .selectImage:
             delegate?.selectImage()
+        case .selectLadder:
+            delegate?.selectLadder()
         case .lockImage:
             delegate?.lockImage()
         case .newDiagram:

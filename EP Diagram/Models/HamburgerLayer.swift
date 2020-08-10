@@ -11,6 +11,7 @@ import UIKit
 enum Layer {
     case takePhoto
     case selectImage
+    case selectLadder
     case newDiagram
     case openDiagram
     case saveDiagram

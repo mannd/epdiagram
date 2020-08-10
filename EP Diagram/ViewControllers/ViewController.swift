@@ -106,11 +106,10 @@ final class ViewController: UIViewController {
         ladderView.addInteraction(interaction)
 
         navigationItem.setLeftBarButton(UIBarButtonItem(image: UIImage(named: "hamburger"), style: .plain, target: self, action: #selector(toggleHamburgerMenu)), animated: true)
-        let ladderButton = UIBarButtonItem(image: UIImage(named: "ladder"), style: .plain, target: self, action: #selector(selectLadder))
-        navigationItem.rightBarButtonItem = ladderButton
 
         loadUserDefaults()
 
+        // FIXME: should load last diagram at startup.
 //        if let lastDiagramName = preferences.lastDiagramName, let lastDiagram = Diagram.retrieveNoThrow(name: lastDiagramName) {
 //            diagram = lastDiagram
 //        }
