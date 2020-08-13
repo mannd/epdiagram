@@ -109,10 +109,9 @@ final class ViewController: UIViewController {
 
         loadUserDefaults()
 
-        // FIXME: should load last diagram at startup.
-//        if let lastDiagramName = preferences.lastDiagramName, let lastDiagram = Diagram.retrieveNoThrow(name: lastDiagramName) {
-//            diagram = lastDiagram
-//        }
+        if let lastDiagramName = preferences.lastDiagramName, let lastDiagram = Diagram.retrieveNoThrow(name: lastDiagramName) {
+            diagram = lastDiagram
+        }
 
         imageView.image = diagram.image
         ladderView.ladder = diagram.ladder
@@ -564,7 +563,9 @@ final class ViewController: UIViewController {
     @IBSegueAction func showSampleSelector(_ coder: NSCoder) -> UIViewController? {
         let sampleDiagrams: [Diagram] = [
             Diagram(name: L("Normal ECG"), image: UIImage(named: "SampleECG")!, diagramData: Diagram.DiagramData(description: L("Just a normal ECG"), ladder: Ladder.defaultLadder())),
-            Diagram(name: L("AV Block"), image: UIImage(named: "AVBlock")!, diagramData: Diagram.DiagramData(description: "High grade AV block", ladder: Ladder.defaultLadder()))
+            Diagram(name: L("AV Block"), image: UIImage(named: "AVBlock")!, diagramData: Diagram.DiagramData(description: "High grade AV block", ladder: Ladder.defaultLadder())),
+            Diagram.blankDiagram(name: "Blank Diagram"),
+            Diagram(name: "Scrollable Blank Diagram", image: UIImage.emptyImage(size: CGSize(width: view.frame.size.width * 3, height: view.frame.size.height), color: UIColor.systemTeal), diagramData: Diagram.DiagramData(description: "wide image", ladder: Ladder.defaultLadder()))
             // TODO: add others here.
         ]
         let sampleSelector = SampleSelector(sampleDiagrams: sampleDiagrams, delegate: self)

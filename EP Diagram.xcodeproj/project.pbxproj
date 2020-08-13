@@ -65,6 +65,7 @@
 		8E9B804722834870008873BB /* Ladder.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8E9B804622834870008873BB /* Ladder.swift */; };
 		8EA444C02476E471005B5452 /* LadderSelector.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8EA444BF2476E471005B5452 /* LadderSelector.swift */; };
 		8EADC2A924D64E1200C5D3D8 /* SampleSelector.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8EADC2A824D64E1200C5D3D8 /* SampleSelector.swift */; };
+		8EBC824124E5E04800B5CA29 /* UIImage+emptyImage.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8EBC824024E5E04800B5CA29 /* UIImage+emptyImage.swift */; };
 		8ECA9FB52470A07B0016D939 /* RegionTemplate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8ECA9FB42470A07B0016D939 /* RegionTemplate.swift */; };
 		8ECA9FB72470A1020016D939 /* LadderTemplate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8ECA9FB62470A1020016D939 /* LadderTemplate.swift */; };
 		8ED3B1B62360DA0D00549381 /* Anchor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8ED3B1B52360DA0D00549381 /* Anchor.swift */; };
@@ -156,6 +157,7 @@
 		8E9B804622834870008873BB /* Ladder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Ladder.swift; sourceTree = "<group>"; };
 		8EA444BF2476E471005B5452 /* LadderSelector.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LadderSelector.swift; sourceTree = "<group>"; };
 		8EADC2A824D64E1200C5D3D8 /* SampleSelector.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SampleSelector.swift; sourceTree = "<group>"; };
+		8EBC824024E5E04800B5CA29 /* UIImage+emptyImage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "UIImage+emptyImage.swift"; sourceTree = "<group>"; };
 		8ECA9FB42470A07B0016D939 /* RegionTemplate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RegionTemplate.swift; sourceTree = "<group>"; };
 		8ECA9FB62470A1020016D939 /* LadderTemplate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LadderTemplate.swift; sourceTree = "<group>"; };
 		8ED3B1B52360DA0D00549381 /* Anchor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Anchor.swift; sourceTree = "<group>"; };
@@ -220,6 +222,7 @@
 			children = (
 				8E6EB6BF2484778E00E5F883 /* Notification+didUndoableAction.swift */,
 				8E973F9A24C4BF0800AB41C3 /* String+isBlank.swift */,
+				8EBC824024E5E04800B5CA29 /* UIImage+emptyImage.swift */,
 			);
 			path = Extensions;
 			sourceTree = "<group>";
@@ -558,6 +561,7 @@
 				8E01D9C722849047000F36FC /* CursorView.swift in Sources */,
 				8EA444C02476E471005B5452 /* LadderSelector.swift in Sources */,
 				8E5918BC24AEAB0B00D8ABA3 /* Caliper.swift in Sources */,
+				8EBC824124E5E04800B5CA29 /* UIImage+emptyImage.swift in Sources */,
 				8E74D58E244FBE2500641E0A /* LadderView+UIContextMenuInteractionDelegate.swift in Sources */,
 				8E033CEA24AC10A300BE6D6F /* Calibration.swift in Sources */,
 				8E9B8045228347DE008873BB /* Region.swift in Sources */,
