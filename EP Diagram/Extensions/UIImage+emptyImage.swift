@@ -8,6 +8,7 @@
 
 import UIKit
 
+// Based on https://stackoverflow.com/questions/14594782/how-can-i-make-an-uiimage-programmatically
 extension UIImage {
     static func emptyImage(size: CGSize, color: UIColor) -> UIImage? {
         UIGraphicsBeginImageContext(size)

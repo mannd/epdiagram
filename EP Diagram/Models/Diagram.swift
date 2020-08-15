@@ -52,6 +52,12 @@ struct Diagram {
         self.diagramData = diagramData
     }
 
+    // init a Diagram with default ladder.
+    init(name: String?, image: UIImage?, description: String = "") {
+        let diagramData = DiagramData(description: description, ladder: Ladder.defaultLadder())
+        self = Diagram(name: name, image: image, diagramData: diagramData)
+    }
+
     // Will overwrite without asking.  Calling method should check if file exists and query for overwrite if appropriate.
     func save() throws {
         os_log("save() - Diagram", log: .action, type: .info)

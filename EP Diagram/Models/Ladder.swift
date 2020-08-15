@@ -122,6 +122,14 @@ class Ladder: Codable {
         }
     }
 
+    // Clear ladder of all marks.
+    func clear() {
+        registry.removeAll()
+        for region in regions {
+            region.marks.removeAll()
+        }
+    }
+
     func getIndex(ofRegion region: Region?) -> Int? {
         guard let region = region else { return nil }
         return regions.firstIndex(of: region)

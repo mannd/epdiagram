@@ -7,7 +7,6 @@
 //
 
 import UIKit
-import AudioToolbox
 import os.log
 
 protocol HamburgerTableDelegate: class {
@@ -18,8 +17,6 @@ protocol HamburgerTableDelegate: class {
     var imageIsLocked: Bool { get set }
     var diagramIsLocked: Bool { get set }
     var diagramSaved: Bool { get }
-
-    func showNeedToSaveMessage()
 
     func takePhoto()
     func selectImage()
@@ -43,34 +40,38 @@ protocol HamburgerTableDelegate: class {
     func showHamburgerMenu()
 }
 
+// MARK: -
+
 extension HamburgerTableDelegate {
+    // This allows the saveDiagram completition to be nil.
     func saveDiagram(completion: (()->Void)? = nil) {
         saveDiagram(completion: completion)
     }
 }
 
+// MARK: -
+
+// Helper class to allow saving images to Photo Album.
 class ImageSaver: NSObject {
     var viewController: UIViewController?
 
     func writeToPhotoAlbum(image: UIImage, viewController: UIViewController) {
         self.viewController = viewController
-        UIImageWriteToSavedPhotosAlbum(image, self, #selector(saveImageError), nil)
+        UIImageWriteToSavedPhotosAlbum(image, self, #selector(showSavedImageResult), nil)
     }
 
-    @objc func saveImageError(_ image: UIImage, didFinishSavingWithError error: Error?, contextInfo: UnsafeRawPointer) {
-        var title: String = ""
-        var message: String = ""
+    @objc func showSavedImageResult(_ image: UIImage, didFinishSavingWithError error: Error?, contextInfo: UnsafeRawPointer) {
+        let title: String
+        let message: String
         if let error = error {
             os_log("Error saving snapshot:  %s", log: .errors, type: .error,   error.localizedDescription)
             title = L("Error Saving Snapshot")
             message = L("Make sure you have allowed EP Diagram to save to the Photos Library in the Settings app.  Error message: \(error.localizedDescription)")
-        }
-        else {
-            // Magic code to play system shutter sound.  We link AudioToolbox framework to make this work.  See http://iphonedevwiki.net/index.php/AudioServices for complete list os system sounds.  Note unlock sound (1101) doesn't seem to work.
-            AudioServicesPlaySystemSoundWithCompletion(SystemSoundID(1108), nil)
+        } else {
+            Sounds.playShutterSound()
             // See https://www.hackingwithswift.com/books/ios-swiftui/how-to-save-images-to-the-users-photo-library
             os_log("Snapshot successfully saved.", log: .action, type: .info)
-            title = L("Success!")
+            title = L("Diagram Snapshot Saved")
             message = L("Diagram snapshot saved to Photo Library.")
         }
         if let viewController = viewController {
@@ -79,104 +80,95 @@ class ImageSaver: NSObject {
     }
 }
 
-extension ViewController: HamburgerTableDelegate, UIImagePickerControllerDelegate & UINavigationControllerDelegate {
-    func lockImage() {
-        _imageIsLocked.toggle()
-        // Turn off scrolling and zooming, but allow single taps to generate marks with cursors.
-        imageScrollView.isScrollEnabled = !_imageIsLocked
-        imageScrollView.pinchGestureRecognizer?.isEnabled = !_imageIsLocked
-        cursorView.imageIsLocked = _imageIsLocked
-        cursorView.setNeedsDisplay()
-        AudioServicesPlaySystemSoundWithCompletion(SystemSoundID(1100), nil)
-    }
+// MARK: -
 
+extension ViewController: HamburgerTableDelegate, UIImagePickerControllerDelegate & UINavigationControllerDelegate {
     var imageIsLocked: Bool {
-        get { return _imageIsLocked }
+        get { _imageIsLocked }
         set(newValue) { _imageIsLocked = newValue}
     }
 
     var diagramIsLocked: Bool {
-        get { return _ladderIsLocked }
+        get { _ladderIsLocked }
         set(newValue) { _ladderIsLocked = newValue }
     }
 
-    var diagramSaved: Bool {
-        return diagram.isSaved
-    }
+    var diagramSaved: Bool { diagram.isSaved }
 
     var constraintHamburgerLeft: NSLayoutConstraint {
-        get {
-            return _constraintHamburgerLeft
-        }
-        set(newValue){
-            _constraintHamburgerLeft = newValue
-        }
+        get { _constraintHamburgerLeft }
+        set(newValue){ _constraintHamburgerLeft = newValue }
     }
+
     var constraintHamburgerWidth: NSLayoutConstraint {
-        get {
-            return _constraintHamburgerWidth
-        }
-        set(newValue) {
-            _constraintHamburgerWidth = newValue
-        }
-    }
-    var maxBlackAlpha: CGFloat {
-        get {
-            return _maxBlackAlpha
-        }
+        get { _constraintHamburgerWidth }
+        set(newValue) { _constraintHamburgerWidth = newValue }
     }
 
-    private static var subsystem = Bundle.main.bundleIdentifier!
-    static let hamburgerCycle = OSLog(subsystem: subsystem, category: "hamburger")
+    var maxBlackAlpha: CGFloat { _maxBlackAlpha }
 
-    func showNeedToSaveMessage() {
-        Common.showMessage(viewController: self, title: L("Save Diagram First"), message: L("Please save this diagram before renaming it or duplicating it."))
+    func lockImage() {
+        imageIsLocked.toggle()
+        // Turn off scrolling and zooming, but allow single taps to generate marks with cursors.
+        imageScrollView.isScrollEnabled = !imageIsLocked
+        imageScrollView.pinchGestureRecognizer?.isEnabled = !imageIsLocked
+        cursorView.imageIsLocked = imageIsLocked
+        cursorView.setNeedsDisplay()
+        Sounds.playLockSound()
     }
 
     func takePhoto() {
         os_log("takePhoto()", log: OSLog.action, type: .info)
+            handleDirtyLadder(
+                title: L("Take Photo"),
+                message: L("Diagram has changes.  You can save it and then take a photo, or abandon the changes and take a photo."),
+                handler: handleTakePhoto)
+    }
+
+    private func handleDirtyLadder(title: String, message: String, handler: @escaping ()->Void) {
         if ladderView.ladderIsDirty {
-            let alert = UIAlertController(title: L("Take Photo"), message: L("Diagram has changes.  You can save it and then take a photo, or abandon the changes and take a photo."), preferredStyle: .alert)
+            let alert = UIAlertController(title: title, message: message, preferredStyle: .alert)
             let cancelAction = UIAlertAction(title: L("Cancel"), style: .cancel, handler: nil)
             let selectWithSaveAction = UIAlertAction(title: L("Save Diagram First"), style: .default, handler: { action in
                 self.dismiss(animated: true, completion: nil)
-                self.saveDiagram(completion: { self.handleTakePhoto() })
+                self.saveDiagram(completion: { handler() })
             })
             let selectWithoutSaveAction = UIAlertAction(title: L("Don't Save Diagram"), style: .destructive, handler: { action in
                 self.dismiss(animated: true, completion: nil)
-                self.handleTakePhoto() })
+                handler() })
             alert.addAction(cancelAction)
             alert.addAction(selectWithSaveAction)
             alert.addAction(selectWithoutSaveAction)
             present(alert, animated: true)
+        } else {
+            handler()
         }
-        else {
-            handleTakePhoto()
-        }
-
     }
 
-    func handleTakePhoto() {
+    private func handleTakePhoto() {
         os_log("takePhoto()", log: OSLog.action, type: .info)
         imagePicker.delegate = self
         imagePicker.allowsEditing = true
         imagePicker.modalPresentationStyle = .fullScreen
         if !UIImagePickerController.isSourceTypeAvailable(.camera) {
-            Common.showMessage(viewController: self, title: L("Camera error"), message: "Camera not available")
+            Common.showMessage(
+                viewController: self,
+                title: L("Camera error"),
+                message: L("Camera not available"))
             os_log("Camera not available", log: .debugging, type: .debug)
             return
         }
         imagePicker.sourceType = .camera
         present(imagePicker, animated: true)
-        newDiagram()
-        // TODO: need to reset ladder as below?  
-        //resetLadder()
     }
 
-    fileprivate func handleSelectImage() {
+    private func handleSelectImage() {
         os_log("handleSelectImage()", log: .action, type: .info)
         if !UIImagePickerController.isSourceTypeAvailable(.photoLibrary) {
-            Common.showMessage(viewController: self, title: L("Photo Library Not Available"), message: L("Make sure you have enabled permission for EP Diagram to use the Photo Library in the Settings app."))
+            Common.showMessage(
+                viewController: self,
+                title: L("Photo Library Not Available"),
+                message: L("Make sure you have enabled permission for EP Diagram to use the Photo Library in the Settings app."))
             os_log("Photo library not available", log: .debugging, type: .debug)
             return
         }
@@ -186,36 +178,24 @@ extension ViewController: HamburgerTableDelegate, UIImagePickerControllerDelegat
         // TODO: Test editing on real devices (doesn't work on simulator).
         // Must allow editing because edited image is used by UIImagePickerController delegate.
         imagePicker.allowsEditing = true
-        // Need to use popover for iPads.  See
+        // Need to use popover for iPads, according to docs, but .fullscreen seems to work too.
         if UIDevice.current.userInterfaceIdiom == .pad {
             imagePicker.modalPresentationStyle = .popover
             imagePicker.popoverPresentationController?.barButtonItem = navigationItem.leftBarButtonItem
         }
         present(imagePicker, animated: true)
-        newDiagram()
+
+//        handleNewDiagram()
+//        newDiagram()
 //        resetLadder()
     }
 
     func selectImage() {
         os_log("selectImage()", log: OSLog.action, type: .info)
-        if ladderView.ladderIsDirty {
-            let alert = UIAlertController(title: L("Select Image"), message: L("Diagram has changes.  You can save it and then select an image, or abandon the changes and select an image."), preferredStyle: .alert)
-            let cancelAction = UIAlertAction(title: L("Cancel"), style: .cancel, handler: nil)
-            let selectWithSaveAction = UIAlertAction(title: L("Save Diagram First"), style: .default, handler: { action in
-                self.dismiss(animated: true, completion: nil)
-                self.saveDiagram(completion: { self.handleSelectImage() })
-            })
-            let selectWithoutSaveAction = UIAlertAction(title: L("Don't Save Diagram"), style: .destructive, handler: { action in
-                self.dismiss(animated: true, completion: nil)
-                self.handleSelectImage() })
-            alert.addAction(cancelAction)
-            alert.addAction(selectWithSaveAction)
-            alert.addAction(selectWithoutSaveAction)
-            present(alert, animated: true)
-        }
-        else {
-            handleSelectImage()
-        }
+            handleDirtyLadder(
+                title: L("Select Image"),
+                message: L("Diagram has changes.  You can save it and then select an image, or abandon the changes and select an image."),
+                handler: handleSelectImage)
     }
 
     func about() {
@@ -223,7 +203,10 @@ extension ViewController: HamburgerTableDelegate, UIImagePickerControllerDelegat
         let version = versionBuild.version ?? L("unknown")
         let build = versionBuild.build ?? L("unknown")
         os_log("EP Diagram: version = %s build = %s", log: OSLog.debugging, type: .info, version, build)
-        Common.showMessage(viewController: self, title: L("EP Diagram"), message: L("Copyright 2020 EP Studios, Inc.\nVersion \(version)"))
+        Common.showMessage(
+            viewController: self,
+            title: L("EP Diagram"),
+            message: L("Copyright 2020 EP Studios, Inc.\nVersion \(version)"))
     }
 
     // FIXME: remove before release!!!!!
@@ -237,38 +220,21 @@ extension ViewController: HamburgerTableDelegate, UIImagePickerControllerDelegat
 //        ladderView.marksAreVisible.toggle()
 //        ladderView.setNeedsDisplay()
     }
+    #else
+    func test() {}
     #endif
 
     // Save old diagram, keep image, clear ladder.
     func newDiagram() {
         os_log("newDiagram()", log: .action, type: .info)
-        if ladderView.ladderIsDirty {
-            let alert = UIAlertController(title: L("New Diagram"), message: L("Diagram has changes.  You can save it before starting a new diagram, or abandon the changes and start a new diagram."), preferredStyle: .alert)
-            let cancelAction = UIAlertAction(title: L("Cancel"), style: .cancel, handler: nil)
-            let selectWithSaveAction = UIAlertAction(title: L("Save Diagram First"), style: .default, handler: { action in
-                self.dismiss(animated: true, completion: nil)
-                self.saveDiagram(completion: { self.handleNewDiagram() })
-            })
-            let selectWithoutSaveAction = UIAlertAction(title: L("Don't Save Diagram"), style: .destructive, handler: { action in
-                self.dismiss(animated: true, completion: nil)
-                self.handleNewDiagram()
-            })
-            alert.addAction(cancelAction)
-            alert.addAction(selectWithSaveAction)
-            alert.addAction(selectWithoutSaveAction)
-            present(alert, animated: true)
-        }
-        else {
-            handleNewDiagram()
-        }
-//        if diagram.isDirty {
-//            saveDiagram()
-//        }
-        ladderView.reset()
+            handleDirtyLadder(
+                title: L("New Diagram"),
+                message: L("Diagram has changes.  You can save it before starting a new diagram, or abandon the changes and start a new diagram."),
+                handler: handleNewDiagram)
     }
 
     // TODO: Need to do other things here, e.g. reset zoom to 1.0, etc.
-    func handleNewDiagram() {
+    private func handleNewDiagram() {
         os_log("handleNewDiagram()", log: .action, type: .info)
         // Use same ladder, blank out image.
         diagram = Diagram.defaultDiagram()
@@ -281,26 +247,10 @@ extension ViewController: HamburgerTableDelegate, UIImagePickerControllerDelegat
     func selectDiagram() {
         os_log("selectDiagram()", log: OSLog.action, type: .info)
         // TODO: change all ladderView.isDirty to diagram.isDirty.
-        if diagram.isDirty {
-            let alert = UIAlertController(title: L("Select Diagram"), message: L("Diagram has changes.  You can save it before selecting a new diagram, or abandon the changes and select a new diagram."), preferredStyle: .alert)
-            let cancelAction = UIAlertAction(title: L("Cancel"), style: .cancel, handler: nil)
-            let selectWithSaveAction = UIAlertAction(title: L("Save Diagram First"), style: .default, handler: { action in
-                self.dismiss(animated: true, completion: nil)
-                self.saveDiagram(completion: { self.handleSelectDiagram() })
-            })
-            let selectWithoutSaveAction = UIAlertAction(title: L("Don't Save Diagram"), style: .destructive, handler: { action in
-                self.dismiss(animated: true, completion: nil)
-                self.handleSelectDiagram()
-            })
-            alert.addAction(cancelAction)
-            alert.addAction(selectWithSaveAction)
-            alert.addAction(selectWithoutSaveAction)
-            present(alert, animated: true)
-        }
-        else {
-            handleSelectDiagram()
-        }
-        ladderView.reset()
+            handleDirtyLadder(
+                title: L("Select Diagram"),
+                message:L("Diagram has changes.  You can save it before selecting a new diagram, or abandon the changes and select a new diagram."),
+                handler: handleSelectDiagram)
     }
 
     private func handleSelectDiagram() {
@@ -308,7 +258,10 @@ extension ViewController: HamburgerTableDelegate, UIImagePickerControllerDelegat
             let epDiagramsDirURL = try DiagramIO.getEPDiagramsDirURL()
             let fileURLs = try FileManager.default.contentsOfDirectory(at: epDiagramsDirURL, includingPropertiesForKeys: nil, options: .skipsHiddenFiles)
             if fileURLs.count < 1 {
-                Common.showMessage(viewController: self, title: "No Saved Diagrams", message: "No previously saved diagrams found.")
+                Common.showMessage(
+                    viewController: self,
+                    title: L("No Saved Diagrams"),
+                    message: L("No previously saved diagrams found."))
                 return
             }
             let filenames = fileURLs.map { $0.lastPathComponent }.sorted()
@@ -363,12 +316,13 @@ extension ViewController: HamburgerTableDelegate, UIImagePickerControllerDelegat
         cursorView.allowTaps = !_ladderIsLocked
         ladderView.isUserInteractionEnabled = !_ladderIsLocked
         setViewsNeedDisplay()
-        AudioServicesPlaySystemSoundWithCompletion(SystemSoundID(1100), nil)
+        Sounds.playLockSound()
     }
 
     // see https://stackoverflow.com/questions/38579679/warning-attempt-to-present-uiimagepickercontroller-on-which-is-alread
     func saveDiagram(completion: (()->Void)? = nil) {
         os_log("saveDiagram()", log: OSLog.action, type: .info)
+        // FIXME: refactor out the huge guard.
         guard let diagramName = diagram.name, !diagramName.isBlank else {
             let alert = UIAlertController(title: L("Save Diagram"), message: L("Give a name and optional description to this diagram"), preferredStyle: .alert)
             alert.addAction(UIAlertAction(title: L("Cancel"), style: .cancel))
@@ -393,7 +347,10 @@ extension ViewController: HamburgerTableDelegate, UIImagePickerControllerDelegat
                             completion()
                         }
                     } catch FileIOError.duplicateDiagramName {
-                        Common.showMessage(viewController: self, title: L("Duplicate Diagram Name"), message: L("Please choose a different name.  This name is a duplicate and would overwrite the diagram with this name."))
+                        Common.showMessage(
+                            viewController: self,
+                            title: L("Duplicate Diagram Name"),
+                            message: L("Please choose a different name.  This name is a duplicate and would overwrite the diagram with this name."))
                     } catch {
                         Common.showFileError(viewController: self, error: error)
                         self.diagram.name = nil
@@ -468,24 +425,10 @@ extension ViewController: HamburgerTableDelegate, UIImagePickerControllerDelegat
 
     func sampleDiagrams() {
         os_log("sampleDiagrams()", log: OSLog.action, type: .info)
-        if ladderView.ladderIsDirty {
-            let alert = UIAlertController(title: L("Select Sample Diagram"), message: L("Diagram has changes.  You can save it and then select a sample diagram, or abandon the changes and select a sample diagram."), preferredStyle: .alert)
-            let cancelAction = UIAlertAction(title: L("Cancel"), style: .cancel, handler: nil)
-            let selectWithSaveAction = UIAlertAction(title: L("Save Diagram First"), style: .default, handler: { action in
-                self.dismiss(animated: true, completion: nil)
-                self.saveDiagram(completion: { self.performShowSampleSelectorSegue() })
-            })
-            let selectWithoutSaveAction = UIAlertAction(title: L("Don't Save Diagram"), style: .destructive, handler: { action in
-                self.dismiss(animated: true, completion: nil)
-                self.performShowSampleSelectorSegue() })
-            alert.addAction(cancelAction)
-            alert.addAction(selectWithSaveAction)
-            alert.addAction(selectWithoutSaveAction)
-            present(alert, animated: true)
-        }
-        else {
-            performShowSampleSelectorSegue()
-        }
+            handleDirtyLadder(
+                title: L("Select Sample Diagram"),
+                message: L("Diagram has changes.  You can save it and then select a sample diagram, or abandon the changes and select a sample diagram."),
+                handler: performShowSampleSelectorSegue)
     }
 
     func showPreferences() {
@@ -510,22 +453,10 @@ extension ViewController: HamburgerTableDelegate, UIImagePickerControllerDelegat
         performShowHelpSegue()
     }
 
-
-    func imagePickerController(_ picker: UIImagePickerController, didFinishPickingMediaWithInfo info: [UIImagePickerController.InfoKey : Any]) {
-        let chosenImage = info[.editedImage] as? UIImage
-        imageView.image = chosenImage
-        picker.dismiss(animated: true, completion: nil)
-    }
-
-    func imagePickerControllerDidCancel(_ picker: UIImagePickerController) {
-        picker.dismiss(animated: true, completion: nil)
-    }
-
     @objc func toggleHamburgerMenu() {
         if hamburgerMenuIsOpen {
             hideHamburgerMenu()
-        }
-        else {
+        } else {
             showHamburgerMenu()
         }
     }
@@ -559,6 +490,27 @@ extension ViewController: HamburgerTableDelegate, UIImagePickerControllerDelegat
             self.separatorView = HorizontalSeparatorView.addSeparatorBetweenViews(separatorType: .horizontal, primaryView: self.imageScrollView, secondaryView: self.ladderView, parentView: self.view)
         })
     }
-    
+
+    private func setDiagramImage(_ image: UIImage?) {
+        diagram.ladder.clear()
+        diagram.image = image
+        imageView.image = image
+        imageScrollView.zoomScale = 1.0
+        imageScrollView.contentOffset = CGPoint()
+        cursorView.clearCalibration()
+        setViewsNeedDisplay()
+    }
+
+    // MARK: - UIImagePickerController delegate
+
+    func imagePickerController(_ picker: UIImagePickerController, didFinishPickingMediaWithInfo info: [UIImagePickerController.InfoKey : Any]) {
+        let chosenImage = info[.editedImage] as? UIImage
+        setDiagramImage(chosenImage)
+        picker.dismiss(animated: true, completion: nil)
+    }
+
+    func imagePickerControllerDidCancel(_ picker: UIImagePickerController) {
+        picker.dismiss(animated: true, completion: nil)
+    }
 }
 

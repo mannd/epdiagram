@@ -241,5 +241,7 @@ func P(_ s: String) {
         print(s)
     }
 }
+#else
+func P(_ s: String) {}
 #endif
 

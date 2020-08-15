@@ -95,19 +95,9 @@ class HamburgerTableViewController: UITableViewController {
         case .saveDiagram:
             delegate?.saveDiagram()
         case .renameDiagram:
-            if !row.isEnabled{
-                delegate?.showNeedToSaveMessage()
-                return
-            } else {
-                delegate?.renameDiagram()
-            }
+            delegate?.renameDiagram()
         case .duplicateDiagram:
-            if !row.isEnabled{
-                delegate?.showNeedToSaveMessage()
-                return
-            } else {
-                delegate?.duplicateDiagram()
-            }
+            delegate?.duplicateDiagram()
         case .getInfo:
             delegate?.getDiagramInfo()
         case .lockLadder:

@@ -217,7 +217,7 @@ final class ViewController: UIViewController {
             let setTitle = L("Set")
             let setButton = UIBarButtonItem(title: setTitle, style: .plain, target: self, action: #selector(setCalibration))
             let clearTitle = L("Clear")
-            let clearButton = UIBarButtonItem(title:clearTitle, style: .plain, target: self, action: nil)
+            let clearButton = UIBarButtonItem(title:clearTitle, style: .plain, target: self, action: #selector(clearCalibration))
             let cancelTitle = L("Cancel")
             let cancelButton = UIBarButtonItem(title: cancelTitle, style: .plain, target: self, action: #selector(cancelCalibration))
             calibrateMenuButtons = [promptButton, setButton, clearButton, cancelButton]
@@ -333,13 +333,21 @@ final class ViewController: UIViewController {
     @objc func setCalibration() {
         os_log("setCalibration()", log: .action, type: .info)
         cursorView.setCalibration(zoom: imageScrollView.zoomScale)
-        cursorView.isCalibrating = false
-        cursorView.setNeedsDisplay()
-        showMainMenu()
+        closeCalibrationMenu()
+    }
+
+    @objc func clearCalibration() {
+        os_log("clearCalibration()", log: .action, type: .info)
+        cursorView.clearCalibration()
+        closeCalibrationMenu()
     }
 
     @objc func cancelCalibration() {
         os_log("cancelCalibration()", log: .action, type: .info)
+        closeCalibrationMenu()
+    }
+
+    private func closeCalibrationMenu() {
         showMainMenu()
         cursorView.isCalibrating = false
         setViewsNeedDisplay()
@@ -487,7 +495,6 @@ final class ViewController: UIViewController {
         })
     }
 
-
     func setMaxCursorPositionY() {
         cursorView.maxCursorPositionY = imageScrollView.frame.height
     }
@@ -562,10 +569,11 @@ final class ViewController: UIViewController {
     
     @IBSegueAction func showSampleSelector(_ coder: NSCoder) -> UIViewController? {
         let sampleDiagrams: [Diagram] = [
-            Diagram(name: L("Normal ECG"), image: UIImage(named: "SampleECG")!, diagramData: Diagram.DiagramData(description: L("Just a normal ECG"), ladder: Ladder.defaultLadder())),
-            Diagram(name: L("AV Block"), image: UIImage(named: "AVBlock")!, diagramData: Diagram.DiagramData(description: "High grade AV block", ladder: Ladder.defaultLadder())),
-            Diagram.blankDiagram(name: "Blank Diagram"),
-            Diagram(name: "Scrollable Blank Diagram", image: UIImage.emptyImage(size: CGSize(width: view.frame.size.width * 3, height: view.frame.size.height), color: UIColor.systemTeal), diagramData: Diagram.DiagramData(description: "wide image", ladder: Ladder.defaultLadder()))
+            Diagram(name: L("Normal ECG"), image: UIImage(named: "SampleECG")!, description: L("Just a normal ECG")),
+            Diagram(name: L("AV Block"), image: UIImage(named: "AVBlock")!, description: L("High grade AV block")),
+            Diagram.blankDiagram(name: L("Blank Diagram")),
+            // Make this taller than height even with rotation.
+            Diagram(name: L("Scrollable Blank Diagram"), image: UIImage.emptyImage(size: CGSize(width: view.frame.size.width * 3, height: max(view.frame.size.height, view.frame.size.width)), color: UIColor.systemTeal), description: L("Wide scrollable blank image"))
             // TODO: add others here.
         ]
         let sampleSelector = SampleSelector(sampleDiagrams: sampleDiagrams, delegate: self)

@@ -18,6 +18,7 @@ protocol CursorViewDelegate: AnyObject {
     func cursorIsVisible() -> Bool
     func cursorMovement() -> Movement
     func isCalibrated() -> Bool
+    func clearCalibration()
     func markMeasurement(segment: Segment) -> CGFloat
     func intervalMeasurement(value: CGFloat) -> CGFloat
 }
@@ -368,9 +369,15 @@ final class CursorView: ScaledView {
     }
 
     func setCalibration(zoom: CGFloat) {
-        // FIXME: hardcoded value
+        // FIXME: hardcoded value.
         calibration.set(zoom: zoom, calFactor: 1000 / caliper.value)
         calibration.isCalibrated = true
+        ladderViewDelegate.refresh()
+    }
+
+    func clearCalibration() {
+        calibration.reset()
+        calibration.isCalibrated = false
         ladderViewDelegate.refresh()
     }
 

@@ -1169,7 +1169,9 @@ final class LadderView: ScaledView {
     }
 
     fileprivate func drawIntervals(region: Region, context: CGContext) {
+        // FIXME: too many isCalibrated(), where should it be?
         guard showIntervals, cursorViewDelegate.isCalibrated() else { return }
+        guard let calibration = calibration, calibration.isCalibrated else { return }
         let marks = region.marks
         let intervals = Interval.createIntervals(marks: marks)
         for interval in intervals {
