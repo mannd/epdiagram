@@ -52,6 +52,9 @@ final class ViewController: UIViewController {
     var diagramFilenames: [String] = []
     var diagram: Diagram = Diagram.blankDiagram()
 
+    // reference to calibration is passed to ladderView and cursorView
+    var calibration = Calibration()
+
     var preferences: Preferences = Preferences()
 
     // Speed up appearance of image picker by initializing it here.
@@ -65,6 +68,10 @@ final class ViewController: UIViewController {
         cursorView.ladderViewDelegate = ladderView
         ladderView.cursorViewDelegate = cursorView
         imageScrollView.delegate = self
+
+        // These two views hold a reference to calibration
+        cursorView.calibration = calibration
+        ladderView.calibration = calibration
 
         // FIXME: Not clear if code below is needed here or in EP Calipers.  App opens external PDF files without it.
         //            if launchFromURL {
@@ -118,7 +125,8 @@ final class ViewController: UIViewController {
 
         setTitle()
 
-        DiagramIO.saveLastDiagram(name: diagram.name)
+        // FIXME: Don't see why we need to do this, if it is default blank diagram the same diagram will appear when restarting the app.
+//        DiagramIO.saveLastDiagram(name: diagram.name)
     }
 
     func getTitle() -> String {
@@ -232,27 +240,6 @@ final class ViewController: UIViewController {
         return UIBarButtonItem(customView: prompt)
     }
 
-    @objc func selectLadder() {
-        os_log("selectLadder()", log: .action, type: .info)
-        if ladderView.ladderIsDirty {
-            let alert = UIAlertController(title: L("Select Ladder"), message: L("Diagram has changes.  You can save it before selecting a new ladder, or abandon the changes and select a new ladder."), preferredStyle: .alert)
-            let cancelAction = UIAlertAction(title: L("Cancel"), style: .cancel, handler: nil)
-            let selectWithSaveAction = UIAlertAction(title: L("Save Diagram First"), style: .default, handler: { action in
-                self.dismiss(animated: true, completion: nil)
-                self.saveDiagram(completion: { self.performSelectLadderSegue() })
-            })
-            let selectWithoutSaveAction = UIAlertAction(title: L("Don't Save Diagram"), style: .destructive, handler: { action in
-                self.dismiss(animated: true, completion: nil)
-                self.performSelectLadderSegue()
-            })
-            alert.addAction(cancelAction)
-            alert.addAction(selectWithSaveAction)
-            alert.addAction(selectWithoutSaveAction)
-            present(alert, animated: true)
-        }
-        performSelectLadderSegue()
-    }
-
     @objc func editDiagram() {
         os_log("editDiagram()", log: OSLog.action, type: .info)
         let alert = UIAlertController(title: L("Edit Diagram"), message: L("Create new diagram or edit this one"), preferredStyle: .actionSheet)
@@ -288,7 +275,7 @@ final class ViewController: UIViewController {
     @objc func calibrate() {
         os_log("calibrate()", log: OSLog.action, type: .info)
         showCalibrateMenu()
-        cursorView.doCalibration()
+        cursorView.showCalipers()
     }
 
     @objc func selectMarks() {
@@ -338,7 +325,9 @@ final class ViewController: UIViewController {
 
     @objc func clearCalibration() {
         os_log("clearCalibration()", log: .action, type: .info)
-        cursorView.clearCalibration()
+        calibration.reset()
+        ladderView.refresh()
+//        cursorView.clearCalibration()
         closeCalibrationMenu()
     }
 

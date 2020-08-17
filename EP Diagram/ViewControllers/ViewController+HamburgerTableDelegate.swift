@@ -107,6 +107,183 @@ extension ViewController: HamburgerTableDelegate, UIImagePickerControllerDelegat
 
     var maxBlackAlpha: CGFloat { _maxBlackAlpha }
 
+    // MARK: - Delegate functions
+
+    func takePhoto() {
+        os_log("takePhoto()", log: OSLog.action, type: .info)
+            showSaveDiagramDialog(
+                withTitle: L("Take Photo"),
+                withActionText: L("take a photo"),
+                andThenDo: handleTakePhoto)
+    }
+
+    func selectImage() {
+        os_log("selectImage()", log: OSLog.action, type: .info)
+        showSaveDiagramDialog(
+            withTitle: L("Select Image"),
+            withActionText: L("select an image"),
+            andThenDo: handleSelectImage)
+    }
+
+    func selectLadder() {
+        os_log("selectLadder()", log: .action, type: .info)
+        showSaveDiagramDialog(
+            withTitle: L("Select Ladder"),
+            withActionText: L("select a new ladder"),
+            andThenDo: performSelectLadderSegue)
+    }
+
+    func newDiagram() {
+        os_log("newDiagram()", log: .action, type: .info)
+        showSaveDiagramDialog(
+            withTitle: L("New Diagram"),
+            withActionText: L("start a new diagram"),
+            andThenDo: handleNewDiagram)
+    }
+
+    func selectDiagram() {
+        os_log("selectDiagram()", log: OSLog.action, type: .info)
+        // TODO: change all ladderView.isDirty to diagram.isDirty.
+        showSaveDiagramDialog(
+            withTitle: L("Select Diagram"),
+            withActionText: L("select a new diagram"),
+            andThenDo: handleSelectDiagram)
+    }
+
+    // see https://stackoverflow.com/questions/38579679/warning-attempt-to-present-uiimagepickercontroller-on-which-is-alread
+    func saveDiagram(completion: (()->Void)? = nil) {
+        os_log("saveDiagram()", log: OSLog.action, type: .info)
+        // FIXME: refactor out the huge guard.
+        guard let diagramName = diagram.name, !diagramName.isBlank else {
+            let alert = UIAlertController(title: L("Save Diagram"), message: L("Give a name and optional description to this diagram"), preferredStyle: .alert)
+            alert.addAction(UIAlertAction(title: L("Cancel"), style: .cancel))
+            alert.addTextField { textField in
+                textField.placeholder = L("Diagram name")
+                textField.text = self.diagram.name
+            }
+            alert.addTextField { textField in
+                textField.placeholder = L("Diagram description")
+                textField.text = self.diagram.description
+            }
+            alert.addAction(UIAlertAction(title: L("Save"), style: .default) { action in
+                if let name = alert.textFields?.first?.text, let description = alert.textFields?[1].text {
+                    do {
+                        if try DiagramIO.diagramDirURLExists(for: name) {
+                            throw FileIOError.duplicateDiagramName
+                        }
+                        self.diagram.name = name
+                        self.diagram.description = description
+                        try self.doSaveDiagram()
+                        if let completion = completion {
+                            completion()
+                        }
+                    } catch FileIOError.duplicateDiagramName {
+                        Common.showMessage(
+                            viewController: self,
+                            title: L("Duplicate Diagram Name"),
+                            message: L("Please choose a different name.  This name is a duplicate and would overwrite the diagram with this name."))
+                    } catch {
+                        Common.showFileError(viewController: self, error: error)
+                        self.diagram.name = nil
+                        self.diagram.description = ""
+                    }
+                }
+            })
+            present(alert, animated: true)
+            return
+        }
+        do {
+            try doSaveDiagram()
+            if let completion = completion {
+                completion()
+            }
+        }
+        catch {
+            os_log("Error: %s", log: .errors, type: .error, error.localizedDescription)
+            Common.showFileError(viewController: self, error: error)
+        }
+    }
+
+    func renameDiagram() {
+        os_log("renameDiagram()", log: .action, type: .info)
+        // Just fail gracefully if name is nil, renameDiagram should not be available if name is nil.
+        guard let name = diagram.name, !name.isBlank else { return }
+        let alert = UIAlertController(title: L("Rename Diagram"), message: L("Enter a new name for diagram \(name)"), preferredStyle: .alert)
+        alert.addAction(UIAlertAction(title: L("Cancel"), style: .cancel, handler: nil))
+        alert.addTextField { textField in
+            textField.placeholder = L("New diagram name")
+        }
+        alert.addAction(UIAlertAction(title: L("Rename"), style: .default) { action in
+            if let name = alert.textFields?.first?.text {
+                do {
+                    try self.diagram.rename(newName: name)
+                    self.setTitle()
+                } catch {
+                    Common.showFileError(viewController: self, error: error)
+                }
+            }
+        })
+        present(alert, animated: true)
+    }
+
+    func duplicateDiagram() {
+        os_log("duplicateDiagram()", log: .action, type: .info)
+        // Just fail gracefully if name is nil, renameDiagram should not be available if name is nil.
+        guard let name = diagram.name, !name.isBlank else { return }
+        let alert = UIAlertController(title: L("Duplicate Diagram"), message: L("Enter a name for duplicate diagram of \(name)"), preferredStyle: .alert)
+        alert.addAction(UIAlertAction(title: L("Cancel"), style: .cancel, handler: nil))
+        alert.addTextField { textField in
+            textField.placeholder = L("Duplicate diagram name")
+        }
+        alert.addAction(UIAlertAction(title: L("Duplicate"), style: .default) { action in
+            if let name = alert.textFields?.first?.text {
+                do {
+                    try self.diagram.duplicate(duplicateName: name)
+                    self.setTitle()
+                } catch {
+                    Common.showFileError(viewController: self, error: error)
+                }
+            }
+        })
+        present(alert, animated: true)
+    }
+
+    func getDiagramInfo() {
+        os_log("getDiagramInfo()", log: .action, type: .info)
+        // TODO: If there are more fields, then include this and add SwiftUI view.
+        // show dialog with diagram info here.
+        P("Name = \(diagram.name ?? "unnamed")")
+        P("Description = \(diagram.description)")
+        P("isDirty = \(diagram.isDirty)")
+        P("isSaved = \(diagram.isSaved)")
+    }
+
+    func snapshotDiagram() {
+        let topRenderer = UIGraphicsImageRenderer(size: imageScrollView.bounds.size)
+        let originX = imageScrollView.bounds.minX - imageScrollView.contentOffset.x
+        let originY = imageScrollView.bounds.minY - imageScrollView.contentOffset.y
+        let bounds = CGRect(x: originX, y: originY, width: imageScrollView.bounds.width, height: imageScrollView.bounds.height)
+        let topImage = topRenderer.image { ctx in
+            imageScrollView.drawHierarchy(in: bounds, afterScreenUpdates: true)
+        }
+        let bottomRenderer = UIGraphicsImageRenderer(size: ladderView.bounds.size)
+        let bottomImage = bottomRenderer.image { ctx in
+            ladderView.drawHierarchy(in: ladderView.bounds, afterScreenUpdates: true)
+        }
+        let size = CGSize(width: ladderView.bounds.size.width, height: imageScrollView.bounds.size.height + ladderView.bounds.size.height)
+        UIGraphicsBeginImageContext(size)
+        let topRect = CGRect(x: 0, y: 0, width: ladderView.bounds.size.width, height: imageScrollView.bounds.size.height)
+        topImage.draw(in: topRect)
+        let bottomRect = CGRect(x: 0, y: imageScrollView.bounds.size.height, width: ladderView.bounds.size.width, height: ladderView.bounds.size.height)
+        bottomImage.draw(in: bottomRect)
+        let newImage = UIGraphicsGetImageFromCurrentImageContext()
+        UIGraphicsEndImageContext()
+        if let newImage = newImage {
+            let imageSaver = ImageSaver()
+            imageSaver.writeToPhotoAlbum(image: newImage, viewController: self)
+        }
+    }
+
     func lockImage() {
         imageIsLocked.toggle()
         // Turn off scrolling and zooming, but allow single taps to generate marks with cursors.
@@ -117,16 +294,62 @@ extension ViewController: HamburgerTableDelegate, UIImagePickerControllerDelegat
         Sounds.playLockSound()
     }
 
-    func takePhoto() {
-        os_log("takePhoto()", log: OSLog.action, type: .info)
-            handleDirtyLadder(
-                title: L("Take Photo"),
-                message: L("Diagram has changes.  You can save it and then take a photo, or abandon the changes and take a photo."),
-                handler: handleTakePhoto)
+    func lockLadder() {
+        os_log("lockDiagram()", log: .action, type: .info)
+        _ladderIsLocked.toggle()
+        // Turn off scrolling and zooming, but allow single taps to generate marks with cursors.
+        ladderView.ladderIsLocked = _ladderIsLocked
+        cursorView.allowTaps = !_ladderIsLocked
+        ladderView.isUserInteractionEnabled = !_ladderIsLocked
+        setViewsNeedDisplay()
+        Sounds.playLockSound()
     }
 
-    private func handleDirtyLadder(title: String, message: String, handler: @escaping ()->Void) {
-        if ladderView.ladderIsDirty {
+    func editTemplates() {
+        os_log("editTemplates()", log: OSLog.action, type: .info)
+        performShowTemplateEditorSegue()
+    }
+
+    func showPreferences() {
+        os_log("showPreferences()", log: OSLog.action, type: .info)
+        performShowPreferencesSegue()
+    }
+
+    func help() {
+        os_log("help()", log: OSLog.action, type: .info)
+        performShowHelpSegue()
+    }
+
+    func about() {
+        let versionBuild = Version.getAppVersion()
+        let version = versionBuild.version ?? L("unknown")
+        let build = versionBuild.build ?? L("unknown")
+        os_log("EP Diagram: version = %s build = %s", log: OSLog.debugging, type: .info, version, build)
+        Common.showMessage(
+            viewController: self,
+            title: L("EP Diagram"),
+            message: L("Copyright 2020 EP Studios, Inc.\nVersion \(version)"))
+    }
+
+    // Use to test features during development
+    #if DEBUG
+    func test() {
+        os_log("test()", log: .debugging, type: .debug)
+        // delete all old diagrams
+        DiagramIO.deleteEPDiagramDir()
+        // toggle mark visibility
+        //        ladderView.marksAreVisible.toggle()
+        //        ladderView.setNeedsDisplay()
+    }
+    #else
+    func test() {}
+    #endif
+
+    // MARK: - Delegate handlers
+
+    private func showSaveDiagramDialog(withTitle title: String, withActionText actionText: String, andThenDo handler: @escaping ()->Void) {
+        if diagram.isDirty {
+            let message = L("Diagram has changes.  You can save it and then \(actionText), or abandon the changes and \(actionText).")
             let alert = UIAlertController(title: title, message: message, preferredStyle: .alert)
             let cancelAction = UIAlertAction(title: L("Cancel"), style: .cancel, handler: nil)
             let selectWithSaveAction = UIAlertAction(title: L("Save Diagram First"), style: .default, handler: { action in
@@ -184,53 +407,6 @@ extension ViewController: HamburgerTableDelegate, UIImagePickerControllerDelegat
             imagePicker.popoverPresentationController?.barButtonItem = navigationItem.leftBarButtonItem
         }
         present(imagePicker, animated: true)
-
-//        handleNewDiagram()
-//        newDiagram()
-//        resetLadder()
-    }
-
-    func selectImage() {
-        os_log("selectImage()", log: OSLog.action, type: .info)
-            handleDirtyLadder(
-                title: L("Select Image"),
-                message: L("Diagram has changes.  You can save it and then select an image, or abandon the changes and select an image."),
-                handler: handleSelectImage)
-    }
-
-    func about() {
-        let versionBuild = Version.getAppVersion()
-        let version = versionBuild.version ?? L("unknown")
-        let build = versionBuild.build ?? L("unknown")
-        os_log("EP Diagram: version = %s build = %s", log: OSLog.debugging, type: .info, version, build)
-        Common.showMessage(
-            viewController: self,
-            title: L("EP Diagram"),
-            message: L("Copyright 2020 EP Studios, Inc.\nVersion \(version)"))
-    }
-
-    // FIXME: remove before release!!!!!
-    // Use to test features during development
-    #if DEBUG
-    func test() {
-        os_log("test()", log: .debugging, type: .debug)
-        // delete all old diagrams
-        DiagramIO.deleteEPDiagramDir()
-        // toggle mark visibility
-//        ladderView.marksAreVisible.toggle()
-//        ladderView.setNeedsDisplay()
-    }
-    #else
-    func test() {}
-    #endif
-
-    // Save old diagram, keep image, clear ladder.
-    func newDiagram() {
-        os_log("newDiagram()", log: .action, type: .info)
-            handleDirtyLadder(
-                title: L("New Diagram"),
-                message: L("Diagram has changes.  You can save it before starting a new diagram, or abandon the changes and start a new diagram."),
-                handler: handleNewDiagram)
     }
 
     // TODO: Need to do other things here, e.g. reset zoom to 1.0, etc.
@@ -241,16 +417,6 @@ extension ViewController: HamburgerTableDelegate, UIImagePickerControllerDelegat
         imageView.image = diagram.image
         ladderView.ladder = diagram.ladder
         setViewsNeedDisplay()
-    }
-
-    // Save old diagram, load selected image and ladder.
-    func selectDiagram() {
-        os_log("selectDiagram()", log: OSLog.action, type: .info)
-        // TODO: change all ladderView.isDirty to diagram.isDirty.
-            handleDirtyLadder(
-                title: L("Select Diagram"),
-                message:L("Diagram has changes.  You can save it before selecting a new diagram, or abandon the changes and select a new diagram."),
-                handler: handleSelectDiagram)
     }
 
     private func handleSelectDiagram() {
@@ -272,168 +438,18 @@ extension ViewController: HamburgerTableDelegate, UIImagePickerControllerDelegat
         }
     }
 
-    func snapshotDiagram() {
-        let topRenderer = UIGraphicsImageRenderer(size: imageScrollView.bounds.size)
-        let originX = imageScrollView.bounds.minX - imageScrollView.contentOffset.x
-        let originY = imageScrollView.bounds.minY - imageScrollView.contentOffset.y
-        let bounds = CGRect(x: originX, y: originY, width: imageScrollView.bounds.width, height: imageScrollView.bounds.height)
-        let topImage = topRenderer.image { ctx in
-            imageScrollView.drawHierarchy(in: bounds, afterScreenUpdates: true)
-        }
-        let bottomRenderer = UIGraphicsImageRenderer(size: ladderView.bounds.size)
-        let bottomImage = bottomRenderer.image { ctx in
-            ladderView.drawHierarchy(in: ladderView.bounds, afterScreenUpdates: true)
-        }
-        let size = CGSize(width: ladderView.bounds.size.width, height: imageScrollView.bounds.size.height + ladderView.bounds.size.height)
-        UIGraphicsBeginImageContext(size)
-        let topRect = CGRect(x: 0, y: 0, width: ladderView.bounds.size.width, height: imageScrollView.bounds.size.height)
-        topImage.draw(in: topRect)
-        let bottomRect = CGRect(x: 0, y: imageScrollView.bounds.size.height, width: ladderView.bounds.size.width, height: ladderView.bounds.size.height)
-        bottomImage.draw(in: bottomRect)
-        let newImage = UIGraphicsGetImageFromCurrentImageContext()
-        UIGraphicsEndImageContext()
-        if let newImage = newImage {
-            let imageSaver = ImageSaver()
-            imageSaver.writeToPhotoAlbum(image: newImage, viewController: self)
-        }
-    }
-
-    func getDiagramInfo() {
-        os_log("getDiagramInfo()", log: .action, type: .info)
-        // TODO: If there are more fields, then include this and add SwiftUI view.
-        // show dialog with diagram info here.
-        P("Name = \(diagram.name ?? "unnamed")")
-        P("Description = \(diagram.description)")
-        P("isDirty = \(diagram.isDirty)")
-        P("isSaved = \(diagram.isSaved)")
-    }
-
-    func lockLadder() {
-        os_log("lockDiagram()", log: .action, type: .info)
-        _ladderIsLocked.toggle()
-        // Turn off scrolling and zooming, but allow single taps to generate marks with cursors.
-        ladderView.ladderIsLocked = _ladderIsLocked
-        cursorView.allowTaps = !_ladderIsLocked
-        ladderView.isUserInteractionEnabled = !_ladderIsLocked
-        setViewsNeedDisplay()
-        Sounds.playLockSound()
-    }
-
-    // see https://stackoverflow.com/questions/38579679/warning-attempt-to-present-uiimagepickercontroller-on-which-is-alread
-    func saveDiagram(completion: (()->Void)? = nil) {
-        os_log("saveDiagram()", log: OSLog.action, type: .info)
-        // FIXME: refactor out the huge guard.
-        guard let diagramName = diagram.name, !diagramName.isBlank else {
-            let alert = UIAlertController(title: L("Save Diagram"), message: L("Give a name and optional description to this diagram"), preferredStyle: .alert)
-            alert.addAction(UIAlertAction(title: L("Cancel"), style: .cancel))
-            alert.addTextField { textField in
-                textField.placeholder = L("Diagram name")
-                textField.text = self.diagram.name
-            }
-            alert.addTextField { textField in
-                textField.placeholder = L("Diagram description")
-                textField.text = self.diagram.description
-            }
-            alert.addAction(UIAlertAction(title: L("Save"), style: .default) { action in
-                if let name = alert.textFields?.first?.text, let description = alert.textFields?[1].text {
-                    do {
-                        if try DiagramIO.diagramDirURLExists(for: name) {
-                            throw FileIOError.duplicateDiagramName
-                        }
-                        self.diagram.name = name
-                        self.diagram.description = description
-                        try self.doSaveDiagram()
-                        if let completion = completion {
-                            completion()
-                        }
-                    } catch FileIOError.duplicateDiagramName {
-                        Common.showMessage(
-                            viewController: self,
-                            title: L("Duplicate Diagram Name"),
-                            message: L("Please choose a different name.  This name is a duplicate and would overwrite the diagram with this name."))
-                    } catch {
-                        Common.showFileError(viewController: self, error: error)
-                        self.diagram.name = nil
-                        self.diagram.description = ""
-                    }
-                }
-            })
-            present(alert, animated: true)
-            return
-        }
-        do {
-            try doSaveDiagram()
-            if let completion = completion {
-                completion()
-            }
-        }
-        catch {
-            os_log("Error: %s", log: .errors, type: .error, error.localizedDescription)
-            Common.showFileError(viewController: self, error: error)
-        }
-    }
-
     private func doSaveDiagram() throws {
         try diagram.save()
         DiagramIO.saveLastDiagram(name: diagram.name)
         setTitle()
     }
 
-    func renameDiagram() {
-        os_log("renameDiagram()", log: .action, type: .info)
-        // Just fail gracefully if name is nil, renameDiagram should not be available if name is nil.
-        guard let name = diagram.name, !name.isBlank else { return }
-        let alert = UIAlertController(title: L("Rename Diagram"), message: L("Enter a new name for diagram \(name)"), preferredStyle: .alert)
-        alert.addAction(UIAlertAction(title: L("Cancel"), style: .cancel, handler: nil))
-        alert.addTextField { textField in
-            textField.placeholder = L("New diagram name")
-        }
-        alert.addAction(UIAlertAction(title: L("Rename"), style: .default) { action in
-            if let name = alert.textFields?.first?.text {
-                do {
-                    try self.diagram.rename(newName: name)
-                    self.setTitle()
-                } catch {
-                    Common.showFileError(viewController: self, error: error)
-                }
-            }
-        })
-        present(alert, animated: true)
-    }
-
-    func duplicateDiagram() {
-        os_log("duplicateDiagram()", log: .action, type: .info)
-        // Just fail gracefully if name is nil, renameDiagram should not be available if name is nil.
-        guard let name = diagram.name, !name.isBlank else { return }
-        let alert = UIAlertController(title: L("Duplicate Diagram"), message: L("Enter a name for duplicate diagram of \(name)"), preferredStyle: .alert)
-        alert.addAction(UIAlertAction(title: L("Cancel"), style: .cancel, handler: nil))
-        alert.addTextField { textField in
-            textField.placeholder = L("Duplicate diagram name")
-        }
-        alert.addAction(UIAlertAction(title: L("Duplicate"), style: .default) { action in
-            if let name = alert.textFields?.first?.text {
-                do {
-                    try self.diagram.duplicate(duplicateName: name)
-                    self.setTitle()
-                } catch {
-                    Common.showFileError(viewController: self, error: error)
-                }
-            }
-        })
-        present(alert, animated: true)
-    }
-
     func sampleDiagrams() {
         os_log("sampleDiagrams()", log: OSLog.action, type: .info)
-            handleDirtyLadder(
-                title: L("Select Sample Diagram"),
-                message: L("Diagram has changes.  You can save it and then select a sample diagram, or abandon the changes and select a sample diagram."),
-                handler: performShowSampleSelectorSegue)
-    }
-
-    func showPreferences() {
-        os_log("showPreferences()", log: OSLog.action, type: .info)
-        performShowPreferencesSegue()
+            showSaveDiagramDialog(
+                withTitle: L("Select Sample Diagram"),
+                withActionText: L("select a sample diagram"),
+                andThenDo: performShowSampleSelectorSegue)
     }
 
     private func resetLadder() {
@@ -443,15 +459,17 @@ extension ViewController: HamburgerTableDelegate, UIImagePickerControllerDelegat
         setViewsNeedDisplay()
     }
 
-    func editTemplates() {
-        os_log("editTemplates()", log: OSLog.action, type: .info)
-        performShowTemplateEditorSegue()
+    private func setDiagramImage(_ image: UIImage?) {
+        diagram.ladder.clear()
+        diagram.image = image
+        imageView.image = image
+        imageScrollView.zoomScale = 1.0
+        imageScrollView.contentOffset = CGPoint()
+        clearCalibration()
+        setViewsNeedDisplay()
     }
 
-    func help() {
-        os_log("help()", log: OSLog.action, type: .info)
-        performShowHelpSegue()
-    }
+    // MARK: - Hamburger menu functions
 
     @objc func toggleHamburgerMenu() {
         if hamburgerMenuIsOpen {
@@ -489,16 +507,6 @@ extension ViewController: HamburgerTableDelegate, UIImagePickerControllerDelegat
         }, completion: { (finished:Bool) in
             self.separatorView = HorizontalSeparatorView.addSeparatorBetweenViews(separatorType: .horizontal, primaryView: self.imageScrollView, secondaryView: self.ladderView, parentView: self.view)
         })
-    }
-
-    private func setDiagramImage(_ image: UIImage?) {
-        diagram.ladder.clear()
-        diagram.image = image
-        imageView.image = image
-        imageScrollView.zoomScale = 1.0
-        imageScrollView.contentOffset = CGPoint()
-        cursorView.clearCalibration()
-        setViewsNeedDisplay()
     }
 
     // MARK: - UIImagePickerController delegate

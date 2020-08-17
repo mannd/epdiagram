@@ -8,25 +8,28 @@
 
 import UIKit
 
-struct Calibration {
+class Calibration {
     var originalZoom: CGFloat = 1
     var currentZoom: CGFloat = 1
     var originalCalFactor: CGFloat = 1
-    var isCalibrated: Bool = false
+    var isCalibrated = false
+
+    static let standardInterval: CGFloat = 1000
 
     var currentCalFactor: CGFloat {
         (originalZoom * originalCalFactor) / currentZoom
     }
 
-    mutating func set(zoom: CGFloat, calFactor: CGFloat) {
+    func set(zoom: CGFloat, calFactor: CGFloat) {
         originalZoom = zoom
         currentZoom = zoom
         originalCalFactor = calFactor
     }
 
-    mutating func reset() {
+    func reset() {
         originalZoom = 1
         currentZoom = 1
+        isCalibrated = false
         // need below?
         //originalCalFactor = 1
     }

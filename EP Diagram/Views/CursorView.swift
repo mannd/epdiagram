@@ -18,7 +18,6 @@ protocol CursorViewDelegate: AnyObject {
     func cursorIsVisible() -> Bool
     func cursorMovement() -> Movement
     func isCalibrated() -> Bool
-    func clearCalibration()
     func markMeasurement(segment: Segment) -> CGFloat
     func intervalMeasurement(value: CGFloat) -> CGFloat
 }
@@ -50,7 +49,7 @@ final class CursorView: ScaledView {
         }
     }
 
-    private var calibration = Calibration()
+    var calibration: Calibration?
 
     var leftMargin: CGFloat = 0
     var maxCursorPositionY: CGFloat = 0 {
@@ -269,10 +268,8 @@ final class CursorView: ScaledView {
     @objc func singleTap(tap: UITapGestureRecognizer) {
         os_log("singleTap(tap:) - CursorView", log: OSLog.touches, type: .info)
         guard allowTaps else { return }
-        if isCalibrating {
-            doCalibration()
-            return
-        }
+        // Single tap does nothing during calibration.
+        guard !isCalibrating else { return }
         ladderViewDelegate.toggleAttachedMarkAnchor()
         ladderViewDelegate.refresh()
         setNeedsDisplay()
@@ -358,8 +355,8 @@ final class CursorView: ScaledView {
         }
     }
 
-    func doCalibration() {
-        os_log("doCalibration()", log: .action, type: .info)
+    func showCalipers() {
+        os_log("showCalipers()", log: .action, type: .info)
         isCalibrating = true
         let width = self.frame.width
         caliper.bar1Position = width / 3
@@ -370,14 +367,8 @@ final class CursorView: ScaledView {
 
     func setCalibration(zoom: CGFloat) {
         // FIXME: hardcoded value.
-        calibration.set(zoom: zoom, calFactor: 1000 / caliper.value)
-        calibration.isCalibrated = true
-        ladderViewDelegate.refresh()
-    }
-
-    func clearCalibration() {
-        calibration.reset()
-        calibration.isCalibrated = false
+        calibration?.set(zoom: zoom, calFactor: Calibration.standardInterval / caliper.value)
+        calibration?.isCalibrated = true
         ladderViewDelegate.refresh()
     }
 
@@ -425,14 +416,16 @@ extension CursorView: CursorViewDelegate {
     }
 
     func isCalibrated() -> Bool {
-        return calibration.isCalibrated
+        return calibration?.isCalibrated ?? false
     }
 
     func markMeasurement(segment: Segment) -> CGFloat {
+        guard let calibration = calibration else { return 0 }
         return abs(segment.proximal.x - segment.distal.x) * calibration.currentCalFactor
     }
 
     func intervalMeasurement(value: CGFloat) -> CGFloat {
+        guard let calibration = calibration else { return 0 }
         return value * calibration.currentCalFactor
     }
 }
