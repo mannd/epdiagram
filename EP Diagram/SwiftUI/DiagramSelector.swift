@@ -21,13 +21,13 @@ struct DiagramSelector: View {
                     ForEach(names, id:\.self) {
                         name in
                         Text(name).onTapGesture {
-                            self.delegate?.selectDiagram(diagramName: name)
+                            self.delegate?.selectDiagram(named: name)
                             self.presentationMode.wrappedValue.dismiss()
                         }.padding()
                         }.onDelete {
                             indices in
                         for index in indices {
-                            self.delegate?.deleteDiagram(diagramName: self.names[index])
+                            self.delegate?.deleteDiagram(named: self.names[index])
                             self.names.remove(at: index)
                         }
                     }

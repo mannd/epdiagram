@@ -228,7 +228,7 @@ extension ViewController: HamburgerTableDelegate, UIImagePickerControllerDelegat
 
     func duplicateDiagram() {
         os_log("duplicateDiagram()", log: .action, type: .info)
-        // Just fail gracefully if name is nil, renameDiagram should not be available if name is nil.
+        // Just fail gracefully if name is nil, duplicateDiagram should not be available if name is nil.
         guard let name = diagram.name, !name.isBlank else { return }
         let alert = UIAlertController(title: L("Duplicate Diagram"), message: L("Enter a name for duplicate diagram of \(name)"), preferredStyle: .alert)
         alert.addAction(UIAlertAction(title: L("Cancel"), style: .cancel, handler: nil))
@@ -413,10 +413,10 @@ extension ViewController: HamburgerTableDelegate, UIImagePickerControllerDelegat
     private func handleNewDiagram() {
         os_log("handleNewDiagram()", log: .action, type: .info)
         // Use same ladder, blank out image.
-        diagram = Diagram.defaultDiagram()
-        imageView.image = diagram.image
-        ladderView.ladder = diagram.ladder
-        setViewsNeedDisplay()
+        setDiagramImage(nil)
+        diagram.name = nil
+        diagram.description = ""
+        setTitle()
     }
 
     private func handleSelectDiagram() {
@@ -453,13 +453,16 @@ extension ViewController: HamburgerTableDelegate, UIImagePickerControllerDelegat
     }
 
     private func resetLadder() {
+        // FIXME: this makes ladder default ladder and it shouldn't.
         ladderView.resetLadder()
         undoManager?.removeAllActions()
         updateUndoRedoButtons()
         setViewsNeedDisplay()
     }
 
-    private func setDiagramImage(_ image: UIImage?) {
+    func setDiagramImage(_ image: UIImage?) {
+        undoManager?.removeAllActions()
+        updateUndoRedoButtons()
         diagram.ladder.clear()
         diagram.image = image
         imageView.image = image
@@ -480,7 +483,7 @@ extension ViewController: HamburgerTableDelegate, UIImagePickerControllerDelegat
     }
 
     func showHamburgerMenu() {
-        os_log("showHamburgerMenu()", log: OSLog.action, type: .info)
+       os_log("showHamburgerMenu()", log: OSLog.action, type: .info)
         hamburgerTableViewController?.reloadData()
         constraintHamburgerLeft.constant = 0
         hamburgerMenuIsOpen = true

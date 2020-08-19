@@ -39,7 +39,7 @@ struct PreferencesView: View {
     }
 
     func onSave() {
-        delegate?.savePreferences(preferences: preferences)
+        delegate?.savePreferences(preferences)
         self.presentationMode.wrappedValue.dismiss()
     }
 }

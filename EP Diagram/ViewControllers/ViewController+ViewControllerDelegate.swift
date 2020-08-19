@@ -11,9 +11,9 @@ import os.log
 
 protocol ViewControllerDelegate: class {
     func selectLadderTemplate(ladderTemplate: LadderTemplate?)
-    func selectDiagram(diagramName: String?)
-    func deleteDiagram(diagramName: String)
-    func savePreferences(preferences: Preferences)
+    func selectDiagram(named name: String?)
+    func deleteDiagram(named name: String)
+    func savePreferences(_ preferences: Preferences)
     func saveTemplates(_ templates: [LadderTemplate])
     func selectSampleDiagram(_ diagram: Diagram?)
 }
@@ -22,17 +22,18 @@ extension ViewController: ViewControllerDelegate {
     func selectLadderTemplate(ladderTemplate: LadderTemplate?) {
         os_log("selecteLadderTemplate - ViewController", log: OSLog.action, type: .info)
         P("ladder is dirty = \(ladderView.ladderIsDirty)")
+
         if let ladderTemplate = ladderTemplate {
             let ladder = Ladder(template: ladderTemplate)
-            diagram.name = nil
+            setDiagramImage(nil)
+            diagram.ladder = ladder
             ladderView.ladder = ladder
             setViewsNeedDisplay()
         }
     }
 
-    // TODO: make sure data is getting loaded correctly.
-    func selectDiagram(diagramName: String?) {
-        guard let diagramName = diagramName else { return }
+    func selectDiagram(named name: String?) {
+        guard let diagramName = name else { return }
         P("diagram name = \(diagramName)")
         do {
             self.diagram = try Diagram.retrieve(name: diagramName)
@@ -47,11 +48,11 @@ extension ViewController: ViewControllerDelegate {
         }
     }
 
-    func deleteDiagram(diagramName: String) {
-        os_log("deleteDiagram %s", log: .action, type: .info, diagramName)
+    func deleteDiagram(named name: String) {
+        os_log("deleteDiagram %s", log: .action, type: .info, name)
         // actually delete diagram files here
         do {
-            let diagramDirURL = try DiagramIO.getDiagramDirURL(for: diagramName)
+            let diagramDirURL = try DiagramIO.getDiagramDirURL(for: name)
             let diagramDirContents = try FileManager.default.contentsOfDirectory(atPath: diagramDirURL.path)
             for path in diagramDirContents {
                 let pathURL = diagramDirURL.appendingPathComponent(path, isDirectory: false)
@@ -59,12 +60,12 @@ extension ViewController: ViewControllerDelegate {
             }
             try FileManager.default.removeItem(atPath: diagramDirURL.path)
         } catch {
-            os_log("Could not delete diagram %s, error: %s", log: .action, type: .error, diagramName, error.localizedDescription)
+            os_log("Could not delete diagram %s, error: %s", log: .action, type: .error, name, error.localizedDescription)
             Common.showFileError(viewController: self, error: error)
         }
     }
 
-    func savePreferences(preferences: Preferences) {
+    func savePreferences(_ preferences: Preferences) {
         os_log("savePreferences()", log: .action, type: .info)
         self.preferences = preferences
         self.preferences.save()

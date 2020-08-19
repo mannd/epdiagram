@@ -68,6 +68,9 @@ final class LadderView: ScaledView {
 
     var calibration: Calibration?
 
+    var isZoning: Bool = false
+    let zoneColor = UIColor.systemIndigo
+
     var ladderIsDirty: Bool {
         get {
             ladder.isDirty
@@ -680,6 +683,10 @@ final class LadderView: ScaledView {
     }
 
     @objc func dragging(pan: UIPanGestureRecognizer) {
+        if isZoning {
+            dragZone(pan: pan)
+            return
+        }
         let position = pan.location(in: self)
         let state = pan.state
         let locationInLadder = getLocationInLadder(position: position)
@@ -785,6 +792,10 @@ final class LadderView: ScaledView {
         }
         cursorViewDelegate.refresh()
         setNeedsDisplay()
+    }
+
+    func dragZone(pan: UIPanGestureRecognizer) {
+        // drag zone
     }
 
     private func swapEndsIfNeeded(mark: Mark) {
@@ -1053,12 +1064,29 @@ final class LadderView: ScaledView {
             let lastRegion = index == ladder.regions.count - 1
             drawRegion(rect: regionRect, context: context, region: region, offset: offsetX, scale: scale, lastRegion: lastRegion)
         }
+        if isZoning {
+            drawZone(context: context)
+        }
         if ladderIsLocked {
             showLockLadderWarning(rect: rect)
         }
         if !marksAreVisible {
             showMarksAreHiddenWarning(rect: rect)
         }
+    }
+
+    fileprivate func drawZone(context: CGContext) {
+        guard let zone = ladder.zone else { return }
+        let start = translateToRegionPositionX(scaledViewPositionX: zone.start)
+        let end = translateToRegionPositionX(scaledViewPositionX: zone.end)
+        for region in zone.regions {
+            let zoneRect = CGRect(x: start, y: region.proximalBoundary, width: end - start, height: region.distalBoundary - region.proximalBoundary)
+            context.addRect(zoneRect)
+            context.setFillColor(zoneColor.cgColor)
+            context.setAlpha(0.2)
+            context.drawPath(using: .fillStroke)
+        }
+        context.setAlpha(1.0)
     }
 
 

@@ -32,6 +32,7 @@ final class ViewController: UIViewController {
     internal var separatorView: SeparatorView?
     private var undoButton: UIBarButtonItem = UIBarButtonItem()
     private var redoButton: UIBarButtonItem = UIBarButtonItem()
+    private var selectButton: UIBarButtonItem = UIBarButtonItem()
     private var mainMenuButtons: [UIBarButtonItem]?
     private var selectMenuButtons: [UIBarButtonItem]?
     private var linkMenuButtons: [UIBarButtonItem]?
@@ -116,9 +117,9 @@ final class ViewController: UIViewController {
 
         loadUserDefaults()
 
-        if let lastDiagramName = preferences.lastDiagramName, let lastDiagram = Diagram.retrieveNoThrow(name: lastDiagramName) {
-            diagram = lastDiagram
-        }
+//        if let lastDiagramName = preferences.lastDiagramName, let lastDiagram = Diagram.retrieveNoThrow(name: lastDiagramName) {
+//            diagram = lastDiagram
+//        }
 
         imageView.image = diagram.image
         ladderView.ladder = diagram.ladder
@@ -183,7 +184,7 @@ final class ViewController: UIViewController {
             let selectTitle = L("Select", comment: "select button label title")
             let linkTitle = L("Link", comment: "link button label title")
             let calibrateButton = UIBarButtonItem(title: calibrateTitle, style: UIBarButtonItem.Style.plain, target: self, action: #selector(calibrate))
-            let selectButton = UIBarButtonItem(title: selectTitle, style: .plain, target: self, action: #selector(selectMarks))
+            selectButton = UIBarButtonItem(title: selectTitle, style: .plain, target: self, action: #selector(showSelectAlert))
             let linkButton = UIBarButtonItem(title: linkTitle, style: .plain, target: self, action: #selector(linkMarks))
             let spacer = UIBarButtonItem(barButtonSystemItem: .flexibleSpace, target: nil, action: nil)
             undoButton = UIBarButtonItem(barButtonSystemItem: .undo, target: self, action: #selector(undo))
@@ -195,14 +196,14 @@ final class ViewController: UIViewController {
         navigationController?.setToolbarHidden(false, animated: false)
     }
 
-    private func showSelectMenu() {
+    private func showSelectMarksMenu(_: UIAlertAction) {
         if selectMenuButtons == nil {
-            let promptButton = makePrompt(text: L("Tap marks to select"))
+            let prompt = makePrompt(text: L("Tap marks to select"))
             let copyTitle = L("Copy", comment: "copy mark button label title")
             let copyButton = UIBarButtonItem(title: copyTitle, style: UIBarButtonItem.Style.plain, target: self, action: #selector(copyMarks))
             let cancelTitle = L("Done")
             let cancelButton = UIBarButtonItem(title: cancelTitle, style: UIBarButtonItem.Style.plain, target: self, action: #selector(cancelSelect))
-            selectMenuButtons = [promptButton, copyButton, cancelButton]
+            selectMenuButtons = [prompt, copyButton, cancelButton]
         }
         setToolbarItems(selectMenuButtons, animated: false)
         navigationController?.setToolbarHidden(false, animated: false)
@@ -210,10 +211,10 @@ final class ViewController: UIViewController {
 
     private func showLinkMenu() {
         if linkMenuButtons == nil {
-            let promptButton = makePrompt(text: L("Tap pairs of marks to link them"))
+            let prompt = makePrompt(text: L("Tap pairs of marks to link them"))
             let cancelTitle = L("Done")
             let cancelButton = UIBarButtonItem(title: cancelTitle, style: .plain, target: self, action: #selector(cancelLink))
-            linkMenuButtons = [promptButton, cancelButton]
+            linkMenuButtons = [prompt, cancelButton]
         }
         setToolbarItems(linkMenuButtons, animated: false)
         navigationController?.setToolbarHidden(false, animated: false)
@@ -240,19 +241,19 @@ final class ViewController: UIViewController {
         return UIBarButtonItem(customView: prompt)
     }
 
-    @objc func editDiagram() {
-        os_log("editDiagram()", log: OSLog.action, type: .info)
-        let alert = UIAlertController(title: L("Edit Diagram"), message: L("Create new diagram or edit this one"), preferredStyle: .actionSheet)
-        let newAction = UIAlertAction(title: L("Create new diagram"), style: .default, handler: nil)
-        let duplicateAction = UIAlertAction(title: L("Duplicate this diagram"), style: .default, handler: nil)
-        let editAction = UIAlertAction(title: L("Edit this diagram"), style: .default, handler: editLadder)
-        let cancelAction = UIAlertAction(title: L("Cancel"), style: .cancel, handler: nil)
-        alert.addAction(newAction)
-        alert.addAction(duplicateAction)
-        alert.addAction(editAction)
-        alert.addAction(cancelAction)
-        present(alert, animated: true, completion: nil)
-    }
+//    @objc func editDiagram() {
+//        os_log("editDiagram()", log: OSLog.action, type: .info)
+//        let alert = UIAlertController(title: L("Edit Diagram"), message: L("Create new diagram or edit this one"), preferredStyle: .actionSheet)
+//        let newAction = UIAlertAction(title: L("Create new diagram"), style: .default, handler: nil)
+//        let duplicateAction = UIAlertAction(title: L("Duplicate this diagram"), style: .default, handler: nil)
+//        let editAction = UIAlertAction(title: L("Edit this diagram"), style: .default, handler: editLadder)
+//        let cancelAction = UIAlertAction(title: L("Cancel"), style: .cancel, handler: nil)
+//        alert.addAction(newAction)
+//        alert.addAction(duplicateAction)
+//        alert.addAction(editAction)
+//        alert.addAction(cancelAction)
+//        present(alert, animated: true, completion: nil)
+//    }
 
     @objc func editLadder(action: UIAlertAction) {
         os_log("editLadder(action:)", log: OSLog.action, type: .info)
@@ -278,9 +279,17 @@ final class ViewController: UIViewController {
         cursorView.showCalipers()
     }
 
-    @objc func selectMarks() {
-        os_log("selectMarks()", log: OSLog.action, type: .info)
-        showSelectMenu()
+    @objc func showSelectAlert() {
+        os_log("selectMarks()", log: .action, type: .info)
+        let alert = UIAlertController(title: nil, message: nil, preferredStyle: .actionSheet)
+        let selectMarksAction = UIAlertAction(title: L("Select Marks"), style: .default, handler: showSelectMarksMenu)
+        let selectZoneAction = UIAlertAction(title: L("Select a Zone"), style: .default, handler: nil)
+        let cancelAction = UIAlertAction(title: L("Cancel"), style: .cancel, handler: nil)
+        alert.addAction(selectMarksAction)
+        alert.addAction(selectZoneAction)
+        alert.addAction(cancelAction)
+        alert.popoverPresentationController?.barButtonItem = selectButton
+        present(alert, animated: true, completion: nil)
         ladderView.selectMarkMode = true
     }
 
@@ -297,6 +306,12 @@ final class ViewController: UIViewController {
 
     @objc func copyMarks() {
         os_log("copyMarks()", log: OSLog.action, type: .info)
+        showPasteMarksMenu()
+    }
+
+    @objc func showPasteMarksMenu() {
+        os_log("showPasteMarksMenu()", log: .action, type: .info)
+        // "Paste marks: Tap on ladder to paste copied mark(s) Done"
     }
 
     @objc func cancelSelect() {

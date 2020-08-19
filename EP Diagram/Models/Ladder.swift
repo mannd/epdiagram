@@ -38,6 +38,8 @@ class Ladder: Codable {
     // marksAreVisible shows and hides all the marks.  You can toggle this for teaching purposes.
     var marksAreVisible: Bool = true
 
+    var zone: Zone?
+
     var id = UUID()
 
     init(template: LadderTemplate) {

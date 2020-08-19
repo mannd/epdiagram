@@ -23,7 +23,7 @@ struct HamburgerViewModel {
         array.append(selectLadderLayer)
         let newDiagramlayer = HamburgerLayer(withName: L("New diagram"), iconName: "plus_square", layer: .newDiagram)
         array.append(newDiagramlayer)
-        let selectDiagramLayer = HamburgerLayer(withName: L("Select diagram"), iconName: "open", layer: .openDiagram)
+        let selectDiagramLayer = HamburgerLayer(withName: L("Select diagram"), iconName: "checkmark", layer: .openDiagram)
         array.append(selectDiagramLayer)
         let saveDiagramLayer = HamburgerLayer(withName: L("Save diagram"), iconName: "save", layer: .saveDiagram)
         array.append(saveDiagramLayer)
