@@ -13,6 +13,7 @@
 		8E1276DD24D46F4200AC4B8F /* help.html in Resources */ = {isa = PBXBuildFile; fileRef = 8E1276DC24D46F4200AC4B8F /* help.html */; };
 		8E1276DF24D4734E00AC4B8F /* HelpViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8E1276DE24D4734E00AC4B8F /* HelpViewController.swift */; };
 		8E1276E124D4758B00AC4B8F /* WebKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 8E1276E024D4758A00AC4B8F /* WebKit.framework */; };
+		8E15013724F2C7CF000CF90E /* Mode.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8E15013624F2C7CF000CF90E /* Mode.swift */; };
 		8E1B6CB8240CAE5300EA88A6 /* ScaledView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8E1B6CB7240CAE5300EA88A6 /* ScaledView.swift */; };
 		8E217D98245B306200CD0CBF /* MathTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8E217D97245B306200CD0CBF /* MathTests.swift */; };
 		8E2439F624B14F770044AEAB /* Interval.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8E2439F524B14F770044AEAB /* Interval.swift */; };
@@ -54,6 +55,8 @@
 		8E7D24E322779DBF005A1729 /* EP_DiagramUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8E7D24E222779DBF005A1729 /* EP_DiagramUITests.swift */; };
 		8E7D24F12277A00C005A1729 /* ImageView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8E7D24F02277A00C005A1729 /* ImageView.swift */; };
 		8E8248DD23B53B55001A85F9 /* SeparatorView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8E8248DC23B53B55001A85F9 /* SeparatorView.swift */; };
+		8E856CF224EDC53D0064121F /* CGPoint+clampY.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8E856CF124EDC53D0064121F /* CGPoint+clampY.swift */; };
+		8E856CF424EDC5E10064121F /* Segment.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8E856CF324EDC5E10064121F /* Segment.swift */; };
 		8E9550BD2474B22000E1B125 /* FileIO.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8E9550BC2474B22000E1B125 /* FileIO.swift */; };
 		8E9550BF2474B69900E1B125 /* FileIOTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8E9550BE2474B69900E1B125 /* FileIOTests.swift */; };
 		8E973F9B24C4BF0800AB41C3 /* String+isBlank.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8E973F9A24C4BF0800AB41C3 /* String+isBlank.swift */; };
@@ -100,6 +103,7 @@
 		8E1276DC24D46F4200AC4B8F /* help.html */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.html; path = help.html; sourceTree = "<group>"; };
 		8E1276DE24D4734E00AC4B8F /* HelpViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HelpViewController.swift; sourceTree = "<group>"; };
 		8E1276E024D4758A00AC4B8F /* WebKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = WebKit.framework; path = Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.15.sdk/System/Library/Frameworks/WebKit.framework; sourceTree = DEVELOPER_DIR; };
+		8E15013624F2C7CF000CF90E /* Mode.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Mode.swift; sourceTree = "<group>"; };
 		8E1B6CB7240CAE5300EA88A6 /* ScaledView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScaledView.swift; sourceTree = "<group>"; };
 		8E217D97245B306200CD0CBF /* MathTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MathTests.swift; sourceTree = "<group>"; };
 		8E2439F524B14F770044AEAB /* Interval.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Interval.swift; sourceTree = "<group>"; };
@@ -148,6 +152,8 @@
 		8E7D24E422779DBF005A1729 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		8E7D24F02277A00C005A1729 /* ImageView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImageView.swift; sourceTree = "<group>"; };
 		8E8248DC23B53B55001A85F9 /* SeparatorView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SeparatorView.swift; sourceTree = "<group>"; };
+		8E856CF124EDC53D0064121F /* CGPoint+clampY.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "CGPoint+clampY.swift"; sourceTree = "<group>"; };
+		8E856CF324EDC5E10064121F /* Segment.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Segment.swift; sourceTree = "<group>"; };
 		8E9550BC2474B22000E1B125 /* FileIO.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FileIO.swift; sourceTree = "<group>"; };
 		8E9550BE2474B69900E1B125 /* FileIOTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FileIOTests.swift; sourceTree = "<group>"; };
 		8E973F9A24C4BF0800AB41C3 /* String+isBlank.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "String+isBlank.swift"; sourceTree = "<group>"; };
@@ -224,6 +230,7 @@
 		8E6EB6BE2484707300E5F883 /* Extensions */ = {
 			isa = PBXGroup;
 			children = (
+				8E856CF124EDC53D0064121F /* CGPoint+clampY.swift */,
 				8E6EB6BF2484778E00E5F883 /* Notification+didUndoableAction.swift */,
 				8E973F9A24C4BF0800AB41C3 /* String+isBlank.swift */,
 				8EBC824024E5E04800B5CA29 /* UIImage+emptyImage.swift */,
@@ -235,11 +242,11 @@
 			isa = PBXGroup;
 			children = (
 				8E7214DD22E95C860062C094 /* Common.swift */,
-				8E253DD4244A8B17008CC56B /* Version.swift */,
-				8E74D58F244FD55E00641E0A /* Logging.swift */,
-				8E9550BC2474B22000E1B125 /* FileIO.swift */,
 				8E35924824BE9B27001E23D5 /* DiagramIO.swift */,
+				8E9550BC2474B22000E1B125 /* FileIO.swift */,
+				8E74D58F244FD55E00641E0A /* Logging.swift */,
 				8EBC824224E6EBA700B5CA29 /* Sounds.swift */,
+				8E253DD4244A8B17008CC56B /* Version.swift */,
 			);
 			path = Common;
 			sourceTree = "<group>";
@@ -268,20 +275,20 @@
 		8E7D24C122779DBD005A1729 /* EP Diagram */ = {
 			isa = PBXGroup;
 			children = (
-				8E1276D924D46BEF00AC4B8F /* Help */,
-				8E689C4F23B498A10042A3F1 /* EP Diagram.entitlements */,
-				8E7214DC22E95C630062C094 /* Common */,
-				8E6EB6BE2484707300E5F883 /* Extensions */,
-				8E033CE624AC101400BE6D6F /* Protocols */,
-				8E9B804C22834960008873BB /* ViewControllers */,
-				8EBC2B41246F718000CFC04D /* SwiftUI */,
-				8E4ACA8724479C2500575538 /* ViewModels */,
-				8E9B804B22834944008873BB /* Views */,
-				8E9B8049228348F7008873BB /* Storyboards */,
-				8E9B803F22834431008873BB /* Models */,
 				8E7D24C222779DBD005A1729 /* AppDelegate.swift */,
 				8E7D24C922779DBF005A1729 /* Assets.xcassets */,
+				8E7214DC22E95C630062C094 /* Common */,
+				8E689C4F23B498A10042A3F1 /* EP Diagram.entitlements */,
+				8E6EB6BE2484707300E5F883 /* Extensions */,
+				8E1276D924D46BEF00AC4B8F /* Help */,
 				8E7D24CE22779DBF005A1729 /* Info.plist */,
+				8E9B803F22834431008873BB /* Models */,
+				8E033CE624AC101400BE6D6F /* Protocols */,
+				8E9B8049228348F7008873BB /* Storyboards */,
+				8EBC2B41246F718000CFC04D /* SwiftUI */,
+				8E9B804C22834960008873BB /* ViewControllers */,
+				8E4ACA8724479C2500575538 /* ViewModels */,
+				8E9B804B22834944008873BB /* Views */,
 			);
 			path = "EP Diagram";
 			sourceTree = "<group>";
@@ -289,20 +296,20 @@
 		8E7D24D622779DBF005A1729 /* EP DiagramTests */ = {
 			isa = PBXGroup;
 			children = (
-				8E7D24D922779DBF005A1729 /* Info.plist */,
+				8E5918BD24AEAFE100D8ABA3 /* CaliperTests.swift */,
 				8E25A9AE22E54F7200D62E18 /* CursorTests.swift */,
-				8E25A9B022E5505200D62E18 /* LadderViewTests.swift */,
-				8E25A9B222E5515D00D62E18 /* LadderTests.swift */,
-				8E7214DF22EB57FC0062C094 /* MarkTests.swift */,
 				8E9A466623005A600037AEAB /* CursorViewTests.swift */,
-				8EF8B5B62330739F00ADB77A /* ViewControllerTests.swift */,
-				8E217D97245B306200CD0CBF /* MathTests.swift */,
-				8E5D0ABC2464F2CD00FE78A2 /* RegionTests.swift */,
+				8E973F9E24C4C93000AB41C3 /* DiagramTests.swift */,
 				8E9550BE2474B69900E1B125 /* FileIOTests.swift */,
 				8E6570FA24A99B8A001358F6 /* FileTests.swift */,
-				8E5918BD24AEAFE100D8ABA3 /* CaliperTests.swift */,
+				8E7D24D922779DBF005A1729 /* Info.plist */,
+				8E25A9B222E5515D00D62E18 /* LadderTests.swift */,
+				8E25A9B022E5505200D62E18 /* LadderViewTests.swift */,
+				8E7214DF22EB57FC0062C094 /* MarkTests.swift */,
+				8E217D97245B306200CD0CBF /* MathTests.swift */,
+				8E5D0ABC2464F2CD00FE78A2 /* RegionTests.swift */,
 				8E973F9C24C4C71E00AB41C3 /* StringTests.swift */,
-				8E973F9E24C4C93000AB41C3 /* DiagramTests.swift */,
+				8EF8B5B62330739F00ADB77A /* ViewControllerTests.swift */,
 			);
 			path = "EP DiagramTests";
 			sourceTree = "<group>";
@@ -319,20 +326,22 @@
 		8E9B803F22834431008873BB /* Models */ = {
 			isa = PBXGroup;
 			children = (
-				8E9B8042228345B5008873BB /* Mark.swift */,
-				8E9B8044228347DE008873BB /* Region.swift */,
-				8E9B804622834870008873BB /* Ladder.swift */,
-				8E55612822A5FEDC00C4D391 /* Cursor.swift */,
 				8ED3B1B52360DA0D00549381 /* Anchor.swift */,
-				8E4ACA852447935600575538 /* HamburgerLayer.swift */,
-				8E3AD1362459CABF0085BDD4 /* LocationInLadder.swift */,
-				8ECA9FB42470A07B0016D939 /* RegionTemplate.swift */,
-				8ECA9FB62470A1020016D939 /* LadderTemplate.swift */,
-				8E4A52EE24886B16007406F5 /* Diagram.swift */,
-				8E7CCC2A248C30A300018D2C /* Preferences.swift */,
 				8E033CE924AC10A300BE6D6F /* Calibration.swift */,
 				8E5918BB24AEAB0B00D8ABA3 /* Caliper.swift */,
+				8E55612822A5FEDC00C4D391 /* Cursor.swift */,
+				8E4A52EE24886B16007406F5 /* Diagram.swift */,
+				8E4ACA852447935600575538 /* HamburgerLayer.swift */,
 				8E2439F524B14F770044AEAB /* Interval.swift */,
+				8E9B804622834870008873BB /* Ladder.swift */,
+				8ECA9FB62470A1020016D939 /* LadderTemplate.swift */,
+				8E3AD1362459CABF0085BDD4 /* LocationInLadder.swift */,
+				8E9B8042228345B5008873BB /* Mark.swift */,
+				8E15013624F2C7CF000CF90E /* Mode.swift */,
+				8E7CCC2A248C30A300018D2C /* Preferences.swift */,
+				8E9B8044228347DE008873BB /* Region.swift */,
+				8ECA9FB42470A07B0016D939 /* RegionTemplate.swift */,
+				8E856CF324EDC5E10064121F /* Segment.swift */,
 				8E982F9224EAF8B500E94F71 /* Zone.swift */,
 			);
 			path = Models;
@@ -350,14 +359,14 @@
 		8E9B804B22834944008873BB /* Views */ = {
 			isa = PBXGroup;
 			children = (
+				8E4ACA7F24478A6E00575538 /* BlackView.swift */,
+				8E01D9C622849047000F36FC /* CursorView.swift */,
+				8E4ACA832447905E00575538 /* HamburgerCell.swift */,
+				8E7D24F02277A00C005A1729 /* ImageView.swift */,
 				8EF9166A227926BC00B51F17 /* LadderView.swift */,
 				8E74D58D244FBE2500641E0A /* LadderView+UIContextMenuInteractionDelegate.swift */,
-				8E01D9C622849047000F36FC /* CursorView.swift */,
-				8E7D24F02277A00C005A1729 /* ImageView.swift */,
-				8E8248DC23B53B55001A85F9 /* SeparatorView.swift */,
 				8E1B6CB7240CAE5300EA88A6 /* ScaledView.swift */,
-				8E4ACA7F24478A6E00575538 /* BlackView.swift */,
-				8E4ACA832447905E00575538 /* HamburgerCell.swift */,
+				8E8248DC23B53B55001A85F9 /* SeparatorView.swift */,
 			);
 			path = Views;
 			sourceTree = "<group>";
@@ -365,12 +374,12 @@
 		8E9B804C22834960008873BB /* ViewControllers */ = {
 			isa = PBXGroup;
 			children = (
-				8E7D24C422779DBD005A1729 /* ViewController.swift */,
-				8E253DD2244A8799008CC56B /* ViewController+UIScrollViewDelegate.swift */,
-				8E253DD0244A86CB008CC56B /* ViewController+HamburgerTableDelegate.swift */,
-				8E6EB6C1248477D500E5F883 /* ViewController+ViewControllerDelegate.swift */,
 				8E4ACA8124478D7C00575538 /* HamburgerTableViewController.swift */,
 				8E1276DE24D4734E00AC4B8F /* HelpViewController.swift */,
+				8E7D24C422779DBD005A1729 /* ViewController.swift */,
+				8E253DD0244A86CB008CC56B /* ViewController+HamburgerTableDelegate.swift */,
+				8E253DD2244A8799008CC56B /* ViewController+UIScrollViewDelegate.swift */,
+				8E6EB6C1248477D500E5F883 /* ViewController+ViewControllerDelegate.swift */,
 			);
 			path = ViewControllers;
 			sourceTree = "<group>";
@@ -378,10 +387,10 @@
 		8EBC2B41246F718000CFC04D /* SwiftUI */ = {
 			isa = PBXGroup;
 			children = (
-				8E671D5124814BB700784EB7 /* LadderTemplatesEditor.swift */,
+				8E7CCC28248C1A9C00018D2C /* DiagramSelector.swift */,
 				8E6A0297246DFB3700A10C9F /* LadderEditor.swift */,
 				8EA444BF2476E471005B5452 /* LadderSelector.swift */,
-				8E7CCC28248C1A9C00018D2C /* DiagramSelector.swift */,
+				8E671D5124814BB700784EB7 /* LadderTemplatesEditor.swift */,
 				8E2BA1CF24A3BDD7002D997F /* PreferencesView.swift */,
 				8EADC2A824D64E1200C5D3D8 /* SampleSelector.swift */,
 			);
@@ -536,12 +545,14 @@
 				8E253DD3244A8799008CC56B /* ViewController+UIScrollViewDelegate.swift in Sources */,
 				8E6EB6C02484778E00E5F883 /* Notification+didUndoableAction.swift in Sources */,
 				8E9550BD2474B22000E1B125 /* FileIO.swift in Sources */,
+				8E856CF224EDC53D0064121F /* CGPoint+clampY.swift in Sources */,
 				8E973F9B24C4BF0800AB41C3 /* String+isBlank.swift in Sources */,
 				8EADC2A924D64E1200C5D3D8 /* SampleSelector.swift in Sources */,
 				8E1276DF24D4734E00AC4B8F /* HelpViewController.swift in Sources */,
 				8E7D24F12277A00C005A1729 /* ImageView.swift in Sources */,
 				8E7D24C522779DBD005A1729 /* ViewController.swift in Sources */,
 				8E3AD1372459CABF0085BDD4 /* LocationInLadder.swift in Sources */,
+				8E15013724F2C7CF000CF90E /* Mode.swift in Sources */,
 				8E253DD5244A8B17008CC56B /* Version.swift in Sources */,
 				8E6EB6C2248477D500E5F883 /* ViewController+ViewControllerDelegate.swift in Sources */,
 				8E4A52EF24886B16007406F5 /* Diagram.swift in Sources */,
@@ -572,6 +583,7 @@
 				8E982F9324EAF8B500E94F71 /* Zone.swift in Sources */,
 				8E033CEA24AC10A300BE6D6F /* Calibration.swift in Sources */,
 				8E9B8045228347DE008873BB /* Region.swift in Sources */,
+				8E856CF424EDC5E10064121F /* Segment.swift in Sources */,
 				8E7CCC29248C1A9C00018D2C /* DiagramSelector.swift in Sources */,
 				8EBC824324E6EBA700B5CA29 /* Sounds.swift in Sources */,
 				8E7D24C322779DBD005A1729 /* AppDelegate.swift in Sources */,

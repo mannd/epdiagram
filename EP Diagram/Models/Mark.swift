@@ -13,29 +13,18 @@
 import UIKit
 import os.log
 
-// We make it easy to normalize the y value of a point to be between 0 and 1.
-extension CGPoint {
-    func normalized() -> CGPoint {
-        return CGPoint(x: self.x, y: self.y < 0 ? 0 : self.y > 1.0 ? 1.0 : self.y)
-    }
-}
+// MARK: - typealiases
 
-// A line segment represented by 2 points.
-struct Segment: Codable, Equatable {
-    var proximal: CGPoint
-    var distal: CGPoint
+typealias MarkSet = Set<Mark>
 
-    func normalized() -> Segment {
-        return Segment(proximal: proximal.normalized(), distal: distal.normalized())
-    }
-}
+// MARK: - enums
 
 enum Movement {
     case horizontal
     case omnidirectional
 }
 
-typealias MarkSet = Set<Mark>
+// MARK: - structs
 
 // A mark may have up to three attachments to marks in the proximal and distal regions
 // and in its own region, i.e. reentry spawning a mark.
@@ -65,26 +54,9 @@ struct MarkGroup: Codable {
     }
 }
 
-extension Mark: Hashable, CustomDebugStringConvertible {
-    var debugDescription: String {
-        return "Mark ID " + id.debugDescription
-    }
-
-    static func == (lhs: Mark, rhs: Mark) -> Bool {
-        return lhs.id == rhs.id
-    }
-
-    func hash(into hasher: inout Hasher) {
-        hasher.combine(id)
-    }
-}
 
 // The mark is a fundamental component of a ladder diagram.
-class Mark: Codable, Comparable {
-    static func < (lhs: Mark, rhs: Mark) -> Bool {
-        return lhs.segment.proximal.x < rhs.segment.proximal.x && lhs.segment.distal.x < rhs.segment.distal.x
-    }
-
+class Mark: Codable {
     /// Draw a solid or dashed line when drawing a mark.
     enum LineStyle: Int, Codable, CustomStringConvertible, CaseIterable, Identifiable {
         var id: LineStyle { self  }
@@ -127,6 +99,7 @@ class Mark: Codable, Comparable {
         case distal
         case none
     }
+    let id: UUID // each mark as a unique id
 
     var segment: Segment
 
@@ -163,7 +136,6 @@ class Mark: Codable, Comparable {
 
     var groupedMarks: MarkGroup
 
-    let id: UUID // each mark as a unique id
 
     init(segment: Segment) {
         self.segment = segment
@@ -204,13 +176,13 @@ class Mark: Codable, Comparable {
         let anchorPosition: CGPoint
         switch anchor {
         case .distal:
-            anchorPosition = segment.distal.normalized()
+            anchorPosition = segment.distal.clampY()
         case .middle:
             anchorPosition = midpoint()
         case .proximal:
-            anchorPosition = segment.proximal.normalized()
+            anchorPosition = segment.proximal.clampY()
         case .none:
-            anchorPosition = segment.proximal.normalized()
+            anchorPosition = segment.proximal.clampY()
         }
         return anchorPosition
     }
@@ -222,5 +194,26 @@ class Mark: Codable, Comparable {
         var denominator = pow((segment.distal.y - segment.proximal.y), 2) + pow((segment.distal.x - segment.proximal.x), 2)
         denominator = sqrt(denominator)
         return numerator / denominator
+    }
+}
+// MARK: - extensions
+
+extension Mark: CustomDebugStringConvertible {
+    var debugDescription: String { "Mark ID " + id.debugDescription }
+}
+
+extension Mark: Comparable {
+    static func < (lhs: Mark, rhs: Mark) -> Bool {
+        return lhs.segment.proximal.x < rhs.segment.proximal.x && lhs.segment.distal.x < rhs.segment.distal.x
+    }
+
+    static func == (lhs: Mark, rhs: Mark) -> Bool {
+        return lhs.id == rhs.id
+    }
+}
+
+extension Mark: Hashable {
+    func hash(into hasher: inout Hasher) {
+        hasher.combine(id)
     }
 }

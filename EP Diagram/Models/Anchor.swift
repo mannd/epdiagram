@@ -14,6 +14,4 @@ enum Anchor: Int, Codable {
     case proximal
     case distal
     case none
-
-//    static let defaultAnchor = Anchor.middle
 }

@@ -9,10 +9,9 @@
 import UIKit
 
 // Note context menus seem to cause constraint warnings (non-fatal).  See https://github.com/apptekstudios/ASCollectionView/issues/77 .  Will ignore for now.
-@available(iOS 13.0, *)
 extension LadderView: UIContextMenuInteractionDelegate {
     func contextMenuInteraction(_ interaction: UIContextMenuInteraction, configurationForMenuAtLocation location: CGPoint) -> UIContextMenuConfiguration? {
-        let markWasTapped = positionIsNearMark(position: location)
+        let markWasLongPressed = positionIsNearMark(position: location)
         setPressedMark(position: location)
         return UIContextMenuConfiguration(identifier: nil, previewProvider: nil) { suggestedActions in
             let solid = UIAction(title: L("Solid")) { action in
@@ -30,6 +29,12 @@ extension LadderView: UIContextMenuInteractionDelegate {
             let unlink = UIAction(title: L("Unlink")) { action in
                 self.ungroupPressedMark()
             }
+            let paste = UIAction(title: L("Paste")) { action in
+
+            }
+            let rhythm = UIAction(title: L("Rhythm")) { action in
+
+            }
             let delete = UIAction(title: L("Delete"), image: UIImage(systemName: "trash"), attributes: .destructive) { action in
                 self.deletePressedMark()
             }
@@ -43,12 +48,13 @@ extension LadderView: UIContextMenuInteractionDelegate {
             let straightenToDistal = UIAction(title: L("Straighten mark to distal endpoint")) { action in
                 self.straightenToDistal()
             }
+            // TODO: Must distinguish long press on mark, label, region, zone, whole ladder (outside of ladder).
             // Create and return a UIMenu with all of the actions as children
-            if markWasTapped {
+            if markWasLongPressed {
                 return UIMenu(title: L("Edit mark"), children: [style, straightenToProximal, straightenToDistal, unlink, delete, deleteAll])
             }
             else {
-                return UIMenu(title: "", children: [delete, deleteAll])
+                return UIMenu(title: "", children: [paste, rhythm, delete, deleteAll])
             }
         }
     }

@@ -28,6 +28,7 @@ final class ViewController: UIViewController {
     // TODO: Possibly change this to property of ladder, since it might depend on label width (# of chars)?
     let leftMargin: CGFloat = 30
     var scale: CGFloat = 1.0
+    let spacer = UIBarButtonItem(barButtonSystemItem: .flexibleSpace, target: nil, action: nil)
 
     internal var separatorView: SeparatorView?
     private var undoButton: UIBarButtonItem = UIBarButtonItem()
@@ -70,7 +71,7 @@ final class ViewController: UIViewController {
         ladderView.cursorViewDelegate = cursorView
         imageScrollView.delegate = self
 
-        // These two views hold a reference to calibration
+        // These two views hold a reference to calibration.
         cursorView.calibration = calibration
         ladderView.calibration = calibration
 
@@ -142,6 +143,11 @@ final class ViewController: UIViewController {
         title = diagram.isDirty ? getTitle() + "*" : getTitle()
     }
 
+    func setMode(_ mode: Mode) {
+        cursorView.mode = mode
+        ladderView.mode = mode
+    }
+
     @objc func onDidUndoableAction(_ notification: Notification) {
         if notification.name == .didUndoableAction {
             updateUndoRedoButtons()
@@ -186,7 +192,6 @@ final class ViewController: UIViewController {
             let calibrateButton = UIBarButtonItem(title: calibrateTitle, style: UIBarButtonItem.Style.plain, target: self, action: #selector(calibrate))
             selectButton = UIBarButtonItem(title: selectTitle, style: .plain, target: self, action: #selector(showSelectAlert))
             let linkButton = UIBarButtonItem(title: linkTitle, style: .plain, target: self, action: #selector(linkMarks))
-            let spacer = UIBarButtonItem(barButtonSystemItem: .flexibleSpace, target: nil, action: nil)
             undoButton = UIBarButtonItem(barButtonSystemItem: .undo, target: self, action: #selector(undo))
             redoButton = UIBarButtonItem(barButtonSystemItem: .redo, target: self, action: #selector(redo))
             mainMenuButtons = [calibrateButton, spacer, selectButton, spacer, linkButton, spacer, undoButton, spacer, redoButton]
@@ -199,14 +204,16 @@ final class ViewController: UIViewController {
     private func showSelectMarksMenu(_: UIAlertAction) {
         if selectMenuButtons == nil {
             let prompt = makePrompt(text: L("Tap marks to select"))
-            let copyTitle = L("Copy", comment: "copy mark button label title")
-            let copyButton = UIBarButtonItem(title: copyTitle, style: UIBarButtonItem.Style.plain, target: self, action: #selector(copyMarks))
             let cancelTitle = L("Done")
             let cancelButton = UIBarButtonItem(title: cancelTitle, style: UIBarButtonItem.Style.plain, target: self, action: #selector(cancelSelect))
-            selectMenuButtons = [prompt, copyButton, cancelButton]
+            selectMenuButtons = [prompt, spacer, cancelButton]
         }
         setToolbarItems(selectMenuButtons, animated: false)
         navigationController?.setToolbarHidden(false, animated: false)
+        cursorView.cursorIsVisible = false
+        ladderView.unhighlightAllMarks()
+        setMode(.select)
+        setViewsNeedDisplay()
     }
 
     private func showLinkMenu() {
@@ -214,22 +221,23 @@ final class ViewController: UIViewController {
             let prompt = makePrompt(text: L("Tap pairs of marks to link them"))
             let cancelTitle = L("Done")
             let cancelButton = UIBarButtonItem(title: cancelTitle, style: .plain, target: self, action: #selector(cancelLink))
-            linkMenuButtons = [prompt, cancelButton]
+            linkMenuButtons = [prompt, spacer, cancelButton]
         }
+        cursorView.cursorIsVisible = false
         setToolbarItems(linkMenuButtons, animated: false)
         navigationController?.setToolbarHidden(false, animated: false)
     }
 
     private func showCalibrateMenu() {
         if calibrateMenuButtons == nil {
-            let promptButton = makePrompt(text: L("Set caliper to 1000 msec"))
+            let promptButton = makePrompt(text: L("Set caliper to 1000 ms"))
             let setTitle = L("Set")
             let setButton = UIBarButtonItem(title: setTitle, style: .plain, target: self, action: #selector(setCalibration))
             let clearTitle = L("Clear")
             let clearButton = UIBarButtonItem(title:clearTitle, style: .plain, target: self, action: #selector(clearCalibration))
             let cancelTitle = L("Cancel")
             let cancelButton = UIBarButtonItem(title: cancelTitle, style: .plain, target: self, action: #selector(cancelCalibration))
-            calibrateMenuButtons = [promptButton, setButton, clearButton, cancelButton]
+            calibrateMenuButtons = [promptButton, spacer, setButton, clearButton, cancelButton]
         }
         setToolbarItems(calibrateMenuButtons, animated: false)
         navigationController?.setToolbarHidden(false, animated: false)
@@ -281,6 +289,7 @@ final class ViewController: UIViewController {
 
     @objc func showSelectAlert() {
         os_log("selectMarks()", log: .action, type: .info)
+        cursorView.cursorIsVisible = false
         let alert = UIAlertController(title: nil, message: nil, preferredStyle: .actionSheet)
         let selectMarksAction = UIAlertAction(title: L("Select Marks"), style: .default, handler: showSelectMarksMenu)
         let selectZoneAction = UIAlertAction(title: L("Select a Zone"), style: .default, handler: nil)
@@ -290,34 +299,34 @@ final class ViewController: UIViewController {
         alert.addAction(cancelAction)
         alert.popoverPresentationController?.barButtonItem = selectButton
         present(alert, animated: true, completion: nil)
-        ladderView.selectMarkMode = true
     }
 
     @objc func linkMarks() {
         os_log("linkMarks()", log: OSLog.action, type: .info)
-        cursorView.hideCursor(true)
+        cursorView.cursorIsVisible = false
         ladderView.unhighlightAllMarks()
-        setViewsNeedDisplay()
         showLinkMenu()
-        ladderView.linkMarkMode = true
-        cursorView.allowTaps = false
+        setMode(.link)
+      setViewsNeedDisplay()
+//        cursorView.allowTaps = false
         // Tap two marks and automatically generate a link between them.  Tap on and then the region in between and generate a blocked link.  Do this by setting link mode in the ladder view and have the ladder view handle the single taps.
     }
 
-    @objc func copyMarks() {
-        os_log("copyMarks()", log: OSLog.action, type: .info)
-        showPasteMarksMenu()
-    }
-
-    @objc func showPasteMarksMenu() {
-        os_log("showPasteMarksMenu()", log: .action, type: .info)
-        // "Paste marks: Tap on ladder to paste copied mark(s) Done"
-    }
+    // FIXME: copy and paste should be long press menu items.
+//    @objc func copyMarks() {
+//        os_log("copyMarks()", log: OSLog.action, type: .info)
+//        showPasteMarksMenu()
+//    }
+//
+//    @objc func showPasteMarksMenu() {
+//        os_log("showPasteMarksMenu()", log: .action, type: .info)
+//        // "Paste marks: Tap on ladder to paste copied mark(s) Done"
+//    }
 
     @objc func cancelSelect() {
         os_log("cancelSelect()", log: OSLog.action, type: .info)
         showMainMenu()
-        ladderView.selectMarkMode = false
+        setMode(.normal)
         ladderView.unhighlightAllMarks()
         ladderView.unselectAllMarks()
         ladderView.setNeedsDisplay()
@@ -326,8 +335,8 @@ final class ViewController: UIViewController {
     @objc func cancelLink() {
         os_log("cancelLink()", log: OSLog.action, type: .info)
         showMainMenu()
-        ladderView.linkMarkMode = false
-        cursorView.allowTaps = true
+        setMode(.normal)
+//        cursorView.allowTaps = true
         ladderView.unhighlightAllMarks()
         ladderView.setNeedsDisplay()
     }
@@ -353,7 +362,7 @@ final class ViewController: UIViewController {
 
     private func closeCalibrationMenu() {
         showMainMenu()
-        cursorView.isCalibrating = false
+        setMode(.normal)
         setViewsNeedDisplay()
     }
 
@@ -386,7 +395,7 @@ final class ViewController: UIViewController {
 
     @objc func singleTap(tap: UITapGestureRecognizer) {
         os_log("singleTap - ViewController", log: OSLog.touches, type: .info)
-        if cursorView.isCalibrating {
+        if cursorView.mode == .calibration {
             P("is Calibrating")
             return
         }
@@ -394,9 +403,9 @@ final class ViewController: UIViewController {
         if !ladderView.hasActiveRegion() {
             ladderView.setActiveRegion(regionNum: 0)
         }
-        if cursorView.cursorIsVisible() {
+        if cursorView.cursorIsVisible {
             ladderView.unattachAttachedMark()
-            cursorView.hideCursor(true)
+            cursorView.cursorIsVisible = false
             ladderView.unhighlightAllMarks()
         }
         else {
@@ -485,7 +494,7 @@ final class ViewController: UIViewController {
         os_log("viewWillTransition", log: OSLog.viewCycle, type: .info)
         super.viewWillTransition(to: size, with: coordinator)
         // Hide cursor with rotation, to avoid redrawing it.
-        cursorView.hideCursor(true)
+        cursorView.cursorIsVisible = false
         // Remove separatorView when rotating to let original constraints resume.
         // Otherwise, views are not laid out correctly.
         if let separatorView = separatorView {
@@ -540,14 +549,17 @@ final class ViewController: UIViewController {
         let hostingController = UIHostingController(coder: coder, rootView: templateEditor)
         return hostingController
     }
-    
 
+
+    // TODO: Should check for customized ladder before selecting new ladder and give opportunity to save it?  Or just handle it like any dirty diagram?
     @IBSegueAction func showLadderSelector(_ coder: NSCoder) -> UIViewController? {
         os_log("showLadderSelector")
         navigationController?.setToolbarHidden(true, animated: true)
         // FIXME: This is setup like this just for testing.
         let ladderTemplates = FileIO.retrieve(FileIO.userTemplateFile, from: .documents, as: [LadderTemplate].self) ?? [LadderTemplate.defaultTemplate(), LadderTemplate.defaultTemplate2()]
-        let index = ladderTemplates.firstIndex(of: ladderView.ladder.template)
+        let index = ladderTemplates.firstIndex(where: { ladderTemplate in
+            ladderTemplate.name == ladderView.ladder.name
+        })
         var ladderSelector = LadderSelector(ladderTemplates: ladderTemplates, selectedIndex: index ?? 0)
         ladderSelector.delegate = self
         let hostingController = UIHostingController(coder: coder, rootView: ladderSelector)

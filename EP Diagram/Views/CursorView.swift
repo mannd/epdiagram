@@ -10,12 +10,12 @@ import UIKit
 import os.log
 
 protocol CursorViewDelegate: AnyObject {
+    var cursorIsVisible: Bool { get set }
+
     func refresh()
     func moveCursor(cursorViewPositionX positionX: CGFloat)
     func setCursorHeight(anchorPositionY: CGFloat?)
     func setCaliperMaxY(_ maxY: CGFloat)
-    func hideCursor(_ hide: Bool)
-    func cursorIsVisible() -> Bool
     func cursorMovement() -> Movement
     func isCalibrated() -> Bool
     func markMeasurement(segment: Segment) -> CGFloat
@@ -57,7 +57,7 @@ final class CursorView: ScaledView {
             cursor.maxPositionOmniCircleY = maxCursorPositionY
         }
     }
-    var isCalibrating = false
+    var mode: Mode = .normal
 
     var allowTaps = true // set false to prevent taps from making marks
     var cursorEndPointY: CGFloat = 0
@@ -114,7 +114,7 @@ final class CursorView: ScaledView {
         if imageIsLocked {
             showLockImageWarning(rect: rect)
         }
-        if isCalibrating {
+        if mode == .calibration {
             drawCaliper(rect)
             return
         }
@@ -251,7 +251,7 @@ final class CursorView: ScaledView {
     // This function passes touch events to the views below if the point is not
     // near the cursor.
     override func point(inside point: CGPoint, with event: UIEvent?) -> Bool {
-        if isCalibrating {
+        if mode == .calibration {
             return caliper.isNearCaliper(point: point, accuracy: accuracy)
         }
         guard cursor.visible else { return false }
@@ -269,7 +269,7 @@ final class CursorView: ScaledView {
         os_log("singleTap(tap:) - CursorView", log: OSLog.touches, type: .info)
         guard allowTaps else { return }
         // Single tap does nothing during calibration.
-        guard !isCalibrating else { return }
+        guard mode == .normal else { return }
         ladderViewDelegate.toggleAttachedMarkAnchor()
         ladderViewDelegate.refresh()
         setNeedsDisplay()
@@ -284,7 +284,7 @@ final class CursorView: ScaledView {
 
     @objc func dragging(pan: UIPanGestureRecognizer) {
         // Don't drag if no attached mark.
-        if isCalibrating {
+        if mode == .calibration {
             dragCaliper(pan: pan)
             return
         }
@@ -357,7 +357,7 @@ final class CursorView: ScaledView {
 
     func showCalipers() {
         os_log("showCalipers()", log: .action, type: .info)
-        isCalibrating = true
+        mode = .calibration
         let width = self.frame.width
         caliper.bar1Position = width / 3
         caliper.bar2Position = caliper.bar1Position + width / 3
@@ -384,7 +384,7 @@ final class CursorView: ScaledView {
             os_log("scale = %f", log: OSLog.debugging, type: .debug, scale)
             P(">>> scale = \(scale)")
             putCursor(imageScrollViewPosition: CGPoint(x: position.x / scale, y: position.y))
-            hideCursor(false)
+            cursorIsVisible = true
             ladderViewDelegate.addAttachedMark(scaledViewPositionX: position.x)
             setCursorHeight()
             setNeedsDisplay()
@@ -395,20 +395,17 @@ final class CursorView: ScaledView {
 // MARK: - CursorView delegate methods
 
 extension CursorView: CursorViewDelegate {
+    var cursorIsVisible: Bool {
+        get { cursor.visible }
+        set(newValue) { cursor.visible = newValue }
+    }
+
     func refresh() {
         setNeedsDisplay()
     }
 
     func moveCursor(cursorViewPositionX positionX: CGFloat) {
         cursor.positionX = positionX
-    }
-
-    func hideCursor(_ hide: Bool) {
-        cursor.visible = !hide
-    }
-
-    func cursorIsVisible() -> Bool {
-        return cursor.visible
     }
 
     func cursorMovement() -> Movement {

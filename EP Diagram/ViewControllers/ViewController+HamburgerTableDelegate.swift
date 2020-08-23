@@ -491,7 +491,7 @@ extension ViewController: HamburgerTableDelegate, UIImagePickerControllerDelegat
         self.separatorView = nil
         navigationController?.setToolbarHidden(true, animated: true)
         // Always hide cursor when opening hamburger menu.
-        cursorView.hideCursor(true)
+        cursorView.cursorIsVisible = true
         cursorView.setNeedsDisplay()
         UIView.animate(withDuration: 0.5, animations: {
             self.view.layoutIfNeeded()

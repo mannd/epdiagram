@@ -9,41 +9,47 @@
 import UIKit
 import os.log
 
+// MARK: - structs
+
 struct NearbyMarks {
     var proximal = [Mark]()
     var middle = [Mark]()
     var distal = [Mark]()
 }
 
-// A Ladder is simply a collection of Regions in top bottom order.
-class Ladder: Codable {
-    private typealias Registry = Dictionary<UUID, Int>
+// MARK: - classes
 
+// A Ladder is simply a collection of Regions in top down order.
+class Ladder: Codable {
+    // MARK: constants
+    let id = UUID()
+
+    // MARK: variables
+    private typealias Registry = Dictionary<UUID, Int>
     private var registry: Registry = [:]
 
-    var template: LadderTemplate
-    var name: String { template.name }
-    // This holds the optional description for the diagram.  It is stored here rather than in Diagram because Diagram is not Codable while Ladder is and so it is easier to serialize the description via Ladder.
+    var name: String
     var description: String = ""
-    var templateDescription: String { template.description }
     var regions = [Region]()
     var numRegions: Int { regions.count }
-    var attachedMark: Mark?
-    var pressedMark: Mark?
-    var movingMark: Mark?
-    var selectedMarks = [Mark]()
-    var linkedMarks = [Mark]()
-    // isDirty will be true if f any changes made to ladder, even if they are reverted back.
+    var attachedMark: Mark? // cursor is attached to a most 1 mark at a time
+    var pressedMark: Mark? // mark that is long-pressed
+    var movingMark: Mark? // mark that is being dragged
+    var selectedMarks = [Mark]() // mark(s) that have been selected
+    var linkedMarks = [Mark]() // marks in the process of being linked
+    // isDirty will be true if there any changes made to ladder, even if they are reverted back.
     var isDirty: Bool = false
     // marksAreVisible shows and hides all the marks.  You can toggle this for teaching purposes.
     var marksAreVisible: Bool = true
 
+    // TODO: Zones are used to select parts of regions.
     var zone: Zone?
 
-    var id = UUID()
 
+    // MARK: methods
     init(template: LadderTemplate) {
-        self.template = template
+        name = template.name
+        description = template.description
         for regionTemplate in template.regionTemplates {
             let region = Region(template: regionTemplate)
             regions.append(region)
@@ -236,4 +242,10 @@ class Ladder: Codable {
     static func defaultLadder() -> Ladder {
         return Ladder(template: LadderTemplate.defaultTemplate())
     }
+}
+
+// MARK: - extensions
+
+extension Ladder: CustomDebugStringConvertible {
+    var debugDescription: String { "Ladder ID " + id.debugDescription}
 }

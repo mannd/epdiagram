@@ -125,8 +125,7 @@ final class LadderView: ScaledView {
     private var dragCreatedMark: Mark?
     private var dragOriginDivision: RegionDivision = .none
 
-    var selectMarkMode: Bool = false
-    var linkMarkMode: Bool = false
+    var mode: Mode = .normal
 
     var leftMargin: CGFloat = 0
     internal var ladderViewHeight: CGFloat = 0
@@ -211,7 +210,7 @@ final class LadderView: ScaledView {
     func resetLadder() {
         ladder = Ladder.defaultLadder()
         activeRegion = ladder.regions[0]
-        cursorViewDelegate.hideCursor(true)
+        cursorViewDelegate.cursorIsVisible = false
         didLoad()
     }
     
@@ -221,11 +220,11 @@ final class LadderView: ScaledView {
         os_log("singleTap(tap:) - LadderView", log: OSLog.touches, type: .info)
         let position = tap.location(in: self)
         let tapLocationInLadder = getLocationInLadder(position: position)
-        if selectMarkMode {
+        if mode == .select {
             performMarkSelecting(tapLocationInLadder)
             return
         }
-        if linkMarkMode {
+        if mode == .link {
             performMarkLinking(tapLocationInLadder)
             return
         }
@@ -234,7 +233,7 @@ final class LadderView: ScaledView {
             assert(tapLocationInLadder.region != nil, "Label tapped, but region is nil!")
             if let region = tapLocationInLadder.region {
                 labelWasTapped(labelRegion: region)
-                cursorViewDelegate.hideCursor(true)
+                cursorViewDelegate.cursorIsVisible = false
                 unattachAttachedMark()
             }
         }
@@ -244,7 +243,7 @@ final class LadderView: ScaledView {
         cursorViewDelegate.refresh()
         setNeedsDisplay()
     }
-
+    
     /// Magic function that returns struct indicating in what part of ladder a point is.
     /// - Parameter position: point to be processed
     func getLocationInLadder(position: CGPoint) -> LocationInLadder {
@@ -274,7 +273,9 @@ final class LadderView: ScaledView {
                 }
             }
         }
-        return LocationInLadder(region: tappedRegion, mark: tappedMark, regionSection: tappedRegionSection, regionDivision: tappedRegionDivision, markAnchor: tappedAnchor, unscaledPosition: position)
+        let location = LocationInLadder(region: tappedRegion, mark: tappedMark, ladder: ladder, regionSection: tappedRegionSection, regionDivision: tappedRegionDivision, markAnchor: tappedAnchor, unscaledPosition: position)
+        P("location in ladder = " + location.debugDescription)
+        return location
     }
 
     private func getTappedRegionDivision(region: Region, positionY: CGFloat) -> RegionDivision {
@@ -312,9 +313,9 @@ final class LadderView: ScaledView {
             if let mark = tapLocationInLadder.mark {
                 markWasTapped(mark: mark, tapLocationInLadder: tapLocationInLadder)
             }
-            else if cursorViewDelegate.cursorIsVisible() {
+            else if cursorViewDelegate.cursorIsVisible {
                 unhighlightAllMarks()
-                cursorViewDelegate.hideCursor(true)
+                cursorViewDelegate.cursorIsVisible = false
                 unattachAttachedMark()
             }
             else { // make mark and attach cursor
@@ -326,7 +327,7 @@ final class LadderView: ScaledView {
                     attachMark(mark)
                     cursorViewDelegate.setCursorHeight()
                     cursorViewDelegate.moveCursor(cursorViewPositionX: mark.segment.proximal.x)
-                    cursorViewDelegate.hideCursor(false)
+                    cursorViewDelegate.cursorIsVisible = true
                 }
             }
         }
@@ -339,14 +340,14 @@ final class LadderView: ScaledView {
                 // TODO: Consider using RegionDivision to position Anchor.  Tapping on cursor it makes sense to just toggle the anchor, but tapping on the mark itself it might be better to position anchor near where you tap.  On other hand, it might be easy to miss the mark division zone.  Also, if not all anchors are available (say the .middle anchor is missing), which anchor do you switch to?  Maybe default to toggleAnchor() if anchor not available.
                 toggleAnchor(mark: mark)
                 adjustCursor(mark: mark, region: activeRegion)
-                cursorViewDelegate.hideCursor(false)
+                cursorViewDelegate.cursorIsVisible = true
             }
             else { // mark wasn't already attached.
                 unattachMarks()
                 attachMark(mark)
                 mark.anchor = ladder.defaultAnchor(forMark: mark)
                 adjustCursor(mark: mark, region: activeRegion)
-                cursorViewDelegate.hideCursor(false)
+                cursorViewDelegate.cursorIsVisible = true
             }
         }
     }
@@ -623,7 +624,10 @@ final class LadderView: ScaledView {
                 undoablyDeleteMark(mark: mark, region: region)
                 return true
             }
+        } else {
+            P("no mark tapped")
         }
+        
         return false
     }
 
@@ -660,7 +664,7 @@ final class LadderView: ScaledView {
         mark.attached = false
         deletedMarks.append(mark)
         ladder.deleteMark(mark, inRegion: region)
-        cursorViewDelegate.hideCursor(true)
+        cursorViewDelegate.cursorIsVisible = false
         cursorViewDelegate.refresh()
     }
 
@@ -671,7 +675,7 @@ final class LadderView: ScaledView {
             mark.attached = false
             mark.highlight = .none
         }
-        cursorViewDelegate.hideCursor(true)
+        cursorViewDelegate.cursorIsVisible = false
         cursorViewDelegate.refresh()
     }
 
@@ -710,7 +714,7 @@ final class LadderView: ScaledView {
                     }
                 }
                 else {  // We need to make a new mark.
-                    cursorViewDelegate.hideCursor(true)
+                    cursorViewDelegate.cursorIsVisible = false
                     unattachAttachedMark()
                     unhighlightAllMarks()
                     // Get the third of region for endpoint of new mark.
@@ -778,7 +782,7 @@ final class LadderView: ScaledView {
                     assessBlockAndImpulseOrigin(mark: dragCreatedMark)
                 }
             }
-            if !cursorViewDelegate.cursorIsVisible() {
+            if !cursorViewDelegate.cursorIsVisible {
                 unhighlightAllMarks()
             }
             movingMark?.attached = false
@@ -995,7 +999,7 @@ final class LadderView: ScaledView {
 //        if cursorViewDelegate.cursorDirection().movement() == .omnidirectional {
 //            ungroupMarks(mark: mark)
 //        }
-        if cursorViewDelegate.cursorIsVisible() {
+        if cursorViewDelegate.cursorIsVisible {
             undoablyMoveMark(movement: cursorViewDelegate.cursorMovement(), mark: mark, regionPosition: regionPosition)
         }
         highlightNearbyMarks(mark)
@@ -1022,6 +1026,11 @@ final class LadderView: ScaledView {
     func setPressedMarkStyle(style: Mark.LineStyle) {
         if let pressedMark = pressedMark {
             pressedMark.lineStyle = style
+            if mode == .select {
+                for mark in ladder.selectedMarks {
+                    mark.lineStyle = style
+                }
+            }
         }
     }
 
@@ -1459,7 +1468,7 @@ final class LadderView: ScaledView {
             ladder.deleteMark(pressedMark, inRegion: activeRegion)
             ladder.setHighlightForAllMarks(highlight: .none)
         }
-        cursorViewDelegate.hideCursor(true)
+        cursorViewDelegate.cursorIsVisible = false
         cursorViewDelegate.refresh()
         setNeedsDisplay()
     }
@@ -1468,7 +1477,7 @@ final class LadderView: ScaledView {
         os_log("deleteAllInRegion() - LadderView", log: OSLog.debugging, type: .debug)
         if let activeRegion = activeRegion {
             ladder.deleteMarksInRegion(activeRegion)
-            cursorViewDelegate.hideCursor(true)
+            cursorViewDelegate.cursorIsVisible = false
             cursorViewDelegate.refresh()
             setNeedsDisplay()
         }
