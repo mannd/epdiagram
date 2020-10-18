@@ -14,5 +14,5 @@ struct RegionTemplate: Codable, Equatable, Hashable {
     var unitHeight: Int = 1
     var deletionFlag: Bool = false
     var lineStyle: Mark.LineStyle = .solid
-    let id = UUID()
+    private(set) var id = UUID()
 }

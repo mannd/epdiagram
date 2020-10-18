@@ -13,9 +13,9 @@ extension RegionTemplate: Identifiable {}
 
 struct LadderEditor: View {
     @Binding var ladderTemplate: LadderTemplate
-    @State var selection: Mark.LineStyle = .solid
     @State private var editMode = EditMode.inactive
     var lineStyles = ["Solid", "Dashed", "Dotted"]
+
     @Environment(\.presentationMode) var presentationMode: Binding<PresentationMode>
 
     var body: some View {
@@ -23,10 +23,10 @@ struct LadderEditor: View {
             VStack {
                 Form {
                     Section(header: Text("Name")) {
-                        TextField(ladderTemplate.name, text: $ladderTemplate.name).padding()
+                        TextField(ladderTemplate.name, text: $ladderTemplate.name)
                     }
                     Section(header: Text("Description")) {
-                        TextField(ladderTemplate.description, text: $ladderTemplate.description).padding()
+                        TextEditor(text: $ladderTemplate.description)
                     }
                     Section(header: Text("Regions")) {
                         List {
@@ -48,25 +48,27 @@ struct LadderEditor: View {
                                             Text("\(self.ladderTemplate.regionTemplates[index].unitHeight) unit" + (self.ladderTemplate.regionTemplates[index].unitHeight > 1 ? "s" : ""))
                                         }
                                     }
-                                    // TODO: Need to get array of indices on load from ladderTemplate.regionTemplates and then pass this back to the delegate after the form is saved.
                                     Picker(selection: self.$ladderTemplate.regionTemplates[index].lineStyle, label: Text("Line style"), content: {
                                         ForEach(Mark.LineStyle.allCases) { style in
                                             Text(style.description)
                                         }
                                     })
-                                }.foregroundColor(self.ladderTemplate.regionTemplates[index].deletionFlag ? .white : .primary).listRowBackground(self.ladderTemplate.regionTemplates[index].deletionFlag ? Color.red : Color.clear).disabled(self.ladderTemplate.regionTemplates[index].deletionFlag)
+                                }.foregroundColor(self.ladderTemplate.regionTemplates[index]
+                                    .deletionFlag ? .white : .primary)
+                                    .listRowBackground(self.ladderTemplate.regionTemplates[index].deletionFlag ? Color.red : Color.clear).disabled(self.ladderTemplate.regionTemplates[index].deletionFlag)
                             }
                             .onMove(perform: onMove)
                             .onDelete(perform: onDelete)
                         }
                     }
                 }
-                Button(action: { self.onUndo() }, label: { Text("Undo") }).disabled(self.editMode == .active || !self.itemsToBeDeleted())
             }
             .navigationBarTitle(Text("Edit Ladder"), displayMode: .inline)
             .navigationBarItems(leading: EditButton(), trailing: addButton)
             .environment(\.editMode, $editMode)
+
         }
+        .navigationViewStyle(StackNavigationViewStyle())
     }
 
     private var addButton: some View {
@@ -86,20 +88,17 @@ struct LadderEditor: View {
 
     private func onDelete(offsets: IndexSet) {
         os_log("onDelete() - LadderEditor", log: OSLog.action, type: .info)
-        for item in offsets {
-            ladderTemplate.regionTemplates[item].deletionFlag = true
+        DispatchQueue.main.async {
+            ladderTemplate.regionTemplates.remove(atOffsets: offsets)
         }
+//        for item in offsets {
+//            ladderTemplate.regionTemplates[item].deletionFlag = true
+//        }
     }
 
     private func onMove(source: IndexSet, destination: Int) {
         os_log("onMove() - LadderEditor", log: OSLog.action, type: .info)
         ladderTemplate.regionTemplates.move(fromOffsets: source, toOffset: destination)
-    }
-
-    private func onUndo() {
-        for i in 0..<ladderTemplate.regionTemplates.count {
-            ladderTemplate.regionTemplates[i].deletionFlag = false
-        }
     }
 
     private func itemsToBeDeleted() -> Bool {

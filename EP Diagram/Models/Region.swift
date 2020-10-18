@@ -30,7 +30,7 @@ enum RegionDivision {
 // A Region has a labelSection such as "A" or "AV" and
 // a markSection.  Region boundaries are set by the calling ScaledView.
 class Region: Codable {
-    let id = UUID()
+    private(set) var id = UUID()
 
     var name: String
     var description: String

@@ -31,6 +31,7 @@ protocol HamburgerTableDelegate: class {
     func duplicateDiagram()
     func getDiagramInfo()
     func lockLadder()
+    func editLadder()
     func sampleDiagrams()
     func showPreferences()
     func editTemplates()
@@ -305,6 +306,11 @@ extension ViewController: HamburgerTableDelegate, UIImagePickerControllerDelegat
         Sounds.playLockSound()
     }
 
+    func editLadder() {
+        os_log("editLadder(action:)", log: OSLog.action, type: .info)
+        performEditLadderSegue()
+    }
+
     func editTemplates() {
         os_log("editTemplates()", log: OSLog.action, type: .info)
         performShowTemplateEditorSegue()
@@ -468,6 +474,7 @@ extension ViewController: HamburgerTableDelegate, UIImagePickerControllerDelegat
         imageView.image = image
         imageScrollView.zoomScale = 1.0
         imageScrollView.contentOffset = CGPoint()
+        cursorView.cursorIsVisible = false
         clearCalibration()
         setViewsNeedDisplay()
     }
@@ -491,7 +498,7 @@ extension ViewController: HamburgerTableDelegate, UIImagePickerControllerDelegat
         self.separatorView = nil
         navigationController?.setToolbarHidden(true, animated: true)
         // Always hide cursor when opening hamburger menu.
-        cursorView.cursorIsVisible = true
+        cursorView.cursorIsVisible = false
         cursorView.setNeedsDisplay()
         UIView.animate(withDuration: 0.5, animations: {
             self.view.layoutIfNeeded()

@@ -25,7 +25,8 @@ extension ViewController: ViewControllerDelegate {
 
         if let ladderTemplate = ladderTemplate {
             let ladder = Ladder(template: ladderTemplate)
-            setDiagramImage(nil)
+            // Reuse image if there is one.
+            setDiagramImage(imageView.image)
             diagram.ladder = ladder
             ladderView.ladder = ladder
             setViewsNeedDisplay()

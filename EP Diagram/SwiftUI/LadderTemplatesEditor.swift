@@ -10,14 +10,16 @@ import SwiftUI
 import os.log
 
 /*
-Must uses indices for this to work.  For onDelete, just mark the row for deletion-> gray out fields, disable navigation, Label for deletion, etc.  Have a deletion flag bit.  When View is Saved, do the actual deletion.
+ Must uses indices for this to work.  For onDelete, just mark the row for deletion-> gray out fields, disable navigation, Label for deletion, etc.  Have a deletion flag bit.  When View is Saved, do the actual deletion.
  */
 struct LadderTemplatesEditor: View {
     @State var ladderTemplates: [LadderTemplate]
     @State private var editMode = EditMode.inactive
     @State private var fileSaveError = false
     @State private var errorMessage = String()
+    var parentViewTitle: String = "Back"
     @Environment(\.presentationMode) private var presentationMode: Binding<PresentationMode>
+    @GestureState private var dragOffset = CGSize.zero
     weak var delegate: ViewControllerDelegate?
     
     var body: some View {
@@ -31,32 +33,44 @@ struct LadderTemplatesEditor: View {
                                 Text(self.ladderTemplates[index].description).foregroundColor(self.ladderTemplates[index].deletionFlag ? Color.white : Color.secondary)
                             }
                         }.listRowBackground(self.ladderTemplates[index].deletionFlag ? Color.red : Color.clear)
-                            .disabled(self.ladderTemplates[index].deletionFlag)
+                        .disabled(self.ladderTemplates[index].deletionFlag)
                     }.onMove(perform: onMove)
-                        .onDelete(perform: { indices in
-                            for index in indices.sorted().reversed() {
-                                self.ladderTemplates.remove(at: index)
-                            }
-                        })
+                    .onDelete(perform: { indices in
+                        for index in indices.sorted().reversed() {
+                            self.ladderTemplates.remove(at: index)
+                        }
+                    })
                 }
-                HStack {
-                    Button(action: {
-                        self.presentationMode.wrappedValue.dismiss()
-                    }, label: { Text("Cancel") })
-                    Spacer()
-                    Button(action: { self.onUndo() }, label: { Text("Undo") }).disabled(!self.itemsToBeDeleted())
-                    Spacer()
-                    Button(action: { self.onSave() }, label: {Text("Save")}).alert(isPresented: $fileSaveError) {
-                        Alert(title: Text("Error Saving Ladders"), message: Text("Changes to ladders could not be saved. \(errorMessage)"), dismissButton: .default(Text("OK")))
-                    }
-                }.disabled(self.editMode == .active)
+
+                Button(action: { self.onSave() }, label: {Text("Save")})
+                    .alert(isPresented: $fileSaveError) {
+                    Alert(title: Text("Error Saving Ladders"), message: Text("Changes to ladders could not be saved. \(errorMessage)"), dismissButton: .default(Text("OK")))
+                }
+                .disabled(self.editMode == .active)
             }.padding()
-                // See https://stackoverflow.com/questions/57888032/swiftui-navigation-on-ipad-how-to-show-master-list as to why this is necessary on iPad.
-            .navigationViewStyle(StackNavigationViewStyle())
-                .navigationBarTitle(Text("Ladder Editor"), displayMode: .inline)
-                .navigationBarItems(leading: EditButton(), trailing: addButton)
-                .environment(\.editMode, $editMode)
+            .navigationBarTitle(Text("Ladder Editor"), displayMode: .inline)
+            .navigationBarItems(leading: EditButton(), trailing: addButton)
+            .environment(\.editMode, $editMode)
         }
+        // FIXME: Use usual back button or Cancel button?
+        // Force full screen for this view even on iPad
+        .navigationViewStyle(StackNavigationViewStyle())
+        // custom back button, but font wrong.
+        // Extension to UINavigationController preserves swipe back behavior.
+//        .navigationBarBackButtonHidden(true)
+//        .navigationBarItems(leading: Button(action: {
+//            onDismiss()
+//            self.presentationMode.wrappedValue.dismiss()
+//        }) {
+//            HStack {
+//                Image(systemName: "chevron.left")
+//                Text("Cancel")
+//            }
+//        })
+    }
+
+    private func onDismiss() {
+        os_log("onDismiss() - LadderTemplateEditor", log: .action, type: .info)
     }
 
     private var addButton: some View {
@@ -87,7 +101,6 @@ struct LadderTemplatesEditor: View {
         ladderTemplates.move(fromOffsets: source, toOffset: destination)
     }
 
-    // FIXME: bug, this methods writes a Documents file to the user directory and kills the Documents dir.
     private func onSave() {
         os_log("onSave() - LadderTemplatesEditor", log: OSLog.action, type: .info)
         // Filter out deleted ladder templates and region templates.
@@ -97,12 +110,6 @@ struct LadderTemplatesEditor: View {
         }
         delegate?.saveTemplates(ladderTemplates)
         self.presentationMode.wrappedValue.dismiss()
-    }
-
-    private func onUndo() {
-        for i in 0..<ladderTemplates.count {
-            ladderTemplates[i].deletionFlag = false
-        }
     }
 
     // TODO: don't delete all regions or templates

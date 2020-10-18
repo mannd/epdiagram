@@ -13,7 +13,7 @@ struct LadderTemplate: Codable, Equatable {
     var description: String = ""
     var regionTemplates = [RegionTemplate]()
     var deletionFlag = false
-    let id = UUID()
+    private(set) var id = UUID()
 
     // Returns a basic ladder (A, AV, V).
     static func defaultTemplate() -> LadderTemplate {

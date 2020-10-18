@@ -75,7 +75,8 @@ final class ViewController: UIViewController {
         cursorView.calibration = calibration
         ladderView.calibration = calibration
 
-        // FIXME: Not clear if code below is needed here or in EP Calipers.  App opens external PDF files without it.
+        // TODO: Put log statement in openURL() and see if it is called twice when launching from URL.
+        // FIXME: Not clear if code below is needed here or in EP Calipers.  App opens external PDF files without it.  It looks like this is called after scaling/centering the view in EP Calipers.
         //            if launchFromURL {
         //                launchFromURL = false
         //                if let launchURL = launchURL {
@@ -190,7 +191,7 @@ final class ViewController: UIViewController {
             let selectTitle = L("Select", comment: "select button label title")
             let linkTitle = L("Link", comment: "link button label title")
             let calibrateButton = UIBarButtonItem(title: calibrateTitle, style: UIBarButtonItem.Style.plain, target: self, action: #selector(calibrate))
-            selectButton = UIBarButtonItem(title: selectTitle, style: .plain, target: self, action: #selector(showSelectAlert))
+            selectButton = UIBarButtonItem(title: selectTitle, style: .plain, target: self, action: #selector(showSelectMarksMenu))
             let linkButton = UIBarButtonItem(title: linkTitle, style: .plain, target: self, action: #selector(linkMarks))
             undoButton = UIBarButtonItem(barButtonSystemItem: .undo, target: self, action: #selector(undo))
             redoButton = UIBarButtonItem(barButtonSystemItem: .redo, target: self, action: #selector(redo))
@@ -201,7 +202,7 @@ final class ViewController: UIViewController {
         navigationController?.setToolbarHidden(false, animated: false)
     }
 
-    private func showSelectMarksMenu(_: UIAlertAction) {
+    @objc func showSelectMarksMenu(_: UIAlertAction) {
         if selectMenuButtons == nil {
             let prompt = makePrompt(text: L("Tap marks to select"))
             let cancelTitle = L("Done")
@@ -248,26 +249,6 @@ final class ViewController: UIViewController {
         prompt.text = text
         return UIBarButtonItem(customView: prompt)
     }
-
-//    @objc func editDiagram() {
-//        os_log("editDiagram()", log: OSLog.action, type: .info)
-//        let alert = UIAlertController(title: L("Edit Diagram"), message: L("Create new diagram or edit this one"), preferredStyle: .actionSheet)
-//        let newAction = UIAlertAction(title: L("Create new diagram"), style: .default, handler: nil)
-//        let duplicateAction = UIAlertAction(title: L("Duplicate this diagram"), style: .default, handler: nil)
-//        let editAction = UIAlertAction(title: L("Edit this diagram"), style: .default, handler: editLadder)
-//        let cancelAction = UIAlertAction(title: L("Cancel"), style: .cancel, handler: nil)
-//        alert.addAction(newAction)
-//        alert.addAction(duplicateAction)
-//        alert.addAction(editAction)
-//        alert.addAction(cancelAction)
-//        present(alert, animated: true, completion: nil)
-//    }
-
-    @objc func editLadder(action: UIAlertAction) {
-        os_log("editLadder(action:)", log: OSLog.action, type: .info)
-        performEditLadderSegue()
-    }
-
 
     @available(*, deprecated, message: "This doesn't seem to do anything.")
     private func centerImage() {
@@ -543,8 +524,9 @@ final class ViewController: UIViewController {
 
     @IBSegueAction func showTemplateEditor(_ coder: NSCoder) -> UIViewController? {
         navigationController?.setToolbarHidden(true, animated: true)
+        // FIXME: Decide how to hande default ladder templates.  Below hard codes 2 defaults if there are no saved defaults.
         let ladderTemplates = FileIO.retrieve(FileIO.userTemplateFile, from: .documents, as: [LadderTemplate].self) ?? [LadderTemplate.defaultTemplate(), LadderTemplate.defaultTemplate2()]
-        var templateEditor = LadderTemplatesEditor(ladderTemplates: ladderTemplates)
+        var templateEditor = LadderTemplatesEditor(ladderTemplates: ladderTemplates, parentViewTitle: getTitle())
         templateEditor.delegate = self
         let hostingController = UIHostingController(coder: coder, rootView: templateEditor)
         return hostingController

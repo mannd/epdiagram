@@ -22,7 +22,7 @@ struct NearbyMarks {
 // A Ladder is simply a collection of Regions in top down order.
 class Ladder: Codable {
     // MARK: constants
-    let id = UUID()
+    private(set) var id = UUID()
 
     // MARK: variables
     private typealias Registry = Dictionary<UUID, Int>
