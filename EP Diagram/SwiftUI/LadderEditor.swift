@@ -20,53 +20,20 @@ struct LadderEditor: View {
 
     var body: some View {
         NavigationView {
-            VStack {
-                Form {
-                    Section(header: Text("Name")) {
-                        TextField(ladderTemplate.name, text: $ladderTemplate.name)
-                    }
-                    Section(header: Text("Description")) {
-                        TextEditor(text: $ladderTemplate.description)
-                    }
-                    Section(header: Text("Regions")) {
-                        List {
-                            ForEach(ladderTemplate.regionTemplates.indices, id: \.self) {
-                                index in
-                                VStack(alignment: .leading) {
-                                    HStack {
-                                        Text("Name:").bold()
-                                        TextField("Name", text: self.$ladderTemplate.regionTemplates[index].name)
-                                    }.foregroundColor(self.ladderTemplate.regionTemplates[index].deletionFlag ? .white : .primary)
-                                    HStack {
-                                        Text("Description:").bold()
-                                        TextField("Description", text: self.$ladderTemplate.regionTemplates[index].description)
-                                    }
-                                    .foregroundColor(self.ladderTemplate.regionTemplates[index].deletionFlag ? .white : .primary)
-                                    Stepper(value: self.$ladderTemplate.regionTemplates[index].unitHeight, in: 1...4, step: 1) {
-                                        HStack {
-                                            Text("Height:").bold()
-                                            Text("\(self.ladderTemplate.regionTemplates[index].unitHeight) unit" + (self.ladderTemplate.regionTemplates[index].unitHeight > 1 ? "s" : ""))
-                                        }
-                                    }
-                                    Picker(selection: self.$ladderTemplate.regionTemplates[index].lineStyle, label: Text("Line style"), content: {
-                                        ForEach(Mark.LineStyle.allCases) { style in
-                                            Text(style.description)
-                                        }
-                                    })
-                                }.foregroundColor(self.ladderTemplate.regionTemplates[index]
-                                    .deletionFlag ? .white : .primary)
-                                    .listRowBackground(self.ladderTemplate.regionTemplates[index].deletionFlag ? Color.red : Color.clear).disabled(self.ladderTemplate.regionTemplates[index].deletionFlag)
-                            }
-                            .onMove(perform: onMove)
-                            .onDelete(perform: onDelete)
-                        }
-                    }
+            Form {
+                Section(header: Text("Name")) {
+                    TextField(ladderTemplate.name, text: $ladderTemplate.name)
+                }
+                Section(header: Text("Description")) {
+                    TextEditor(text: $ladderTemplate.description)
+                }
+                Section(header: Text("Regions")) {
+                    RegionListView(ladderTemplate: $ladderTemplate)
                 }
             }
             .navigationBarTitle(Text("Edit Ladder"), displayMode: .inline)
             .navigationBarItems(leading: EditButton(), trailing: addButton)
             .environment(\.editMode, $editMode)
-
         }
         .navigationViewStyle(StackNavigationViewStyle())
     }
@@ -86,21 +53,6 @@ struct LadderEditor: View {
         ladderTemplate.regionTemplates.append(newRegionTemplate)
     }
 
-    private func onDelete(offsets: IndexSet) {
-        os_log("onDelete() - LadderEditor", log: OSLog.action, type: .info)
-        DispatchQueue.main.async {
-            ladderTemplate.regionTemplates.remove(atOffsets: offsets)
-        }
-//        for item in offsets {
-//            ladderTemplate.regionTemplates[item].deletionFlag = true
-//        }
-    }
-
-    private func onMove(source: IndexSet, destination: Int) {
-        os_log("onMove() - LadderEditor", log: OSLog.action, type: .info)
-        ladderTemplate.regionTemplates.move(fromOffsets: source, toOffset: destination)
-    }
-
     private func itemsToBeDeleted() -> Bool {
         var flag = false
         for i in 0..<ladderTemplate.regionTemplates.count {
@@ -112,10 +64,62 @@ struct LadderEditor: View {
     }
 }
 
-#if DEBUG
-struct LadderEditor_Previews: PreviewProvider {
-    static var previews: some View {
-        LadderEditor(ladderTemplate: .constant(LadderTemplate.defaultTemplate()))
+
+
+struct RegionListView: View {
+    @Binding var ladderTemplate: LadderTemplate
+
+    var body: some View {
+        List {
+            ForEach(ladderTemplate.regionTemplates.indices, id: \.self) {
+                index in
+                VStack(alignment: .leading) {
+                    HStack {
+                        Text("Name:").bold()
+                        TextField("Name", text: self.$ladderTemplate.regionTemplates[index].name)
+                    }.foregroundColor(self.ladderTemplate.regionTemplates[index].deletionFlag ? .white : .primary)
+                    HStack {
+                        Text("Description:").bold()
+                        TextField("Description", text: self.$ladderTemplate.regionTemplates[index].description)
+                    }
+                    .foregroundColor(self.ladderTemplate.regionTemplates[index].deletionFlag ? .white : .primary)
+                    Stepper(value: self.$ladderTemplate.regionTemplates[index].unitHeight, in: 1...4, step: 1) {
+                        HStack {
+                            Text("Height:").bold()
+                            Text("\(self.ladderTemplate.regionTemplates[index].unitHeight) unit" + (self.ladderTemplate.regionTemplates[index].unitHeight > 1 ? "s" : ""))
+                        }
+                    }
+                    Picker(selection: self.$ladderTemplate.regionTemplates[index].lineStyle, label: Text("Line style"), content: {
+                        ForEach(Mark.LineStyle.allCases) { style in
+                            Text(style.description)
+                        }
+                    })
+                }.foregroundColor(self.ladderTemplate.regionTemplates[index]
+                                    .deletionFlag ? .white : .primary)
+                .listRowBackground(self.ladderTemplate.regionTemplates[index].deletionFlag ? Color.red : Color.clear).disabled(self.ladderTemplate.regionTemplates[index].deletionFlag)
+            }
+            .onMove(perform: onMove)
+            .onDelete(perform: onDelete)
+        }
     }
+
+    private func onDelete(offsets: IndexSet) {
+        os_log("onDelete() - LadderEditor", log: OSLog.action, type: .info)
+        for item in offsets {
+            ladderTemplate.regionTemplates[item].deletionFlag = true
+        }
+    }
+
+    private func onMove(source: IndexSet, destination: Int) {
+        os_log("onMove() - LadderEditor", log: OSLog.action, type: .info)
+        ladderTemplate.regionTemplates.move(fromOffsets: source, toOffset: destination)
+    }
+
+    #if DEBUG
+    struct LadderEditor_Previews: PreviewProvider {
+        static var previews: some View {
+            LadderEditor(ladderTemplate: .constant(LadderTemplate.defaultTemplate()))
+        }
+    }
+    #endif
 }
-#endif
