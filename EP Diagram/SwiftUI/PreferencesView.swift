@@ -9,8 +9,10 @@
 import SwiftUI
 
 struct PreferencesView: View {
-    @State var preferences: Preferences
-    weak var delegate: ViewControllerDelegate?
+    @State private var lineWidth = UserDefaults.standard.integer(forKey: Preferences.defaultLineWidthKey)
+    @State private var showImpulseOrigin = UserDefaults.standard.bool(forKey: Preferences.defaultShowImpulseOriginKey)
+    @State private var showBlock = UserDefaults.standard.bool(forKey: Preferences.defaultShowBlockKey)
+    @State private var showIntervals = UserDefaults.standard.bool(forKey: Preferences.defaultShowIntervalsKey)
     @Environment(\.presentationMode) private var presentationMode: Binding<PresentationMode>
 
 
@@ -19,36 +21,40 @@ struct PreferencesView: View {
             VStack{
                 Form {
                     Section(header: Text("Mark preferences")) {
-                        Stepper(L("Mark line width = \(preferences.lineWidth)"), value: $preferences.lineWidth, in: 1...6, step: 1)
-                        Toggle(isOn: $preferences.showImpulseOrigin) {
+                        Stepper(L("Mark line width = \(lineWidth)"), value: $lineWidth, in: 1...6, step: 1)
+                        Toggle(isOn: $showImpulseOrigin) {
                             Text("Show impulse origin")
                         }
-                        Toggle(isOn: $preferences.showBlock) {
+                        Toggle(isOn: $showBlock) {
                             Text("Show block")
                         }
-                        Toggle(isOn: $preferences.showIntervals) {
+                        Toggle(isOn: $showIntervals) {
                             Text("Show intervals")
                         }
                     }
                 }
                 Button(action: { self.onSave() }, label: { Text("Save Changes") })
+                    .padding()
+                    .foregroundColor(.red)
             }
-            .padding()
             .navigationBarTitle("Preferences", displayMode: .inline)
         }
+        .navigationViewStyle(StackNavigationViewStyle())
     }
 
     func onSave() {
-        delegate?.savePreferences(preferences)
+        UserDefaults.standard.setValue(lineWidth, forKey: Preferences.defaultLineWidthKey)
+        UserDefaults.standard.setValue(showImpulseOrigin, forKey: Preferences.defaultShowImpulseOriginKey)
+        UserDefaults.standard.setValue(showBlock, forKey: Preferences.defaultShowBlockKey)
+        UserDefaults.standard.setValue(showIntervals, forKey: Preferences.defaultShowIntervalsKey)
         self.presentationMode.wrappedValue.dismiss()
     }
 }
 
 #if DEBUG
 struct PreferencesView_Previews: PreviewProvider {
-    static let preferences = Preferences()
     static var previews: some View {
-        PreferencesView(preferences: preferences)
+        PreferencesView()
     }
 }
 #endif

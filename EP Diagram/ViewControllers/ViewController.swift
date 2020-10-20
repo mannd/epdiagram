@@ -559,8 +559,7 @@ final class ViewController: UIViewController {
 
     @IBSegueAction func showPreferences(_ coder: NSCoder) -> UIViewController? {
         preferences.retrieve()
-        var preferencesView = PreferencesView(preferences: preferences)
-        preferencesView.delegate = self
+        let preferencesView = PreferencesView()
         let hostingController = UIHostingController(coder: coder, rootView: preferencesView)
         return hostingController
     }
