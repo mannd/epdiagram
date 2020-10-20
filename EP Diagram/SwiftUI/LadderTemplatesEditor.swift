@@ -9,9 +9,6 @@
 import SwiftUI
 import os.log
 
-/*
- Must uses indices for this to work.  For onDelete, just mark the row for deletion-> gray out fields, disable navigation, Label for deletion, etc.  Have a deletion flag bit.  When View is Saved, do the actual deletion.
- */
 struct LadderTemplatesEditor: View {
     @State var ladderTemplates: [LadderTemplate]
     @State private var editMode = EditMode.inactive
@@ -26,35 +23,36 @@ struct LadderTemplatesEditor: View {
         NavigationView {
             VStack {
                 List() {
-                    ForEach(ladderTemplates.indices, id: \.self) { index in
-                        NavigationLink(destination: LadderEditor(ladderTemplate: self.$ladderTemplates[index])) {
+                    ForEach(ladderTemplates) { ladderTemplate in
+                        NavigationLink(destination: LadderEditor(ladderTemplate: self.selectedLadderTemplate(id: ladderTemplate.id))) {
                             VStack(alignment: .leading) {
-                                Text(self.ladderTemplates[index].name).foregroundColor(self.ladderTemplates[index].deletionFlag ? Color.white : Color.primary)
-                                Text(self.ladderTemplates[index].description).foregroundColor(self.ladderTemplates[index].deletionFlag ? Color.white : Color.secondary)
+                                Text(ladderTemplate.name)
+                                Text(ladderTemplate.description)
                             }
-                        }.listRowBackground(self.ladderTemplates[index].deletionFlag ? Color.red : Color.clear)
-                        .disabled(self.ladderTemplates[index].deletionFlag)
-                    }.onMove(perform: onMove)
-                    .onDelete(perform: { indices in
-                        for index in indices.sorted().reversed() {
-                            self.ladderTemplates.remove(at: index)
                         }
-                    })
-                }
 
-                Button(action: { self.onSave() }, label: {Text("Save")})
+                    }
+                    .onDelete { indexSet in
+                        self.ladderTemplates.remove(atOffsets: indexSet)
+                    }
+                    .onMove { indices, newOffset in
+                        self.ladderTemplates.move(fromOffsets: indices, toOffset: newOffset)
+                    }
+                }
+                Button(action: { self.onSave() }, label: {Text("Save Changes")})
                     .alert(isPresented: $fileSaveError) {
                     Alert(title: Text("Error Saving Ladders"), message: Text("Changes to ladders could not be saved. \(errorMessage)"), dismissButton: .default(Text("OK")))
-                }
+                    }.foregroundColor(.red)
                 .disabled(self.editMode == .active)
             }.padding()
             .navigationBarTitle(Text("Ladder Editor"), displayMode: .inline)
             .navigationBarItems(leading: EditButton(), trailing: addButton)
             .environment(\.editMode, $editMode)
         }
-        // FIXME: Use usual back button or Cancel button?
         // Force full screen for this view even on iPad
         .navigationViewStyle(StackNavigationViewStyle())
+
+        // FIXME: Use usual back button or Cancel button?
         // custom back button, but font wrong.
         // Extension to UINavigationController preserves swipe back behavior.
 //        .navigationBarBackButtonHidden(true)
@@ -69,8 +67,12 @@ struct LadderTemplatesEditor: View {
 //        })
     }
 
-    private func onDismiss() {
-        os_log("onDismiss() - LadderTemplateEditor", log: .action, type: .info)
+    // We create a binding for each template, otherwise delete does not work.  See https://troz.net/post/2019/swiftui-data-flow/ where this is the least ugly of several ugly work arounds.
+    private func selectedLadderTemplate(id: UUID) -> Binding<LadderTemplate> {
+        guard let index = self.ladderTemplates.firstIndex(where: { $0.id == id }) else {
+            fatalError("Ladder template doesn't exist.")
+        }
+        return self.$ladderTemplates[index]
     }
 
     private var addButton: some View {
@@ -89,38 +91,12 @@ struct LadderTemplatesEditor: View {
         ladderTemplates.append(newLadderTemplate)
     }
 
-    private func onDelete(offsets: IndexSet) {
-        os_log("onDelete() - LadderTemplatesEditor", log: OSLog.action, type: .info)
-        for item in offsets {
-            ladderTemplates[item].deletionFlag = true
-        }
-    }
-
-    private func onMove(source: IndexSet, destination: Int) {
-        os_log("onMove() - LadderTemplatesEditor", log: OSLog.action, type: .info)
-        ladderTemplates.move(fromOffsets: source, toOffset: destination)
-    }
-
+    // FIXME: Catch errors and set $fileSaveError to activate alert.
+    // Errors should include deleting last template and templates with no regionTemplates.
     private func onSave() {
         os_log("onSave() - LadderTemplatesEditor", log: OSLog.action, type: .info)
-        // Filter out deleted ladder templates and region templates.
-        var filteredTemplates = ladderTemplates.filter { $0.deletionFlag == false }
-        for i in 0..<filteredTemplates.count {
-            filteredTemplates[i].regionTemplates = filteredTemplates[i].regionTemplates.filter { $0.deletionFlag == false }
-        }
         delegate?.saveTemplates(ladderTemplates)
         self.presentationMode.wrappedValue.dismiss()
-    }
-
-    // TODO: don't delete all regions or templates
-    private func itemsToBeDeleted() -> Bool {
-        var flag = false
-        for i in 0..<ladderTemplates.count {
-            if ladderTemplates[i].deletionFlag == true {
-                flag = true
-            }
-        }
-        return flag
     }
 }
 

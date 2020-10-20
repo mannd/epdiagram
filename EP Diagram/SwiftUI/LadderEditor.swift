@@ -14,8 +14,6 @@ extension RegionTemplate: Identifiable {}
 struct LadderEditor: View {
     @Binding var ladderTemplate: LadderTemplate
     @State private var editMode = EditMode.inactive
-    var lineStyles = ["Solid", "Dashed", "Dotted"]
-
     @Environment(\.presentationMode) var presentationMode: Binding<PresentationMode>
 
     var body: some View {
@@ -52,67 +50,52 @@ struct LadderEditor: View {
         let newRegionTemplate = RegionTemplate(name: "XX", description: "New region", unitHeight: 1)
         ladderTemplate.regionTemplates.append(newRegionTemplate)
     }
-
-    private func itemsToBeDeleted() -> Bool {
-        var flag = false
-        for i in 0..<ladderTemplate.regionTemplates.count {
-            if ladderTemplate.regionTemplates[i].deletionFlag == true {
-                flag = true
-            }
-        }
-        return flag
-    }
 }
-
-
 
 struct RegionListView: View {
     @Binding var ladderTemplate: LadderTemplate
 
     var body: some View {
         List {
-            ForEach(ladderTemplate.regionTemplates.indices, id: \.self) {
-                index in
+            ForEach(ladderTemplate.regionTemplates) {
+                regionTemplate in
                 VStack(alignment: .leading) {
                     HStack {
                         Text("Name:").bold()
-                        TextField("Name", text: self.$ladderTemplate.regionTemplates[index].name)
-                    }.foregroundColor(self.ladderTemplate.regionTemplates[index].deletionFlag ? .white : .primary)
+                        TextField("Name", text: selectedRegionTemplate(id: regionTemplate.id).name)
+                    }
                     HStack {
                         Text("Description:").bold()
-                        TextField("Description", text: self.$ladderTemplate.regionTemplates[index].description)
+                        TextField("Description", text: self.selectedRegionTemplate(id: regionTemplate.id).description)
                     }
-                    .foregroundColor(self.ladderTemplate.regionTemplates[index].deletionFlag ? .white : .primary)
-                    Stepper(value: self.$ladderTemplate.regionTemplates[index].unitHeight, in: 1...4, step: 1) {
+                    Stepper(value: self.selectedRegionTemplate(id: regionTemplate.id).unitHeight, in: 1...4, step: 1) {
                         HStack {
                             Text("Height:").bold()
-                            Text("\(self.ladderTemplate.regionTemplates[index].unitHeight) unit" + (self.ladderTemplate.regionTemplates[index].unitHeight > 1 ? "s" : ""))
+                            Text("\(regionTemplate.unitHeight) unit" + (regionTemplate.unitHeight > 1 ? "s" : ""))
                         }
                     }
-                    Picker(selection: self.$ladderTemplate.regionTemplates[index].lineStyle, label: Text("Line style"), content: {
+
+                    Picker(selection: self.selectedRegionTemplate(id: regionTemplate.id).lineStyle, label: Text("Line style"), content: {
                         ForEach(Mark.LineStyle.allCases) { style in
                             Text(style.description)
                         }
                     })
-                }.foregroundColor(self.ladderTemplate.regionTemplates[index]
-                                    .deletionFlag ? .white : .primary)
-                .listRowBackground(self.ladderTemplate.regionTemplates[index].deletionFlag ? Color.red : Color.clear).disabled(self.ladderTemplate.regionTemplates[index].deletionFlag)
+                }
             }
-            .onMove(perform: onMove)
-            .onDelete(perform: onDelete)
+            .onDelete { indexSet in
+                self.ladderTemplate.regionTemplates.remove(atOffsets: indexSet)
+            }
+            .onMove { indices, newOffset in
+                self.ladderTemplate.regionTemplates.move(fromOffsets: indices, toOffset: newOffset)
+            }
         }
     }
 
-    private func onDelete(offsets: IndexSet) {
-        os_log("onDelete() - LadderEditor", log: OSLog.action, type: .info)
-        for item in offsets {
-            ladderTemplate.regionTemplates[item].deletionFlag = true
+    private func selectedRegionTemplate(id: UUID) -> Binding<RegionTemplate> {
+        guard let index = self.ladderTemplate.regionTemplates.firstIndex(where: { $0.id == id }) else {
+            fatalError("Region template doesn't exist.")
         }
-    }
-
-    private func onMove(source: IndexSet, destination: Int) {
-        os_log("onMove() - LadderEditor", log: OSLog.action, type: .info)
-        ladderTemplate.regionTemplates.move(fromOffsets: source, toOffset: destination)
+        return self.$ladderTemplate.regionTemplates[index]
     }
 
     #if DEBUG
