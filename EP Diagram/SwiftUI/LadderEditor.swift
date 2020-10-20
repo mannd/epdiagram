@@ -50,16 +50,6 @@ struct LadderEditor: View {
         let newRegionTemplate = RegionTemplate(name: "XX", description: "New region", unitHeight: 1)
         ladderTemplate.regionTemplates.append(newRegionTemplate)
     }
-
-//    private func itemsToBeDeleted() -> Bool {
-//        var flag = false
-//        for i in 0..<ladderTemplate.regionTemplates.count {
-//            if ladderTemplate.regionTemplates[i].deletionFlag == true {
-//                flag = true
-//            }
-//        }
-//        return flag
-//    }
 }
 
 struct RegionListView: View {
@@ -100,7 +90,6 @@ struct RegionListView: View {
             }
         }
     }
-
 
     private func selectedRegionTemplate(id: UUID) -> Binding<RegionTemplate> {
         guard let index = self.ladderTemplate.regionTemplates.firstIndex(where: { $0.id == id }) else {
