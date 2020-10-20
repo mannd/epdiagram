@@ -103,11 +103,6 @@ struct LadderTemplatesEditor: View {
 
     private func onSave() {
         os_log("onSave() - LadderTemplatesEditor", log: OSLog.action, type: .info)
-        // Filter out deleted ladder templates and region templates.
-        var filteredTemplates = ladderTemplates.filter { $0.deletionFlag == false }
-        for i in 0..<filteredTemplates.count {
-            filteredTemplates[i].regionTemplates = filteredTemplates[i].regionTemplates.filter { $0.deletionFlag == false }
-        }
         delegate?.saveTemplates(ladderTemplates)
         self.presentationMode.wrappedValue.dismiss()
     }
