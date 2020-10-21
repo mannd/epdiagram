@@ -68,4 +68,16 @@ class DiagramIO {
             os_log("deleteEPDiagramDir() error %s", log: .errors, type: .error, error.localizedDescription)
         }
     }
+
+    static func deleteLadderTemplates() {
+        do {
+            if let url = FileIO.getURL(for: .documents) {
+                let templateFileURL = url.appendingPathComponent(FileIO.userTemplateFile)
+                try FileManager.default.removeItem(at: templateFileURL)
+            }
+        } catch {
+            os_log("deleteLadderTemplates() error %s", log: .errors, type: .error, error.localizedDescription)
+        }
+    }
+
 }

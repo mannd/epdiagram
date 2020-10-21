@@ -45,6 +45,7 @@
 		8E7214E022EB57FC0062C094 /* MarkTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8E7214DF22EB57FC0062C094 /* MarkTests.swift */; };
 		8E74D58E244FBE2500641E0A /* LadderView+UIContextMenuInteractionDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8E74D58D244FBE2500641E0A /* LadderView+UIContextMenuInteractionDelegate.swift */; };
 		8E74D590244FD55E00641E0A /* Logging.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8E74D58F244FD55E00641E0A /* Logging.swift */; };
+		8E77BDA4253F5AA600FD51E5 /* RegionEditor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8E77BDA3253F5AA600FD51E5 /* RegionEditor.swift */; };
 		8E7CCC29248C1A9C00018D2C /* DiagramSelector.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8E7CCC28248C1A9C00018D2C /* DiagramSelector.swift */; };
 		8E7CCC2B248C30A300018D2C /* Preferences.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8E7CCC2A248C30A300018D2C /* Preferences.swift */; };
 		8E7D24C322779DBD005A1729 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8E7D24C222779DBD005A1729 /* AppDelegate.swift */; };
@@ -137,6 +138,7 @@
 		8E7214DF22EB57FC0062C094 /* MarkTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MarkTests.swift; sourceTree = "<group>"; };
 		8E74D58D244FBE2500641E0A /* LadderView+UIContextMenuInteractionDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "LadderView+UIContextMenuInteractionDelegate.swift"; sourceTree = "<group>"; };
 		8E74D58F244FD55E00641E0A /* Logging.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Logging.swift; sourceTree = "<group>"; };
+		8E77BDA3253F5AA600FD51E5 /* RegionEditor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RegionEditor.swift; sourceTree = "<group>"; };
 		8E7CCC28248C1A9C00018D2C /* DiagramSelector.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DiagramSelector.swift; sourceTree = "<group>"; };
 		8E7CCC2A248C30A300018D2C /* Preferences.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Preferences.swift; sourceTree = "<group>"; };
 		8E7D24BF22779DBD005A1729 /* EP Diagram.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "EP Diagram.app"; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -396,6 +398,7 @@
 				8E671D5124814BB700784EB7 /* LadderTemplatesEditor.swift */,
 				8E2BA1CF24A3BDD7002D997F /* PreferencesView.swift */,
 				8EADC2A824D64E1200C5D3D8 /* SampleSelector.swift */,
+				8E77BDA3253F5AA600FD51E5 /* RegionEditor.swift */,
 			);
 			path = SwiftUI;
 			sourceTree = "<group>";
@@ -580,6 +583,7 @@
 				8E2439F624B14F770044AEAB /* Interval.swift in Sources */,
 				8ECA9FB72470A1020016D939 /* LadderTemplate.swift in Sources */,
 				8E01D9C722849047000F36FC /* CursorView.swift in Sources */,
+				8E77BDA4253F5AA600FD51E5 /* RegionEditor.swift in Sources */,
 				8EA444C02476E471005B5452 /* LadderSelector.swift in Sources */,
 				8E5918BC24AEAB0B00D8ABA3 /* Caliper.swift in Sources */,
 				8EBC824124E5E04800B5CA29 /* UIImage+emptyImage.swift in Sources */,

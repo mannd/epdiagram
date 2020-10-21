@@ -59,28 +59,32 @@ struct RegionListView: View {
         List {
             ForEach(ladderTemplate.regionTemplates) {
                 regionTemplate in
-                VStack(alignment: .leading) {
-                    HStack {
-                        Text("Name:").bold()
-                        TextField("Name", text: selectedRegionTemplate(id: regionTemplate.id).name)
-                    }
-                    HStack {
-                        Text("Description:").bold()
-                        TextField("Description", text: self.selectedRegionTemplate(id: regionTemplate.id).description)
-                    }
-                    Stepper(value: self.selectedRegionTemplate(id: regionTemplate.id).unitHeight, in: 1...4, step: 1) {
-                        HStack {
-                            Text("Height:").bold()
-                            Text("\(regionTemplate.unitHeight) unit" + (regionTemplate.unitHeight > 1 ? "s" : ""))
-                        }
-                    }
 
-                    Picker(selection: self.selectedRegionTemplate(id: regionTemplate.id).lineStyle, label: Text("Line style"), content: {
-                        ForEach(Mark.LineStyle.allCases) { style in
-                            Text(style.description)
-                        }
-                    })
+                NavigationLink(
+                    destination: RegionEditor(regionTemplate: self.selectedRegionTemplate(id: regionTemplate.id))) {
+                    VStack(alignment: .leading) {
+                        Text(regionTemplate.name).bold()
+                        Text(regionTemplate.description)
+                        Text("Height: \(regionTemplate.unitHeight)")
+                        Text("Line style: \(regionTemplate.lineStyle.description)")
+                        //                    Stepper(value: self.selectedRegionTemplate(id: regionTemplate.id).unitHeight, in: 1...4, step: 1) {
+                        //                        HStack {
+                        //                            Text("Height:").bold()
+//                            Text("\(regionTemplate.unitHeight) unit" + (regionTemplate.unitHeight > 1 ? "s" : ""))
+//                        }
+//                    }
+
+//                    Picker(selection: self.selectedRegionTemplate(id: regionTemplate.id).lineStyle, label: Text("Line style"), content: {
+//                        ForEach(Mark.LineStyle.allCases) { style in
+//                            Text(style.description)
+//                        }
+//                    })
                 }
+}
+
+
+
+
             }
             .onDelete { indexSet in
                 self.ladderTemplate.regionTemplates.remove(atOffsets: indexSet)
@@ -95,6 +99,7 @@ struct RegionListView: View {
         guard let index = self.ladderTemplate.regionTemplates.firstIndex(where: { $0.id == id }) else {
             fatalError("Region template doesn't exist.")
         }
+        print(index)
         return self.$ladderTemplate.regionTemplates[index]
     }
 

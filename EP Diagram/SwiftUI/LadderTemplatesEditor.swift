@@ -45,26 +45,12 @@ struct LadderTemplatesEditor: View {
                     }.foregroundColor(.red)
                 .disabled(self.editMode == .active)
             }.padding()
-            .navigationBarTitle(Text("Ladder Editor"), displayMode: .inline)
+            .navigationBarTitle(Text("Ladders"), displayMode: .inline)
             .navigationBarItems(leading: EditButton(), trailing: addButton)
             .environment(\.editMode, $editMode)
         }
         // Force full screen for this view even on iPad
         .navigationViewStyle(StackNavigationViewStyle())
-
-        // FIXME: Use usual back button or Cancel button?
-        // custom back button, but font wrong.
-        // Extension to UINavigationController preserves swipe back behavior.
-//        .navigationBarBackButtonHidden(true)
-//        .navigationBarItems(leading: Button(action: {
-//            onDismiss()
-//            self.presentationMode.wrappedValue.dismiss()
-//        }) {
-//            HStack {
-//                Image(systemName: "chevron.left")
-//                Text("Cancel")
-//            }
-//        })
     }
 
     // We create a binding for each template, otherwise delete does not work.  See https://troz.net/post/2019/swiftui-data-flow/ where this is the least ugly of several ugly work arounds.

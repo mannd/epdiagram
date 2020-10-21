@@ -342,7 +342,8 @@ extension ViewController: HamburgerTableDelegate, UIImagePickerControllerDelegat
     func test() {
         os_log("test()", log: .debugging, type: .debug)
         // delete all old diagrams
-        DiagramIO.deleteEPDiagramDir()
+        //DiagramIO.deleteEPDiagramDir()
+        DiagramIO.deleteLadderTemplates()
         // toggle mark visibility
         //        ladderView.marksAreVisible.toggle()
         //        ladderView.setNeedsDisplay()

@@ -20,7 +20,7 @@ struct LadderSelector: View {
     @Environment(\.presentationMode) var presentationMode: Binding<PresentationMode>
     weak var delegate: ViewControllerDelegate?
 
-    var body: some View {
+    var ladderListView: some View {
         NavigationView {
             Form {
                 Section(header: Text("Select ladder")) {
@@ -57,6 +57,23 @@ struct LadderSelector: View {
                 Text("Select") })
         }
     }
+
+    @ViewBuilder
+    var listView: some View {
+        if ladderTemplates.isEmpty {
+            emptyListView
+        } else {
+            ladderListView
+        }
+    }
+
+    var body: some View {
+        listView
+    }
+
+    var emptyListView: some View {
+           Text("Oops, looks like you deleted all your ladders.  Use the Ladder Editor to create new ones.")
+       }
 
     private func selectLadder() {
         os_log("selectLadder()", log: OSLog.action, type: .info)
