@@ -24,7 +24,7 @@ struct LadderTemplatesEditor: View {
             VStack {
                 List() {
                     ForEach(ladderTemplates) { ladderTemplate in
-                        NavigationLink(destination: LadderEditor(ladderTemplate: self.selectedLadderTemplate(id: ladderTemplate.id))) {
+                        NavigationLink(destination: LadderTemplateEditor(ladderTemplate: self.selectedLadderTemplate(id: ladderTemplate.id))) {
                             VStack(alignment: .leading) {
                                 Text(ladderTemplate.name)
                                 Text(ladderTemplate.description)
@@ -39,10 +39,12 @@ struct LadderTemplatesEditor: View {
                         self.ladderTemplates.move(fromOffsets: indices, toOffset: newOffset)
                     }
                 }
-                Button(action: { self.onSave() }, label: {Text("Save Changes")})
+                Button(action: { self.onSave() }, label: {
+                        Image(systemName: "square.and.arrow.down")
+                        Text("Save Changes")})
                     .alert(isPresented: $fileSaveError) {
                     Alert(title: Text("Error Saving Ladders"), message: Text("Changes to ladders could not be saved. \(errorMessage)"), dismissButton: .default(Text("OK")))
-                    }.foregroundColor(.red)
+                    }
                 .disabled(self.editMode == .active)
             }.padding()
             .navigationBarTitle(Text("Ladders"), displayMode: .inline)
@@ -81,6 +83,11 @@ struct LadderTemplatesEditor: View {
     // Errors should include deleting last template and templates with no regionTemplates.
     private func onSave() {
         os_log("onSave() - LadderTemplatesEditor", log: OSLog.action, type: .info)
+        for ladderTemplate in ladderTemplates {
+            if ladderTemplate.regionTemplates.count < 1 {
+                fileSaveError = true
+            }
+        }
         delegate?.saveTemplates(ladderTemplates)
         self.presentationMode.wrappedValue.dismiss()
     }
@@ -92,6 +99,7 @@ fileprivate let testData = [LadderTemplate.defaultTemplate(), LadderTemplate.def
 struct LadderTemplatesEditor_Previews: PreviewProvider {
     static var previews: some View {
         LadderTemplatesEditor(ladderTemplates: testData)
+
     }
 }
 #endif

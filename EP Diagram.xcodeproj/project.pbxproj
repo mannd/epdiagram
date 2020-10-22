@@ -38,14 +38,14 @@
 		8E5D0ABD2464F2CD00FE78A2 /* RegionTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8E5D0ABC2464F2CD00FE78A2 /* RegionTests.swift */; };
 		8E6570FB24A99B8A001358F6 /* FileTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8E6570FA24A99B8A001358F6 /* FileTests.swift */; };
 		8E671D5224814BB700784EB7 /* LadderTemplatesEditor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8E671D5124814BB700784EB7 /* LadderTemplatesEditor.swift */; };
-		8E6A0298246DFB3700A10C9F /* LadderEditor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8E6A0297246DFB3700A10C9F /* LadderEditor.swift */; };
+		8E6A0298246DFB3700A10C9F /* LadderTemplateEditor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8E6A0297246DFB3700A10C9F /* LadderTemplateEditor.swift */; };
 		8E6EB6C02484778E00E5F883 /* Notification+didUndoableAction.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8E6EB6BF2484778E00E5F883 /* Notification+didUndoableAction.swift */; };
 		8E6EB6C2248477D500E5F883 /* ViewController+ViewControllerDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8E6EB6C1248477D500E5F883 /* ViewController+ViewControllerDelegate.swift */; };
 		8E7214DE22E95C860062C094 /* Common.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8E7214DD22E95C860062C094 /* Common.swift */; };
 		8E7214E022EB57FC0062C094 /* MarkTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8E7214DF22EB57FC0062C094 /* MarkTests.swift */; };
 		8E74D58E244FBE2500641E0A /* LadderView+UIContextMenuInteractionDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8E74D58D244FBE2500641E0A /* LadderView+UIContextMenuInteractionDelegate.swift */; };
 		8E74D590244FD55E00641E0A /* Logging.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8E74D58F244FD55E00641E0A /* Logging.swift */; };
-		8E77BDA4253F5AA600FD51E5 /* RegionEditor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8E77BDA3253F5AA600FD51E5 /* RegionEditor.swift */; };
+		8E77BDA4253F5AA600FD51E5 /* RegionTemplateEditor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8E77BDA3253F5AA600FD51E5 /* RegionTemplateEditor.swift */; };
 		8E7CCC29248C1A9C00018D2C /* DiagramSelector.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8E7CCC28248C1A9C00018D2C /* DiagramSelector.swift */; };
 		8E7CCC2B248C30A300018D2C /* Preferences.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8E7CCC2A248C30A300018D2C /* Preferences.swift */; };
 		8E7D24C322779DBD005A1729 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8E7D24C222779DBD005A1729 /* AppDelegate.swift */; };
@@ -131,14 +131,14 @@
 		8E6570FA24A99B8A001358F6 /* FileTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FileTests.swift; sourceTree = "<group>"; };
 		8E671D5124814BB700784EB7 /* LadderTemplatesEditor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LadderTemplatesEditor.swift; sourceTree = "<group>"; };
 		8E689C4F23B498A10042A3F1 /* EP Diagram.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = "EP Diagram.entitlements"; sourceTree = "<group>"; };
-		8E6A0297246DFB3700A10C9F /* LadderEditor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LadderEditor.swift; sourceTree = "<group>"; };
+		8E6A0297246DFB3700A10C9F /* LadderTemplateEditor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LadderTemplateEditor.swift; sourceTree = "<group>"; };
 		8E6EB6BF2484778E00E5F883 /* Notification+didUndoableAction.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Notification+didUndoableAction.swift"; sourceTree = "<group>"; };
 		8E6EB6C1248477D500E5F883 /* ViewController+ViewControllerDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "ViewController+ViewControllerDelegate.swift"; sourceTree = "<group>"; };
 		8E7214DD22E95C860062C094 /* Common.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Common.swift; sourceTree = "<group>"; };
 		8E7214DF22EB57FC0062C094 /* MarkTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MarkTests.swift; sourceTree = "<group>"; };
 		8E74D58D244FBE2500641E0A /* LadderView+UIContextMenuInteractionDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "LadderView+UIContextMenuInteractionDelegate.swift"; sourceTree = "<group>"; };
 		8E74D58F244FD55E00641E0A /* Logging.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Logging.swift; sourceTree = "<group>"; };
-		8E77BDA3253F5AA600FD51E5 /* RegionEditor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RegionEditor.swift; sourceTree = "<group>"; };
+		8E77BDA3253F5AA600FD51E5 /* RegionTemplateEditor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RegionTemplateEditor.swift; sourceTree = "<group>"; };
 		8E7CCC28248C1A9C00018D2C /* DiagramSelector.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DiagramSelector.swift; sourceTree = "<group>"; };
 		8E7CCC2A248C30A300018D2C /* Preferences.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Preferences.swift; sourceTree = "<group>"; };
 		8E7D24BF22779DBD005A1729 /* EP Diagram.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "EP Diagram.app"; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -393,12 +393,12 @@
 			isa = PBXGroup;
 			children = (
 				8E7CCC28248C1A9C00018D2C /* DiagramSelector.swift */,
-				8E6A0297246DFB3700A10C9F /* LadderEditor.swift */,
 				8EA444BF2476E471005B5452 /* LadderSelector.swift */,
 				8E671D5124814BB700784EB7 /* LadderTemplatesEditor.swift */,
+				8E6A0297246DFB3700A10C9F /* LadderTemplateEditor.swift */,
+				8E77BDA3253F5AA600FD51E5 /* RegionTemplateEditor.swift */,
 				8E2BA1CF24A3BDD7002D997F /* PreferencesView.swift */,
 				8EADC2A824D64E1200C5D3D8 /* SampleSelector.swift */,
-				8E77BDA3253F5AA600FD51E5 /* RegionEditor.swift */,
 			);
 			path = SwiftUI;
 			sourceTree = "<group>";
@@ -563,7 +563,7 @@
 				8E253DD5244A8B17008CC56B /* Version.swift in Sources */,
 				8E6EB6C2248477D500E5F883 /* ViewController+ViewControllerDelegate.swift in Sources */,
 				8E4A52EF24886B16007406F5 /* Diagram.swift in Sources */,
-				8E6A0298246DFB3700A10C9F /* LadderEditor.swift in Sources */,
+				8E6A0298246DFB3700A10C9F /* LadderTemplateEditor.swift in Sources */,
 				8E2BA1D024A3BDD7002D997F /* PreferencesView.swift in Sources */,
 				8E1B6CB8240CAE5300EA88A6 /* ScaledView.swift in Sources */,
 				8E8248DD23B53B55001A85F9 /* SeparatorView.swift in Sources */,
@@ -583,7 +583,7 @@
 				8E2439F624B14F770044AEAB /* Interval.swift in Sources */,
 				8ECA9FB72470A1020016D939 /* LadderTemplate.swift in Sources */,
 				8E01D9C722849047000F36FC /* CursorView.swift in Sources */,
-				8E77BDA4253F5AA600FD51E5 /* RegionEditor.swift in Sources */,
+				8E77BDA4253F5AA600FD51E5 /* RegionTemplateEditor.swift in Sources */,
 				8EA444C02476E471005B5452 /* LadderSelector.swift in Sources */,
 				8E5918BC24AEAB0B00D8ABA3 /* Caliper.swift in Sources */,
 				8EBC824124E5E04800B5CA29 /* UIImage+emptyImage.swift in Sources */,

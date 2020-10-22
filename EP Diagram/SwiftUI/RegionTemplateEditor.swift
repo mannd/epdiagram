@@ -8,7 +8,7 @@
 
 import SwiftUI
 
-struct RegionEditor: View {
+struct RegionTemplateEditor: View {
     @Binding var regionTemplate: RegionTemplate
 
     var body: some View {
@@ -42,9 +42,10 @@ struct RegionEditor: View {
     }
 }
 
-
+#if DEBUG
 struct RegionEditor_Previews: PreviewProvider {
     static var previews: some View {
-        RegionEditor(regionTemplate: .constant(RegionTemplate(name: "A", description: "Atrium", unitHeight: 1, lineStyle: .solid)))
+        RegionTemplateEditor(regionTemplate: .constant(RegionTemplate(name: "A", description: "Atrium", unitHeight: 1, lineStyle: .solid)))
     }
 }
+#endif

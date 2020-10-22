@@ -24,20 +24,21 @@ struct DiagramSelector: View {
                             self.delegate?.selectDiagram(named: name)
                             self.presentationMode.wrappedValue.dismiss()
                         }.padding()
-                        }.onDelete {
-                            indices in
+                    }.onDelete {
+                        indices in
                         for index in indices {
                             self.delegate?.deleteDiagram(named: self.names[index])
                             self.names.remove(at: index)
                         }
                     }
                 }
-                .navigationBarTitle(Text("Select diagram"), displayMode: .inline)
+                .navigationBarTitle(Text("Saved Diagrams"), displayMode: .inline)
                 .navigationBarItems(leading: EditButton())
                 .environment(\.editMode, $editMode)
             }
+            .navigationViewStyle(StackNavigationViewStyle())
+        }
     }
-}
 }
 
 #if DEBUG

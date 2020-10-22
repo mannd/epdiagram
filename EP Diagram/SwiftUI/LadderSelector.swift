@@ -68,11 +68,11 @@ struct LadderSelector: View {
     }
 
     var body: some View {
-        listView
+        listView.navigationViewStyle(StackNavigationViewStyle())
     }
 
     var emptyListView: some View {
-           Text("Oops, looks like you deleted all your ladders.  Use the Ladder Editor to create new ones.")
+           Text("You have no saved ladders.  Use the Ladder Editor to create new ones.")
        }
 
     private func selectLadder() {
@@ -90,7 +90,12 @@ fileprivate let testData: [LadderTemplate] = [LadderTemplate.defaultTemplate(), 
 
 struct LadderSelector_Previews: PreviewProvider {
     static var previews: some View {
-        LadderSelector(ladderTemplates: testData)
+        Group {
+            LadderSelector(ladderTemplates: testData)
+            LadderSelector(ladderTemplates: testData)
+                .preferredColorScheme(.dark)
+                .padding(0.0)
+        }
     }
 }
 #endif

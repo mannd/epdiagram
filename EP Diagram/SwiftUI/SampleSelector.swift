@@ -30,8 +30,9 @@ struct SampleSelector: View {
                     }
                 }
             }
-            .navigationBarTitle(Text("Select sample diagram"), displayMode: .inline)
+            .navigationBarTitle(Text("Sample Diagrams"), displayMode: .inline)
         }
+        .navigationViewStyle(StackNavigationViewStyle())
     }
 }
 

@@ -507,11 +507,6 @@ final class ViewController: UIViewController {
         setViewsNeedDisplay()
     }
 
-    func setViewsNeedDisplay() {
-        cursorView.setNeedsDisplay()
-        ladderView.setNeedsDisplay()
-    }
-
     // MARK: - Segue
     
     override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
@@ -559,7 +554,7 @@ final class ViewController: UIViewController {
 
     @IBSegueAction func showPreferences(_ coder: NSCoder) -> UIViewController? {
         preferences.retrieve()
-        let preferencesView = PreferencesView()
+        let preferencesView = PreferencesView(delegate: self)
         let hostingController = UIHostingController(coder: coder, rootView: preferencesView)
         return hostingController
     }

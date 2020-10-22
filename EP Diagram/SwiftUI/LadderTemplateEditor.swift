@@ -54,22 +54,29 @@ struct LadderTemplateEditor: View {
 
 struct RegionListView: View {
     @Binding var ladderTemplate: LadderTemplate
+    @State private var tooFewRegionTemplates = false
 
     var body: some View {
         List {
             ForEach(ladderTemplate.regionTemplates) { regionTemplate in
                 NavigationLink(
-                    destination: RegionEditor(regionTemplate: self.selectedRegionTemplate(id: regionTemplate.id))) {
+                    destination: RegionTemplateEditor(regionTemplate: self.selectedRegionTemplate(id: regionTemplate.id))) {
                     VStack(alignment: .leading) {
-                        Text(regionTemplate.name).bold()
-                        Text(regionTemplate.description)
-                        Text("Height: \(regionTemplate.unitHeight)")
-                        Text("Line style: \(regionTemplate.lineStyle.description)")
+                        Text(regionTemplate.name).bold().foregroundColor(.red)
+                        Text(regionTemplate.description).bold()
+                        Text("Height: ") + Text("\(regionTemplate.unitHeight)").bold()
+                        Text("Line style: ") + Text("\(regionTemplate.lineStyle.description)").bold()
                     }
+                }.alert(isPresented: $tooFewRegionTemplates) { Alert(title: Text("Too Few Regions"), message: Text("You have to have at least 1 region in your ladder."), dismissButton: .default(Text("OK")))
                 }
             }
+            
             .onDelete { indexSet in
-                self.ladderTemplate.regionTemplates.remove(atOffsets: indexSet)
+                // Don't allow deletion of last region, having zero regions will break things.
+                self.tooFewRegionTemplates = self.ladderTemplate.regionTemplates.count < 2
+                if !self.tooFewRegionTemplates {
+                    self.ladderTemplate.regionTemplates.remove(atOffsets: indexSet)
+                }
             }
             .onMove { indices, newOffset in
                 self.ladderTemplate.regionTemplates.move(fromOffsets: indices, toOffset: newOffset)

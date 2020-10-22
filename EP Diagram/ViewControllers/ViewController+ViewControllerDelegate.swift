@@ -13,9 +13,11 @@ protocol ViewControllerDelegate: class {
     func selectLadderTemplate(ladderTemplate: LadderTemplate?)
     func selectDiagram(named name: String?)
     func deleteDiagram(named name: String)
-    func savePreferences(_ preferences: Preferences)
+//    func savePreferences(_ preferences: Preferences)
     func saveTemplates(_ templates: [LadderTemplate])
     func selectSampleDiagram(_ diagram: Diagram?)
+    func setViewsNeedDisplay()
+    func updatePreferences()
 }
 
 extension ViewController: ViewControllerDelegate {
@@ -66,14 +68,23 @@ extension ViewController: ViewControllerDelegate {
         }
     }
 
-    func savePreferences(_ preferences: Preferences) {
-        os_log("savePreferences()", log: .action, type: .info)
-        self.preferences = preferences
-        self.preferences.save()
-        ladderView.lineWidth = CGFloat(preferences.lineWidth)
-        ladderView.showBlock = preferences.showBlock
-        ladderView.showImpulseOrigin = preferences.showImpulseOrigin
-        ladderView.showIntervals = preferences.showIntervals
+//    func savePreferences(_ preferences: Preferences) {
+//        os_log("savePreferences()", log: .action, type: .info)
+//        self.preferences = preferences
+//        self.preferences.save()
+//        ladderView.lineWidth = CGFloat(preferences.lineWidth)
+//        ladderView.showBlock = preferences.showBlock
+//        ladderView.showImpulseOrigin = preferences.showImpulseOrigin
+//        ladderView.showIntervals = preferences.showIntervals
+//        setViewsNeedDisplay()
+//    }
+
+    func updatePreferences() {
+        os_log("updatePreferences()", log: .action, type: .info)
+        ladderView.lineWidth = CGFloat(UserDefaults.standard.double(forKey: Preferences.defaultLineWidthKey))
+        ladderView.showBlock = UserDefaults.standard.bool(forKey: Preferences.defaultShowBlockKey)
+        ladderView.showImpulseOrigin = UserDefaults.standard.bool(forKey: Preferences.defaultShowImpulseOriginKey)
+        ladderView.showIntervals = UserDefaults.standard.bool(forKey: Preferences.defaultShowIntervalsKey)
         setViewsNeedDisplay()
     }
 
@@ -95,6 +106,11 @@ extension ViewController: ViewControllerDelegate {
         self.ladderView.ladder = self.diagram.ladder
         setTitle()
         setViewsNeedDisplay()
+    }
+
+    func setViewsNeedDisplay() {
+        cursorView.setNeedsDisplay()
+        ladderView.setNeedsDisplay()
     }
 
 }
