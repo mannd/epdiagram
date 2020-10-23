@@ -43,9 +43,9 @@ struct LadderTemplatesEditor: View {
                         Image(systemName: "square.and.arrow.down")
                         Text("Save Changes")})
                     .alert(isPresented: $fileSaveError) {
-                    Alert(title: Text("Error Saving Ladders"), message: Text("Changes to ladders could not be saved. \(errorMessage)"), dismissButton: .default(Text("OK")))
+                        Alert(title: Text("Error Saving Ladders"), message: Text("Changes to ladders could not be saved. \(errorMessage)"), dismissButton: .default(Text("OK")))
                     }
-                .disabled(self.editMode == .active)
+                    .disabled(self.editMode == .active)
             }.padding()
             .navigationBarTitle(Text("Ladders"), displayMode: .inline)
             .navigationBarItems(leading: EditButton(), trailing: addButton)

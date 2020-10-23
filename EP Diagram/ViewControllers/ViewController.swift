@@ -516,24 +516,28 @@ final class ViewController: UIViewController {
         }
     }
 
-
     @IBSegueAction func showTemplateEditor(_ coder: NSCoder) -> UIViewController? {
         navigationController?.setToolbarHidden(true, animated: true)
         // FIXME: Decide how to hande default ladder templates.  Below hard codes 2 defaults if there are no saved defaults.
-        let ladderTemplates = FileIO.retrieve(FileIO.userTemplateFile, from: .documents, as: [LadderTemplate].self) ?? [LadderTemplate.defaultTemplate(), LadderTemplate.defaultTemplate2()]
+        // Restore default ladder templates if none saved.
+        var ladderTemplates = FileIO.retrieve(FileIO.userTemplateFile, from: .documents, as: [LadderTemplate].self) ?? LadderTemplate.defaultTemplates()
+        if ladderTemplates.isEmpty {
+            ladderTemplates = LadderTemplate.defaultTemplates()
+        }
         var templateEditor = LadderTemplatesEditor(ladderTemplates: ladderTemplates, parentViewTitle: getTitle())
         templateEditor.delegate = self
         let hostingController = UIHostingController(coder: coder, rootView: templateEditor)
         return hostingController
     }
 
-
-    // TODO: Should check for customized ladder before selecting new ladder and give opportunity to save it?  Or just handle it like any dirty diagram?
     @IBSegueAction func showLadderSelector(_ coder: NSCoder) -> UIViewController? {
         os_log("showLadderSelector")
         navigationController?.setToolbarHidden(true, animated: true)
-        // FIXME: This is setup like this just for testing.
-        let ladderTemplates = FileIO.retrieve(FileIO.userTemplateFile, from: .documents, as: [LadderTemplate].self) ?? [LadderTemplate.defaultTemplate(), LadderTemplate.defaultTemplate2()]
+        // Use default ladder templates if none saved.
+        var ladderTemplates = FileIO.retrieve(FileIO.userTemplateFile, from: .documents, as: [LadderTemplate].self) ?? LadderTemplate.defaultTemplates()
+        if ladderTemplates.isEmpty {
+            ladderTemplates = LadderTemplate.defaultTemplates()
+        }
         let index = ladderTemplates.firstIndex(where: { ladderTemplate in
             ladderTemplate.name == ladderView.ladder.name
         })
@@ -600,19 +604,6 @@ final class ViewController: UIViewController {
     func performShowTemplateEditorSegue() {
         performSegue(withIdentifier: "showTemplateEditorSegue", sender: self)
     }
-    
-    // MARK: - Save and restore views
-
-    // TODO: Need to implement this functionality.
-
-    override func encodeRestorableState(with coder: NSCoder) {
-        os_log("encodeRestorableState(with:) - ViewController", log: .viewCycle, type: .info)
-    }
-
-    override func decodeRestorableState(with coder: NSCoder) {
-        os_log("decodeRestorableState(with:) - ViewController", log: .viewCycle, type: .info)
-    }
-
 }
 
 

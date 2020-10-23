@@ -33,4 +33,8 @@ struct LadderTemplate: Codable, Equatable {
         ladderTemplate.regionTemplates.append(contentsOf: [saRegionTemplate, aRegionTemplate, avnRegionTemplate, vRegionTemplate])
         return ladderTemplate
     }
+
+    static func defaultTemplates() -> [LadderTemplate] {
+        return [defaultTemplate(), defaultTemplate2()]
+    }
 }

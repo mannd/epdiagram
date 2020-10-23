@@ -56,14 +56,13 @@ class HamburgerTableViewController: UITableViewController {
 
         if (row.layer == .lockImage && imageIsLocked) || (row.layer == .lockLadder && diagramIsLocked) {
             cell.label?.text = row.altName
-            cell.icon?.image = UIImage(named: row.altIconName!)
+            cell.icon?.image = row.altIcon
         }
         else {
             cell.label?.text = row.name
             cell.label?.isEnabled = row.isEnabled
             cell.icon?.alpha = row.isEnabled ? 1.0 : 0.4
-            cell.icon?.image = UIImage(named: row.iconName!)
-
+            cell.icon?.image = row.icon
         }
         cell.label?.adjustsFontSizeToFitWidth = true
         return cell

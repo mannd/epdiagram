@@ -1,16 +1,17 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="16097.2" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES" initialViewController="en3-9x-pbF">
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="17156" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES" initialViewController="en3-9x-pbF">
     <device id="retina6_1" orientation="portrait" appearance="light"/>
     <dependencies>
-        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="16087"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="17125"/>
         <capability name="Safe area layout guides" minToolsVersion="9.0"/>
+        <capability name="System colors in document resources" minToolsVersion="11.0"/>
         <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
     </dependencies>
     <scenes>
         <!--View Controller-->
         <scene sceneID="tne-QT-ifu">
             <objects>
-                <viewController storyboardIdentifier="ViewController" id="BYZ-38-t0r" customClass="ViewController" customModule="EP_Diagram" customModuleProvider="target" sceneMemberID="viewController">
+                <viewController storyboardIdentifier="ViewController" useStoryboardIdentifierAsRestorationIdentifier="YES" id="BYZ-38-t0r" customClass="ViewController" customModule="EP_Diagram" customModuleProvider="target" sceneMemberID="viewController">
                     <view key="view" contentMode="scaleToFill" id="8bC-Xf-vdC">
                         <rect key="frame" x="0.0" y="0.0" width="414" height="896"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
@@ -51,7 +52,8 @@
                                 </connections>
                             </containerView>
                         </subviews>
-                        <color key="backgroundColor" systemColor="systemBackgroundColor" cocoaTouchSystemColor="whiteColor"/>
+                        <viewLayoutGuide key="safeArea" id="6Tk-OE-BBY"/>
+                        <color key="backgroundColor" systemColor="systemBackgroundColor"/>
                         <constraints>
                             <constraint firstItem="4H8-sQ-vM2" firstAttribute="top" secondItem="6Tk-OE-BBY" secondAttribute="top" id="0Ek-m5-aVH"/>
                             <constraint firstItem="QhZ-gG-IcS" firstAttribute="top" secondItem="6Tk-OE-BBY" secondAttribute="top" id="0PF-2Y-htw"/>
@@ -73,7 +75,6 @@
                             <constraint firstItem="wlk-vO-fuM" firstAttribute="leading" secondItem="6Tk-OE-BBY" secondAttribute="leading" id="hSs-E4-qiy"/>
                             <constraint firstItem="6Tk-OE-BBY" firstAttribute="bottom" secondItem="wlk-vO-fuM" secondAttribute="bottom" id="nPH-aF-sHW"/>
                         </constraints>
-                        <viewLayoutGuide key="safeArea" id="6Tk-OE-BBY"/>
                     </view>
                     <navigationItem key="navigationItem" id="ryt-Rx-YMV"/>
                     <connections>
@@ -103,7 +104,7 @@
                     <tableView key="view" clipsSubviews="YES" contentMode="scaleToFill" alwaysBounceVertical="YES" dataMode="prototypes" style="grouped" separatorStyle="default" rowHeight="44" sectionHeaderHeight="18" sectionFooterHeight="18" id="Nn9-hn-PN5">
                         <rect key="frame" x="0.0" y="0.0" width="250" height="813"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
-                        <color key="backgroundColor" systemColor="systemBackgroundColor" cocoaTouchSystemColor="whiteColor"/>
+                        <color key="backgroundColor" systemColor="systemBackgroundColor"/>
                         <inset key="separatorInset" minX="48" minY="0.0" maxX="0.0" maxY="0.0"/>
                         <prototypes>
                             <tableViewCell clipsSubviews="YES" contentMode="scaleToFill" preservesSuperviewLayoutMargins="YES" selectionStyle="default" indentationWidth="10" reuseIdentifier="HamburgerCell" id="qVe-TQ-yXg" customClass="HamburgerCell" customModule="EP_Diagram" customModuleProvider="target">
@@ -119,9 +120,9 @@
                                             <nil key="textColor"/>
                                             <nil key="highlightedColor"/>
                                         </label>
-                                        <imageView userInteractionEnabled="NO" contentMode="scaleToFill" verticalHuggingPriority="251" image="camera" translatesAutoresizingMaskIntoConstraints="NO" id="axf-C8-uXJ" userLabel="Icon">
-                                            <rect key="frame" x="10" y="14" width="20" height="16"/>
-                                            <color key="tintColor" systemColor="systemBlueColor" red="0.0" green="0.47843137250000001" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+                                        <imageView userInteractionEnabled="NO" contentMode="scaleToFill" verticalHuggingPriority="251" image="camera" catalog="system" translatesAutoresizingMaskIntoConstraints="NO" id="axf-C8-uXJ" userLabel="Icon">
+                                            <rect key="frame" x="8" y="12.5" width="24.5" height="18"/>
+                                            <color key="tintColor" systemColor="systemBlueColor"/>
                                         </imageView>
                                     </subviews>
                                     <constraints>
@@ -181,7 +182,8 @@
                                 <nil key="highlightedColor"/>
                             </label>
                         </subviews>
-                        <color key="backgroundColor" systemColor="systemBackgroundColor" cocoaTouchSystemColor="whiteColor"/>
+                        <viewLayoutGuide key="safeArea" id="gIg-G7-FnG"/>
+                        <color key="backgroundColor" systemColor="systemBackgroundColor"/>
                         <constraints>
                             <constraint firstItem="1GS-6k-POx" firstAttribute="centerY" secondItem="XzE-wF-qej" secondAttribute="centerY" id="AkM-hv-Sz0"/>
                             <constraint firstItem="gIg-G7-FnG" firstAttribute="trailing" secondItem="8XA-rq-ici" secondAttribute="trailing" id="KgF-NU-YsN"/>
@@ -190,7 +192,6 @@
                             <constraint firstItem="1GS-6k-POx" firstAttribute="centerX" secondItem="XzE-wF-qej" secondAttribute="centerX" id="cO4-ck-Md2"/>
                             <constraint firstItem="gIg-G7-FnG" firstAttribute="bottom" secondItem="8XA-rq-ici" secondAttribute="bottom" id="uGZ-vN-osG"/>
                         </constraints>
-                        <viewLayoutGuide key="safeArea" id="gIg-G7-FnG"/>
                     </view>
                     <navigationItem key="navigationItem" id="5LG-FK-1Vz"/>
                     <connections>
@@ -267,6 +268,12 @@
     </scenes>
     <resources>
         <image name="SampleECG" width="1411" height="676"/>
-        <image name="camera" width="21" height="16"/>
+        <image name="camera" catalog="system" width="128" height="94"/>
+        <systemColor name="systemBackgroundColor">
+            <color white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+        </systemColor>
+        <systemColor name="systemBlueColor">
+            <color red="0.0" green="0.47843137254901963" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+        </systemColor>
     </resources>
 </document>

@@ -32,24 +32,42 @@ enum Layer {
 struct HamburgerLayer {
     var name: String?
     var iconName: String?
+    var icon: UIImage?
     var layer: Layer?
     var altName: String?
     var altIconName: String?
+    var altIcon: UIImage?
     var isEnabled: Bool = true
 
-    init(withName name: String, iconName: String, layer: Layer) {
+//    init(withName name: String, iconName: String, layer: Layer) {
+//        self.name = name
+//        self.iconName = iconName
+//        self.layer = layer
+//        self.altName = nil
+//        self.altIconName = nil
+//    }
+//
+//    init(withName name: String, iconName: String, layer: Layer, altName: String, altIconName: String) {
+//        self.name = name
+//        self.iconName = iconName
+//        self.layer = layer
+//        self.altName = altName
+//        self.altIconName = altIconName
+//    }
+
+    init(withName name: String, icon: UIImage?, layer: Layer) {
         self.name = name
-        self.iconName = iconName
+        self.icon = icon
         self.layer = layer
         self.altName = nil
-        self.altIconName = nil
+        self.altIcon = nil
     }
 
-    init(withName name: String, iconName: String, layer: Layer, altName: String, altIconName: String) {
+    init(withName name: String, icon: UIImage?, layer: Layer, altName: String, altIcon: UIImage?) {
         self.name = name
-        self.iconName = iconName
+        self.icon = icon
         self.layer = layer
         self.altName = altName
-        self.altIconName = altIconName
+        self.altIcon = altIcon
     }
 }

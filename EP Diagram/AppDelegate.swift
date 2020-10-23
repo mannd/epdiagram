@@ -52,20 +52,16 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         return true
     }
 
-
-//        UINavigationController *navigationController = (UINavigationController *)  self.window.rootViewController;
-//        EPSMainViewController *mainViewController = (EPSMainViewController *) [navigationController.viewControllers objectAtIndex:0];
-//
-//
-//        if (url != nil && [url isFileURL]) {
-//            // Note that openURL won't run the first time program loads, so we pass the relevant info
-//            // to mainViewController which calls openURL in viewDidLoad.
-//            mainViewController.launchFromURL = YES;
-//            mainViewController.launchURL = url;
-//            [mainViewController openURL:url];
-//        }
-//        return YES;
-
+    // For non-scene-based versions of this app on iOS 13.1 and earlier.
+    func application(_ application: UIApplication, shouldSaveApplicationState coder: NSCoder) -> Bool {
+        return true
     }
+
+    // For non-scene-based versions of this app on iOS 13.1 and earlier.
+    func application(_ application: UIApplication, shouldRestoreApplicationState coder: NSCoder) -> Bool {
+        return true
+    }
+
+}
 
 
