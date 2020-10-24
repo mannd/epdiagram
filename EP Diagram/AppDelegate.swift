@@ -41,26 +41,16 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         // Called when the application is about to terminate. Save data if appropriate. See also applicationDidEnterBackground:.
     }
 
-    func application(_ app: UIApplication, open url: URL, options: [UIApplication.OpenURLOptionsKey : Any] = [:]) -> Bool {
-        let navigationController = self.window?.rootViewController as? UINavigationController
-        let viewController = navigationController?.viewControllers[0] as? ViewController
-        if url.isFileURL {
-            viewController?.launchFromURL = true
-            viewController?.launchURL = url
-            viewController?.openURL(url: url)
-        }
-        return true
-    }
-
-    // For non-scene-based versions of this app on iOS 13.1 and earlier.
-    func application(_ application: UIApplication, shouldSaveApplicationState coder: NSCoder) -> Bool {
-        return true
-    }
-
-    // For non-scene-based versions of this app on iOS 13.1 and earlier.
-    func application(_ application: UIApplication, shouldRestoreApplicationState coder: NSCoder) -> Bool {
-        return true
-    }
+//    func application(_ app: UIApplication, open url: URL, options: [UIApplication.OpenURLOptionsKey : Any] = [:]) -> Bool {
+//        let navigationController = self.window?.rootViewController as? UINavigationController
+//        let viewController = navigationController?.viewControllers[0] as? ViewController
+//        if url.isFileURL {
+//            viewController?.launchFromURL = true
+//            viewController?.launchURL = url
+//            viewController?.openURL(url: url)
+//        }
+//        return true
+//    }
 
 }
 

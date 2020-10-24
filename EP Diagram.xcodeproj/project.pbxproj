@@ -283,6 +283,7 @@
 			isa = PBXGroup;
 			children = (
 				8E7D24C222779DBD005A1729 /* AppDelegate.swift */,
+				8E0FDE822543A01D00865CBC /* SceneDelegate.swift */,
 				8E7D24C922779DBF005A1729 /* Assets.xcassets */,
 				8E7D24CE22779DBF005A1729 /* Info.plist */,
 				8E7214DC22E95C630062C094 /* Common */,
@@ -296,7 +297,6 @@
 				8E9B804C22834960008873BB /* ViewControllers */,
 				8E4ACA8724479C2500575538 /* ViewModels */,
 				8E9B804B22834944008873BB /* Views */,
-				8E0FDE822543A01D00865CBC /* SceneDelegate.swift */,
 			);
 			path = "EP Diagram";
 			sourceTree = "<group>";
