@@ -18,4 +18,5 @@ extension OSLog {
     static let touches = OSLog(subsystem: OSLog.subsystem, category: "touches")
     static let errors = OSLog(subsystem: OSLog.subsystem, category: "errors")
     static let hamburgerCycle = OSLog(subsystem: subsystem, category: "hamburger")
+    static let lifeCycle = OSLog(subsystem: subsystem, category: "lifecycle")
 }

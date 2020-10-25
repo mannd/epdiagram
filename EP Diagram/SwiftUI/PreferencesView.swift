@@ -33,10 +33,7 @@ struct PreferencesView: View {
                         }
                     }
                 }
-                Button(action: { self.onSave() }, label: {
-                        Image(systemName: "square.and.arrow.down")
-                        Text("Save Changes")})
-                    .padding()
+                SaveButton(action: self.onSave)
             }
             .navigationBarTitle("Preferences", displayMode: .inline)
         }

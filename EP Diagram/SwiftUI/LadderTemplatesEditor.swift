@@ -39,9 +39,7 @@ struct LadderTemplatesEditor: View {
                         self.ladderTemplates.move(fromOffsets: indices, toOffset: newOffset)
                     }
                 }
-                Button(action: { self.onSave() }, label: {
-                        Image(systemName: "square.and.arrow.down")
-                        Text("Save Changes")})
+                SaveButton(action: self.onSave)
                     .alert(isPresented: $fileSaveError) {
                         Alert(title: Text("Error Saving Ladders"), message: Text("Changes to ladders could not be saved. \(errorMessage)"), dismissButton: .default(Text("OK")))
                     }
