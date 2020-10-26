@@ -89,6 +89,50 @@ extension ViewController: ViewControllerDelegate {
         setViewsNeedDisplay()
     }
 
+    @objc
+    func enterBackground() {
+        os_log("enterBackground()", log: .lifeCycle, type: .info)
+        if let id = view.window?.windowScene?.session.persistentIdentifier {
+            do {
+                if var url = FileIO.getURL(for: .documents) {
+                    url = url.appendingPathComponent("temporary")
+                    url = url.appendingPathComponent(id)
+                    if !FileManager.default.fileExists(atPath: url.path) {
+                        try FileManager.default.createDirectory(atPath: url.path, withIntermediateDirectories: true, attributes: nil)
+                    }
+                    try diagram.save(name: id, url: url)
+                    diagram.image = nil
+                }
+            } catch {
+                os_log("Error saving temp diagram file: %s", log: .errors, type: .error, error.localizedDescription)
+            }
+        }
+    }
+
+    @objc
+    func enterForeground() {
+        os_log("enterForground()", log: .lifeCycle, type: .info)
+        if let id = view.window?.windowScene?.session.persistentIdentifier {
+            do {
+                if var url = FileIO.getURL(for: .documents) {
+                    url = url.appendingPathComponent("temporary")
+                    url = url.appendingPathComponent(id)
+                    try diagram = Diagram.retrieve(name: id, url: url)
+                    url = url.appendingPathComponent(id)
+                    if FileManager.default.fileExists(atPath: url.path) {
+                        do {
+                            try FileManager.default.removeItem(at: url)
+                        } catch {
+                            fatalError(error.localizedDescription)
+                        }
+                    }
+                }
+            } catch {
+                os_log("Error retrieving temp diagram file: %s", log: .errors, type: .error, error.localizedDescription)
+            }
+        }
+    }
+
     func saveTemplates(_ templates: [LadderTemplate]) {
         os_log("saveTemplates()", log: .action, type: .info)
         do {

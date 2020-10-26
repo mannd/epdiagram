@@ -87,6 +87,7 @@ final class ViewController: UIViewController {
 
         if Common.isRunningOnMac() {
             navigationController?.setNavigationBarHidden(true, animated: false)
+            // TODO: Need to convert hamburger menu to regular menu on Mac.
         }
         UIView.setAnimationsEnabled(true)
 
@@ -163,6 +164,8 @@ final class ViewController: UIViewController {
         showMainMenu()
         NotificationCenter.default.addObserver(self, selector: #selector(onDidUndoableAction(_:)), name: .didUndoableAction, object: nil)
         NotificationCenter.default.addObserver(self, selector: #selector(updatePreferences), name: .preferencesChanged, object: nil)
+        NotificationCenter.default.addObserver(self, selector: #selector(enterBackground), name: UIScene.didEnterBackgroundNotification, object: nil)
+        NotificationCenter.default.addObserver(self, selector: #selector(enterForeground), name: UIScene.willEnterForegroundNotification, object: nil)
         updateUndoRedoButtons()
         resetViews()
     }
@@ -170,6 +173,9 @@ final class ViewController: UIViewController {
     override func viewWillDisappear(_ animated: Bool) {
         super.viewWillDisappear(animated)
         NotificationCenter.default.removeObserver(self, name: .didUndoableAction, object: nil)
+        NotificationCenter.default.removeObserver(self, name: .preferencesChanged, object: nil)
+        NotificationCenter.default.removeObserver(self, name: UIScene.didEnterBackgroundNotification, object: nil)
+        NotificationCenter.default.removeObserver(self, name: UIScene.willEnterForegroundNotification, object: nil)
     }
 
     // Crash program at compile time if IUO delegates are nil.

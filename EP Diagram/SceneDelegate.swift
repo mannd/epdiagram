@@ -21,19 +21,19 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
 
 
     func sceneWillEnterForeground(_ scene: UIScene) {
-        os_log("sceneWillEnterForeground(scene:)", log: .lifeCycle, type: .info)
+        os_log("sceneWillEnterForeground(scene:), %s", log: .lifeCycle, type: .info, scene.session.persistentIdentifier)
     }
 
     func sceneDidEnterBackground(_ scene: UIScene) {
-        os_log("sceneDidEnterBackground(scene:)", log: .lifeCycle, type: .info)
+        os_log("sceneDidEnterBackground(scene:), %s", log: .lifeCycle, type: .info, scene.session.persistentIdentifier)
     }
 
     func sceneWillResignActive(_ scene: UIScene) {
-        os_log("sceneWillResignActive(scene:)", log: .lifeCycle, type: .info)
+        os_log("sceneWillResignActive(scene:), %s", log: .lifeCycle, type: .info, scene.session.persistentIdentifier)
     }
 
     func sceneDidBecomeActive(_ scene: UIScene) {
-        os_log("sceneDidBecomeActive(scene:)", log: .lifeCycle, type: .info)
+        os_log("sceneDidBecomeActive(scene:), %s", log: .lifeCycle, type: .info, scene.session.persistentIdentifier)
     }
 
     func scene(_ scene: UIScene, openURLContexts URLContexts: Set<UIOpenURLContext>) {
