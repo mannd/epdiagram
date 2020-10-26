@@ -79,6 +79,7 @@ extension ViewController: ViewControllerDelegate {
 //        setViewsNeedDisplay()
 //    }
 
+    @objc
     func updatePreferences() {
         os_log("updatePreferences()", log: .action, type: .info)
         ladderView.lineWidth = CGFloat(UserDefaults.standard.double(forKey: Preferences.defaultLineWidthKey))

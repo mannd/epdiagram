@@ -162,6 +162,7 @@ final class ViewController: UIViewController {
         imageScrollView.contentInset = UIEdgeInsets(top: 0, left: leftMargin, bottom: 0, right: 0)
         showMainMenu()
         NotificationCenter.default.addObserver(self, selector: #selector(onDidUndoableAction(_:)), name: .didUndoableAction, object: nil)
+        NotificationCenter.default.addObserver(self, selector: #selector(updatePreferences), name: .preferencesChanged, object: nil)
         updateUndoRedoButtons()
         resetViews()
     }
@@ -558,7 +559,7 @@ final class ViewController: UIViewController {
 
     @IBSegueAction func showPreferences(_ coder: NSCoder) -> UIViewController? {
         preferences.retrieve()
-        let preferencesView = PreferencesView(delegate: self)
+        let preferencesView = PreferencesView()
         let hostingController = UIHostingController(coder: coder, rootView: preferencesView)
         return hostingController
     }

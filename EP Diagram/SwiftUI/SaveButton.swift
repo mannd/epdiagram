@@ -14,7 +14,7 @@ struct SaveButton: View {
     var body: some View {
             Button(action: action, label: {
                     Image(systemName: "square.and.arrow.down")
-                    Text("Save Changes")}
+                    Text("Save")}
 
             )
             .padding(EdgeInsets(top: 12, leading: 20, bottom: 12, trailing: 20))

@@ -14,7 +14,6 @@ struct PreferencesView: View {
     @State private var showBlock = UserDefaults.standard.bool(forKey: Preferences.defaultShowBlockKey)
     @State private var showIntervals = UserDefaults.standard.bool(forKey: Preferences.defaultShowIntervalsKey)
     @Environment(\.presentationMode) private var presentationMode: Binding<PresentationMode>
-    weak var delegate: ViewControllerDelegate?
 
     var body: some View {
         NavigationView {
@@ -45,7 +44,7 @@ struct PreferencesView: View {
         UserDefaults.standard.setValue(showImpulseOrigin, forKey: Preferences.defaultShowImpulseOriginKey)
         UserDefaults.standard.setValue(showBlock, forKey: Preferences.defaultShowBlockKey)
         UserDefaults.standard.setValue(showIntervals, forKey: Preferences.defaultShowIntervalsKey)
-        delegate?.updatePreferences()
+        NotificationCenter.default.post(name: Notification.Name.preferencesChanged, object: nil)
         self.presentationMode.wrappedValue.dismiss()
     }
 }

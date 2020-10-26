@@ -20,37 +20,39 @@ struct LadderTemplatesEditor: View {
     weak var delegate: ViewControllerDelegate?
     
     var body: some View {
-        NavigationView {
-            VStack {
-                List() {
-                    ForEach(ladderTemplates) { ladderTemplate in
-                        NavigationLink(destination: LadderTemplateEditor(ladderTemplate: self.selectedLadderTemplate(id: ladderTemplate.id))) {
-                            VStack(alignment: .leading) {
-                                Text(ladderTemplate.name)
-                                Text(ladderTemplate.description)
+        VStack {
+            NavigationView {
+                VStack {
+                    List() {
+                        ForEach(ladderTemplates) { ladderTemplate in
+                            NavigationLink(destination: LadderTemplateEditor(ladderTemplate: self.selectedLadderTemplate(id: ladderTemplate.id))) {
+                                VStack(alignment: .leading) {
+                                    Text(ladderTemplate.name)
+                                    Text(ladderTemplate.description)
+                                }
                             }
-                        }
 
+                        }
+                        .onDelete { indexSet in
+                            self.ladderTemplates.remove(atOffsets: indexSet)
+                        }
+                        .onMove { indices, newOffset in
+                            self.ladderTemplates.move(fromOffsets: indices, toOffset: newOffset)
+                        }
                     }
-                    .onDelete { indexSet in
-                        self.ladderTemplates.remove(atOffsets: indexSet)
-                    }
-                    .onMove { indices, newOffset in
-                        self.ladderTemplates.move(fromOffsets: indices, toOffset: newOffset)
-                    }
-                }
-                SaveButton(action: self.onSave)
-                    .alert(isPresented: $fileSaveError) {
-                        Alert(title: Text("Error Saving Ladders"), message: Text("Changes to ladders could not be saved. \(errorMessage)"), dismissButton: .default(Text("OK")))
-                    }
-                    .disabled(self.editMode == .active)
-            }.padding()
-            .navigationBarTitle(Text("Ladders"), displayMode: .inline)
-            .navigationBarItems(leading: EditButton(), trailing: addButton)
-            .environment(\.editMode, $editMode)
+                    SaveButton(action: self.onSave)
+                        .alert(isPresented: $fileSaveError) {
+                            Alert(title: Text("Error Saving Ladders"), message: Text("Changes to ladders could not be saved. \(errorMessage)"), dismissButton: .default(Text("OK")))
+                        }
+                        .disabled(self.editMode == .active)
+                }.padding()
+                .navigationBarTitle(Text("Ladders"), displayMode: .inline)
+                .navigationBarItems(leading: EditButton(), trailing: addButton)
+                .environment(\.editMode, $editMode)
+            }
+            // Force full screen for this view even on iPad
+            .navigationViewStyle(StackNavigationViewStyle())
         }
-        // Force full screen for this view even on iPad
-        .navigationViewStyle(StackNavigationViewStyle())
     }
 
     // We create a binding for each template, otherwise delete does not work.  See https://troz.net/post/2019/swiftui-data-flow/ where this is the least ugly of several ugly work arounds.
