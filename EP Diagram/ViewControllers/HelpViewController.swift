@@ -15,8 +15,13 @@ class HelpViewController: UIViewController, WKNavigationDelegate {
     @IBOutlet var helpWebView: WKWebView!
     @IBOutlet var loadingLabel: UILabel!
 
+    static let inHelpKey = "inHelpKey"
+    static let contentOffsetYKey = "contentOffsetYKey"
+    var restorationInfo: [AnyHashable: Any]?
+
     override func viewDidLoad() {
     super.viewDidLoad()
+
         loadingLabel.text = L("Loading...")
         guard let url = Bundle.main.url(forResource: "help", withExtension: "html") else { return }
         helpWebView.navigationDelegate = self
@@ -26,6 +31,32 @@ class HelpViewController: UIViewController, WKNavigationDelegate {
         title = L("Help")
 
         // Do any additional setup after loading the view.
+    }
+
+    override func viewDidAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
+        self.userActivity = self.view.window?.windowScene?.userActivity
+        self.restorationInfo = nil
+    }
+
+    var didFirstLayout = false
+    override func viewDidLayoutSubviews() {
+        if didFirstLayout { return }
+        didFirstLayout = true
+        // FIXME: scrolling to y offset not working, ? why.  Not crucial though.
+//        let info = restorationInfo
+//        if let contentOffsetY = info?[HelpViewController.contentOffsetYKey] as? CGFloat {
+////            helpWebView.scrollView.setContentOffset(CGPoint(x: 0, y: contentOffsetY), animated: false)
+////            helpWebView.evaluateJavaScript("window.scrollTo(0,\(contentOffsetY)", completionHandler: nil)
+//        }
+    }
+
+    override func updateUserActivityState(_ activity: NSUserActivity) {
+        os_log("updateUserActivityState(activity:) - HelpViewController", log: .lifeCycle, type: .info)
+        super.updateUserActivityState(activity)
+        let contentOffset = helpWebView.scrollView.contentOffset
+        activity.addUserInfoEntries(from: [HelpViewController.contentOffsetYKey: contentOffset.y])
+        activity.addUserInfoEntries(from: [HelpViewController.inHelpKey: true])
     }
     
 

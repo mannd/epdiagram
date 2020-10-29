@@ -59,6 +59,7 @@ final class ViewController: UIViewController {
     var calibration = Calibration()
 
     var preferences: Preferences = Preferences()
+    var restorationInfo: [AnyHashable: Any]?
 
     // Speed up appearance of image picker by initializing it here.
     let imagePicker: UIImagePickerController = UIImagePickerController()
@@ -68,7 +69,11 @@ final class ViewController: UIViewController {
         super.viewDidLoad()
 
         let info = self.restorationInfo
-        print("info", info as Any)
+        if let info = info {
+            for item in info {
+                print(item)
+            }
+        }
         if let title = info?["title"] as? String {
             self.title = title
         }
@@ -151,13 +156,11 @@ final class ViewController: UIViewController {
         }
     }
 
-    var restorationInfo: [AnyHashable: Any]?
-
     override func viewDidAppear(_ animated: Bool) {
         os_log("viewDidAppear() - ViewController", log: OSLog.viewCycle, type: .info)
         super.viewDidAppear(animated)
+        // See https://github.com/mattneub/Programming-iOS-Book-Examples/blob/master/bk2ch06p357StateSaveAndRestoreWithNSUserActivity/ch19p626pageController/SceneDelegate.swift
         self.restorationInfo = nil
-        // FIXME: See https://github.com/mattneub/Programming-iOS-Book-Examples/blob/master/bk2ch06p357StateSaveAndRestoreWithNSUserActivity/ch19p626pageController/SceneDelegate.swift
         self.userActivity = self.view.window?.windowScene?.userActivity
 
         assertDelegatesNonNil()
@@ -172,8 +175,21 @@ final class ViewController: UIViewController {
         NotificationCenter.default.addObserver(self, selector: #selector(didDisconnect), name: UIScene.didDisconnectNotification, object: nil)
         updateUndoRedoButtons()
         resetViews()
+    }
 
-       
+    // We only want to use the restorationInfo once when view controller first appears.
+    var didFirstLayout = false
+    override func viewDidLayoutSubviews() {
+        os_log("viewDidLayoutSubviews() - ViewController", log: .viewCycle, type: .info)
+        if didFirstLayout { return }
+        didFirstLayout = true
+        let info = restorationInfo
+        if let inHelp = info?[HelpViewController.inHelpKey] as? Bool, inHelp {
+            performShowHelpSegue()
+        }
+        if let inPreferences = info?["inPreferences"] as? Bool, inPreferences {
+            performShowPreferencesSegue()
+        }
     }
 
     override func viewWillDisappear(_ animated: Bool) {

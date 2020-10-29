@@ -14,6 +14,7 @@ struct PreferencesView: View {
     @State private var showBlock = UserDefaults.standard.bool(forKey: Preferences.defaultShowBlockKey)
     @State private var showIntervals = UserDefaults.standard.bool(forKey: Preferences.defaultShowIntervalsKey)
     @Environment(\.presentationMode) private var presentationMode: Binding<PresentationMode>
+    @SceneStorage("inPreferences") private var inPreferences = true
 
     var body: some View {
         NavigationView {
@@ -37,6 +38,7 @@ struct PreferencesView: View {
             .navigationBarTitle("Preferences", displayMode: .inline)
         }
         .navigationViewStyle(StackNavigationViewStyle())
+        .userActivity("org.epstudios.epdiagram.mainActivity", isActive: true, {_ in })
     }
 
     func onSave() {
