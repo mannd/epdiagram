@@ -16,9 +16,14 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         // Use this method to optionally configure and attach the UIWindow `window` to the provided UIWindowScene `scene`.
         // If using a storyboard, the `window` property will automatically be initialized and attached to the scene.
         // This delegate does not imply the connecting scene or session are new (see `application:configurationForConnectingSceneSession` instead).
-        guard let _ = (scene as? UIWindowScene) else { return }
+        os_log("scene(scene:willConnectTo:options:), %s", log: .lifeCycle, type: .info, scene.session.persistentIdentifier)
+        guard let scene = (scene as? UIWindowScene) else { return }
+        scene.userActivity = session.stateRestorationActivity ?? NSUserActivity(activityType: "org.epstudios.epdiagram.mainActivity")
+        let navigationController = window?.rootViewController as? UINavigationController
+        if let rvc = navigationController?.viewControllers.first as? ViewController {
+            rvc.restorationInfo = scene.userActivity?.userInfo
+        }
     }
-
 
     func sceneWillEnterForeground(_ scene: UIScene) {
         os_log("sceneWillEnterForeground(scene:), %s", log: .lifeCycle, type: .info, scene.session.persistentIdentifier)
@@ -34,6 +39,16 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
 
     func sceneDidBecomeActive(_ scene: UIScene) {
         os_log("sceneDidBecomeActive(scene:), %s", log: .lifeCycle, type: .info, scene.session.persistentIdentifier)
+    }
+
+    func sceneDidDisconnect(_ scene: UIScene) {
+        os_log("sceneDidDisconnect(scene:), %s", log: .lifeCycle, type: .info, scene.session.persistentIdentifier)
+    }
+
+    // TODO: load ladder and image from User Activity and file cache.
+    func stateRestorationActivity(for scene: UIScene) -> NSUserActivity? {
+        os_log("stateRestorationActivity(scene:), %s", log: .lifeCycle, type: .info, scene.session.persistentIdentifier)
+        return scene.userActivity
     }
 
     func scene(_ scene: UIScene, openURLContexts URLContexts: Set<UIOpenURLContext>) {

@@ -27,6 +27,8 @@
 		8E2BA1D024A3BDD7002D997F /* PreferencesView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8E2BA1CF24A3BDD7002D997F /* PreferencesView.swift */; };
 		8E35924924BE9B27001E23D5 /* DiagramIO.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8E35924824BE9B27001E23D5 /* DiagramIO.swift */; };
 		8E3AD1372459CABF0085BDD4 /* LocationInLadder.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8E3AD1362459CABF0085BDD4 /* LocationInLadder.swift */; };
+		8E40975025473F6D00932CE3 /* Diagram+restore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8E40974F25473F6D00932CE3 /* Diagram+restore.swift */; };
+		8E438A60254A50590015110E /* AppState.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8E438A5F254A50590015110E /* AppState.swift */; };
 		8E4A52EF24886B16007406F5 /* Diagram.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8E4A52EE24886B16007406F5 /* Diagram.swift */; };
 		8E4ACA8024478A6E00575538 /* BlackView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8E4ACA7F24478A6E00575538 /* BlackView.swift */; };
 		8E4ACA8224478D7C00575538 /* HamburgerTableViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8E4ACA8124478D7C00575538 /* HamburgerTableViewController.swift */; };
@@ -121,6 +123,8 @@
 		8E2BA1CF24A3BDD7002D997F /* PreferencesView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PreferencesView.swift; sourceTree = "<group>"; };
 		8E35924824BE9B27001E23D5 /* DiagramIO.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DiagramIO.swift; sourceTree = "<group>"; };
 		8E3AD1362459CABF0085BDD4 /* LocationInLadder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocationInLadder.swift; sourceTree = "<group>"; };
+		8E40974F25473F6D00932CE3 /* Diagram+restore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Diagram+restore.swift"; sourceTree = "<group>"; };
+		8E438A5F254A50590015110E /* AppState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppState.swift; sourceTree = "<group>"; };
 		8E4A52EE24886B16007406F5 /* Diagram.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Diagram.swift; sourceTree = "<group>"; };
 		8E4ACA7F24478A6E00575538 /* BlackView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BlackView.swift; sourceTree = "<group>"; };
 		8E4ACA8124478D7C00575538 /* HamburgerTableViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HamburgerTableViewController.swift; sourceTree = "<group>"; };
@@ -243,6 +247,7 @@
 				8E973F9A24C4BF0800AB41C3 /* String+isBlank.swift */,
 				8EBC824024E5E04800B5CA29 /* UIImage+emptyImage.swift */,
 				8E9F0983253CF483009BC968 /* UINavigationController+gestureRecognizerShouldBegin.swift */,
+				8E40974F25473F6D00932CE3 /* Diagram+restore.swift */,
 			);
 			path = Extensions;
 			sourceTree = "<group>";
@@ -353,6 +358,7 @@
 				8ECA9FB42470A07B0016D939 /* RegionTemplate.swift */,
 				8E856CF324EDC5E10064121F /* Segment.swift */,
 				8E982F9224EAF8B500E94F71 /* Zone.swift */,
+				8E438A5F254A50590015110E /* AppState.swift */,
 			);
 			path = Models;
 			sourceTree = "<group>";
@@ -557,6 +563,7 @@
 				8E253DD3244A8799008CC56B /* ViewController+UIScrollViewDelegate.swift in Sources */,
 				8E6EB6C02484778E00E5F883 /* Notification+didUndoableAction.swift in Sources */,
 				8E9550BD2474B22000E1B125 /* FileIO.swift in Sources */,
+				8E438A60254A50590015110E /* AppState.swift in Sources */,
 				8E856CF224EDC53D0064121F /* CGPoint+clampY.swift in Sources */,
 				8E973F9B24C4BF0800AB41C3 /* String+isBlank.swift in Sources */,
 				8EADC2A924D64E1200C5D3D8 /* SampleSelector.swift in Sources */,
@@ -585,6 +592,7 @@
 				8ED3B1B62360DA0D00549381 /* Anchor.swift in Sources */,
 				8E4ACA842447905E00575538 /* HamburgerCell.swift in Sources */,
 				8E4ACA862447935600575538 /* HamburgerLayer.swift in Sources */,
+				8E40975025473F6D00932CE3 /* Diagram+restore.swift in Sources */,
 				8ECB309925462C2D00DC79A8 /* SaveButton.swift in Sources */,
 				8EF9166B227926BC00B51F17 /* LadderView.swift in Sources */,
 				8E2439F624B14F770044AEAB /* Interval.swift in Sources */,

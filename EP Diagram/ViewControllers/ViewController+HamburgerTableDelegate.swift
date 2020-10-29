@@ -158,22 +158,22 @@ extension ViewController: HamburgerTableDelegate, UIImagePickerControllerDelegat
         guard let diagramName = diagram.name, !diagramName.isBlank else {
             let alert = UIAlertController(title: L("Save Diagram"), message: L("Give a name and optional description to this diagram"), preferredStyle: .alert)
             alert.addAction(UIAlertAction(title: L("Cancel"), style: .cancel))
-            alert.addTextField { textField in
+            alert.addTextField { [self] textField in
                 textField.placeholder = L("Diagram name")
-                textField.text = self.diagram.name
+                textField.text = diagram.name
             }
-            alert.addTextField { textField in
+            alert.addTextField { [self] textField in
                 textField.placeholder = L("Diagram description")
-                textField.text = self.diagram.description
+                textField.text = diagram.description
             }
-            alert.addAction(UIAlertAction(title: L("Save"), style: .default) { action in
+            alert.addAction(UIAlertAction(title: L("Save"), style: .default) { [self] action in
                 if let name = alert.textFields?.first?.text, let description = alert.textFields?[1].text {
                     do {
                         if try DiagramIO.diagramDirURLExists(for: name) {
                             throw FileIOError.duplicateDiagramName
                         }
-                        self.diagram.name = name
-                        self.diagram.description = description
+                        diagram.name = name
+                        diagram.description = description
                         try self.doSaveDiagram()
                         if let completion = completion {
                             completion()
@@ -185,8 +185,8 @@ extension ViewController: HamburgerTableDelegate, UIImagePickerControllerDelegat
                             message: L("Please choose a different name.  This name is a duplicate and would overwrite the diagram with this name."))
                     } catch {
                         Common.showFileError(viewController: self, error: error)
-                        self.diagram.name = nil
-                        self.diagram.description = ""
+                        diagram.name = nil
+                        diagram.description = ""
                     }
                 }
             })
@@ -214,10 +214,10 @@ extension ViewController: HamburgerTableDelegate, UIImagePickerControllerDelegat
         alert.addTextField { textField in
             textField.placeholder = L("New diagram name")
         }
-        alert.addAction(UIAlertAction(title: L("Rename"), style: .default) { action in
+        alert.addAction(UIAlertAction(title: L("Rename"), style: .default) { [self] action in
             if let name = alert.textFields?.first?.text {
                 do {
-                    try self.diagram.rename(newName: name)
+                    try diagram.rename(newName: name)
                     self.setTitle()
                 } catch {
                     Common.showFileError(viewController: self, error: error)
@@ -236,10 +236,10 @@ extension ViewController: HamburgerTableDelegate, UIImagePickerControllerDelegat
         alert.addTextField { textField in
             textField.placeholder = L("Duplicate diagram name")
         }
-        alert.addAction(UIAlertAction(title: L("Duplicate"), style: .default) { action in
+        alert.addAction(UIAlertAction(title: L("Duplicate"), style: .default) { [self] action in
             if let name = alert.textFields?.first?.text {
                 do {
-                    try self.diagram.duplicate(duplicateName: name)
+                    try diagram.duplicate(duplicateName: name)
                     self.setTitle()
                 } catch {
                     Common.showFileError(viewController: self, error: error)

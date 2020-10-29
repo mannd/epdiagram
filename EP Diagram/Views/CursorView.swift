@@ -38,7 +38,7 @@ final class CursorView: ScaledView {
     var lineWidth: CGFloat = 2
     var color: UIColor = UIColor.systemBlue
 
-    private var cursor: Cursor
+    private var cursor: Cursor = Cursor()
     private var rawCursorHeight: CGFloat?
 
     private var caliper: Caliper = Caliper()
@@ -69,28 +69,21 @@ final class CursorView: ScaledView {
     // MARK: - init
 
     required init?(coder: NSCoder) {
-        self.cursor = Cursor()
-        self.cursor.visible = false
         super.init(coder: coder)
-        didLoad()
+        setupView()
     }
 
     override init(frame: CGRect) {
-        self.cursor = Cursor()
-        self.cursor.visible = false
         super.init(frame: frame)
-        didLoad()
+        setupView()
     }
 
-    private func didLoad() {
+    private func setupView() {
         self.isOpaque = false // CursorView is mostly transparent, so let iOS know.
         self.layer.masksToBounds = true // Draw a border around the view.
-        if #available(iOS 13.0, *) {
-            self.layer.borderColor = UIColor.label.cgColor
-        } else {
-            self.layer.borderColor = UIColor.black.cgColor
-        }
+        self.layer.borderColor = UIColor.label.cgColor
         self.layer.borderWidth = 1
+        self.cursor.visible = false
 
         let singleTapRecognizer = UITapGestureRecognizer(target: self, action: #selector(singleTap))
         singleTapRecognizer.numberOfTapsRequired = 1
