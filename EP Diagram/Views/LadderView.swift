@@ -88,7 +88,7 @@ final class LadderView: ScaledView {
         }
     }
     
-    internal var ladder: Ladder
+    var ladder: Ladder = Ladder.defaultLadder()
 
 
     private var activeRegion: Region? {
@@ -137,27 +137,24 @@ final class LadderView: ScaledView {
 
     // MARK: - init
 
+    // This is not called because view is created from storyboard.
     override init(frame: CGRect) {
         os_log("init(frame:) - LadderView", log: .viewCycle, type: .info)
-        self.ladder = Ladder.defaultLadder()
-        activeRegion = ladder.regions[0]
         super.init(frame: frame)
-        didLoad()
+        setupView()
     }
 
     required init?(coder aDecoder: NSCoder) {
         os_log("init(coder:) - LadderView", log: .viewCycle, type: .info)
-        self.ladder = Ladder.defaultLadder()
-        activeRegion = ladder.regions[0]
         super.init(coder: aDecoder)
-        didLoad()
+        setupView()
     }
 
     func reset() {
         os_log("reset() - LadderView", log: .action, type: .info)
     }
 
-    private func didLoad() {
+    private func setupView() {
         os_log("didLoad() - LadderView", log: .action, type: .info)
         ladderViewHeight = self.frame.height
         initializeRegions()
@@ -211,7 +208,7 @@ final class LadderView: ScaledView {
         ladder = Ladder.defaultLadder()
         activeRegion = ladder.regions[0]
         cursorViewDelegate.cursorIsVisible = false
-        didLoad()
+        setupView()
     }
     
     // MARK: - Touches
@@ -1115,11 +1112,7 @@ final class LadderView: ScaledView {
         let labelRect = CGRect(x: 0, y: rect.origin.y + (rect.height - size.height) / 2, width: rect.origin.x, height: size.height)
         context.addRect(stringRect)
         context.setStrokeColor(red.cgColor)
-        if #available(iOS 13.0, *) {
-            context.setFillColor(UIColor.secondarySystemBackground.cgColor)
-        } else {
-            context.setFillColor(UIColor.white.cgColor)
-        }
+        context.setFillColor(UIColor.secondarySystemBackground.cgColor)
         context.setLineWidth(1)
         context.drawPath(using: .fillStroke)
         labelText.draw(in: labelRect)
@@ -1127,11 +1120,7 @@ final class LadderView: ScaledView {
 
     fileprivate func drawRegionArea(context: CGContext, rect: CGRect, region: Region) {
         // Draw top ladder line
-        if #available(iOS 13.0, *) {
-            context.setStrokeColor(UIColor.label.cgColor)
-        } else {
-            context.setStrokeColor(UIColor.black.cgColor)
-        }
+        context.setStrokeColor(UIColor.label.cgColor)
         context.setLineWidth(1)
         context.move(to: CGPoint(x: rect.origin.x, y: rect.origin.y))
         context.addLine(to: CGPoint(x: rect.width, y: rect.origin.y))
@@ -1198,7 +1187,7 @@ final class LadderView: ScaledView {
         drawPivots(forMark: mark, segment: Segment(proximal: p1, distal: p2), context: context)
         drawMarkText(forMark: mark, segment: segment, context: context)
 
-        context.setStrokeColor(getLineColor())
+        context.setStrokeColor(UIColor.label.cgColor)
     }
 
     fileprivate func drawIntervals(region: Region, context: CGContext) {
@@ -1400,14 +1389,6 @@ final class LadderView: ScaledView {
             return linkColor.cgColor
         case .none:
             return unhighlightedColor.cgColor
-        }
-    }
-
-    private func getLineColor() -> CGColor {
-        if #available(iOS 13.0, *) {
-            return UIColor.label.cgColor
-        } else {
-            return UIColor.black.cgColor
         }
     }
 

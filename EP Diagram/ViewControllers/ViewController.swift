@@ -51,8 +51,9 @@ final class ViewController: UIViewController {
     internal var _ladderIsLocked: Bool = false
     internal let _maxBlackAlpha: CGFloat = 0.4
 
+
     var diagramFilenames: [String] = []
-    var diagram: Diagram = Diagram.blankDiagram()
+      var diagram: Diagram = Diagram.defaultDiagram()
 
     // reference to calibration is passed to ladderView and cursorView
     var calibration = Calibration()
@@ -66,6 +67,12 @@ final class ViewController: UIViewController {
         os_log("viewDidLoad() - ViewController", log: OSLog.viewCycle, type: .info)
         super.viewDidLoad()
 
+        let info = self.restorationInfo
+        print("info", info as Any)
+        if let title = info?["title"] as? String {
+            self.title = title
+        }
+
         // These 2 views are guaranteed to exist, so the delegates are IUOs.
         cursorView.ladderViewDelegate = ladderView
         ladderView.cursorViewDelegate = cursorView
@@ -75,18 +82,9 @@ final class ViewController: UIViewController {
         cursorView.calibration = calibration
         ladderView.calibration = calibration
 
-        // TODO: Put log statement in openURL() and see if it is called twice when launching from URL.
-        // FIXME: Not clear if code below is needed here or in EP Calipers.  App opens external PDF files without it.  It looks like this is called after scaling/centering the view in EP Calipers.
-        //            if launchFromURL {
-        //                launchFromURL = false
-        //                if let launchURL = launchURL {
-        //                    openURL(url: launchURL)
-        //                }
-        //            }
-
-
         if Common.isRunningOnMac() {
             navigationController?.setNavigationBarHidden(true, animated: false)
+            // TODO: Need to convert hamburger menu to regular menu on Mac.
         }
         UIView.setAnimationsEnabled(true)
 
@@ -121,15 +119,13 @@ final class ViewController: UIViewController {
 
 //        if let lastDiagramName = preferences.lastDiagramName, let lastDiagram = Diagram.retrieveNoThrow(name: lastDiagramName) {
 //            diagram = lastDiagram
-//        }
+        //        }
+        enterForeground()
 
         imageView.image = diagram.image
         ladderView.ladder = diagram.ladder
 
-        setTitle()
-
-        // FIXME: Don't see why we need to do this, if it is default blank diagram the same diagram will appear when restarting the app.
-//        DiagramIO.saveLastDiagram(name: diagram.name)
+//        setTitle()
     }
 
     func getTitle() -> String {
@@ -141,7 +137,7 @@ final class ViewController: UIViewController {
     }
 
     func setTitle() {
-        title = diagram.isDirty ? getTitle() + "*" : getTitle()
+        title = getTitle()
     }
 
     func setMode(_ mode: Mode) {
@@ -155,20 +151,48 @@ final class ViewController: UIViewController {
         }
     }
 
+    var restorationInfo: [AnyHashable: Any]?
+
     override func viewDidAppear(_ animated: Bool) {
         os_log("viewDidAppear() - ViewController", log: OSLog.viewCycle, type: .info)
+        super.viewDidAppear(animated)
+        self.restorationInfo = nil
+        // FIXME: See https://github.com/mattneub/Programming-iOS-Book-Examples/blob/master/bk2ch06p357StateSaveAndRestoreWithNSUserActivity/ch19p626pageController/SceneDelegate.swift
+        self.userActivity = self.view.window?.windowScene?.userActivity
+
         assertDelegatesNonNil()
         // Need to set this here, after view draw, or Mac malpositions cursor at start of app.
         imageScrollView.contentInset = UIEdgeInsets(top: 0, left: leftMargin, bottom: 0, right: 0)
         showMainMenu()
         NotificationCenter.default.addObserver(self, selector: #selector(onDidUndoableAction(_:)), name: .didUndoableAction, object: nil)
+        NotificationCenter.default.addObserver(self, selector: #selector(updatePreferences), name: .preferencesChanged, object: nil)
+        NotificationCenter.default.addObserver(self, selector: #selector(enterBackground), name: UIScene.didEnterBackgroundNotification, object: nil)
+        NotificationCenter.default.addObserver(self, selector: #selector(enterForeground), name: UIScene.willEnterForegroundNotification, object: nil)
+        NotificationCenter.default.addObserver(self, selector: #selector(willConnect), name: UIScene.willConnectNotification, object: nil)
+        NotificationCenter.default.addObserver(self, selector: #selector(didDisconnect), name: UIScene.didDisconnectNotification, object: nil)
         updateUndoRedoButtons()
         resetViews()
+
+       
     }
 
     override func viewWillDisappear(_ animated: Bool) {
         super.viewWillDisappear(animated)
         NotificationCenter.default.removeObserver(self, name: .didUndoableAction, object: nil)
+        NotificationCenter.default.removeObserver(self, name: .preferencesChanged, object: nil)
+        NotificationCenter.default.removeObserver(self, name: UIScene.didEnterBackgroundNotification, object: nil)
+        NotificationCenter.default.removeObserver(self, name: UIScene.willEnterForegroundNotification, object: nil)
+        NotificationCenter.default.removeObserver(self, name: UIScene.willConnectNotification, object: nil)
+        NotificationCenter.default.removeObserver(self, name: UIScene.didDisconnectNotification, object: nil)
+    }
+
+    override
+    func updateUserActivityState(_ activity: NSUserActivity) {
+        os_log("updateUserActivityState called")
+        super.updateUserActivityState(activity)
+        let info = ["Diagram Name": diagram.name, "title": self.title]
+        activity.addUserInfoEntries(from: info as [AnyHashable : Any])
+
     }
 
     // Crash program at compile time if IUO delegates are nil.
@@ -558,7 +582,7 @@ final class ViewController: UIViewController {
 
     @IBSegueAction func showPreferences(_ coder: NSCoder) -> UIViewController? {
         preferences.retrieve()
-        let preferencesView = PreferencesView(delegate: self)
+        let preferencesView = PreferencesView()
         let hostingController = UIHostingController(coder: coder, rootView: preferencesView)
         return hostingController
     }

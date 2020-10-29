@@ -64,50 +64,70 @@ struct Diagram {
         guard var name = name else { throw FileIOError.diagramIsUnnamed }
         if name.isBlank { throw FileIOError.diagramNameIsBlank }
         name = DiagramIO.cleanupFilename(name)
-        let diagramDirURL = try DiagramIO.getDiagramDirURL(for: name)
+        try save(name: name)
+    }
+
+    func save(name: String) throws {
+        let url = try DiagramIO.getDiagramDirURL(for: name)
+        try save(name: name, url: url)
+//        if let image = image {
+//            let imageData = image.pngData()
+//            let imageURL = url.appendingPathComponent(FileIO.imageFilename, isDirectory: false)
+//            try imageData?.write(to: imageURL)
+//        }
+//        let encoder = JSONEncoder()
+//        let diagramData = try encoder.encode(self.diagramData)
+//        let ladderURL = url.appendingPathComponent(FileIO.ladderFilename, isDirectory: false)
+//        FileManager.default.createFile(atPath: ladderURL.path, contents: diagramData, attributes: nil)
+    }
+
+    func save(name: String, url: URL) throws {
         if let image = image {
             let imageData = image.pngData()
-            let imageURL = diagramDirURL.appendingPathComponent(FileIO.imageFilename, isDirectory: false)
+            let imageURL = url.appendingPathComponent(FileIO.imageFilename, isDirectory: false)
             try imageData?.write(to: imageURL)
         }
         let encoder = JSONEncoder()
         let diagramData = try encoder.encode(self.diagramData)
-        let ladderURL = diagramDirURL.appendingPathComponent(FileIO.ladderFilename, isDirectory: false)
+        let ladderURL = url.appendingPathComponent(FileIO.ladderFilename, isDirectory: false)
         FileManager.default.createFile(atPath: ladderURL.path, contents: diagramData, attributes: nil)
-        ladder.isDirty = false
     }
 
     mutating func retrieve() throws {
         os_log("retrieve() - Diagram", log: .action, type: .info)
         guard let name = name else { throw FileIOError.diagramIsUnnamed }
         if name.isBlank { throw FileIOError.diagramNameIsBlank }
-        let diagramDirURL = try DiagramIO.getDiagramDirURL(for: name)
-        let imageURL = diagramDirURL.appendingPathComponent(FileIO.imageFilename, isDirectory: false)
-        var image: UIImage? = nil
-        if FileManager.default.fileExists(atPath: imageURL.path) {
-            image = UIImage(contentsOfFile: imageURL.path)
-        }
-        let ladderURL = diagramDirURL.appendingPathComponent(FileIO.ladderFilename, isDirectory: false)
-        let decoder = JSONDecoder()
-        if let data = FileManager.default.contents(atPath: ladderURL.path) {
-            let diagramData = try decoder.decode(DiagramData.self, from: data)
-            self.image = image
-            self.diagramData = diagramData
-        }
-        else {
-            throw FileIOError.diagramDirectoryNotFound
-        }
+        self = try Diagram.retrieve(name: name)
     }
 
     static func retrieve(name: String) throws -> Diagram {
         if name.isBlank { throw FileIOError.diagramNameIsBlank }
         let diagramDirURL = try DiagramIO.getDiagramDirURL(for: name)
-        let imageURL = diagramDirURL.appendingPathComponent(FileIO.imageFilename, isDirectory: false)
+        return try retrieve(name: name, url: diagramDirURL)
+//        let imageURL = diagramDirURL.appendingPathComponent(FileIO.imageFilename, isDirectory: false)
+//        var image: UIImage? = nil
+//        if FileManager.default.fileExists(atPath: imageURL.path) {
+//            image = UIImage(contentsOfFile: imageURL.path)
+//        }
+//        let ladderURL = diagramDirURL.appendingPathComponent(FileIO.ladderFilename, isDirectory: false)
+//        let decoder = JSONDecoder()
+//        if let data = FileManager.default.contents(atPath: ladderURL.path) {
+//            let diagramData = try decoder.decode(DiagramData.self, from: data)
+//            let diagram = Diagram(name: name, image: image, diagramData: diagramData)
+//            return diagram
+//        }
+//        else {
+//            throw FileIOError.diagramDirectoryNotFound
+//        }
+    }
+
+    static func retrieve(name: String, url: URL) throws -> Diagram {
+        let imageURL = url.appendingPathComponent(FileIO.imageFilename, isDirectory: false)
         var image: UIImage? = nil
         if FileManager.default.fileExists(atPath: imageURL.path) {
             image = UIImage(contentsOfFile: imageURL.path)
         }
-        let ladderURL = diagramDirURL.appendingPathComponent(FileIO.ladderFilename, isDirectory: false)
+        let ladderURL = url.appendingPathComponent(FileIO.ladderFilename, isDirectory: false)
         let decoder = JSONDecoder()
         if let data = FileManager.default.contents(atPath: ladderURL.path) {
             let diagramData = try decoder.decode(DiagramData.self, from: data)

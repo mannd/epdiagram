@@ -17,23 +17,25 @@ struct LadderTemplateEditor: View {
     @Environment(\.presentationMode) var presentationMode: Binding<PresentationMode>
 
     var body: some View {
-        NavigationView {
-            Form {
-                Section(header: Text("Name")) {
-                    TextField(ladderTemplate.name, text: $ladderTemplate.name)
+        VStack {
+            NavigationView {
+                Form {
+                    Section(header: Text("Name")) {
+                        TextField(ladderTemplate.name, text: $ladderTemplate.name)
+                    }
+                    Section(header: Text("Description")) {
+                        TextEditor(text: $ladderTemplate.description)
+                    }
+                    Section(header: Text("Regions")) {
+                        RegionListView(ladderTemplate: $ladderTemplate)
+                    }
                 }
-                Section(header: Text("Description")) {
-                    TextEditor(text: $ladderTemplate.description)
-                }
-                Section(header: Text("Regions")) {
-                    RegionListView(ladderTemplate: $ladderTemplate)
-                }
+                .navigationBarTitle(Text("Edit Ladder"), displayMode: .inline)
+                .navigationBarItems(leading: EditButton(), trailing: addButton)
+                .environment(\.editMode, $editMode)
             }
-            .navigationBarTitle(Text("Edit Ladder"), displayMode: .inline)
-            .navigationBarItems(leading: EditButton(), trailing: addButton)
-            .environment(\.editMode, $editMode)
+            .navigationViewStyle(StackNavigationViewStyle())
         }
-        .navigationViewStyle(StackNavigationViewStyle())
     }
 
     private var addButton: some View {

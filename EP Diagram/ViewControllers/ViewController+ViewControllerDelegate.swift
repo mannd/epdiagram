@@ -39,11 +39,11 @@ extension ViewController: ViewControllerDelegate {
         guard let diagramName = name else { return }
         P("diagram name = \(diagramName)")
         do {
-            self.diagram = try Diagram.retrieve(name: diagramName)
-            self.imageView.image = self.diagram.image
-            self.ladderView.ladder = self.diagram.ladder
+            diagram = try Diagram.retrieve(name: diagramName)
+            self.imageView.image = diagram.image
+            self.ladderView.ladder = diagram.ladder
             self.setTitle()
-            DiagramIO.saveLastDiagram(name: self.diagram.name)
+            DiagramIO.saveLastDiagram(name: diagram.name)
             self.setViewsNeedDisplay()
         } catch {
             os_log("Error: %s", log: .errors, type: .error, error.localizedDescription)
@@ -79,6 +79,7 @@ extension ViewController: ViewControllerDelegate {
 //        setViewsNeedDisplay()
 //    }
 
+    @objc
     func updatePreferences() {
         os_log("updatePreferences()", log: .action, type: .info)
         ladderView.lineWidth = CGFloat(UserDefaults.standard.double(forKey: Preferences.defaultLineWidthKey))
@@ -87,6 +88,65 @@ extension ViewController: ViewControllerDelegate {
         ladderView.showIntervals = UserDefaults.standard.bool(forKey: Preferences.defaultShowIntervalsKey)
         setViewsNeedDisplay()
     }
+
+    @objc
+    func enterBackground() {
+//        os_log("enterBackground()", log: .lifeCycle, type: .info)
+//        // save ladder to User Activity here and cache image.
+//        // Remember image doesn't change, so only cache once.
+//        if let id = view.window?.windowScene?.session.persistentIdentifier {
+//            do {
+//                if var url = FileIO.getURL(for: .cache) {
+//                    os_log("cach path = %s", url.path)
+//                    url = url.appendingPathComponent(id)
+//                    if !FileManager.default.fileExists(atPath: url.path) {
+//                        try FileManager.default.createDirectory(atPath: url.path, withIntermediateDirectories: true, attributes: nil)
+//                    }
+//                    try diagram.save(name: id, url: url)
+//                    diagram.image = nil
+//                }
+//            } catch {
+//                os_log("Error saving temp diagram file: %s", log: .errors, type: .error, error.localizedDescription)
+//            }
+//        }
+    }
+
+    @objc
+    func enterForeground() {
+//        os_log("enterForground()", log: .lifeCycle, type: .info)
+//        // FIXME: id is nil here?? why??
+//        if let id = view.window?.windowScene?.session.persistentIdentifier {
+//            do {
+//                if var url = FileIO.getURL(for: .cache) {
+//                    url = url.appendingPathComponent(id)
+//                    try diagram = Diagram.retrieve(name: id, url: url)
+//                    url = url.appendingPathComponent(id)
+//                    if FileManager.default.fileExists(atPath: url.path) {
+//                        do {
+//                            try FileManager.default.removeItem(at: url)
+//                        } catch {
+//                            fatalError(error.localizedDescription)
+//                        }
+//                    }
+//                }
+//            } catch {
+//                os_log("Error retrieving temp diagram file: %s", log: .errors, type: .error, error.localizedDescription)
+//            }
+//        }
+    }
+
+    @objc
+    func willConnect() {
+        os_log("willConnect()", log: .lifeCycle, type: .info)
+    }
+
+    @objc
+    func didDisconnect() {
+        os_log("didDisconnect()", log: .lifeCycle, type: .info)
+
+    }
+
+    
 
     func saveTemplates(_ templates: [LadderTemplate]) {
         os_log("saveTemplates()", log: .action, type: .info)
@@ -102,8 +162,8 @@ extension ViewController: ViewControllerDelegate {
         os_log("selectSampleDiagram()", log: .action, type: .info)
         guard let diagram = diagram else { return }
         self.diagram = diagram
-        self.imageView.image = self.diagram.image
-        self.ladderView.ladder = self.diagram.ladder
+        self.imageView.image = diagram.image
+        self.ladderView.ladder = diagram.ladder
         setTitle()
         setViewsNeedDisplay()
     }
