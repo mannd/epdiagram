@@ -18,9 +18,11 @@ class HelpViewController: UIViewController, WKNavigationDelegate {
     static let inHelpKey = "inHelpKey"
     static let contentOffsetYKey = "contentOffsetYKey"
     var restorationInfo: [AnyHashable: Any]?
+    var storedContentOffsetY: CGFloat = 0
 
     override func viewDidLoad() {
-    super.viewDidLoad()
+        os_log("viewDidLoad() - HelpViewConroller", log: .viewCycle, type: .info)
+        super.viewDidLoad()
 
         loadingLabel.text = L("Loading...")
         guard let url = Bundle.main.url(forResource: "help", withExtension: "html") else { return }
@@ -30,25 +32,17 @@ class HelpViewController: UIViewController, WKNavigationDelegate {
         helpWebView.load(request)
         title = L("Help")
 
-        // Do any additional setup after loading the view.
+        let info = restorationInfo
+        if let offsetY = info?[HelpViewController.contentOffsetYKey] as? CGFloat {
+            storedContentOffsetY = offsetY
+        }
     }
 
     override func viewDidAppear(_ animated: Bool) {
-        super.viewWillAppear(animated)
+        os_log("viewDidAppear - HelpViewController", log: .viewCycle, type: .info)
+        super.viewDidAppear(animated)
         self.userActivity = self.view.window?.windowScene?.userActivity
         self.restorationInfo = nil
-    }
-
-    var didFirstLayout = false
-    override func viewDidLayoutSubviews() {
-        if didFirstLayout { return }
-        didFirstLayout = true
-        // FIXME: scrolling to y offset not working, ? why.  Not crucial though.
-//        let info = restorationInfo
-//        if let contentOffsetY = info?[HelpViewController.contentOffsetYKey] as? CGFloat {
-////            helpWebView.scrollView.setContentOffset(CGPoint(x: 0, y: contentOffsetY), animated: false)
-////            helpWebView.evaluateJavaScript("window.scrollTo(0,\(contentOffsetY)", completionHandler: nil)
-//        }
     }
 
     override func updateUserActivityState(_ activity: NSUserActivity) {
@@ -62,12 +56,13 @@ class HelpViewController: UIViewController, WKNavigationDelegate {
 
     func webView(_ webView: WKWebView, didStartProvisionalNavigation navigation: WKNavigation!) {
         loadingLabel.isHidden = false
-
     }
 
     func webView(_ webView: WKWebView, didFinish navigation: WKNavigation!) {
         loadingLabel.isHidden = true
-
+        // animated: must be true or will not scroll to position.
+        helpWebView.scrollView.setContentOffset(CGPoint(x: 0, y: storedContentOffsetY), animated: true)
+        storedContentOffsetY = 0
     }
 
 }

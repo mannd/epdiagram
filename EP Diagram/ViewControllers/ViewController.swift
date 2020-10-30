@@ -637,6 +637,12 @@ final class ViewController: UIViewController {
         performSegue(withIdentifier: "showHelpSegue", sender: self)
     }
 
+    @IBSegueAction func performShowHelpSegueAction(_ coder: NSCoder) -> HelpViewController? {
+        let helpViewController = HelpViewController(coder: coder)
+        helpViewController?.restorationInfo = self.restorationInfo
+        return helpViewController
+    }
+    
     func performShowPreferencesSegue() {
         performSegue(withIdentifier: "showPreferencesSegue", sender: self)
     }

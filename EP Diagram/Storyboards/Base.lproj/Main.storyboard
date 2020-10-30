@@ -89,7 +89,7 @@
                         <segue destination="lYc-7T-fo8" kind="show" identifier="showTemplateEditorSegue" destinationCreationSelector="showTemplateEditor:" id="yOM-cF-bRp"/>
                         <segue destination="laf-9G-lzB" kind="show" identifier="showDiagramSelectorSegue" destinationCreationSelector="showDiagramSelector:" id="PMT-lw-9Pg"/>
                         <segue destination="aUo-Pc-QYX" kind="show" identifier="showPreferencesSegue" destinationCreationSelector="showPreferences:" id="JGa-0u-G6I"/>
-                        <segue destination="X4y-SM-iwI" kind="show" identifier="showHelpSegue" id="ezU-te-0lg"/>
+                        <segue destination="X4y-SM-iwI" kind="show" identifier="showHelpSegue" destinationCreationSelector="performShowHelpSegueAction:" id="ezU-te-0lg"/>
                         <segue destination="ggo-hf-FSM" kind="show" identifier="showSampleSelectorSegue" destinationCreationSelector="showSampleSelector:" id="ItN-ts-1CH"/>
                     </connections>
                 </viewController>
@@ -157,7 +157,7 @@
                 </hostingController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="SXR-j0-LQJ" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="1491" y="121"/>
+            <point key="canvasLocation" x="1604" y="485"/>
         </scene>
         <!--Help View Controller-->
         <scene sceneID="s9a-hu-d0H">
