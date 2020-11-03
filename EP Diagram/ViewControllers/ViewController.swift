@@ -64,7 +64,8 @@ final class ViewController: UIViewController {
     static let restorationContentOffsetXKey = "restorationContentOffsetXKey"
     static let restorationContentOffsetYKey = "restorationContentOffsetYKey"
     static let restorationZoomKey = "restorationZoomKey"
-    // calibration key?, etc.
+    static let restorationIsCalibratedKey = "restorationIsCalibrated"
+    static let restorationCalFactorKey = "restorationCalFactorKey"
     static let restorationFileNameKey = "restorationFileNameKey"
     var restorationInfo: [AnyHashable: Any]?
     var restorationFileName: String = ""
@@ -165,18 +166,33 @@ final class ViewController: UIViewController {
         }
     }
 
+    override func viewWillAppear(_ animated: Bool) {
+        os_log("viewWillAppear() - ViewController", log: .viewCycle, type: .info)
+        super.viewWillAppear(animated)
+
+    }
+
     override func viewDidAppear(_ animated: Bool) {
         os_log("viewDidAppear() - ViewController", log: OSLog.viewCycle, type: .info)
         super.viewDidAppear(animated)
         // See https://github.com/mattneub/Programming-iOS-Book-Examples/blob/master/bk2ch06p357StateSaveAndRestoreWithNSUserActivity/ch19p626pageController/SceneDelegate.swift
+        var restorationContentOffset = CGPoint()
         if let contentOffsetX = restorationInfo?[ViewController.restorationContentOffsetXKey] {
-            imageScrollView.contentOffset.x = contentOffsetX as? CGFloat ?? 0
+            restorationContentOffset.x = contentOffsetX as? CGFloat ?? 0
         }
         if let contentOffsetY = restorationInfo?[ViewController.restorationContentOffsetYKey] {
-            imageScrollView.contentOffset.y = contentOffsetY as? CGFloat ?? 0
+            restorationContentOffset.y = contentOffsetY as? CGFloat ?? 0
         }
+        print("restorationContentOffset = \(restorationContentOffset)")
+        imageScrollView.setContentOffset(restorationContentOffset, animated: true)
         if let zoomScale = restorationInfo?[ViewController.restorationZoomKey] {
             imageScrollView.zoomScale = zoomScale as? CGFloat ?? 1
+        }
+        if let isCalibrated = restorationInfo?[ViewController.restorationIsCalibratedKey] {
+            cursorView.setIsCalibrated(isCalibrated as? Bool ?? false)
+        }
+        if let calFactor = restorationInfo?[ViewController.restorationCalFactorKey] {
+            cursorView.calFactor = calFactor as? CGFloat ?? 1.0
         }
         self.restorationInfo = nil
         self.userActivity = self.view.window?.windowScene?.userActivity
@@ -224,11 +240,14 @@ final class ViewController: UIViewController {
         // FIXME: delete old restorationFileName info here
         deleteCacheFile(fileName: restorationFileName)
         restorationFileName = UUID().uuidString
+        print("updateUserActivityState contentOffset = \(imageScrollView.contentOffset)")
         let info: [AnyHashable: Any] = [
             ViewController.restorationFileNameKey: restorationFileName,
             ViewController.restorationContentOffsetXKey: imageScrollView.contentOffset.x,
             ViewController.restorationContentOffsetYKey: imageScrollView.contentOffset.y,
-            ViewController.restorationZoomKey: imageScrollView.zoomScale
+            ViewController.restorationZoomKey: imageScrollView.zoomScale,
+            ViewController.restorationIsCalibratedKey: cursorView.isCalibrated(),
+            ViewController.restorationCalFactorKey: cursorView.calFactor
         ]
         activity.addUserInfoEntries(from: info)
 
