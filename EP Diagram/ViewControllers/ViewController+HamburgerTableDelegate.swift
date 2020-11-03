@@ -472,7 +472,7 @@ extension ViewController: HamburgerTableDelegate, UIImagePickerControllerDelegat
         updateUndoRedoButtons()
         diagram.ladder.clear()
         diagram.image = image
-        imageView.image = image
+        setImageViewImage(with: image)
         imageScrollView.zoomScale = 1.0
         imageScrollView.contentOffset = CGPoint()
         cursorView.cursorIsVisible = false

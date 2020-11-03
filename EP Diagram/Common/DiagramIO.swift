@@ -80,4 +80,9 @@ class DiagramIO {
         }
     }
 
+    static func getRestorationURL() -> URL? {
+        guard let cacheURL = FileIO.getURL(for: .cache) else { return nil }
+        let restorationURL =  cacheURL.appendingPathComponent(FileIO.restorationDir)
+        return restorationURL
+    }
 }

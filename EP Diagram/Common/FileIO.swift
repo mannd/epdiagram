@@ -49,6 +49,7 @@ final class FileIO {
     static let epDiagramDir = "epdiagram"
     static let imageFilename = "image.png"
     static let ladderFilename = "ladder.json"
+    static let restorationDir = "restoration"
 
     enum Directory {
         case documents

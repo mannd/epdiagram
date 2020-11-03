@@ -173,10 +173,13 @@ struct Diagram {
         return Diagram(name: name, image: UIImage(named: "SampleECG")!, diagramData: diagramData)
     }
 
+
     static func blankDiagram(name: String? = nil) -> Diagram {
         let diagramData = DiagramData(description: "Blank diagram", ladder: Ladder.defaultLadder())
         let diagram = Diagram(name: name, image: nil, diagramData: diagramData)
 //        diagram.ladder.zone = Zone(regions: [diagram.ladder.regions[0], diagram.ladder.regions[1]], start: 100, end: 250)
         return diagram
     }
+
+
 }
