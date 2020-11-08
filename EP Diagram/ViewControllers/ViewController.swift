@@ -88,8 +88,10 @@ final class ViewController: UIViewController {
         if let fileName = info?[ViewController.restorationFileNameKey] as? String {
             if let diagram = restoreDiagramFromCache(fileName: fileName) {
                 self.diagram = diagram
-            } else {
-                diagram = Diagram.defaultDiagram()
+                // delete cache file here, after user update complete.
+                DispatchQueue.main.async {
+                    self.deleteCacheFile(fileName: fileName)
+                }
             }
         }
 
@@ -237,8 +239,9 @@ final class ViewController: UIViewController {
     func updateUserActivityState(_ activity: NSUserActivity) {
         os_log("updateUserActivityState called")
         super.updateUserActivityState(activity)
-        // FIXME: delete old restorationFileName info here
-        deleteCacheFile(fileName: restorationFileName)
+        // FIXME: make sure old cache is deleted
+        print("+++ restorationFileName: \(restorationFileName)")
+        listCacheFiles()
         restorationFileName = UUID().uuidString
         print("updateUserActivityState contentOffset = \(imageScrollView.contentOffset)")
         let info: [AnyHashable: Any] = [
@@ -250,7 +253,18 @@ final class ViewController: UIViewController {
             ViewController.restorationCalFactorKey: cursorView.calFactor
         ]
         activity.addUserInfoEntries(from: info)
+    }
 
+    private func listCacheFiles() {
+        guard let restorationURL = FileIO.getURL(for: .cache) else { return }
+        if let fileURLs = try? FileManager.default.contentsOfDirectory(at: restorationURL, includingPropertiesForKeys: nil), fileURLs.count > 0 {
+            for file in fileURLs {
+                let fileName = file.path
+                print("***** cache file paths = \(fileName)")
+            }
+        } else {
+            print("***** no cache files found")
+        }
     }
 
     @objc func didEnterBackground() {
@@ -264,7 +278,9 @@ final class ViewController: UIViewController {
 
     // FIXME: have separate cache dir and delete all in it, otherwise if program terminated we may leave cache files.
     func deleteCacheFile(fileName name: String) {
-        guard let restorationURL = DiagramIO.getRestorationURL() else { return }
+        os_log("deleteCacheFile(fileName:)", log: .action, type: .info)
+        guard let restorationURL = FileIO.getURL(for: .cache) else { return }
+        print("restorationURL = \(restorationURL.path)")
         do {
             let nameURL = restorationURL.appendingPathComponent(name)
             if FileManager.default.fileExists(atPath: nameURL.path) {
