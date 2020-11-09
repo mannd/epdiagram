@@ -10,7 +10,14 @@ import UIKit
 import os.log
 
 struct Diagram {
-    var name: String?
+    var fileName: String?
+    var name: String? {
+        get { diagramData.name }
+        set(newValue) {
+            diagramData.name = newValue
+            fileName = newValue
+        }
+    }
     var image: UIImage? // nil image is blank.
     var description: String {
         get { diagramData.description }
@@ -24,6 +31,7 @@ struct Diagram {
     // Future use?
 //    var creationDate: Date?
 //    var lastSavedDate: Date?
+
     // A diagram does not get a name until it is saved.
     var isSaved: Bool {
         !name.isBlank
@@ -35,16 +43,11 @@ struct Diagram {
 
     var diagramData: DiagramData = DiagramData()
     struct DiagramData: Codable {
-         var description: String = ""
-         var ladder: Ladder = Ladder.defaultLadder()
+        var name: String?
+        var description: String = ""
+        var ladder: Ladder = Ladder.defaultLadder()
         // creationDate, lastSavedDate?
     }
-
-//    init(name: String?, image: UIImage, ladder: Ladder) {
-//        self.name = name
-//        self.image = image
-//        self.ladder = ladder
-//    }
 
     init(name: String?, image: UIImage?, diagramData: DiagramData) {
         self.name = name
@@ -54,7 +57,7 @@ struct Diagram {
 
     // init a Diagram with default ladder.
     init(name: String?, image: UIImage?, description: String = "") {
-        let diagramData = DiagramData(description: description, ladder: Ladder.defaultLadder())
+        let diagramData = DiagramData(name: name, description: description, ladder: Ladder.defaultLadder())
         self = Diagram(name: name, image: image, diagramData: diagramData)
     }
 
@@ -64,24 +67,15 @@ struct Diagram {
         guard var name = name else { throw FileIOError.diagramIsUnnamed }
         if name.isBlank { throw FileIOError.diagramNameIsBlank }
         name = DiagramIO.cleanupFilename(name)
-        try save(name: name)
+        try save(fileName: name)
     }
 
-    func save(name: String) throws {
-        let url = try DiagramIO.getDiagramDirURL(for: name)
-        try save(name: name, url: url)
-//        if let image = image {
-//            let imageData = image.pngData()
-//            let imageURL = url.appendingPathComponent(FileIO.imageFilename, isDirectory: false)
-//            try imageData?.write(to: imageURL)
-//        }
-//        let encoder = JSONEncoder()
-//        let diagramData = try encoder.encode(self.diagramData)
-//        let ladderURL = url.appendingPathComponent(FileIO.ladderFilename, isDirectory: false)
-//        FileManager.default.createFile(atPath: ladderURL.path, contents: diagramData, attributes: nil)
+    func save(fileName: String) throws {
+        let url = try DiagramIO.getDiagramDirURL(for: fileName)
+        try save(fileName: fileName, url: url)
     }
 
-    func save(name: String, url: URL) throws {
+    func save(fileName: String, url: URL) throws {
         if let image = image {
             let imageData = image.pngData()
             let imageURL = url.appendingPathComponent(FileIO.imageFilename, isDirectory: false)
@@ -97,31 +91,16 @@ struct Diagram {
         os_log("retrieve() - Diagram", log: .action, type: .info)
         guard let name = name else { throw FileIOError.diagramIsUnnamed }
         if name.isBlank { throw FileIOError.diagramNameIsBlank }
-        self = try Diagram.retrieve(name: name)
+        self = try Diagram.retrieve(fileName: name)
     }
 
-    static func retrieve(name: String) throws -> Diagram {
-        if name.isBlank { throw FileIOError.diagramNameIsBlank }
-        let diagramDirURL = try DiagramIO.getDiagramDirURL(for: name)
-        return try retrieve(name: name, url: diagramDirURL)
-//        let imageURL = diagramDirURL.appendingPathComponent(FileIO.imageFilename, isDirectory: false)
-//        var image: UIImage? = nil
-//        if FileManager.default.fileExists(atPath: imageURL.path) {
-//            image = UIImage(contentsOfFile: imageURL.path)
-//        }
-//        let ladderURL = diagramDirURL.appendingPathComponent(FileIO.ladderFilename, isDirectory: false)
-//        let decoder = JSONDecoder()
-//        if let data = FileManager.default.contents(atPath: ladderURL.path) {
-//            let diagramData = try decoder.decode(DiagramData.self, from: data)
-//            let diagram = Diagram(name: name, image: image, diagramData: diagramData)
-//            return diagram
-//        }
-//        else {
-//            throw FileIOError.diagramDirectoryNotFound
-//        }
+    static func retrieve(fileName: String) throws -> Diagram {
+        if fileName.isBlank { throw FileIOError.diagramNameIsBlank }
+        let diagramDirURL = try DiagramIO.getDiagramDirURL(for: fileName)
+        return try retrieve(fileName: fileName, url: diagramDirURL)
     }
 
-    static func retrieve(name: String, url: URL) throws -> Diagram {
+    static func retrieve(fileName: String, url: URL) throws -> Diagram {
         let imageURL = url.appendingPathComponent(FileIO.imageFilename, isDirectory: false)
         var image: UIImage? = nil
         if FileManager.default.fileExists(atPath: imageURL.path) {
@@ -131,7 +110,7 @@ struct Diagram {
         let decoder = JSONDecoder()
         if let data = FileManager.default.contents(atPath: ladderURL.path) {
             let diagramData = try decoder.decode(DiagramData.self, from: data)
-            let diagram = Diagram(name: name, image: image, diagramData: diagramData)
+            let diagram = Diagram(name: fileName, image: image, diagramData: diagramData)
             return diagram
         }
         else {
@@ -140,7 +119,7 @@ struct Diagram {
     }
 
     static func retrieveNoThrow(name: String) -> Diagram? {
-        return try? retrieve(name: name)
+        return try? retrieve(fileName: name)
     }
 
     mutating func rename(newName: String) throws {
@@ -169,13 +148,13 @@ struct Diagram {
     }
 
     static func defaultDiagram(name: String? = nil) -> Diagram {
-        let diagramData = DiagramData(description: "Normal ECG", ladder: Ladder.defaultLadder())
+        let diagramData = DiagramData(name: "Normal ECG", description: "Normal ECG", ladder: Ladder.defaultLadder())
         return Diagram(name: name, image: UIImage(named: "SampleECG")!, diagramData: diagramData)
     }
 
 
     static func blankDiagram(name: String? = nil) -> Diagram {
-        let diagramData = DiagramData(description: "Blank diagram", ladder: Ladder.defaultLadder())
+        let diagramData = DiagramData(name: "Blank diagram", description: "Blank diagram", ladder: Ladder.defaultLadder())
         let diagram = Diagram(name: name, image: nil, diagramData: diagramData)
 //        diagram.ladder.zone = Zone(regions: [diagram.ladder.regions[0], diagram.ladder.regions[1]], start: 100, end: 250)
         return diagram

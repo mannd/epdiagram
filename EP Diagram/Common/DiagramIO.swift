@@ -69,6 +69,15 @@ class DiagramIO {
         }
     }
 
+    static func deleteCacheFiles() {
+        if let url = FileIO.getURL(for: .cache) {
+            let paths = FileIO.enumerateDirectory(url)
+            for path in paths {
+                FileIO.remove(path, from: .cache)
+            }
+        }
+    }
+
     static func deleteLadderTemplates() {
         do {
             if let url = FileIO.getURL(for: .documents) {
@@ -80,9 +89,10 @@ class DiagramIO {
         }
     }
 
+    static let restorationDir = ""
     static func getRestorationURL() -> URL? {
         guard let cacheURL = FileIO.getURL(for: .cache) else { return nil }
-        let restorationURL =  cacheURL.appendingPathComponent(FileIO.restorationDir)
+        let restorationURL =  cacheURL.appendingPathComponent(restorationDir)
         return restorationURL
     }
 }

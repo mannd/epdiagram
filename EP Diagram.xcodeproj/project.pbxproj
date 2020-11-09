@@ -61,6 +61,7 @@
 		8E8248DD23B53B55001A85F9 /* SeparatorView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8E8248DC23B53B55001A85F9 /* SeparatorView.swift */; };
 		8E856CF224EDC53D0064121F /* CGPoint+clampY.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8E856CF124EDC53D0064121F /* CGPoint+clampY.swift */; };
 		8E856CF424EDC5E10064121F /* Segment.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8E856CF324EDC5E10064121F /* Segment.swift */; };
+		8E87DFBD255A0DFD0016267D /* ViewController+RestorationDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8E87DFBC255A0DFD0016267D /* ViewController+RestorationDelegate.swift */; };
 		8E9550BD2474B22000E1B125 /* FileIO.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8E9550BC2474B22000E1B125 /* FileIO.swift */; };
 		8E9550BF2474B69900E1B125 /* FileIOTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8E9550BE2474B69900E1B125 /* FileIOTests.swift */; };
 		8E973F9B24C4BF0800AB41C3 /* String+isBlank.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8E973F9A24C4BF0800AB41C3 /* String+isBlank.swift */; };
@@ -164,6 +165,7 @@
 		8E8248DC23B53B55001A85F9 /* SeparatorView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SeparatorView.swift; sourceTree = "<group>"; };
 		8E856CF124EDC53D0064121F /* CGPoint+clampY.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "CGPoint+clampY.swift"; sourceTree = "<group>"; };
 		8E856CF324EDC5E10064121F /* Segment.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Segment.swift; sourceTree = "<group>"; };
+		8E87DFBC255A0DFD0016267D /* ViewController+RestorationDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "ViewController+RestorationDelegate.swift"; sourceTree = "<group>"; };
 		8E9550BC2474B22000E1B125 /* FileIO.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FileIO.swift; sourceTree = "<group>"; };
 		8E9550BE2474B69900E1B125 /* FileIOTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FileIOTests.swift; sourceTree = "<group>"; };
 		8E973F9A24C4BF0800AB41C3 /* String+isBlank.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "String+isBlank.swift"; sourceTree = "<group>"; };
@@ -396,6 +398,7 @@
 				8E253DD0244A86CB008CC56B /* ViewController+HamburgerTableDelegate.swift */,
 				8E253DD2244A8799008CC56B /* ViewController+UIScrollViewDelegate.swift */,
 				8E6EB6C1248477D500E5F883 /* ViewController+ViewControllerDelegate.swift */,
+				8E87DFBC255A0DFD0016267D /* ViewController+RestorationDelegate.swift */,
 			);
 			path = ViewControllers;
 			sourceTree = "<group>";
@@ -599,6 +602,7 @@
 				8ECA9FB72470A1020016D939 /* LadderTemplate.swift in Sources */,
 				8E01D9C722849047000F36FC /* CursorView.swift in Sources */,
 				8E77BDA4253F5AA600FD51E5 /* RegionTemplateEditor.swift in Sources */,
+				8E87DFBD255A0DFD0016267D /* ViewController+RestorationDelegate.swift in Sources */,
 				8EA444C02476E471005B5452 /* LadderSelector.swift in Sources */,
 				8E5918BC24AEAB0B00D8ABA3 /* Caliper.swift in Sources */,
 				8EBC824124E5E04800B5CA29 /* UIImage+emptyImage.swift in Sources */,

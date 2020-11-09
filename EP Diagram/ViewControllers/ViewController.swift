@@ -12,6 +12,7 @@ import os.log
 
 final class ViewController: UIViewController {
 
+    // View, outlets, constraints
     @IBOutlet var _constraintHamburgerWidth: NSLayoutConstraint!
     @IBOutlet var _constraintHamburgerLeft: NSLayoutConstraint!
     @IBOutlet var imageScrollView: UIScrollView!
@@ -19,19 +20,17 @@ final class ViewController: UIViewController {
     @IBOutlet var ladderView: LadderView!
     @IBOutlet var cursorView: CursorView!
     @IBOutlet var blackView: BlackView!
-
     // We get this view via its embed segue!  See prepareForSegue().
     var hamburgerTableViewController: HamburgerTableViewController?
-
+    var separatorView: SeparatorView?
 
     // This margin is used for all the views.  As ECGs are always read from left
     // to right, there is no reason to reverse this.
     // TODO: Possibly change this to property of ladder, since it might depend on label width (# of chars)?
-    let leftMargin: CGFloat = 30
-    var scale: CGFloat = 1.0
-    let spacer = UIBarButtonItem(barButtonSystemItem: .flexibleSpace, target: nil, action: nil)
+    private let leftMargin: CGFloat = 30
 
-    internal var separatorView: SeparatorView?
+    // Buttons, menus
+    private let spacer = UIBarButtonItem(barButtonSystemItem: .flexibleSpace, target: nil, action: nil)
     private var undoButton: UIBarButtonItem = UIBarButtonItem()
     private var redoButton: UIBarButtonItem = UIBarButtonItem()
     private var selectButton: UIBarButtonItem = UIBarButtonItem()
@@ -40,18 +39,17 @@ final class ViewController: UIViewController {
     private var linkMenuButtons: [UIBarButtonItem]?
     private var calibrateMenuButtons: [UIBarButtonItem]?
 
-    internal var hamburgerMenuIsOpen = false
-
     // PDF and launch from URL stuff
     var pdfRef: CGPDFDocument?
     var launchFromURL: Bool = false
     var launchURL: URL?
     var pageNumber: Int = 1
 
-    internal var _imageIsLocked: Bool = false
-    internal var _ladderIsLocked: Bool = false
-    internal let _maxBlackAlpha: CGFloat = 0.4
-
+    // For hambuger menu
+    var hamburgerMenuIsOpen = false
+    var _imageIsLocked: Bool = false
+    var _ladderIsLocked: Bool = false
+    let _maxBlackAlpha: CGFloat = 0.4
 
     var diagramFilenames: [String] = []
     var diagram: Diagram = Diagram.defaultDiagram()
@@ -61,14 +59,17 @@ final class ViewController: UIViewController {
 
     var preferences: Preferences = Preferences()
 
+    // Stuff for state restoration
     static let restorationContentOffsetXKey = "restorationContentOffsetXKey"
     static let restorationContentOffsetYKey = "restorationContentOffsetYKey"
     static let restorationZoomKey = "restorationZoomKey"
     static let restorationIsCalibratedKey = "restorationIsCalibrated"
     static let restorationCalFactorKey = "restorationCalFactorKey"
-    static let restorationFileNameKey = "restorationFileNameKey"
+//    static let restorationFileNameKey = "restorationFileNameKey"
     var restorationInfo: [AnyHashable: Any]?
+//    var restorationFileName: String = UUID().uuidString
     var restorationFileName: String = ""
+    var persistentID = ""
 
     // Speed up appearance of image picker by initializing it here.
     let imagePicker: UIImagePickerController = UIImagePickerController()
@@ -77,72 +78,73 @@ final class ViewController: UIViewController {
         os_log("viewDidLoad() - ViewController", log: OSLog.viewCycle, type: .info)
         super.viewDidLoad()
 
+        if let restorationURL = DiagramIO.getRestorationURL() {
+            os_log("restorationURL path = %s", log: .debugging, type: .debug, restorationURL.path)
+            let paths = FileIO.enumerateDirectory(restorationURL)
+            for path in paths {
+                os_log("    %s", log: .debugging, type: .debug, path)
+            }
+        }
+
+        restorationFileName = persistentID
         let info = self.restorationInfo
-        if let info = info {
-            for item in info {
-                print(item)
-            }
-
-        }
-        // restore diagram file here
-        if let fileName = info?[ViewController.restorationFileNameKey] as? String {
-            if let diagram = restoreDiagramFromCache(fileName: fileName) {
+        print(info as Any)
+        // Restore cached diagram file.
+//        if let fileName = info?[ViewController.restorationFileNameKey] as? String {
+//            restorationFileName = fileName
+//            os_log("restoration fileName is %s", log: .debugging, type: .debug, fileName)
+            if let diagram = restoreDiagramFromCache(fileName: restorationFileName) {
+                os_log("restoring diagram from cache", log: .debugging, type: .debug)
                 self.diagram = diagram
-                // delete cache file here, after user update complete.
-                DispatchQueue.main.async {
-                    self.deleteCacheFile(fileName: fileName)
-                }
             }
-        }
+//        }
 
-        // These 2 views are guaranteed to exist, so the delegates are IUOs.
-        cursorView.ladderViewDelegate = ladderView
-        ladderView.cursorViewDelegate = cursorView
-        imageScrollView.delegate = self
-
-        // These two views hold a reference to calibration.
-        cursorView.calibration = calibration
-        ladderView.calibration = calibration
-
+        // TODO: Lots of other customization for Mac version.
         if Common.isRunningOnMac() {
             navigationController?.setNavigationBarHidden(true, animated: false)
             // TODO: Need to convert hamburger menu to regular menu on Mac.
         }
-        UIView.setAnimationsEnabled(true)
 
+        // Setup cursor and ladder views.
+        // These 2 views are guaranteed to exist, so the delegates are IUOs.
+        cursorView.ladderViewDelegate = ladderView
+        ladderView.cursorViewDelegate = cursorView
+        imageScrollView.delegate = self
+        // These two views hold a common reference to calibration.
+        cursorView.calibration = calibration
+        ladderView.calibration = calibration
         // Distinguish the two views using slightly different background colors.
         imageScrollView.backgroundColor = UIColor.secondarySystemBackground
         ladderView.backgroundColor = UIColor.tertiarySystemBackground
-
+        // Limit max and min scale of image.
         imageScrollView.maximumZoomScale = 7.0
         imageScrollView.minimumZoomScale = 0.25
-
-        blackView.delegate = self
-        blackView.alpha = 0.0
-        constraintHamburgerLeft.constant = -self._constraintHamburgerWidth.constant;
-
         // Ensure there is a space for labels at the left margin.
         ladderView.leftMargin = leftMargin
         cursorView.leftMargin = leftMargin
-
         setMaxCursorPositionY()
         cursorView.caliperMaxY = imageScrollView.frame.height
+        // Pass diagram image and ladder to image and ladder views.
+        setImageViewImage(with: diagram.image)
+        ladderView.ladder = diagram.ladder
+        // Title is set to diagram name.
+        setTitle()
+        // Get defaults and apply them to views.
+        loadUserDefaults()
 
+        // Set up hamburger menu.
+        blackView.delegate = self
+        blackView.alpha = 0.0
+        constraintHamburgerLeft.constant = -self._constraintHamburgerWidth.constant
+        navigationItem.setLeftBarButton(UIBarButtonItem(image: UIImage(named: "hamburger"), style: .plain, target: self, action: #selector(toggleHamburgerMenu)), animated: true)
+
+        // Set up touches.
         let singleTapRecognizer = UITapGestureRecognizer(target: self, action: #selector(self.singleTap))
         singleTapRecognizer.numberOfTapsRequired = 1
         imageScrollView.addGestureRecognizer(singleTapRecognizer)
-
+        // Set up context menu.
         let interaction = UIContextMenuInteraction(delegate: ladderView)
         ladderView.addInteraction(interaction)
-
-        navigationItem.setLeftBarButton(UIBarButtonItem(image: UIImage(named: "hamburger"), style: .plain, target: self, action: #selector(toggleHamburgerMenu)), animated: true)
-
-        loadUserDefaults()
-
-        setImageViewImage(with: diagram.image)
-        ladderView.ladder = diagram.ladder
-
-//        setTitle()
     }
 
     func getTitle() -> String {
@@ -177,6 +179,7 @@ final class ViewController: UIViewController {
     override func viewDidAppear(_ animated: Bool) {
         os_log("viewDidAppear() - ViewController", log: OSLog.viewCycle, type: .info)
         super.viewDidAppear(animated)
+        self.userActivity = self.view.window?.windowScene?.userActivity
         // See https://github.com/mattneub/Programming-iOS-Book-Examples/blob/master/bk2ch06p357StateSaveAndRestoreWithNSUserActivity/ch19p626pageController/SceneDelegate.swift
         var restorationContentOffset = CGPoint()
         if let contentOffsetX = restorationInfo?[ViewController.restorationContentOffsetXKey] {
@@ -196,8 +199,13 @@ final class ViewController: UIViewController {
         if let calFactor = restorationInfo?[ViewController.restorationCalFactorKey] {
             cursorView.calFactor = calFactor as? CGFloat ?? 1.0
         }
+
+        // FIXME: image.png is never written and won't be restored after second attempt when we try to delete the cache file.
+//        deleteCacheFile(fileName: restorationFileName)
+//        restorationFileName = UUID().uuidString
+
         self.restorationInfo = nil
-        self.userActivity = self.view.window?.windowScene?.userActivity
+
 
         assertDelegatesNonNil()
         // Need to set this here, after view draw, or Mac malpositions cursor at start of app.
@@ -206,11 +214,27 @@ final class ViewController: UIViewController {
         NotificationCenter.default.addObserver(self, selector: #selector(onDidUndoableAction(_:)), name: .didUndoableAction, object: nil)
         NotificationCenter.default.addObserver(self, selector: #selector(updatePreferences), name: .preferencesChanged, object: nil)
         NotificationCenter.default.addObserver(self, selector: #selector(didEnterBackground), name: UIScene.didEnterBackgroundNotification, object: nil)
-//        NotificationCenter.default.addObserver(self, selector: #selector(enterForeground), name: UIScene.willEnterForegroundNotification, object: nil)
-//        NotificationCenter.default.addObserver(self, selector: #selector(willConnect), name: UIScene.willConnectNotification, object: nil)
         NotificationCenter.default.addObserver(self, selector: #selector(didDisconnect), name: UIScene.didDisconnectNotification, object: nil)
         updateUndoRedoButtons()
         resetViews()
+    }
+
+    func cleanCacheExceptFor(fileName name: String) {
+        if let url = DiagramIO.getRestorationURL() {
+            let dirs = FileIO.enumerateDirectory(url)
+            for dir in dirs {
+                if dir != name {
+                    let nameURL = url.appendingPathComponent(name)
+                    if FileManager.default.fileExists(atPath: nameURL.path) {
+                        do {
+                        try FileManager.default.removeItem(at: nameURL)
+                        } catch {
+                            os_log("error cleaning cache", log: .debugging, type: .debug)
+                        }
+                    }
+                }
+            }
+        }
     }
 
     // We only want to use the restorationInfo once when view controller first appears.
@@ -230,8 +254,6 @@ final class ViewController: UIViewController {
         NotificationCenter.default.removeObserver(self, name: .didUndoableAction, object: nil)
         NotificationCenter.default.removeObserver(self, name: .preferencesChanged, object: nil)
         NotificationCenter.default.removeObserver(self, name: UIScene.didEnterBackgroundNotification, object: nil)
-//        NotificationCenter.default.removeObserver(self, name: UIScene.willEnterForegroundNotification, object: nil)
-//        NotificationCenter.default.removeObserver(self, name: UIScene.willConnectNotification, object: nil)
         NotificationCenter.default.removeObserver(self, name: UIScene.didDisconnectNotification, object: nil)
     }
 
@@ -239,13 +261,9 @@ final class ViewController: UIViewController {
     func updateUserActivityState(_ activity: NSUserActivity) {
         os_log("updateUserActivityState called")
         super.updateUserActivityState(activity)
-        // FIXME: make sure old cache is deleted
-        print("+++ restorationFileName: \(restorationFileName)")
-        listCacheFiles()
-        restorationFileName = UUID().uuidString
-        print("updateUserActivityState contentOffset = \(imageScrollView.contentOffset)")
+
         let info: [AnyHashable: Any] = [
-            ViewController.restorationFileNameKey: restorationFileName,
+//            ViewController.restorationFileNameKey: restorationFileName,
             ViewController.restorationContentOffsetXKey: imageScrollView.contentOffset.x,
             ViewController.restorationContentOffsetYKey: imageScrollView.contentOffset.y,
             ViewController.restorationZoomKey: imageScrollView.zoomScale,
@@ -253,10 +271,12 @@ final class ViewController: UIViewController {
             ViewController.restorationCalFactorKey: cursorView.calFactor
         ]
         activity.addUserInfoEntries(from: info)
+        print(activity.userInfo as Any)
     }
 
+
     private func listCacheFiles() {
-        guard let restorationURL = FileIO.getURL(for: .cache) else { return }
+        guard let restorationURL = DiagramIO.getRestorationURL() else { return }
         if let fileURLs = try? FileManager.default.contentsOfDirectory(at: restorationURL, includingPropertiesForKeys: nil), fileURLs.count > 0 {
             for file in fileURLs {
                 let fileName = file.path
@@ -267,6 +287,8 @@ final class ViewController: UIViewController {
         }
     }
 
+    // FIXME: I guess we need to save diagram when using hamburger menu.
+    // Need to sort out what is happening exactly here.  See performHelpSegue: are saving useractivity but it's not coming back.
     @objc func didEnterBackground() {
         os_log("didEnterBackground()", log: .action, type: .info)
         saveDiagramToCache(fileName: restorationFileName)
@@ -276,10 +298,9 @@ final class ViewController: UIViewController {
         os_log("didDisconnect()", log: .action, type: .info)
     }
 
-    // FIXME: have separate cache dir and delete all in it, otherwise if program terminated we may leave cache files.
     func deleteCacheFile(fileName name: String) {
-        os_log("deleteCacheFile(fileName:)", log: .action, type: .info)
-        guard let restorationURL = FileIO.getURL(for: .cache) else { return }
+        os_log("deleteCacheFile(fileName: %s)", log: .debugging, type: .debug, name)
+        guard let restorationURL = DiagramIO.getRestorationURL() else { return }
         print("restorationURL = \(restorationURL.path)")
         do {
             let nameURL = restorationURL.appendingPathComponent(name)
@@ -291,11 +312,10 @@ final class ViewController: UIViewController {
         }
     }
 
-    // FIXME: Consider using Bookmarks instead of storing files. https://developer.apple.com/library/archive/documentation/FileManagement/Conceptual/FileSystemProgrammingGuide/AccessingFilesandDirectories/AccessingFilesandDirectories.html#//apple_ref/doc/uid/TP40010672-CH3
     func saveDiagramToCache(fileName name: String) {
-        os_log("saveDiagramToCache(fileName:)", log: .action, type: .info)
-        DispatchQueue.global().async { [self] in
-            guard let restorationURL = FileIO.getURL(for: .cache) else { return }
+        os_log("saveDiagramToCache(fileName:)", log: .debugging, type: .info)
+//        DispatchQueue.global().async { [self] in
+            guard let restorationURL = DiagramIO.getRestorationURL() else { return }
             print(">>>> restorationURL = \(restorationURL)")
             do {
                 let nameURL = restorationURL.appendingPathComponent(name)
@@ -308,6 +328,9 @@ final class ViewController: UIViewController {
                 if let image = diagram.image {
                     let imageData = image.pngData()
                     let imageURL = nameURL.appendingPathComponent(FileIO.imageFilename, isDirectory: false)
+                    if FileManager.default.fileExists(atPath: imageURL.path) {
+                        try FileManager.default.removeItem(at: imageURL)
+                    }
                     try imageData?.write(to: imageURL)
                 }
                 let encoder = JSONEncoder()
@@ -317,17 +340,19 @@ final class ViewController: UIViewController {
             } catch {
                 os_log("saveDiagramToCache(fileName:) error %s", log: .errors, type: .error, error.localizedDescription)
             }
-        }
+//        }
     }
 
+
+
     func restoreDiagramFromCache(fileName name: String) -> Diagram? {
-        guard let restorationURL = FileIO.getURL(for: .cache) else { return nil }
+        guard let restorationURL = DiagramIO.getRestorationURL() else { return nil }
         do {
             let nameURL = restorationURL.appendingPathComponent(name)
             if !FileManager.default.fileExists(atPath: nameURL.path) {
                 return nil
             }
-            return try Diagram.retrieve(name: name, url: nameURL)
+            return try Diagram.retrieve(fileName: name, url: nameURL)
         } catch {
             os_log("restoreDiagramToCache(fileName:) error %s", log: .errors, type: .error, error.localizedDescription)
             return nil
@@ -637,34 +662,6 @@ final class ViewController: UIViewController {
 
     func setImageViewImage(with image: UIImage?) {
         imageView.image = image
-        // FIXME: cache new image here if it is not nil.  Erase old cached image first.
-//        DispatchQueue.global().async { [self] in
-//            guard let restorationURL = FileIO.getURL(for: .cache), restorationFileName.count > 0 else { return }
-//            print(">>>> restorationURL = \(restorationURL)")
-//            do {
-//                let nameURL = restorationURL.appendingPathComponent(restorationFileName)
-//                if !FileManager.default.fileExists(atPath: nameURL.path) {
-//                    try FileManager.default.createDirectory(at: nameURL,
-//                                                            withIntermediateDirectories: true,
-//                                                            attributes: nil)
-//                }
-//                print(">>>>>>>>>> \(nameURL.path)")
-//
-//                if let image = diagram.image {
-//                    let imageData = image.pngData()
-//                    let imageURL = nameURL.appendingPathComponent(FileIO.imageFilename, isDirectory: false)
-//                    try imageData?.write(to: imageURL)
-//                }
-////                let encoder = JSONEncoder()
-////                let diagramData = try encoder.encode(diagram.diagramData)
-////                let ladderURL = nameURL.appendingPathComponent(FileIO.ladderFilename, isDirectory: false)
-////                FileManager.default.createFile(atPath: ladderURL.path, contents: diagramData, attributes: nil)
-//            } catch {
-//                os_log("saveImageViewImage(with:) error %s", log: .errors, type: .error, error.localizedDescription)
-//            }
-//        }
-
-
     }
 
     // MARK: - Rotate view
@@ -792,12 +789,15 @@ final class ViewController: UIViewController {
     }
 
     func performShowHelpSegue() {
+        P("performShowHelpSegue")
+        self.userActivity?.needsSave = true
         performSegue(withIdentifier: "showHelpSegue", sender: self)
     }
 
     @IBSegueAction func performShowHelpSegueAction(_ coder: NSCoder) -> HelpViewController? {
         let helpViewController = HelpViewController(coder: coder)
         helpViewController?.restorationInfo = self.restorationInfo
+        helpViewController?.restorationDelegate = self
         return helpViewController
     }
     
@@ -809,7 +809,4 @@ final class ViewController: UIViewController {
         performSegue(withIdentifier: "showTemplateEditorSegue", sender: self)
     }
 }
-
-
-
 

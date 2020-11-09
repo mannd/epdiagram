@@ -84,6 +84,7 @@ class ImageSaver: NSObject {
 // MARK: -
 
 extension ViewController: HamburgerTableDelegate, UIImagePickerControllerDelegate & UINavigationControllerDelegate {
+    
     var imageIsLocked: Bool {
         get { _imageIsLocked }
         set(newValue) { _imageIsLocked = newValue}
@@ -343,10 +344,11 @@ extension ViewController: HamburgerTableDelegate, UIImagePickerControllerDelegat
         os_log("test()", log: .debugging, type: .debug)
         // delete all old diagrams
         //DiagramIO.deleteEPDiagramDir()
-        DiagramIO.deleteLadderTemplates()
+//        DiagramIO.deleteLadderTemplates()
         // toggle mark visibility
         //        ladderView.marksAreVisible.toggle()
         //        ladderView.setNeedsDisplay()
+        DiagramIO.deleteCacheFiles()
     }
     #else
     func test() {}
@@ -447,7 +449,7 @@ extension ViewController: HamburgerTableDelegate, UIImagePickerControllerDelegat
 
     private func doSaveDiagram() throws {
         try diagram.save()
-        DiagramIO.saveLastDiagram(name: diagram.name)
+//        DiagramIO.saveLastDiagram(name: diagram.name)
         setTitle()
     }
 

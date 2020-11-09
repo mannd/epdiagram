@@ -40,7 +40,6 @@ struct Preferences {
         userDefaults.set(showImpulseOrigin, forKey: Preferences.defaultShowImpulseOriginKey)
         userDefaults.set(showBlock, forKey: Preferences.defaultShowBlockKey)
         userDefaults.set(showIntervals, forKey: Preferences.defaultShowIntervalsKey)
-//        userDefaults.set(lastDiagramName, forKey: Preferences.defaultLastDiagramKey)
 
 
     }
@@ -51,7 +50,6 @@ struct Preferences {
         showImpulseOrigin = userDefaults.bool(forKey: Preferences.defaultShowImpulseOriginKey)
         showBlock = userDefaults.bool(forKey: Preferences.defaultShowBlockKey)
         showIntervals = userDefaults.bool(forKey: Preferences.defaultShowIntervalsKey)
-//        lastDiagramName = userDefaults.string(forKey: Preferences.defaultLastDiagramKey)
     }
     
 }

@@ -22,6 +22,7 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         let navigationController = window?.rootViewController as? UINavigationController
         if let rvc = navigationController?.viewControllers.first as? ViewController {
             rvc.restorationInfo = scene.userActivity?.userInfo
+            rvc.persistentID = scene.session.persistentIdentifier
         }
     }
 
@@ -45,7 +46,6 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         os_log("sceneDidDisconnect(scene:), %s", log: .lifeCycle, type: .info, scene.session.persistentIdentifier)
     }
 
-    // TODO: load ladder and image from User Activity and file cache.
     func stateRestorationActivity(for scene: UIScene) -> NSUserActivity? {
         os_log("stateRestorationActivity(scene:), %s", log: .lifeCycle, type: .info, scene.session.persistentIdentifier)
         return scene.userActivity

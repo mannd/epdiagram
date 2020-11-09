@@ -49,7 +49,6 @@ extension ViewController: UIScrollViewDelegate {
     func scrollViewDidEndZooming(_ scrollView: UIScrollView, with view: UIView?, atScale scale: CGFloat) {
         os_log("scrollViewDidEndZooming()", log: OSLog.viewCycle, type: .info)
         scrollViewAdjustViews(scrollView)
-        self.scale = scale
     }
 
     func scrollViewDidZoom(_ scrollView: UIScrollView) {
@@ -61,7 +60,7 @@ extension ViewController: UIScrollViewDelegate {
         cursorView.offsetX = scrollView.contentOffset.x
         cursorView.scale = scrollView.zoomScale
         ladderView.scale = scrollView.zoomScale
-        calibration.currentZoom = scale
+        calibration.currentZoom = scrollView.zoomScale
         setViewsNeedDisplay()
     }
 

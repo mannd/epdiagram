@@ -39,11 +39,11 @@ extension ViewController: ViewControllerDelegate {
         guard let diagramName = name else { return }
         P("diagram name = \(diagramName)")
         do {
-            diagram = try Diagram.retrieve(name: diagramName)
+            diagram = try Diagram.retrieve(fileName: diagramName)
             setImageViewImage(with: diagram.image)
             self.ladderView.ladder = diagram.ladder
             self.setTitle()
-            DiagramIO.saveLastDiagram(name: diagram.name)
+//            DiagramIO.saveLastDiagram(name: diagram.name)
             self.setViewsNeedDisplay()
         } catch {
             os_log("Error: %s", log: .errors, type: .error, error.localizedDescription)

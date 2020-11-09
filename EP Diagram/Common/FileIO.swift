@@ -129,5 +129,15 @@ final class FileIO {
         } else { return false }
      }
 
+    static func enumerateDirectory(_ url: URL) -> [String] {
+        var paths: [String] = []
+        if let enumerator = FileManager.default.enumerator(atPath: url.path) {
+            for case let path as String in enumerator {
+                paths.append(path)
+            }
+        }
+        return paths
+    }
+
 }
 
