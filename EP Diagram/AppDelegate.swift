@@ -22,6 +22,13 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         return true
     }
 
+    override func buildMenu(with builder: UIMenuBuilder) {
+        super.buildMenu(with: builder)
+
+//        let diagramMenu: UIMenu = UIMenu(title: "Diagram", image: nil, identifier: nil, options: .destructive, children: [])
+//        builder.replace(menu: .file, with: diagramMenu)
+    }
+
     // MARK: UISceneSession Lifecycle
 
     func application(_ application: UIApplication, configurationForConnecting connectingSceneSession: UISceneSession, options: UIScene.ConnectionOptions) -> UISceneConfiguration {
