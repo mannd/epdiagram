@@ -18,6 +18,7 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         // This delegate does not imply the connecting scene or session are new (see `application:configurationForConnectingSceneSession` instead).
         os_log("scene(scene:willConnectTo:options:), %s", log: .lifeCycle, type: .info, scene.session.persistentIdentifier)
         guard let scene = (scene as? UIWindowScene) else { return }
+        scene.title = L("EP Diagram")
         scene.userActivity = session.stateRestorationActivity ?? NSUserActivity(activityType: "org.epstudios.epdiagram.mainActivity")
         let navigationController = window?.rootViewController as? UINavigationController
         if let rvc = navigationController?.viewControllers.first as? ViewController {
@@ -26,6 +27,7 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         }
     }
 
+   
     func sceneWillEnterForeground(_ scene: UIScene) {
         os_log("sceneWillEnterForeground(scene:), %s", log: .lifeCycle, type: .info, scene.session.persistentIdentifier)
     }

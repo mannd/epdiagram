@@ -36,8 +36,8 @@ struct DiagramSelector: View {
                 .navigationBarItems(leading: EditButton())
                 .environment(\.editMode, $editMode)
             }
-            .navigationViewStyle(StackNavigationViewStyle())
-        }
+        }            .navigationViewStyle(StackNavigationViewStyle())
+
     }
 }
 

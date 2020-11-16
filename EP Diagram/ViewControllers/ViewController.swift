@@ -88,7 +88,7 @@ final class ViewController: UIViewController {
 
         // TODO: Lots of other customization for Mac version.
         if Common.isRunningOnMac() {
-            navigationController?.setNavigationBarHidden(true, animated: false)
+//            navigationController?.setNavigationBarHidden(true, animated: false)
             // TODO: Need to convert hamburger menu to regular menu on Mac.
         }
 
@@ -123,7 +123,10 @@ final class ViewController: UIViewController {
         blackView.delegate = self
         blackView.alpha = 0.0
         _constraintHamburgerLeft.constant = -self._constraintHamburgerWidth.constant
-        navigationItem.setLeftBarButton(UIBarButtonItem(image: UIImage(named: "hamburger"), style: .plain, target: self, action: #selector(toggleHamburgerMenu)), animated: true)
+        // Hamburger menu is replaced by main menu on Mac.
+        if !Common.isRunningOnMac() {
+            navigationItem.setLeftBarButton(UIBarButtonItem(image: UIImage(named: "hamburger"), style: .plain, target: self, action: #selector(toggleHamburgerMenu)), animated: true)
+        }
 
         // Set up touches.
         let singleTapRecognizer = UITapGestureRecognizer(target: self, action: #selector(self.singleTap))
@@ -136,10 +139,8 @@ final class ViewController: UIViewController {
     }
 
     func getTitle() -> String {
-        guard let name = diagram.name else { return L("EP Diagram", comment: "app name") }
-        if Common.isRunningOnMac() || Common.isIPad() {
-            return L("EP Diagram - \(name)")
-        }
+        guard let name = diagram.name else { return L("New Diagram", comment: "app name") }
+
         return name
     }
 
@@ -650,7 +651,7 @@ final class ViewController: UIViewController {
         setViewsNeedDisplay()
     }
 
-    // MARK: - Segue
+    // MARK: - Segues
 
     override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
         if segue.identifier == "HamburgerSegue" {
@@ -720,6 +721,13 @@ final class ViewController: UIViewController {
         return hostingController
     }
 
+    @IBSegueAction func performShowHelpSegueAction(_ coder: NSCoder) -> HelpViewController? {
+        let helpViewController = HelpViewController(coder: coder)
+        helpViewController?.restorationInfo = self.restorationInfo
+        helpViewController?.restorationDelegate = self
+        return helpViewController
+    }
+
     func performSelectLadderSegue() {
         performSegue(withIdentifier: "selectLadderSegue", sender: self)
     }
@@ -742,18 +750,54 @@ final class ViewController: UIViewController {
         performSegue(withIdentifier: "showHelpSegue", sender: self)
     }
 
-    @IBSegueAction func performShowHelpSegueAction(_ coder: NSCoder) -> HelpViewController? {
-        let helpViewController = HelpViewController(coder: coder)
-        helpViewController?.restorationInfo = self.restorationInfo
-        helpViewController?.restorationDelegate = self
-        return helpViewController
-    }
-
     func performShowPreferencesSegue() {
         performSegue(withIdentifier: "showPreferencesSegue", sender: self)
     }
 
     func performShowTemplateEditorSegue() {
         performSegue(withIdentifier: "showTemplateEditorSegue", sender: self)
+    }
+
+    // MARK: - Mac menu actions
+
+    @IBAction func showPreferencesCommand(_ sender: Any) {
+        showPreferences()
+    }
+
+    // This is called automatically by the Help menu.
+    @IBAction func showHelp(_ sender: Any) {
+        showHelp()
+    }
+
+    @IBAction func newDiagram(_ sender: Any) {
+        newDiagram()
+    }
+
+    @IBAction func saveDiagram(_ sender: Any) {
+        saveDiagram()
+    }
+
+    @IBAction func selectDiagram(_ sender: Any) {
+        selectDiagram()
+    }
+
+    @IBAction func renameDiagram(_ sender: Any) {
+        renameDiagram()
+    }
+
+    @IBAction func duplicateDiagram(_ sender: Any) {
+        duplicateDiagram()
+    }
+
+    @IBAction func getDiagramInfo(_ sender: Any) {
+        getDiagramInfo()
+    }
+
+    @IBAction func sampleDiagrams(_ sender: Any) {
+        sampleDiagrams()
+    }
+
+    @IBAction func snapShotDiagram(_ sender: Any) {
+        snapshotDiagram()
     }
 }

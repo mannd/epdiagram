@@ -110,7 +110,7 @@ class HamburgerTableViewController: UITableViewController {
         case .templates:
             delegate?.editTemplates()
         case .help:
-            delegate?.help()
+            delegate?.showHelp()
         case .about:
             delegate?.about()
         case .test:
