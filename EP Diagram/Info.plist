@@ -13,6 +13,8 @@
 			<string>PDF</string>
 			<key>LSHandlerRank</key>
 			<string>Alternate</string>
+			<key>CFBundleTypeRole</key>
+			<string>Viewer</string>
 			<key>LSItemContentTypes</key>
 			<array>
 				<string>com.adobe.pdf</string>
@@ -25,6 +27,8 @@
 			<string>Image</string>
 			<key>LSHandlerRank</key>
 			<string>Alternate</string>
+			<key>CFBundleTypeRole</key>
+			<string>Viewer</string>
 			<key>LSItemContentTypes</key>
 			<array>
 				<string>public.image</string>

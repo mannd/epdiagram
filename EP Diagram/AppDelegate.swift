@@ -36,9 +36,13 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
             let openPreferences = UIMenu(title: "Preferences...", image: nil, identifier: UIMenu.Identifier("openPreferences"), options: .displayInline, children: [preferencesCommand])
             builder.insertSibling(openPreferences, afterMenu: .about)
 
-            let newDiagramCommand = UIKeyCommand(title: L("New"), image: UIImage(systemName: "plus.app"), action: #selector(ViewController.newDiagram(_:)), input: "D", modifierFlags: [.command])
-            let selectDiagramCommand = UICommand(title: L("Select..."), image: UIImage(systemName: "checkmark.circle"), action: #selector(ViewController.selectDiagram(_:)))
-            let saveDiagramCommand = UIKeyCommand(title: L("Save"), image: UIImage(systemName: "square.and.arrow.down"), action: #selector(ViewController.saveDiagram(_:)), input: "S", modifierFlags: [.command])
+            let openImageCommand = UIKeyCommand(title: L("Open..."), action: #selector(ViewController.openImage(_:)), input: "O", modifierFlags: [.command])
+            let openImageMenu = UIMenu(title: "OpenImage", image: nil, identifier: UIMenu.Identifier("openImage"), options: .displayInline, children: [openImageCommand])
+            builder.insertSibling(openImageMenu, afterMenu: .newScene)
+
+            let newDiagramCommand = UIKeyCommand(title: L("New"), action: #selector(ViewController.newDiagram(_:)), input: "D", modifierFlags: [.command])
+            let selectDiagramCommand = UICommand(title: L("Select..."), action: #selector(ViewController.selectDiagram(_:)))
+            let saveDiagramCommand = UIKeyCommand(title: L("Save"), action: #selector(ViewController.saveDiagram(_:)), input: "S", modifierFlags: [.command])
             let renameDiagramCommand = UICommand(title: L("Rename"), action: #selector(ViewController.renameDiagram(_:)))
             let duplicateDiagramCommand = UICommand(title: L("Duplicate"), action: #selector(ViewController.duplicateDiagram(_:)))
 

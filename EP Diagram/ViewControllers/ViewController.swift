@@ -800,4 +800,20 @@ final class ViewController: UIViewController {
     @IBAction func snapShotDiagram(_ sender: Any) {
         snapshotDiagram()
     }
+
+    @IBAction func openImage(_ sender: AnyObject) {
+        /* Present open panel. */
+//        guard let window = self.window else { return }
+//        let openPanel = NSOpenPanel()
+//        openPanel.allowedFileTypes = validFileExtensions()
+//        openPanel.canSelectHiddenExtension = true
+//        openPanel.beginSheetModal(for: window,
+//            completionHandler: {
+//                (result: NSApplication.ModalResponse) -> Void in
+//                if result == .OK {
+//                    self.openURL(openPanel.url, addToRecentDocuments: true)
+//               }
+//            }
+//        )
+    }
 }
