@@ -35,7 +35,7 @@ protocol HamburgerTableDelegate: class {
     func sampleDiagrams()
     func showPreferences()
     func editTemplates()
-    func help()
+    func showHelp()
     func lockImage()
     func hideHamburgerMenu()
     func showHamburgerMenu()
@@ -142,6 +142,7 @@ extension ViewController: HamburgerTableDelegate, UIImagePickerControllerDelegat
             withActionText: L("start a new diagram"),
             andThenDo: handleNewDiagram)
     }
+
 
     func selectDiagram() {
         os_log("selectDiagram()", log: OSLog.action, type: .info)
@@ -322,8 +323,8 @@ extension ViewController: HamburgerTableDelegate, UIImagePickerControllerDelegat
         performShowPreferencesSegue()
     }
 
-    func help() {
-        os_log("help()", log: OSLog.action, type: .info)
+    func showHelp() {
+        os_log("showHelp()", log: OSLog.action, type: .info)
         performShowHelpSegue()
     }
 

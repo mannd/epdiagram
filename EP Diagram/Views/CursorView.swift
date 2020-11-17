@@ -158,7 +158,8 @@ final class CursorView: ScaledView {
             context.move(to: CGPoint(x: caliper.bar1Position, y: caliper.crossbarPosition))
             context.addLine(to: CGPoint(x: caliper.bar2Position, y: caliper.crossbarPosition))
             let text = caliper.text
-            let measureText = "\(caliper.value) points"
+            let caliperValue = String(format: "%.2f", caliper.value)
+            let measureText = "\(caliperValue) points"
             var attributes = [NSAttributedString.Key: Any]()
             let textFont = UIFont(name: "Helvetica Neue Medium", size: 14.0) ?? UIFont.systemFont(ofSize: 14, weight: UIFont.Weight.medium)
             let paragraphStyle = NSParagraphStyle.default.mutableCopy() as! NSMutableParagraphStyle
