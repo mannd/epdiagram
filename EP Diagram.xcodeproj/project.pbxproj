@@ -9,6 +9,10 @@
 /* Begin PBXBuildFile section */
 		8E01D9C722849047000F36FC /* CursorView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8E01D9C622849047000F36FC /* CursorView.swift */; };
 		8E033CEA24AC10A300BE6D6F /* Calibration.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8E033CE924AC10A300BE6D6F /* Calibration.swift */; };
+		8E04C5CB2569947100946348 /* Startup.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 8E04C5CA2569947100946348 /* Startup.storyboard */; };
+		8E04C5D02569950800946348 /* RootViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8E04C5CF2569950800946348 /* RootViewController.swift */; };
+		8E04C5D5256995E000946348 /* DocumentBrowserViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8E04C5D4256995E000946348 /* DocumentBrowserViewController.swift */; };
+		8E04C5DB256996E400946348 /* DiagramDocument.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8E04C5DA256996E400946348 /* DiagramDocument.swift */; };
 		8E0FDE832543A01D00865CBC /* SceneDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8E0FDE822543A01D00865CBC /* SceneDelegate.swift */; };
 		8E1276DB24D46C2000AC4B8F /* help.org in Resources */ = {isa = PBXBuildFile; fileRef = 8E1276DA24D46C2000AC4B8F /* help.org */; };
 		8E1276DD24D46F4200AC4B8F /* help.html in Resources */ = {isa = PBXBuildFile; fileRef = 8E1276DC24D46F4200AC4B8F /* help.html */; };
@@ -106,6 +110,10 @@
 /* Begin PBXFileReference section */
 		8E01D9C622849047000F36FC /* CursorView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CursorView.swift; sourceTree = "<group>"; };
 		8E033CE924AC10A300BE6D6F /* Calibration.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Calibration.swift; sourceTree = "<group>"; };
+		8E04C5CA2569947100946348 /* Startup.storyboard */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; path = Startup.storyboard; sourceTree = "<group>"; };
+		8E04C5CF2569950800946348 /* RootViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RootViewController.swift; sourceTree = "<group>"; };
+		8E04C5D4256995E000946348 /* DocumentBrowserViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DocumentBrowserViewController.swift; sourceTree = "<group>"; };
+		8E04C5DA256996E400946348 /* DiagramDocument.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DiagramDocument.swift; sourceTree = "<group>"; };
 		8E0FDE822543A01D00865CBC /* SceneDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SceneDelegate.swift; sourceTree = "<group>"; };
 		8E1276DA24D46C2000AC4B8F /* help.org */ = {isa = PBXFileReference; lastKnownFileType = text; path = help.org; sourceTree = "<group>"; };
 		8E1276DC24D46F4200AC4B8F /* help.html */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.html; path = help.html; sourceTree = "<group>"; };
@@ -224,6 +232,14 @@
 			path = Protocols;
 			sourceTree = "<group>";
 		};
+		8E04C5D9256996B600946348 /* UIDocument */ = {
+			isa = PBXGroup;
+			children = (
+				8E04C5DA256996E400946348 /* DiagramDocument.swift */,
+			);
+			path = UIDocument;
+			sourceTree = "<group>";
+		};
 		8E1276D924D46BEF00AC4B8F /* Help */ = {
 			isa = PBXGroup;
 			children = (
@@ -291,6 +307,7 @@
 		8E7D24C122779DBD005A1729 /* EP Diagram */ = {
 			isa = PBXGroup;
 			children = (
+				8E04C5D9256996B600946348 /* UIDocument */,
 				8E7D24C222779DBD005A1729 /* AppDelegate.swift */,
 				8E0FDE822543A01D00865CBC /* SceneDelegate.swift */,
 				8E7D24C922779DBF005A1729 /* Assets.xcassets */,
@@ -370,6 +387,7 @@
 			children = (
 				8E7D24C622779DBD005A1729 /* Main.storyboard */,
 				8E7D24CB22779DBF005A1729 /* LaunchScreen.storyboard */,
+				8E04C5CA2569947100946348 /* Startup.storyboard */,
 			);
 			path = Storyboards;
 			sourceTree = "<group>";
@@ -399,6 +417,8 @@
 				8E253DD2244A8799008CC56B /* ViewController+UIScrollViewDelegate.swift */,
 				8E6EB6C1248477D500E5F883 /* ViewController+ViewControllerDelegate.swift */,
 				8E87DFBC255A0DFD0016267D /* ViewController+RestorationDelegate.swift */,
+				8E04C5CF2569950800946348 /* RootViewController.swift */,
+				8E04C5D4256995E000946348 /* DocumentBrowserViewController.swift */,
 			);
 			path = ViewControllers;
 			sourceTree = "<group>";
@@ -531,6 +551,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				8E04C5CB2569947100946348 /* Startup.storyboard in Resources */,
 				8E7D24CD22779DBF005A1729 /* LaunchScreen.storyboard in Resources */,
 				8E1276DD24D46F4200AC4B8F /* help.html in Resources */,
 				8E7D24CA22779DBF005A1729 /* Assets.xcassets in Resources */,
@@ -562,6 +583,7 @@
 			files = (
 				8ECA9FB52470A07B0016D939 /* RegionTemplate.swift in Sources */,
 				8E4ACA8924479C5200575538 /* HamburgerViewModel.swift in Sources */,
+				8E04C5D02569950800946348 /* RootViewController.swift in Sources */,
 				8E74D590244FD55E00641E0A /* Logging.swift in Sources */,
 				8E253DD3244A8799008CC56B /* ViewController+UIScrollViewDelegate.swift in Sources */,
 				8E6EB6C02484778E00E5F883 /* Notification+didUndoableAction.swift in Sources */,
@@ -581,6 +603,8 @@
 				8E4A52EF24886B16007406F5 /* Diagram.swift in Sources */,
 				8E6A0298246DFB3700A10C9F /* LadderTemplateEditor.swift in Sources */,
 				8E2BA1D024A3BDD7002D997F /* PreferencesView.swift in Sources */,
+				8E04C5D5256995E000946348 /* DocumentBrowserViewController.swift in Sources */,
+				8E04C5DB256996E400946348 /* DiagramDocument.swift in Sources */,
 				8E1B6CB8240CAE5300EA88A6 /* ScaledView.swift in Sources */,
 				8E8248DD23B53B55001A85F9 /* SeparatorView.swift in Sources */,
 				8E671D5224814BB700784EB7 /* LadderTemplatesEditor.swift in Sources */,

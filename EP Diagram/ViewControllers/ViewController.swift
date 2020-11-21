@@ -264,38 +264,38 @@ final class ViewController: UIViewController {
     func saveDiagramToCache(fileName name: String) {
         os_log("saveDiagramToCache(fileName:)", log: .debugging, type: .info)
 //        DispatchQueue.global().async { [self] in
-            guard let restorationURL = DiagramIO.getRestorationURL() else { return }
-            print(">>>> restorationURL = \(restorationURL)")
-            do {
-                let nameURL = restorationURL.appendingPathComponent(name)
-                if !FileManager.default.fileExists(atPath: nameURL.path) {
-                    try FileManager.default.createDirectory(at: nameURL,
-                                                            withIntermediateDirectories: true,
-                                                            attributes: nil)
-                }
-                print(">>>>>>>>>> \(nameURL.path)")
-                if let image = diagram.image {
-                    let imageData = image.pngData()
-                    let imageURL = nameURL.appendingPathComponent(FileIO.imageFilename, isDirectory: false)
-                    if FileManager.default.fileExists(atPath: imageURL.path) {
-                        try FileManager.default.removeItem(at: imageURL)
-                    }
-                    try imageData?.write(to: imageURL)
-                }
-                let encoder = JSONEncoder()
-                let diagramData = try encoder.encode(diagram.diagramData)
-                let ladderURL = nameURL.appendingPathComponent(FileIO.ladderFilename, isDirectory: false)
-                FileManager.default.createFile(atPath: ladderURL.path, contents: diagramData, attributes: nil)
-            } catch {
-                os_log("saveDiagramToCache(fileName:) error %s", log: .errors, type: .error, error.localizedDescription)
-            }
+//            guard let restorationURL = DiagramIO.getRestorationURL() else { return }
+//            print(">>>> restorationURL = \(restorationURL)")
+//            do {
+//                let nameURL = restorationURL.appendingPathComponent(name)
+//                if !FileManager.default.fileExists(atPath: nameURL.path) {
+//                    try FileManager.default.createDirectory(at: nameURL,
+//                                                            withIntermediateDirectories: true,
+//                                                            attributes: nil)
+//                }
+//                print(">>>>>>>>>> \(nameURL.path)")
+//                if let image = diagram.image {
+//                    let imageData = image.pngData()
+//                    let imageURL = nameURL.appendingPathComponent(FileIO.imageFilename, isDirectory: false)
+//                    if FileManager.default.fileExists(atPath: imageURL.path) {
+//                        try FileManager.default.removeItem(at: imageURL)
+//                    }
+//                    try imageData?.write(to: imageURL)
+//                }
+//                let encoder = JSONEncoder()
+////                let diagramData = try encoder.encode(diagram.diagramData)
+//                let ladderURL = nameURL.appendingPathComponent(FileIO.ladderFilename, isDirectory: false)
+////                FileManager.default.createFile(atPath: ladderURL.path, contents: diagramData, attributes: nil)
+//            } catch {
+//                os_log("saveDiagramToCache(fileName:) error %s", log: .errors, type: .error, error.localizedDescription)
+//            }
 //        }
     }
 
 
 
     func restoreDiagramFromCache(fileName name: String) -> Diagram? {
-        guard let restorationURL = DiagramIO.getRestorationURL() else { return nil }
+//        guard let restorationURL = DiagramIO.getRestorationURL() else { return nil }
 //        do {
 //            let nameURL = restorationURL.appendingPathComponent(name)
 //            if !FileManager.default.fileExists(atPath: nameURL.path) {

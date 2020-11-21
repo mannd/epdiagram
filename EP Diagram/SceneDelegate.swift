@@ -17,14 +17,14 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         // If using a storyboard, the `window` property will automatically be initialized and attached to the scene.
         // This delegate does not imply the connecting scene or session are new (see `application:configurationForConnectingSceneSession` instead).
         os_log("scene(scene:willConnectTo:options:), %s", log: .lifeCycle, type: .info, scene.session.persistentIdentifier)
-        guard let scene = (scene as? UIWindowScene) else { return }
-        scene.title = L("EP Diagram")
-        scene.userActivity = session.stateRestorationActivity ?? NSUserActivity(activityType: "org.epstudios.epdiagram.mainActivity")
-        let navigationController = window?.rootViewController as? UINavigationController
-        if let rvc = navigationController?.viewControllers.first as? ViewController {
-            rvc.restorationInfo = scene.userActivity?.userInfo
-            rvc.persistentID = scene.session.persistentIdentifier
-        }
+//        guard let scene = (scene as? UIWindowScene) else { return }
+//        scene.title = L("EP Diagram")
+//        scene.userActivity = session.stateRestorationActivity ?? NSUserActivity(activityType: "org.epstudios.epdiagram.mainActivity")
+//        let navigationController = window?.rootViewController as? UINavigationController
+//        if let rvc = navigationController?.viewControllers.first as? ViewController {
+//            rvc.restorationInfo = scene.userActivity?.userInfo
+//            rvc.persistentID = scene.session.persistentIdentifier
+//        }
     }
 
    

@@ -25,15 +25,8 @@ class Diagram: NSCoding {
     var name: String?
     var image: UIImage? // nil image is blank.
     var description: String
-//    {
-//        get { diagramData.description }
-//        set(newValue) { diagramData.description = newValue }
-//    }
+
     var ladder: Ladder
-//    {
-//        get { diagramData.ladder }
-//        set(newValue) { diagramData.ladder = newValue }
-//    }
     
     // Future use?
 //    var creationDate: Date?
@@ -52,6 +45,7 @@ class Diagram: NSCoding {
         coder.encode(name, forKey: Keys.name.description)
         coder.encode(description, forKey: Keys.description.description)
         coder.encode(image, forKey: Keys.image.description)
+        coder.encode(ladder, forKey: Keys.ladder.description)
     }
 
     required init?(coder: NSCoder) {
@@ -68,13 +62,13 @@ class Diagram: NSCoding {
     }
 
 
-    var diagramData: DiagramData = DiagramData()
-    struct DiagramData: Codable {
-        var name: String?
-        var description: String = ""
-        var ladder: Ladder = Ladder.defaultLadder()
-        // creationDate, lastSavedDate?
-    }
+//    var diagramData: DiagramData = DiagramData()
+//    struct DiagramData: Codable {
+//        var name: String?
+//        var description: String = ""
+//        var ladder: Ladder = Ladder.defaultLadder()
+//        // creationDate, lastSavedDate?
+//    }
 
     init(name: String?, description: String, image: UIImage?, ladder: Ladder) {
         self.name = name
@@ -182,13 +176,11 @@ class Diagram: NSCoding {
 //    }
 //
     static func defaultDiagram(name: String? = nil) -> Diagram {
-//        let diagramData = DiagramData(name: "Normal ECG", description: "Normal ECG", ladder: Ladder.defaultLadder())
         return Diagram(name: name, description: "Normal ECG", image: UIImage(named: "SampleECG")!, ladder: Ladder.defaultLadder())
     }
 
 
     static func blankDiagram(name: String? = nil) -> Diagram {
-        let diagramData = DiagramData(name: "Blank diagram", description: "Blank diagram", ladder: Ladder.defaultLadder())
         let diagram = Diagram(name: name, description: "Blank diagram", image: nil, ladder: Ladder.defaultLadder())
 //        diagram.ladder.zone = Zone(regions: [diagram.ladder.regions[0], diagram.ladder.regions[1]], start: 100, end: 250)
         return diagram
