@@ -296,16 +296,16 @@ final class ViewController: UIViewController {
 
     func restoreDiagramFromCache(fileName name: String) -> Diagram? {
         guard let restorationURL = DiagramIO.getRestorationURL() else { return nil }
-        do {
-            let nameURL = restorationURL.appendingPathComponent(name)
-            if !FileManager.default.fileExists(atPath: nameURL.path) {
-                return nil
-            }
-            return try Diagram.retrieve(fileName: name, url: nameURL)
-        } catch {
-            os_log("restoreDiagramToCache(fileName:) error %s", log: .errors, type: .error, error.localizedDescription)
+//        do {
+//            let nameURL = restorationURL.appendingPathComponent(name)
+//            if !FileManager.default.fileExists(atPath: nameURL.path) {
+//                return nil
+//            }
+//            return try Diagram.retrieve(fileName: name, url: nameURL)
+//        } catch {
+//            os_log("restoreDiagramToCache(fileName:) error %s", log: .errors, type: .error, error.localizedDescription)
             return nil
-        }
+//        }
     }
 
     // Crash program at compile time if IUO delegates are nil.
@@ -708,14 +708,14 @@ final class ViewController: UIViewController {
     }
 
     @IBSegueAction func showSampleSelector(_ coder: NSCoder) -> UIViewController? {
-        let sampleDiagrams: [Diagram] = [
-            Diagram(name: L("Normal ECG"), image: UIImage(named: "SampleECG")!, description: L("Just a normal ECG")),
-            Diagram(name: L("AV Block"), image: UIImage(named: "AVBlock")!, description: L("High grade AV block")),
-            Diagram.blankDiagram(name: L("Blank Diagram")),
-            // Make this taller than height even with rotation.
-            Diagram(name: L("Scrollable Blank Diagram"), image: UIImage.emptyImage(size: CGSize(width: view.frame.size.width * 3, height: max(view.frame.size.height, view.frame.size.width)), color: UIColor.systemTeal), description: L("Wide scrollable blank image"))
-            // TODO: add others here.
-        ]
+        let sampleDiagrams: [Diagram] = []
+//            Diagram(name: L("Normal ECG"), image: UIImage(named: "SampleECG")!, description: L("Just a normal ECG")),
+//            Diagram(name: L("AV Block"), image: UIImage(named: "AVBlock")!, description: L("High grade AV block")),
+//            Diagram.blankDiagram(name: L("Blank Diagram")),
+//            // Make this taller than height even with rotation.
+//            Diagram(name: L("Scrollable Blank Diagram"), image: UIImage.emptyImage(size: CGSize(width: view.frame.size.width * 3, height: max(view.frame.size.height, view.frame.size.width)), color: UIColor.systemTeal), description: L("Wide scrollable blank image"))
+//            // TODO: add others here.
+//        ]
         let sampleSelector = SampleSelector(sampleDiagrams: sampleDiagrams, delegate: self)
         let hostingController = UIHostingController(coder: coder, rootView: sampleSelector)
         return hostingController

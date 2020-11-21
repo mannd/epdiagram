@@ -210,45 +210,45 @@ extension ViewController: HamburgerTableDelegate, UIImagePickerControllerDelegat
     func renameDiagram() {
         os_log("renameDiagram()", log: .action, type: .info)
         // Just fail gracefully if name is nil, renameDiagram should not be available if name is nil.
-        guard let name = diagram.name, !name.isBlank else { return }
-        let alert = UIAlertController(title: L("Rename Diagram"), message: L("Enter a new name for diagram \(name)"), preferredStyle: .alert)
-        alert.addAction(UIAlertAction(title: L("Cancel"), style: .cancel, handler: nil))
-        alert.addTextField { textField in
-            textField.placeholder = L("New diagram name")
-        }
-        alert.addAction(UIAlertAction(title: L("Rename"), style: .default) { [self] action in
-            if let name = alert.textFields?.first?.text {
-                do {
-                    try diagram.rename(newName: name)
-                    self.setTitle()
-                } catch {
-                    Common.showFileError(viewController: self, error: error)
-                }
-            }
-        })
-        present(alert, animated: true)
+//        guard let name = diagram.name, !name.isBlank else { return }
+//        let alert = UIAlertController(title: L("Rename Diagram"), message: L("Enter a new name for diagram \(name)"), preferredStyle: .alert)
+//        alert.addAction(UIAlertAction(title: L("Cancel"), style: .cancel, handler: nil))
+//        alert.addTextField { textField in
+//            textField.placeholder = L("New diagram name")
+//        }
+//        alert.addAction(UIAlertAction(title: L("Rename"), style: .default) { [self] action in
+//            if let name = alert.textFields?.first?.text {
+//                do {
+//                    try diagram.rename(newName: name)
+//                    self.setTitle()
+//                } catch {
+//                    Common.showFileError(viewController: self, error: error)
+//                }
+//            }
+//        })
+//        present(alert, animated: true)
     }
 
     func duplicateDiagram() {
         os_log("duplicateDiagram()", log: .action, type: .info)
         // Just fail gracefully if name is nil, duplicateDiagram should not be available if name is nil.
-        guard let name = diagram.name, !name.isBlank else { return }
-        let alert = UIAlertController(title: L("Duplicate Diagram"), message: L("Enter a name for duplicate diagram of \(name)"), preferredStyle: .alert)
-        alert.addAction(UIAlertAction(title: L("Cancel"), style: .cancel, handler: nil))
-        alert.addTextField { textField in
-            textField.placeholder = L("Duplicate diagram name")
-        }
-        alert.addAction(UIAlertAction(title: L("Duplicate"), style: .default) { [self] action in
-            if let name = alert.textFields?.first?.text {
-                do {
-                    try diagram.duplicate(duplicateName: name)
-                    self.setTitle()
-                } catch {
-                    Common.showFileError(viewController: self, error: error)
-                }
-            }
-        })
-        present(alert, animated: true)
+//        guard let name = diagram.name, !name.isBlank else { return }
+//        let alert = UIAlertController(title: L("Duplicate Diagram"), message: L("Enter a name for duplicate diagram of \(name)"), preferredStyle: .alert)
+//        alert.addAction(UIAlertAction(title: L("Cancel"), style: .cancel, handler: nil))
+//        alert.addTextField { textField in
+//            textField.placeholder = L("Duplicate diagram name")
+//        }
+//        alert.addAction(UIAlertAction(title: L("Duplicate"), style: .default) { [self] action in
+//            if let name = alert.textFields?.first?.text {
+//                do {
+//                    try diagram.duplicate(duplicateName: name)
+//                    self.setTitle()
+//                } catch {
+//                    Common.showFileError(viewController: self, error: error)
+//                }
+//            }
+//        })
+//        present(alert, animated: true)
     }
 
     func getDiagramInfo() {
@@ -449,7 +449,7 @@ extension ViewController: HamburgerTableDelegate, UIImagePickerControllerDelegat
     }
 
     private func doSaveDiagram() throws {
-        try diagram.save()
+//        try diagram.save()
 //        DiagramIO.saveLastDiagram(name: diagram.name)
         setTitle()
     }

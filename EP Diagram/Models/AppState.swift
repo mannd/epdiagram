@@ -13,7 +13,7 @@ extension Diagram {
         activity.addUserInfoEntries(from: ["ladder": ladder])
     }
 
-    mutating func restore(from activity: NSUserActivity) {
+    func restore(from activity: NSUserActivity) {
         guard activity.activityType == "org.epstudios.epdiagram.mainActivity" else { return }
         guard let ladder = activity.userInfo?["ladder"] as? Ladder else { return }
 
