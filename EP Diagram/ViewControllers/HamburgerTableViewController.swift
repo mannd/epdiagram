@@ -35,7 +35,7 @@ class HamburgerTableViewController: UITableViewController {
     private func loadData() {
         imageIsLocked = delegate?.imageIsLocked ?? false
         diagramIsLocked = delegate?.diagramIsLocked ?? false
-        hamburgerViewModel.diagramSaved = delegate?.diagramSaved ?? false
+//        hamburgerViewModel.diagramSaved = delegate?.diagramSaved ?? false
         rows = hamburgerViewModel.allLayers()
     }
 

@@ -17,6 +17,8 @@ enum FileIOError: Error {
     case diagramIsUnnamed
     case duplicateDiagramName
     case diagramNameIsBlank
+    case decodingFailed
+    case encodingFailed
 }
 
 extension FileIOError: LocalizedError {
@@ -36,6 +38,10 @@ extension FileIOError: LocalizedError {
             return L("Diagram name is a duplicate.")
         case .diagramNameIsBlank:
             return L("Diagram name can't be blank.")
+        case .decodingFailed:
+            return L("Decoding failed.")
+        case .encodingFailed:
+            return L("Encoding failed.")
         }
     }
 }

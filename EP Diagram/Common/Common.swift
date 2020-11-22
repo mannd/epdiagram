@@ -203,7 +203,7 @@ class Common {
         }
         alert.addTextField { textField in
             textField.placeholder = L("Diagram description")
-            textField.text = diagram.description
+            textField.text = diagram.longDescription
         }
         alert.addAction(UIAlertAction(title: L("Save"), style: .default) { action in
             if let name = alert.textFields?.first?.text, let description = alert.textFields?[1].text {

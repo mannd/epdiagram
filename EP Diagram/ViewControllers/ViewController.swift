@@ -82,9 +82,10 @@ final class ViewController: UIViewController {
         // }
 
         restorationFileName = persistentID // each screen has unique id
-        if let diagram = restoreDiagramFromCache(fileName: restorationFileName) {
-            self.diagram = diagram
-        }
+//        if let diagram = restoreDiagramFromCache(fileName: restorationFileName) {
+//            self.diagram = diagram
+//        }
+        loadDocument()
 
         // TODO: Lots of other customization for Mac version.
         if Common.isRunningOnMac() {
@@ -153,11 +154,6 @@ final class ViewController: UIViewController {
         ladderView.mode = mode
     }
 
-    @objc func onDidUndoableAction(_ notification: Notification) {
-        if notification.name == .didUndoableAction {
-            updateUndoRedoButtons()
-        }
-    }
 
     override func viewWillAppear(_ animated: Bool) {
         os_log("viewWillAppear() - ViewController", log: .viewCycle, type: .info)
@@ -195,13 +191,12 @@ final class ViewController: UIViewController {
         // Need to set this here, after view draw, or Mac malpositions cursor at start of app.
         imageScrollView.contentInset = UIEdgeInsets(top: 0, left: leftMargin, bottom: 0, right: 0)
         showMainMenu()
-        NotificationCenter.default.addObserver(self, selector: #selector(onDidUndoableAction(_:)), name: .didUndoableAction, object: nil)
-        NotificationCenter.default.addObserver(self, selector: #selector(updatePreferences), name: .preferencesChanged, object: nil)
-        NotificationCenter.default.addObserver(self, selector: #selector(didEnterBackground), name: UIScene.didEnterBackgroundNotification, object: nil)
-        NotificationCenter.default.addObserver(self, selector: #selector(didDisconnect), name: UIScene.didDisconnectNotification, object: nil)
+        setupNotifications()
         updateUndoRedoButtons()
         resetViews()
     }
+
+
 
     // We only want to use the restorationInfo once when view controller first appears.
     var didFirstLayout = false
@@ -217,10 +212,7 @@ final class ViewController: UIViewController {
 
     override func viewWillDisappear(_ animated: Bool) {
         super.viewWillDisappear(animated)
-        NotificationCenter.default.removeObserver(self, name: .didUndoableAction, object: nil)
-        NotificationCenter.default.removeObserver(self, name: .preferencesChanged, object: nil)
-        NotificationCenter.default.removeObserver(self, name: UIScene.didEnterBackgroundNotification, object: nil)
-        NotificationCenter.default.removeObserver(self, name: UIScene.didDisconnectNotification, object: nil)
+        removeNotifications()
     }
 
     override func updateUserActivityState(_ activity: NSUserActivity) {
@@ -238,14 +230,7 @@ final class ViewController: UIViewController {
         print(activity.userInfo as Any)
     }
 
-    @objc func didEnterBackground() {
-        os_log("didEnterBackground()", log: .action, type: .info)
-        saveDiagramToCache(fileName: restorationFileName)
-    }
 
-    @objc func didDisconnect() {
-        os_log("didDisconnect()", log: .action, type: .info)
-    }
 
     func deleteCacheFile(fileName name: String) {
         os_log("deleteCacheFile(fileName: %s)", log: .debugging, type: .debug, name)
@@ -500,14 +485,7 @@ final class ViewController: UIViewController {
         }
     }
 
-    func updateUndoRedoButtons() {
-        // DispatchQueue here forces UI to finish up its tasks before performing below on the main thread.
-        // If not used, undoManager.canUndo/Redo is not updated before this is called.
-        DispatchQueue.main.async {
-            self.undoButton.isEnabled = self.undoManager?.canUndo ?? false
-            self.redoButton.isEnabled = self.undoManager?.canRedo ?? false
-        }
-    }
+
 
     // MARK: - Touches
 
@@ -816,4 +794,109 @@ final class ViewController: UIViewController {
 //            }
 //        )
     }
+}
+
+extension ViewController {
+    func setupNotifications() {
+        NotificationCenter.default.addObserver(self, selector: #selector(onDidUndoableAction(_:)), name: .didUndoableAction, object: nil)
+        NotificationCenter.default.addObserver(self, selector: #selector(updatePreferences), name: .preferencesChanged, object: nil)
+        NotificationCenter.default.addObserver(self, selector: #selector(didEnterBackground), name: UIScene.didEnterBackgroundNotification, object: nil)
+        NotificationCenter.default.addObserver(self, selector: #selector(didDisconnect), name: UIScene.didDisconnectNotification, object: nil)
+    }
+
+    func removeNotifications() {
+        NotificationCenter.default.removeObserver(self, name: .didUndoableAction, object: nil)
+        NotificationCenter.default.removeObserver(self, name: .preferencesChanged, object: nil)
+        NotificationCenter.default.removeObserver(self, name: UIScene.didEnterBackgroundNotification, object: nil)
+        NotificationCenter.default.removeObserver(self, name: UIScene.didDisconnectNotification, object: nil)
+    }
+
+    @objc func onDidUndoableAction(_ notification: Notification) {
+        if notification.name == .didUndoableAction {
+            updateUndoRedoButtons()
+        }
+    }
+
+    func updateUndoRedoButtons() {
+        // DispatchQueue here forces UI to finish up its tasks before performing below on the main thread.
+        // If not used, undoManager.canUndo/Redo is not updated before this is called.
+        DispatchQueue.main.async {
+            self.undoButton.isEnabled = self.undoManager?.canUndo ?? false
+            self.redoButton.isEnabled = self.undoManager?.canRedo ?? false
+        }
+    }
+
+    @objc func didEnterBackground() {
+        os_log("didEnterBackground()", log: .action, type: .info)
+        saveDefaultDocument(diagram)
+    }
+
+    @objc func didDisconnect() {
+        os_log("didDisconnect()", log: .action, type: .info)
+    }
+
+    @objc func updatePreferences() {
+        os_log("updatePreferences()", log: .action, type: .info)
+        ladderView.lineWidth = CGFloat(UserDefaults.standard.double(forKey: Preferences.defaultLineWidthKey))
+        ladderView.showBlock = UserDefaults.standard.bool(forKey: Preferences.defaultShowBlockKey)
+        ladderView.showImpulseOrigin = UserDefaults.standard.bool(forKey: Preferences.defaultShowImpulseOriginKey)
+        ladderView.showIntervals = UserDefaults.standard.bool(forKey: Preferences.defaultShowIntervalsKey)
+        setViewsNeedDisplay()
+    }
+
+    var defaultDocumentURL: URL {
+        // TODO: Fix !
+        let docURL = FileIO.getURL(for: .documents)!
+        // TODO: use restoration file name, and delete old default file to account for screens.
+        let docPath = docURL.appendingPathComponent("Default.diagram")
+        return docPath
+//      let docspath = UIApplication.documentsDirectory()
+//      return docspath.appendingPathComponent("Default.rwmarkup")
+    }
+
+    func loadDefaultDocument() -> Diagram? {
+      do {
+        let decoder = JSONDecoder()
+        if let data = FileManager.default.contents(atPath: defaultDocumentURL.path) {
+            let documentData = try decoder.decode(Diagram.self, from: data)
+            return documentData
+        }
+        else { return nil }
+
+      //            let diagram = Diagram(name: fileName, image: image, diagramData: diagramData)
+      //            return diagram
+      //        }
+//        let documentData = try Data(contentsOf: defaultDocumentURL)
+//        let unarchiver = try NSKeyedUnarchiver(forReadingFrom: documentData)
+//        unarchiver.requiresSecureCoding = false
+//        return unarchiver.decodeObject(of: Diagram.self, forKey: NSKeyedArchiveRootObjectKey)
+      } catch {
+        return nil
+      }
+    }
+
+    @discardableResult func saveDefaultDocument(_ content: Diagram) -> Bool {
+      do {
+        let encoder = JSONEncoder()
+        let documentData = try encoder.encode(content)
+       //        let diagramData = try encoder.encode(self.diagramData)
+       //        let ladderURL = url.appendingPathComponent(FileIO.ladderFilename, isDirectory: false)
+       //        FileManager.default.createFile(atPath: ladderURL.path, contents: diagramData, attributes: nil)
+//        let documentData = try NSKeyedArchiver.archivedData(withRootObject: content, requiringSecureCoding: false)
+        try documentData.write(to: defaultDocumentURL)
+        print("written to \(defaultDocumentURL)")
+        return true
+      } catch {
+        return false
+      }
+    }
+
+    private func loadDocument() {
+      if let content = loadDefaultDocument() {
+        diagram = content
+      } else {
+        diagram = Diagram.defaultDiagram()
+      }
+    }
+
 }

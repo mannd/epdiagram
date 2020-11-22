@@ -16,7 +16,7 @@ protocol HamburgerTableDelegate: class {
     var maxBlackAlpha: CGFloat { get }
     var imageIsLocked: Bool { get set }
     var diagramIsLocked: Bool { get set }
-    var diagramSaved: Bool { get }
+//    var diagramSaved: Bool { get }
 
     func takePhoto()
     func selectImage()
@@ -95,8 +95,6 @@ extension ViewController: HamburgerTableDelegate, UIImagePickerControllerDelegat
         set(newValue) { _ladderIsLocked = newValue }
     }
 
-    var diagramSaved: Bool { diagram.isSaved }
-
     var constraintHamburgerLeft: NSLayoutConstraint {
         get { _constraintHamburgerLeft }
         set(newValue){ _constraintHamburgerLeft = newValue }
@@ -166,7 +164,7 @@ extension ViewController: HamburgerTableDelegate, UIImagePickerControllerDelegat
             }
             alert.addTextField { [self] textField in
                 textField.placeholder = L("Diagram description")
-                textField.text = diagram.description
+                textField.text = diagram.longDescription
             }
             alert.addAction(UIAlertAction(title: L("Save"), style: .default) { [self] action in
                 if let name = alert.textFields?.first?.text, let description = alert.textFields?[1].text {
@@ -175,7 +173,7 @@ extension ViewController: HamburgerTableDelegate, UIImagePickerControllerDelegat
                             throw FileIOError.duplicateDiagramName
                         }
                         diagram.name = name
-                        diagram.description = description
+                        diagram.longDescription = description
                         try self.doSaveDiagram()
                         if let completion = completion {
                             completion()
@@ -188,7 +186,7 @@ extension ViewController: HamburgerTableDelegate, UIImagePickerControllerDelegat
                     } catch {
                         Common.showFileError(viewController: self, error: error)
                         diagram.name = nil
-                        diagram.description = ""
+                        diagram.longDescription = ""
                     }
                 }
             })
@@ -256,9 +254,7 @@ extension ViewController: HamburgerTableDelegate, UIImagePickerControllerDelegat
         // TODO: If there are more fields, then include this and add SwiftUI view.
         // show dialog with diagram info here.
         P("Name = \(diagram.name ?? "unnamed")")
-        P("Description = \(diagram.description)")
-        P("isDirty = \(diagram.isDirty)")
-        P("isSaved = \(diagram.isSaved)")
+        P("Description = \(diagram.longDescription)")
     }
 
     func snapshotDiagram() {
@@ -358,24 +354,24 @@ extension ViewController: HamburgerTableDelegate, UIImagePickerControllerDelegat
     // MARK: - Delegate handlers
 
     private func showSaveDiagramDialog(withTitle title: String, withActionText actionText: String, andThenDo handler: @escaping ()->Void) {
-        if diagram.isDirty {
-            let message = L("Diagram has changes.  You can save it and then \(actionText), or abandon the changes and \(actionText).")
-            let alert = UIAlertController(title: title, message: message, preferredStyle: .alert)
-            let cancelAction = UIAlertAction(title: L("Cancel"), style: .cancel, handler: nil)
-            let selectWithSaveAction = UIAlertAction(title: L("Save Diagram First"), style: .default, handler: { action in
-                self.dismiss(animated: true, completion: nil)
-                self.saveDiagram(completion: { handler() })
-            })
-            let selectWithoutSaveAction = UIAlertAction(title: L("Don't Save Diagram"), style: .destructive, handler: { action in
-                self.dismiss(animated: true, completion: nil)
-                handler() })
-            alert.addAction(cancelAction)
-            alert.addAction(selectWithSaveAction)
-            alert.addAction(selectWithoutSaveAction)
-            present(alert, animated: true)
-        } else {
-            handler()
-        }
+//        if diagram.isDirty {
+//            let message = L("Diagram has changes.  You can save it and then \(actionText), or abandon the changes and \(actionText).")
+//            let alert = UIAlertController(title: title, message: message, preferredStyle: .alert)
+//            let cancelAction = UIAlertAction(title: L("Cancel"), style: .cancel, handler: nil)
+//            let selectWithSaveAction = UIAlertAction(title: L("Save Diagram First"), style: .default, handler: { action in
+//                self.dismiss(animated: true, completion: nil)
+//                self.saveDiagram(completion: { handler() })
+//            })
+//            let selectWithoutSaveAction = UIAlertAction(title: L("Don't Save Diagram"), style: .destructive, handler: { action in
+//                self.dismiss(animated: true, completion: nil)
+//                handler() })
+//            alert.addAction(cancelAction)
+//            alert.addAction(selectWithSaveAction)
+//            alert.addAction(selectWithoutSaveAction)
+//            present(alert, animated: true)
+//        } else {
+//            handler()
+//        }
     }
 
     private func handleTakePhoto() {
@@ -425,7 +421,7 @@ extension ViewController: HamburgerTableDelegate, UIImagePickerControllerDelegat
         // Use same ladder, blank out image.
         setDiagramImage(nil)
         diagram.name = nil
-        diagram.description = ""
+        diagram.longDescription = ""
         setTitle()
     }
 
@@ -535,4 +531,17 @@ extension ViewController: HamburgerTableDelegate, UIImagePickerControllerDelegat
         picker.dismiss(animated: true, completion: nil)
     }
 }
+
+extension ViewController {
+  static func freshController(diagram: Diagram? = nil) -> ViewController {
+    let storyboard = UIStoryboard(name: "Main", bundle: nil)
+    guard let controller = storyboard.instantiateInitialViewController() as? ViewController else {
+      fatalError("Project fault - cant instantiate ViewController from storyboard")
+    }
+    //controller.delegate = delegate
+    controller.diagram = diagram ?? Diagram.defaultDiagram()
+    return controller
+  }
+}
+
 

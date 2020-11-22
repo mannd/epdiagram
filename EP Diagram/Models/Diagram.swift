@@ -9,57 +9,62 @@
 import UIKit
 import os.log
 
-private enum Keys: String, CustomStringConvertible {
-    case name = "diagramName"
-    case description = "diagramDescription"
-    case image = "diagramImage"
-    case ladder = "diagramLadder"
-
-    var description: String {
-        return self.rawValue
-    }
-}
-
-class Diagram: NSCoding {
-
+class Diagram: Codable {
     var name: String?
-    var image: UIImage? // nil image is blank.
-    var description: String
-
+//    var image: UIImage? // nil image is blank.
+    var imageWrapper: ImageWrapper?
+    var image: UIImage? {
+        get {
+            return imageWrapper?.image
+        }
+        set(newValue) {
+            imageWrapper = ImageWrapper(image: newValue)
+        }
+    }
+    var longDescription: String
     var ladder: Ladder
-    
-    // Future use?
-//    var creationDate: Date?
-//    var lastSavedDate: Date?
 
-    // A diagram does not get a name until it is saved.
-    var isSaved: Bool {
-        !name.isBlank
-    }
-    // TODO: make diagram dirty when any marks are added or deleted.
-    var isDirty: Bool {
-        ladder.isDirty
-    }
+//    // A diagram does not get a name until it is saved.
+//    var isSaved: Bool {
+//        !name.isBlank
+//    }
+//    // TODO: make diagram dirty when any marks are added or deleted.
+//    var isDirty: Bool {
+//        ladder.isDirty
+//    }
 
-    func encode(with coder: NSCoder) {
-        coder.encode(name, forKey: Keys.name.description)
-        coder.encode(description, forKey: Keys.description.description)
-        coder.encode(image, forKey: Keys.image.description)
-        coder.encode(ladder, forKey: Keys.ladder.description)
-    }
+    private enum Keys: String, CustomStringConvertible {
+        case name = "diagramName"
+        case longDescription = "diagramLongDescription"
+        case image = "diagramImage"
+        case ladder = "diagramLadder"
 
-    required init?(coder: NSCoder) {
-        name = coder.decodeObject(forKey: Keys.name.description) as? String
-        description = coder.decodeObject(forKey: Keys.description.description) as? String ?? ""
-        if let data = coder.decodeObject(forKey: Keys.image.description) as? Data {
-            image = UIImage(data: data)
-        }
-        if let ladder = coder.decodeObject(forKey: Keys.ladder.description) as? Ladder {
-            self.ladder = ladder
-        } else {
-            self.ladder = Ladder.defaultLadder()
+        var description: String {
+            return self.rawValue
         }
     }
+
+//    func encode(with coder: NSCoder) {
+//        coder.encode(name, forKey: Keys.name.description)
+//        coder.encode(description, forKey: Keys.longDescription.description)
+//        if let image = image, let data = image.jpegData(compressionQuality: 1.0) {
+//          coder.encode(data, forKey: Keys.image.description)
+//        }
+//        coder.encode(ladder, forKey: Keys.ladder.description)
+//    }
+//
+//    required init?(coder: NSCoder) {
+//        name = coder.decodeObject(forKey: Keys.name.description) as? String
+//        longDescription = coder.decodeObject(forKey: Keys.longDescription.description) as? String ?? ""
+//        if let data = coder.decodeObject(forKey: Keys.image.description) as? Data {
+//            image = UIImage(data: data)
+//        }
+//        if let ladder = coder.decodeObject(forKey: Keys.ladder.description) as? Ladder {
+//            self.ladder = ladder
+//        } else {
+//            self.ladder = Ladder.defaultLadder()
+//        }
+//    }
 
 
 //    var diagramData: DiagramData = DiagramData()
@@ -72,8 +77,8 @@ class Diagram: NSCoding {
 
     init(name: String?, description: String, image: UIImage?, ladder: Ladder) {
         self.name = name
-        self.description = description
-        self.image = image
+        self.longDescription = description
+        self.imageWrapper = ImageWrapper(image: image)
         self.ladder = ladder
     }
 

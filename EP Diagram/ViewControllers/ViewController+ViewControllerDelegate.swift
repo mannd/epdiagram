@@ -13,11 +13,9 @@ protocol ViewControllerDelegate: class {
     func selectLadderTemplate(ladderTemplate: LadderTemplate?)
     func selectDiagram(named name: String?)
     func deleteDiagram(named name: String)
-//    func savePreferences(_ preferences: Preferences)
     func saveTemplates(_ templates: [LadderTemplate])
     func selectSampleDiagram(_ diagram: Diagram?)
     func setViewsNeedDisplay()
-    func updatePreferences()
 }
 
 extension ViewController: ViewControllerDelegate {
@@ -68,16 +66,7 @@ extension ViewController: ViewControllerDelegate {
         }
     }
 
-    @objc
-    func updatePreferences() {
-        os_log("updatePreferences()", log: .action, type: .info)
-        ladderView.lineWidth = CGFloat(UserDefaults.standard.double(forKey: Preferences.defaultLineWidthKey))
-        ladderView.showBlock = UserDefaults.standard.bool(forKey: Preferences.defaultShowBlockKey)
-        ladderView.showImpulseOrigin = UserDefaults.standard.bool(forKey: Preferences.defaultShowImpulseOriginKey)
-        ladderView.showIntervals = UserDefaults.standard.bool(forKey: Preferences.defaultShowIntervalsKey)
-        setViewsNeedDisplay()
-    }
-
+ 
     func saveTemplates(_ templates: [LadderTemplate]) {
         os_log("saveTemplates()", log: .action, type: .info)
         do {
