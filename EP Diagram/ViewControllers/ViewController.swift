@@ -81,14 +81,12 @@ final class ViewController: UIViewController {
         //     }
         // }
 
-//        if let diagram = restoreDiagramFromCache(fileName: restorationFileName) {
-//            self.diagram = diagram
-//        }
         restorationFileName = restorationInfo?[ViewController.restorationFileName] as? String ?? ""
-        loadDocument()
+        if !launchFromURL {
+            loadDocument()
+        }
         deleteDefaultDocument()
         restorationFileName = persistentID // each screen has unique id
-
 
         // TODO: Lots of other customization for Mac version.
         if Common.isRunningOnMac() {
@@ -214,7 +212,6 @@ final class ViewController: UIViewController {
     override func updateUserActivityState(_ activity: NSUserActivity) {
         os_log("updateUserActivityState called")
         super.updateUserActivityState(activity)
-
         let info: [AnyHashable: Any] = [
             ViewController.restorationContentOffsetXKey: imageScrollView.contentOffset.x,
             ViewController.restorationContentOffsetYKey: imageScrollView.contentOffset.y,
@@ -225,69 +222,6 @@ final class ViewController: UIViewController {
         ]
         activity.addUserInfoEntries(from: info)
         print(activity.userInfo as Any)
-    }
-
-
-
-    func deleteCacheFile(fileName name: String) {
-        os_log("deleteCacheFile(fileName: %s)", log: .debugging, type: .debug, name)
-        guard let restorationURL = DiagramIO.getRestorationURL() else { return }
-        print("restorationURL = \(restorationURL.path)")
-        do {
-            let nameURL = restorationURL.appendingPathComponent(name)
-            if FileManager.default.fileExists(atPath: nameURL.path) {
-                try FileManager.default.removeItem(at: nameURL)
-            }
-        } catch {
-                    os_log("deleteCacheFile(fileName:) error %s", log: .errors, type: .error, error.localizedDescription)
-        }
-    }
-
-    func saveDiagramToCache(fileName name: String) {
-        os_log("saveDiagramToCache(fileName:)", log: .debugging, type: .info)
-//        DispatchQueue.global().async { [self] in
-//            guard let restorationURL = DiagramIO.getRestorationURL() else { return }
-//            print(">>>> restorationURL = \(restorationURL)")
-//            do {
-//                let nameURL = restorationURL.appendingPathComponent(name)
-//                if !FileManager.default.fileExists(atPath: nameURL.path) {
-//                    try FileManager.default.createDirectory(at: nameURL,
-//                                                            withIntermediateDirectories: true,
-//                                                            attributes: nil)
-//                }
-//                print(">>>>>>>>>> \(nameURL.path)")
-//                if let image = diagram.image {
-//                    let imageData = image.pngData()
-//                    let imageURL = nameURL.appendingPathComponent(FileIO.imageFilename, isDirectory: false)
-//                    if FileManager.default.fileExists(atPath: imageURL.path) {
-//                        try FileManager.default.removeItem(at: imageURL)
-//                    }
-//                    try imageData?.write(to: imageURL)
-//                }
-//                let encoder = JSONEncoder()
-////                let diagramData = try encoder.encode(diagram.diagramData)
-//                let ladderURL = nameURL.appendingPathComponent(FileIO.ladderFilename, isDirectory: false)
-////                FileManager.default.createFile(atPath: ladderURL.path, contents: diagramData, attributes: nil)
-//            } catch {
-//                os_log("saveDiagramToCache(fileName:) error %s", log: .errors, type: .error, error.localizedDescription)
-//            }
-//        }
-    }
-
-
-
-    func restoreDiagramFromCache(fileName name: String) -> Diagram? {
-//        guard let restorationURL = DiagramIO.getRestorationURL() else { return nil }
-//        do {
-//            let nameURL = restorationURL.appendingPathComponent(name)
-//            if !FileManager.default.fileExists(atPath: nameURL.path) {
-//                return nil
-//            }
-//            return try Diagram.retrieve(fileName: name, url: nameURL)
-//        } catch {
-//            os_log("restoreDiagramToCache(fileName:) error %s", log: .errors, type: .error, error.localizedDescription)
-            return nil
-//        }
     }
 
     // Crash program at compile time if IUO delegates are nil.
@@ -520,6 +454,8 @@ final class ViewController: UIViewController {
         if ext != "PDF" {
             // self.enablePageButtons = false
             setImageViewImage(with: UIImage(contentsOfFile: url.path))
+            diagram.image = imageView.image
+            ladderView.ladder.clear()
         }
         else {
             // self.numberOfPages = 0
@@ -575,6 +511,8 @@ final class ViewController: UIViewController {
             let image: UIImage? = UIGraphicsGetImageFromCurrentImageContext()
             if image != nil {
                 setImageViewImage(with: image)
+                diagram.image = image
+                ladderView.ladder.clear()
             }
             UIGraphicsEndImageContext()
         }

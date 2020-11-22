@@ -54,15 +54,16 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
     }
 
     func scene(_ scene: UIScene, openURLContexts URLContexts: Set<UIOpenURLContext>) {
-//        let navigationController = self.window?.rootViewController as? UINavigationController
-//        let viewController = navigationController?.viewControllers[0] as? ViewController
-//        for context in URLContexts {
-//            let url = context.url
-//            if url.isFileURL {
-//                viewController?.launchFromURL = true
-//                viewController?.launchURL = url
-//                viewController?.openURL(url: url)
-//            }
-//        }
+        os_log("scene(_:openURLContexts), %s", log: .lifeCycle, type: .info, scene.session.persistentIdentifier)
+        let navigationController = self.window?.rootViewController as? UINavigationController
+        let viewController = navigationController?.viewControllers[0] as? ViewController
+        for context in URLContexts {
+            let url = context.url
+            if url.isFileURL {
+                viewController?.launchFromURL = true
+                viewController?.launchURL = url
+                viewController?.openURL(url: url)
+            }
+        }
     }
 }

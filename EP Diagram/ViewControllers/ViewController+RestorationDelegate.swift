@@ -14,6 +14,6 @@ protocol RestorationDelegate {
 
 extension ViewController: RestorationDelegate {
     func saveDiagramToCache() {
-        saveDiagramToCache(fileName: restorationFileName)
+        saveDefaultDocument(diagram)
     }
 }
