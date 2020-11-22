@@ -33,24 +33,7 @@ private enum Keys: String, CustomStringConvertible {
 // MARK: - classes
 
 // A Ladder is simply a collection of Regions in top down order.
-class Ladder: NSObject, NSCoding, Codable {
-    func encode(with coder: NSCoder) {
-        coder.encode(name, forKey: Keys.name.description)
-        coder.encode(longDescription, forKey: Keys.longDescription.description)
-        coder.encode(regions, forKey: Keys.regions.description)
-    }
-
-    required init?(coder: NSCoder) {
-        if let name = coder.decodeObject(forKey: Keys.name.description) as? String {
-            self.name = name
-        } else {
-            self.name = ""
-        }
-        longDescription = coder.decodeObject(forKey: Keys.longDescription.description) as? String ?? ""
-        if let data = coder.decodeObject(forKey: Keys.regions.description) as? [Region] {
-            regions = data
-        }
-    }
+class Ladder: Codable {
 
     // MARK: constants
     private(set) var id = UUID()

@@ -28,7 +28,7 @@ enum Movement {
 
 // A mark may have up to three attachments to marks in the proximal and distal regions
 // and in its own region, i.e. reentry spawning a mark.
-class MarkGroup: Codable {
+struct MarkGroup: Codable {
     var proximal: MarkSet
     var middle: MarkSet
     var distal: MarkSet
@@ -45,7 +45,7 @@ class MarkGroup: Codable {
         self.distal = distal
     }
 
-    func remove(mark: Mark) {
+    mutating func remove(mark: Mark) {
         proximal.remove(mark)
         middle.remove(mark)
         distal.remove(mark)

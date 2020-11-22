@@ -31,7 +31,7 @@ enum RegionDivision {
 // A Region is a row of a ladder corresponding to an anatomic substrate.
 // A Region has a labelSection such as "A" or "AV" and
 // a markSection.  Region boundaries are set by the calling ScaledView.
-class Region: NSObject, NSCoding, Codable {
+class Region: Codable {
 
 
     private(set) var id = UUID()
@@ -48,30 +48,6 @@ class Region: NSObject, NSCoding, Codable {
     // TODO: Add style to region, which can be overrident, and set as a default in preferences
     // TODO: We can init lineStyle with the template lineStyle, but we need to be able to set it as well.
     var lineStyle: Mark.LineStyle = .solid
-
-    private enum Keys: String, CustomStringConvertible {
-        case name = "regionName"
-        case longDescription = "regionLongDescription"
-        case unitHeight = "regionUnitHeight"
-        // etc.
-
-        var description: String {
-            return self.rawValue
-        }
-    }
-
-    func encode(with coder: NSCoder) {
-        coder.encode(name, forKey: Keys.name.description)
-        coder.encode(longDescription, forKey: Keys.longDescription.description)
-        coder.encode(unitHeight, forKey: Keys.unitHeight.description)
-    }
-
-    required init?(coder: NSCoder) {
-        guard let name = coder.decodeObject(forKey: Keys.name.description) as? String else { return nil }
-        self.name = name
-        longDescription = coder.decodeObject(forKey: Keys.longDescription.description) as? String ?? ""
-        unitHeight = coder.decodeObject(forKey: Keys.unitHeight.description) as? Int ?? 1
-    }
 
     // A region is copied from a template, after which the template is no longer referenced.
     init(template: RegionTemplate) {
@@ -115,8 +91,8 @@ class Region: NSObject, NSCoding, Codable {
 //    var debugDescription: String { "Region ID " + id.debugDescription }
 //}
 //
-//extension Region: Equatable {
-//    static func == (lhs: Region, rhs: Region) -> Bool {
-//        return lhs.id == rhs.id
-//    }
-//}
+extension Region: Equatable {
+    static func == (lhs: Region, rhs: Region) -> Bool {
+        return lhs.id == rhs.id
+    }
+}

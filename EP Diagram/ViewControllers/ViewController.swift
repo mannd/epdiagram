@@ -11,7 +11,6 @@ import SwiftUI
 import os.log
 
 final class ViewController: UIViewController {
-
     // View, outlets, constraints
     @IBOutlet var _constraintHamburgerWidth: NSLayoutConstraint!
     @IBOutlet var _constraintHamburgerLeft: NSLayoutConstraint!
@@ -25,7 +24,7 @@ final class ViewController: UIViewController {
 
     // This margin is passed to other views.
     // TODO: Possibly change this to property of ladder, since it might depend on label width (# of chars)?
-    private let leftMargin: CGFloat = 30
+    private let leftMargin: CGFloat = 40
 
     // Buttons, menus
     private let spacer = UIBarButtonItem(barButtonSystemItem: .flexibleSpace, target: nil, action: nil)
@@ -60,6 +59,7 @@ final class ViewController: UIViewController {
     static let restorationZoomKey = "restorationZoomKey"
     static let restorationIsCalibratedKey = "restorationIsCalibrated"
     static let restorationCalFactorKey = "restorationCalFactorKey"
+    static let restorationFileName = "restorationFileNameKey"
     // Set by screen delegate
     var restorationInfo: [AnyHashable: Any]?
     var persistentID = ""
@@ -81,11 +81,14 @@ final class ViewController: UIViewController {
         //     }
         // }
 
-        restorationFileName = persistentID // each screen has unique id
 //        if let diagram = restoreDiagramFromCache(fileName: restorationFileName) {
 //            self.diagram = diagram
 //        }
+        restorationFileName = restorationInfo?[ViewController.restorationFileName] as? String ?? ""
         loadDocument()
+        deleteDefaultDocument()
+        restorationFileName = persistentID // each screen has unique id
+
 
         // TODO: Lots of other customization for Mac version.
         if Common.isRunningOnMac() {
@@ -154,13 +157,6 @@ final class ViewController: UIViewController {
         ladderView.mode = mode
     }
 
-
-    override func viewWillAppear(_ animated: Bool) {
-        os_log("viewWillAppear() - ViewController", log: .viewCycle, type: .info)
-        super.viewWillAppear(animated)
-
-    }
-
     override func viewDidAppear(_ animated: Bool) {
         os_log("viewDidAppear() - ViewController", log: OSLog.viewCycle, type: .info)
         super.viewDidAppear(animated)
@@ -224,7 +220,8 @@ final class ViewController: UIViewController {
             ViewController.restorationContentOffsetYKey: imageScrollView.contentOffset.y,
             ViewController.restorationZoomKey: imageScrollView.zoomScale,
             ViewController.restorationIsCalibratedKey: cursorView.isCalibrated(),
-            ViewController.restorationCalFactorKey: cursorView.calFactor
+            ViewController.restorationCalFactorKey: cursorView.calFactor,
+            ViewController.restorationFileName: restorationFileName
         ]
         activity.addUserInfoEntries(from: info)
         print(activity.userInfo as Any)
@@ -242,7 +239,7 @@ final class ViewController: UIViewController {
                 try FileManager.default.removeItem(at: nameURL)
             }
         } catch {
-            os_log("deleteCacheFile(fileName:) error %s", log: .errors, type: .error, error.localizedDescription)
+                    os_log("deleteCacheFile(fileName:) error %s", log: .errors, type: .error, error.localizedDescription)
         }
     }
 
@@ -844,59 +841,55 @@ extension ViewController {
         setViewsNeedDisplay()
     }
 
-    var defaultDocumentURL: URL {
-        // TODO: Fix !
-        let docURL = FileIO.getURL(for: .documents)!
-        // TODO: use restoration file name, and delete old default file to account for screens.
-        let docPath = docURL.appendingPathComponent("Default.diagram")
+    var defaultDocumentURL: URL? {
+        guard let docURL = FileIO.getURL(for: .cache) else { return nil }
+        let docPath = docURL.appendingPathComponent("\(restorationFileName).diagram")
         return docPath
-//      let docspath = UIApplication.documentsDirectory()
-//      return docspath.appendingPathComponent("Default.rwmarkup")
     }
 
     func loadDefaultDocument() -> Diagram? {
-      do {
-        let decoder = JSONDecoder()
-        if let data = FileManager.default.contents(atPath: defaultDocumentURL.path) {
-            let documentData = try decoder.decode(Diagram.self, from: data)
-            return documentData
+        guard let defaultDocumentURL = defaultDocumentURL else { return nil }
+        do {
+            let decoder = JSONDecoder()
+            if let data = FileManager.default.contents(atPath: defaultDocumentURL.path) {
+                let documentData = try decoder.decode(Diagram.self, from: data)
+                return documentData
+            } else { return nil }
+        } catch {
+            return nil
         }
-        else { return nil }
-
-      //            let diagram = Diagram(name: fileName, image: image, diagramData: diagramData)
-      //            return diagram
-      //        }
-//        let documentData = try Data(contentsOf: defaultDocumentURL)
-//        let unarchiver = try NSKeyedUnarchiver(forReadingFrom: documentData)
-//        unarchiver.requiresSecureCoding = false
-//        return unarchiver.decodeObject(of: Diagram.self, forKey: NSKeyedArchiveRootObjectKey)
-      } catch {
-        return nil
-      }
     }
 
     @discardableResult func saveDefaultDocument(_ content: Diagram) -> Bool {
-      do {
-        let encoder = JSONEncoder()
-        let documentData = try encoder.encode(content)
-       //        let diagramData = try encoder.encode(self.diagramData)
-       //        let ladderURL = url.appendingPathComponent(FileIO.ladderFilename, isDirectory: false)
-       //        FileManager.default.createFile(atPath: ladderURL.path, contents: diagramData, attributes: nil)
-//        let documentData = try NSKeyedArchiver.archivedData(withRootObject: content, requiringSecureCoding: false)
-        try documentData.write(to: defaultDocumentURL)
-        print("written to \(defaultDocumentURL)")
-        return true
-      } catch {
-        return false
-      }
+        guard let defaultDocumentURL = defaultDocumentURL else { return false }
+        do {
+            let encoder = JSONEncoder()
+            let documentData = try encoder.encode(content)
+            try documentData.write(to: defaultDocumentURL)
+            print("written to \(defaultDocumentURL)")
+            return true
+        } catch {
+            return false
+        }
+    }
+
+    func deleteDefaultDocument() {
+        guard let defaultDocumentURL = defaultDocumentURL else { return }
+        do {
+            if FileManager.default.fileExists(atPath: defaultDocumentURL.path) {
+                try FileManager.default.removeItem(at: defaultDocumentURL)
+            }
+        } catch {
+            os_log("deleteDefaultDocument() error %s", log: .errors, type: .error, error.localizedDescription)
+        }
     }
 
     private func loadDocument() {
-      if let content = loadDefaultDocument() {
-        diagram = content
-      } else {
-        diagram = Diagram.defaultDiagram()
-      }
+        if let content = loadDefaultDocument() {
+            diagram = content
+        } else {
+            diagram = Diagram.defaultDiagram()
+        }
     }
 
 }

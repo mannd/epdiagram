@@ -34,7 +34,13 @@ class DiagramDocument: UIDocument {
     override func contents(forType typeName: String) throws -> Any {
         let data: Data
         do {
-            data = try NSKeyedArchiver.archivedData(withRootObject: diagram, requiringSecureCoding: false)
+            let encoder = JSONEncoder()
+            data = try encoder.encode(diagram)
+//            if let data = FileManager.default.contents(atPath: defaultDocumentURL.path) {
+//                let documentData = try decoder.decode(Diagram.self, from: data)
+//                return documentData
+//            }
+//            data = try NSKeyedArchiver.archivedData(withRootObject: diagram, requiringSecureCoding: false)
         } catch {
             throw DocumentError.archivingFailure
         }
@@ -47,16 +53,21 @@ class DiagramDocument: UIDocument {
     override func load(fromContents contents: Any, ofType typeName: String?) throws {
         guard let data = contents as? Data else { throw DocumentError.unrecognizedContent }
 
-        let unarchiver: NSKeyedUnarchiver
+        let decoder = JSONDecoder()
         do {
-            unarchiver = try NSKeyedUnarchiver(forReadingFrom: data)
+            diagram = try decoder.decode(Diagram.self, from: data)
+
+//
+//        let unarchiver: NSKeyedUnarchiver
+//        do {
+//            unarchiver = try NSKeyedUnarchiver(forReadingFrom: data)
         } catch {
             throw DocumentError.corruptDocument
         }
-        unarchiver.requiresSecureCoding = false
-        let decodedContent = unarchiver.decodeObject(forKey: NSKeyedArchiveRootObjectKey) as? Diagram
-        guard let content = decodedContent else { throw DocumentError.corruptDocument }
-
-        diagram = content
+//        unarchiver.requiresSecureCoding = false
+//        let decodedContent = unarchiver.decodeObject(forKey: NSKeyedArchiveRootObjectKey) as? Diagram
+//        guard let content = decodedContent else { throw DocumentError.corruptDocument }
+//
+//        diagram = content
     }
 }

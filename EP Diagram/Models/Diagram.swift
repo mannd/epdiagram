@@ -24,14 +24,14 @@ class Diagram: Codable {
     var longDescription: String
     var ladder: Ladder
 
-//    // A diagram does not get a name until it is saved.
-//    var isSaved: Bool {
-//        !name.isBlank
-//    }
-//    // TODO: make diagram dirty when any marks are added or deleted.
-//    var isDirty: Bool {
-//        ladder.isDirty
-//    }
+    // A diagram does not get a name until it is saved.
+    var isSaved: Bool {
+        !name.isBlank
+    }
+    // TODO: make diagram dirty when any marks are added or deleted.
+    var isDirty: Bool {
+        ladder.isDirty
+    }
 
     private enum Keys: String, CustomStringConvertible {
         case name = "diagramName"

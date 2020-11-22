@@ -354,24 +354,24 @@ extension ViewController: HamburgerTableDelegate, UIImagePickerControllerDelegat
     // MARK: - Delegate handlers
 
     private func showSaveDiagramDialog(withTitle title: String, withActionText actionText: String, andThenDo handler: @escaping ()->Void) {
-//        if diagram.isDirty {
-//            let message = L("Diagram has changes.  You can save it and then \(actionText), or abandon the changes and \(actionText).")
-//            let alert = UIAlertController(title: title, message: message, preferredStyle: .alert)
-//            let cancelAction = UIAlertAction(title: L("Cancel"), style: .cancel, handler: nil)
-//            let selectWithSaveAction = UIAlertAction(title: L("Save Diagram First"), style: .default, handler: { action in
-//                self.dismiss(animated: true, completion: nil)
-//                self.saveDiagram(completion: { handler() })
-//            })
-//            let selectWithoutSaveAction = UIAlertAction(title: L("Don't Save Diagram"), style: .destructive, handler: { action in
-//                self.dismiss(animated: true, completion: nil)
-//                handler() })
-//            alert.addAction(cancelAction)
-//            alert.addAction(selectWithSaveAction)
-//            alert.addAction(selectWithoutSaveAction)
-//            present(alert, animated: true)
-//        } else {
-//            handler()
-//        }
+        if diagram.isDirty {
+            let message = L("Diagram has changes.  You can save it and then \(actionText), or abandon the changes and \(actionText).")
+            let alert = UIAlertController(title: title, message: message, preferredStyle: .alert)
+            let cancelAction = UIAlertAction(title: L("Cancel"), style: .cancel, handler: nil)
+            let selectWithSaveAction = UIAlertAction(title: L("Save Diagram First"), style: .default, handler: { action in
+                self.dismiss(animated: true, completion: nil)
+                self.saveDiagram(completion: { handler() })
+            })
+            let selectWithoutSaveAction = UIAlertAction(title: L("Don't Save Diagram"), style: .destructive, handler: { action in
+                self.dismiss(animated: true, completion: nil)
+                handler() })
+            alert.addAction(cancelAction)
+            alert.addAction(selectWithSaveAction)
+            alert.addAction(selectWithoutSaveAction)
+            present(alert, animated: true)
+        } else {
+            handler()
+        }
     }
 
     private func handleTakePhoto() {
