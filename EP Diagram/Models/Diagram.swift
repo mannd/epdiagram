@@ -9,13 +9,12 @@
 import UIKit
 import os.log
 
-class Diagram: Codable {
+struct Diagram: Codable {
     var name: String?
-//    var image: UIImage? // nil image is blank.
-    var imageWrapper: ImageWrapper?
+    var imageWrapper: ImageWrapper
     var image: UIImage? {
         get {
-            return imageWrapper?.image
+            return imageWrapper.image
         }
         set(newValue) {
             imageWrapper = ImageWrapper(image: newValue)
@@ -31,17 +30,6 @@ class Diagram: Codable {
     // TODO: make diagram dirty when any marks are added or deleted.
     var isDirty: Bool {
         ladder.isDirty
-    }
-
-    private enum Keys: String, CustomStringConvertible {
-        case name = "diagramName"
-        case longDescription = "diagramLongDescription"
-        case image = "diagramImage"
-        case ladder = "diagramLadder"
-
-        var description: String {
-            return self.rawValue
-        }
     }
 
 //    func encode(with coder: NSCoder) {
@@ -64,15 +52,6 @@ class Diagram: Codable {
 //        } else {
 //            self.ladder = Ladder.defaultLadder()
 //        }
-//    }
-
-
-//    var diagramData: DiagramData = DiagramData()
-//    struct DiagramData: Codable {
-//        var name: String?
-//        var description: String = ""
-//        var ladder: Ladder = Ladder.defaultLadder()
-//        // creationDate, lastSavedDate?
 //    }
 
     init(name: String?, description: String, image: UIImage?, ladder: Ladder) {
@@ -186,6 +165,7 @@ class Diagram: Codable {
 
 
     static func blankDiagram(name: String? = nil) -> Diagram {
+        return defaultDiagram()
         let diagram = Diagram(name: name, description: "Blank diagram", image: nil, ladder: Ladder.defaultLadder())
 //        diagram.ladder.zone = Zone(regions: [diagram.ladder.regions[0], diagram.ladder.regions[1]], start: 100, end: 250)
         return diagram

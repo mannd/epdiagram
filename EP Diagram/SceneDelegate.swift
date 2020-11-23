@@ -20,8 +20,11 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         guard let scene = (scene as? UIWindowScene) else { return }
         scene.title = L("EP Diagram")
         scene.userActivity = session.stateRestorationActivity ?? NSUserActivity(activityType: "org.epstudios.epdiagram.mainActivity")
-        let navigationController = window?.rootViewController as? UINavigationController
-        if let rvc = navigationController?.viewControllers.first as? ViewController {
+
+        if let rvc = window?.rootViewController as? RootViewController {
+
+
+
             rvc.restorationInfo = scene.userActivity?.userInfo
             rvc.persistentID = scene.session.persistentIdentifier
         }
@@ -55,15 +58,16 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
 
     func scene(_ scene: UIScene, openURLContexts URLContexts: Set<UIOpenURLContext>) {
         os_log("scene(_:openURLContexts), %s", log: .lifeCycle, type: .info, scene.session.persistentIdentifier)
-        let navigationController = self.window?.rootViewController as? UINavigationController
-        let viewController = navigationController?.viewControllers[0] as? ViewController
-        for context in URLContexts {
-            let url = context.url
-            if url.isFileURL {
-                viewController?.launchFromURL = true
-                viewController?.launchURL = url
-                viewController?.openURL(url: url)
-            }
-        }
+//        let navigationController = self.window?.rootViewController as? UINavigationController
+//        let viewController = navigationController?.viewControllers[0] as? ViewController
+//        for context in URLContexts {
+//            let url = context.url
+//            // FIXME: Handle diagrams and ladders differently??
+//            if url.isFileURL && url.pathExtension.uppercased() != "DIAGRAM" {
+//                viewController?.launchFromURL = true
+//                viewController?.launchURL = url
+//                viewController?.openURL(url: url)
+//            }
+//        }
     }
 }

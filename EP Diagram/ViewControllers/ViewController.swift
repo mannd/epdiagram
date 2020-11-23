@@ -36,6 +36,8 @@ final class ViewController: UIViewController {
     private var linkMenuButtons: [UIBarButtonItem]?
     private var calibrateMenuButtons: [UIBarButtonItem]?
 
+    var delegate: DiagramEditorDelegate?
+
     // PDF and launch from URL stuff
     var pdfRef: CGPDFDocument?
     var launchFromURL: Bool = false
@@ -49,7 +51,7 @@ final class ViewController: UIViewController {
     let _maxBlackAlpha: CGFloat = 0.4
 
     var diagramFilenames: [String] = []
-    var diagram: Diagram = Diagram.defaultDiagram()
+    var diagram: Diagram = Diagram.blankDiagram()
     var calibration = Calibration() // reference to calibration is passed to ladderand cursor views
     var preferences: Preferences = Preferences()
 
@@ -59,7 +61,7 @@ final class ViewController: UIViewController {
     static let restorationZoomKey = "restorationZoomKey"
     static let restorationIsCalibratedKey = "restorationIsCalibrated"
     static let restorationCalFactorKey = "restorationCalFactorKey"
-    static let restorationFileName = "restorationFileNameKey"
+    static let restorationFileNameKey = "restorationFileNameKey"
     // Set by screen delegate
     var restorationInfo: [AnyHashable: Any]?
     var persistentID = ""
@@ -71,21 +73,12 @@ final class ViewController: UIViewController {
     override func viewDidLoad() {
         os_log("viewDidLoad() - ViewController", log: OSLog.viewCycle, type: .info)
         super.viewDidLoad()
-
-        // For debugging
-        // if let restorationURL = DiagramIO.getRestorationURL() {
-        //     os_log("restorationURL path = %s", log: .debugging, type: .debug, restorationURL.path)
-        //     let paths = FileIO.enumerateDirectory(restorationURL)
-        //     for path in paths {
-        //         os_log("    %s", log: .debugging, type: .debug, path)
-        //     }
-        // }
-
-        restorationFileName = restorationInfo?[ViewController.restorationFileName] as? String ?? ""
-        if !launchFromURL {
-            loadDocument()
-        }
-        deleteDefaultDocument()
+        //showRestorationInfo() // for debugging
+        restorationFileName = restorationInfo?[ViewController.restorationFileNameKey] as? String ?? ""
+//        if !launchFromURL {
+//            loadDocument()
+//        }
+//        deleteDefaultDocument()
         restorationFileName = persistentID // each screen has unique id
 
         // TODO: Lots of other customization for Mac version.
@@ -138,6 +131,17 @@ final class ViewController: UIViewController {
         // Set up context menu.
         let interaction = UIContextMenuInteraction(delegate: ladderView)
         ladderView.addInteraction(interaction)
+    }
+
+    private func showRestorationInfo() {
+        // For debugging
+        if let restorationURL = DiagramIO.getRestorationURL() {
+            os_log("restorationURL path = %s", log: .debugging, type: .debug, restorationURL.path)
+            let paths = FileIO.enumerateDirectory(restorationURL)
+            for path in paths {
+                os_log("    %s", log: .debugging, type: .debug, path)
+            }
+        }
     }
 
     func getTitle() -> String {
@@ -218,10 +222,10 @@ final class ViewController: UIViewController {
             ViewController.restorationZoomKey: imageScrollView.zoomScale,
             ViewController.restorationIsCalibratedKey: cursorView.isCalibrated(),
             ViewController.restorationCalFactorKey: cursorView.calFactor,
-            ViewController.restorationFileName: restorationFileName
+            ViewController.restorationFileNameKey: restorationFileName
         ]
         activity.addUserInfoEntries(from: info)
-        print(activity.userInfo as Any)
+        //print(activity.userInfo as Any)
     }
 
     // Crash program at compile time if IUO delegates are nil.
@@ -443,19 +447,14 @@ final class ViewController: UIViewController {
     }
 
     // MARK: - Handle PDFs, URLs at app startup
-
-    // FIXME: cache image to unique location in background when loading new image and retain
-    // filename, while deleting old image cache.  Use this to restore diagram, since once image is
-    // loaded it does not change.
     func openURL(url: URL) {
         os_log("openURL action", log: OSLog.action, type: .info)
         // self.resetImage
         let ext = url.pathExtension.uppercased()
         if ext != "PDF" {
             // self.enablePageButtons = false
-            setImageViewImage(with: UIImage(contentsOfFile: url.path))
-            diagram.image = imageView.image
-            ladderView.ladder.clear()
+            // FIXME: image upside down after being saved and reopened???
+            setDiagramImage(UIImage(contentsOfFile: url.path))
         }
         else {
             // self.numberOfPages = 0
@@ -471,11 +470,8 @@ final class ViewController: UIViewController {
             self.pageNumber = 1
             // enablePageButtons = (numberOfPages > 1)
             openPDFPage(pdfRef, atPage: pageNumber)
+
         }
-        //            [self.imageView setHidden:NO];
-        //            [self.scrollView setZoomScale:1.0f];
-        //            [self clearCalibration];
-        //            [self selectMainToolbar];
     }
 
     private func getPDFDocumentRef(_ fileName: UnsafePointer<Int8>?) -> CGPDFDocument? {
@@ -497,7 +493,8 @@ final class ViewController: UIViewController {
         let page: CGPDFPage? = getPDFPage(documentRef, pageNumber: pageNum)
         if let page = page {
             let sourceRect: CGRect = page.getBoxRect(.mediaBox)
-            let scaleFactor: CGFloat = 5.0
+            // FIXME: scale factor was originally 5, but everything too big on reopening image.
+            let scaleFactor: CGFloat = 1.0
             //                let sourceRectSize = CGSize(width: sourceRect.size.width, height: sourceRect.size.height)
             let sourceRectSize = sourceRect.size
             UIGraphicsBeginImageContextWithOptions(sourceRectSize, false, scaleFactor)
@@ -510,9 +507,7 @@ final class ViewController: UIViewController {
             currentContext?.drawPDFPage(page)
             let image: UIImage? = UIGraphicsGetImageFromCurrentImageContext()
             if image != nil {
-                setImageViewImage(with: image)
-                diagram.image = image
-                ladderView.ladder.clear()
+                setDiagramImage(image)
             }
             UIGraphicsEndImageContext()
         }
@@ -826,8 +821,21 @@ extension ViewController {
         if let content = loadDefaultDocument() {
             diagram = content
         } else {
-            diagram = Diagram.defaultDiagram()
+            diagram = Diagram.blankDiagram()
         }
     }
 
 }
+
+extension ViewController {
+  static func freshController() -> UINavigationController {
+    let storyboard = UIStoryboard(name: "Main", bundle: nil)
+    guard let controller = storyboard.instantiateInitialViewController() as? UINavigationController else {
+      fatalError("Project fault - cant instantiate MarkupViewController from storyboard")
+    }
+//    controller.delegate = delegate
+//    controller.currentContent = markup
+    return controller
+  }
+}
+

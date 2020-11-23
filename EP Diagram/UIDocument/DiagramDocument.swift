@@ -29,19 +29,19 @@ enum DocumentError: Error {
 class DiagramDocument: UIDocument {
     static let extensionName = "diagram"
 
-    var diagram = Diagram.defaultDiagram()
+    var diagram = Diagram.blankDiagram() {
+        didSet {
+            updateChangeCount(.done)
+        }
+    }
 
     override func contents(forType typeName: String) throws -> Any {
         let data: Data
         do {
             let encoder = JSONEncoder()
             data = try encoder.encode(diagram)
-//            if let data = FileManager.default.contents(atPath: defaultDocumentURL.path) {
-//                let documentData = try decoder.decode(Diagram.self, from: data)
-//                return documentData
-//            }
-//            data = try NSKeyedArchiver.archivedData(withRootObject: diagram, requiringSecureCoding: false)
         } catch {
+            print("throw archivingFailure********")
             throw DocumentError.archivingFailure
         }
         guard !data.isEmpty else {
@@ -56,18 +56,9 @@ class DiagramDocument: UIDocument {
         let decoder = JSONDecoder()
         do {
             diagram = try decoder.decode(Diagram.self, from: data)
-
-//
-//        let unarchiver: NSKeyedUnarchiver
-//        do {
-//            unarchiver = try NSKeyedUnarchiver(forReadingFrom: data)
         } catch {
+            print("thrown+++++++++++++")
             throw DocumentError.corruptDocument
         }
-//        unarchiver.requiresSecureCoding = false
-//        let decodedContent = unarchiver.decodeObject(forKey: NSKeyedArchiveRootObjectKey) as? Diagram
-//        guard let content = decodedContent else { throw DocumentError.corruptDocument }
-//
-//        diagram = content
     }
 }

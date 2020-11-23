@@ -30,12 +30,10 @@ struct ImageWrapper: Codable {
 
     public func encode(to encoder: Encoder) throws {
         guard let image = image else { return }
-      var container = encoder.container(keyedBy: CodingKeys.self)
-      guard let data = image.pngData() else {
-          throw FileIOError.encodingFailed
-      }
-
-      try container.encode(data, forKey: CodingKeys.image)
+        var container = encoder.container(keyedBy: CodingKeys.self)
+        guard let data = image.jpegData(compressionQuality: 1.0) else {
+            throw FileIOError.encodingFailed
+        }
+        try container.encode(data, forKey: CodingKeys.image)
     }
-
 }

@@ -533,15 +533,17 @@ extension ViewController: HamburgerTableDelegate, UIImagePickerControllerDelegat
 }
 
 extension ViewController {
-  static func freshController(diagram: Diagram? = nil) -> ViewController {
-    let storyboard = UIStoryboard(name: "Main", bundle: nil)
-    guard let controller = storyboard.instantiateInitialViewController() as? ViewController else {
-      fatalError("Project fault - cant instantiate ViewController from storyboard")
+    static func freshController(diagram: Diagram? = nil, delegate: DiagramEditorDelegate) -> UINavigationController {
+        let storyboard = UIStoryboard(name: "Main", bundle: nil)
+        guard let controller = storyboard.instantiateInitialViewController() as? UINavigationController else {
+            fatalError("Project fault - cant instantiate ViewController from storyboard")
+        }
+        if let vc = controller.viewControllers.first as? ViewController {
+            vc.delegate = delegate
+            vc.diagram = diagram ?? Diagram.blankDiagram()
+        }
+        return controller
     }
-    //controller.delegate = delegate
-    controller.diagram = diagram ?? Diagram.defaultDiagram()
-    return controller
-  }
 }
 
 

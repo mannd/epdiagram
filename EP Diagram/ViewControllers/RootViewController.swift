@@ -17,12 +17,44 @@ enum NavigationContext {
 class RootViewController: UIViewController {
 
     var presentationContext: NavigationContext = .launched
+    lazy var documentBrowser: DocumentBrowserViewController = {
+        return DocumentBrowserViewController()
+    }()
+    // These arrive from SceneDelegate and have to eventually get to the diagram vc.
+    var restorationInfo: [AnyHashable: Any]?
+    var persistentID: String = ""
 
     override func viewDidLoad() {
         super.viewDidLoad()
-
-        // Do any additional setup after loading the view.
     }
+
+    override func viewDidAppear(_ animated: Bool) {
+        super.viewDidAppear(animated)
+        displayDocumentBrowser()
+//        displayDiagramViewController(presenter: self)
+    }
+
+    func displayDocumentBrowser(inboundURL: URL? = nil, importIfNeeded: Bool = true) {
+      if presentationContext == .launched {
+        documentBrowser.modalPresentationStyle = .fullScreen
+        present(documentBrowser, animated: false)
+      }
+      presentationContext = .browsing
+    }
+
+    func displayDiagramViewController(presenter: UIViewController) {
+        presentationContext = .editing
+        let controller = ViewController.freshController()
+        if let vc = controller.viewControllers.first as? ViewController {
+            vc.restorationInfo = restorationInfo
+            vc.persistentID = persistentID
+        }
+        // Best if diagram vc covers whole screen.
+        controller.modalPresentationStyle = .fullScreen
+        presenter.present(controller, animated: true)
+
+    }
+
     
 
     /*
