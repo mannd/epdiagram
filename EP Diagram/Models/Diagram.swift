@@ -164,11 +164,15 @@ struct Diagram: Codable {
     }
 
 
+    // FiXME: Dodge to get around not having null encodable UIImage.
     static func blankDiagram(name: String? = nil) -> Diagram {
-        return defaultDiagram()
         let diagram = Diagram(name: name, description: "Blank diagram", image: nil, ladder: Ladder.defaultLadder())
 //        diagram.ladder.zone = Zone(regions: [diagram.ladder.regions[0], diagram.ladder.regions[1]], start: 100, end: 250)
         return diagram
+    }
+
+    static func scrollableBlankDiagram() -> Diagram {
+        return Diagram(name: L("Scrollable Blank Diagram"), description: L("Wide scrollable blank image"), image: UIImage.emptyImage(size: CGSize(width: 1, height: 1), color: UIColor.systemTeal), ladder: Ladder.defaultLadder())
     }
 
 
