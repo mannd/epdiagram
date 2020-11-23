@@ -119,10 +119,11 @@ extension ViewController: HamburgerTableDelegate, UIImagePickerControllerDelegat
 
     func selectImage() {
         os_log("selectImage()", log: OSLog.action, type: .info)
-        showSaveDiagramDialog(
-            withTitle: L("Select Image"),
-            withActionText: L("select an image"),
-            andThenDo: handleSelectImage)
+        handleSelectImage()
+//        showSaveDiagramDialog(
+//            withTitle: L("Select Image"),
+//            withActionText: L("select an image"),
+//            andThenDo: handleSelectImage)
     }
 
     func selectLadder() {
@@ -479,6 +480,7 @@ extension ViewController: HamburgerTableDelegate, UIImagePickerControllerDelegat
         setViewsNeedDisplay()
     }
 
+ 
     // MARK: - Hamburger menu functions
 
     @objc func toggleHamburgerMenu() {

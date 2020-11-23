@@ -51,7 +51,11 @@ final class ViewController: UIViewController {
     let _maxBlackAlpha: CGFloat = 0.4
 
     var diagramFilenames: [String] = []
-    var diagram: Diagram = Diagram.blankDiagram()
+    var diagram: Diagram = Diagram.blankDiagram() {
+        didSet {
+            delegate?.diagramEditorDidUpdateContent(self, diagram: diagram)
+        }
+    }
     var calibration = Calibration() // reference to calibration is passed to ladderand cursor views
     var preferences: Preferences = Preferences()
 
@@ -73,6 +77,7 @@ final class ViewController: UIViewController {
     override func viewDidLoad() {
         os_log("viewDidLoad() - ViewController", log: OSLog.viewCycle, type: .info)
         super.viewDidLoad()
+
         //showRestorationInfo() // for debugging
         restorationFileName = restorationInfo?[ViewController.restorationFileNameKey] as? String ?? ""
 //        if !launchFromURL {
@@ -122,6 +127,8 @@ final class ViewController: UIViewController {
         if !Common.isRunningOnMac() {
             navigationItem.setLeftBarButton(UIBarButtonItem(image: UIImage(named: "hamburger"), style: .plain, target: self, action: #selector(toggleHamburgerMenu)), animated: true)
         }
+
+        navigationItem.setRightBarButton(UIBarButtonItem(image: UIImage(systemName: "xmark"), style: .plain, target: self, action: #selector(closeAction)), animated: true)
 
         // Set up touches.
         let singleTapRecognizer = UITapGestureRecognizer(target: self, action: #selector(self.singleTap))
@@ -318,6 +325,11 @@ final class ViewController: UIViewController {
     }
 
     // MARK: -  Buttons
+
+    @objc func closeAction() {
+        view.endEditing(true)
+        delegate?.diagramEditorDidFinishEditing(self, diagram: diagram)
+    }
 
     @objc func calibrate() {
         os_log("calibrate()", log: OSLog.action, type: .info)
@@ -758,7 +770,7 @@ extension ViewController {
 
     @objc func didEnterBackground() {
         os_log("didEnterBackground()", log: .action, type: .info)
-        saveDefaultDocument(diagram)
+//        saveDefaultDocument(diagram)
     }
 
     @objc func didDisconnect() {
