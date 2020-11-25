@@ -423,16 +423,16 @@
 		8E9B804C22834960008873BB /* ViewControllers */ = {
 			isa = PBXGroup;
 			children = (
-				8E4ACA8124478D7C00575538 /* HamburgerTableViewController.swift */,
-				8E1276DE24D4734E00AC4B8F /* HelpViewController.swift */,
+				8E04C5CF2569950800946348 /* RootViewController.swift */,
+				8E04C5D4256995E000946348 /* DocumentBrowserViewController.swift */,
+				8EC5D287256B149C00F49865 /* DocumentBrowserDelegate.swift */,
 				8E7D24C422779DBD005A1729 /* ViewController.swift */,
 				8E253DD0244A86CB008CC56B /* ViewController+HamburgerTableDelegate.swift */,
 				8E253DD2244A8799008CC56B /* ViewController+UIScrollViewDelegate.swift */,
 				8E6EB6C1248477D500E5F883 /* ViewController+ViewControllerDelegate.swift */,
 				8E87DFBC255A0DFD0016267D /* ViewController+RestorationDelegate.swift */,
-				8E04C5CF2569950800946348 /* RootViewController.swift */,
-				8E04C5D4256995E000946348 /* DocumentBrowserViewController.swift */,
-				8EC5D287256B149C00F49865 /* DocumentBrowserDelegate.swift */,
+				8E4ACA8124478D7C00575538 /* HamburgerTableViewController.swift */,
+				8E1276DE24D4734E00AC4B8F /* HelpViewController.swift */,
 			);
 			path = ViewControllers;
 			sourceTree = "<group>";

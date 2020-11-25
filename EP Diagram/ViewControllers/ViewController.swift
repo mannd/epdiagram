@@ -78,13 +78,9 @@ final class ViewController: UIViewController {
         os_log("viewDidLoad() - ViewController", log: OSLog.viewCycle, type: .info)
         super.viewDidLoad()
 
-        //showRestorationInfo() // for debugging
-        restorationFileName = restorationInfo?[ViewController.restorationFileNameKey] as? String ?? ""
-//        if !launchFromURL {
-//            loadDocument()
-//        }
-//        deleteDefaultDocument()
-        restorationFileName = persistentID // each screen has unique id
+        showRestorationInfo() // for debugging
+//        restorationFileName = restorationInfo?[ViewController.restorationFileNameKey] as? String ?? ""
+//        restorationFileName = persistentID // each screen has unique id
 
         // TODO: Lots of other customization for Mac version.
         if Common.isRunningOnMac() {

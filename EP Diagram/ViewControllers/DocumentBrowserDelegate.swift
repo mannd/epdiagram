@@ -11,6 +11,8 @@ import UIKit
 class DocumentBrowserDelegate: NSObject, UIDocumentBrowserViewControllerDelegate {
     var presentationHandler: ((URL?, Error?) -> Void)?
 
+
+
     func documentBrowser(_ controller: UIDocumentBrowserViewController, didRequestDocumentCreationWithHandler importHandler: @escaping (URL?, UIDocumentBrowserViewController.ImportMode) -> Void) {
 
         let cacheDocumentURL = createNewDocumentURL()

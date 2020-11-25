@@ -31,15 +31,19 @@ class RootViewController: UIViewController {
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
         displayDocumentBrowser()
-//        displayDiagramViewController(presenter: self)
     }
 
     func displayDocumentBrowser(inboundURL: URL? = nil, importIfNeeded: Bool = true) {
-      if presentationContext == .launched {
-        documentBrowser.modalPresentationStyle = .fullScreen
-        present(documentBrowser, animated: false)
-      }
-      presentationContext = .browsing
+        if presentationContext == .launched {
+            documentBrowser.restorationInfo = restorationInfo
+            documentBrowser.persistentID = persistentID
+            documentBrowser.modalPresentationStyle = .fullScreen
+            present(documentBrowser, animated: false)
+        }
+        presentationContext = .browsing
+        if let inbound = inboundURL {
+          documentBrowser.openRemoteDocument(inbound, importIfNeeded: importIfNeeded)
+        }
     }
 
     func displayDiagramViewController(presenter: UIViewController) {
@@ -55,16 +59,8 @@ class RootViewController: UIViewController {
 
     }
 
-    
-
-    /*
-    // MARK: - Navigation
-
-    // In a storyboard-based application, you will often want to do a little preparation before navigation
-    override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
-        // Get the new view controller using segue.destination.
-        // Pass the selected object to the new view controller.
+    func openRemoteDocument(_ inboundURL: URL, importIfNeeded: Bool) {
+        displayDocumentBrowser(inboundURL: inboundURL, importIfNeeded: importIfNeeded)
     }
-    */
 
 }

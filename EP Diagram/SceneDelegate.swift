@@ -58,16 +58,13 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
 
     func scene(_ scene: UIScene, openURLContexts URLContexts: Set<UIOpenURLContext>) {
         os_log("scene(_:openURLContexts), %s", log: .lifeCycle, type: .info, scene.session.persistentIdentifier)
-//        let navigationController = self.window?.rootViewController as? UINavigationController
-//        let viewController = navigationController?.viewControllers[0] as? ViewController
-//        for context in URLContexts {
-//            let url = context.url
-//            // FIXME: Handle diagrams and ladders differently??
-//            if url.isFileURL && url.pathExtension.uppercased() != "DIAGRAM" {
-//                viewController?.launchFromURL = true
-//                viewController?.launchURL = url
-//                viewController?.openURL(url: url)
-//            }
-//        }
+        guard let rootViewController = self.window?.rootViewController as? RootViewController else { return }
+        for context in URLContexts {
+            let url = context.url
+            // FIXME: Handle diagrams, images, and ladders differently??
+            if url.isFileURL {
+                rootViewController.openRemoteDocument(url, importIfNeeded: true)
+            }
+        }
     }
 }

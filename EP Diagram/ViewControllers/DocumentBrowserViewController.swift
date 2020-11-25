@@ -21,6 +21,8 @@ class DocumentBrowserViewController: UIViewController {
         browser.view.tintColor = .green
         return browser
     }()
+    var restorationInfo: [AnyHashable: Any]?
+    var persistentID: String = ""
 
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -35,6 +37,8 @@ class DocumentBrowserViewController: UIViewController {
 
           guard error == nil else {
             //present error to user e.g UIAlertController
+            let alert = UIAlertController(title: L("Error opening document"), message: L("Could not open document."), preferredStyle: .alert)
+            self?.present(alert, animated: true)
             return
           }
 
@@ -90,6 +94,16 @@ extension DocumentBrowserViewController: DiagramEditorDelegate {
         currentDocument = nil
     }
 
+    func openRemoteDocument(_ inboundURL: URL, importIfNeeded: Bool) {
+      documentBrowser.revealDocument(at: inboundURL, importIfNeeded: importIfNeeded) { (url, error) in
+        if let error = error {
+          print("import did fail - should be communicated to user - \(error)")
+        } else if let url = url {
+          self.openDocument(url: url)
+        }
+      }
+    }
+
 }
 
 extension DocumentBrowserViewController {
@@ -97,7 +111,6 @@ extension DocumentBrowserViewController {
         guard !isDocumentCurrentlyOpen(url: url) else { return }
         closeDiagramController {
             let document = DiagramDocument(fileURL: url)
-            // FIXME: open fails here.
             document.open { openSuccess in
                 guard openSuccess else {
                     print ("could not open \(url)")
