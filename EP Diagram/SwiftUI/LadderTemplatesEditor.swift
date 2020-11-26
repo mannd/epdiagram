@@ -17,7 +17,7 @@ struct LadderTemplatesEditor: View {
     var parentViewTitle: String = "Back"
     @Environment(\.presentationMode) private var presentationMode: Binding<PresentationMode>
     @GestureState private var dragOffset = CGSize.zero
-    weak var delegate: ViewControllerDelegate?
+    weak var delegate: DiagramViewControllerDelegate?
     
     var body: some View {
         VStack {

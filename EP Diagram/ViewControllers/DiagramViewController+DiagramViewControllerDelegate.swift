@@ -1,5 +1,5 @@
 //
-//  ViewController+ViewControllerDelegate.swift
+//  DiagramViewController+DiagramViewControllerDelegate.swift
 //  EP Diagram
 //
 //  Created by David Mann on 5/31/20.
@@ -9,7 +9,7 @@
 import UIKit
 import os.log
 
-protocol ViewControllerDelegate: class {
+protocol DiagramViewControllerDelegate: class {
     func selectLadderTemplate(ladderTemplate: LadderTemplate?)
     func selectDiagram(named name: String?)
     func deleteDiagram(named name: String)
@@ -18,7 +18,7 @@ protocol ViewControllerDelegate: class {
     func setViewsNeedDisplay()
 }
 
-extension ViewController: ViewControllerDelegate {
+extension DiagramViewController: DiagramViewControllerDelegate {
     func selectLadderTemplate(ladderTemplate: LadderTemplate?) {
         os_log("selecteLadderTemplate - ViewController", log: OSLog.action, type: .info)
         P("ladder is dirty = \(ladderView.ladderIsDirty)")

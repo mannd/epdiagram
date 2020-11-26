@@ -1,5 +1,5 @@
 //
-//  ViewController+HamburgerTableDelegate.swift
+//  DiagramViewController+HamburgerTableDelegate.swift
 //  EP Diagram
 //
 //  Created by David Mann on 4/17/20.
@@ -83,7 +83,7 @@ class ImageSaver: NSObject {
 
 // MARK: -
 
-extension ViewController: HamburgerTableDelegate, UIImagePickerControllerDelegate & UINavigationControllerDelegate {
+extension DiagramViewController: HamburgerTableDelegate, UIImagePickerControllerDelegate & UINavigationControllerDelegate {
     
     var imageIsLocked: Bool {
         get { _imageIsLocked }
@@ -534,13 +534,13 @@ extension ViewController: HamburgerTableDelegate, UIImagePickerControllerDelegat
     }
 }
 
-extension ViewController {
+extension DiagramViewController {
     static func freshController(diagram: Diagram? = nil, delegate: DiagramEditorDelegate) -> UINavigationController {
         let storyboard = UIStoryboard(name: "Main", bundle: nil)
         guard let controller = storyboard.instantiateInitialViewController() as? UINavigationController else {
             fatalError("Project fault - cant instantiate ViewController from storyboard")
         }
-        if let vc = controller.viewControllers.first as? ViewController {
+        if let vc = controller.viewControllers.first as? DiagramViewController {
             vc.delegate = delegate
             vc.diagram = diagram ?? Diagram.blankDiagram()
         }

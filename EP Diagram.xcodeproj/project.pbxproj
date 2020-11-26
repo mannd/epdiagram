@@ -23,8 +23,8 @@
 		8E1B6CB8240CAE5300EA88A6 /* ScaledView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8E1B6CB7240CAE5300EA88A6 /* ScaledView.swift */; };
 		8E217D98245B306200CD0CBF /* MathTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8E217D97245B306200CD0CBF /* MathTests.swift */; };
 		8E2439F624B14F770044AEAB /* Interval.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8E2439F524B14F770044AEAB /* Interval.swift */; };
-		8E253DD1244A86CB008CC56B /* ViewController+HamburgerTableDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8E253DD0244A86CB008CC56B /* ViewController+HamburgerTableDelegate.swift */; };
-		8E253DD3244A8799008CC56B /* ViewController+UIScrollViewDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8E253DD2244A8799008CC56B /* ViewController+UIScrollViewDelegate.swift */; };
+		8E253DD1244A86CB008CC56B /* DiagramViewController+HamburgerTableDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8E253DD0244A86CB008CC56B /* DiagramViewController+HamburgerTableDelegate.swift */; };
+		8E253DD3244A8799008CC56B /* DiagramViewController+UIScrollViewDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8E253DD2244A8799008CC56B /* DiagramViewController+UIScrollViewDelegate.swift */; };
 		8E253DD5244A8B17008CC56B /* Version.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8E253DD4244A8B17008CC56B /* Version.swift */; };
 		8E25A9AF22E54F7200D62E18 /* CursorTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8E25A9AE22E54F7200D62E18 /* CursorTests.swift */; };
 		8E25A9B122E5505200D62E18 /* LadderViewTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8E25A9B022E5505200D62E18 /* LadderViewTests.swift */; };
@@ -47,7 +47,7 @@
 		8E671D5224814BB700784EB7 /* LadderTemplatesEditor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8E671D5124814BB700784EB7 /* LadderTemplatesEditor.swift */; };
 		8E6A0298246DFB3700A10C9F /* LadderTemplateEditor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8E6A0297246DFB3700A10C9F /* LadderTemplateEditor.swift */; };
 		8E6EB6C02484778E00E5F883 /* Notification+didUndoableAction.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8E6EB6BF2484778E00E5F883 /* Notification+didUndoableAction.swift */; };
-		8E6EB6C2248477D500E5F883 /* ViewController+ViewControllerDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8E6EB6C1248477D500E5F883 /* ViewController+ViewControllerDelegate.swift */; };
+		8E6EB6C2248477D500E5F883 /* DiagramViewController+DiagramViewControllerDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8E6EB6C1248477D500E5F883 /* DiagramViewController+DiagramViewControllerDelegate.swift */; };
 		8E7214DE22E95C860062C094 /* Common.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8E7214DD22E95C860062C094 /* Common.swift */; };
 		8E7214E022EB57FC0062C094 /* MarkTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8E7214DF22EB57FC0062C094 /* MarkTests.swift */; };
 		8E74D58E244FBE2500641E0A /* LadderView+UIContextMenuInteractionDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8E74D58D244FBE2500641E0A /* LadderView+UIContextMenuInteractionDelegate.swift */; };
@@ -56,7 +56,7 @@
 		8E7CCC29248C1A9C00018D2C /* DiagramSelector.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8E7CCC28248C1A9C00018D2C /* DiagramSelector.swift */; };
 		8E7CCC2B248C30A300018D2C /* Preferences.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8E7CCC2A248C30A300018D2C /* Preferences.swift */; };
 		8E7D24C322779DBD005A1729 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8E7D24C222779DBD005A1729 /* AppDelegate.swift */; };
-		8E7D24C522779DBD005A1729 /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8E7D24C422779DBD005A1729 /* ViewController.swift */; };
+		8E7D24C522779DBD005A1729 /* DiagramViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8E7D24C422779DBD005A1729 /* DiagramViewController.swift */; };
 		8E7D24C822779DBD005A1729 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 8E7D24C622779DBD005A1729 /* Main.storyboard */; };
 		8E7D24CA22779DBF005A1729 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 8E7D24C922779DBF005A1729 /* Assets.xcassets */; };
 		8E7D24CD22779DBF005A1729 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 8E7D24CB22779DBF005A1729 /* LaunchScreen.storyboard */; };
@@ -65,7 +65,7 @@
 		8E8248DD23B53B55001A85F9 /* SeparatorView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8E8248DC23B53B55001A85F9 /* SeparatorView.swift */; };
 		8E856CF224EDC53D0064121F /* CGPoint+clampY.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8E856CF124EDC53D0064121F /* CGPoint+clampY.swift */; };
 		8E856CF424EDC5E10064121F /* Segment.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8E856CF324EDC5E10064121F /* Segment.swift */; };
-		8E87DFBD255A0DFD0016267D /* ViewController+RestorationDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8E87DFBC255A0DFD0016267D /* ViewController+RestorationDelegate.swift */; };
+		8E87DFBD255A0DFD0016267D /* Diagram+RestorationDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8E87DFBC255A0DFD0016267D /* Diagram+RestorationDelegate.swift */; };
 		8E9550BD2474B22000E1B125 /* FileIO.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8E9550BC2474B22000E1B125 /* FileIO.swift */; };
 		8E9550BF2474B69900E1B125 /* FileIOTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8E9550BE2474B69900E1B125 /* FileIOTests.swift */; };
 		8E973F9B24C4BF0800AB41C3 /* String+isBlank.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8E973F9A24C4BF0800AB41C3 /* String+isBlank.swift */; };
@@ -126,8 +126,8 @@
 		8E1B6CB7240CAE5300EA88A6 /* ScaledView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScaledView.swift; sourceTree = "<group>"; };
 		8E217D97245B306200CD0CBF /* MathTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MathTests.swift; sourceTree = "<group>"; };
 		8E2439F524B14F770044AEAB /* Interval.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Interval.swift; sourceTree = "<group>"; };
-		8E253DD0244A86CB008CC56B /* ViewController+HamburgerTableDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "ViewController+HamburgerTableDelegate.swift"; sourceTree = "<group>"; };
-		8E253DD2244A8799008CC56B /* ViewController+UIScrollViewDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "ViewController+UIScrollViewDelegate.swift"; sourceTree = "<group>"; };
+		8E253DD0244A86CB008CC56B /* DiagramViewController+HamburgerTableDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "DiagramViewController+HamburgerTableDelegate.swift"; sourceTree = "<group>"; };
+		8E253DD2244A8799008CC56B /* DiagramViewController+UIScrollViewDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "DiagramViewController+UIScrollViewDelegate.swift"; sourceTree = "<group>"; };
 		8E253DD4244A8B17008CC56B /* Version.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Version.swift; sourceTree = "<group>"; };
 		8E25A9AE22E54F7200D62E18 /* CursorTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CursorTests.swift; sourceTree = "<group>"; };
 		8E25A9B022E5505200D62E18 /* LadderViewTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LadderViewTests.swift; sourceTree = "<group>"; };
@@ -151,7 +151,7 @@
 		8E689C4F23B498A10042A3F1 /* EP Diagram.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = "EP Diagram.entitlements"; sourceTree = "<group>"; };
 		8E6A0297246DFB3700A10C9F /* LadderTemplateEditor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LadderTemplateEditor.swift; sourceTree = "<group>"; };
 		8E6EB6BF2484778E00E5F883 /* Notification+didUndoableAction.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Notification+didUndoableAction.swift"; sourceTree = "<group>"; };
-		8E6EB6C1248477D500E5F883 /* ViewController+ViewControllerDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "ViewController+ViewControllerDelegate.swift"; sourceTree = "<group>"; };
+		8E6EB6C1248477D500E5F883 /* DiagramViewController+DiagramViewControllerDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "DiagramViewController+DiagramViewControllerDelegate.swift"; sourceTree = "<group>"; };
 		8E7214DD22E95C860062C094 /* Common.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Common.swift; sourceTree = "<group>"; };
 		8E7214DF22EB57FC0062C094 /* MarkTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MarkTests.swift; sourceTree = "<group>"; };
 		8E74D58D244FBE2500641E0A /* LadderView+UIContextMenuInteractionDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "LadderView+UIContextMenuInteractionDelegate.swift"; sourceTree = "<group>"; };
@@ -161,7 +161,7 @@
 		8E7CCC2A248C30A300018D2C /* Preferences.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Preferences.swift; sourceTree = "<group>"; };
 		8E7D24BF22779DBD005A1729 /* EP Diagram.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "EP Diagram.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		8E7D24C222779DBD005A1729 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
-		8E7D24C422779DBD005A1729 /* ViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ViewController.swift; sourceTree = "<group>"; };
+		8E7D24C422779DBD005A1729 /* DiagramViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DiagramViewController.swift; sourceTree = "<group>"; };
 		8E7D24C722779DBD005A1729 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Main.storyboard; sourceTree = "<group>"; };
 		8E7D24C922779DBF005A1729 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		8E7D24CC22779DBF005A1729 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
@@ -175,7 +175,7 @@
 		8E8248DC23B53B55001A85F9 /* SeparatorView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SeparatorView.swift; sourceTree = "<group>"; };
 		8E856CF124EDC53D0064121F /* CGPoint+clampY.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "CGPoint+clampY.swift"; sourceTree = "<group>"; };
 		8E856CF324EDC5E10064121F /* Segment.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Segment.swift; sourceTree = "<group>"; };
-		8E87DFBC255A0DFD0016267D /* ViewController+RestorationDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "ViewController+RestorationDelegate.swift"; sourceTree = "<group>"; };
+		8E87DFBC255A0DFD0016267D /* Diagram+RestorationDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Diagram+RestorationDelegate.swift"; sourceTree = "<group>"; };
 		8E9550BC2474B22000E1B125 /* FileIO.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FileIO.swift; sourceTree = "<group>"; };
 		8E9550BE2474B69900E1B125 /* FileIOTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FileIOTests.swift; sourceTree = "<group>"; };
 		8E973F9A24C4BF0800AB41C3 /* String+isBlank.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "String+isBlank.swift"; sourceTree = "<group>"; };
@@ -426,11 +426,11 @@
 				8E04C5CF2569950800946348 /* RootViewController.swift */,
 				8E04C5D4256995E000946348 /* DocumentBrowserViewController.swift */,
 				8EC5D287256B149C00F49865 /* DocumentBrowserDelegate.swift */,
-				8E7D24C422779DBD005A1729 /* ViewController.swift */,
-				8E253DD0244A86CB008CC56B /* ViewController+HamburgerTableDelegate.swift */,
-				8E253DD2244A8799008CC56B /* ViewController+UIScrollViewDelegate.swift */,
-				8E6EB6C1248477D500E5F883 /* ViewController+ViewControllerDelegate.swift */,
-				8E87DFBC255A0DFD0016267D /* ViewController+RestorationDelegate.swift */,
+				8E7D24C422779DBD005A1729 /* DiagramViewController.swift */,
+				8E253DD0244A86CB008CC56B /* DiagramViewController+HamburgerTableDelegate.swift */,
+				8E253DD2244A8799008CC56B /* DiagramViewController+UIScrollViewDelegate.swift */,
+				8E6EB6C1248477D500E5F883 /* DiagramViewController+DiagramViewControllerDelegate.swift */,
+				8E87DFBC255A0DFD0016267D /* Diagram+RestorationDelegate.swift */,
 				8E4ACA8124478D7C00575538 /* HamburgerTableViewController.swift */,
 				8E1276DE24D4734E00AC4B8F /* HelpViewController.swift */,
 			);
@@ -600,7 +600,7 @@
 				8E4ACA8924479C5200575538 /* HamburgerViewModel.swift in Sources */,
 				8E04C5D02569950800946348 /* RootViewController.swift in Sources */,
 				8E74D590244FD55E00641E0A /* Logging.swift in Sources */,
-				8E253DD3244A8799008CC56B /* ViewController+UIScrollViewDelegate.swift in Sources */,
+				8E253DD3244A8799008CC56B /* DiagramViewController+UIScrollViewDelegate.swift in Sources */,
 				8E6EB6C02484778E00E5F883 /* Notification+didUndoableAction.swift in Sources */,
 				8E9550BD2474B22000E1B125 /* FileIO.swift in Sources */,
 				8E856CF224EDC53D0064121F /* CGPoint+clampY.swift in Sources */,
@@ -608,12 +608,12 @@
 				8EADC2A924D64E1200C5D3D8 /* SampleSelector.swift in Sources */,
 				8E1276DF24D4734E00AC4B8F /* HelpViewController.swift in Sources */,
 				8E7D24F12277A00C005A1729 /* ImageView.swift in Sources */,
-				8E7D24C522779DBD005A1729 /* ViewController.swift in Sources */,
+				8E7D24C522779DBD005A1729 /* DiagramViewController.swift in Sources */,
 				8E9F0984253CF483009BC968 /* UINavigationController+gestureRecognizerShouldBegin.swift in Sources */,
 				8E3AD1372459CABF0085BDD4 /* LocationInLadder.swift in Sources */,
 				8E15013724F2C7CF000CF90E /* Mode.swift in Sources */,
 				8E253DD5244A8B17008CC56B /* Version.swift in Sources */,
-				8E6EB6C2248477D500E5F883 /* ViewController+ViewControllerDelegate.swift in Sources */,
+				8E6EB6C2248477D500E5F883 /* DiagramViewController+DiagramViewControllerDelegate.swift in Sources */,
 				8E4A52EF24886B16007406F5 /* Diagram.swift in Sources */,
 				8E6A0298246DFB3700A10C9F /* LadderTemplateEditor.swift in Sources */,
 				8E2BA1D024A3BDD7002D997F /* PreferencesView.swift in Sources */,
@@ -628,7 +628,7 @@
 				8EC5D288256B149C00F49865 /* DocumentBrowserDelegate.swift in Sources */,
 				8E9B804722834870008873BB /* Ladder.swift in Sources */,
 				8E55612922A5FEDC00C4D391 /* Cursor.swift in Sources */,
-				8E253DD1244A86CB008CC56B /* ViewController+HamburgerTableDelegate.swift in Sources */,
+				8E253DD1244A86CB008CC56B /* DiagramViewController+HamburgerTableDelegate.swift in Sources */,
 				8E7CCC2B248C30A300018D2C /* Preferences.swift in Sources */,
 				8E4ACA8024478A6E00575538 /* BlackView.swift in Sources */,
 				8EC5D28D256B154E00F49865 /* UIView+PinToInside.swift in Sources */,
@@ -642,7 +642,7 @@
 				8ECA9FB72470A1020016D939 /* LadderTemplate.swift in Sources */,
 				8E01D9C722849047000F36FC /* CursorView.swift in Sources */,
 				8E77BDA4253F5AA600FD51E5 /* RegionTemplateEditor.swift in Sources */,
-				8E87DFBD255A0DFD0016267D /* ViewController+RestorationDelegate.swift in Sources */,
+				8E87DFBD255A0DFD0016267D /* Diagram+RestorationDelegate.swift in Sources */,
 				8EA444C02476E471005B5452 /* LadderSelector.swift in Sources */,
 				8E5918BC24AEAB0B00D8ABA3 /* Caliper.swift in Sources */,
 				8EBC824124E5E04800B5CA29 /* UIImage+emptyImage.swift in Sources */,

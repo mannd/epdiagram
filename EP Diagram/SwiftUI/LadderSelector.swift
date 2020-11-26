@@ -18,7 +18,7 @@ struct LadderSelector: View {
     @State var selectedTemplate: LadderTemplate? = nil
     @State private var showingAlert: Bool = false
     @Environment(\.presentationMode) var presentationMode: Binding<PresentationMode>
-    weak var delegate: ViewControllerDelegate?
+    weak var delegate: DiagramViewControllerDelegate?
 
     var ladderListView: some View {
         NavigationView {

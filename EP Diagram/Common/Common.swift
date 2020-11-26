@@ -235,7 +235,7 @@ func L(_ s: String, comment: String = "") -> String {
 /// Print logging info only while in debug mode.
 /// - Parameter s: logging message to print
 // Make false to suppress printing of messages, even in debug mode.
-var printMessages = true
+var printMessages = false
 func P(_ s: String) {
     if printMessages {
         print(s)

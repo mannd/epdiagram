@@ -13,7 +13,7 @@ class ViewControllerTests: XCTestCase {
 
     func test_loadViewController() {
         let sb = UIStoryboard(name: "Main", bundle: nil)
-        let sut = sb.instantiateViewController(withIdentifier: String(describing: ViewController.self)) as! ViewController
+        let sut = sb.instantiateViewController(withIdentifier: String(describing: DiagramViewController.self)) as! DiagramViewController
         sut.loadViewIfNeeded()
         // test view controller here
         // Testing my testing, these all must be non-nil if outlets are connected.

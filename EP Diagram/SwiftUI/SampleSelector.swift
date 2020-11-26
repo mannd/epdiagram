@@ -11,7 +11,7 @@ import SwiftUI
 struct SampleSelector: View {
     var sampleDiagrams: [Diagram]
     @State var selectedDiagram: Diagram? = nil
-    weak var delegate: ViewControllerDelegate?
+    weak var delegate: DiagramViewControllerDelegate?
     @Environment(\.presentationMode) var presentationMode: Binding<PresentationMode>
 
 

@@ -41,7 +41,7 @@ class LadderViewTests: XCTestCase {
     // Pass scale and offset to ladderViewModel.
     func testScaleAndContent() {
         let sb = UIStoryboard(name: "Main", bundle: nil)
-        let sut = sb.instantiateViewController(withIdentifier: String(describing: ViewController.self)) as! ViewController
+        let sut = sb.instantiateViewController(withIdentifier: String(describing: DiagramViewController.self)) as! DiagramViewController
         sut.loadViewIfNeeded()
         let ladderView = sut.ladderView
         ladderView!.scale = 2.5

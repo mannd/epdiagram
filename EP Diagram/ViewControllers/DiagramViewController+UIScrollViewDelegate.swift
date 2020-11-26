@@ -1,5 +1,5 @@
 //
-//  ViewController+UIScrollViewDelegate.swift
+//  DiagramViewController+UIScrollViewDelegate.swift
 //  EP Diagram
 //
 //  Created by David Mann on 4/17/20.
@@ -9,7 +9,7 @@
 import UIKit
 import os.log
 
-extension ViewController: UIScrollViewDelegate {
+extension DiagramViewController: UIScrollViewDelegate {
 
     func viewForZooming(in scrollView: UIScrollView) -> UIView? {
         if scrollView == imageScrollView {

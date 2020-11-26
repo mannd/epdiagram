@@ -1,5 +1,5 @@
 //
-//  ViewController.swift
+//  DiagramViewController.swift
 //  EP Diagram
 //
 //  Created by David Mann on 4/29/19.
@@ -10,7 +10,7 @@ import UIKit
 import SwiftUI
 import os.log
 
-final class ViewController: UIViewController {
+final class DiagramViewController: UIViewController {
     // View, outlets, constraints
     @IBOutlet var _constraintHamburgerWidth: NSLayoutConstraint!
     @IBOutlet var _constraintHamburgerLeft: NSLayoutConstraint!
@@ -37,6 +37,7 @@ final class ViewController: UIViewController {
     private var calibrateMenuButtons: [UIBarButtonItem]?
 
     var delegate: DiagramEditorDelegate?
+    var currentDocument: DiagramDocument?
 
     // PDF and launch from URL stuff
     var pdfRef: CGPDFDocument?
@@ -66,10 +67,11 @@ final class ViewController: UIViewController {
     static let restorationIsCalibratedKey = "restorationIsCalibrated"
     static let restorationCalFactorKey = "restorationCalFactorKey"
     static let restorationFileNameKey = "restorationFileNameKey"
+    static let restorationNeededKey = "restorationNeededKey"
     // Set by screen delegate
     var restorationInfo: [AnyHashable: Any]?
     var persistentID = ""
-    var restorationFileName = ""
+    var restorationFilename = ""
 
     // Speed up appearance of image picker by initializing it here.
     let imagePicker: UIImagePickerController = UIImagePickerController()
@@ -79,6 +81,12 @@ final class ViewController: UIViewController {
         super.viewDidLoad()
 
         showRestorationInfo() // for debugging
+
+//        if restorationFilename.isEmpty {
+//            restorationFilename = persistentID
+//        }
+
+//        loadDefaultDocument()
 //        restorationFileName = restorationInfo?[ViewController.restorationFileNameKey] as? String ?? ""
 //        restorationFileName = persistentID // each screen has unique id
 
@@ -168,21 +176,21 @@ final class ViewController: UIViewController {
         self.userActivity = self.view.window?.windowScene?.userActivity
         // See https://github.com/mattneub/Programming-iOS-Book-Examples/blob/master/bk2ch06p357StateSaveAndRestoreWithNSUserActivity/ch19p626pageController/SceneDelegate.swift
         var restorationContentOffset = CGPoint()
-        if let contentOffsetX = restorationInfo?[ViewController.restorationContentOffsetXKey] {
+        if let contentOffsetX = restorationInfo?[DiagramViewController.restorationContentOffsetXKey] {
             restorationContentOffset.x = contentOffsetX as? CGFloat ?? 0
         }
-        if let contentOffsetY = restorationInfo?[ViewController.restorationContentOffsetYKey] {
+        if let contentOffsetY = restorationInfo?[DiagramViewController.restorationContentOffsetYKey] {
             restorationContentOffset.y = contentOffsetY as? CGFloat ?? 0
         }
         print("restorationContentOffset = \(restorationContentOffset)")
         imageScrollView.setContentOffset(restorationContentOffset, animated: true)
-        if let zoomScale = restorationInfo?[ViewController.restorationZoomKey] {
+        if let zoomScale = restorationInfo?[DiagramViewController.restorationZoomKey] {
             imageScrollView.zoomScale = zoomScale as? CGFloat ?? 1
         }
-        if let isCalibrated = restorationInfo?[ViewController.restorationIsCalibratedKey] {
+        if let isCalibrated = restorationInfo?[DiagramViewController.restorationIsCalibratedKey] {
             cursorView.setIsCalibrated(isCalibrated as? Bool ?? false)
         }
-        if let calFactor = restorationInfo?[ViewController.restorationCalFactorKey] {
+        if let calFactor = restorationInfo?[DiagramViewController.restorationCalFactorKey] {
             cursorView.calFactor = calFactor as? CGFloat ?? 1.0
         }
 
@@ -218,17 +226,20 @@ final class ViewController: UIViewController {
 
     override func updateUserActivityState(_ activity: NSUserActivity) {
         os_log("updateUserActivityState called")
+        let currentDocumentURL: String = currentDocument?.fileURL.lastPathComponent ?? ""
+        print(currentDocumentURL)
         super.updateUserActivityState(activity)
         let info: [AnyHashable: Any] = [
-            ViewController.restorationContentOffsetXKey: imageScrollView.contentOffset.x,
-            ViewController.restorationContentOffsetYKey: imageScrollView.contentOffset.y,
-            ViewController.restorationZoomKey: imageScrollView.zoomScale,
-            ViewController.restorationIsCalibratedKey: cursorView.isCalibrated(),
-            ViewController.restorationCalFactorKey: cursorView.calFactor,
-            ViewController.restorationFileNameKey: restorationFileName
+            DiagramViewController.restorationContentOffsetXKey: imageScrollView.contentOffset.x,
+            DiagramViewController.restorationContentOffsetYKey: imageScrollView.contentOffset.y,
+            DiagramViewController.restorationZoomKey: imageScrollView.zoomScale,
+            DiagramViewController.restorationIsCalibratedKey: cursorView.isCalibrated(),
+            DiagramViewController.restorationCalFactorKey: cursorView.calFactor,
+            DiagramViewController.restorationFileNameKey: currentDocumentURL,
+            DiagramViewController.restorationNeededKey: true
         ]
         activity.addUserInfoEntries(from: info)
-        //print(activity.userInfo as Any)
+        print(activity.userInfo as Any)
     }
 
     // Crash program at compile time if IUO delegates are nil.
@@ -734,7 +745,7 @@ final class ViewController: UIViewController {
     }
 }
 
-extension ViewController {
+extension DiagramViewController {
     func setupNotifications() {
         NotificationCenter.default.addObserver(self, selector: #selector(onDidUndoableAction(_:)), name: .didUndoableAction, object: nil)
         NotificationCenter.default.addObserver(self, selector: #selector(updatePreferences), name: .preferencesChanged, object: nil)
@@ -766,7 +777,8 @@ extension ViewController {
 
     @objc func didEnterBackground() {
         os_log("didEnterBackground()", log: .action, type: .info)
-//        saveDefaultDocument(diagram)
+        let result = saveDefaultDocument(diagram)
+        print("save \(result ? "OK" : "Fail!") to \(defaultDocumentURL)")
     }
 
     @objc func didDisconnect() {
@@ -784,7 +796,8 @@ extension ViewController {
 
     var defaultDocumentURL: URL? {
         guard let docURL = FileIO.getURL(for: .cache) else { return nil }
-        let docPath = docURL.appendingPathComponent("\(restorationFileName).diagram")
+        // FIXME: must account for multiple scenes, can't have just one default file.
+        let docPath = docURL.appendingPathComponent("\(restorationFilename).diagram")
         return docPath
     }
 
@@ -835,7 +848,7 @@ extension ViewController {
 
 }
 
-extension ViewController {
+extension DiagramViewController {
   static func freshController() -> UINavigationController {
     let storyboard = UIStoryboard(name: "Main", bundle: nil)
     guard let controller = storyboard.instantiateInitialViewController() as? UINavigationController else {

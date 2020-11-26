@@ -30,7 +30,14 @@ class RootViewController: UIViewController {
 
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
+        if let cachedDocURLPath = restorationInfo?[DiagramViewController.restorationFileNameKey] as? String, !cachedDocURLPath.isEmpty {
+            if let docURL = FileIO.getURL(for: .documents) {
+                let fileURL = docURL.appendingPathComponent(cachedDocURLPath)
+                openRemoteDocument(fileURL, importIfNeeded: true)
+            }
+        } else {
         displayDocumentBrowser()
+        }
     }
 
     func displayDocumentBrowser(inboundURL: URL? = nil, importIfNeeded: Bool = true) {
@@ -48,8 +55,8 @@ class RootViewController: UIViewController {
 
     func displayDiagramViewController(presenter: UIViewController) {
         presentationContext = .editing
-        let controller = ViewController.freshController()
-        if let vc = controller.viewControllers.first as? ViewController {
+        let controller = DiagramViewController.freshController()
+        if let vc = controller.viewControllers.first as? DiagramViewController {
             vc.restorationInfo = restorationInfo
             vc.persistentID = persistentID
         }

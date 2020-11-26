@@ -1,5 +1,5 @@
 //
-//  ViewController+RestorationDelegate.swift
+//  DiagramViewController+RestorationDelegate.swift
 //  EP Diagram
 //
 //  Created by David Mann on 11/9/20.
@@ -12,7 +12,7 @@ protocol RestorationDelegate {
     func saveDiagramToCache()
 }
 
-extension ViewController: RestorationDelegate {
+extension DiagramViewController: RestorationDelegate {
     func saveDiagramToCache() {
         saveDefaultDocument(diagram)
     }

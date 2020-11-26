@@ -10,7 +10,7 @@ import SwiftUI
 
 struct DiagramSelector: View {
     @State var names: [String] = []
-    weak var delegate: ViewControllerDelegate?
+    weak var delegate: DiagramViewControllerDelegate?
     @State private var editMode = EditMode.inactive
     @Environment(\.presentationMode) var presentationMode: Binding<PresentationMode>
 

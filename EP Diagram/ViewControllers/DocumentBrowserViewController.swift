@@ -38,6 +38,9 @@ class DocumentBrowserViewController: UIViewController {
           guard error == nil else {
             //present error to user e.g UIAlertController
             let alert = UIAlertController(title: L("Error opening document"), message: L("Could not open document."), preferredStyle: .alert)
+            alert.addAction(UIAlertAction(title: NSLocalizedString("OK", comment: "Default action"), style: .default, handler: { _ in
+            NSLog("The \"OK\" alert occured.")
+            }))
             self?.present(alert, animated: true)
             return
           }
@@ -51,24 +54,28 @@ class DocumentBrowserViewController: UIViewController {
 }
 
 protocol DiagramEditorDelegate {
-    func diagramEditorDidFinishEditing(_ controller: ViewController, diagram: Diagram)
-    func diagramEditorDidUpdateContent(_ controller: ViewController, diagram: Diagram)
+    func diagramEditorDidFinishEditing(_ controller: DiagramViewController, diagram: Diagram)
+    func diagramEditorDidUpdateContent(_ controller: DiagramViewController, diagram: Diagram)
 }
 
 extension DocumentBrowserViewController: DiagramEditorDelegate {
-    func diagramEditorDidFinishEditing(_ controller: ViewController, diagram: Diagram) {
+    func diagramEditorDidFinishEditing(_ controller: DiagramViewController, diagram: Diagram) {
         currentDocument?.diagram = diagram
         closeDiagramController()
     }
 
-    func diagramEditorDidUpdateContent(_ controller: ViewController, diagram: Diagram) {
+    func diagramEditorDidUpdateContent(_ controller: DiagramViewController, diagram: Diagram) {
         currentDocument?.diagram = diagram
     }
 
     func displayDiagramController() {
         guard !editingDocument, let document = currentDocument else { return }
         editingDocument = true
-        let controller = ViewController.freshController(diagram: document.diagram, delegate: self)
+        let controller = DiagramViewController.freshController(diagram: document.diagram, delegate: self)
+        let diagramViewController = controller.viewControllers[0] as? DiagramViewController
+        diagramViewController?.restorationInfo = restorationInfo
+        diagramViewController?.restorationIdentifier = restorationIdentifier
+        diagramViewController?.currentDocument = currentDocument
         controller.modalPresentationStyle = .fullScreen
         present(controller, animated: true)
     }
@@ -95,15 +102,19 @@ extension DocumentBrowserViewController: DiagramEditorDelegate {
     }
 
     func openRemoteDocument(_ inboundURL: URL, importIfNeeded: Bool) {
-      documentBrowser.revealDocument(at: inboundURL, importIfNeeded: importIfNeeded) { (url, error) in
-        if let error = error {
-          print("import did fail - should be communicated to user - \(error)")
-        } else if let url = url {
-          self.openDocument(url: url)
+        documentBrowser.revealDocument(at: inboundURL, importIfNeeded: importIfNeeded) { (url, error) in
+            if let error = error {
+                let alert = UIAlertController(title: L("Could Not Open Document"), message: L("EP Diagram could not open this document due to error \(error.localizedDescription)"), preferredStyle: .alert)
+                alert.addAction(UIAlertAction(title: NSLocalizedString("OK", comment: "Default action"), style: .default, handler: { _ in
+                NSLog("The \"OK\" alert occured.")
+                }))
+                self.present(alert, animated: true)
+                print("import did fail - \(error)")
+            } else if let url = url {
+                self.openDocument(url: url)
+            }
         }
-      }
     }
-
 }
 
 extension DocumentBrowserViewController {
