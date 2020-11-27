@@ -30,13 +30,15 @@ class RootViewController: UIViewController {
 
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
-        if let cachedDocURLPath = restorationInfo?[DiagramViewController.restorationFileNameKey] as? String, !cachedDocURLPath.isEmpty {
+        if let cachedDocURLPath = restorationInfo?[DiagramViewController.restorationFileNameKey] as? String,
+           !cachedDocURLPath.isEmpty,
+           restorationInfo?[DiagramViewController.restorationDoRestorationKey] as? Bool ?? false  {
             if let docURL = FileIO.getURL(for: .documents) {
                 let fileURL = docURL.appendingPathComponent(cachedDocURLPath)
                 openRemoteDocument(fileURL, importIfNeeded: true)
             }
         } else {
-        displayDocumentBrowser()
+            displayDocumentBrowser()
         }
     }
 

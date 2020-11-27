@@ -61,4 +61,9 @@ class DiagramDocument: UIDocument {
             throw DocumentError.corruptDocument
         }
     }
+
+    override func handleError(_ error: Error, userInteractionPermitted: Bool) {
+        super.handleError(error, userInteractionPermitted: userInteractionPermitted)
+        print("handleError called \(error.localizedDescription)")
+    }
 }

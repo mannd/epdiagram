@@ -51,9 +51,20 @@ class DocumentBrowserDelegate: NSObject, UIDocumentBrowserViewControllerDelegate
 }
 
 extension DocumentBrowserDelegate {
+    static let newDocumentNumberKey = "newDocumentNumberKey"
+
     private func getDocumentName() -> String {
-        let newDocTag = UUID().uuidString
-        return "\(newDocTag)"
+        let newDocNumber = UserDefaults.standard.integer(forKey: DocumentBrowserDelegate.newDocumentNumberKey)
+        return "Untitled \(newDocNumber)"
+    }
+
+    private func incrementNameCount() {
+        var newDocNumber = UserDefaults.standard.integer(forKey: DocumentBrowserDelegate.newDocumentNumberKey) + 1
+        // This is really paranoid
+        if newDocNumber >= Int.max {
+            newDocNumber = 1
+        }
+        UserDefaults.standard.set(newDocNumber, forKey: DocumentBrowserDelegate.newDocumentNumberKey)
     }
 
     func createNewDocumentURL() -> URL {
@@ -64,6 +75,7 @@ extension DocumentBrowserDelegate {
         let tempURL = cachePath
             .appendingPathComponent(newName)
             .appendingPathExtension(DiagramDocument.extensionName)
+        incrementNameCount()
         print("tempURL = \(tempURL)")
         return tempURL
     }

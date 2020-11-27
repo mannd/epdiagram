@@ -19,6 +19,9 @@ final class DiagramViewController: UIViewController {
     @IBOutlet var ladderView: LadderView!
     @IBOutlet var cursorView: CursorView!
     @IBOutlet var blackView: BlackView!
+    @IBOutlet var titleTextField: UITextField!
+
+
     var hamburgerTableViewController: HamburgerTableViewController? // We get this view via its embed segue!
     var separatorView: SeparatorView?
 
@@ -68,10 +71,12 @@ final class DiagramViewController: UIViewController {
     static let restorationCalFactorKey = "restorationCalFactorKey"
     static let restorationFileNameKey = "restorationFileNameKey"
     static let restorationNeededKey = "restorationNeededKey"
+    static let restorationDoRestorationKey = "restorationDoRestorationKey"
     // Set by screen delegate
     var restorationInfo: [AnyHashable: Any]?
     var persistentID = ""
     var restorationFilename = ""
+    var viewClosed = false
 
     // Speed up appearance of image picker by initializing it here.
     let imagePicker: UIImagePickerController = UIImagePickerController()
@@ -79,7 +84,9 @@ final class DiagramViewController: UIViewController {
     override func viewDidLoad() {
         os_log("viewDidLoad() - ViewController", log: OSLog.viewCycle, type: .info)
         super.viewDidLoad()
+        viewClosed = false
 
+        titleTextField.text = currentDocument?.fileURL.deletingPathExtension().lastPathComponent
         showRestorationInfo() // for debugging
 
 //        if restorationFilename.isEmpty {
@@ -175,6 +182,9 @@ final class DiagramViewController: UIViewController {
         super.viewDidAppear(animated)
         self.userActivity = self.view.window?.windowScene?.userActivity
         // See https://github.com/mattneub/Programming-iOS-Book-Examples/blob/master/bk2ch06p357StateSaveAndRestoreWithNSUserActivity/ch19p626pageController/SceneDelegate.swift
+        if let zoomScale = restorationInfo?[DiagramViewController.restorationZoomKey] {
+            imageScrollView.zoomScale = zoomScale as? CGFloat ?? 1
+        }
         var restorationContentOffset = CGPoint()
         if let contentOffsetX = restorationInfo?[DiagramViewController.restorationContentOffsetXKey] {
             restorationContentOffset.x = contentOffsetX as? CGFloat ?? 0
@@ -184,9 +194,7 @@ final class DiagramViewController: UIViewController {
         }
         print("restorationContentOffset = \(restorationContentOffset)")
         imageScrollView.setContentOffset(restorationContentOffset, animated: true)
-        if let zoomScale = restorationInfo?[DiagramViewController.restorationZoomKey] {
-            imageScrollView.zoomScale = zoomScale as? CGFloat ?? 1
-        }
+
         if let isCalibrated = restorationInfo?[DiagramViewController.restorationIsCalibratedKey] {
             cursorView.setIsCalibrated(isCalibrated as? Bool ?? false)
         }
@@ -236,7 +244,7 @@ final class DiagramViewController: UIViewController {
             DiagramViewController.restorationIsCalibratedKey: cursorView.isCalibrated(),
             DiagramViewController.restorationCalFactorKey: cursorView.calFactor,
             DiagramViewController.restorationFileNameKey: currentDocumentURL,
-            DiagramViewController.restorationNeededKey: true
+            DiagramViewController.restorationDoRestorationKey: !viewClosed
         ]
         activity.addUserInfoEntries(from: info)
         print(activity.userInfo as Any)
@@ -334,6 +342,8 @@ final class DiagramViewController: UIViewController {
     // MARK: -  Buttons
 
     @objc func closeAction() {
+        os_log("CLOSE ACTION")
+        viewClosed = true
         view.endEditing(true)
         delegate?.diagramEditorDidFinishEditing(self, diagram: diagram)
     }
@@ -751,6 +761,7 @@ extension DiagramViewController {
         NotificationCenter.default.addObserver(self, selector: #selector(updatePreferences), name: .preferencesChanged, object: nil)
         NotificationCenter.default.addObserver(self, selector: #selector(didEnterBackground), name: UIScene.didEnterBackgroundNotification, object: nil)
         NotificationCenter.default.addObserver(self, selector: #selector(didDisconnect), name: UIScene.didDisconnectNotification, object: nil)
+  
     }
 
     func removeNotifications() {
@@ -778,11 +789,12 @@ extension DiagramViewController {
     @objc func didEnterBackground() {
         os_log("didEnterBackground()", log: .action, type: .info)
         let result = saveDefaultDocument(diagram)
-        print("save \(result ? "OK" : "Fail!") to \(defaultDocumentURL)")
+        print("save \(result ? "OK" : "Fail!") to \(String(describing: defaultDocumentURL))")
     }
 
     @objc func didDisconnect() {
-        os_log("didDisconnect()", log: .action, type: .info)
+        os_log("didDisconnect()", log: .lifeCycle, type: .info)
+
     }
 
     @objc func updatePreferences() {

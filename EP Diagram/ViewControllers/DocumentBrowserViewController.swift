@@ -7,6 +7,7 @@
 //
 
 import UIKit
+import OSLog
 
 class DocumentBrowserViewController: UIViewController {
 
@@ -34,16 +35,15 @@ class DocumentBrowserViewController: UIViewController {
     func installDocumentBrowser() {
         view.pinToInside(view: documentBrowser.view)
         browserDelegate.presentationHandler = { [weak self] url, error in
-
-          guard error == nil else {
-            //present error to user e.g UIAlertController
-            let alert = UIAlertController(title: L("Error opening document"), message: L("Could not open document."), preferredStyle: .alert)
-            alert.addAction(UIAlertAction(title: NSLocalizedString("OK", comment: "Default action"), style: .default, handler: { _ in
-            NSLog("The \"OK\" alert occured.")
-            }))
-            self?.present(alert, animated: true)
-            return
-          }
+            guard error == nil else {
+                //present error to user e.g UIAlertController
+                let alert = UIAlertController(title: L("Error opening document"), message: L("Could not open document."), preferredStyle: .alert)
+                alert.addAction(UIAlertAction(title: NSLocalizedString("OK", comment: "Default action"), style: .default, handler: { _ in
+                    NSLog("The \"OK\" alert occured.")
+                }))
+                self?.present(alert, animated: true)
+                return
+            }
 
           if let url = url, let self = self {
             self.openDocument(url: url)
