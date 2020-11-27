@@ -12,6 +12,7 @@ enum Layer {
     case takePhoto
     case selectImage
     case selectLadder
+    case renameDiagram
     case getInfo
     case snapshot
     case sample

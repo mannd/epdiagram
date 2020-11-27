@@ -53,7 +53,6 @@
 		8E74D58E244FBE2500641E0A /* LadderView+UIContextMenuInteractionDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8E74D58D244FBE2500641E0A /* LadderView+UIContextMenuInteractionDelegate.swift */; };
 		8E74D590244FD55E00641E0A /* Logging.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8E74D58F244FD55E00641E0A /* Logging.swift */; };
 		8E77BDA4253F5AA600FD51E5 /* RegionTemplateEditor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8E77BDA3253F5AA600FD51E5 /* RegionTemplateEditor.swift */; };
-		8E7CCC29248C1A9C00018D2C /* DiagramSelector.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8E7CCC28248C1A9C00018D2C /* DiagramSelector.swift */; };
 		8E7CCC2B248C30A300018D2C /* Preferences.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8E7CCC2A248C30A300018D2C /* Preferences.swift */; };
 		8E7D24C322779DBD005A1729 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8E7D24C222779DBD005A1729 /* AppDelegate.swift */; };
 		8E7D24C522779DBD005A1729 /* DiagramViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8E7D24C422779DBD005A1729 /* DiagramViewController.swift */; };
@@ -157,7 +156,6 @@
 		8E74D58D244FBE2500641E0A /* LadderView+UIContextMenuInteractionDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "LadderView+UIContextMenuInteractionDelegate.swift"; sourceTree = "<group>"; };
 		8E74D58F244FD55E00641E0A /* Logging.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Logging.swift; sourceTree = "<group>"; };
 		8E77BDA3253F5AA600FD51E5 /* RegionTemplateEditor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RegionTemplateEditor.swift; sourceTree = "<group>"; };
-		8E7CCC28248C1A9C00018D2C /* DiagramSelector.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DiagramSelector.swift; sourceTree = "<group>"; };
 		8E7CCC2A248C30A300018D2C /* Preferences.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Preferences.swift; sourceTree = "<group>"; };
 		8E7D24BF22779DBD005A1729 /* EP Diagram.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "EP Diagram.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		8E7D24C222779DBD005A1729 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
@@ -440,7 +438,6 @@
 		8EBC2B41246F718000CFC04D /* SwiftUI */ = {
 			isa = PBXGroup;
 			children = (
-				8E7CCC28248C1A9C00018D2C /* DiagramSelector.swift */,
 				8EA444BF2476E471005B5452 /* LadderSelector.swift */,
 				8E671D5124814BB700784EB7 /* LadderTemplatesEditor.swift */,
 				8E6A0297246DFB3700A10C9F /* LadderTemplateEditor.swift */,
@@ -652,7 +649,6 @@
 				8E9B8045228347DE008873BB /* Region.swift in Sources */,
 				8E856CF424EDC5E10064121F /* Segment.swift in Sources */,
 				8E0FDE832543A01D00865CBC /* SceneDelegate.swift in Sources */,
-				8E7CCC29248C1A9C00018D2C /* DiagramSelector.swift in Sources */,
 				8EBC824324E6EBA700B5CA29 /* Sounds.swift in Sources */,
 				8E7D24C322779DBD005A1729 /* AppDelegate.swift in Sources */,
 				8E35924924BE9B27001E23D5 /* DiagramIO.swift in Sources */,

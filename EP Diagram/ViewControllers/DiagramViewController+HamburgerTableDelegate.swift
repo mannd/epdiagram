@@ -21,6 +21,7 @@ protocol HamburgerTableDelegate: class {
     func takePhoto()
     func selectImage()
     func selectLadder()
+    func renameDiagram()
     func about()
     func test()
     func snapshotDiagram()
@@ -109,6 +110,32 @@ extension DiagramViewController: HamburgerTableDelegate, UIImagePickerController
         os_log("selectLadder()", log: .action, type: .info)
         performSelectLadderSegue()
     }
+
+    func renameDiagram() {
+          os_log("renameDiagram()", log: .action, type: .info)
+          // Just fail gracefully if name is nil, renameDiagram should not be available if name is nil.
+        guard let diagramName = diagram.name, !diagramName.isBlank else { return }
+        let alert = UIAlertController(title: L("Rename Diagram"), message: L("Enter a new name for diagram \(diagramName)"), preferredStyle: .alert)
+        alert.addAction(UIAlertAction(title: L("Cancel"), style: .cancel, handler: nil))
+        alert.addTextField { textField in
+            textField.placeholder = L("New diagram name")
+        }
+        alert.addAction(UIAlertAction(title: L("Rename"), style: .default) { [self] action in
+            if let newName = alert.textFields?.first?.text {
+                if let currentFileURL = currentDocument?.fileURL {
+                    let newFileURL = currentFileURL.deletingLastPathComponent()
+                        .appendingPathComponent(newName)
+                        .appendingPathExtension(DiagramDocument.extensionName)
+                    renameDocument(oldURL: currentFileURL, newURL: newFileURL)
+                    diagram.name = newName
+                    currentDocument?.updateChangeCount(.done)
+                    delegate?.diagramEditorDidUpdateContent(self, diagram: diagram)
+                    setTitle()
+                }
+            }
+        })
+        present(alert, animated: true)
+      }
 
     func getDiagramInfo() {
         os_log("getDiagramInfo()", log: .action, type: .info)

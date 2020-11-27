@@ -19,8 +19,6 @@ final class DiagramViewController: UIViewController {
     @IBOutlet var ladderView: LadderView!
     @IBOutlet var cursorView: CursorView!
     @IBOutlet var blackView: BlackView!
-    @IBOutlet var titleTextField: UITextField!
-
 
     var hamburgerTableViewController: HamburgerTableViewController? // We get this view via its embed segue!
     var separatorView: SeparatorView?
@@ -85,9 +83,7 @@ final class DiagramViewController: UIViewController {
         os_log("viewDidLoad() - ViewController", log: OSLog.viewCycle, type: .info)
         super.viewDidLoad()
         viewClosed = false
-        titleTextField.delegate = self
 
-        titleTextField.text = currentDocument?.fileURL.deletingPathExtension().lastPathComponent
         showRestorationInfo() // for debugging
 
         // TODO: Lots of other customization for Mac version.
@@ -133,7 +129,7 @@ final class DiagramViewController: UIViewController {
         }
 
         navigationItem.setRightBarButton(UIBarButtonItem(image: UIImage(systemName: "xmark"), style: .plain, target: self, action: #selector(closeAction)), animated: true)
-
+       
         // Set up touches.
         let singleTapRecognizer = UITapGestureRecognizer(target: self, action: #selector(self.singleTap))
         singleTapRecognizer.numberOfTapsRequired = 1
@@ -834,33 +830,10 @@ extension DiagramViewController {
   }
 }
 
-extension DiagramViewController: UITextFieldDelegate {
-    func textFieldShouldReturn(_ textField: UITextField) -> Bool {
-        os_log("TEXT FIELD SHOULD RETURN")
-        if textField === titleTextField {
-            textField.resignFirstResponder()
-        }
-        return true
-    }
+extension DiagramViewController {
 
-    func textFieldDidEndEditing(_ textField: UITextField, reason: UITextField.DidEndEditingReason) {
-        os_log("TEXT FIELD END EDITING")
-        switch textField.tag {
-        case 0:
-            diagram.name = textField.text
-            if let currentFileURL = currentDocument?.fileURL, let diagramName = diagram.name {
-                let newFileURL = currentFileURL.deletingLastPathComponent()
-                    .appendingPathComponent(diagramName)
-                    .appendingPathExtension(DiagramDocument.extensionName)
-                renameDocument(oldURL: currentFileURL, newURL: newFileURL)
-                delegate?.diagramEditorDidUpdateContent(self, diagram: diagram)
-            }
-        default:
-            print("unhandled text field?")
-        }
-    }
-
-    private func renameDocument(oldURL: URL, newURL: URL) {
+    func renameDocument(oldURL: URL, newURL: URL) {
+        guard oldURL != newURL else { return }
         DispatchQueue.global(qos: .background).async {
             var error: NSError? = nil
             let fileCoordinator = NSFileCoordinator()

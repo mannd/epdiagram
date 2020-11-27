@@ -22,6 +22,8 @@ struct HamburgerViewModel {
         // FIXME: need ladder svg
         let selectLadderLayer = HamburgerLayer(withName: L("Select ladder"), icon: UIImage(named: "ladder"), layer: .selectLadder)
         array.append(selectLadderLayer)
+        let renameDiagramLayer = HamburgerLayer(withName: L("Rename diagram"), icon: UIImage(systemName: "square.and.pencil"), layer: .renameDiagram)
+        array.append(renameDiagramLayer)
         let getInfoLayer = HamburgerLayer(withName: L("Diagram info"), icon: UIImage(systemName: "questionmark.square"), layer: .getInfo)
         array.append(getInfoLayer)
         let saveImageLayer = HamburgerLayer(withName: L("Snapshot diagram"), icon: UIImage(systemName: "photo.on.rectangle"), layer: .snapshot)
