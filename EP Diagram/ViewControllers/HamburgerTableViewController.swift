@@ -87,16 +87,6 @@ class HamburgerTableViewController: UITableViewController {
             delegate?.selectLadder()
         case .lockImage:
             delegate?.lockImage()
-        case .newDiagram:
-            delegate?.newDiagram()
-        case .openDiagram:
-            delegate?.selectDiagram()
-        case .saveDiagram:
-            delegate?.saveDiagram()
-        case .renameDiagram:
-            delegate?.renameDiagram()
-        case .duplicateDiagram:
-            delegate?.duplicateDiagram()
         case .getInfo:
             delegate?.getDiagramInfo()
         case .lockLadder:

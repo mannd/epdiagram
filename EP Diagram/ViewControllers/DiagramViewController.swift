@@ -629,14 +629,6 @@ final class DiagramViewController: UIViewController {
     }
 
 
-    @IBSegueAction func showDiagramSelector(_ coder: NSCoder) -> UIViewController? {
-        os_log("showDiagramSelector() - ViewController", log: OSLog.action, type: .info)
-        let diagramSelector = DiagramSelector(names: diagramFilenames, delegate: self)
-        let hostingController = UIHostingController(coder: coder, rootView: diagramSelector)
-        return hostingController
-    }
-
-
     @IBSegueAction func showPreferences(_ coder: NSCoder) -> UIViewController? {
         preferences.retrieve()
         let preferencesView = PreferencesView()
@@ -645,14 +637,14 @@ final class DiagramViewController: UIViewController {
     }
 
     @IBSegueAction func showSampleSelector(_ coder: NSCoder) -> UIViewController? {
-        let sampleDiagrams: [Diagram] = []
-//            Diagram(name: L("Normal ECG"), image: UIImage(named: "SampleECG")!, description: L("Just a normal ECG")),
-//            Diagram(name: L("AV Block"), image: UIImage(named: "AVBlock")!, description: L("High grade AV block")),
-//            Diagram.blankDiagram(name: L("Blank Diagram")),
-//            // Make this taller than height even with rotation.
-//            Diagram(name: L("Scrollable Blank Diagram"), image: UIImage.emptyImage(size: CGSize(width: view.frame.size.width * 3, height: max(view.frame.size.height, view.frame.size.width)), color: UIColor.systemTeal), description: L("Wide scrollable blank image"))
-//            // TODO: add others here.
-//        ]
+        let sampleDiagrams: [Diagram] = [
+            Diagram(name: L("Normal ECG"), description: L("Just a normal ECG"), image: UIImage(named: "SampleECG")!, ladder: Ladder.defaultLadder()),
+        Diagram(name: L("AV Block"), description: L("High grade AV block"), image: UIImage(named: "AVBlock")!, ladder: Ladder.defaultLadder())
+//        Diagram.blankDiagram(name: L("Blank Diagram")),
+//        // Make this taller than height even with rotation.
+//        Diagram(name: L("Scrollable Blank Diagram"), image: UIImage.emptyImage(size: CGSize(width: view.frame.size.width * 3, height: max(view.frame.size.height, view.frame.size.width)), color: UIColor.systemTeal), description: L("Wide scrollable blank image"))
+        // TODO: add others here.
+        ]
         let sampleSelector = SampleSelector(sampleDiagrams: sampleDiagrams, delegate: self)
         let hostingController = UIHostingController(coder: coder, rootView: sampleSelector)
         return hostingController
@@ -671,10 +663,6 @@ final class DiagramViewController: UIViewController {
 
     func performEditLadderSegue() {
         performSegue(withIdentifier: "EditLadderSegue", sender: self)
-    }
-
-    func performShowDiagramSelectorSegue() {
-        performSegue(withIdentifier: "showDiagramSelectorSegue", sender: self)
     }
 
     func performShowSampleSelectorSegue() {
@@ -706,26 +694,7 @@ final class DiagramViewController: UIViewController {
         showHelp()
     }
 
-    @IBAction func newDiagram(_ sender: Any) {
-        newDiagram()
-    }
-
-    @IBAction func saveDiagram(_ sender: Any) {
-        saveDiagram()
-    }
-
-    @IBAction func selectDiagram(_ sender: Any) {
-        selectDiagram()
-    }
-
-    @IBAction func renameDiagram(_ sender: Any) {
-        renameDiagram()
-    }
-
-    @IBAction func duplicateDiagram(_ sender: Any) {
-        duplicateDiagram()
-    }
-
+ 
     @IBAction func getDiagramInfo(_ sender: Any) {
         getDiagramInfo()
     }

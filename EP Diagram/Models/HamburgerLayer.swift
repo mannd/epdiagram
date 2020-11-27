@@ -12,11 +12,6 @@ enum Layer {
     case takePhoto
     case selectImage
     case selectLadder
-    case newDiagram
-    case openDiagram
-    case saveDiagram
-    case renameDiagram
-    case duplicateDiagram
     case getInfo
     case snapshot
     case sample
@@ -38,22 +33,6 @@ struct HamburgerLayer {
     var altIconName: String?
     var altIcon: UIImage?
     var isEnabled: Bool = true
-
-//    init(withName name: String, iconName: String, layer: Layer) {
-//        self.name = name
-//        self.iconName = iconName
-//        self.layer = layer
-//        self.altName = nil
-//        self.altIconName = nil
-//    }
-//
-//    init(withName name: String, iconName: String, layer: Layer, altName: String, altIconName: String) {
-//        self.name = name
-//        self.iconName = iconName
-//        self.layer = layer
-//        self.altName = altName
-//        self.altIconName = altIconName
-//    }
 
     init(withName name: String, icon: UIImage?, layer: Layer) {
         self.name = name

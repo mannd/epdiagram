@@ -96,7 +96,6 @@
                         <outlet property="titleTextField" destination="yY6-y7-H2Q" id="d0K-3E-T13"/>
                         <segue destination="LJm-2p-ngb" kind="show" identifier="selectLadderSegue" destinationCreationSelector="showLadderSelector:" id="4Gf-Q1-Gss"/>
                         <segue destination="lYc-7T-fo8" kind="show" identifier="showTemplateEditorSegue" destinationCreationSelector="showTemplateEditor:" id="yOM-cF-bRp"/>
-                        <segue destination="laf-9G-lzB" kind="show" identifier="showDiagramSelectorSegue" destinationCreationSelector="showDiagramSelector:" id="PMT-lw-9Pg"/>
                         <segue destination="aUo-Pc-QYX" kind="show" identifier="showPreferencesSegue" destinationCreationSelector="showPreferences:" id="JGa-0u-G6I"/>
                         <segue destination="X4y-SM-iwI" kind="show" identifier="showHelpSegue" destinationCreationSelector="performShowHelpSegueAction:" id="ezU-te-0lg"/>
                         <segue destination="ggo-hf-FSM" kind="show" identifier="showSampleSelectorSegue" destinationCreationSelector="showSampleSelector:" id="ItN-ts-1CH"/>
@@ -156,7 +155,7 @@
                 </tableViewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="qCE-BD-hD2" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="-69" y="1135"/>
+            <point key="canvasLocation" x="-174" y="1134"/>
         </scene>
         <!--Hosting Controller-->
         <scene sceneID="QVs-n6-kdo">
@@ -220,7 +219,7 @@
                 </hostingController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="PLw-dA-uEH" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="2376" y="1160"/>
+            <point key="canvasLocation" x="1910" y="1163"/>
         </scene>
         <!--Hosting Controller-->
         <scene sceneID="eah-A4-Jzh">
@@ -230,7 +229,7 @@
                 </hostingController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="fbD-f9-Y3a" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="3030" y="1160"/>
+            <point key="canvasLocation" x="2703" y="1163"/>
         </scene>
         <!--Hosting Controller-->
         <scene sceneID="KIe-xf-6Pi">
@@ -241,16 +240,6 @@
                 <placeholder placeholderIdentifier="IBFirstResponder" id="LlP-FI-RPV" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
             </objects>
             <point key="canvasLocation" x="374" y="1160"/>
-        </scene>
-        <!--Hosting Controller-->
-        <scene sceneID="ICJ-r9-f69">
-            <objects>
-                <hostingController id="laf-9G-lzB" sceneMemberID="viewController">
-                    <navigationItem key="navigationItem" id="zf8-lP-8AM"/>
-                </hostingController>
-                <placeholder placeholderIdentifier="IBFirstResponder" id="Ehb-Tc-ZTz" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
-            </objects>
-            <point key="canvasLocation" x="1719" y="1160"/>
         </scene>
         <!--Navigation Controller-->
         <scene sceneID="krg-YB-oDF">
