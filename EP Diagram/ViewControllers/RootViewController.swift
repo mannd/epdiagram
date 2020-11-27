@@ -30,12 +30,17 @@ class RootViewController: UIViewController {
 
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
+        // Fail gently if cached file no longer exists.
         if let cachedDocURLPath = restorationInfo?[DiagramViewController.restorationFileNameKey] as? String,
            !cachedDocURLPath.isEmpty,
            restorationInfo?[DiagramViewController.restorationDoRestorationKey] as? Bool ?? false  {
             if let docURL = FileIO.getURL(for: .documents) {
                 let fileURL = docURL.appendingPathComponent(cachedDocURLPath)
-                openRemoteDocument(fileURL, importIfNeeded: true)
+                if FileManager.default.fileExists(atPath: fileURL.path) {
+                    openRemoteDocument(fileURL, importIfNeeded: true)
+                } else {
+                    displayDocumentBrowser()
+                }
             }
         } else {
             displayDocumentBrowser()
