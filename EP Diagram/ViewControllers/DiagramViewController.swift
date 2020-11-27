@@ -85,17 +85,10 @@ final class DiagramViewController: UIViewController {
         os_log("viewDidLoad() - ViewController", log: OSLog.viewCycle, type: .info)
         super.viewDidLoad()
         viewClosed = false
+        titleTextField.delegate = self
 
         titleTextField.text = currentDocument?.fileURL.deletingPathExtension().lastPathComponent
         showRestorationInfo() // for debugging
-
-//        if restorationFilename.isEmpty {
-//            restorationFilename = persistentID
-//        }
-
-//        loadDefaultDocument()
-//        restorationFileName = restorationInfo?[ViewController.restorationFileNameKey] as? String ?? ""
-//        restorationFileName = persistentID // each screen has unique id
 
         // TODO: Lots of other customization for Mac version.
         if Common.isRunningOnMac() {
@@ -839,5 +832,49 @@ extension DiagramViewController {
 //    controller.currentContent = markup
     return controller
   }
+}
+
+extension DiagramViewController: UITextFieldDelegate {
+    func textFieldShouldReturn(_ textField: UITextField) -> Bool {
+        os_log("TEXT FIELD SHOULD RETURN")
+        if textField === titleTextField {
+            textField.resignFirstResponder()
+        }
+        return true
+    }
+
+    func textFieldDidEndEditing(_ textField: UITextField, reason: UITextField.DidEndEditingReason) {
+        os_log("TEXT FIELD END EDITING")
+        switch textField.tag {
+        case 0:
+            diagram.name = textField.text
+            if let currentFileURL = currentDocument?.fileURL, let diagramName = diagram.name {
+                let newFileURL = currentFileURL.deletingLastPathComponent()
+                    .appendingPathComponent(diagramName)
+                    .appendingPathExtension(DiagramDocument.extensionName)
+                renameDocument(oldURL: currentFileURL, newURL: newFileURL)
+                delegate?.diagramEditorDidUpdateContent(self, diagram: diagram)
+            }
+        default:
+            print("unhandled text field?")
+        }
+    }
+
+    private func renameDocument(oldURL: URL, newURL: URL) {
+        DispatchQueue.global(qos: .background).async {
+            var error: NSError? = nil
+            let fileCoordinator = NSFileCoordinator()
+            fileCoordinator.coordinate(writingItemAt: oldURL, options: .forMoving, writingItemAt: newURL, options: .forReplacing, error: &error, byAccessor: { newURL1, newURL2 in
+                let fileManager = FileManager.default
+                fileCoordinator.item(at: oldURL, willMoveTo: newURL)
+                if (try? fileManager.moveItem(at: newURL1, to: newURL2)) != nil {
+                    fileCoordinator.item(at: oldURL, didMoveTo: newURL)
+                }
+            })
+            if let error = error {
+                print("error = \(error.localizedDescription)")
+            }
+        }
+    }
 }
 
