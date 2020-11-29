@@ -424,17 +424,17 @@ final class DiagramViewController: UIViewController {
 
     @objc func undo() {
         os_log("undo action", log: OSLog.action, type: .info)
-        if self.undoManager?.canUndo ?? false {
-            self.undoManager?.undo()
-            ladderView.setNeedsDisplay()
+        if self.currentDocument?.undoManager?.canUndo ?? false {
+            self.currentDocument?.undoManager?.undo()
+ //           ladderView.setNeedsDisplay()
         }
     }
 
     @objc func redo() {
         os_log("redo action", log: OSLog.action, type: .info)
-        if self.undoManager?.canRedo ?? false {
-            self.undoManager?.redo()
-            ladderView.setNeedsDisplay()
+        if self.currentDocument?.undoManager?.canRedo ?? false {
+            self.currentDocument?.undoManager?.redo()
+ //           ladderView.setNeedsDisplay()
         }
     }
 
@@ -719,6 +719,8 @@ extension DiagramViewController {
         NotificationCenter.default.addObserver(self, selector: #selector(updatePreferences), name: .preferencesChanged, object: nil)
         NotificationCenter.default.addObserver(self, selector: #selector(didEnterBackground), name: UIScene.didEnterBackgroundNotification, object: nil)
         NotificationCenter.default.addObserver(self, selector: #selector(didDisconnect), name: UIScene.didDisconnectNotification, object: nil)
+
+        NotificationCenter.default.addObserver(self, selector: #selector(resolveFileConflicts), name: UIDocument.stateChangedNotification, object: nil)
   
     }
 
@@ -739,8 +741,8 @@ extension DiagramViewController {
         // DispatchQueue here forces UI to finish up its tasks before performing below on the main thread.
         // If not used, undoManager.canUndo/Redo is not updated before this is called.
         DispatchQueue.main.async {
-            self.undoButton.isEnabled = self.undoManager?.canUndo ?? false
-            self.redoButton.isEnabled = self.undoManager?.canRedo ?? false
+            self.undoButton.isEnabled = self.currentDocument?.undoManager?.canUndo ?? false
+            self.redoButton.isEnabled = self.currentDocument?.undoManager?.canRedo ?? false
         }
     }
 
@@ -752,6 +754,21 @@ extension DiagramViewController {
     @objc func didDisconnect() {
         os_log("didDisconnect()", log: .lifeCycle, type: .info)
 
+    }
+
+    @objc func resolveFileConflicts() {
+        os_log("resolveFileConflicts()", log: .action, type: .info)
+        guard let currentDocument = currentDocument else { return }
+        if currentDocument.documentState == UIDocument.State.inConflict {
+            // Use newest file wins strategy.
+            do {
+                try NSFileVersion.removeOtherVersionsOfItem(at: currentDocument.fileURL)
+
+            } catch {
+                os_log("Error resolving file conflict - %s", log: .errors, type: .error, error.localizedDescription)
+            }
+            currentDocument.diagram = diagram
+        }
     }
 
     @objc func updatePreferences() {

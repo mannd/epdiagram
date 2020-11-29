@@ -295,8 +295,9 @@ extension DiagramViewController: HamburgerTableDelegate, UIImagePickerController
         setViewsNeedDisplay()
     }
 
-    func setDiagramImage(_ image: UIImage?) {
+    @objc func setDiagramImage(_ image: UIImage?) {
         undoManager?.removeAllActions()
+        currentDocument?.undoManager.registerUndo(withTarget: self, selector: #selector(setDiagramImage), object: imageView.image)
         updateUndoRedoButtons()
         diagram.ladder.clear()
         diagram.image = image
