@@ -230,14 +230,6 @@
 			path = Protocols;
 			sourceTree = "<group>";
 		};
-		8E04C5D9256996B600946348 /* UIDocument */ = {
-			isa = PBXGroup;
-			children = (
-				8E04C5DA256996E400946348 /* DiagramDocument.swift */,
-			);
-			path = UIDocument;
-			sourceTree = "<group>";
-		};
 		8E04C5FA256A0AB300946348 /* Helpers */ = {
 			isa = PBXGroup;
 			children = (
@@ -314,7 +306,6 @@
 			isa = PBXGroup;
 			children = (
 				8E04C5FA256A0AB300946348 /* Helpers */,
-				8E04C5D9256996B600946348 /* UIDocument */,
 				8E7D24C222779DBD005A1729 /* AppDelegate.swift */,
 				8E0FDE822543A01D00865CBC /* SceneDelegate.swift */,
 				8E7D24C922779DBF005A1729 /* Assets.xcassets */,
@@ -367,6 +358,7 @@
 		8E9B803F22834431008873BB /* Models */ = {
 			isa = PBXGroup;
 			children = (
+				8E04C5DA256996E400946348 /* DiagramDocument.swift */,
 				8ED3B1B52360DA0D00549381 /* Anchor.swift */,
 				8E033CE924AC10A300BE6D6F /* Calibration.swift */,
 				8E5918BB24AEAB0B00D8ABA3 /* Caliper.swift */,
