@@ -84,7 +84,7 @@ final class DiagramViewController: UIViewController {
         super.viewDidLoad()
         viewClosed = false
 
-        showRestorationInfo() // for debugging
+        //showRestorationInfo() // for debugging
 
         // TODO: Lots of other customization for Mac version.
         if Common.isRunningOnMac() {
@@ -641,8 +641,8 @@ final class DiagramViewController: UIViewController {
 
     @IBSegueAction func performShowHelpSegueAction(_ coder: NSCoder) -> HelpViewController? {
         let helpViewController = HelpViewController(coder: coder)
+        currentDocument?.updateChangeCount(.done)
         helpViewController?.restorationInfo = self.restorationInfo
-        helpViewController?.restorationDelegate = self
         return helpViewController
     }
 
@@ -746,8 +746,7 @@ extension DiagramViewController {
 
     @objc func didEnterBackground() {
         os_log("didEnterBackground()", log: .action, type: .info)
-        let result = saveDefaultDocument(diagram)
-        print("save \(result ? "OK" : "Fail!") to \(String(describing: defaultDocumentURL))")
+        currentDocument?.updateChangeCount(.done)
     }
 
     @objc func didDisconnect() {
@@ -784,30 +783,6 @@ extension DiagramViewController {
         }
     }
 
-    @discardableResult func saveDefaultDocument(_ content: Diagram) -> Bool {
-        guard let defaultDocumentURL = defaultDocumentURL else { return false }
-        do {
-            let encoder = JSONEncoder()
-            let documentData = try encoder.encode(content)
-            try documentData.write(to: defaultDocumentURL)
-            print("written to \(defaultDocumentURL)")
-            return true
-        } catch {
-            return false
-        }
-    }
-
-    func deleteDefaultDocument() {
-        guard let defaultDocumentURL = defaultDocumentURL else { return }
-        do {
-            if FileManager.default.fileExists(atPath: defaultDocumentURL.path) {
-                try FileManager.default.removeItem(at: defaultDocumentURL)
-            }
-        } catch {
-            os_log("deleteDefaultDocument() error %s", log: .errors, type: .error, error.localizedDescription)
-        }
-    }
-
     private func loadDocument() {
         if let content = loadDefaultDocument() {
             diagram = content
@@ -819,18 +794,13 @@ extension DiagramViewController {
 }
 
 extension DiagramViewController {
-  static func freshController() -> UINavigationController {
-    let storyboard = UIStoryboard(name: "Main", bundle: nil)
-    guard let controller = storyboard.instantiateInitialViewController() as? UINavigationController else {
-      fatalError("Project fault - cant instantiate MarkupViewController from storyboard")
+    static func navigationControllerFactory() -> UINavigationController {
+        let storyboard = UIStoryboard(name: "Main", bundle: nil)
+        guard let controller = storyboard.instantiateInitialViewController() as? UINavigationController else {
+            fatalError("Project fault - cant instantiate NavigationController from storyboard")
+        }
+        return controller
     }
-//    controller.delegate = delegate
-//    controller.currentContent = markup
-    return controller
-  }
-}
-
-extension DiagramViewController {
 
     func renameDocument(oldURL: URL, newURL: URL) {
         guard oldURL != newURL else { return }

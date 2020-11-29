@@ -19,7 +19,6 @@ class HelpViewController: UIViewController, WKNavigationDelegate {
     static let contentOffsetYKey = "contentOffsetYKey"
     var restorationInfo: [AnyHashable: Any]?
     var storedContentOffsetY: CGFloat = 0
-    var restorationDelegate: RestorationDelegate?
 
     override func viewDidLoad() {
         os_log("viewDidLoad() - HelpViewConroller", log: .viewCycle, type: .info)
@@ -44,8 +43,6 @@ class HelpViewController: UIViewController, WKNavigationDelegate {
         super.viewDidAppear(animated)
         self.userActivity = self.view.window?.windowScene?.userActivity
         self.restorationInfo = nil
-
-        NotificationCenter.default.addObserver(self, selector: #selector(didEnterBackground), name: UIScene.didEnterBackgroundNotification, object: nil)
     }
 
     override func updateUserActivityState(_ activity: NSUserActivity) {
@@ -56,13 +53,6 @@ class HelpViewController: UIViewController, WKNavigationDelegate {
         activity.addUserInfoEntries(from: [HelpViewController.inHelpKey: true])
         print(activity.userInfo as Any)
     }
-
-    @objc func didEnterBackground() {
-        os_log("didEnterBackground() - HelpViewController", log: .debugging, type: .debug)
-        // save diagram here !!!!
-        restorationDelegate?.saveDiagramToCache()
-    }
-    
 
     func webView(_ webView: WKWebView, didStartProvisionalNavigation navigation: WKNavigation!) {
         loadingLabel.isHidden = false

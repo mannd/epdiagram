@@ -105,11 +105,9 @@ extension DocumentBrowserViewController: DiagramEditorDelegate {
         documentBrowser.revealDocument(at: inboundURL, importIfNeeded: importIfNeeded) { (url, error) in
             if let error = error {
                 let alert = UIAlertController(title: L("Could Not Open Document"), message: L("EP Diagram could not open this document due to error \(error.localizedDescription)"), preferredStyle: .alert)
-                alert.addAction(UIAlertAction(title: NSLocalizedString("OK", comment: "Default action"), style: .default, handler: { _ in
-                NSLog("The \"OK\" alert occured.")
-                }))
+                alert.addAction(UIAlertAction(title: NSLocalizedString("OK", comment: "Default action"), style: .default))
                 self.present(alert, animated: true)
-                print("import did fail - \(error)")
+                os_log("import did fail - %s", log: .errors, type: .error, error.localizedDescription)
             } else if let url = url {
                 self.openDocument(url: url)
             }
