@@ -24,12 +24,12 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
             Preferences.defaultLastDiagramKey: ""
         ])
         // Check for iCloud availability
+        // TODO: test this!
         DispatchQueue.global(qos: .background).async {
             let fileManager = FileManager.default
             let ubiqURL = fileManager.url(forUbiquityContainerIdentifier: nil)
             DispatchQueue.main.async {
                 self.ubiqURL = ubiqURL
-                print("\(self.ubiqURL)")
             }
         }
         return true

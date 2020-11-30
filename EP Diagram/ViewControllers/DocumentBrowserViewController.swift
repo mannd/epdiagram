@@ -49,7 +49,6 @@ class DocumentBrowserViewController: UIViewController {
             self.openDocument(url: url)
           }
         }
-
     }
 }
 
@@ -71,8 +70,10 @@ extension DocumentBrowserViewController: DiagramEditorDelegate {
     func displayDiagramController() {
         guard !editingDocument, let document = currentDocument else { return }
         editingDocument = true
-        let controller = DiagramViewController.freshController(diagram: document.diagram, delegate: self)
+        let controller = DiagramViewController.navigationControllerFactory()
         let diagramViewController = controller.viewControllers[0] as? DiagramViewController
+        diagramViewController?.delegate = self
+        diagramViewController?.diagram = document.diagram
         diagramViewController?.restorationInfo = restorationInfo
         diagramViewController?.restorationIdentifier = restorationIdentifier
         diagramViewController?.currentDocument = currentDocument

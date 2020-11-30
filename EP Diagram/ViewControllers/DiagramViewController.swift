@@ -169,10 +169,10 @@ final class DiagramViewController: UIViewController {
     override func viewDidAppear(_ animated: Bool) {
         os_log("viewDidAppear() - ViewController", log: OSLog.viewCycle, type: .info)
         super.viewDidAppear(animated)
-        // Need to set this here, after view draw, or Mac malpositions cursor at start of app.
-        // Also need to set this before zooming image from userActivity saved userInfo.
-        imageScrollView.contentInset = UIEdgeInsets(top: 0, left: leftMargin, bottom: 0, right: 0)
 
+        // FIXME: leftMargin must adjust to zoom.
+        // Need to set this here, after view draw, or Mac malpositions cursor at start of app.
+        imageScrollView.contentInset = UIEdgeInsets(top: 0, left: leftMargin, bottom: 0, right: 0)
 
         self.userActivity = self.view.window?.windowScene?.userActivity
         // See https://github.com/mattneub/Programming-iOS-Book-Examples/blob/master/bk2ch06p357StateSaveAndRestoreWithNSUserActivity/ch19p626pageController/SceneDelegate.swift
@@ -180,8 +180,10 @@ final class DiagramViewController: UIViewController {
             imageScrollView.zoomScale = zoomScale as? CGFloat ?? 1
         }
         var restorationContentOffset = CGPoint()
+        // FIXME: Do we have to correct content offset Y too?
         if let contentOffsetX = restorationInfo?[DiagramViewController.restorationContentOffsetXKey] {
-            restorationContentOffset.x = contentOffsetX as? CGFloat ?? 0
+            restorationContentOffset.x = (contentOffsetX as? CGFloat ?? 0) * imageScrollView.zoomScale
+            print("*********restorationContentOffset.x = \(restorationContentOffset.x)")
         }
         if let contentOffsetY = restorationInfo?[DiagramViewController.restorationContentOffsetYKey] {
             restorationContentOffset.y = contentOffsetY as? CGFloat ?? 0
@@ -197,9 +199,7 @@ final class DiagramViewController: UIViewController {
         }
 
         self.restorationInfo = nil
-
         assertDelegatesNonNil()
-
         showMainMenu()
         setupNotifications()
         updateUndoRedoButtons()
@@ -231,7 +231,8 @@ final class DiagramViewController: UIViewController {
         print(currentDocumentURL)
         super.updateUserActivityState(activity)
         let info: [AnyHashable: Any] = [
-            DiagramViewController.restorationContentOffsetXKey: imageScrollView.contentOffset.x,
+            // FIXME: We are correcting just x for zoom scale.  Test if correcting is needed too.
+            DiagramViewController.restorationContentOffsetXKey: imageScrollView.contentOffset.x / imageScrollView.zoomScale,
             DiagramViewController.restorationContentOffsetYKey: imageScrollView.contentOffset.y,
             DiagramViewController.restorationZoomKey: imageScrollView.zoomScale,
             DiagramViewController.restorationIsCalibratedKey: cursorView.isCalibrated(),

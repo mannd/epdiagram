@@ -14,6 +14,18 @@ class DocumentBrowserDelegate: NSObject, UIDocumentBrowserViewControllerDelegate
     func documentBrowser(_ controller: UIDocumentBrowserViewController, didRequestDocumentCreationWithHandler importHandler: @escaping (URL?, UIDocumentBrowserViewController.ImportMode) -> Void) {
 
         print("create new doc")
+//        let alert = UIAlertController(title: "Name New Diagram", message: "Pick a name for this diagram", preferredStyle: .alert)
+//        alert.addAction(UIAlertAction(title: L("Cancel"), style: .cancel, handler: nil))
+//        alert.addTextField { textField in
+//            textField.placeholder = "Untitled"
+//        }
+//        alert.addAction(UIAlertAction(title: L("OK"), style: .default) { [self] action in
+//            if let newName = alert.textFields?.first?.text, !newName.isEmpty {
+//
+//                }
+//            }
+//
+//        }
 
         let cacheDocumentURL = createNewDocumentURL()
         let newDocument = DiagramDocument(fileURL: cacheDocumentURL)
@@ -67,11 +79,11 @@ extension DocumentBrowserDelegate {
         UserDefaults.standard.set(newDocNumber, forKey: DocumentBrowserDelegate.newDocumentNumberKey)
     }
 
-    func createNewDocumentURL() -> URL {
+    func createNewDocumentURL(name: String? = nil) -> URL {
         guard let cachePath = FileIO.getCacheURL() else {
             fatalError()
         }
-        let newName = getDocumentName()
+        let newName = name ?? getDocumentName()
         let tempURL = cachePath
             .appendingPathComponent(newName)
             .appendingPathExtension(DiagramDocument.extensionName)
