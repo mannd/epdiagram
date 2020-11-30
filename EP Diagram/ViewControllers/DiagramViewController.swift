@@ -756,6 +756,7 @@ extension DiagramViewController {
 
     }
 
+    // FIXME: this is being called multiple times.
     @objc func resolveFileConflicts() {
         os_log("resolveFileConflicts()", log: .action, type: .info)
         guard let currentDocument = currentDocument else { return }
