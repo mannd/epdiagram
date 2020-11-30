@@ -63,7 +63,7 @@ final class FileIO {
         case applicationSupport
     }
 
-    internal static func getURL(for directory: Directory) -> URL? {
+    private static func getURL(for directory: Directory) -> URL? {
         var searchDirectory : FileManager.SearchPathDirectory
         switch directory {
         case .documents:
@@ -73,11 +73,24 @@ final class FileIO {
         case .applicationSupport:
             searchDirectory = .applicationSupportDirectory
         }
-        return FileManager.default.urls(for: searchDirectory, in: .userDomainMask).first
+        let ubiqURL = (UIApplication.shared.delegate as? AppDelegate)?.ubiqURL
+        if let ubiqURL = ubiqURL, directory == .documents {
+            return ubiqURL
+        } else {
+            return FileManager.default.urls(for: searchDirectory, in: .userDomainMask).first
+        }
+    }
+
+    static func getDocumentsURL() -> URL? {
+        return getURL(for: .documents)
+    }
+
+    static func getCacheURL() -> URL? {
+        return getURL(for: .cache)
     }
 
     static func store<T: Encodable>(_ object: T, to directory: Directory, withFileName fileName: String, subDirectory: String? = nil) throws {
-        guard var url = getURL(for: directory) else {
+        guard var url = getDocumentsURL() else {
             os_log("Search directory not found", log: .default, type: .fault)
             throw FileIOError.searchDirectoryNotFound
         }
@@ -101,7 +114,7 @@ final class FileIO {
     }
 
     static func retrieve<T: Decodable>(_ fileName: String, from directory: Directory, subDirectory: String? = nil, as type: T.Type) -> T? {
-        guard var url = getURL(for: directory) else { return nil }
+        guard var url = getDocumentsURL() else { return nil }
         if let subDirectory = subDirectory {
             url = url.appendingPathComponent(subDirectory)
         }

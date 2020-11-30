@@ -34,7 +34,7 @@ class RootViewController: UIViewController {
         if let lastDocumentURLPath = restorationInfo?[DiagramViewController.restorationFileNameKey] as? String,
            !lastDocumentURLPath.isEmpty,
            restorationInfo?[DiagramViewController.restorationDoRestorationKey] as? Bool ?? false  {
-            if let docURL = FileIO.getURL(for: .documents) {
+            if let docURL = FileIO.getDocumentsURL() {
                 let fileURL = docURL.appendingPathComponent(lastDocumentURLPath)
                 if FileManager.default.fileExists(atPath: fileURL.path) {
                     openRemoteDocument(fileURL, importIfNeeded: true)

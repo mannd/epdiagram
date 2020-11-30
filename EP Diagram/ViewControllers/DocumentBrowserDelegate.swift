@@ -11,9 +11,9 @@ import UIKit
 class DocumentBrowserDelegate: NSObject, UIDocumentBrowserViewControllerDelegate {
     var presentationHandler: ((URL?, Error?) -> Void)?
 
-
-
     func documentBrowser(_ controller: UIDocumentBrowserViewController, didRequestDocumentCreationWithHandler importHandler: @escaping (URL?, UIDocumentBrowserViewController.ImportMode) -> Void) {
+
+        print("create new doc")
 
         let cacheDocumentURL = createNewDocumentURL()
         let newDocument = DiagramDocument(fileURL: cacheDocumentURL)
@@ -68,7 +68,7 @@ extension DocumentBrowserDelegate {
     }
 
     func createNewDocumentURL() -> URL {
-        guard let cachePath = FileIO.getURL(for: .cache) else {
+        guard let cachePath = FileIO.getCacheURL() else {
             fatalError()
         }
         let newName = getDocumentName()

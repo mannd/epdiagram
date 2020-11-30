@@ -11,6 +11,8 @@ import OSLog
 
 @UIApplicationMain
 class AppDelegate: UIResponder, UIApplicationDelegate {
+    var ubiqURL: URL?
+
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
         // Override point for customization after application launch.
         // TODO: Add further defaults here.
@@ -21,6 +23,15 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
             Preferences.defaultShowIntervalsKey: false,
             Preferences.defaultLastDiagramKey: ""
         ])
+        // Check for iCloud availability
+        DispatchQueue.global(qos: .background).async {
+            let fileManager = FileManager.default
+            let ubiqURL = fileManager.url(forUbiquityContainerIdentifier: nil)
+            DispatchQueue.main.async {
+                self.ubiqURL = ubiqURL
+                print("\(self.ubiqURL)")
+            }
+        }
         return true
     }
 

@@ -169,6 +169,11 @@ final class DiagramViewController: UIViewController {
     override func viewDidAppear(_ animated: Bool) {
         os_log("viewDidAppear() - ViewController", log: OSLog.viewCycle, type: .info)
         super.viewDidAppear(animated)
+        // Need to set this here, after view draw, or Mac malpositions cursor at start of app.
+        // Also need to set this before zooming image from userActivity saved userInfo.
+        imageScrollView.contentInset = UIEdgeInsets(top: 0, left: leftMargin, bottom: 0, right: 0)
+
+
         self.userActivity = self.view.window?.windowScene?.userActivity
         // See https://github.com/mattneub/Programming-iOS-Book-Examples/blob/master/bk2ch06p357StateSaveAndRestoreWithNSUserActivity/ch19p626pageController/SceneDelegate.swift
         if let zoomScale = restorationInfo?[DiagramViewController.restorationZoomKey] {
@@ -194,8 +199,7 @@ final class DiagramViewController: UIViewController {
         self.restorationInfo = nil
 
         assertDelegatesNonNil()
-        // Need to set this here, after view draw, or Mac malpositions cursor at start of app.
-        imageScrollView.contentInset = UIEdgeInsets(top: 0, left: leftMargin, bottom: 0, right: 0)
+
         showMainMenu()
         setupNotifications()
         updateUndoRedoButtons()
@@ -748,7 +752,10 @@ extension DiagramViewController {
 
     @objc func didEnterBackground() {
         os_log("didEnterBackground()", log: .action, type: .info)
-        currentDocument?.updateChangeCount(.done)
+        // FIXME: Is it necessary to force save here?  Or can I just use updateChangeCount and autosave?
+        saveDefaultDocument(diagram)
+        // or ??
+        //currentDocument?.updateChangeCount(.done)
     }
 
     @objc func didDisconnect() {
@@ -782,7 +789,7 @@ extension DiagramViewController {
     }
 
     var defaultDocumentURL: URL? {
-        guard let docURL = FileIO.getURL(for: .cache) else { return nil }
+        guard let docURL = FileIO.getCacheURL() else { return nil }
         // FIXME: must account for multiple scenes, can't have just one default file.
         let docPath = docURL.appendingPathComponent("\(restorationFilename).diagram")
         return docPath
@@ -798,6 +805,19 @@ extension DiagramViewController {
             } else { return nil }
         } catch {
             return nil
+        }
+    }
+
+    @discardableResult func saveDefaultDocument(_ content: Diagram) -> Bool {
+        guard let defaultDocumentURL = defaultDocumentURL else { return false }
+        do {
+            let encoder = JSONEncoder()
+            let documentData = try encoder.encode(content)
+            try documentData.write(to: defaultDocumentURL)
+            print("written to \(defaultDocumentURL)")
+            return true
+        } catch {
+            return false
         }
     }
 
