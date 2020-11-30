@@ -42,8 +42,6 @@ final class LadderView: ScaledView {
     private let lowerLimitMarkHeight: CGFloat = 0.1
     private let lowerLimitMarkWidth: CGFloat = 20
 
-    private var deletedMarks = [Mark]()
-
     // TODO: lineWidth vs markLineWidth??????
     // variables that need to eventually be preferences
     var markLineWidth: CGFloat = 2
@@ -660,15 +658,14 @@ final class LadderView: ScaledView {
     private func deleteMark(mark: Mark, region: Region?) {
         os_log("deleteMark(mark:region:) - LadderView", log: OSLog.debugging, type: .debug)
         mark.attached = false
-        deletedMarks.append(mark)
-        ladder.deleteMark(mark, inRegion: region)
+	        ladder.deleteMark(mark, inRegion: region)
         cursorViewDelegate.cursorIsVisible = false
         cursorViewDelegate.refresh()
     }
 
     private func undeleteMark(mark: Mark, region: Region?) {
         os_log("undeleteMark(mark:region:) - LadderView", log: OSLog.debugging, type: .debug)
-        if let region = region, let mark = deletedMarks.popLast() {
+        if let region = region {
             region.appendMark(mark)
             mark.attached = false
             mark.highlight = .none
