@@ -290,13 +290,15 @@ extension DiagramViewController: HamburgerTableDelegate, UIImagePickerController
     private func resetLadder() {
         // FIXME: this makes ladder default ladder and it shouldn't.
         ladderView.resetLadder()
-        undoManager?.removeAllActions()
+        // FIXME: decide whether to reset undo here
+//        undoManager?.removeAllActions()
         updateUndoRedoButtons()
         setViewsNeedDisplay()
     }
 
     @objc func setDiagramImage(_ image: UIImage?) {
-        undoManager?.removeAllActions()
+        // FIXME: decide whether to reset undo here
+//        undoManager?.removeAllActions()
         currentDocument?.undoManager.registerUndo(withTarget: self, selector: #selector(setDiagramImage), object: imageView.image)
         updateUndoRedoButtons()
         diagram.ladder.clear()

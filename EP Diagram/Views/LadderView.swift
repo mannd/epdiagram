@@ -132,6 +132,7 @@ final class LadderView: ScaledView {
     private var regionUnitHeight: CGFloat = 0
 
     weak var cursorViewDelegate: CursorViewDelegate! // Note IUO.
+    var currentDocument: DiagramDocument?
 
     override var canBecomeFirstResponder: Bool { return true }
 
@@ -631,7 +632,7 @@ final class LadderView: ScaledView {
     // See https://stackoverflow.com/questions/36491789/using-nsundomanager-how-to-register-undos-using-swift-closures/36492619#36492619
     private func undoablyDeleteMark(mark: Mark, region: Region?) {
         os_log("undoablyDeleteMark(mark:region:) - LadderView", log: OSLog.debugging, type: .debug)
-        self.undoManager?.registerUndo(withTarget: self, handler: { target in
+        currentDocument?.undoManager?.registerUndo(withTarget: self, handler: { target in
             target.redoablyUndeleteMark(mark: mark, region: region)
         })
         NotificationCenter.default.post(name: .didUndoableAction, object: nil)
@@ -640,7 +641,7 @@ final class LadderView: ScaledView {
 
     private func redoablyUndeleteMark(mark: Mark, region: Region?) {
         os_log("redoablyUndeleteMark(mark:region:) - LadderView", log: OSLog.debugging, type: .debug)
-        self.undoManager?.registerUndo(withTarget: self, handler: { target in
+        currentDocument?.undoManager?.registerUndo(withTarget: self, handler: { target in
             target.undoablyDeleteMark(mark: mark, region: region)
         })
         NotificationCenter.default.post(name: .didUndoableAction, object: nil)
@@ -649,7 +650,7 @@ final class LadderView: ScaledView {
 
     private func undoablyAddMark(mark: Mark, region: Region?) {
         os_log("undoablyAddMark(mark:region:) - LadderView", log: OSLog.debugging, type: .debug)
-        self.undoManager?.registerUndo(withTarget: self, handler: { target in
+        currentDocument?.undoManager?.registerUndo(withTarget: self, handler: { target in
             target.undoablyDeleteMark(mark: mark, region: region)
         })
         NotificationCenter.default.post(name: .didUndoableAction, object: nil)
@@ -692,7 +693,7 @@ final class LadderView: ScaledView {
         let state = pan.state
         let locationInLadder = getLocationInLadder(position: position)
         if state == .began {
-            self.undoManager?.beginUndoGrouping()
+            currentDocument?.undoManager?.beginUndoGrouping()
             // Activate region and get regions proximal and distal.
             if let region = locationInLadder.region {
                 regionOfDragOrigin = region
@@ -761,7 +762,7 @@ final class LadderView: ScaledView {
             }
         }
         if state == .ended {
-            self.undoManager?.endUndoGrouping()
+            currentDocument?.undoManager?.endUndoGrouping()
             if let movingMark = movingMark {
                 swapEndsIfNeeded(mark: movingMark)
                 groupNearbyMarks(mark: movingMark)
@@ -915,7 +916,7 @@ final class LadderView: ScaledView {
     }
 
     private func undoablyMoveMark(movement: Movement, mark: Mark, regionPosition: CGPoint) {
-        self.undoManager?.registerUndo(withTarget: self, handler: {target in
+        currentDocument?.undoManager?.registerUndo(withTarget: self, handler: {target in
             target.undoablyMoveMark(movement: movement, mark: mark, regionPosition: regionPosition)
         })
         NotificationCenter.default.post(name: .didUndoableAction, object: nil)

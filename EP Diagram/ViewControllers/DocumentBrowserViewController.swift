@@ -7,7 +7,7 @@
 //
 
 import UIKit
-import OSLog
+import os.log
 
 class DocumentBrowserViewController: UIViewController {
 

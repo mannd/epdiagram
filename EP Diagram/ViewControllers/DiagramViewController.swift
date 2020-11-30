@@ -96,6 +96,8 @@ final class DiagramViewController: UIViewController {
         // These 2 views are guaranteed to exist, so the delegates are IUOs.
         cursorView.ladderViewDelegate = ladderView
         ladderView.cursorViewDelegate = cursorView
+        cursorView.currentDocument = currentDocument
+        ladderView.currentDocument = currentDocument
         imageScrollView.delegate = self
         // These two views hold a common reference to calibration.
         cursorView.calibration = calibration
@@ -431,7 +433,7 @@ final class DiagramViewController: UIViewController {
         os_log("undo action", log: OSLog.action, type: .info)
         if self.currentDocument?.undoManager?.canUndo ?? false {
             self.currentDocument?.undoManager?.undo()
- //           ladderView.setNeedsDisplay()
+            ladderView.setNeedsDisplay()
         }
     }
 
@@ -439,7 +441,7 @@ final class DiagramViewController: UIViewController {
         os_log("redo action", log: OSLog.action, type: .info)
         if self.currentDocument?.undoManager?.canRedo ?? false {
             self.currentDocument?.undoManager?.redo()
- //           ladderView.setNeedsDisplay()
+            ladderView.setNeedsDisplay()
         }
     }
 
@@ -754,9 +756,9 @@ extension DiagramViewController {
     @objc func didEnterBackground() {
         os_log("didEnterBackground()", log: .action, type: .info)
         // FIXME: Is it necessary to force save here?  Or can I just use updateChangeCount and autosave?
-        saveDefaultDocument(diagram)
+//        saveDefaultDocument(diagram)
         // or ??
-        //currentDocument?.updateChangeCount(.done)
+        currentDocument?.updateChangeCount(.done)
     }
 
     @objc func didDisconnect() {
