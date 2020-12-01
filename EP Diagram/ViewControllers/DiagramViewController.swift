@@ -154,7 +154,7 @@ final class DiagramViewController: UIViewController {
     }
 
     func getTitle() -> String {
-        guard let name = diagram.name else { return L("New Diagram", comment: "app name") }
+        guard let name = currentDocument?.name() else { return L("New Diagram", comment: "app name") }
 
         return name
     }
@@ -844,6 +844,7 @@ extension DiagramViewController {
     }
 
     func renameDocument(oldURL: URL, newURL: URL) {
+        os_log("renameDocument", log: .action, type: .info)
         guard oldURL != newURL else { return }
         DispatchQueue.global(qos: .background).async {
             var error: NSError? = nil

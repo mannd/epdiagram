@@ -114,7 +114,7 @@ extension DiagramViewController: HamburgerTableDelegate, UIImagePickerController
     func renameDiagram() {
           os_log("renameDiagram()", log: .action, type: .info)
           // Just fail gracefully if name is nil, renameDiagram should not be available if name is nil.
-        guard let diagramName = diagram.name, !diagramName.isBlank else { return }
+        guard let diagramName = currentDocument?.name(), !diagramName.isBlank else { return }
         let alert = UIAlertController(title: L("Rename Diagram"), message: L("Enter a new name for diagram \(diagramName)"), preferredStyle: .alert)
         alert.addAction(UIAlertAction(title: L("Cancel"), style: .cancel, handler: nil))
         alert.addTextField { textField in
@@ -127,8 +127,10 @@ extension DiagramViewController: HamburgerTableDelegate, UIImagePickerController
                         .appendingPathComponent(newName)
                         .appendingPathExtension(DiagramDocument.extensionName)
                     renameDocument(oldURL: currentFileURL, newURL: newFileURL)
+                    // FIXME: currentDocument.fileURL not changing to newURL.
                     diagram.name = newName
                     currentDocument?.updateChangeCount(.done)
+
                     delegate?.diagramEditorDidUpdateContent(self, diagram: diagram)
                     setTitle()
                 }

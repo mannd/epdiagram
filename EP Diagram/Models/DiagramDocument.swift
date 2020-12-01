@@ -35,6 +35,10 @@ class DiagramDocument: UIDocument {
         }
     }
 
+    func name() -> String {
+        return fileURL.deletingPathExtension().lastPathComponent
+    }
+
     override func contents(forType typeName: String) throws -> Any {
         let data: Data
         do {

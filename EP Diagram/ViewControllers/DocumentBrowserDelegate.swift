@@ -13,37 +13,39 @@ class DocumentBrowserDelegate: NSObject, UIDocumentBrowserViewControllerDelegate
 
     func documentBrowser(_ controller: UIDocumentBrowserViewController, didRequestDocumentCreationWithHandler importHandler: @escaping (URL?, UIDocumentBrowserViewController.ImportMode) -> Void) {
 
-        print("create new doc")
-//        let alert = UIAlertController(title: "Name New Diagram", message: "Pick a name for this diagram", preferredStyle: .alert)
-//        alert.addAction(UIAlertAction(title: L("Cancel"), style: .cancel, handler: nil))
-//        alert.addTextField { textField in
-//            textField.placeholder = "Untitled"
-//        }
-//        alert.addAction(UIAlertAction(title: L("OK"), style: .default) { [self] action in
-//            if let newName = alert.textFields?.first?.text, !newName.isEmpty {
-//
-//                }
-//            }
-//
-//        }
-
-        let cacheDocumentURL = createNewDocumentURL()
-        let newDocument = DiagramDocument(fileURL: cacheDocumentURL)
-        newDocument.save(to: cacheDocumentURL, for: .forCreating) { saveSuccess in
-            guard saveSuccess else {
-                importHandler(nil, .none)
-                return
+        var documentName: String = ""
+        let alert = UIAlertController(title: "Name New Diagram", message: "Pick a name for this diagram", preferredStyle: .alert)
+        alert.addTextField { textField in
+            documentName = self.getDocumentName()
+            textField.placeholder = L("Document name")
+            textField.text = documentName
+        }
+        alert.addAction(UIAlertAction(title: L("Cancel"), style: .cancel) {_ in
+            importHandler(nil, .none)
+            return
+        })
+        alert.addAction(UIAlertAction(title: L("OK"), style: .default) {_ in
+            if let name = alert.textFields?.first?.text {
+                documentName = name
             }
-            newDocument.close { closeSuccess in
-                guard closeSuccess else {
+            let cacheDocumentURL = self.createNewDocumentURL(name: documentName)
+            let newDocument = DiagramDocument(fileURL: cacheDocumentURL)
+            newDocument.save(to: cacheDocumentURL, for: .forCreating) { saveSuccess in
+                guard saveSuccess else {
                     importHandler(nil, .none)
                     return
                 }
-
-                importHandler(cacheDocumentURL, .move)
+                newDocument.close { closeSuccess in
+                    guard closeSuccess else {
+                        importHandler(nil, .none)
+                        return
+                    }
+                    importHandler(cacheDocumentURL, .move)
+                }
             }
+        })
 
-        }
+        controller.present(alert, animated: true)
   }
 
   func documentBrowser(_ controller: UIDocumentBrowserViewController, didPickDocumentURLs documentURLs: [URL]) {

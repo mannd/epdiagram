@@ -27,9 +27,11 @@ class DocumentBrowserViewController: UIViewController {
 
     override func viewDidLoad() {
         super.viewDidLoad()
-        installDocumentBrowser()
+    }
 
-        // Do any additional setup after loading the view.
+    override func viewDidAppear(_ animated: Bool) {
+        super.viewDidAppear(animated)
+        installDocumentBrowser()
     }
 
     func installDocumentBrowser() {
