@@ -690,6 +690,7 @@ final class LadderView: ScaledView {
         let state = pan.state
         let locationInLadder = getLocationInLadder(position: position)
         if state == .began {
+            // FIXME: need to make mark linking undoable.  Right now undoing move keeps marks linked.
             currentDocument?.undoManager?.beginUndoGrouping()
             // Activate region and get regions proximal and distal.
             if let region = locationInLadder.region {
@@ -990,10 +991,8 @@ final class LadderView: ScaledView {
 
     func moveMark(mark: Mark, scaledViewPosition: CGPoint) {
         guard let activeRegion = activeRegion else { return }
+//        let originalSegment = mark.segment
         let regionPosition = translateToRegionPosition(scaledViewPosition: scaledViewPosition, region: activeRegion)
-//        if cursorViewDelegate.cursorDirection().movement() == .omnidirectional {
-//            ungroupMarks(mark: mark)
-//        }
         if cursorViewDelegate.cursorIsVisible {
             undoablyMoveMark(movement: cursorViewDelegate.cursorMovement(), mark: mark, regionPosition: regionPosition)
         }

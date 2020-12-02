@@ -45,7 +45,6 @@ class DiagramDocument: UIDocument {
             let encoder = JSONEncoder()
             data = try encoder.encode(diagram)
         } catch {
-            print("throw archivingFailure********")
             throw DocumentError.archivingFailure
         }
         guard !data.isEmpty else {
@@ -61,7 +60,6 @@ class DiagramDocument: UIDocument {
         do {
             diagram = try decoder.decode(Diagram.self, from: data)
         } catch {
-            print("thrown+++++++++++++")
             throw DocumentError.corruptDocument
         }
     }
