@@ -11,7 +11,7 @@ import os.log
 
 class DiagramIO {
     static func getEPDiagramsDirURL() throws -> URL {
-        guard let documentDirURL = FileIO.getURL(for: .documents) else {
+        guard let documentDirURL = FileIO.getDocumentsURL() else {
             throw FileIOError.documentDirectoryNotFound
         }
         P("documentDirURL = \(documentDirURL)")
@@ -70,7 +70,7 @@ class DiagramIO {
     }
 
     static func deleteCacheFiles() {
-        if let url = FileIO.getURL(for: .cache) {
+        if let url = FileIO.getCacheURL() {
             let paths = FileIO.enumerateDirectory(url)
             for path in paths {
                 FileIO.remove(path, from: .cache)
@@ -80,7 +80,7 @@ class DiagramIO {
 
     static func deleteLadderTemplates() {
         do {
-            if let url = FileIO.getURL(for: .documents) {
+            if let url = FileIO.getDocumentsURL() {
                 let templateFileURL = url.appendingPathComponent(FileIO.userTemplateFile)
                 try FileManager.default.removeItem(at: templateFileURL)
             }
@@ -91,7 +91,7 @@ class DiagramIO {
 
     static let restorationDir = ""
     static func getRestorationURL() -> URL? {
-        guard let cacheURL = FileIO.getURL(for: .cache) else { return nil }
+        guard let cacheURL = FileIO.getCacheURL() else { return nil }
         let restorationURL =  cacheURL.appendingPathComponent(restorationDir)
         return restorationURL
     }

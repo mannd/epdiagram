@@ -1,5 +1,5 @@
 //
-//  ViewController+ViewControllerDelegate.swift
+//  DiagramViewController+DiagramViewControllerDelegate.swift
 //  EP Diagram
 //
 //  Created by David Mann on 5/31/20.
@@ -9,18 +9,16 @@
 import UIKit
 import os.log
 
-protocol ViewControllerDelegate: class {
+protocol DiagramViewControllerDelegate: class {
     func selectLadderTemplate(ladderTemplate: LadderTemplate?)
     func selectDiagram(named name: String?)
     func deleteDiagram(named name: String)
-//    func savePreferences(_ preferences: Preferences)
     func saveTemplates(_ templates: [LadderTemplate])
     func selectSampleDiagram(_ diagram: Diagram?)
     func setViewsNeedDisplay()
-    func updatePreferences()
 }
 
-extension ViewController: ViewControllerDelegate {
+extension DiagramViewController: DiagramViewControllerDelegate {
     func selectLadderTemplate(ladderTemplate: LadderTemplate?) {
         os_log("selecteLadderTemplate - ViewController", log: OSLog.action, type: .info)
         P("ladder is dirty = \(ladderView.ladderIsDirty)")
@@ -38,17 +36,17 @@ extension ViewController: ViewControllerDelegate {
     func selectDiagram(named name: String?) {
         guard let diagramName = name else { return }
         P("diagram name = \(diagramName)")
-        do {
-            diagram = try Diagram.retrieve(fileName: diagramName)
-            setImageViewImage(with: diagram.image)
-            self.ladderView.ladder = diagram.ladder
-            self.setTitle()
-//            DiagramIO.saveLastDiagram(name: diagram.name)
-            self.setViewsNeedDisplay()
-        } catch {
-            os_log("Error: %s", log: .errors, type: .error, error.localizedDescription)
-            Common.showFileError(viewController: self, error: error)
-        }
+//        do {
+//            diagram = try Diagram.retrieve(fileName: diagramName)
+//            setImageViewImage(with: diagram.image)
+//            self.ladderView.ladder = diagram.ladder
+//            self.setTitle()
+////            DiagramIO.saveLastDiagram(name: diagram.name)
+//            self.setViewsNeedDisplay()
+//        } catch {
+//            os_log("Error: %s", log: .errors, type: .error, error.localizedDescription)
+//            Common.showFileError(viewController: self, error: error)
+//        }
     }
 
     func deleteDiagram(named name: String) {
@@ -68,16 +66,7 @@ extension ViewController: ViewControllerDelegate {
         }
     }
 
-    @objc
-    func updatePreferences() {
-        os_log("updatePreferences()", log: .action, type: .info)
-        ladderView.lineWidth = CGFloat(UserDefaults.standard.double(forKey: Preferences.defaultLineWidthKey))
-        ladderView.showBlock = UserDefaults.standard.bool(forKey: Preferences.defaultShowBlockKey)
-        ladderView.showImpulseOrigin = UserDefaults.standard.bool(forKey: Preferences.defaultShowImpulseOriginKey)
-        ladderView.showIntervals = UserDefaults.standard.bool(forKey: Preferences.defaultShowIntervalsKey)
-        setViewsNeedDisplay()
-    }
-
+ 
     func saveTemplates(_ templates: [LadderTemplate]) {
         os_log("saveTemplates()", log: .action, type: .info)
         do {
@@ -102,5 +91,6 @@ extension ViewController: ViewControllerDelegate {
         cursorView.setNeedsDisplay()
         ladderView.setNeedsDisplay()
     }
+    
 
 }

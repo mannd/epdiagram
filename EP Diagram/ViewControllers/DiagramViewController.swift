@@ -1,5 +1,5 @@
 //
-//  ViewController.swift
+//  DiagramViewController.swift
 //  EP Diagram
 //
 //  Created by David Mann on 4/29/19.
@@ -10,8 +10,7 @@ import UIKit
 import SwiftUI
 import os.log
 
-final class ViewController: UIViewController {
-
+final class DiagramViewController: UIViewController {
     // View, outlets, constraints
     @IBOutlet var _constraintHamburgerWidth: NSLayoutConstraint!
     @IBOutlet var _constraintHamburgerLeft: NSLayoutConstraint!
@@ -20,12 +19,13 @@ final class ViewController: UIViewController {
     @IBOutlet var ladderView: LadderView!
     @IBOutlet var cursorView: CursorView!
     @IBOutlet var blackView: BlackView!
+
     var hamburgerTableViewController: HamburgerTableViewController? // We get this view via its embed segue!
     var separatorView: SeparatorView?
 
     // This margin is passed to other views.
     // TODO: Possibly change this to property of ladder, since it might depend on label width (# of chars)?
-    private let leftMargin: CGFloat = 30
+    private let leftMargin: CGFloat = 40
 
     // Buttons, menus
     private let spacer = UIBarButtonItem(barButtonSystemItem: .flexibleSpace, target: nil, action: nil)
@@ -36,6 +36,9 @@ final class ViewController: UIViewController {
     private var selectMenuButtons: [UIBarButtonItem]?
     private var linkMenuButtons: [UIBarButtonItem]?
     private var calibrateMenuButtons: [UIBarButtonItem]?
+
+    var delegate: DiagramEditorDelegate?
+    var currentDocument: DiagramDocument?
 
     // PDF and launch from URL stuff
     var pdfRef: CGPDFDocument?
@@ -50,7 +53,11 @@ final class ViewController: UIViewController {
     let _maxBlackAlpha: CGFloat = 0.4
 
     var diagramFilenames: [String] = []
-    var diagram: Diagram = Diagram.defaultDiagram()
+    var diagram: Diagram = Diagram.blankDiagram() {
+        didSet {
+            delegate?.diagramEditorDidUpdateContent(self, diagram: diagram)
+        }
+    }
     var calibration = Calibration() // reference to calibration is passed to ladderand cursor views
     var preferences: Preferences = Preferences()
 
@@ -60,10 +67,14 @@ final class ViewController: UIViewController {
     static let restorationZoomKey = "restorationZoomKey"
     static let restorationIsCalibratedKey = "restorationIsCalibrated"
     static let restorationCalFactorKey = "restorationCalFactorKey"
+    static let restorationFileNameKey = "restorationFileNameKey"
+    static let restorationNeededKey = "restorationNeededKey"
+    static let restorationDoRestorationKey = "restorationDoRestorationKey"
     // Set by screen delegate
     var restorationInfo: [AnyHashable: Any]?
     var persistentID = ""
-    var restorationFileName = ""
+    var restorationFilename = ""
+    var viewClosed = false
 
     // Speed up appearance of image picker by initializing it here.
     let imagePicker: UIImagePickerController = UIImagePickerController()
@@ -71,20 +82,9 @@ final class ViewController: UIViewController {
     override func viewDidLoad() {
         os_log("viewDidLoad() - ViewController", log: OSLog.viewCycle, type: .info)
         super.viewDidLoad()
+        viewClosed = false
 
-        // For debugging
-        // if let restorationURL = DiagramIO.getRestorationURL() {
-        //     os_log("restorationURL path = %s", log: .debugging, type: .debug, restorationURL.path)
-        //     let paths = FileIO.enumerateDirectory(restorationURL)
-        //     for path in paths {
-        //         os_log("    %s", log: .debugging, type: .debug, path)
-        //     }
-        // }
-
-        restorationFileName = persistentID // each screen has unique id
-        if let diagram = restoreDiagramFromCache(fileName: restorationFileName) {
-            self.diagram = diagram
-        }
+        //showRestorationInfo() // for debugging
 
         // TODO: Lots of other customization for Mac version.
         if Common.isRunningOnMac() {
@@ -96,6 +96,8 @@ final class ViewController: UIViewController {
         // These 2 views are guaranteed to exist, so the delegates are IUOs.
         cursorView.ladderViewDelegate = ladderView
         ladderView.cursorViewDelegate = cursorView
+        cursorView.currentDocument = currentDocument
+        ladderView.currentDocument = currentDocument
         imageScrollView.delegate = self
         // These two views hold a common reference to calibration.
         cursorView.calibration = calibration
@@ -128,6 +130,8 @@ final class ViewController: UIViewController {
             navigationItem.setLeftBarButton(UIBarButtonItem(image: UIImage(named: "hamburger"), style: .plain, target: self, action: #selector(toggleHamburgerMenu)), animated: true)
         }
 
+        navigationItem.setRightBarButton(UIBarButtonItem(image: UIImage(systemName: "xmark"), style: .plain, target: self, action: #selector(closeAction)), animated: true)
+       
         // Set up touches.
         let singleTapRecognizer = UITapGestureRecognizer(target: self, action: #selector(self.singleTap))
         singleTapRecognizer.numberOfTapsRequired = 1
@@ -138,8 +142,19 @@ final class ViewController: UIViewController {
         ladderView.addInteraction(interaction)
     }
 
+    private func showRestorationInfo() {
+        // For debugging
+        if let restorationURL = DiagramIO.getRestorationURL() {
+            os_log("restorationURL path = %s", log: .debugging, type: .debug, restorationURL.path)
+            let paths = FileIO.enumerateDirectory(restorationURL)
+            for path in paths {
+                os_log("    %s", log: .debugging, type: .debug, path)
+            }
+        }
+    }
+
     func getTitle() -> String {
-        guard let name = diagram.name else { return L("New Diagram", comment: "app name") }
+        guard let name = currentDocument?.name() else { return L("New Diagram", comment: "app name") }
 
         return name
     }
@@ -153,55 +168,47 @@ final class ViewController: UIViewController {
         ladderView.mode = mode
     }
 
-    @objc func onDidUndoableAction(_ notification: Notification) {
-        if notification.name == .didUndoableAction {
-            updateUndoRedoButtons()
-        }
-    }
-
-    override func viewWillAppear(_ animated: Bool) {
-        os_log("viewWillAppear() - ViewController", log: .viewCycle, type: .info)
-        super.viewWillAppear(animated)
-
-    }
-
     override func viewDidAppear(_ animated: Bool) {
         os_log("viewDidAppear() - ViewController", log: OSLog.viewCycle, type: .info)
         super.viewDidAppear(animated)
+
+        // FIXME: leftMargin must adjust to zoom.
+        // Need to set this here, after view draw, or Mac malpositions cursor at start of app.
+        imageScrollView.contentInset = UIEdgeInsets(top: 0, left: leftMargin, bottom: 0, right: 0)
+
         self.userActivity = self.view.window?.windowScene?.userActivity
         // See https://github.com/mattneub/Programming-iOS-Book-Examples/blob/master/bk2ch06p357StateSaveAndRestoreWithNSUserActivity/ch19p626pageController/SceneDelegate.swift
-        var restorationContentOffset = CGPoint()
-        if let contentOffsetX = restorationInfo?[ViewController.restorationContentOffsetXKey] {
-            restorationContentOffset.x = contentOffsetX as? CGFloat ?? 0
+        if let zoomScale = restorationInfo?[DiagramViewController.restorationZoomKey] {
+            imageScrollView.zoomScale = zoomScale as? CGFloat ?? 1
         }
-        if let contentOffsetY = restorationInfo?[ViewController.restorationContentOffsetYKey] {
+        var restorationContentOffset = CGPoint()
+        // FIXME: Do we have to correct content offset Y too?
+        if let contentOffsetX = restorationInfo?[DiagramViewController.restorationContentOffsetXKey] {
+            restorationContentOffset.x = (contentOffsetX as? CGFloat ?? 0) * imageScrollView.zoomScale
+            print("*********restorationContentOffset.x = \(restorationContentOffset.x)")
+        }
+        if let contentOffsetY = restorationInfo?[DiagramViewController.restorationContentOffsetYKey] {
             restorationContentOffset.y = contentOffsetY as? CGFloat ?? 0
         }
         print("restorationContentOffset = \(restorationContentOffset)")
         imageScrollView.setContentOffset(restorationContentOffset, animated: true)
-        if let zoomScale = restorationInfo?[ViewController.restorationZoomKey] {
-            imageScrollView.zoomScale = zoomScale as? CGFloat ?? 1
-        }
-        if let isCalibrated = restorationInfo?[ViewController.restorationIsCalibratedKey] {
+
+        if let isCalibrated = restorationInfo?[DiagramViewController.restorationIsCalibratedKey] {
             cursorView.setIsCalibrated(isCalibrated as? Bool ?? false)
         }
-        if let calFactor = restorationInfo?[ViewController.restorationCalFactorKey] {
+        if let calFactor = restorationInfo?[DiagramViewController.restorationCalFactorKey] {
             cursorView.calFactor = calFactor as? CGFloat ?? 1.0
         }
 
         self.restorationInfo = nil
-
         assertDelegatesNonNil()
-        // Need to set this here, after view draw, or Mac malpositions cursor at start of app.
-        imageScrollView.contentInset = UIEdgeInsets(top: 0, left: leftMargin, bottom: 0, right: 0)
         showMainMenu()
-        NotificationCenter.default.addObserver(self, selector: #selector(onDidUndoableAction(_:)), name: .didUndoableAction, object: nil)
-        NotificationCenter.default.addObserver(self, selector: #selector(updatePreferences), name: .preferencesChanged, object: nil)
-        NotificationCenter.default.addObserver(self, selector: #selector(didEnterBackground), name: UIScene.didEnterBackgroundNotification, object: nil)
-        NotificationCenter.default.addObserver(self, selector: #selector(didDisconnect), name: UIScene.didDisconnectNotification, object: nil)
+        setupNotifications()
         updateUndoRedoButtons()
         resetViews()
     }
+
+
 
     // We only want to use the restorationInfo once when view controller first appears.
     var didFirstLayout = false
@@ -217,95 +224,26 @@ final class ViewController: UIViewController {
 
     override func viewWillDisappear(_ animated: Bool) {
         super.viewWillDisappear(animated)
-        NotificationCenter.default.removeObserver(self, name: .didUndoableAction, object: nil)
-        NotificationCenter.default.removeObserver(self, name: .preferencesChanged, object: nil)
-        NotificationCenter.default.removeObserver(self, name: UIScene.didEnterBackgroundNotification, object: nil)
-        NotificationCenter.default.removeObserver(self, name: UIScene.didDisconnectNotification, object: nil)
+        removeNotifications()
     }
 
     override func updateUserActivityState(_ activity: NSUserActivity) {
         os_log("updateUserActivityState called")
+        let currentDocumentURL: String = currentDocument?.fileURL.lastPathComponent ?? ""
+        print(currentDocumentURL)
         super.updateUserActivityState(activity)
-
         let info: [AnyHashable: Any] = [
-            ViewController.restorationContentOffsetXKey: imageScrollView.contentOffset.x,
-            ViewController.restorationContentOffsetYKey: imageScrollView.contentOffset.y,
-            ViewController.restorationZoomKey: imageScrollView.zoomScale,
-            ViewController.restorationIsCalibratedKey: cursorView.isCalibrated(),
-            ViewController.restorationCalFactorKey: cursorView.calFactor
+            // FIXME: We are correcting just x for zoom scale.  Test if correcting is needed too.
+            DiagramViewController.restorationContentOffsetXKey: imageScrollView.contentOffset.x / imageScrollView.zoomScale,
+            DiagramViewController.restorationContentOffsetYKey: imageScrollView.contentOffset.y,
+            DiagramViewController.restorationZoomKey: imageScrollView.zoomScale,
+            DiagramViewController.restorationIsCalibratedKey: cursorView.isCalibrated(),
+            DiagramViewController.restorationCalFactorKey: cursorView.calFactor,
+            DiagramViewController.restorationFileNameKey: currentDocumentURL,
+            DiagramViewController.restorationDoRestorationKey: !viewClosed
         ]
         activity.addUserInfoEntries(from: info)
         print(activity.userInfo as Any)
-    }
-
-    @objc func didEnterBackground() {
-        os_log("didEnterBackground()", log: .action, type: .info)
-        saveDiagramToCache(fileName: restorationFileName)
-    }
-
-    @objc func didDisconnect() {
-        os_log("didDisconnect()", log: .action, type: .info)
-    }
-
-    func deleteCacheFile(fileName name: String) {
-        os_log("deleteCacheFile(fileName: %s)", log: .debugging, type: .debug, name)
-        guard let restorationURL = DiagramIO.getRestorationURL() else { return }
-        print("restorationURL = \(restorationURL.path)")
-        do {
-            let nameURL = restorationURL.appendingPathComponent(name)
-            if FileManager.default.fileExists(atPath: nameURL.path) {
-                try FileManager.default.removeItem(at: nameURL)
-            }
-        } catch {
-            os_log("deleteCacheFile(fileName:) error %s", log: .errors, type: .error, error.localizedDescription)
-        }
-    }
-
-    func saveDiagramToCache(fileName name: String) {
-        os_log("saveDiagramToCache(fileName:)", log: .debugging, type: .info)
-//        DispatchQueue.global().async { [self] in
-            guard let restorationURL = DiagramIO.getRestorationURL() else { return }
-            print(">>>> restorationURL = \(restorationURL)")
-            do {
-                let nameURL = restorationURL.appendingPathComponent(name)
-                if !FileManager.default.fileExists(atPath: nameURL.path) {
-                    try FileManager.default.createDirectory(at: nameURL,
-                                                            withIntermediateDirectories: true,
-                                                            attributes: nil)
-                }
-                print(">>>>>>>>>> \(nameURL.path)")
-                if let image = diagram.image {
-                    let imageData = image.pngData()
-                    let imageURL = nameURL.appendingPathComponent(FileIO.imageFilename, isDirectory: false)
-                    if FileManager.default.fileExists(atPath: imageURL.path) {
-                        try FileManager.default.removeItem(at: imageURL)
-                    }
-                    try imageData?.write(to: imageURL)
-                }
-                let encoder = JSONEncoder()
-                let diagramData = try encoder.encode(diagram.diagramData)
-                let ladderURL = nameURL.appendingPathComponent(FileIO.ladderFilename, isDirectory: false)
-                FileManager.default.createFile(atPath: ladderURL.path, contents: diagramData, attributes: nil)
-            } catch {
-                os_log("saveDiagramToCache(fileName:) error %s", log: .errors, type: .error, error.localizedDescription)
-            }
-//        }
-    }
-
-
-
-    func restoreDiagramFromCache(fileName name: String) -> Diagram? {
-        guard let restorationURL = DiagramIO.getRestorationURL() else { return nil }
-        do {
-            let nameURL = restorationURL.appendingPathComponent(name)
-            if !FileManager.default.fileExists(atPath: nameURL.path) {
-                return nil
-            }
-            return try Diagram.retrieve(fileName: name, url: nameURL)
-        } catch {
-            os_log("restoreDiagramToCache(fileName:) error %s", log: .errors, type: .error, error.localizedDescription)
-            return nil
-        }
     }
 
     // Crash program at compile time if IUO delegates are nil.
@@ -399,6 +337,13 @@ final class ViewController: UIViewController {
 
     // MARK: -  Buttons
 
+    @objc func closeAction() {
+        os_log("CLOSE ACTION")
+        viewClosed = true
+        view.endEditing(true)
+        delegate?.diagramEditorDidFinishEditing(self, diagram: diagram)
+    }
+
     @objc func calibrate() {
         os_log("calibrate()", log: OSLog.action, type: .info)
         showCalibrateMenu()
@@ -486,28 +431,21 @@ final class ViewController: UIViewController {
 
     @objc func undo() {
         os_log("undo action", log: OSLog.action, type: .info)
-        if self.undoManager?.canUndo ?? false {
-            self.undoManager?.undo()
+        if self.currentDocument?.undoManager?.canUndo ?? false {
+            self.currentDocument?.undoManager?.undo()
             ladderView.setNeedsDisplay()
         }
     }
 
     @objc func redo() {
         os_log("redo action", log: OSLog.action, type: .info)
-        if self.undoManager?.canRedo ?? false {
-            self.undoManager?.redo()
+        if self.currentDocument?.undoManager?.canRedo ?? false {
+            self.currentDocument?.undoManager?.redo()
             ladderView.setNeedsDisplay()
         }
     }
 
-    func updateUndoRedoButtons() {
-        // DispatchQueue here forces UI to finish up its tasks before performing below on the main thread.
-        // If not used, undoManager.canUndo/Redo is not updated before this is called.
-        DispatchQueue.main.async {
-            self.undoButton.isEnabled = self.undoManager?.canUndo ?? false
-            self.redoButton.isEnabled = self.undoManager?.canRedo ?? false
-        }
-    }
+
 
     // MARK: - Touches
 
@@ -534,17 +472,14 @@ final class ViewController: UIViewController {
     }
 
     // MARK: - Handle PDFs, URLs at app startup
-
-    // FIXME: cache image to unique location in background when loading new image and retain
-    // filename, while deleting old image cache.  Use this to restore diagram, since once image is
-    // loaded it does not change.
     func openURL(url: URL) {
         os_log("openURL action", log: OSLog.action, type: .info)
         // self.resetImage
         let ext = url.pathExtension.uppercased()
         if ext != "PDF" {
             // self.enablePageButtons = false
-            setImageViewImage(with: UIImage(contentsOfFile: url.path))
+            // FIXME: image upside down after being saved and reopened???
+            setDiagramImage(UIImage(contentsOfFile: url.path))
         }
         else {
             // self.numberOfPages = 0
@@ -560,11 +495,8 @@ final class ViewController: UIViewController {
             self.pageNumber = 1
             // enablePageButtons = (numberOfPages > 1)
             openPDFPage(pdfRef, atPage: pageNumber)
+
         }
-        //            [self.imageView setHidden:NO];
-        //            [self.scrollView setZoomScale:1.0f];
-        //            [self clearCalibration];
-        //            [self selectMainToolbar];
     }
 
     private func getPDFDocumentRef(_ fileName: UnsafePointer<Int8>?) -> CGPDFDocument? {
@@ -586,7 +518,8 @@ final class ViewController: UIViewController {
         let page: CGPDFPage? = getPDFPage(documentRef, pageNumber: pageNum)
         if let page = page {
             let sourceRect: CGRect = page.getBoxRect(.mediaBox)
-            let scaleFactor: CGFloat = 5.0
+            // FIXME: scale factor was originally 5, but everything too big on reopening image.
+            let scaleFactor: CGFloat = 1.0
             //                let sourceRectSize = CGSize(width: sourceRect.size.width, height: sourceRect.size.height)
             let sourceRectSize = sourceRect.size
             UIGraphicsBeginImageContextWithOptions(sourceRectSize, false, scaleFactor)
@@ -599,7 +532,7 @@ final class ViewController: UIViewController {
             currentContext?.drawPDFPage(page)
             let image: UIImage? = UIGraphicsGetImageFromCurrentImageContext()
             if image != nil {
-                setImageViewImage(with: image)
+                setDiagramImage(image)
             }
             UIGraphicsEndImageContext()
         }
@@ -692,14 +625,6 @@ final class ViewController: UIViewController {
     }
 
 
-    @IBSegueAction func showDiagramSelector(_ coder: NSCoder) -> UIViewController? {
-        os_log("showDiagramSelector() - ViewController", log: OSLog.action, type: .info)
-        let diagramSelector = DiagramSelector(names: diagramFilenames, delegate: self)
-        let hostingController = UIHostingController(coder: coder, rootView: diagramSelector)
-        return hostingController
-    }
-
-
     @IBSegueAction func showPreferences(_ coder: NSCoder) -> UIViewController? {
         preferences.retrieve()
         let preferencesView = PreferencesView()
@@ -709,12 +634,12 @@ final class ViewController: UIViewController {
 
     @IBSegueAction func showSampleSelector(_ coder: NSCoder) -> UIViewController? {
         let sampleDiagrams: [Diagram] = [
-            Diagram(name: L("Normal ECG"), image: UIImage(named: "SampleECG")!, description: L("Just a normal ECG")),
-            Diagram(name: L("AV Block"), image: UIImage(named: "AVBlock")!, description: L("High grade AV block")),
-            Diagram.blankDiagram(name: L("Blank Diagram")),
-            // Make this taller than height even with rotation.
-            Diagram(name: L("Scrollable Blank Diagram"), image: UIImage.emptyImage(size: CGSize(width: view.frame.size.width * 3, height: max(view.frame.size.height, view.frame.size.width)), color: UIColor.systemTeal), description: L("Wide scrollable blank image"))
-            // TODO: add others here.
+            Diagram(name: L("Normal ECG"), description: L("Just a normal ECG"), image: UIImage(named: "SampleECG")!, ladder: Ladder.defaultLadder()),
+        Diagram(name: L("AV Block"), description: L("High grade AV block"), image: UIImage(named: "AVBlock")!, ladder: Ladder.defaultLadder())
+//        Diagram.blankDiagram(name: L("Blank Diagram")),
+//        // Make this taller than height even with rotation.
+//        Diagram(name: L("Scrollable Blank Diagram"), image: UIImage.emptyImage(size: CGSize(width: view.frame.size.width * 3, height: max(view.frame.size.height, view.frame.size.width)), color: UIColor.systemTeal), description: L("Wide scrollable blank image"))
+        // TODO: add others here.
         ]
         let sampleSelector = SampleSelector(sampleDiagrams: sampleDiagrams, delegate: self)
         let hostingController = UIHostingController(coder: coder, rootView: sampleSelector)
@@ -723,8 +648,8 @@ final class ViewController: UIViewController {
 
     @IBSegueAction func performShowHelpSegueAction(_ coder: NSCoder) -> HelpViewController? {
         let helpViewController = HelpViewController(coder: coder)
+        currentDocument?.updateChangeCount(.done)
         helpViewController?.restorationInfo = self.restorationInfo
-        helpViewController?.restorationDelegate = self
         return helpViewController
     }
 
@@ -734,10 +659,6 @@ final class ViewController: UIViewController {
 
     func performEditLadderSegue() {
         performSegue(withIdentifier: "EditLadderSegue", sender: self)
-    }
-
-    func performShowDiagramSelectorSegue() {
-        performSegue(withIdentifier: "showDiagramSelectorSegue", sender: self)
     }
 
     func performShowSampleSelectorSegue() {
@@ -769,26 +690,7 @@ final class ViewController: UIViewController {
         showHelp()
     }
 
-    @IBAction func newDiagram(_ sender: Any) {
-        newDiagram()
-    }
-
-    @IBAction func saveDiagram(_ sender: Any) {
-        saveDiagram()
-    }
-
-    @IBAction func selectDiagram(_ sender: Any) {
-        selectDiagram()
-    }
-
-    @IBAction func renameDiagram(_ sender: Any) {
-        renameDiagram()
-    }
-
-    @IBAction func duplicateDiagram(_ sender: Any) {
-        duplicateDiagram()
-    }
-
+ 
     @IBAction func getDiagramInfo(_ sender: Any) {
         getDiagramInfo()
     }
@@ -817,3 +719,168 @@ final class ViewController: UIViewController {
 //        )
     }
 }
+
+extension DiagramViewController {
+    func setupNotifications() {
+        NotificationCenter.default.addObserver(self, selector: #selector(onDidUndoableAction(_:)), name: .didUndoableAction, object: nil)
+        NotificationCenter.default.addObserver(self, selector: #selector(updatePreferences), name: .preferencesChanged, object: nil)
+        NotificationCenter.default.addObserver(self, selector: #selector(didEnterBackground), name: UIScene.didEnterBackgroundNotification, object: nil)
+        NotificationCenter.default.addObserver(self, selector: #selector(didDisconnect), name: UIScene.didDisconnectNotification, object: nil)
+
+        NotificationCenter.default.addObserver(self, selector: #selector(resolveFileConflicts), name: UIDocument.stateChangedNotification, object: nil)
+  
+    }
+
+    func removeNotifications() {
+        NotificationCenter.default.removeObserver(self, name: .didUndoableAction, object: nil)
+        NotificationCenter.default.removeObserver(self, name: .preferencesChanged, object: nil)
+        NotificationCenter.default.removeObserver(self, name: UIScene.didEnterBackgroundNotification, object: nil)
+        NotificationCenter.default.removeObserver(self, name: UIScene.didDisconnectNotification, object: nil)
+    }
+
+    @objc func onDidUndoableAction(_ notification: Notification) {
+        if notification.name == .didUndoableAction {
+            updateUndoRedoButtons()
+        }
+    }
+
+    func updateUndoRedoButtons() {
+        // DispatchQueue here forces UI to finish up its tasks before performing below on the main thread.
+        // If not used, undoManager.canUndo/Redo is not updated before this is called.
+        DispatchQueue.main.async {
+            self.undoButton.isEnabled = self.currentDocument?.undoManager?.canUndo ?? false
+            self.redoButton.isEnabled = self.currentDocument?.undoManager?.canRedo ?? false
+        }
+    }
+
+    @objc func didEnterBackground() {
+        os_log("didEnterBackground()", log: .action, type: .info)
+        // FIXME: Is it necessary to force save here?  Or can I just use updateChangeCount and autosave?
+//        saveDefaultDocument(diagram)
+        // or ??
+        currentDocument?.updateChangeCount(.done)
+    }
+
+    @objc func didDisconnect() {
+        os_log("didDisconnect()", log: .lifeCycle, type: .info)
+
+    }
+
+    // FIXME: this is being called multiple times.
+    @objc func resolveFileConflicts() {
+        os_log("resolveFileConflicts()", log: .action, type: .info)
+        guard let currentDocument = currentDocument else { return }
+        if currentDocument.documentState == UIDocument.State.inConflict {
+            // Use newest file wins strategy.
+            do {
+                try NSFileVersion.removeOtherVersionsOfItem(at: currentDocument.fileURL)
+
+            } catch {
+                os_log("Error resolving file conflict - %s", log: .errors, type: .error, error.localizedDescription)
+            }
+            currentDocument.diagram = diagram
+        }
+    }
+
+    @objc func updatePreferences() {
+        os_log("updatePreferences()", log: .action, type: .info)
+        ladderView.lineWidth = CGFloat(UserDefaults.standard.double(forKey: Preferences.defaultLineWidthKey))
+        ladderView.showBlock = UserDefaults.standard.bool(forKey: Preferences.defaultShowBlockKey)
+        ladderView.showImpulseOrigin = UserDefaults.standard.bool(forKey: Preferences.defaultShowImpulseOriginKey)
+        ladderView.showIntervals = UserDefaults.standard.bool(forKey: Preferences.defaultShowIntervalsKey)
+        setViewsNeedDisplay()
+    }
+
+    var defaultDocumentURL: URL? {
+        guard let docURL = FileIO.getCacheURL() else { return nil }
+        // FIXME: must account for multiple scenes, can't have just one default file.
+        let docPath = docURL.appendingPathComponent("\(restorationFilename).diagram")
+        return docPath
+    }
+
+    func loadDefaultDocument() -> Diagram? {
+        guard let defaultDocumentURL = defaultDocumentURL else { return nil }
+        do {
+            let decoder = JSONDecoder()
+            if let data = FileManager.default.contents(atPath: defaultDocumentURL.path) {
+                let documentData = try decoder.decode(Diagram.self, from: data)
+                return documentData
+            } else { return nil }
+        } catch {
+            return nil
+        }
+    }
+
+    @discardableResult func saveDefaultDocument(_ content: Diagram) -> Bool {
+        guard let defaultDocumentURL = defaultDocumentURL else { return false }
+        do {
+            let encoder = JSONEncoder()
+            let documentData = try encoder.encode(content)
+            try documentData.write(to: defaultDocumentURL)
+            print("written to \(defaultDocumentURL)")
+            return true
+        } catch {
+            return false
+        }
+    }
+
+    private func loadDocument() {
+        if let content = loadDefaultDocument() {
+            diagram = content
+        } else {
+            diagram = Diagram.blankDiagram()
+        }
+    }
+
+}
+
+extension DiagramViewController {
+    static func navigationControllerFactory() -> UINavigationController {
+        let storyboard = UIStoryboard(name: "Main", bundle: nil)
+        guard let controller = storyboard.instantiateInitialViewController() as? UINavigationController else {
+            fatalError("Project fault - cant instantiate NavigationController from storyboard")
+        }
+        return controller
+    }
+
+    func renameDocument(oldURL: URL, newURL: URL) {
+        os_log("renameDocument", log: .action, type: .info)
+        guard oldURL != newURL else { return }
+        DispatchQueue.global(qos: .background).async {
+            self.currentDocument?.close { success in
+                if success {
+                    let error: NSError? = nil
+                    let fileCoordinator = NSFileCoordinator()
+                    var moveError = error
+                    fileCoordinator.coordinate(writingItemAt: oldURL, options: .forMoving, writingItemAt: newURL, options: .forReplacing, error: &moveError, byAccessor: { newURL1, newURL2 in
+                        let fileManager = FileManager.default
+                        fileCoordinator.item(at: oldURL, willMoveTo: newURL)
+                        if (try? fileManager.moveItem(at: newURL1, to: newURL2)) != nil {
+                            fileCoordinator.item(at: oldURL, didMoveTo: newURL)
+                            self.currentDocument = DiagramDocument(fileURL: newURL)
+                            self.currentDocument?.open { openSuccess in
+                                guard openSuccess else {
+                                    print ("could not open \(newURL)")
+                                    return
+                                }
+                                // Try to delete old document, ignore errors.
+                                // FIXME: Should rename delete old file?
+                                if fileManager.isDeletableFile(atPath: oldURL.path) {
+                                    try? fileManager.removeItem(atPath: oldURL.path)
+                                }
+                                DispatchQueue.main.async {
+                                    self.currentDocument?.diagram = self.diagram
+                                    self.setTitle()
+                                }
+                            }
+                        }
+                        if let error = error {
+                            print("error = \(error.localizedDescription)")
+                        }
+                    })
+                }
+            }
+        }
+    }
+}
+

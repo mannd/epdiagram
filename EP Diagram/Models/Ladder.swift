@@ -17,10 +17,24 @@ struct NearbyMarks {
     var distal = [Mark]()
 }
 
+// MARK: - enums
+
+private enum Keys: String, CustomStringConvertible {
+    case name = "ladderName"
+    case longDescription = "ladderLongDescription"
+    case regions = "ladderRegions"
+    // etc.
+
+    var description: String {
+        return self.rawValue
+    }
+}
+
 // MARK: - classes
 
 // A Ladder is simply a collection of Regions in top down order.
 class Ladder: Codable {
+
     // MARK: constants
     private(set) var id = UUID()
 
@@ -29,7 +43,7 @@ class Ladder: Codable {
     private var registry: Registry = [:]
 
     var name: String
-    var description: String = ""
+    var longDescription: String = ""
     var regions = [Region]()
     var numRegions: Int { regions.count }
     var attachedMark: Mark? // cursor is attached to a most 1 mark at a time
@@ -49,7 +63,7 @@ class Ladder: Codable {
     // MARK: methods
     init(template: LadderTemplate) {
         name = template.name
-        description = template.description
+        longDescription = template.description
         for regionTemplate in template.regionTemplates {
             let region = Region(template: regionTemplate)
             regions.append(region)
@@ -246,6 +260,6 @@ class Ladder: Codable {
 
 // MARK: - extensions
 
-extension Ladder: CustomDebugStringConvertible {
-    var debugDescription: String { "Ladder ID " + id.debugDescription}
-}
+//extension Ladder: CustomDebugStringConvertible {
+//    var debugDescription: String { "Ladder ID " + id.debugDescription}
+//}

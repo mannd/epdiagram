@@ -22,18 +22,8 @@ struct HamburgerViewModel {
         // FIXME: need ladder svg
         let selectLadderLayer = HamburgerLayer(withName: L("Select ladder"), icon: UIImage(named: "ladder"), layer: .selectLadder)
         array.append(selectLadderLayer)
-        let newDiagramlayer = HamburgerLayer(withName: L("New diagram"), icon: UIImage(systemName: "plus.app"), layer: .newDiagram)
-        array.append(newDiagramlayer)
-        let selectDiagramLayer = HamburgerLayer(withName: L("Select diagram"), icon: UIImage(systemName: "checkmark.circle"), layer: .openDiagram)
-        array.append(selectDiagramLayer)
-        let saveDiagramLayer = HamburgerLayer(withName: L("Save diagram"), icon: UIImage(systemName: "square.and.arrow.down"), layer: .saveDiagram)
-        array.append(saveDiagramLayer)
-        var renameDiagramLayer = HamburgerLayer(withName: L("Rename diagram"), icon: UIImage(systemName: "square.and.pencil"), layer: .renameDiagram)
-        renameDiagramLayer.isEnabled = diagramSaved
+        let renameDiagramLayer = HamburgerLayer(withName: L("Rename diagram"), icon: UIImage(systemName: "square.and.pencil"), layer: .renameDiagram)
         array.append(renameDiagramLayer)
-        var duplicateDiagramLayer = HamburgerLayer(withName: L("Duplicate diagram"), icon: UIImage(systemName: "plus.square.on.square"), layer: .duplicateDiagram)
-        duplicateDiagramLayer.isEnabled = diagramSaved
-        array.append(duplicateDiagramLayer)
         let getInfoLayer = HamburgerLayer(withName: L("Diagram info"), icon: UIImage(systemName: "questionmark.square"), layer: .getInfo)
         array.append(getInfoLayer)
         let saveImageLayer = HamburgerLayer(withName: L("Snapshot diagram"), icon: UIImage(systemName: "photo.on.rectangle"), layer: .snapshot)

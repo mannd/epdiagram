@@ -203,7 +203,7 @@ class Common {
         }
         alert.addTextField { textField in
             textField.placeholder = L("Diagram description")
-            textField.text = diagram.description
+            textField.text = diagram.longDescription
         }
         alert.addAction(UIAlertAction(title: L("Save"), style: .default) { action in
             if let name = alert.textFields?.first?.text, let description = alert.textFields?[1].text {
@@ -235,7 +235,7 @@ func L(_ s: String, comment: String = "") -> String {
 /// Print logging info only while in debug mode.
 /// - Parameter s: logging message to print
 // Make false to suppress printing of messages, even in debug mode.
-var printMessages = true
+var printMessages = false
 func P(_ s: String) {
     if printMessages {
         print(s)

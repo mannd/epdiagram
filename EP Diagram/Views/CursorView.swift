@@ -76,6 +76,7 @@ final class CursorView: ScaledView {
     var imageIsLocked = false
 
     weak var ladderViewDelegate: LadderViewDelegate! // Note IUO.
+    var currentDocument: DiagramDocument?
 
     // MARK: - init
 
@@ -295,7 +296,7 @@ final class CursorView: ScaledView {
         }
         guard let attachedMarkAnchorPosition = ladderViewDelegate.getAttachedMarkScaledAnchorPosition() else { return }
         if pan.state == .began {
-            self.undoManager?.beginUndoGrouping()
+            currentDocument?.undoManager?.beginUndoGrouping()
             cursorEndPointY = attachedMarkAnchorPosition.y
             ladderViewDelegate.setAttachedMarkAndGroupedMarksHighlights()
 //            ladderViewDelegate.highlightGroupedMarks(highlight: .grouped)
@@ -311,7 +312,7 @@ final class CursorView: ScaledView {
             pan.setTranslation(CGPoint(x: 0,y: 0), in: self)
         }
         if pan.state == .ended {
-            self.undoManager?.endUndoGrouping()
+            currentDocument?.undoManager?.endUndoGrouping()
             ladderViewDelegate.groupMarksNearbyAttachedMark()
             ladderViewDelegate.refresh()
             cursorEndPointY = 0

@@ -11,7 +11,7 @@ import SwiftUI
 struct SampleSelector: View {
     var sampleDiagrams: [Diagram]
     @State var selectedDiagram: Diagram? = nil
-    weak var delegate: ViewControllerDelegate?
+    weak var delegate: DiagramViewControllerDelegate?
     @Environment(\.presentationMode) var presentationMode: Binding<PresentationMode>
 
 
@@ -21,7 +21,7 @@ struct SampleSelector: View {
                 List() {
                     ForEach(sampleDiagrams, id:\.self.name) {
                         diagram in VStack(alignment: .leading) { Text(diagram.name ?? "").bold().foregroundColor(.green)
-                            Text(diagram.description).foregroundColor(.secondary)
+                            Text(diagram.longDescription).foregroundColor(.secondary)
                             }.padding().onTapGesture {
                             self.selectedDiagram = diagram
                             self.delegate?.selectSampleDiagram(self.selectedDiagram)

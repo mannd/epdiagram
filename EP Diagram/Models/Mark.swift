@@ -24,19 +24,25 @@ enum Movement {
     case omnidirectional
 }
 
-// MARK: - structs
+// MARK: - classes
 
 // A mark may have up to three attachments to marks in the proximal and distal regions
 // and in its own region, i.e. reentry spawning a mark.
 struct MarkGroup: Codable {
-    var proximal = MarkSet()
-    var middle = MarkSet()
-    var distal = MarkSet()
+    var proximal: MarkSet
+    var middle: MarkSet
+    var distal: MarkSet
 
     var allMarks: MarkSet {
         get {
             proximal.union(middle.union(distal))
         }
+    }
+
+    init(proximal: MarkSet = MarkSet(), middle: MarkSet = MarkSet(), distal: MarkSet = MarkSet()) {
+        self.proximal = proximal
+        self.middle = middle
+        self.distal = distal
     }
 
     mutating func remove(mark: Mark) {
@@ -57,52 +63,21 @@ struct MarkGroup: Codable {
 
 // The mark is a fundamental component of a ladder diagram.
 class Mark: Codable {
-    /// Draw a solid or dashed line when drawing a mark.
-    enum LineStyle: Int, Codable, CustomStringConvertible, CaseIterable, Identifiable {
-        var id: LineStyle { self  }
-
-        var description: String {
-            switch self {
-            case .solid:
-                return "Solid"
-            case .dashed:
-                return "Dashed"
-            case .dotted:
-                return "Dotted"
-            }
-        }
-
-        case solid
-        case dashed
-        case dotted
-    }
-
-    // Highlight is used to show state of a mark visibly.
-    enum Highlight: Int, Codable {
-        case attached // cursor attached
-        case grouped // mark attached to cursor and 
-        case selected
-        case linked
-        case none
-    }
-
-    // Site of block
-    enum Block: Int, Codable {
-        case proximal
-        case distal
-        case none
-    }
-
-    // Site of impulse origin
-    enum ImpulseOrigin: Int, Codable {
-        case proximal
-        case distal
-        case none
-    }
     let id: UUID // each mark as a unique id
 
     var segment: Segment
+    var attached: Bool = false // cursor attached and shown
+    var selected: Bool = false // mark is selected for some action
+    var highlight: Highlight = .none
+    var anchor: Anchor = .middle // Anchor point for movement and to attach a cursor
+    var lineStyle: LineStyle = .solid
+    var block: Block = .none
+    var impulseOrigin: ImpulseOrigin = .none
+    var text: String = ""  // text is usually a calibrated interval
+    var showText: Bool = true
+    var groupedMarks: MarkGroup = MarkGroup()
 
+    // Calculated properties
     // Useful to detect marks that are too tiny to keep.
     var height: CGFloat {
         get {
@@ -120,21 +95,16 @@ class Mark: Codable {
         }
     }
 
-    var attached: Bool = false // cursor attached and shown
-    var selected: Bool = false // mark is selected for some action
-    var highlight: Highlight = .none
+    private enum Keys: String, CustomStringConvertible {
+        case id = "markID"
+        case segment = "markSegment"
+        case anchor = "markAnchor"
+        //etc.
 
-    // Anchor point for movement and to attach a cursor
-    var anchor: Anchor
-    var lineStyle: LineStyle = .solid
-
-    var block: Block = .none
-    var impulseOrigin: ImpulseOrigin = .none
-
-    var text: String = "test"
-    var showText: Bool = true
-
-    var groupedMarks: MarkGroup
+        var description: String {
+            return self.rawValue
+        }
+    }
 
 
     init(segment: Segment) {
@@ -198,9 +168,9 @@ class Mark: Codable {
 }
 // MARK: - extensions
 
-extension Mark: CustomDebugStringConvertible {
-    var debugDescription: String { "Mark ID " + id.debugDescription }
-}
+//extension Mark: CustomDebugStringConvertible {
+//    var debugDescription: String { "Mark ID " + id.debugDescription }
+//}
 
 extension Mark: Comparable {
     static func < (lhs: Mark, rhs: Mark) -> Bool {
@@ -216,4 +186,51 @@ extension Mark: Hashable {
     func hash(into hasher: inout Hasher) {
         hasher.combine(id)
     }
+}
+
+// enums for Mark
+extension Mark {
+    /// Draw a solid or dashed line when drawing a mark.
+    enum LineStyle: Int, Codable, CustomStringConvertible, CaseIterable, Identifiable {
+        var id: LineStyle { self  }
+
+        var description: String {
+            switch self {
+            case .solid:
+                return "Solid"
+            case .dashed:
+                return "Dashed"
+            case .dotted:
+                return "Dotted"
+            }
+        }
+
+        case solid
+        case dashed
+        case dotted
+    }
+
+    // Highlight is used to show state of a mark visibly.
+    enum Highlight: Int, Codable {
+        case attached // cursor attached
+        case grouped // mark attached to cursor and
+        case selected
+        case linked
+        case none
+    }
+
+    // Site of block
+    enum Block: Int, Codable {
+        case proximal
+        case distal
+        case none
+    }
+
+    // Site of impulse origin
+    enum ImpulseOrigin: Int, Codable {
+        case proximal
+        case distal
+        case none
+    }
+
 }

@@ -1,17 +1,17 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="17156" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES" initialViewController="en3-9x-pbF">
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="17506" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES" initialViewController="en3-9x-pbF">
     <device id="retina6_1" orientation="portrait" appearance="light"/>
     <dependencies>
-        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="17125"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="17505"/>
         <capability name="Safe area layout guides" minToolsVersion="9.0"/>
         <capability name="System colors in document resources" minToolsVersion="11.0"/>
         <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
     </dependencies>
     <scenes>
-        <!--View Controller-->
+        <!--Diagram View Controller-->
         <scene sceneID="tne-QT-ifu">
             <objects>
-                <viewController storyboardIdentifier="ViewController" useStoryboardIdentifierAsRestorationIdentifier="YES" id="BYZ-38-t0r" customClass="ViewController" customModule="EP_Diagram" customModuleProvider="target" sceneMemberID="viewController">
+                <viewController storyboardIdentifier="ViewController" useStoryboardIdentifierAsRestorationIdentifier="YES" id="BYZ-38-t0r" customClass="DiagramViewController" customModule="EP_Diagram" customModuleProvider="target" sceneMemberID="viewController">
                     <view key="view" contentMode="scaleToFill" id="8bC-Xf-vdC">
                         <rect key="frame" x="0.0" y="0.0" width="414" height="896"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
@@ -76,7 +76,9 @@
                             <constraint firstItem="6Tk-OE-BBY" firstAttribute="bottom" secondItem="wlk-vO-fuM" secondAttribute="bottom" id="nPH-aF-sHW"/>
                         </constraints>
                     </view>
-                    <navigationItem key="navigationItem" id="ryt-Rx-YMV"/>
+                    <navigationItem key="navigationItem" id="ryt-Rx-YMV">
+                        <nil key="title"/>
+                    </navigationItem>
                     <connections>
                         <outlet property="_constraintHamburgerLeft" destination="hSs-E4-qiy" id="zf0-W6-uUC"/>
                         <outlet property="_constraintHamburgerWidth" destination="nDl-D1-xA0" id="BaQ-pj-B0A"/>
@@ -87,7 +89,6 @@
                         <outlet property="ladderView" destination="rq1-PC-4iG" id="IAX-Gu-2b0"/>
                         <segue destination="LJm-2p-ngb" kind="show" identifier="selectLadderSegue" destinationCreationSelector="showLadderSelector:" id="4Gf-Q1-Gss"/>
                         <segue destination="lYc-7T-fo8" kind="show" identifier="showTemplateEditorSegue" destinationCreationSelector="showTemplateEditor:" id="yOM-cF-bRp"/>
-                        <segue destination="laf-9G-lzB" kind="show" identifier="showDiagramSelectorSegue" destinationCreationSelector="showDiagramSelector:" id="PMT-lw-9Pg"/>
                         <segue destination="aUo-Pc-QYX" kind="show" identifier="showPreferencesSegue" destinationCreationSelector="showPreferences:" id="JGa-0u-G6I"/>
                         <segue destination="X4y-SM-iwI" kind="show" identifier="showHelpSegue" destinationCreationSelector="performShowHelpSegueAction:" id="ezU-te-0lg"/>
                         <segue destination="ggo-hf-FSM" kind="show" identifier="showSampleSelectorSegue" destinationCreationSelector="showSampleSelector:" id="ItN-ts-1CH"/>
@@ -115,7 +116,7 @@
                                     <autoresizingMask key="autoresizingMask"/>
                                     <subviews>
                                         <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Label" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="GbR-wZ-dcR">
-                                            <rect key="frame" x="45" y="11.5" width="42" height="21"/>
+                                            <rect key="frame" x="45" y="12" width="42" height="20"/>
                                             <fontDescription key="fontDescription" type="system" pointSize="17"/>
                                             <nil key="textColor"/>
                                             <nil key="highlightedColor"/>
@@ -147,7 +148,7 @@
                 </tableViewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="qCE-BD-hD2" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="580" y="821"/>
+            <point key="canvasLocation" x="-174" y="1134"/>
         </scene>
         <!--Hosting Controller-->
         <scene sceneID="QVs-n6-kdo">
@@ -157,7 +158,7 @@
                 </hostingController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="SXR-j0-LQJ" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="1604" y="485"/>
+            <point key="canvasLocation" x="1052" y="1160"/>
         </scene>
         <!--Help View Controller-->
         <scene sceneID="s9a-hu-d0H">
@@ -176,7 +177,7 @@
                                 </wkWebViewConfiguration>
                             </wkWebView>
                             <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Label" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="1GS-6k-POx">
-                                <rect key="frame" x="186" y="437.5" width="42" height="21"/>
+                                <rect key="frame" x="186" y="438" width="42" height="20"/>
                                 <fontDescription key="fontDescription" type="system" pointSize="17"/>
                                 <nil key="textColor"/>
                                 <nil key="highlightedColor"/>
@@ -201,7 +202,7 @@
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="VRI-RL-nE8" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="2297" y="121"/>
+            <point key="canvasLocation" x="1660" y="120"/>
         </scene>
         <!--Hosting Controller-->
         <scene sceneID="dWr-ZE-lZ6">
@@ -211,7 +212,7 @@
                 </hostingController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="PLw-dA-uEH" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="2987" y="848"/>
+            <point key="canvasLocation" x="1910" y="1163"/>
         </scene>
         <!--Hosting Controller-->
         <scene sceneID="eah-A4-Jzh">
@@ -221,7 +222,7 @@
                 </hostingController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="fbD-f9-Y3a" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="3746" y="849"/>
+            <point key="canvasLocation" x="2703" y="1163"/>
         </scene>
         <!--Hosting Controller-->
         <scene sceneID="KIe-xf-6Pi">
@@ -231,17 +232,7 @@
                 </hostingController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="LlP-FI-RPV" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="1490" y="849"/>
-        </scene>
-        <!--Hosting Controller-->
-        <scene sceneID="ICJ-r9-f69">
-            <objects>
-                <hostingController id="laf-9G-lzB" sceneMemberID="viewController">
-                    <navigationItem key="navigationItem" id="zf8-lP-8AM"/>
-                </hostingController>
-                <placeholder placeholderIdentifier="IBFirstResponder" id="Ehb-Tc-ZTz" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
-            </objects>
-            <point key="canvasLocation" x="2216" y="844"/>
+            <point key="canvasLocation" x="374" y="1160"/>
         </scene>
         <!--Navigation Controller-->
         <scene sceneID="krg-YB-oDF">
