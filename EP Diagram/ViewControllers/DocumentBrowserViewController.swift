@@ -9,37 +9,28 @@
 import UIKit
 import os.log
 
-class DocumentBrowserViewController: UIViewController {
+class DocumentBrowserViewController: UIDocumentBrowserViewController {
 
     var currentDocument: DiagramDocument?
     var editingDocument = false
     var browserDelegate = DocumentBrowserDelegate()
-    lazy var documentBrowser: UIDocumentBrowserViewController = {
-      let browser = UIDocumentBrowserViewController()
-        browser.allowsDocumentCreation = true
-        browser.browserUserInterfaceStyle = .dark
-        browser.delegate = browserDelegate
-        browser.view.tintColor = .green
-        return browser
-    }()
     var restorationInfo: [AnyHashable: Any]?
     var persistentID: String = ""
 
     override func viewDidLoad() {
         super.viewDidLoad()
-    }
-
-    override func viewDidAppear(_ animated: Bool) {
-        super.viewDidAppear(animated)
+        allowsDocumentCreation = true
+        browserUserInterfaceStyle = .dark
+        delegate = browserDelegate
+        view.tintColor = .green
         installDocumentBrowser()
     }
 
     func installDocumentBrowser() {
-        view.pinToInside(view: documentBrowser.view)
         browserDelegate.presentationHandler = { [weak self] url, error in
             guard error == nil else {
                 //present error to user e.g UIAlertController
-                let alert = UIAlertController(title: L("Error opening document"), message: L("Could not open document."), preferredStyle: .alert)
+                let alert = UIAlertController(title: L("Error opening document"), message: L("Could not open document."), preferredStyle: .actionSheet)
                 alert.addAction(UIAlertAction(title: NSLocalizedString("OK", comment: "Default action"), style: .default, handler: { _ in
                     NSLog("The \"OK\" alert occured.")
                 }))
@@ -105,7 +96,7 @@ extension DocumentBrowserViewController: DiagramEditorDelegate {
     }
 
     func openRemoteDocument(_ inboundURL: URL, importIfNeeded: Bool) {
-        documentBrowser.revealDocument(at: inboundURL, importIfNeeded: importIfNeeded) { (url, error) in
+        revealDocument(at: inboundURL, importIfNeeded: importIfNeeded) { (url, error) in
             if let error = error {
                 let alert = UIAlertController(title: L("Could Not Open Document"), message: L("EP Diagram could not open this document due to error \(error.localizedDescription)"), preferredStyle: .alert)
                 alert.addAction(UIAlertAction(title: NSLocalizedString("OK", comment: "Default action"), style: .default))

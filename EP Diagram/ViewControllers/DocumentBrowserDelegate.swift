@@ -15,6 +15,8 @@ class DocumentBrowserDelegate: NSObject, UIDocumentBrowserViewControllerDelegate
 
         var documentName: String = ""
         let alert = UIAlertController(title: "Name New Diagram", message: "Pick a name for this diagram", preferredStyle: .alert)
+        // FIXME: This causes constraint warnings, but it appears to be an Apple bug.
+        // Only way around this would be to create a custom UIAlertController.
         alert.addTextField { textField in
             documentName = self.getDocumentName()
             textField.placeholder = L("Document name")
@@ -44,7 +46,6 @@ class DocumentBrowserDelegate: NSObject, UIDocumentBrowserViewControllerDelegate
                 }
             }
         })
-
         controller.present(alert, animated: true)
   }
 

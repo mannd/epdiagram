@@ -847,17 +847,38 @@ extension DiagramViewController {
         os_log("renameDocument", log: .action, type: .info)
         guard oldURL != newURL else { return }
         DispatchQueue.global(qos: .background).async {
-            var error: NSError? = nil
-            let fileCoordinator = NSFileCoordinator()
-            fileCoordinator.coordinate(writingItemAt: oldURL, options: .forMoving, writingItemAt: newURL, options: .forReplacing, error: &error, byAccessor: { newURL1, newURL2 in
-                let fileManager = FileManager.default
-                fileCoordinator.item(at: oldURL, willMoveTo: newURL)
-                if (try? fileManager.moveItem(at: newURL1, to: newURL2)) != nil {
-                    fileCoordinator.item(at: oldURL, didMoveTo: newURL)
+            self.currentDocument?.close { success in
+                if success {
+                    let error: NSError? = nil
+                    let fileCoordinator = NSFileCoordinator()
+                    var moveError = error
+                    fileCoordinator.coordinate(writingItemAt: oldURL, options: .forMoving, writingItemAt: newURL, options: .forReplacing, error: &moveError, byAccessor: { newURL1, newURL2 in
+                        let fileManager = FileManager.default
+                        fileCoordinator.item(at: oldURL, willMoveTo: newURL)
+                        if (try? fileManager.moveItem(at: newURL1, to: newURL2)) != nil {
+                            fileCoordinator.item(at: oldURL, didMoveTo: newURL)
+                            self.currentDocument = DiagramDocument(fileURL: newURL)
+                            self.currentDocument?.open { openSuccess in
+                                guard openSuccess else {
+                                    print ("could not open \(newURL)")
+                                    return
+                                }
+                                // Try to delete old document, ignore errors.
+                                // FIXME: Should rename delete old file?
+                                if fileManager.isDeletableFile(atPath: oldURL.path) {
+                                    try? fileManager.removeItem(atPath: oldURL.path)
+                                }
+                                DispatchQueue.main.async {
+                                    self.currentDocument?.diagram = self.diagram
+                                    self.setTitle()
+                                }
+                            }
+                        }
+                        if let error = error {
+                            print("error = \(error.localizedDescription)")
+                        }
+                    })
                 }
-            })
-            if let error = error {
-                print("error = \(error.localizedDescription)")
             }
         }
     }
