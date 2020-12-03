@@ -39,9 +39,6 @@ class Ladder: Codable {
     private(set) var id = UUID()
 
     // MARK: variables
-    private typealias Registry = Dictionary<UUID, Int>
-    private var registry: Registry = [:]
-
     var name: String
     var longDescription: String = ""
     var regions = [Region]()
@@ -111,8 +108,9 @@ class Ladder: Codable {
         guard let region = region else { return nil }
         mark.lineStyle = region.lineStyle
         region.appendMark(mark)
-        registry[mark.id] = getIndex(ofRegion: region)
-        isDirty = true
+        if let index = getIndex(ofRegion: region) {
+            mark.regionIndex = index
+        }
         return mark
     }
 
@@ -123,13 +121,11 @@ class Ladder: Codable {
             region.marks.remove(at: index)
         }
         removeMarkReferences(toMark: mark)
-        registry.removeValue(forKey: mark.id)
     }
 
     func deleteMarksInRegion(_ region: Region) {
         setHighlightForAllMarks(highlight: .none)
         for mark: Mark in region.marks {
-            registry.removeValue(forKey: mark.id)
             removeMarkReferences(toMark: mark)
         }
         region.marks.removeAll()
@@ -146,7 +142,6 @@ class Ladder: Codable {
 
     // Clear ladder of all marks.
     func clear() {
-        registry.removeAll()
         for region in regions {
             region.marks.removeAll()
         }
@@ -155,11 +150,10 @@ class Ladder: Codable {
     func getIndex(ofRegion region: Region?) -> Int? {
         guard let region = region else { return nil }
         return regions.firstIndex(of: region)
-//        return region.index
     }
 
     func getRegionIndex(ofMark mark: Mark) -> Int? {
-        let index = registry[mark.id]
+        let index = mark.regionIndex
         return index
     }
 

@@ -247,6 +247,16 @@
 			path = Help;
 			sourceTree = "<group>";
 		};
+		8E371FC32578123600BBE976 /* Support */ = {
+			isa = PBXGroup;
+			children = (
+				8E7D24C222779DBD005A1729 /* AppDelegate.swift */,
+				8E0FDE822543A01D00865CBC /* SceneDelegate.swift */,
+				8E7D24C922779DBF005A1729 /* Assets.xcassets */,
+			);
+			path = Support;
+			sourceTree = "<group>";
+		};
 		8E4ACA8724479C2500575538 /* ViewModels */ = {
 			isa = PBXGroup;
 			children = (
@@ -305,13 +315,11 @@
 		8E7D24C122779DBD005A1729 /* EP Diagram */ = {
 			isa = PBXGroup;
 			children = (
-				8E04C5FA256A0AB300946348 /* Helpers */,
-				8E7D24C222779DBD005A1729 /* AppDelegate.swift */,
-				8E0FDE822543A01D00865CBC /* SceneDelegate.swift */,
-				8E7D24C922779DBF005A1729 /* Assets.xcassets */,
-				8E7D24CE22779DBF005A1729 /* Info.plist */,
-				8E7214DC22E95C630062C094 /* Common */,
 				8E689C4F23B498A10042A3F1 /* EP Diagram.entitlements */,
+				8E7D24CE22779DBF005A1729 /* Info.plist */,
+				8E371FC32578123600BBE976 /* Support */,
+				8E04C5FA256A0AB300946348 /* Helpers */,
+				8E7214DC22E95C630062C094 /* Common */,
 				8E6EB6BE2484707300E5F883 /* Extensions */,
 				8E1276D924D46BEF00AC4B8F /* Help */,
 				8E9B803F22834431008873BB /* Models */,

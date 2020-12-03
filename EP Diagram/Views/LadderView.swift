@@ -400,7 +400,7 @@ final class LadderView: ScaledView {
                 // what region is the mark in?
                 let markRegionIndex = ladder.getRegionIndex(ofMark: mark)
                 let firstMarkRegionIndex = ladder.getRegionIndex(ofMark: ladder.linkedMarks[0])
-                os_log("markRegionIndex = %d, firstMarkRegionIndex = %d", log: OSLog.debugging, type: .info, markRegionIndex!, firstMarkRegionIndex!)
+                os_log("markRegionIndex = %d, firstMarkRegionIndex = %d (-1 == nil)", log: OSLog.debugging, type: .info, markRegionIndex ?? -1, firstMarkRegionIndex ?? -1)
                 // TODO: what about create mark with each tap?
                 ladder.linkedMarks.append(mark)
                 mark.highlight = .linked
@@ -921,7 +921,13 @@ final class LadderView: ScaledView {
         moveMark(movement: movement, mark: mark, regionPosition: regionPosition)
     }
 
+    private func newUndoablyMoveMark(movement: Movement, mark: Mark, regionPosition: CGPoint) {
+        
+
+    }
+
     private func moveMark(movement: Movement, mark: Mark, regionPosition: CGPoint) {
+//        self.activeRegion = ladder.getRegion(ofMark: mark)
         if movement == .horizontal {
             switch mark.anchor {
             case .proximal:
@@ -955,7 +961,8 @@ final class LadderView: ScaledView {
                 break
             }
         }
-        moveAttachedMarks(forMark: mark)
+        // FIXME: moving attached marks crashes app
+//        moveAttachedMarks(forMark: mark)
         if let activeRegion = activeRegion {
             adjustCursor(mark: mark, region: activeRegion)
             cursorViewDelegate.refresh()

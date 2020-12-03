@@ -65,7 +65,8 @@ struct MarkGroup: Codable {
 class Mark: Codable {
     let id: UUID // each mark as a unique id
 
-    var segment: Segment
+    var segment: Segment // where a mark is, using regional coordinates
+
     var attached: Bool = false // cursor attached and shown
     var selected: Bool = false // mark is selected for some action
     var highlight: Highlight = .none
@@ -76,6 +77,7 @@ class Mark: Codable {
     var text: String = ""  // text is usually a calibrated interval
     var showText: Bool = true
     var groupedMarks: MarkGroup = MarkGroup()
+    var regionIndex: Int = -1 // keep track of which region mark is in a ladder
 
     // Calculated properties
     // Useful to detect marks that are too tiny to keep.
@@ -157,7 +159,7 @@ class Mark: Codable {
         return anchorPosition
     }
 
-    // Note point must be in absolute coordiates, with y between 0 and 1 relative to region height.
+    // Note point must be in absolute coordinates, with y between 0 and 1 relative to region height.
     func distance(point: CGPoint) -> CGFloat {
         var numerator = (segment.distal.y - segment.proximal.y) * point.x - (segment.distal.x - segment.proximal.x) * point.y + segment.distal.x * segment.proximal.y - segment.distal.y * segment.proximal.x
         numerator = abs(numerator)
@@ -168,9 +170,9 @@ class Mark: Codable {
 }
 // MARK: - extensions
 
-//extension Mark: CustomDebugStringConvertible {
-//    var debugDescription: String { "Mark ID " + id.debugDescription }
-//}
+extension Mark: CustomDebugStringConvertible {
+    var debugDescription: String { "Mark ID " + id.debugDescription }
+}
 
 extension Mark: Comparable {
     static func < (lhs: Mark, rhs: Mark) -> Bool {
@@ -192,7 +194,7 @@ extension Mark: Hashable {
 extension Mark {
     /// Draw a solid or dashed line when drawing a mark.
     enum LineStyle: Int, Codable, CustomStringConvertible, CaseIterable, Identifiable {
-        var id: LineStyle { self  }
+        var id: LineStyle { self }
 
         var description: String {
             switch self {

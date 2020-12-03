@@ -432,6 +432,8 @@ final class DiagramViewController: UIViewController {
     @objc func undo() {
         os_log("undo action", log: OSLog.action, type: .info)
         if self.currentDocument?.undoManager?.canUndo ?? false {
+            // Cursor doesn't track undo and redo well, so hide it!
+            cursorView.cursorIsVisible = false
             self.currentDocument?.undoManager?.undo()
             ladderView.setNeedsDisplay()
         }
@@ -440,6 +442,7 @@ final class DiagramViewController: UIViewController {
     @objc func redo() {
         os_log("redo action", log: OSLog.action, type: .info)
         if self.currentDocument?.undoManager?.canRedo ?? false {
+            cursorView.cursorIsVisible = false
             self.currentDocument?.undoManager?.redo()
             ladderView.setNeedsDisplay()
         }
@@ -461,8 +464,8 @@ final class DiagramViewController: UIViewController {
         }
         if cursorView.cursorIsVisible {
             ladderView.unattachAttachedMark()
-            cursorView.cursorIsVisible = false
             ladderView.unhighlightAllMarks()
+            cursorView.cursorIsVisible = false
         }
         else {
             let position = tap.location(in: imageScrollView)
@@ -758,7 +761,9 @@ extension DiagramViewController {
         // FIXME: Is it necessary to force save here?  Or can I just use updateChangeCount and autosave?
 //        saveDefaultDocument(diagram)
         // or ??
-        currentDocument?.updateChangeCount(.done)
+//        currentDocument?.updateChangeCount(.done)
+        // or this might not be necessary.  If there are any changes, they should already have been autosaved.
+
     }
 
     @objc func didDisconnect() {
