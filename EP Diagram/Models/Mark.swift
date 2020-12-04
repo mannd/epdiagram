@@ -26,6 +26,7 @@ enum Movement {
 
 // MARK: - classes
 
+// FIXME: These sets are retaining strong references to marks, making deleting them problematic.  It may be necessary to make sets of mark ids to avoid this.
 // A mark may have up to three attachments to marks in the proximal and distal regions
 // and in its own region, i.e. reentry spawning a mark.
 struct MarkGroup: Codable {
@@ -60,10 +61,9 @@ struct MarkGroup: Codable {
     }
 }
 
-
 // The mark is a fundamental component of a ladder diagram.
 class Mark: Codable {
-    let id: UUID // each mark as a unique id
+    let id: UUID // each mark has a unique id to allow sets of marks
 
     var segment: Segment // where a mark is, using regional coordinates
 
@@ -77,7 +77,7 @@ class Mark: Codable {
     var text: String = ""  // text is usually a calibrated interval
     var showText: Bool = true
     var groupedMarks: MarkGroup = MarkGroup()
-    var regionIndex: Int = -1 // keep track of which region mark is in a ladder
+    var regionIndex: Int = -1 // keep track of which region mark is in a ladder, negative value should not occur, except on init.
 
     // Calculated properties
     // Useful to detect marks that are too tiny to keep.
@@ -127,7 +127,7 @@ class Mark: Codable {
     }
 
     deinit {
-        os_log("Mark deinitied", log: OSLog.debugging, type: .debug)
+        os_log("Mark deinitied %s", log: OSLog.debugging, type: .debug, debugDescription)
     }
 
     /// Return midpoint of mark as CGPoint
@@ -136,6 +136,10 @@ class Mark: Codable {
         let x = (segment.distal.x - segment.proximal.x) / 2.0 + segment.proximal.x
         let y = (segment.distal.y - segment.proximal.y) / 2.0 + segment.proximal.y
         return CGPoint(x: x, y: y)
+    }
+
+    func midpointX() -> CGFloat {
+        return (segment.distal.x - segment.proximal.x) / 2.0 + segment.proximal.x
     }
 
     func swapEnds() {

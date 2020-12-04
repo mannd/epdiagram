@@ -927,16 +927,15 @@ final class LadderView: ScaledView {
     }
 
     private func moveMark(movement: Movement, mark: Mark, regionPosition: CGPoint) {
-//        self.activeRegion = ladder.getRegion(ofMark: mark)
         if movement == .horizontal {
             switch mark.anchor {
             case .proximal:
                 mark.segment.proximal.x = regionPosition.x
             case .middle:
                 // Determine halfway point between proximal and distal.
-                let differenceX = (mark.segment.proximal.x - mark.segment.distal.x) / 2
-                mark.segment.proximal.x = regionPosition.x + differenceX
-                mark.segment.distal.x = regionPosition.x - differenceX
+                let differanceX = (mark.segment.proximal.x - mark.segment.distal.x) / 2
+                mark.segment.proximal.x = regionPosition.x + differanceX
+                mark.segment.distal.x = regionPosition.x - differanceX
             case .distal:
                 mark.segment.distal.x = regionPosition.x
             case .none:
@@ -998,7 +997,6 @@ final class LadderView: ScaledView {
 
     func moveMark(mark: Mark, scaledViewPosition: CGPoint) {
         guard let activeRegion = activeRegion else { return }
-//        let originalSegment = mark.segment
         let regionPosition = translateToRegionPosition(scaledViewPosition: scaledViewPosition, region: activeRegion)
         if cursorViewDelegate.cursorIsVisible {
             undoablyMoveMark(movement: cursorViewDelegate.cursorMovement(), mark: mark, regionPosition: regionPosition)

@@ -254,6 +254,6 @@ class Ladder: Codable {
 
 // MARK: - extensions
 
-//extension Ladder: CustomDebugStringConvertible {
-//    var debugDescription: String { "Ladder ID " + id.debugDescription}
-//}
+extension Ladder: CustomDebugStringConvertible {
+    var debugDescription: String { "Ladder ID " + id.debugDescription}
+}
