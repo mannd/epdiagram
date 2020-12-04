@@ -123,8 +123,6 @@ final class LadderView: ScaledView {
     private var dragCreatedMark: Mark?
     private var dragOriginDivision: RegionDivision = .none
 
-    private var registry: [UUID: Mark] = [:]
-
     var mode: Mode = .normal
 
     var leftMargin: CGFloat = 0
@@ -526,16 +524,6 @@ final class LadderView: ScaledView {
         }
     }
 
-    func registerMark(_ mark: Mark) {
-        registry[mark.id] = mark
-        print(registry)
-    }
-
-    func unregisterMark(_ mark: Mark) {
-        registry.removeValue(forKey: mark.id)
-        print(registry)
-    }
-
     func addMark(scaledViewPositionX: CGFloat) -> Mark? {
         return addMark(regionPositionX: translateToRegionPositionX(scaledViewPositionX: scaledViewPositionX))
     }
@@ -544,7 +532,6 @@ final class LadderView: ScaledView {
         if let mark = ladder.addMark(at: regionPositionX, inRegion: activeRegion) {
             mark.highlight = .attached
             mark.attached = true
-            registerMark(mark)
             return mark
         }
         return nil
@@ -673,7 +660,6 @@ final class LadderView: ScaledView {
     private func deleteMark(mark: Mark, region: Region?) {
         os_log("deleteMark(mark:region:) - LadderView", log: OSLog.debugging, type: .debug)
         mark.attached = false
-        unregisterMark(mark)
         ladder.deleteMark(mark, inRegion: region)
         cursorViewDelegate.cursorIsVisible = false
         cursorViewDelegate.refresh()
@@ -682,8 +668,7 @@ final class LadderView: ScaledView {
     private func undeleteMark(mark: Mark, region: Region?) {
         os_log("undeleteMark(mark:region:) - LadderView", log: OSLog.debugging, type: .debug)
         if let region = region {
-            region.appendMark(mark)
-            registerMark(mark)
+            ladder.addMark(mark, toRegion: region)
             mark.attached = false
             mark.highlight = .none
         }
@@ -1587,7 +1572,6 @@ extension LadderView: LadderViewDelegate {
         attachedMark = ladder.addMark(at: positionX / scale, inRegion: activeRegion)
         if let attachedMark = attachedMark {
             undoablyAddMark(mark: attachedMark, region: activeRegion)
-            registerMark(attachedMark)
             attachedMark.attached = true
             attachedMark.highlight = .attached
         }

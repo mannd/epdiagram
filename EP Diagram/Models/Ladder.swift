@@ -56,6 +56,8 @@ class Ladder: Codable {
     // TODO: Zones are used to select parts of regions.
     var zone: Zone?
 
+    private var registry: [UUID: Mark] = [:]
+
 
     // MARK: methods
     init(template: LadderTemplate) {
@@ -65,6 +67,16 @@ class Ladder: Codable {
             let region = Region(template: regionTemplate)
             regions.append(region)
         }
+    }
+
+    func registerMark(_ mark: Mark) {
+        registry[mark.id] = mark
+        print(registry)
+    }
+
+    func unregisterMark(_ mark: Mark) {
+        registry.removeValue(forKey: mark.id)
+        print(registry)
     }
 
     func hasMarks() -> Bool {
@@ -98,16 +110,17 @@ class Ladder: Codable {
         return addMark(Mark(positionX: positionX), toRegion: region)
     }
 
-    func addMark(fromSegment segment: Segment, inRegion region: Region?) -> Mark? {
+     func addMark(fromSegment segment: Segment, inRegion region: Region?) -> Mark? {
         let mark = Mark(segment: segment)
         return addMark(mark, toRegion: region)
     }
 
-    private func addMark(_ mark: Mark, toRegion region: Region?) -> Mark? {
+    @discardableResult func addMark(_ mark: Mark, toRegion region: Region?) -> Mark? {
         os_log("addMark(_:toRegion:) - Ladder", log: .action, type: .info)
         guard let region = region else { return nil }
         mark.lineStyle = region.lineStyle
         region.appendMark(mark)
+        registerMark(mark)
         if let index = getIndex(ofRegion: region) {
             mark.regionIndex = index
         }
@@ -117,6 +130,7 @@ class Ladder: Codable {
     func deleteMark(_ mark: Mark?, inRegion region: Region?) {
         guard let mark = mark, let region = region else { return }
         setHighlightForAllMarks(highlight: .none)
+        unregisterMark(mark)
         if let index = region.marks.firstIndex(where: {$0 === mark}) {
             region.marks.remove(at: index)
         }
