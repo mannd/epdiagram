@@ -26,6 +26,12 @@ enum Movement {
 
 // MARK: - classes
 
+// FIXME: This is problematic, see below.  For solutions see https://www.behindmedia.com/2017/12/22/implementing-a-weakly-referencing-set-in-swift/, which implements a set of generic weak references.  More practical is https://stackoverflow.com/questions/43306110/remove-duplicate-values-from-a-dictionary-in-swift-3 which uses a combination of a set and a dictionary to insure that the dictionary only includes unique items.
+
+// Actually we don't need a dictionary, just an array of UUID?
+
+// See https://swiftrocks.com/weak-dictionary-values-in-swift for another solution.
+
 // FIXME: These sets are retaining strong references to marks, making deleting them problematic.  It may be necessary to make sets of mark ids to avoid this.
 // A mark may have up to three attachments to marks in the proximal and distal regions
 // and in its own region, i.e. reentry spawning a mark.
@@ -76,7 +82,11 @@ class Mark: Codable {
     var impulseOrigin: ImpulseOrigin = .none
     var text: String = ""  // text is usually a calibrated interval
     var showText: Bool = true
-    var groupedMarks: MarkGroup = MarkGroup()
+    var groupedMarks: MarkGroup = MarkGroup() {
+        didSet {
+            print(groupedMarks)
+        }
+    }
     var regionIndex: Int = -1 // keep track of which region mark is in a ladder, negative value should not occur, except on init.
 
     // Calculated properties

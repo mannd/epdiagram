@@ -95,16 +95,16 @@ class Ladder: Codable {
     // TODO: Does region have to be optional?  Consider refactor away optionality.
     // addMark() functions.  All require a Region in which to add the mark.  Each new mark is registered to that region.  All return addedMark or nil if region is nil.
     func addMark(at positionX: CGFloat, inRegion region: Region?) -> Mark? {
-        return registerAndAppendMark(Mark(positionX: positionX), toRegion: region)
+        return addMark(Mark(positionX: positionX), toRegion: region)
     }
 
     func addMark(fromSegment segment: Segment, inRegion region: Region?) -> Mark? {
         let mark = Mark(segment: segment)
-        return registerAndAppendMark(mark, toRegion: region)
+        return addMark(mark, toRegion: region)
     }
 
-    private func registerAndAppendMark(_ mark: Mark, toRegion region: Region?) -> Mark? {
-        os_log("registerAndAppendMark(_:toRegion:) - Ladder", log: .action, type: .info)
+    private func addMark(_ mark: Mark, toRegion region: Region?) -> Mark? {
+        os_log("addMark(_:toRegion:) - Ladder", log: .action, type: .info)
         guard let region = region else { return nil }
         mark.lineStyle = region.lineStyle
         region.appendMark(mark)
@@ -245,6 +245,7 @@ class Ladder: Codable {
         // TODO: deal with middle marks
         return []
     }
+
 
     // Returns a basic ladder (A, AV, V).
     static func defaultLadder() -> Ladder {

@@ -85,7 +85,7 @@ final class LadderView: ScaledView {
             ladder.marksAreVisible = newValue
         }
     }
-    
+
     var ladder: Ladder = Ladder.defaultLadder()
 
 
@@ -122,6 +122,8 @@ final class LadderView: ScaledView {
     private var regionDistalToDragOrigin: Region?
     private var dragCreatedMark: Mark?
     private var dragOriginDivision: RegionDivision = .none
+
+    private var registry: [UUID: Mark] = [:]
 
     var mode: Mode = .normal
 
@@ -209,7 +211,7 @@ final class LadderView: ScaledView {
         cursorViewDelegate.cursorIsVisible = false
         setupView()
     }
-    
+
     // MARK: - Touches
 
     @objc func singleTap(tap: UITapGestureRecognizer) {
@@ -239,7 +241,7 @@ final class LadderView: ScaledView {
         cursorViewDelegate.refresh()
         setNeedsDisplay()
     }
-    
+
     /// Magic function that returns struct indicating in what part of ladder a point is.
     /// - Parameter position: point to be processed
     func getLocationInLadder(position: CGPoint) -> LocationInLadder {
@@ -524,15 +526,28 @@ final class LadderView: ScaledView {
         }
     }
 
+    func registerMark(_ mark: Mark) {
+        registry[mark.id] = mark
+        print(registry)
+    }
+
+    func unregisterMark(_ mark: Mark) {
+        registry.removeValue(forKey: mark.id)
+        print(registry)
+    }
+
     func addMark(scaledViewPositionX: CGFloat) -> Mark? {
         return addMark(regionPositionX: translateToRegionPositionX(scaledViewPositionX: scaledViewPositionX))
     }
 
     func addMark(regionPositionX: CGFloat) -> Mark? {
-        let mark = ladder.addMark(at: regionPositionX, inRegion: activeRegion)
-        mark?.highlight = .attached
-        mark?.attached = true
-        return mark
+        if let mark = ladder.addMark(at: regionPositionX, inRegion: activeRegion) {
+            mark.highlight = .attached
+            mark.attached = true
+            registerMark(mark)
+            return mark
+        }
+        return nil
     }
 
     func getAnchor(regionDivision: RegionDivision) -> Anchor {
@@ -623,7 +638,7 @@ final class LadderView: ScaledView {
         } else {
             P("no mark tapped")
         }
-        
+
         return false
     }
 
@@ -658,7 +673,8 @@ final class LadderView: ScaledView {
     private func deleteMark(mark: Mark, region: Region?) {
         os_log("deleteMark(mark:region:) - LadderView", log: OSLog.debugging, type: .debug)
         mark.attached = false
-	        ladder.deleteMark(mark, inRegion: region)
+        unregisterMark(mark)
+        ladder.deleteMark(mark, inRegion: region)
         cursorViewDelegate.cursorIsVisible = false
         cursorViewDelegate.refresh()
     }
@@ -667,6 +683,7 @@ final class LadderView: ScaledView {
         os_log("undeleteMark(mark:region:) - LadderView", log: OSLog.debugging, type: .debug)
         if let region = region {
             region.appendMark(mark)
+            registerMark(mark)
             mark.attached = false
             mark.highlight = .none
         }
@@ -919,11 +936,6 @@ final class LadderView: ScaledView {
         })
         NotificationCenter.default.post(name: .didUndoableAction, object: nil)
         moveMark(movement: movement, mark: mark, regionPosition: regionPosition)
-    }
-
-    private func newUndoablyMoveMark(movement: Movement, mark: Mark, regionPosition: CGPoint) {
-        
-
     }
 
     private func moveMark(movement: Movement, mark: Mark, regionPosition: CGPoint) {
@@ -1251,7 +1263,7 @@ final class LadderView: ScaledView {
         let attributes: [NSAttributedString.Key: Any] = [
             .font: UIFont.systemFont(ofSize: 14.0),
             .foregroundColor: UIColor.white, .backgroundColor: UIColor.systemRed,
-        
+
         ]
         let lockRect = CGRect(x: rect.origin.x + 5, y: rect.origin.y + 5, width: rect.size.width, height: rect.size.height)
         text.draw(in: lockRect, withAttributes: attributes)
@@ -1438,7 +1450,7 @@ final class LadderView: ScaledView {
         ladderViewHeight = self.frame.height
         initializeRegions()
         cursorViewDelegate.setCursorHeight()
-        
+
     }
 
     func setCaliperMaxY(_ maxY: CGFloat) {
@@ -1575,6 +1587,7 @@ extension LadderView: LadderViewDelegate {
         attachedMark = ladder.addMark(at: positionX / scale, inRegion: activeRegion)
         if let attachedMark = attachedMark {
             undoablyAddMark(mark: attachedMark, region: activeRegion)
+            registerMark(attachedMark)
             attachedMark.attached = true
             attachedMark.highlight = .attached
         }
@@ -1586,10 +1599,12 @@ extension LadderView: LadderViewDelegate {
         addGroupedMiddleMarks(ofMark: attachedMark)
     }
 
+    //FIXME: This func crashes when encoding automatically, probably due to some kind of endless reference thrashing.  (e.g. it encodes a mark and its markgroup, and each mark in the mark group has the original mark in its markgroup, etc.
     func groupNearbyMarks(mark: Mark) {
         os_log("groupNearbyMarks(mark:) - LadderView", log: OSLog.debugging, type: .debug)
-        var minimum: CGFloat = 15
-        minimum = minimum / scale
+        // FIXME: temporary return
+        return
+        let minimum: CGFloat = 15 / scale
         let nearbyMarks = getNearbyMarks(mark: mark, nearbyDistance: minimum)
         let proxMarks = nearbyMarks.proximal
         let distalMarks = nearbyMarks.distal
@@ -1705,4 +1720,3 @@ extension LadderView: LadderViewDelegate {
         }
     }
 }
-
