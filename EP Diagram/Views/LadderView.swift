@@ -590,9 +590,10 @@ final class LadderView: ScaledView {
 
     func setAttachedMarkAndGroupedMarksHighlights() {
         if let attachedMark = attachedMark {
-            let groupedMarks = attachedMark.groupedMarks
+            let groupedMarkIds = attachedMark.groupedMarkIds
             // Note that the order below is important.  An attached mark can be in its own groupedMarks.  But we always want the attached mark to have an .attached highlight.
-            groupedMarks.highlight(highlight: .grouped)
+            ladder.setHighlightForMarkIdGroup(highlight: .grouped, markIdGroup: groupedMarkIds)
+//            l.highlight(highlight: .grouped)
             attachedMark.highlight = .attached
         }
     }
@@ -823,12 +824,12 @@ final class LadderView: ScaledView {
             if mark.segment.distal.y != 1.0 && mark.segment.distal.x > mark.segment.proximal.x {
                 mark.block = .distal
             }
-            if mark.groupedMarks.proximal.count == 0 {
+            if mark.groupedMarkIds.proximal.count == 0 {
                 if mark.segment.proximal.x <= mark.segment.distal.x {
                     mark.impulseOrigin = .proximal
                 }
             }
-            if mark.groupedMarks.distal.count == 0 {
+            if mark.groupedMarkIds.distal.count == 0 {
                 if mark.segment.distal.x < mark.segment.proximal.x {
                     mark.impulseOrigin = .distal
                 }
@@ -840,41 +841,12 @@ final class LadderView: ScaledView {
         guard let mark = mark else { return }
         var nearbyDistance: CGFloat = 10
         nearbyDistance = nearbyDistance / scale
-        let nearbyMarks = getNearbyMarks(mark: mark, nearbyDistance: nearbyDistance)
+        let nearbyMarkIds = getNearbyMarkIds(mark: mark, nearbyDistance: nearbyDistance)
+//        let nearbyMarks = getNearbyMarks(mark: mark, nearbyDistance: nearbyDistance)
         ladder.setHighlightForAllMarks(highlight: .none)
-        nearbyMarks.highlight(highlight: .grouped)
+        ladder.setHighlightForMarkIdGroup(highlight: .grouped, markIdGroup: nearbyMarkIds)
+//        nearbyMarks.highlight(highlight: .grouped)
         setAttachedMarkAndGroupedMarksHighlights()
-    }
-
-
-
-    func getNearbyMarks(mark: Mark, nearbyDistance: CGFloat) -> MarkGroup {
-        guard let activeRegion = activeRegion else { return MarkGroup() }
-        var proximalMarks = MarkSet()
-        var distalMarks = MarkSet()
-        var middleMarks = MarkSet()
-        if let proximalRegion = ladder.getRegionBefore(region: activeRegion) {
-            for neighboringMark in proximalRegion.marks {
-                if assessCloseness(ofMark: mark, inRegion: activeRegion, toNeighboringMark: neighboringMark, inNeighboringRegion: proximalRegion, usingNearbyDistance: nearbyDistance) {
-                    proximalMarks.insert(neighboringMark)
-                }
-            }
-        }
-        if let distalRegion = ladder.getRegionAfter(region: activeRegion) {
-            for neighboringMark in distalRegion.marks {
-                if assessCloseness(ofMark: mark, inRegion: activeRegion, toNeighboringMark: neighboringMark, inNeighboringRegion: distalRegion, usingNearbyDistance: nearbyDistance) {
-                    distalMarks.insert(neighboringMark)
-                }
-            }
-        }
-        // check in the same region ("middle region", same as activeRegion)
-        for neighboringMark in activeRegion.marks {
-            if assessCloseness(ofMark: mark, inRegion: activeRegion, toNeighboringMark: neighboringMark, inNeighboringRegion: activeRegion, usingNearbyDistance: nearbyDistance) {
-                middleMarks.insert(neighboringMark)
-                P("found middle mark")
-            }
-        }
-        return MarkGroup(proximal: proximalMarks, middle: middleMarks, distal: distalMarks)
     }
 
     func getNearbyMarkIds(mark: Mark, nearbyDistance: CGFloat) -> MarkIdGroup {
@@ -905,7 +877,6 @@ final class LadderView: ScaledView {
         }
         return MarkIdGroup(proximal: proximalMarkIds, middle: middleMarkIds, distal: distalMarkIds)
     }
-
 
     private func assessCloseness(ofMark mark: Mark, inRegion region: Region, toNeighboringMark neighboringMark: Mark, inNeighboringRegion neighboringRegion: Region, usingNearbyDistance nearbyDistance: CGFloat) -> Bool {
         guard mark != neighboringMark else { return false }
@@ -990,8 +961,9 @@ final class LadderView: ScaledView {
                 break
             }
         }
-        // FIXME: moving attached marks crashes app
-//        moveAttachedMarks(forMark: mark)
+        // FIXME: attaching marks needs to be undoable
+        // Also these are grouped marks, not attached marks.
+        moveAttachedMarks(forMark: mark)
         if let activeRegion = activeRegion {
             adjustCursor(mark: mark, region: activeRegion)
             cursorViewDelegate.refresh()
@@ -1000,13 +972,13 @@ final class LadderView: ScaledView {
 
     private func moveAttachedMarks(forMark mark: Mark) {
         // adjust ends of mark segment.
-        for proximalMark in mark.groupedMarks.proximal {
+        for proximalMark in ladder.getMarkSet(fromMarkIdSet: mark.groupedMarkIds.proximal) {
             proximalMark.segment.distal.x = mark.segment.proximal.x
         }
-        for distalMark in mark.groupedMarks.distal {
+        for distalMark in ladder.getMarkSet(fromMarkIdSet: mark.groupedMarkIds.distal) {
             distalMark.segment.proximal.x = mark.segment.distal.x
         }
-        for middleMark in mark.groupedMarks.middle {
+        for middleMark in ladder.getMarkSet(fromMarkIdSet:mark.groupedMarkIds.middle) {
             if mark == middleMark { break }
             let distanceToProximal = Common.distanceSegmentToPoint(segment: mark.segment, point: middleMark.segment.proximal)
             let distanceToDistal = Common.distanceSegmentToPoint(segment: mark.segment, point: middleMark.segment.distal)
@@ -1504,7 +1476,7 @@ final class LadderView: ScaledView {
 
     func ungroupMarks(mark: Mark) {
         ladder.setHighlightForAllMarks(highlight: .none)
-        mark.groupedMarks = MarkGroup()
+        mark.groupedMarkIds = MarkIdGroup()
     }
 
     @objc func straightenToProximal() {
@@ -1620,15 +1592,16 @@ extension LadderView: LadderViewDelegate {
     func groupNearbyMarks(mark: Mark) {
         os_log("groupNearbyMarks(mark:) - LadderView", log: OSLog.debugging, type: .debug)
         // FIXME: temporary return
-        return
         let minimum: CGFloat = 15 / scale
-        let nearbyMarks = getNearbyMarks(mark: mark, nearbyDistance: minimum)
+        let nearbyMarkIds = getNearbyMarkIds(mark: mark, nearbyDistance: minimum)
+        let nearbyMarks = ladder.getMarkGroup(fromMarkIdGroup: nearbyMarkIds)
+//        let nearbyMarks = getNearbyMarks(mark: mark, nearbyDistance: minimum)
         let proxMarks = nearbyMarks.proximal
         let distalMarks = nearbyMarks.distal
         let middleMarks = nearbyMarks.middle
         for proxMark in proxMarks {
-            mark.groupedMarks.proximal.insert(proxMark)
-            proxMark.groupedMarks.distal.insert(mark)
+            mark.groupedMarkIds.proximal.insert(proxMark.id)
+            proxMark.groupedMarkIds.distal.insert(mark.id)
             mark.segment.proximal.x = proxMark.segment.distal.x
             if mark.anchor == .proximal {
                 cursorViewDelegate.moveCursor(cursorViewPositionX: mark.segment.proximal.x)
@@ -1636,11 +1609,11 @@ extension LadderView: LadderViewDelegate {
             else if mark.anchor == .middle {
                 cursorViewDelegate.moveCursor(cursorViewPositionX: mark.midpoint().x)
             }
-            proxMark.groupedMarks.distal.insert(mark)
+            proxMark.groupedMarkIds.distal.insert(mark.id)
         }
         for distalMark in distalMarks {
-            mark.groupedMarks.distal.insert(distalMark)
-            distalMark.groupedMarks.proximal.insert(mark)
+            mark.groupedMarkIds.distal.insert(distalMark.id)
+            distalMark.groupedMarkIds.proximal.insert(mark.id)
             mark.segment.distal.x = distalMark.segment.proximal.x
             if mark.anchor == .proximal {
                 cursorViewDelegate.moveCursor(cursorViewPositionX: mark.segment.proximal.x)
@@ -1648,7 +1621,7 @@ extension LadderView: LadderViewDelegate {
             else if mark.anchor == .middle {
                 cursorViewDelegate.moveCursor(cursorViewPositionX: mark.midpoint().x)
             }
-            distalMark.groupedMarks.proximal.insert(mark)
+            distalMark.groupedMarkIds.proximal.insert(mark.id)
         }
         for middleMark in middleMarks {
             // FIXME: this doesn't work for vertical mark.
@@ -1676,8 +1649,8 @@ extension LadderView: LadderViewDelegate {
                     mark.segment.distal.x = middleMark.segment.distal.x
                 }
             }
-            mark.groupedMarks.middle.insert(middleMark)
-            middleMark.groupedMarks.middle.insert(mark)
+            mark.groupedMarkIds.middle.insert(middleMark.id)
+            middleMark.groupedMarkIds.middle.insert(mark.id)
             if let activeRegion = activeRegion {
                 adjustCursor(mark: mark, region: activeRegion)
             }
@@ -1686,11 +1659,11 @@ extension LadderView: LadderViewDelegate {
 
     // FIXME: this should add all grouped middle marks together, but doesn't seem to work.
     func addGroupedMiddleMarks(ofMark mark: Mark) {
-        var middleMarks = mark.groupedMarks.middle
-        for m in middleMarks {
-            middleMarks = middleMarks.union(m.groupedMarks.middle)
-        }
-        mark.groupedMarks.middle = middleMarks
+//        var middleMarkIds = mark.groupedMarkIds.middle
+//        for id in middleMarkIds {
+//            middleMarkIds = middleMarkIds.union(ladder.lookup(id: id)?.groupedMarkIds.middle)
+//        }
+//        mark.groupedMarkIds.middle = middleMarkIds
     }
 
     func getPositionYInView(positionY: CGFloat, view: UIView) -> CGFloat {

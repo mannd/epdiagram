@@ -81,14 +81,27 @@ class Ladder: Codable {
         return registry[id]
     }
 
-    func lookup(ids: [UUID]) -> [Mark] {
-        var marks = [Mark]()
+    func lookup(ids: MarkIdSet) -> MarkSet {
+        var markSet = MarkSet()
         for id in ids {
             if let mark = lookup(id: id) {
-                marks.append(mark)
+                markSet.insert(mark)
             }
         }
-        return marks
+        return markSet
+    }
+
+    // Convert a MarkIdGroup to a MarkGroup
+    func getMarkGroup(fromMarkIdGroup markIdGroup: MarkIdGroup) -> MarkGroup {
+        var markGroup = MarkGroup()
+        markGroup.proximal = lookup(ids: markIdGroup.proximal)
+        markGroup.middle = lookup(ids: markIdGroup.middle)
+        markGroup.distal = lookup(ids: markIdGroup.distal)
+        return markGroup
+    }
+
+    func getMarkSet(fromMarkIdSet markIdSet: MarkIdSet) -> MarkSet {
+        return lookup(ids: markIdSet)
     }
 
     func hasMarks() -> Bool {
@@ -146,26 +159,15 @@ class Ladder: Codable {
         if let index = region.marks.firstIndex(where: {$0 === mark}) {
             region.marks.remove(at: index)
         }
-        removeMarkReferences(toMark: mark)
         removeMarkIdReferences(toMarkId: mark.id)
     }
 
     func deleteMarksInRegion(_ region: Region) {
         setHighlightForAllMarks(highlight: .none)
         for mark: Mark in region.marks {
-            removeMarkReferences(toMark: mark)
             removeMarkIdReferences(toMarkId: mark.id)
         }
         region.marks.removeAll()
-    }
-
-    // Remove references to this mark in neighboring marks groupedMarks.
-    func removeMarkReferences(toMark mark: Mark) {
-        for region in regions {
-            for m in region.marks {
-                m.groupedMarks.remove(mark: mark)
-            }
-        }
     }
 
     func removeMarkIdReferences(toMarkId id: UUID) {
@@ -231,6 +233,11 @@ class Ladder: Codable {
         }
     }
 
+    func setHighlightForMarkIdGroup(highlight: Mark.Highlight, markIdGroup: MarkIdGroup) {
+        let markGroup = getMarkGroup(fromMarkIdGroup: markIdGroup)
+        markGroup.highlight(highlight: highlight)
+    }
+
     func unattachAllMarks() {
         for region in regions {
             region.marks.forEach { item in item.attached = false }
@@ -245,9 +252,9 @@ class Ladder: Codable {
     }
 
     func availableAnchors(forMark mark: Mark) -> [Anchor] {
-        let groupedMarks = mark.groupedMarks
+        let groupedMarkIds = mark.groupedMarkIds
         // FIXME: if attachment is in middle, only allow other end to move
-        if groupedMarks.count < 2 {
+        if groupedMarkIds.count < 2 {
             return defaultAnchors()
         }
         else {
@@ -266,16 +273,16 @@ class Ladder: Codable {
     // Pivot points are really fixed points (rename?) that can't move during mark movement.
     func pivotPoints(forMark mark: Mark) -> [Anchor] {
         // No pivot points, i.e. full freedom of movement if no grouped marks.
-        if mark.groupedMarks.count == 0 {
+        if mark.groupedMarkIds.count == 0 {
             return []
         }
-        if mark.groupedMarks.proximal.count > 0 && mark.groupedMarks.distal.count > 0 {
+        if mark.groupedMarkIds.proximal.count > 0 && mark.groupedMarkIds.distal.count > 0 {
             return [.proximal, .distal]
         }
-        else if mark.groupedMarks.proximal.count > 0 {
+        else if mark.groupedMarkIds.proximal.count > 0 {
             return [.distal]
         }
-        else if mark.groupedMarks.distal.count > 0 {
+        else if mark.groupedMarkIds.distal.count > 0 {
             return [.proximal]
         }
         // TODO: deal with middle marks

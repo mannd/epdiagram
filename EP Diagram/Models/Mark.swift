@@ -110,11 +110,7 @@ class Mark: Codable {
     var impulseOrigin: ImpulseOrigin = .none
     var text: String = ""  // text is usually a calibrated interval
     var showText: Bool = true
-    var groupedMarks: MarkGroup = MarkGroup() {
-        didSet {
-            print(groupedMarks)
-        }
-    }
+    // Ids of other marks that this mark is grouped with.
     var groupedMarkIds: MarkIdGroup = MarkIdGroup() {
         didSet {
             print(groupedMarkIds)
@@ -140,22 +136,9 @@ class Mark: Codable {
         }
     }
 
-    private enum Keys: String, CustomStringConvertible {
-        case id = "markID"
-        case segment = "markSegment"
-        case anchor = "markAnchor"
-        //etc.
-
-        var description: String {
-            return self.rawValue
-        }
-    }
-
-
     init(segment: Segment) {
         self.segment = segment
         self.id = UUID()
-        groupedMarks = MarkGroup()
         groupedMarkIds = MarkIdGroup()
         anchor = .middle
     }
