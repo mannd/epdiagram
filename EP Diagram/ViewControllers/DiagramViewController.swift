@@ -758,12 +758,6 @@ extension DiagramViewController {
 
     @objc func didEnterBackground() {
         os_log("didEnterBackground()", log: .action, type: .info)
-        // FIXME: Is it necessary to force save here?  Or can I just use updateChangeCount and autosave?
-//        saveDefaultDocument(diagram)
-        // or ??
-//        currentDocument?.updateChangeCount(.done)
-        // or this might not be necessary.  If there are any changes, they should already have been autosaved.
-
     }
 
     @objc func didDisconnect() {
@@ -771,7 +765,6 @@ extension DiagramViewController {
 
     }
 
-    // FIXME: this is being called multiple times.
     @objc func resolveFileConflicts() {
         os_log("resolveFileConflicts()", log: .action, type: .info)
         guard let currentDocument = currentDocument else { return }

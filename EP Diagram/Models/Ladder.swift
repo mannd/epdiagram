@@ -56,6 +56,8 @@ class Ladder: Codable {
     // TODO: Zones are used to select parts of regions.
     var zone: Zone?
 
+    private var registry: [UUID: Mark] = [:]
+
 
     // MARK: methods
     init(template: LadderTemplate) {
@@ -65,6 +67,41 @@ class Ladder: Codable {
             let region = Region(template: regionTemplate)
             regions.append(region)
         }
+    }
+
+    func registerMark(_ mark: Mark) {
+        registry[mark.id] = mark
+    }
+
+    func unregisterMark(_ mark: Mark) {
+        registry.removeValue(forKey: mark.id)
+    }
+
+    func lookup(id: UUID) -> Mark? {
+        return registry[id]
+    }
+
+    func lookup(ids: MarkIdSet) -> MarkSet {
+        var markSet = MarkSet()
+        for id in ids {
+            if let mark = lookup(id: id) {
+                markSet.insert(mark)
+            }
+        }
+        return markSet
+    }
+
+    // Convert a MarkIdGroup to a MarkGroup
+    func getMarkGroup(fromMarkIdGroup markIdGroup: MarkIdGroup) -> MarkGroup {
+        var markGroup = MarkGroup()
+        markGroup.proximal = lookup(ids: markIdGroup.proximal)
+        markGroup.middle = lookup(ids: markIdGroup.middle)
+        markGroup.distal = lookup(ids: markIdGroup.distal)
+        return markGroup
+    }
+
+    func getMarkSet(fromMarkIdSet markIdSet: MarkIdSet) -> MarkSet {
+        return lookup(ids: markIdSet)
     }
 
     func hasMarks() -> Bool {
@@ -95,19 +132,20 @@ class Ladder: Codable {
     // TODO: Does region have to be optional?  Consider refactor away optionality.
     // addMark() functions.  All require a Region in which to add the mark.  Each new mark is registered to that region.  All return addedMark or nil if region is nil.
     func addMark(at positionX: CGFloat, inRegion region: Region?) -> Mark? {
-        return registerAndAppendMark(Mark(positionX: positionX), toRegion: region)
+        return addMark(Mark(positionX: positionX), toRegion: region)
     }
 
-    func addMark(fromSegment segment: Segment, inRegion region: Region?) -> Mark? {
+     func addMark(fromSegment segment: Segment, inRegion region: Region?) -> Mark? {
         let mark = Mark(segment: segment)
-        return registerAndAppendMark(mark, toRegion: region)
+        return addMark(mark, toRegion: region)
     }
 
-    private func registerAndAppendMark(_ mark: Mark, toRegion region: Region?) -> Mark? {
-        os_log("registerAndAppendMark(_:toRegion:) - Ladder", log: .action, type: .info)
+    @discardableResult func addMark(_ mark: Mark, toRegion region: Region?) -> Mark? {
+        os_log("addMark(_:toRegion:) - Ladder", log: .action, type: .info)
         guard let region = region else { return nil }
         mark.lineStyle = region.lineStyle
         region.appendMark(mark)
+        registerMark(mark)
         if let index = getIndex(ofRegion: region) {
             mark.regionIndex = index
         }
@@ -117,25 +155,25 @@ class Ladder: Codable {
     func deleteMark(_ mark: Mark?, inRegion region: Region?) {
         guard let mark = mark, let region = region else { return }
         setHighlightForAllMarks(highlight: .none)
+        unregisterMark(mark)
         if let index = region.marks.firstIndex(where: {$0 === mark}) {
             region.marks.remove(at: index)
         }
-        removeMarkReferences(toMark: mark)
+        removeMarkIdReferences(toMarkId: mark.id)
     }
 
     func deleteMarksInRegion(_ region: Region) {
         setHighlightForAllMarks(highlight: .none)
         for mark: Mark in region.marks {
-            removeMarkReferences(toMark: mark)
+            removeMarkIdReferences(toMarkId: mark.id)
         }
         region.marks.removeAll()
     }
 
-    // Remove references to this mark in neighboring marks groupedMarks.
-    func removeMarkReferences(toMark mark: Mark) {
+    func removeMarkIdReferences(toMarkId id: UUID) {
         for region in regions {
-            for m in region.marks {
-                m.groupedMarks.remove(mark: mark)
+            for mark in region.marks {
+                mark.groupedMarkIds.remove(id: id)
             }
         }
     }
@@ -195,6 +233,11 @@ class Ladder: Codable {
         }
     }
 
+    func setHighlightForMarkIdGroup(highlight: Mark.Highlight, markIdGroup: MarkIdGroup) {
+        let markGroup = getMarkGroup(fromMarkIdGroup: markIdGroup)
+        markGroup.highlight(highlight: highlight)
+    }
+
     func unattachAllMarks() {
         for region in regions {
             region.marks.forEach { item in item.attached = false }
@@ -209,9 +252,9 @@ class Ladder: Codable {
     }
 
     func availableAnchors(forMark mark: Mark) -> [Anchor] {
-        let groupedMarks = mark.groupedMarks
+        let groupedMarkIds = mark.groupedMarkIds
         // FIXME: if attachment is in middle, only allow other end to move
-        if groupedMarks.count < 2 {
+        if groupedMarkIds.count < 2 {
             return defaultAnchors()
         }
         else {
@@ -230,21 +273,22 @@ class Ladder: Codable {
     // Pivot points are really fixed points (rename?) that can't move during mark movement.
     func pivotPoints(forMark mark: Mark) -> [Anchor] {
         // No pivot points, i.e. full freedom of movement if no grouped marks.
-        if mark.groupedMarks.count == 0 {
+        if mark.groupedMarkIds.count == 0 {
             return []
         }
-        if mark.groupedMarks.proximal.count > 0 && mark.groupedMarks.distal.count > 0 {
+        if mark.groupedMarkIds.proximal.count > 0 && mark.groupedMarkIds.distal.count > 0 {
             return [.proximal, .distal]
         }
-        else if mark.groupedMarks.proximal.count > 0 {
+        else if mark.groupedMarkIds.proximal.count > 0 {
             return [.distal]
         }
-        else if mark.groupedMarks.distal.count > 0 {
+        else if mark.groupedMarkIds.distal.count > 0 {
             return [.proximal]
         }
         // TODO: deal with middle marks
         return []
     }
+
 
     // Returns a basic ladder (A, AV, V).
     static func defaultLadder() -> Ladder {

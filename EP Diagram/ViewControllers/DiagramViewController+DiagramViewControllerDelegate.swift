@@ -19,6 +19,7 @@ protocol DiagramViewControllerDelegate: class {
 }
 
 extension DiagramViewController: DiagramViewControllerDelegate {
+    // FIXME: need to make this undoable, going back to previous ladder (not just template).  See set diagram.image.
     func selectLadderTemplate(ladderTemplate: LadderTemplate?) {
         os_log("selecteLadderTemplate - ViewController", log: OSLog.action, type: .info)
         P("ladder is dirty = \(ladderView.ladderIsDirty)")

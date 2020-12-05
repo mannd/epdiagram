@@ -16,6 +16,7 @@ import os.log
 // MARK: - typealiases
 
 typealias MarkSet = Set<Mark>
+typealias MarkIdSet = Set<UUID>
 
 // MARK: - enums
 
@@ -25,6 +26,12 @@ enum Movement {
 }
 
 // MARK: - classes
+
+// FIXME: This is problematic, see below.  For solutions see https://www.behindmedia.com/2017/12/22/implementing-a-weakly-referencing-set-in-swift/, which implements a set of generic weak references.  More practical is https://stackoverflow.com/questions/43306110/remove-duplicate-values-from-a-dictionary-in-swift-3 which uses a combination of a set and a dictionary to insure that the dictionary only includes unique items.
+
+// Actually we don't need a dictionary, just an array of UUID?
+
+// See https://swiftrocks.com/weak-dictionary-values-in-swift for another solution.
 
 // FIXME: These sets are retaining strong references to marks, making deleting them problematic.  It may be necessary to make sets of mark ids to avoid this.
 // A mark may have up to three attachments to marks in the proximal and distal regions
@@ -61,6 +68,33 @@ struct MarkGroup: Codable {
     }
 }
 
+struct MarkIdGroup: Codable {
+    var proximal: MarkIdSet
+    var middle: MarkIdSet
+    var distal: MarkIdSet
+
+    var allMarkIds: MarkIdSet {
+        proximal.union(middle.union(distal))
+    }
+    var count: Int {
+        allMarkIds.count
+    }
+
+    init(proximal: MarkIdSet = MarkIdSet(),
+         middle: MarkIdSet = MarkIdSet(),
+         distal: MarkIdSet = MarkIdSet()) {
+        self.proximal = proximal
+        self.middle = middle
+        self.distal = distal
+    }
+
+    mutating func remove(id: UUID) {
+        proximal.remove(id)
+        middle.remove(id)
+        distal.remove(id)
+    }
+}
+
 // The mark is a fundamental component of a ladder diagram.
 class Mark: Codable {
     let id: UUID // each mark has a unique id to allow sets of marks
@@ -76,7 +110,12 @@ class Mark: Codable {
     var impulseOrigin: ImpulseOrigin = .none
     var text: String = ""  // text is usually a calibrated interval
     var showText: Bool = true
-    var groupedMarks: MarkGroup = MarkGroup()
+    // Ids of other marks that this mark is grouped with.
+    var groupedMarkIds: MarkIdGroup = MarkIdGroup() {
+        didSet {
+            print(groupedMarkIds)
+        }
+    }
     var regionIndex: Int = -1 // keep track of which region mark is in a ladder, negative value should not occur, except on init.
 
     // Calculated properties
@@ -97,22 +136,10 @@ class Mark: Codable {
         }
     }
 
-    private enum Keys: String, CustomStringConvertible {
-        case id = "markID"
-        case segment = "markSegment"
-        case anchor = "markAnchor"
-        //etc.
-
-        var description: String {
-            return self.rawValue
-        }
-    }
-
-
     init(segment: Segment) {
         self.segment = segment
         self.id = UUID()
-        groupedMarks = MarkGroup()
+        groupedMarkIds = MarkIdGroup()
         anchor = .middle
     }
 
