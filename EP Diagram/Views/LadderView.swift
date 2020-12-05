@@ -437,9 +437,10 @@ final class LadderView: ScaledView {
                     if firstTappedMarkRegionIndex < regionIndex {
                         P("add mark and link to distal end of linked mark")
                         P("tapRegionPosition = \(tapRegionPosition)")
-                        // FIXME: need to undoablyAddMark() here
-                        let newMark = addMark(regionPositionX: firstTappedMark.segment.distal.x)
-                        newMark?.segment.distal = tapRegionPosition
+                        if let newMark = addMark(regionPositionX: firstTappedMark.segment.distal.x) {
+                            newMark.segment.distal = tapRegionPosition
+                            undoablyAddMark(mark: newMark, region: region)
+                        }
                     }
                     else if firstTappedMarkRegionIndex > regionIndex {
                         P("add mark and link to proximal end of linked mark")
@@ -845,6 +846,8 @@ final class LadderView: ScaledView {
         setAttachedMarkAndGroupedMarksHighlights()
     }
 
+
+
     func getNearbyMarks(mark: Mark, nearbyDistance: CGFloat) -> MarkGroup {
         guard let activeRegion = activeRegion else { return MarkGroup() }
         var proximalMarks = MarkSet()
@@ -873,6 +876,36 @@ final class LadderView: ScaledView {
         }
         return MarkGroup(proximal: proximalMarks, middle: middleMarks, distal: distalMarks)
     }
+
+    func getNearbyMarkIds(mark: Mark, nearbyDistance: CGFloat) -> MarkIdGroup {
+        guard let activeRegion = activeRegion else { return MarkIdGroup() }
+        var proximalMarkIds = MarkIdSet()
+        var distalMarkIds = MarkIdSet()
+        var middleMarkIds = MarkIdSet()
+        if let proximalRegion = ladder.getRegionBefore(region: activeRegion) {
+            for neighboringMark in proximalRegion.marks {
+                if assessCloseness(ofMark: mark, inRegion: activeRegion, toNeighboringMark: neighboringMark, inNeighboringRegion: proximalRegion, usingNearbyDistance: nearbyDistance) {
+                    proximalMarkIds.insert(neighboringMark.id)
+                }
+            }
+        }
+        if let distalRegion = ladder.getRegionAfter(region: activeRegion) {
+            for neighboringMark in distalRegion.marks {
+                if assessCloseness(ofMark: mark, inRegion: activeRegion, toNeighboringMark: neighboringMark, inNeighboringRegion: distalRegion, usingNearbyDistance: nearbyDistance) {
+                    distalMarkIds.insert(neighboringMark.id)
+                }
+            }
+        }
+        // check in the same region ("middle region", same as activeRegion)
+        for neighboringMark in activeRegion.marks {
+            if assessCloseness(ofMark: mark, inRegion: activeRegion, toNeighboringMark: neighboringMark, inNeighboringRegion: activeRegion, usingNearbyDistance: nearbyDistance) {
+                middleMarkIds.insert(neighboringMark.id)
+                P("found middle mark")
+            }
+        }
+        return MarkIdGroup(proximal: proximalMarkIds, middle: middleMarkIds, distal: distalMarkIds)
+    }
+
 
     private func assessCloseness(ofMark mark: Mark, inRegion region: Region, toNeighboringMark neighboringMark: Mark, inNeighboringRegion neighboringRegion: Region, usingNearbyDistance nearbyDistance: CGFloat) -> Bool {
         guard mark != neighboringMark else { return false }

@@ -16,6 +16,7 @@ import os.log
 // MARK: - typealiases
 
 typealias MarkSet = Set<Mark>
+typealias MarkIdSet = Set<UUID>
 
 // MARK: - enums
 
@@ -67,6 +68,33 @@ struct MarkGroup: Codable {
     }
 }
 
+struct MarkIdGroup: Codable {
+    var proximal: MarkIdSet
+    var middle: MarkIdSet
+    var distal: MarkIdSet
+
+    var allMarkIds: MarkIdSet {
+        proximal.union(middle.union(distal))
+    }
+    var count: Int {
+        allMarkIds.count
+    }
+
+    init(proximal: MarkIdSet = MarkIdSet(),
+         middle: MarkIdSet = MarkIdSet(),
+         distal: MarkIdSet = MarkIdSet()) {
+        self.proximal = proximal
+        self.middle = middle
+        self.distal = distal
+    }
+
+    mutating func remove(id: UUID) {
+        proximal.remove(id)
+        middle.remove(id)
+        distal.remove(id)
+    }
+}
+
 // The mark is a fundamental component of a ladder diagram.
 class Mark: Codable {
     let id: UUID // each mark has a unique id to allow sets of marks
@@ -85,6 +113,11 @@ class Mark: Codable {
     var groupedMarks: MarkGroup = MarkGroup() {
         didSet {
             print(groupedMarks)
+        }
+    }
+    var groupedMarkIds: MarkIdGroup = MarkIdGroup() {
+        didSet {
+            print(groupedMarkIds)
         }
     }
     var regionIndex: Int = -1 // keep track of which region mark is in a ladder, negative value should not occur, except on init.
@@ -123,6 +156,7 @@ class Mark: Codable {
         self.segment = segment
         self.id = UUID()
         groupedMarks = MarkGroup()
+        groupedMarkIds = MarkIdGroup()
         anchor = .middle
     }
 

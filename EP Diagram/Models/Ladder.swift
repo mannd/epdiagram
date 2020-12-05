@@ -71,12 +71,24 @@ class Ladder: Codable {
 
     func registerMark(_ mark: Mark) {
         registry[mark.id] = mark
-        print(registry)
     }
 
     func unregisterMark(_ mark: Mark) {
         registry.removeValue(forKey: mark.id)
-        print(registry)
+    }
+
+    func lookup(id: UUID) -> Mark? {
+        return registry[id]
+    }
+
+    func lookup(ids: [UUID]) -> [Mark] {
+        var marks = [Mark]()
+        for id in ids {
+            if let mark = lookup(id: id) {
+                marks.append(mark)
+            }
+        }
+        return marks
     }
 
     func hasMarks() -> Bool {
@@ -135,12 +147,14 @@ class Ladder: Codable {
             region.marks.remove(at: index)
         }
         removeMarkReferences(toMark: mark)
+        removeMarkIdReferences(toMarkId: mark.id)
     }
 
     func deleteMarksInRegion(_ region: Region) {
         setHighlightForAllMarks(highlight: .none)
         for mark: Mark in region.marks {
             removeMarkReferences(toMark: mark)
+            removeMarkIdReferences(toMarkId: mark.id)
         }
         region.marks.removeAll()
     }
@@ -150,6 +164,14 @@ class Ladder: Codable {
         for region in regions {
             for m in region.marks {
                 m.groupedMarks.remove(mark: mark)
+            }
+        }
+    }
+
+    func removeMarkIdReferences(toMarkId id: UUID) {
+        for region in regions {
+            for mark in region.marks {
+                mark.groupedMarkIds.remove(id: id)
             }
         }
     }
