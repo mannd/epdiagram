@@ -299,8 +299,6 @@ extension DiagramViewController: HamburgerTableDelegate, UIImagePickerController
 //    }
 
     @objc func setDiagramImage(_ image: UIImage?) {
-        // FIXME: decide whether to reset undo here
-//        undoManager?.removeAllActions()
         currentDocument?.undoManager.registerUndo(withTarget: self, selector: #selector(setDiagramImage), object: imageView.image)
         updateUndoRedoButtons()
         diagram.ladder.clear()

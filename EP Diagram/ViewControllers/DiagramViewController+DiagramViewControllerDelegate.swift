@@ -52,6 +52,15 @@ extension DiagramViewController: DiagramViewControllerDelegate {
     func selectSampleDiagram(_ diagram: Diagram?) {
         os_log("selectSampleDiagram()", log: .action, type: .info)
         guard let diagram = diagram else { return }
+        setDiagram(diagram)
+    }
+
+    func setDiagram(_ diagram: Diagram) {
+        let oldDiagram = self.diagram
+        currentDocument?.undoManager?.registerUndo(withTarget: self, handler: { target in
+            target.setDiagram(oldDiagram)
+        })
+        NotificationCenter.default.post(name: .didUndoableAction, object: nil)
         self.diagram = diagram
         self.setImageViewImage(with: diagram.image)
         self.ladderView.ladder = diagram.ladder
