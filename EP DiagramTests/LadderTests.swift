@@ -92,14 +92,5 @@ class LadderTests: XCTestCase {
         XCTAssertEqual(false, ladder.hasMarks())
     }
 
-    func testIsDirty() {
-        ladder = Ladder(template: LadderTemplate.defaultTemplate())
-        XCTAssertEqual(false, ladder.isDirty)
-        let segment: Segment = Segment(proximal: CGPoint(x: 0, y: 0), distal: CGPoint(x: 0, y: 1))
-        let mark = ladder.addMark(fromSegment: segment, inRegion: ladder.regions[0])
-        XCTAssertEqual(true, ladder.isDirty)
-        ladder.deleteMark(mark, inRegion: ladder.regions[0])
-        XCTAssertEqual(true, ladder.isDirty)
-    }
 
 }

@@ -11,8 +11,6 @@ import os.log
 
 protocol DiagramViewControllerDelegate: class {
     func selectLadderTemplate(ladderTemplate: LadderTemplate?)
-    func selectDiagram(named name: String?)
-    func deleteDiagram(named name: String)
     func saveTemplates(_ templates: [LadderTemplate])
     func selectSampleDiagram(_ diagram: Diagram?)
     func setViewsNeedDisplay()
@@ -26,48 +24,21 @@ extension DiagramViewController: DiagramViewControllerDelegate {
 
         if let ladderTemplate = ladderTemplate {
             let ladder = Ladder(template: ladderTemplate)
-            // Reuse image if there is one.
-            setDiagramImage(imageView.image)
-            diagram.ladder = ladder
-            ladderView.ladder = ladder
-            setViewsNeedDisplay()
+            setLadder(ladder: ladder)
         }
     }
 
-    func selectDiagram(named name: String?) {
-        guard let diagramName = name else { return }
-        P("diagram name = \(diagramName)")
-//        do {
-//            diagram = try Diagram.retrieve(fileName: diagramName)
-//            setImageViewImage(with: diagram.image)
-//            self.ladderView.ladder = diagram.ladder
-//            self.setTitle()
-////            DiagramIO.saveLastDiagram(name: diagram.name)
-//            self.setViewsNeedDisplay()
-//        } catch {
-//            os_log("Error: %s", log: .errors, type: .error, error.localizedDescription)
-//            Common.showFileError(viewController: self, error: error)
-//        }
+    private func setLadder(ladder: Ladder) {
+        let oldLadder = diagram.ladder
+        currentDocument?.undoManager?.registerUndo(withTarget: self, handler: { target in
+            target.setLadder(ladder: oldLadder)
+        })
+        NotificationCenter.default.post(name: .didUndoableAction, object: nil)
+        diagram.ladder = ladder
+        ladderView.ladder = ladder
+        setViewsNeedDisplay()
     }
 
-    func deleteDiagram(named name: String) {
-        os_log("deleteDiagram %s", log: .action, type: .info, name)
-        // actually delete diagram files here
-        do {
-            let diagramDirURL = try DiagramIO.getDiagramDirURL(for: name)
-            let diagramDirContents = try FileManager.default.contentsOfDirectory(atPath: diagramDirURL.path)
-            for path in diagramDirContents {
-                let pathURL = diagramDirURL.appendingPathComponent(path, isDirectory: false)
-                try FileManager.default.removeItem(atPath: pathURL.path)
-            }
-            try FileManager.default.removeItem(atPath: diagramDirURL.path)
-        } catch {
-            os_log("Could not delete diagram %s, error: %s", log: .action, type: .error, name, error.localizedDescription)
-            Common.showFileError(viewController: self, error: error)
-        }
-    }
-
- 
     func saveTemplates(_ templates: [LadderTemplate]) {
         os_log("saveTemplates()", log: .action, type: .info)
         do {

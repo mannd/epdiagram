@@ -31,18 +31,4 @@ class FileIOTests: XCTestCase {
         }
     }
 
-    func testGetURL() {
-        // these aren't tests, just used for debuggin
-        var url = FileIO.getURL(for: .documents)
-        P("url.documents = \(String(describing: url))")
-        url = FileIO.getURL(for: .cache)
-        P("url.cache = \(String(describing: url))")
-        url = FileIO.getURL(for: .applicationSupport)
-        P("url.applicationSupport = \(String(describing: url))")
-        let s = "This is a test"
-        try! FileIO.store(s, to: .documents, withFileName: "test1")
-        let returnedS: String?  = FileIO.retrieve("test1", from: .documents, as: String.self)
-        XCTAssertEqual(s, returnedS!)
-    }
-
 }

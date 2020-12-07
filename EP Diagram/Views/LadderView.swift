@@ -32,7 +32,6 @@ protocol LadderViewDelegate: AnyObject {
     func assessBlockAndImpulseOrigin(mark: Mark?)
     func getAttachedMarkScaledAnchorPosition() -> CGPoint?
     func setAttachedMarkAndGroupedMarksHighlights()
-//    func highlightGroupedMarks(highlight: Mark.Highlight)
     func toggleAttachedMarkAnchor()
 }
 
@@ -203,12 +202,12 @@ final class LadderView: ScaledView {
         return ladderViewHeight / CGFloat(numRegionUnits)
     }
 
-    func resetLadder() {
-        ladder = Ladder.defaultLadder()
-        activeRegion = ladder.regions[0]
-        cursorViewDelegate.cursorIsVisible = false
-        setupView()
-    }
+//    func resetLadder() {
+//        ladder = Ladder.defaultLadder()
+//        activeRegion = ladder.regions[0]
+//        cursorViewDelegate.cursorIsVisible = false
+//        setupView()
+//    }
 
     // MARK: - Touches
 
@@ -593,7 +592,6 @@ final class LadderView: ScaledView {
             let groupedMarkIds = attachedMark.groupedMarkIds
             // Note that the order below is important.  An attached mark can be in its own groupedMarks.  But we always want the attached mark to have an .attached highlight.
             ladder.setHighlightForMarkIdGroup(highlight: .grouped, markIdGroup: groupedMarkIds)
-//            l.highlight(highlight: .grouped)
             attachedMark.highlight = .attached
         }
     }
@@ -934,9 +932,9 @@ final class LadderView: ScaledView {
                 mark.segment.proximal.x = regionPosition.x
             case .middle:
                 // Determine halfway point between proximal and distal.
-                let differanceX = (mark.segment.proximal.x - mark.segment.distal.x) / 2
-                mark.segment.proximal.x = regionPosition.x + differanceX
-                mark.segment.distal.x = regionPosition.x - differanceX
+                let differenceX = (mark.segment.proximal.x - mark.segment.distal.x) / 2
+                mark.segment.proximal.x = regionPosition.x + differenceX
+                mark.segment.distal.x = regionPosition.x - differenceX
             case .distal:
                 mark.segment.distal.x = regionPosition.x
             case .none:
@@ -961,16 +959,15 @@ final class LadderView: ScaledView {
                 break
             }
         }
-        // FIXME: attaching marks needs to be undoable
-        // Also these are grouped marks, not attached marks.
-        moveAttachedMarks(forMark: mark)
+        // FIXME: moving grouped marks needs to be undoable
+        moveGroupedMarks(forMark: mark)
         if let activeRegion = activeRegion {
             adjustCursor(mark: mark, region: activeRegion)
             cursorViewDelegate.refresh()
         }
     }
 
-    private func moveAttachedMarks(forMark mark: Mark) {
+    private func moveGroupedMarks(forMark mark: Mark) {
         // adjust ends of mark segment.
         for proximalMark in ladder.getMarkSet(fromMarkIdSet: mark.groupedMarkIds.proximal) {
             proximalMark.segment.distal.x = mark.segment.proximal.x
@@ -1450,7 +1447,7 @@ final class LadderView: ScaledView {
     @objc func deletePressedMark() {
         os_log("deletePressedMark() - LadderView", log: OSLog.debugging, type: .debug)
         if let pressedMark = pressedMark {
-            ladder.deleteMark(pressedMark, inRegion: activeRegion)
+            undoablyDeleteMark(mark: pressedMark, region: activeRegion)
             ladder.setHighlightForAllMarks(highlight: .none)
         }
         cursorViewDelegate.cursorIsVisible = false
@@ -1461,7 +1458,12 @@ final class LadderView: ScaledView {
     @objc func deleteAllInRegion() {
         os_log("deleteAllInRegion() - LadderView", log: OSLog.debugging, type: .debug)
         if let activeRegion = activeRegion {
-            ladder.deleteMarksInRegion(activeRegion)
+            undoManager?.beginUndoGrouping()
+            for mark in activeRegion.marks {
+                undoablyDeleteMark(mark: mark, region: activeRegion)
+            }
+            undoManager?.endUndoGrouping()
+            ladder.setHighlightForAllMarks(highlight: .none)
             cursorViewDelegate.cursorIsVisible = false
             cursorViewDelegate.refresh()
             setNeedsDisplay()
@@ -1696,12 +1698,6 @@ extension LadderView: LadderViewDelegate {
         os_log("deleteAttachedMark() - LadderView", log: OSLog.debugging, type: .debug)
         deleteMark(attachedMark)
     }
-
-//    func highlightGroupedMarks(highlight: Mark.Highlight) {
-//        guard let attachedMark = attachedMark else { return }
-//        attachedMark.groupedMarks.highlight(highlight: highlight)
-//        attachedMark.highlight = .attached
-//    }
 
     func toggleAttachedMarkAnchor() {
         toggleAnchor(mark: attachedMark)

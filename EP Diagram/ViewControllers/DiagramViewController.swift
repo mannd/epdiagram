@@ -435,7 +435,7 @@ final class DiagramViewController: UIViewController {
             // Cursor doesn't track undo and redo well, so hide it!
             cursorView.cursorIsVisible = false
             self.currentDocument?.undoManager?.undo()
-            ladderView.setNeedsDisplay()
+            setViewsNeedDisplay()
         }
     }
 
@@ -444,7 +444,7 @@ final class DiagramViewController: UIViewController {
         if self.currentDocument?.undoManager?.canRedo ?? false {
             cursorView.cursorIsVisible = false
             self.currentDocument?.undoManager?.redo()
-            ladderView.setNeedsDisplay()
+            setViewsNeedDisplay()
         }
     }
 
@@ -749,7 +749,6 @@ extension DiagramViewController {
 
     func updateUndoRedoButtons() {
         // DispatchQueue here forces UI to finish up its tasks before performing below on the main thread.
-        // If not used, undoManager.canUndo/Redo is not updated before this is called.
         DispatchQueue.main.async {
             self.undoButton.isEnabled = self.currentDocument?.undoManager?.canUndo ?? false
             self.redoButton.isEnabled = self.currentDocument?.undoManager?.canRedo ?? false
