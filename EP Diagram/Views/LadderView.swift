@@ -40,6 +40,7 @@ final class LadderView: ScaledView {
     private let accuracy: CGFloat = 20
     private let lowerLimitMarkHeight: CGFloat = 0.1
     private let lowerLimitMarkWidth: CGFloat = 20
+    private let nearbyMarkAccuracy: CGFloat = 15
 
     // TODO: lineWidth vs markLineWidth??????
     // variables that need to eventually be preferences
@@ -52,6 +53,7 @@ final class LadderView: ScaledView {
     var linkColor = UIColor.systemGreen
     var selectedColor = UIColor.systemRed
     var groupedColor = UIColor.systemPurple
+    var snapToNearbyMarks = true
 
     // Controlled by Preferences at present.
     var lineWidth: CGFloat = 2
@@ -762,7 +764,8 @@ final class LadderView: ScaledView {
             }
         }
         if state == .ended {
-            currentDocument?.undoManager?.endUndoGrouping()
+//            currentDocument?.undoManager?.endUndoGrouping()
+
             if let movingMark = movingMark {
                 swapEndsIfNeeded(mark: movingMark)
                 groupNearbyMarks(mark: movingMark)
@@ -780,6 +783,8 @@ final class LadderView: ScaledView {
                     assessBlockAndImpulseOrigin(mark: dragCreatedMark)
                 }
             }
+            // FIXME: moved from start of if statement
+            currentDocument?.undoManager?.endUndoGrouping()
             if !cursorViewDelegate.cursorIsVisible {
                 unhighlightAllMarks()
             }
@@ -968,6 +973,7 @@ final class LadderView: ScaledView {
     }
 
     private func moveGroupedMarks(forMark mark: Mark) {
+        os_log("moveGroupedMarked(forMark:)", log: .action, type: .info)
         // adjust ends of mark segment.
         for proximalMark in ladder.getMarkSet(fromMarkIdSet: mark.groupedMarkIds.proximal) {
             proximalMark.segment.distal.x = mark.segment.proximal.x
@@ -1590,20 +1596,54 @@ extension LadderView: LadderViewDelegate {
         addGroupedMiddleMarks(ofMark: attachedMark)
     }
 
-    //FIXME: This func crashes when encoding automatically, probably due to some kind of endless reference thrashing.  (e.g. it encodes a mark and its markgroup, and each mark in the mark group has the original mark in its markgroup, etc.
-    func groupNearbyMarks(mark: Mark) {
-        os_log("groupNearbyMarks(mark:) - LadderView", log: OSLog.debugging, type: .debug)
-        // FIXME: temporary return
-        let minimum: CGFloat = 15 / scale
-        let nearbyMarkIds = getNearbyMarkIds(mark: mark, nearbyDistance: minimum)
-        let nearbyMarks = ladder.getMarkGroup(fromMarkIdGroup: nearbyMarkIds)
-//        let nearbyMarks = getNearbyMarks(mark: mark, nearbyDistance: minimum)
-        let proxMarks = nearbyMarks.proximal
-        let distalMarks = nearbyMarks.distal
-        let middleMarks = nearbyMarks.middle
-        for proxMark in proxMarks {
+
+
+    private func snap(movingMark: Mark, fixedMark: Mark) {
+
+    }
+
+
+    func undoablySnapMarkToNearbyMarks(mark: Mark, nearbyMarks: MarkGroup) {
+        currentDocument?.undoManager?.registerUndo(withTarget: self) { target in
+            target.redoablyUnsnapMarkFromNearbyMarks(mark: mark, nearbyMarks: nearbyMarks)
+        }
+        NotificationCenter.default.post(name: .didUndoableAction, object: nil)
+        snapMarkToNearbyMarks(mark: mark, nearbyMarks: nearbyMarks)
+    }
+
+    func redoablyUnsnapMarkFromNearbyMarks(mark: Mark, nearbyMarks: MarkGroup) {
+        currentDocument?.undoManager?.registerUndo(withTarget: self) { target in
+            target.undoablySnapMarkToNearbyMarks(mark: mark, nearbyMarks: nearbyMarks)
+        }
+        NotificationCenter.default.post(name: .didUndoableAction, object: nil)
+        unsnapMarkFromNearbyMarks(mark: mark, nearbyMarks: nearbyMarks)
+    }
+
+    func unsnapMarkFromNearbyMarks(mark: Mark, nearbyMarks: MarkGroup) {
+        os_log("unsnapMarkFromNearbyMarks(mark:nearbyMarks:))", log: .action, type: .info)
+        guard snapToNearbyMarks else { return }
+        for proxMark in nearbyMarks.proximal {
+            mark.groupedMarkIds.proximal.remove(proxMark.id)
+            proxMark.groupedMarkIds.distal.remove(mark.id)
+            // unmove mark ??  maybe not needed?
+        }
+        for distalMark in nearbyMarks.distal {
+            mark.groupedMarkIds.distal.remove(distalMark.id)
+            distalMark.groupedMarkIds.proximal.remove(mark.id)
+        }
+        // TODO: middle marks
+    }
+
+    // Adjust ends of marks to connect after dragging.
+    func snapMarkToNearbyMarks(mark: Mark, nearbyMarks: MarkGroup) {
+        os_log("SnapMarkToNearbyMarks(mark:nearbyMarks:))", log: .action, type: .info)
+        guard snapToNearbyMarks else { return }
+        for proxMark in nearbyMarks.proximal {
             mark.groupedMarkIds.proximal.insert(proxMark.id)
             proxMark.groupedMarkIds.distal.insert(mark.id)
+            // FIXME: These movements need to be undoable
+
+
             mark.segment.proximal.x = proxMark.segment.distal.x
             if mark.anchor == .proximal {
                 cursorViewDelegate.moveCursor(cursorViewPositionX: mark.segment.proximal.x)
@@ -1613,7 +1653,7 @@ extension LadderView: LadderViewDelegate {
             }
             proxMark.groupedMarkIds.distal.insert(mark.id)
         }
-        for distalMark in distalMarks {
+        for distalMark in nearbyMarks.distal {
             mark.groupedMarkIds.distal.insert(distalMark.id)
             distalMark.groupedMarkIds.proximal.insert(mark.id)
             mark.segment.distal.x = distalMark.segment.proximal.x
@@ -1625,7 +1665,7 @@ extension LadderView: LadderViewDelegate {
             }
             distalMark.groupedMarkIds.proximal.insert(mark.id)
         }
-        for middleMark in middleMarks {
+        for middleMark in nearbyMarks.middle {
             // FIXME: this doesn't work for vertical mark.
             var distanceToProximal = Common.distanceSegmentToPoint(segment: middleMark.segment, point: mark.segment.proximal)
             distanceToProximal = min(distanceToProximal, Common.distanceSegmentToPoint(segment: mark.segment, point: middleMark.segment.proximal))
@@ -1657,6 +1697,15 @@ extension LadderView: LadderViewDelegate {
                 adjustCursor(mark: mark, region: activeRegion)
             }
         }
+    }
+
+    // FIXME: Must be undoable!!!!
+    func groupNearbyMarks(mark: Mark) {
+        os_log("groupNearbyMarks(mark:) - LadderView", log: OSLog.debugging, type: .debug)
+        let minimum: CGFloat = nearbyMarkAccuracy / scale
+        let nearbyMarkIds = getNearbyMarkIds(mark: mark, nearbyDistance: minimum)
+        let nearbyMarks = ladder.getMarkGroup(fromMarkIdGroup: nearbyMarkIds)
+        undoablySnapMarkToNearbyMarks(mark: mark, nearbyMarks: nearbyMarks)
     }
 
     // FIXME: this should add all grouped middle marks together, but doesn't seem to work.

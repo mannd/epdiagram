@@ -93,6 +93,7 @@ struct MarkIdGroup: Codable {
         middle.remove(id)
         distal.remove(id)
     }
+    
 }
 
 // The mark is a fundamental component of a ladder diagram.

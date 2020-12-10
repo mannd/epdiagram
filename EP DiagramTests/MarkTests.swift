@@ -92,4 +92,33 @@ class MarkTests: XCTestCase {
         XCTAssert(allMarks.contains(mark3))
     }
 
+    func testRegistry() {
+        let ladder = Ladder.defaultLadder()
+        let mark1 = Mark()
+        ladder.addMark(mark1, toRegion: ladder.regions[0])
+        let mark2 = Mark()
+        ladder.addMark(mark2, toRegion: ladder.regions[1])
+        let mark3 = Mark()
+        ladder.addMark(mark3, toRegion: ladder.regions[2])
+        XCTAssertEqual(ladder.lookup(id: mark1.id), mark1)
+        XCTAssertEqual(ladder.lookup(id: mark2.id), mark2)
+        XCTAssertEqual(ladder.lookup(id: mark3.id), mark3)
+        ladder.deleteMark(mark1, inRegion: ladder.regions[0])
+        XCTAssertEqual(ladder.lookup(id: mark1.id), nil)
+    }
+
+    func testRelativeRegions() {
+        let ladder = Ladder.defaultLadder()
+        let aMark = Mark()
+        let avMark = Mark()
+        let vMark = Mark()
+        ladder.addMark(aMark, toRegion: ladder.regions[0])
+        ladder.addMark(avMark, toRegion: ladder.regions[1])
+        ladder.addMark(vMark, toRegion: ladder.regions[2])
+        XCTAssertEqual(Ladder.getRelativeRegionBetweenMarks(mark: aMark, otherMark: aMark), RelativeRegion.same)
+        XCTAssertEqual(Ladder.getRelativeRegionBetweenMarks(mark: aMark, otherMark: avMark), RelativeRegion.after)
+        XCTAssertEqual(Ladder.getRelativeRegionBetweenMarks(mark: avMark, otherMark: aMark), RelativeRegion.before)
+        XCTAssertEqual(Ladder.getRelativeRegionBetweenMarks(mark: aMark, otherMark: vMark), RelativeRegion.distant)
+    }
+
 }

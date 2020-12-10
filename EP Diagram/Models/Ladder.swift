@@ -30,6 +30,14 @@ private enum Keys: String, CustomStringConvertible {
     }
 }
 
+// Is a mark in the region before, same region, region after, or farther away?
+enum RelativeRegion {
+    case before
+    case same
+    case after
+    case distant
+}
+
 // MARK: - classes
 
 // A Ladder is simply a collection of Regions in top down order.
@@ -127,6 +135,22 @@ class Ladder: Codable {
     func editRegion(region: Region) {
         os_log("editRegion(region:)", log: .action, type: .info)
         fatalError("not implemented")
+    }
+
+    static func getRelativeRegionBetweenMarks(mark: Mark, otherMark: Mark) -> RelativeRegion {
+        var relativeRegion: RelativeRegion = .distant
+        let regionDiff = otherMark.regionIndex - mark.regionIndex
+        switch regionDiff {
+        case 1:
+            relativeRegion = .after
+        case 0:
+            relativeRegion = .same
+        case -1:
+            relativeRegion = .before
+        default:
+            relativeRegion = .distant
+        }
+        return relativeRegion
     }
     
     // TODO: Does region have to be optional?  Consider refactor away optionality.
