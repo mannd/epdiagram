@@ -452,6 +452,14 @@ final class DiagramViewController: UIViewController {
 
     // MARK: - Touches
 
+    // Taps to cursor and ladder view are absorbed by cursor view and ladder view.
+    // Single tap to image (not near mark) adds mark with cursor if no mark attached.
+    // Single tap to image with mark attached unattaches mark.
+    // Double tap to image, with attached mark:
+    //    First tap unattaches mark, second tap adds mark with cursor.
+    //    - without attached mark:
+    //    First tap adds attached mark, second shifts anchor.
+    // FIXME: not sure if second behavior is good.
     @objc func singleTap(tap: UITapGestureRecognizer) {
         os_log("singleTap - ViewController", log: OSLog.touches, type: .info)
         if cursorView.mode == .calibration {
@@ -475,13 +483,13 @@ final class DiagramViewController: UIViewController {
     }
 
     // MARK: - Handle PDFs, URLs at app startup
+
     func openURL(url: URL) {
         os_log("openURL action", log: OSLog.action, type: .info)
         // self.resetImage
         let ext = url.pathExtension.uppercased()
         if ext != "PDF" {
             // self.enablePageButtons = false
-            // FIXME: image upside down after being saved and reopened???
             setDiagramImage(UIImage(contentsOfFile: url.path))
         }
         else {
