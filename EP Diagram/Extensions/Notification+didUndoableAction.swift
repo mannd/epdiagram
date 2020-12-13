@@ -10,5 +10,4 @@ import Foundation
 
 extension Notification.Name {
     static let didUndoableAction = Notification.Name("didUndoableAction")
-    static let preferencesChanged = Notification.Name("preferencesChanged")
 }

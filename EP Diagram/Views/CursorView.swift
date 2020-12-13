@@ -376,18 +376,12 @@ final class CursorView: ScaledView {
         ladderViewDelegate.refresh()
     }
 
-    func putCursor(imageScrollViewPosition position: CGPoint) {
-        cursor.positionX = position.x
-        cursor.positionOmniCircleY = position.y > maxCursorPositionY ? maxCursorPositionY : position.y
-    }
-
     func addMarkWithAttachedCursor(position: CGPoint) {
         os_log("addMarkWithAttachedCursor(position:) - CursorView", log: OSLog.debugging, type: .debug)
         // imageScrollView starts at x = 0, contentInset shifts view to right, and the left margin is negative.
         if position.x > 0 {
-            os_log("scale = %f", log: OSLog.debugging, type: .debug, scale)
-            P(">>> scale = \(scale)")
-            putCursor(imageScrollViewPosition: CGPoint(x: position.x / scale, y: position.y))
+            moveCursor(cursorViewPositionX: position.x / scale)
+            cursor.positionOmniCircleY = position.y > maxCursorPositionY ? maxCursorPositionY : position.y
             cursorIsVisible = true
             ladderViewDelegate.addAttachedMark(scaledViewPositionX: position.x)
             setCursorHeight()

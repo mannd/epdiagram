@@ -14,7 +14,7 @@ struct PreferencesView: View {
     @State private var showBlock = UserDefaults.standard.bool(forKey: Preferences.defaultShowBlockKey)
     @State private var showIntervals = UserDefaults.standard.bool(forKey: Preferences.defaultShowIntervalsKey)
     @Environment(\.presentationMode) private var presentationMode: Binding<PresentationMode>
-    @SceneStorage("inPreferences") private var inPreferences = true
+    weak var delegate: DiagramViewControllerDelegate?
 
     var body: some View {
         NavigationView {
@@ -43,10 +43,13 @@ struct PreferencesView: View {
 
     func onSave() {
         UserDefaults.standard.setValue(lineWidth, forKey: Preferences.defaultLineWidthKey)
+        print(lineWidth)
         UserDefaults.standard.setValue(showImpulseOrigin, forKey: Preferences.defaultShowImpulseOriginKey)
         UserDefaults.standard.setValue(showBlock, forKey: Preferences.defaultShowBlockKey)
+        print(showBlock)
         UserDefaults.standard.setValue(showIntervals, forKey: Preferences.defaultShowIntervalsKey)
-        NotificationCenter.default.post(name: Notification.Name.preferencesChanged, object: nil)
+//        NotificationCenter.default.post(name: .preferencesChanged, object: self)
+        delegate?.updatePreferences()
         self.presentationMode.wrappedValue.dismiss()
     }
 }

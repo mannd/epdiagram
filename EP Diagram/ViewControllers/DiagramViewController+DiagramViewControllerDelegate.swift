@@ -14,6 +14,7 @@ protocol DiagramViewControllerDelegate: class {
     func saveTemplates(_ templates: [LadderTemplate])
     func selectSampleDiagram(_ diagram: Diagram?)
     func setViewsNeedDisplay()
+    func updatePreferences()
 }
 
 extension DiagramViewController: DiagramViewControllerDelegate {
@@ -26,6 +27,15 @@ extension DiagramViewController: DiagramViewControllerDelegate {
             let ladder = Ladder(template: ladderTemplate)
             setLadder(ladder: ladder)
         }
+    }
+
+    func updatePreferences() {
+        os_log("updatePreferences()", log: .action, type: .info)
+        ladderView.lineWidth = CGFloat(UserDefaults.standard.double(forKey: Preferences.defaultLineWidthKey))
+        ladderView.showBlock = UserDefaults.standard.bool(forKey: Preferences.defaultShowBlockKey)
+        ladderView.showImpulseOrigin = UserDefaults.standard.bool(forKey: Preferences.defaultShowImpulseOriginKey)
+        ladderView.showIntervals = UserDefaults.standard.bool(forKey: Preferences.defaultShowIntervalsKey)
+        setViewsNeedDisplay()
     }
 
     private func setLadder(ladder: Ladder) {

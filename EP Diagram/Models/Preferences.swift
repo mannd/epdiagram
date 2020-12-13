@@ -40,8 +40,6 @@ struct Preferences {
         userDefaults.set(showImpulseOrigin, forKey: Preferences.defaultShowImpulseOriginKey)
         userDefaults.set(showBlock, forKey: Preferences.defaultShowBlockKey)
         userDefaults.set(showIntervals, forKey: Preferences.defaultShowIntervalsKey)
-
-
     }
 
     mutating func retrieve() {

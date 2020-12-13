@@ -638,7 +638,8 @@ final class DiagramViewController: UIViewController {
 
     @IBSegueAction func showPreferences(_ coder: NSCoder) -> UIViewController? {
         preferences.retrieve()
-        let preferencesView = PreferencesView()
+        var preferencesView = PreferencesView()
+        preferencesView.delegate = self
         let hostingController = UIHostingController(coder: coder, rootView: preferencesView)
         return hostingController
     }
@@ -734,17 +735,14 @@ final class DiagramViewController: UIViewController {
 extension DiagramViewController {
     func setupNotifications() {
         NotificationCenter.default.addObserver(self, selector: #selector(onDidUndoableAction(_:)), name: .didUndoableAction, object: nil)
-        NotificationCenter.default.addObserver(self, selector: #selector(updatePreferences), name: .preferencesChanged, object: nil)
         NotificationCenter.default.addObserver(self, selector: #selector(didEnterBackground), name: UIScene.didEnterBackgroundNotification, object: nil)
         NotificationCenter.default.addObserver(self, selector: #selector(didDisconnect), name: UIScene.didDisconnectNotification, object: nil)
-
         NotificationCenter.default.addObserver(self, selector: #selector(resolveFileConflicts), name: UIDocument.stateChangedNotification, object: nil)
   
     }
 
     func removeNotifications() {
         NotificationCenter.default.removeObserver(self, name: .didUndoableAction, object: nil)
-        NotificationCenter.default.removeObserver(self, name: .preferencesChanged, object: nil)
         NotificationCenter.default.removeObserver(self, name: UIScene.didEnterBackgroundNotification, object: nil)
         NotificationCenter.default.removeObserver(self, name: UIScene.didDisconnectNotification, object: nil)
     }
@@ -785,15 +783,6 @@ extension DiagramViewController {
             }
             currentDocument.diagram = diagram
         }
-    }
-
-    @objc func updatePreferences() {
-        os_log("updatePreferences()", log: .action, type: .info)
-        ladderView.lineWidth = CGFloat(UserDefaults.standard.double(forKey: Preferences.defaultLineWidthKey))
-        ladderView.showBlock = UserDefaults.standard.bool(forKey: Preferences.defaultShowBlockKey)
-        ladderView.showImpulseOrigin = UserDefaults.standard.bool(forKey: Preferences.defaultShowImpulseOriginKey)
-        ladderView.showIntervals = UserDefaults.standard.bool(forKey: Preferences.defaultShowIntervalsKey)
-        setViewsNeedDisplay()
     }
 
     var defaultDocumentURL: URL? {

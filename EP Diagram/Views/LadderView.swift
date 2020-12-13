@@ -777,6 +777,7 @@ final class LadderView: ScaledView {
             }
         }
         if state == .ended {
+            currentDocument?.undoManager?.endUndoGrouping()
             if let movingMark = movingMark {
                 swapEndsIfNeeded(mark: movingMark)
                 groupNearbyMarks(mark: movingMark)
@@ -806,7 +807,6 @@ final class LadderView: ScaledView {
             regionDistalToDragOrigin = nil
             dragOriginDivision = .none
         }
-        currentDocument?.undoManager?.endUndoGrouping()
         cursorViewDelegate.refresh()
         setNeedsDisplay()
     }
@@ -1635,7 +1635,6 @@ extension LadderView: LadderViewDelegate {
         for proxMark in nearbyMarks.proximal {
             mark.groupedMarkIds.proximal.remove(proxMark.id)
             proxMark.groupedMarkIds.distal.remove(mark.id)
-            // unmove mark ??  maybe not needed?
         }
         for distalMark in nearbyMarks.distal {
             mark.groupedMarkIds.distal.remove(distalMark.id)
@@ -1661,7 +1660,6 @@ extension LadderView: LadderViewDelegate {
             else if mark.anchor == .middle {
                 cursorViewDelegate.moveCursor(cursorViewPositionX: mark.midpoint().x)
             }
-//            proxMark.groupedMarkIds.distal.insert(mark.id)
         }
         for distalMark in nearbyMarks.distal {
             mark.groupedMarkIds.distal.insert(distalMark.id)
@@ -1673,10 +1671,11 @@ extension LadderView: LadderViewDelegate {
             else if mark.anchor == .middle {
                 cursorViewDelegate.moveCursor(cursorViewPositionX: mark.midpoint().x)
             }
-//            distalMark.groupedMarkIds.proximal.insert(mark.id)
         }
         for middleMark in nearbyMarks.middle {
             // FIXME: this doesn't work for vertical mark.
+            mark.groupedMarkIds.middle.insert(middleMark.id)
+            middleMark.groupedMarkIds.middle.insert(mark.id)
             var distanceToProximal = Common.distanceSegmentToPoint(segment: middleMark.segment, point: mark.segment.proximal)
             distanceToProximal = min(distanceToProximal, Common.distanceSegmentToPoint(segment: mark.segment, point: middleMark.segment.proximal))
             var distanceToDistal = Common.distanceSegmentToPoint(segment: middleMark.segment, point: mark.segment.distal)
@@ -1686,9 +1685,10 @@ extension LadderView: LadderViewDelegate {
                 if let x = x {
                     mark.segment.proximal.x = x
                 }
+                // FIXME: This causes unexpected straightening of mark
                 else { // vertical mark
-                    mark.segment.proximal.x = middleMark.segment.proximal.x
-                    mark.segment.distal.x = middleMark.segment.proximal.x
+//                    mark.segment.proximal.x = middleMark.segment.proximal.x
+//                    mark.segment.distal.x = middleMark.segment.proximal.x
                 }
             }
             else {
@@ -1696,15 +1696,11 @@ extension LadderView: LadderViewDelegate {
                 if let x = x {
                     mark.segment.distal.x = x
                 }
+                // FIXME: This causes unexpected straightening of mark
                 else { // vertical mark
-                    mark.segment.proximal.x = middleMark.segment.distal.x
-                    mark.segment.distal.x = middleMark.segment.distal.x
+//                    mark.segment.proximal.x = middleMark.segment.distal.x
+//                    mark.segment.distal.x = middleMark.segment.distal.x
                 }
-            }
-            mark.groupedMarkIds.middle.insert(middleMark.id)
-            middleMark.groupedMarkIds.middle.insert(mark.id)
-            if let activeRegion = activeRegion {
-                adjustCursor(mark: mark, region: activeRegion)
             }
         }
     }
@@ -1721,7 +1717,9 @@ extension LadderView: LadderViewDelegate {
     func addGroupedMiddleMarks(ofMark mark: Mark) {
 //        var middleMarkIds = mark.groupedMarkIds.middle
 //        for id in middleMarkIds {
-//            middleMarkIds = middleMarkIds.union(ladder.lookup(id: id)?.groupedMarkIds.middle)
+//            if let middleSet = ladder.lookup(id: id)?.groupedMarkIds.middle {
+//                middleMarkIds = middleMarkIds.union(middleSet)
+//            }
 //        }
 //        mark.groupedMarkIds.middle = middleMarkIds
     }

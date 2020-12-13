@@ -20,6 +20,7 @@ class DocumentBrowserViewController: UIDocumentBrowserViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         allowsDocumentCreation = true
+        localizedCreateDocumentActionTitle = L("Create New Diagram")
         browserUserInterfaceStyle = .dark
         delegate = browserDelegate
         view.tintColor = .green
@@ -30,10 +31,8 @@ class DocumentBrowserViewController: UIDocumentBrowserViewController {
         browserDelegate.presentationHandler = { [weak self] url, error in
             guard error == nil else {
                 //present error to user e.g UIAlertController
-                let alert = UIAlertController(title: L("Error opening document"), message: L("Could not open document."), preferredStyle: .actionSheet)
-                alert.addAction(UIAlertAction(title: NSLocalizedString("OK", comment: "Default action"), style: .default, handler: { _ in
-                    NSLog("The \"OK\" alert occured.")
-                }))
+                let alert = UIAlertController(title: L("Error Opening Diagram"), message: L("This diagram could not be opened."), preferredStyle: .alert)
+                alert.addAction(UIAlertAction(title: L("OK"), style: .cancel, handler: { _ in }))
                 self?.present(alert, animated: true)
                 return
             }
