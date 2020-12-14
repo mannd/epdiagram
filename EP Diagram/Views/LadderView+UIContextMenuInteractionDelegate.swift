@@ -38,8 +38,11 @@ extension LadderView: UIContextMenuInteractionDelegate {
             let delete = UIAction(title: L("Delete"), image: UIImage(systemName: "trash"), attributes: .destructive) { action in
                 self.deletePressedMark()
             }
-            let deleteAll = UIAction(title: L("Delete all in region"), image: UIImage(systemName: "trash"), attributes: .destructive) { action in
+            let deleteAllInRegion = UIAction(title: L("Delete all in region"), image: UIImage(systemName: "trash"), attributes: .destructive) { action in
                 self.deleteAllInRegion()
+            }
+            let deleteAllInLadder = UIAction(title: L("Delete all marks in ladder"), image: UIImage(systemName: "trash"), attributes: .destructive) { action in
+                self.deleteAllInLadder()
             }
             // FIXME: make sure we won't move grouped marks, or disconnect them when straightening.
             let straightenToProximal = UIAction(title: L("Straighten mark to proximal endpoint")) { action in
@@ -51,10 +54,10 @@ extension LadderView: UIContextMenuInteractionDelegate {
             // TODO: Must distinguish long press on mark, label, region, zone, whole ladder (outside of ladder).
             // Create and return a UIMenu with all of the actions as children
             if markWasLongPressed {
-                return UIMenu(title: L("Edit mark"), children: [style, straightenToProximal, straightenToDistal, unlink, delete, deleteAll])
+                return UIMenu(title: L("Edit mark"), children: [style, straightenToProximal, straightenToDistal, unlink, delete, deleteAllInRegion, deleteAllInLadder])
             }
             else {
-                return UIMenu(title: "", children: [paste, rhythm, delete, deleteAll])
+                return UIMenu(title: "", children: [paste, rhythm, delete, deleteAllInRegion, deleteAllInLadder])
             }
         }
     }

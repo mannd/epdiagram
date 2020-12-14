@@ -14,7 +14,6 @@ protocol DiagramViewControllerDelegate: class {
     func saveTemplates(_ templates: [LadderTemplate])
     func selectSampleDiagram(_ diagram: Diagram?)
     func setViewsNeedDisplay()
-    func updatePreferences()
 }
 
 extension DiagramViewController: DiagramViewControllerDelegate {

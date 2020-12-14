@@ -1485,6 +1485,21 @@ final class LadderView: ScaledView {
         }
     }
 
+    @objc func deleteAllInLadder() {
+        os_log("deleteAllInLadder() - LadderView", log: OSLog.debugging, type: .debug)
+        undoManager?.beginUndoGrouping()
+        for region in ladder.regions {
+            for mark in region.marks {
+                undoablyDeleteMark(mark: mark, region: region)
+            }
+        }
+        undoManager?.endUndoGrouping()
+        ladder.setHighlightForAllMarks(highlight: .none)
+        cursorViewDelegate.cursorIsVisible = false
+        cursorViewDelegate.refresh()
+        setNeedsDisplay()
+    }
+
     @objc func ungroupPressedMark() {
         if let pressedMark = pressedMark {
             ungroupMarks(mark: pressedMark)
