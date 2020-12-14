@@ -17,11 +17,12 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         // Override point for customization after application launch.
         // TODO: Add further defaults here.
         UserDefaults.standard.register(defaults: [
-            Preferences.defaultLineWidthKey: 2,
-            Preferences.defaultShowImpulseOriginKey: false,
-            Preferences.defaultShowBlockKey: true,
-            Preferences.defaultShowIntervalsKey: false,
-            Preferences.defaultLastDiagramKey: ""
+            Preferences.defaultLineWidthKey: Preferences.lineWidth,
+            Preferences.defaultCursorLineWidthKey: Preferences.cursorLineWidth,
+            Preferences.defaultShowImpulseOriginKey: Preferences.showImpulseOrigin,
+            Preferences.defaultShowBlockKey: Preferences.showBlock,
+            Preferences.defaultShowIntervalsKey: Preferences.showIntervals,
+            Preferences.defaultSnapMarksKey: Preferences.snapMarks,
         ])
         // Check for iCloud availability
         // TODO: test this!

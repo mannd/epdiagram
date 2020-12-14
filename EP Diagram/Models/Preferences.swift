@@ -12,17 +12,21 @@ import UIKit
 struct Preferences {
     // keys
     static let defaultLineWidthKey = "defaultLineWidthKey"
+    static let defaultCursorLineWidthKey = "defaultCursorLineWidthKey"
     static let defaultShowImpulseOriginKey = "defaultShowImpuseOriginKey"
     static let defaultShowBlockKey = "defaultShowBlockKey"
     static let defaultShowIntervalsKey = "defaultShowIntervalsKey"
-    static let defaultLastDiagramKey = "defaultLastDiagramKey"
+    static let defaultSnapMarksKey = "defaultSnapMarksKey"
+
 
     // Stored as Int, converted to CGFloat when used.
-    var lineWidth: Int = 2
-    var showImpulseOrigin = false
-    var showBlock = false
-    var showIntervals = false
-    var lastDiagramName: String? = nil
+    static var lineWidth: Int = 2
+    static var cursorLineWidth: Int = 1
+    static var showImpulseOrigin = false
+    static var showBlock = false
+    static var showIntervals = false
+    static var snapMarks = true
+    
 //    var red = UIColor.systemRed
 //    var blue = UIColor.systemBlue
 //    var unhighlightedColor = UIColor.label
@@ -33,21 +37,5 @@ struct Preferences {
 //    var markLineWidth: CGFloat = 2
 //    var connectedLineWidth: CGFloat = 4
 //    var showPivots = false
-
-    func save() {
-        let userDefaults = UserDefaults.standard
-        userDefaults.set(lineWidth, forKey: Preferences.defaultLineWidthKey)
-        userDefaults.set(showImpulseOrigin, forKey: Preferences.defaultShowImpulseOriginKey)
-        userDefaults.set(showBlock, forKey: Preferences.defaultShowBlockKey)
-        userDefaults.set(showIntervals, forKey: Preferences.defaultShowIntervalsKey)
-    }
-
-    mutating func retrieve() {
-        let userDefaults = UserDefaults.standard
-        lineWidth = userDefaults.integer(forKey: Preferences.defaultLineWidthKey)
-        showImpulseOrigin = userDefaults.bool(forKey: Preferences.defaultShowImpulseOriginKey)
-        showBlock = userDefaults.bool(forKey: Preferences.defaultShowBlockKey)
-        showIntervals = userDefaults.bool(forKey: Preferences.defaultShowIntervalsKey)
-    }
     
 }

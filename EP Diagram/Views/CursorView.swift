@@ -36,7 +36,7 @@ final class CursorView: ScaledView {
     private let accuracy: CGFloat = 20 // How close a tap has to be to a cursor in unscaled view to register.
 
     // Parameters that will eventually be preferences.
-    var lineWidth: CGFloat = 2
+    var lineWidth: CGFloat = 1
     var color: UIColor = UIColor.systemBlue
 
     private var cursor: Cursor = Cursor()

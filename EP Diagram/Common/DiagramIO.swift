@@ -54,11 +54,6 @@ class DiagramIO {
         return newFilename
     }
 
-    static func saveLastDiagram(name: String?) {
-        let preferences = UserDefaults.standard
-        preferences.set(name, forKey: Preferences.defaultLastDiagramKey)
-    }
-
     // for debugging only!
     static func deleteEPDiagramDir() {
         do {

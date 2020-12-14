@@ -53,7 +53,7 @@ final class LadderView: ScaledView {
     var linkColor = UIColor.systemGreen
     var selectedColor = UIColor.systemRed
     var groupedColor = UIColor.systemPurple
-    var snapToNearbyMarks = true
+    var snapMarks = true
 
     // Controlled by Preferences at present.
     var lineWidth: CGFloat = 2
@@ -700,6 +700,7 @@ final class LadderView: ScaledView {
 
     @objc func dragging(pan: UIPanGestureRecognizer) {
         if isZoning {
+            print("zone drag")
             dragZone(pan: pan)
             return
         }
@@ -707,7 +708,6 @@ final class LadderView: ScaledView {
         let state = pan.state
         let locationInLadder = getLocationInLadder(position: position)
         if state == .began {
-            // FIXME: need to make mark linking undoable.  Right now undoing move keeps marks linked.
             currentDocument?.undoManager?.beginUndoGrouping()
             // Activate region and get regions proximal and distal.
             if let region = locationInLadder.region {
@@ -974,7 +974,6 @@ final class LadderView: ScaledView {
                 break
             }
         }
-        // FIXME: moving grouped marks needs to be undoable
         moveGroupedMarks(forMark: mark)
         if let activeRegion = activeRegion {
             adjustCursor(mark: mark, region: activeRegion)
@@ -1631,7 +1630,7 @@ extension LadderView: LadderViewDelegate {
 
     func unsnapMarkFromNearbyMarks(mark: Mark, nearbyMarks: MarkGroup) {
         os_log("unsnapMarkFromNearbyMarks(mark:nearbyMarks:))", log: .action, type: .info)
-        guard snapToNearbyMarks else { return }
+        guard snapMarks else { return }
         for proxMark in nearbyMarks.proximal {
             mark.groupedMarkIds.proximal.remove(proxMark.id)
             proxMark.groupedMarkIds.distal.remove(mark.id)
@@ -1649,7 +1648,7 @@ extension LadderView: LadderViewDelegate {
     // Adjust ends of marks to connect after dragging.
     func snapMarkToNearbyMarks(mark: Mark, nearbyMarks: MarkGroup) {
         os_log("SnapMarkToNearbyMarks(mark:nearbyMarks:))", log: .action, type: .info)
-        guard snapToNearbyMarks else { return }
+        guard snapMarks else { return }
         for proxMark in nearbyMarks.proximal {
             mark.groupedMarkIds.proximal.insert(proxMark.id)
             proxMark.groupedMarkIds.distal.insert(mark.id)
@@ -1705,8 +1704,9 @@ extension LadderView: LadderViewDelegate {
         }
     }
 
-	    func groupNearbyMarks(mark: Mark) {
+    func groupNearbyMarks(mark: Mark) {
         os_log("groupNearbyMarks(mark:) - LadderView", log: OSLog.debugging, type: .debug)
+        guard snapMarks else { return }
         let minimum: CGFloat = nearbyMarkAccuracy / scale
         let nearbyMarkIds = getNearbyMarkIds(mark: mark, nearbyDistance: minimum)
         let nearbyMarks = ladder.getMarkGroup(fromMarkIdGroup: nearbyMarkIds)

@@ -29,15 +29,6 @@ extension DiagramViewController: DiagramViewControllerDelegate {
         }
     }
 
-    func updatePreferences() {
-        os_log("updatePreferences()", log: .action, type: .info)
-        ladderView.lineWidth = CGFloat(UserDefaults.standard.double(forKey: Preferences.defaultLineWidthKey))
-        ladderView.showBlock = UserDefaults.standard.bool(forKey: Preferences.defaultShowBlockKey)
-        ladderView.showImpulseOrigin = UserDefaults.standard.bool(forKey: Preferences.defaultShowImpulseOriginKey)
-        ladderView.showIntervals = UserDefaults.standard.bool(forKey: Preferences.defaultShowIntervalsKey)
-        setViewsNeedDisplay()
-    }
-
     private func setLadder(ladder: Ladder) {
         let oldLadder = diagram.ladder
         currentDocument?.undoManager?.registerUndo(withTarget: self, handler: { target in

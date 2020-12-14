@@ -119,7 +119,7 @@ final class DiagramViewController: UIViewController {
         // Title is set to diagram name.
         title = getTitle()
         // Get defaults and apply them to views.
-        loadUserDefaults()
+        updatePreferences()
 
         // Set up hamburger menu.
         blackView.delegate = self
@@ -249,15 +249,6 @@ final class DiagramViewController: UIViewController {
     // Crash program at compile time if IUO delegates are nil.
     private func assertDelegatesNonNil() {
         assert(cursorView.ladderViewDelegate != nil && ladderView.cursorViewDelegate != nil, "LadderViewDelegate and/or CursorViewDelegate are nil")
-    }
-
-    func loadUserDefaults() {
-        os_log("loadUserDefaults() - ViewController", log: .action, type: .info)
-        preferences.retrieve()
-        ladderView.lineWidth = CGFloat(preferences.lineWidth)
-        ladderView.showBlock = preferences.showBlock
-        ladderView.showImpulseOrigin = preferences.showImpulseOrigin
-        ladderView.showIntervals = preferences.showIntervals
     }
 
     private func showMainMenu() {
@@ -637,9 +628,8 @@ final class DiagramViewController: UIViewController {
 
 
     @IBSegueAction func showPreferences(_ coder: NSCoder) -> UIViewController? {
-        preferences.retrieve()
-        var preferencesView = PreferencesView()
-        preferencesView.delegate = self
+//        preferences.retrieve()
+        let preferencesView = PreferencesView()
         let hostingController = UIHostingController(coder: coder, rootView: preferencesView)
         return hostingController
     }
@@ -735,6 +725,7 @@ final class DiagramViewController: UIViewController {
 extension DiagramViewController {
     func setupNotifications() {
         NotificationCenter.default.addObserver(self, selector: #selector(onDidUndoableAction(_:)), name: .didUndoableAction, object: nil)
+        NotificationCenter.default.addObserver(self, selector: #selector(updatePreferences), name: UserDefaults.didChangeNotification, object: nil)
         NotificationCenter.default.addObserver(self, selector: #selector(didEnterBackground), name: UIScene.didEnterBackgroundNotification, object: nil)
         NotificationCenter.default.addObserver(self, selector: #selector(didDisconnect), name: UIScene.didDisconnectNotification, object: nil)
         NotificationCenter.default.addObserver(self, selector: #selector(resolveFileConflicts), name: UIDocument.stateChangedNotification, object: nil)
@@ -768,6 +759,17 @@ extension DiagramViewController {
     @objc func didDisconnect() {
         os_log("didDisconnect()", log: .lifeCycle, type: .info)
 
+    }
+
+    @objc func updatePreferences() {
+        os_log("updatePreferences()", log: .action, type: .info)
+        ladderView.lineWidth = CGFloat(UserDefaults.standard.double(forKey: Preferences.defaultLineWidthKey))
+        cursorView.lineWidth = CGFloat(UserDefaults.standard.double(forKey: Preferences.defaultCursorLineWidthKey))
+        ladderView.showBlock = UserDefaults.standard.bool(forKey: Preferences.defaultShowBlockKey)
+        ladderView.showImpulseOrigin = UserDefaults.standard.bool(forKey: Preferences.defaultShowImpulseOriginKey)
+        ladderView.showIntervals = UserDefaults.standard.bool(forKey: Preferences.defaultShowIntervalsKey)
+        ladderView.snapMarks = UserDefaults.standard.bool(forKey: Preferences.defaultSnapMarksKey)
+        setViewsNeedDisplay()
     }
 
     @objc func resolveFileConflicts() {
