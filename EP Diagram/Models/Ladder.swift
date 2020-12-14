@@ -275,7 +275,7 @@ class Ladder: Codable {
         selectedMarks = []
     }
 
-    func availableAnchors(forMark mark: Mark) -> [Anchor] {
+    func getAvailableAnchors(forMark mark: Mark) -> [Anchor] {
         let groupedMarkIds = mark.groupedMarkIds
         // FIXME: if attachment is in middle, only allow other end to move
         if groupedMarkIds.count < 2 {
@@ -286,12 +286,30 @@ class Ladder: Codable {
         }
     }
 
+    func toggleAnchor(mark: Mark?) {
+        guard let mark = mark else { return }
+        let availableAnchors = getAvailableAnchors(forMark: mark)
+        assert(availableAnchors.count == 2 || availableAnchors.count == 3, "Impossible anchor count!")
+        let currentAnchor = mark.anchor
+        if availableAnchors.contains(currentAnchor) {
+            guard let currentAnchorIndex = availableAnchors.firstIndex(of: currentAnchor) else { mark.anchor = availableAnchors [0]; return }
+            if currentAnchorIndex == availableAnchors.count - 1 {
+                mark.anchor = availableAnchors[0] // last anchor, scroll around
+            } else {
+                mark.anchor = availableAnchors[currentAnchorIndex + 1]
+            }
+        }
+        else {
+            mark.anchor = availableAnchors[0]
+        }
+    }
+
     private func defaultAnchors() -> [Anchor] {
-        return [.middle, .proximal, .distal]
+        return [.middle, .proximal, .distal] // Middle anchor is default first anchor
     }
 
     func defaultAnchor(forMark mark: Mark) -> Anchor {
-        return availableAnchors(forMark: mark)[0]
+        return getAvailableAnchors(forMark: mark)[0]
     }
 
     // Pivot points are really fixed points (rename?) that can't move during mark movement.

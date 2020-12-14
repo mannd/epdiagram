@@ -10,9 +10,12 @@ import UIKit
 
 // Cursor is a vertical line that is used to move and set Marks.
 class Cursor  {
+    static let intersectionRadius: CGFloat = 5
+    static let omniCircleRadius: CGFloat = 20
+    let omniCircleMargin: CGFloat = 25 // how close circle gets to top and bottom of cursor
+    
     var positionX: CGFloat // the horizontal position of the cursor using cursor view coordinates
     var positionOmniCircleY: CGFloat // point along omnidirectional cursor where circle is shown
-    var maxPositionOmniCircleY: CGFloat // lowest point on screen where circle can be draw
     var markIntersectionPositionY: CGFloat // the end point and thus intersection point with the attached mark
 
     var anchor = Anchor.middle
@@ -22,7 +25,6 @@ class Cursor  {
     init(positionX: CGFloat) {
         self.positionX = positionX
         self.positionOmniCircleY = 100 // this is a reasonable default value
-        self.maxPositionOmniCircleY = 0 // this will be calculated by cursor view
         self.markIntersectionPositionY = 0
     }
 
@@ -36,8 +38,12 @@ class Cursor  {
 
     func move(delta: CGPoint) {
         positionX += delta.x
-        if positionOmniCircleY < maxPositionOmniCircleY {
-            positionOmniCircleY += delta.y
+        positionOmniCircleY += delta.y
+        if positionOmniCircleY > markIntersectionPositionY - omniCircleMargin {
+            positionOmniCircleY = markIntersectionPositionY - omniCircleMargin
+        }
+        if positionOmniCircleY < omniCircleMargin {
+            positionOmniCircleY = omniCircleMargin
         }
     }
 }

@@ -92,5 +92,21 @@ class LadderTests: XCTestCase {
         XCTAssertEqual(false, ladder.hasMarks())
     }
 
-
+    func testToggleAnchor() {
+        let ladder = Ladder.defaultLadder()
+        let mark = ladder.addMark(Mark(), toRegion: ladder.regions[0])
+        XCTAssertEqual(Anchor.middle, mark?.anchor)
+        ladder.toggleAnchor(mark: mark)
+        XCTAssertEqual(Anchor.proximal, mark?.anchor)
+        ladder.toggleAnchor(mark: mark)
+        XCTAssertEqual(Anchor.distal, mark?.anchor)
+        ladder.toggleAnchor(mark: mark)
+        XCTAssertEqual(Anchor.middle, mark?.anchor)
+        ladder.toggleAnchor(mark: mark)
+        XCTAssertEqual(Anchor.proximal, mark?.anchor)
+        mark?.anchor = .none
+        XCTAssertEqual(Anchor.none, mark?.anchor)
+        ladder.toggleAnchor(mark: mark)
+        XCTAssertEqual(Anchor.middle, mark?.anchor)
+    }
 }

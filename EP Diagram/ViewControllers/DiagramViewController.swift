@@ -111,7 +111,6 @@ final class DiagramViewController: UIViewController {
         // Ensure there is a space for labels at the left margin.
         ladderView.leftMargin = leftMargin
         cursorView.leftMargin = leftMargin
-        setMaxCursorPositionY()
         cursorView.caliperMaxY = imageScrollView.frame.height
         // Pass diagram image and ladder to image and ladder views.
         setImageViewImage(with: diagram.image)
@@ -405,6 +404,7 @@ final class DiagramViewController: UIViewController {
         os_log("clearCalibration()", log: .action, type: .info)
         calibration.reset()
         ladderView.refresh()
+        cursorView.refresh()
 //        cursorView.clearCalibration()
         closeCalibrationMenu()
     }
@@ -568,20 +568,16 @@ final class DiagramViewController: UIViewController {
         })
     }
 
-    func setMaxCursorPositionY() {
-        cursorView.maxCursorPositionY = imageScrollView.frame.height
-    }
-
     private func resetViews() {
         os_log("resetView() - ViewController", log: .action, type: .info)
         // Add back in separatorView after rotation.
         if (separatorView == nil) {
             separatorView = HorizontalSeparatorView.addSeparatorBetweenViews(separatorType: .horizontal, primaryView: imageScrollView, secondaryView: ladderView, parentView: self.view)
+            separatorView?.cursorViewDelegate = cursorView
         }
         self.ladderView.resetSize()
         // FIXME: save and restore scrollview offset so it is maintained with rotation.
         self.imageView.setNeedsDisplay()
-        setMaxCursorPositionY()
         cursorView.caliperMaxY = imageScrollView.frame.height
         setViewsNeedDisplay()
     }

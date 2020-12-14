@@ -539,6 +539,7 @@ final class LadderView: ScaledView {
         return nil
     }
 
+    @available(*, deprecated, message: "Used for setting anchor depending on tap location, not used.")
     func getAnchor(regionDivision: RegionDivision) -> Anchor {
         let anchor: Anchor
         switch regionDivision {
@@ -554,39 +555,8 @@ final class LadderView: ScaledView {
         return anchor
     }
 
-    // FIXME: When cursor goes from hidden to visible, mark anchor should reset to middle of mark.
-    private func toggleAnchor(mark: Mark?) {
-        guard let mark = mark else { return }
-        let availableAnchors = ladder.availableAnchors(forMark: mark)
-        guard availableAnchors.count > 0 else { return }
-        let currentAnchor = mark.anchor
-        if availableAnchors.contains(currentAnchor) {
-            if availableAnchors.count == 1 {
-                return // can't change anchor
-            }
-            // ok to ! this, since we alreay made sure currentAnchor in availableAnchors
-            let currentAnchorIndex = availableAnchors.firstIndex(of: currentAnchor)!
-            // last anchor, scroll around
-            if currentAnchorIndex == availableAnchors.count - 1 {
-                mark.anchor = availableAnchors[0]
-            }
-            else {
-                if let newAnchor = Anchor(rawValue: mark.anchor.rawValue + 1) {
-                    if newAnchor == .none {
-                        mark.anchor = availableAnchors[0]
-                    }
-                    else {
-                        mark.anchor = newAnchor
-                    }
-                }
-                else {
-                    mark.anchor = availableAnchors[0]
-                }
-            }
-        }
-        else {
-            mark.anchor = availableAnchors[0]
-        }
+    func toggleAnchor(mark: Mark?) {
+        ladder.toggleAnchor(mark: mark)
     }
 
     func setAttachedMarkAndGroupedMarksHighlights() {
@@ -1584,7 +1554,6 @@ extension LadderView: LadderViewDelegate {
     }
 
     func refresh() {
-        cursorViewDelegate.refresh()
         setNeedsDisplay()
     }
 

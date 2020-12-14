@@ -63,11 +63,6 @@ final class CursorView: ScaledView {
     }
 
     var leftMargin: CGFloat = 0
-    var maxCursorPositionY: CGFloat = 0 {
-        didSet {
-            cursor.maxPositionOmniCircleY = maxCursorPositionY
-        }
-    }
     var mode: Mode = .normal
 
     var allowTaps = true // set false to prevent taps from making marks
@@ -139,10 +134,10 @@ final class CursorView: ScaledView {
             context.addLine(to: endPoint)
             context.strokePath()
             if position > leftMargin {
-                drawCircle(context: context, center: endPoint, radius: 5)
+                drawCircle(context: context, center: endPoint, radius: Cursor.intersectionRadius)
             }
             if cursor.movement == .omnidirectional {
-                drawCircle(context: context, center: CGPoint(x: position, y: cursor.positionOmniCircleY), radius: 20)
+                drawCircle(context: context, center: CGPoint(x: position, y: cursor.positionOmniCircleY), radius: Cursor.omniCircleRadius)
             }
         }
     }
@@ -273,9 +268,8 @@ final class CursorView: ScaledView {
 
     @objc func singleTap(tap: UITapGestureRecognizer) {
         os_log("singleTap(tap:) - CursorView", log: OSLog.touches, type: .info)
-        guard allowTaps else { return }
-        // Single tap does nothing during calibration.
-        guard mode == .normal else { return }
+        guard allowTaps else { return } // Taps do nothing when ladder is locked.
+        guard mode == .normal else { return } // Single tap does nothing during calibration.
         ladderViewDelegate.toggleAttachedMarkAnchor()
         ladderViewDelegate.refresh()
         setNeedsDisplay()
@@ -283,17 +277,19 @@ final class CursorView: ScaledView {
 
     @objc func doubleTap(tap: UITapGestureRecognizer) {
         os_log("doubleTap(tap:) - CursorView", log: OSLog.touches, type: .info)
-//        redoablyUnAddMarkWithAttachedCursor(position: tap.location(in: self))
         ladderViewDelegate.deleteAttachedMark()
         ladderViewDelegate.refresh()
+        setNeedsDisplay()
     }
 
     @objc func dragging(pan: UIPanGestureRecognizer) {
-        // Don't drag if no attached mark.
         if mode == .calibration {
             dragCaliper(pan: pan)
             return
         }
+        // TODO: Should be no dragging in link or select mode on cursor (and no cursor either).
+        guard mode == .normal else { return }
+        // Don't drag if no attached mark.
         guard let attachedMarkAnchorPosition = ladderViewDelegate.getAttachedMarkScaledAnchorPosition() else { return }
         if pan.state == .began {
             currentDocument?.undoManager?.beginUndoGrouping()
@@ -314,6 +310,7 @@ final class CursorView: ScaledView {
             currentDocument?.undoManager?.endUndoGrouping()
             ladderViewDelegate.groupMarksNearbyAttachedMark()
             ladderViewDelegate.refresh()
+            setNeedsDisplay()
             cursorEndPointY = 0
         }
     }
@@ -353,9 +350,7 @@ final class CursorView: ScaledView {
                 cursor.movement = .horizontal
             }
             let pressPositionY = press.location(in: self).y
-            P("ppy \(pressPositionY),  mcpy \(maxCursorPositionY)")
-            cursor.positionOmniCircleY = pressPositionY > maxCursorPositionY ? maxCursorPositionY : pressPositionY
-            P("cursor.positionY \(cursor.positionOmniCircleY)")
+            cursor.positionOmniCircleY =  pressPositionY
             setNeedsDisplay()
         }
     }
@@ -374,14 +369,15 @@ final class CursorView: ScaledView {
         calibration?.set(zoom: zoom, calFactor: Calibration.standardInterval / caliper.value)
         calibration?.isCalibrated = true
         ladderViewDelegate.refresh()
+        setNeedsDisplay()
     }
 
     func addMarkWithAttachedCursor(position: CGPoint) {
         os_log("addMarkWithAttachedCursor(position:) - CursorView", log: OSLog.debugging, type: .debug)
         // imageScrollView starts at x = 0, contentInset shifts view to right, and the left margin is negative.
+        // So ignore positions in left margin.
         if position.x > 0 {
             moveCursor(cursorViewPositionX: position.x / scale)
-            cursor.positionOmniCircleY = position.y > maxCursorPositionY ? maxCursorPositionY : position.y
             cursorIsVisible = true
             ladderViewDelegate.addAttachedMark(scaledViewPositionX: position.x)
             setCursorHeight()

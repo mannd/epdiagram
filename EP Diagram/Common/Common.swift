@@ -10,6 +10,13 @@ import UIKit
 
 /// Namespace for global static functions, variables.
 class Common {
+    // Positions:
+    // There are 2 coordinate systems in use for positioning marks.
+    // Region position: A point with x coordinate starting at the left margin of a region, and a y coordinate between 0 and 1.0, spanning the proximal to distal borders of the region.
+    // Scaled position: A point in the coordinate system of the ladder view.
+    // Note that region positions are NOT affected by scrolling (content offset) and scaling (zoom).
+    // Functions below translate from one coordinate system to the other.
+    
     // PositionX translation
     static func translateToRegionPositionX(scaledViewPositionX: CGFloat, offset: CGFloat, scale: CGFloat) -> CGFloat {
         return (scaledViewPositionX + offset) / scale
