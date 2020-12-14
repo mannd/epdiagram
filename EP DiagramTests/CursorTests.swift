@@ -20,15 +20,15 @@ class CursorTests: XCTestCase {
     }
 
     func testPointIsNearCursor() {
-        let cursor = Cursor(location: 100)
+        let cursor = Cursor(positionX: 100)
         // Assumes differential of 40.
-        XCTAssertTrue(cursor.isNearCursor(point: CGPoint(x: 105, y: 55)))
-        XCTAssertFalse(cursor.isNearCursor(point: CGPoint(x: 145, y: 55)))
+        XCTAssertTrue(cursor.isNearCursor(point: CGPoint(x: 105, y: 55), accuracy: 20))
+        XCTAssertFalse(cursor.isNearCursor(point: CGPoint(x: 145, y: 55), accuracy: 20))
     }
 
     func testCursorMove() {
-        let cursor = Cursor(location: 100)
-        cursor.move(delta: 20)
-        XCTAssertEqual(cursor.position, 120)
+        let cursor = Cursor(positionX: 100)
+        cursor.move(delta: CGPoint(x: 20, y: 20))
+        XCTAssertEqual(cursor.positionX, 120)
     }
 }

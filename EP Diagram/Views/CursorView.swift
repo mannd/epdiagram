@@ -7,236 +7,424 @@
 //
 
 import UIKit
+import os.log
 
 protocol CursorViewDelegate: AnyObject {
+    var cursorIsVisible: Bool { get set }
+
     func refresh()
-    func attachMark(mark: Mark?)
-    func unattachMark()
-    func moveCursor(location: CGFloat)
-    func recenterCursor()
-    func highlightCursor(_ on: Bool)
-    func hideCursor(hide: Bool)
-    func cursorIsVisible() -> Bool
-    func setAnchor(anchor: Cursor.Anchor)
+    func moveCursor(cursorViewPositionX positionX: CGFloat)
+    func setCursorHeight(anchorPositionY: CGFloat?)
+    func setCaliperMaxY(_ maxY: CGFloat)
+    func cursorMovement() -> Movement
+    func isCalibrated() -> Bool
+    func setIsCalibrated(_ value: Bool)
+    func markMeasurement(segment: Segment) -> CGFloat
+    func intervalMeasurement(value: CGFloat) -> CGFloat
 }
 
-class CursorView: UIView, CursorViewDelegate {
-    var attachedMark: Mark?
-    var cursorViewModel: CursorViewModel = CursorViewModel()
-    weak var ladderViewDelegate: LadderViewDelegate?
-    var leftMargin: CGFloat = 0 {
+extension CursorViewDelegate {
+    // Must be declared here, before class definition of setCursorHeight
+    func setCursorHeight(anchorPositionY: CGFloat? = nil) {
+        return setCursorHeight(anchorPositionY: anchorPositionY)
+    }
+}
+
+final class CursorView: ScaledView {
+    private let rightMargin: CGFloat = 5 // unused?
+    private let alphaValue: CGFloat = 0.8
+    private let accuracy: CGFloat = 20 // How close a tap has to be to a cursor in unscaled view to register.
+
+    // Parameters that will eventually be preferences.
+    var lineWidth: CGFloat = 1
+    var color: UIColor = UIColor.systemBlue
+
+    private var cursor: Cursor = Cursor()
+    private var rawCursorHeight: CGFloat?
+
+    private var caliper: Caliper = Caliper()
+    private var draggedComponent: Caliper.Component?
+    var caliperMaxY: CGFloat = 0 {
         didSet {
-            cursorViewModel.leftMargin = leftMargin
+            caliper.maxY = caliperMaxY
         }
     }
-    var scale: CGFloat = 1.0 {
-        didSet {
-            cursorViewModel.scale = scale
+
+    var calibration: Calibration?
+
+    var calFactor: CGFloat {
+        get {
+            return calibration?.originalCalFactor ?? 1.0
+        }
+        set(value) {
+            guard let calibration = calibration else { return }
+            calibration.originalCalFactor = value
         }
     }
-    var offset: CGFloat = 0 {
+
+    var leftMargin: CGFloat = 0
+    var maxCursorPositionY: CGFloat = 0 {
         didSet {
-            cursorViewModel.offset = offset
+            cursor.maxPositionOmniCircleY = maxCursorPositionY
         }
     }
-    let accuracy: CGFloat = 20
-    var calibrating = false
+    var mode: Mode = .normal
+
+    var allowTaps = true // set false to prevent taps from making marks
+    var cursorEndPointY: CGFloat = 0
+
+    var imageIsLocked = false
+
+    weak var ladderViewDelegate: LadderViewDelegate! // Note IUO.
+    var currentDocument: DiagramDocument?
+
+    // MARK: - init
 
     required init?(coder: NSCoder) {
         super.init(coder: coder)
-        self.isOpaque = false
-        cursorViewModel = CursorViewModel(leftMargin: leftMargin, width: self.frame.width, height: 0)
+        setupView()
+    }
 
-        let singleTapRecognizer = UITapGestureRecognizer(target: self, action: #selector(self.singleTap))
+    override init(frame: CGRect) {
+        super.init(frame: frame)
+        setupView()
+    }
+
+    private func setupView() {
+        self.isOpaque = false // CursorView is mostly transparent, so let iOS know.
+        self.layer.masksToBounds = true // Draw a border around the view.
+        self.layer.borderColor = UIColor.label.cgColor
+        self.layer.borderWidth = 1
+        self.cursor.visible = false
+
+        let singleTapRecognizer = UITapGestureRecognizer(target: self, action: #selector(singleTap))
         singleTapRecognizer.numberOfTapsRequired = 1
         self.addGestureRecognizer(singleTapRecognizer)
-        let doubleTapRecognizer = UITapGestureRecognizer(target: self, action: #selector(self.doubleTap))
+
+        let doubleTapRecognizer = UITapGestureRecognizer(target: self, action: #selector(doubleTap))
         doubleTapRecognizer.numberOfTapsRequired = 2
         singleTapRecognizer.require(toFail: doubleTapRecognizer)
         self.addGestureRecognizer(doubleTapRecognizer)
+
         let draggingPanRecognizer = UIPanGestureRecognizer(target: self, action: #selector(self.dragging))
         self.addGestureRecognizer(draggingPanRecognizer)
+
         let longPressRecognizer = UILongPressGestureRecognizer(target: self, action: #selector(self.longPress))
         self.addGestureRecognizer(longPressRecognizer)
-
     }
+
+    // MARK: - draw
 
     override func draw(_ rect: CGRect) {
-        PRINT("CursorView draw()")
+        if imageIsLocked {
+            showLockImageWarning(rect: rect)
+        }
+        if mode == .calibration {
+            drawCaliper(rect)
+            return
+        }
         if let context = UIGraphicsGetCurrentContext() {
-            cursorViewModel.height = getCursorHeight(anchor: attachedMark?.anchor ?? .none)
-            cursorViewModel.draw(rect: rect, context: context, defaultHeight: ladderViewDelegate?.getTopOfLadder(view: self))
+            guard cursor.visible else { return }
+
+            let position = scale * cursor.positionX - offsetX // inlined, for efficiency
+            let cursorDefaultHeight = ladderViewDelegate.getTopOfLadder(view: self)
+            let defaultHeight = cursorDefaultHeight
+            let height = (position <= leftMargin) ? defaultHeight : cursor.markIntersectionPositionY
+            let endPoint = CGPoint(x: position, y: height)
+
+            context.setStrokeColor(color.cgColor)
+            context.setLineWidth(lineWidth)
+            context.setAlpha(alphaValue)
+            context.move(to: CGPoint(x: position, y: 0))
+            context.addLine(to: endPoint)
+            context.strokePath()
+            if position > leftMargin {
+                drawCircle(context: context, center: endPoint, radius: 5)
+            }
+            if cursor.movement == .omnidirectional {
+                drawCircle(context: context, center: CGPoint(x: position, y: cursor.positionOmniCircleY), radius: 20)
+            }
         }
     }
 
-    private func getCursorHeight(anchor: Anchor) -> CGFloat {
-        switch anchor {
-        case .proximal:
-            return ladderViewDelegate?.getRegionProximalBoundary(view: self) ?? self.frame.height
-        case .middle:
-            return ladderViewDelegate?.getRegionMidPoint(view: self) ?? self.frame.height
-        case .distal:
-            return ladderViewDelegate?.getRegionDistalBoundary(view: self) ?? self.frame.height
-        case .none:
-            return ladderViewDelegate?.getHeight() ?? self.frame.height
+    func drawCaliper(_ rect: CGRect) {
+        if let context = UIGraphicsGetCurrentContext() {
+            context.setStrokeColor(caliper.color.cgColor)
+            context.setLineWidth(lineWidth)
+            context.setAlpha(alphaValue)
+            context.move(to: CGPoint(x: caliper.bar1Position, y: 0))
+            context.addLine(to: CGPoint(x: caliper.bar1Position, y: caliperMaxY))
+            context.move(to: CGPoint(x: caliper.bar2Position, y: 0))
+            context.addLine(to: CGPoint(x: caliper.bar2Position, y: caliperMaxY))
+            context.move(to: CGPoint(x: caliper.bar1Position, y: caliper.crossbarPosition))
+            context.addLine(to: CGPoint(x: caliper.bar2Position, y: caliper.crossbarPosition))
+            let text = caliper.text
+            let caliperValue = String(format: "%.2f", caliper.value)
+            let measureText = "\(caliperValue) points"
+            var attributes = [NSAttributedString.Key: Any]()
+            let textFont = UIFont(name: "Helvetica Neue Medium", size: 14.0) ?? UIFont.systemFont(ofSize: 14, weight: UIFont.Weight.medium)
+            let paragraphStyle = NSParagraphStyle.default.mutableCopy() as! NSMutableParagraphStyle
+            attributes = [
+                NSAttributedString.Key.font: textFont,
+                NSAttributedString.Key.paragraphStyle: paragraphStyle,
+                NSAttributedString.Key.foregroundColor: caliper.color
+            ]
+            let size = text.size(withAttributes: attributes)
+            let measureSize = measureText.size(withAttributes: attributes)
+            let maxWidth = max(size.width, measureSize.width)
+            if maxWidth < caliper.value {
+                let textRect = CGRect(origin: CGPoint(x: caliper.bar1Position + (caliper.value - size.width) / 2, y: caliper.crossbarPosition), size: size)
+                text.draw(in: textRect, withAttributes: attributes)
+                let measureTextRect = CGRect(origin: CGPoint(x: caliper.bar1Position + (caliper.value - measureSize.width) / 2, y: caliper.crossbarPosition - measureSize.height), size: measureSize)
+                measureText.draw(in: measureTextRect, withAttributes: attributes)
+            }
+            context.strokePath()
         }
     }
+
+
+//    func caliperText(rect: CGRect, textPosition: TextPosition, optimizeTextPosition: Bool) {
+//        let text = measurement()
+//        paragraphStyle.lineBreakMode = .byTruncatingTail
+//        paragraphStyle.alignment = .center
+//        var attributes = [NSAttributedString.Key: Any]()
+//        attributes = [
+//            NSAttributedString.Key.font: textFont,
+//            NSAttributedString.Key.paragraphStyle: paragraphStyle,
+//            NSAttributedString.Key.foregroundColor: color
+//        ]
+//        let size = text.size(withAttributes: attributes)
+//        let textRect = caliperTextPosition(left: fmin(bar1Position, bar2Position), right: fmax(bar1Position, bar2Position), center: crossBarPosition, size: size, rect: rect, textPosition: textPosition, optimizeTextPosition: optimizeTextPosition)
+//        text.draw(in: textRect, withAttributes: attributes)
+//    }
+
+    func showLockImageWarning(rect: CGRect) {
+        let text = L("IMAGE LOCK")
+        let attributes: [NSAttributedString.Key: Any] = [
+            .font: UIFont.systemFont(ofSize: 14.0),
+            .foregroundColor: UIColor.white, .backgroundColor: UIColor.systemRed
+        ]
+        let lockRect = CGRect(x: rect.origin.x + 5, y: rect.origin.y + 5, width: rect.size.width, height: rect.size.height)
+        text.draw(in: lockRect, withAttributes: attributes)
+    }
+
+    func setCursorHeight(anchorPositionY: CGFloat? = nil) {
+        if let anchorPositionY = anchorPositionY {
+            let positionY = ladderViewDelegate.getPositionYInView(positionY: anchorPositionY, view: self)
+            cursor.markIntersectionPositionY = positionY
+        }
+        else {
+            let cursorHeight = getCursorHeight(anchor: getAttachedMarkAnchor())
+            cursor.markIntersectionPositionY = cursorHeight ?? 0
+        }
+    }
+
+    func setCaliperMaxY(_ maxY: CGFloat) {
+        caliperMaxY = maxY
+    }
+
+    // Add tiny circle around intersection of cursor and mark.
+    private func drawCircle(context: CGContext, center: CGPoint, radius: CGFloat) {
+        context.addArc(center: center, radius: radius, startAngle: 0.0, endAngle: .pi * 2.0, clockwise: true)
+        context.strokePath()
+    }
+
+    func getAttachedMarkAnchor() -> Anchor {
+        return ladderViewDelegate.getAttachedMarkAnchor()
+    }
+
+    private func getAnchorPositionY(_ anchor: Anchor, _ ladderViewDelegate: LadderViewDelegate) -> CGFloat? {
+        let anchorY: CGFloat?
+        switch anchor {
+        case .proximal:
+            anchorY = ladderViewDelegate.getRegionProximalBoundary(view: self)
+        case .middle:
+            anchorY = ladderViewDelegate.getRegionMidPoint(view: self)
+        case .distal:
+            anchorY = ladderViewDelegate.getRegionDistalBoundary(view: self)
+        case .none:
+            anchorY = nil
+        }
+        return anchorY
+    }
+
+    private func getCursorHeight(anchor: Anchor) -> CGFloat? {
+        return getAnchorPositionY(anchor, ladderViewDelegate)
+    }
+
+    // MARK: - touches
 
     // This function passes touch events to the views below if the point is not
     // near the cursor.
     override func point(inside point: CGPoint, with event: UIEvent?) -> Bool {
-        // Hidden cursor shouldn't interfere with touches.
-        // TODO: However, scrollview must deal with single tap and create cursor via a delegate.
-        guard cursorViewModel.cursor.visible else { return false }
-        if isNearCursor(location: point.x, cursor: cursorViewModel.cursor) && point.y < ladderViewDelegate?.getRegionProximalBoundary(view: self) ?? self.frame.height {
-            PRINT("near cursor")
+        if mode == .calibration {
+            return caliper.isNearCaliper(point: point, accuracy: accuracy)
+        }
+        guard cursor.visible else { return false }
+        if isNearCursor(positionX: point.x, accuracy: accuracy) && point.y < ladderViewDelegate.getRegionProximalBoundary(view: self) {
             return true
         }
         return false
     }
 
-    func isNearCursor(location: CGFloat, cursor: Cursor) -> Bool {
-        return location < Common.translateToRelativeLocation(location: cursor.position, offset: offset, scale: scale) + accuracy
-            && location > Common.translateToRelativeLocation(location: cursor.position, offset: offset, scale: scale) - accuracy
+    func isNearCursor(positionX: CGFloat, accuracy: CGFloat) -> Bool {
+        return positionX < translateToScaledViewPositionX(regionPositionX: cursor.positionX) + accuracy && positionX > translateToScaledViewPositionX(regionPositionX: cursor.positionX) - accuracy
     }
 
-
     @objc func singleTap(tap: UITapGestureRecognizer) {
-        PRINT("Single tap on cursor")
-        if calibrating {
-            doCalibration()
-            return
-        }
-        // toggle hide or show cursor with single tap
-        hideCursor(hide: cursorViewModel.cursorVisible)
-        unattachMark()
+        os_log("singleTap(tap:) - CursorView", log: OSLog.touches, type: .info)
+        guard allowTaps else { return }
+        // Single tap does nothing during calibration.
+        guard mode == .normal else { return }
+        ladderViewDelegate.toggleAttachedMarkAnchor()
+        ladderViewDelegate.refresh()
         setNeedsDisplay()
     }
 
     @objc func doubleTap(tap: UITapGestureRecognizer) {
-        PRINT("Double tap on cursor")
-        // delete attached Mark
-        if let attachedMark = attachedMark {
-            ladderViewDelegate?.deleteMark(mark: attachedMark)
-            ladderViewDelegate?.refresh()
-        }
-        hideCursor(hide: true)
-        setNeedsDisplay()
+        os_log("doubleTap(tap:) - CursorView", log: OSLog.touches, type: .info)
+//        redoablyUnAddMarkWithAttachedCursor(position: tap.location(in: self))
+        ladderViewDelegate.deleteAttachedMark()
+        ladderViewDelegate.refresh()
     }
 
     @objc func dragging(pan: UIPanGestureRecognizer) {
-        PRINT("Panning cursor")
-        // FIXME: Move this to dragging in LadderView
-//        let vel: CGPoint = pan.velocity(in: self)
-//        if vel.x > 1.0 {
-//            PRINT("Panning to right")
-//        }
-//        else if vel.x < 1.0 {
-//            PRINT("Panning to left")
-//        }
-//        if vel.y > 1.0 {
-//            PRINT("Panning down")
-//        }
-//        else if vel.y < 1.0 {
-//            PRINT("Panning up")
-//        }
-
-        // drag Cursor
-        let delta = pan.translation(in: self)
-        // Adjust movement to scale
-        cursorViewModel.cursor.move(delta: delta.x / scale)
-        if let attachedMark = attachedMark {
-            PRINT("Move attached Mark")
-//            switch cursorViewModel.cursor.anchor {
-//            case .proximal:
-//                attachedMark.anchor = .proximal
-//            case .middle:
-//                attachedMark.anchor = .middle
-//            case .distal:
-//                attachedMark.anchor = .distal
-//            case .none:
-//                attachedMark.anchor = .none
-//            }
-            ladderViewDelegate?.moveMark(mark: attachedMark, location: Common.translateToRelativeLocation(location: cursorViewModel.cursor.position, offset: offset, scale: scale), moveCursor: false)
-            ladderViewDelegate?.refresh()
+        // Don't drag if no attached mark.
+        if mode == .calibration {
+            dragCaliper(pan: pan)
+            return
         }
-        pan.setTranslation(CGPoint(x: 0,y: 0), in: self)
+        guard let attachedMarkAnchorPosition = ladderViewDelegate.getAttachedMarkScaledAnchorPosition() else { return }
+        if pan.state == .began {
+            currentDocument?.undoManager?.beginUndoGrouping()
+            cursorEndPointY = attachedMarkAnchorPosition.y
+            ladderViewDelegate.setAttachedMarkAndGroupedMarksHighlights()
+            ladderViewDelegate.moveAttachedMark(position: attachedMarkAnchorPosition) // This has to be here for undo to work.
+        }
+        if pan.state == .changed {
+            let delta = pan.translation(in: self)
+            cursorMove(delta: delta)
+            cursorEndPointY += delta.y
+            ladderViewDelegate.moveAttachedMark(position: CGPoint(x: translateToScaledViewPositionX(regionPositionX: cursor.positionX), y: cursorEndPointY))
+            ladderViewDelegate.refresh()
+            setNeedsDisplay()
+            pan.setTranslation(CGPoint(x: 0,y: 0), in: self)
+        }
+        if pan.state == .ended {
+            currentDocument?.undoManager?.endUndoGrouping()
+            ladderViewDelegate.groupMarksNearbyAttachedMark()
+            ladderViewDelegate.refresh()
+            cursorEndPointY = 0
+        }
+    }
+
+    private func dragCaliper(pan: UIPanGestureRecognizer) {
+        // No undo for calibration.
+        if pan.state == .began {
+            draggedComponent = caliper.isNearCaliperComponent(point: pan.location(in: self), accuracy: accuracy)
+            caliper.color = UIColor.systemBlue
+        }
+        else if pan.state == .changed {
+            guard let draggedComponent = draggedComponent else { return }
+            let delta = pan.translation(in: self)
+            caliper.move(delta: delta, component: draggedComponent)
+            pan.setTranslation(CGPoint(x: 0,y: 0), in: self)
+        }
+        else if pan.state == .ended {
+            draggedComponent = nil
+            caliper.color = UIColor.systemRed
+            P("caliper.value = \(caliper.value)")
+        }
         setNeedsDisplay()
+
+    }
+
+    private func cursorMove(delta: CGPoint) {
+        // Movement adjusted to scale.
+        cursor.move(delta: CGPoint(x: delta.x / scale, y: delta.y))
     }
 
     @objc func longPress(press: UILongPressGestureRecognizer) {
-        PRINT("Long press on caliper")
+        if press.state == .began {
+            if cursor.movement == .horizontal {
+                cursor.movement = .omnidirectional
+            }
+            else if cursor.movement == .omnidirectional {
+                cursor.movement = .horizontal
+            }
+            let pressPositionY = press.location(in: self).y
+            P("ppy \(pressPositionY),  mcpy \(maxCursorPositionY)")
+            cursor.positionOmniCircleY = pressPositionY > maxCursorPositionY ? maxCursorPositionY : pressPositionY
+            P("cursor.positionY \(cursor.positionOmniCircleY)")
+            setNeedsDisplay()
+        }
     }
 
-    func doCalibration() {
-        PRINT("Do calibration")
+    func showCalipers() {
+        os_log("showCalipers()", log: .action, type: .info)
+        mode = .calibration
+        let width = self.frame.width
+        caliper.bar1Position = width / 3
+        caliper.bar2Position = caliper.bar1Position + width / 3
+        caliper.crossbarPosition = caliperMaxY / 2
+        setNeedsDisplay()
     }
 
-
-    func putCursor(location: CGFloat) {
-        PRINT("Cursor location = \(location)")
-        // 
-        cursorViewModel.cursor.position = location / scale
-        hideCursor(hide: false)
+    func setCalibration(zoom: CGFloat) {
+        calibration?.set(zoom: zoom, calFactor: Calibration.standardInterval / caliper.value)
+        calibration?.isCalibrated = true
+        ladderViewDelegate.refresh()
     }
 
-    // MARK: - CursorView delegate methods
+    func addMarkWithAttachedCursor(position: CGPoint) {
+        os_log("addMarkWithAttachedCursor(position:) - CursorView", log: OSLog.debugging, type: .debug)
+        // imageScrollView starts at x = 0, contentInset shifts view to right, and the left margin is negative.
+        if position.x > 0 {
+            moveCursor(cursorViewPositionX: position.x / scale)
+            cursor.positionOmniCircleY = position.y > maxCursorPositionY ? maxCursorPositionY : position.y
+            cursorIsVisible = true
+            ladderViewDelegate.addAttachedMark(scaledViewPositionX: position.x)
+            setCursorHeight()
+            setNeedsDisplay()
+        }
+    }
+}
+
+// MARK: - CursorView delegate methods
+
+extension CursorView: CursorViewDelegate {
+    var cursorIsVisible: Bool {
+        get { cursor.visible }
+        set(newValue) { cursor.visible = newValue }
+    }
+
     func refresh() {
         setNeedsDisplay()
     }
 
-    func attachMark(mark: Mark?) {
-        guard let mark = mark else { return }
-        attachedMark = mark
-        mark.attached = true
-        mark.highlight = .all
-        PRINT("Mark attached!")
+    func moveCursor(cursorViewPositionX positionX: CGFloat) {
+        cursor.positionX = positionX
     }
 
-    func unattachMark() {
-        if let mark = attachedMark {
-            mark.attached = false
-            mark.highlight = .none
-            ladderViewDelegate?.refresh()
-        }
-        attachedMark = nil
-        PRINT("Mark unattached!")
+    func cursorMovement() -> Movement {
+        return cursor.movement
     }
 
-    func moveCursor(location: CGFloat) {
-        cursorViewModel.cursor.position = location
+    func isCalibrated() -> Bool {
+        return calibration?.isCalibrated ?? false
     }
 
-    func recenterCursor() {
-        // TODO: Deal with mark already in center, so cursor doesn't move:
-        // Possible solutions:
-        //    Test for this situation and move cursor elsewhere
-        //    Move cursor set distance from mark in either direction
-        //    Change color of grabbed vs released cursor (and change mark color too?)
-        //    Combination of above.
-        cursorViewModel.centerCursor()
+    func setIsCalibrated(_ value: Bool) {
+        calibration?.isCalibrated = value
     }
 
-    func highlightCursor(_ on: Bool) {
-        if on {
-            cursorViewModel.cursorState = .attached
-        }
-        else {
-            cursorViewModel.cursorState = .unattached
-        }
+    func markMeasurement(segment: Segment) -> CGFloat {
+        guard let calibration = calibration else { return 0 }
+        return abs(segment.proximal.x - segment.distal.x) * calibration.currentCalFactor
     }
 
-    func hideCursor(hide: Bool) {
-        cursorViewModel.cursorVisible = !hide
+    func intervalMeasurement(value: CGFloat) -> CGFloat {
+        guard let calibration = calibration else { return 0 }
+        return value * calibration.currentCalFactor
     }
-
-    func cursorIsVisible() -> Bool {
-        return cursorViewModel.cursorVisible
-    }
-
-    func setAnchor(anchor: Cursor.Anchor) {
-        PRINT("CursorView set anchor to \(anchor)")
-        cursorViewModel.cursor.anchor = anchor
-    }
-
 }
