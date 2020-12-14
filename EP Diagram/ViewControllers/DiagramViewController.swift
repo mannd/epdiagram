@@ -277,7 +277,6 @@ final class DiagramViewController: UIViewController {
         setToolbarItems(selectMenuButtons, animated: false)
         navigationController?.setToolbarHidden(false, animated: false)
         cursorView.cursorIsVisible = false
-        ladderView.unhighlightAllMarks()
         setMode(.select)
         setViewsNeedDisplay()
     }
@@ -357,7 +356,6 @@ final class DiagramViewController: UIViewController {
     @objc func linkMarks() {
         os_log("linkMarks()", log: OSLog.action, type: .info)
         cursorView.cursorIsVisible = false
-        ladderView.unhighlightAllMarks()
         showLinkMenu()
         setMode(.link)
       setViewsNeedDisplay()
@@ -454,7 +452,7 @@ final class DiagramViewController: UIViewController {
     @objc func singleTap(tap: UITapGestureRecognizer) {
         os_log("singleTap - ViewController", log: OSLog.touches, type: .info)
         if cursorView.mode == .calibration {
-            P("is Calibrating")
+            print("is Calibrating")
             return
         }
         guard cursorView.allowTaps else { return }
@@ -463,7 +461,6 @@ final class DiagramViewController: UIViewController {
         }
         if cursorView.cursorIsVisible {
             ladderView.unattachAttachedMark()
-            ladderView.unhighlightAllMarks()
             cursorView.cursorIsVisible = false
         }
         else {
@@ -764,6 +761,7 @@ extension DiagramViewController {
         ladderView.showBlock = UserDefaults.standard.bool(forKey: Preferences.defaultShowBlockKey)
         ladderView.showImpulseOrigin = UserDefaults.standard.bool(forKey: Preferences.defaultShowImpulseOriginKey)
         ladderView.showIntervals = UserDefaults.standard.bool(forKey: Preferences.defaultShowIntervalsKey)
+        ladderView.showConductionTimes = UserDefaults.standard.bool(forKey: Preferences.defaultShowConductionTimesKey)
         ladderView.snapMarks = UserDefaults.standard.bool(forKey: Preferences.defaultSnapMarksKey)
         setViewsNeedDisplay()
     }

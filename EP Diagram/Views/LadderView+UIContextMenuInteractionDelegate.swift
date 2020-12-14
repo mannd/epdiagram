@@ -11,6 +11,7 @@ import UIKit
 // Note context menus seem to cause constraint warnings (non-fatal).  See https://github.com/apptekstudios/ASCollectionView/issues/77 .  Will ignore for now.
 extension LadderView: UIContextMenuInteractionDelegate {
     func contextMenuInteraction(_ interaction: UIContextMenuInteraction, configurationForMenuAtLocation location: CGPoint) -> UIContextMenuConfiguration? {
+        cursorViewDelegate.cursorIsVisible = false
         let markWasLongPressed = positionIsNearMark(position: location)
         setPressedMark(position: location)
         return UIContextMenuConfiguration(identifier: nil, previewProvider: nil) { suggestedActions in
@@ -60,5 +61,9 @@ extension LadderView: UIContextMenuInteractionDelegate {
                 return UIMenu(title: "", children: [paste, rhythm, delete, deleteAllInRegion, deleteAllInLadder])
             }
         }
+    }
+
+    func contextMenuInteraction(_ interaction: UIContextMenuInteraction, willEndFor configuration: UIContextMenuConfiguration, animator: UIContextMenuInteractionAnimating?) {
+        unhighlightAllMarks()
     }
 }

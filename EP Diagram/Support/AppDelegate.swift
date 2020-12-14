@@ -22,6 +22,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
             Preferences.defaultShowImpulseOriginKey: Preferences.showImpulseOrigin,
             Preferences.defaultShowBlockKey: Preferences.showBlock,
             Preferences.defaultShowIntervalsKey: Preferences.showIntervals,
+            Preferences.defaultShowConductionTimesKey: Preferences.showConductionTimes,
             Preferences.defaultSnapMarksKey: Preferences.snapMarks,
         ])
         // Check for iCloud availability

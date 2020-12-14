@@ -114,10 +114,17 @@ final class CursorView: ScaledView {
         if imageIsLocked {
             showLockImageWarning(rect: rect)
         }
-        if mode == .calibration {
+        switch mode {
+        case .calibration:
             drawCaliper(rect)
-            return
+        case .normal:
+            drawCursor(rect)
+        default:
+            break
         }
+    }
+
+    func drawCursor(_ rect: CGRect) {
         if let context = UIGraphicsGetCurrentContext() {
             guard cursor.visible else { return }
 
@@ -157,7 +164,7 @@ final class CursorView: ScaledView {
             let caliperValue = String(format: "%.2f", caliper.value)
             let measureText = "\(caliperValue) points"
             var attributes = [NSAttributedString.Key: Any]()
-            let textFont = UIFont(name: "Helvetica Neue Medium", size: 14.0) ?? UIFont.systemFont(ofSize: 14, weight: UIFont.Weight.medium)
+            let textFont = UIFont(name: "Helvetica Neue Medium", size: 16.0) ?? UIFont.systemFont(ofSize: 16, weight: UIFont.Weight.medium)
             let paragraphStyle = NSParagraphStyle.default.mutableCopy() as! NSMutableParagraphStyle
             attributes = [
                 NSAttributedString.Key.font: textFont,
@@ -391,7 +398,12 @@ final class CursorView: ScaledView {
 extension CursorView: CursorViewDelegate {
     var cursorIsVisible: Bool {
         get { cursor.visible }
-        set(newValue) { cursor.visible = newValue }
+        set(newValue) {
+            cursor.visible = newValue
+            if !cursorIsVisible {
+                ladderViewDelegate.unhighlightAllMarks()
+            }
+        }
     }
 
     func refresh() {

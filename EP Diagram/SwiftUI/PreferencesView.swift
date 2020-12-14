@@ -14,6 +14,7 @@ struct PreferencesView: View {
     @AppStorage(Preferences.defaultShowImpulseOriginKey) var showImpulseOrigin: Bool = Preferences.showImpulseOrigin
     @AppStorage(Preferences.defaultShowBlockKey) var showBlock: Bool = Preferences.showBlock
     @AppStorage(Preferences.defaultShowIntervalsKey) var showIntervals: Bool = Preferences.showIntervals
+    @AppStorage(Preferences.defaultShowConductionTimesKey) var showConductionTimes: Bool = Preferences.showConductionTimes
     @AppStorage(Preferences.defaultSnapMarksKey) var snapMarks: Bool = Preferences.snapMarks
     @Environment(\.presentationMode) private var presentationMode: Binding<PresentationMode>
 
@@ -32,6 +33,9 @@ struct PreferencesView: View {
                         }
                         Toggle(isOn: $showIntervals) {
                             Text("Show intervals")
+                        }
+                        Toggle(isOn: $showConductionTimes) {
+                            Text("Show conduction times")
                         }
                         Toggle(isOn: $snapMarks) {
                             Text("Snap marks")

@@ -61,6 +61,7 @@ final class LadderView: ScaledView {
     var showBlock = true
     var showPivots = true
     var showIntervals = true
+    var showConductionTimes = true
     var showMarkText = true
 
     var ladderIsLocked = false
@@ -311,7 +312,6 @@ final class LadderView: ScaledView {
                 markWasTapped(mark: mark, tapLocationInLadder: tapLocationInLadder)
             }
             else if cursorViewDelegate.cursorIsVisible {
-                unhighlightAllMarks()
                 cursorViewDelegate.cursorIsVisible = false
                 unattachAttachedMark()
             }
@@ -699,7 +699,6 @@ final class LadderView: ScaledView {
                 else {  // We need to make a new mark.
                     cursorViewDelegate.cursorIsVisible = false
                     unattachAttachedMark()
-                    unhighlightAllMarks()
                     // Get the third of region for endpoint of new mark.
                     dragOriginDivision = locationInLadder.regionDivision
                     switch dragOriginDivision {
@@ -1002,7 +1001,9 @@ final class LadderView: ScaledView {
             activeRegion = region
         }
         if let mark = locationInLadder.mark {
+            unhighlightAllMarks()
             pressedMark = mark
+            mark.highlight = .selected
         }
     }
 
@@ -1288,7 +1289,7 @@ final class LadderView: ScaledView {
     }
 
     func drawMarkText(forMark mark: Mark, segment: Segment, context: CGContext) {
-        guard cursorViewDelegate.isCalibrated(), showMarkText, mark.showText, mark.text.count > 0 else { return }
+        guard cursorViewDelegate.isCalibrated(), showConductionTimes, mark.showText else { return }
         let value = lround(Double(cursorViewDelegate.markMeasurement(segment: segment)))
         let text = "\(value)"
         var origin = Common.getSegmentMidpoint(segment)

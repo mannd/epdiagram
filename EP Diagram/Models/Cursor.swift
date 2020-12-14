@@ -12,7 +12,7 @@ import UIKit
 class Cursor  {
     static let intersectionRadius: CGFloat = 5
     static let omniCircleRadius: CGFloat = 20
-    let omniCircleMargin: CGFloat = 25 // how close circle gets to top and bottom of cursor
+    private let omniCircleMargin: CGFloat = 25 // how close circle gets to top and bottom of cursor
     
     var positionX: CGFloat // the horizontal position of the cursor using cursor view coordinates
     var positionOmniCircleY: CGFloat // point along omnidirectional cursor where circle is shown

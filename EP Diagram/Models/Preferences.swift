@@ -16,6 +16,7 @@ struct Preferences {
     static let defaultShowImpulseOriginKey = "defaultShowImpuseOriginKey"
     static let defaultShowBlockKey = "defaultShowBlockKey"
     static let defaultShowIntervalsKey = "defaultShowIntervalsKey"
+    static let defaultShowConductionTimesKey = "defaultShowConductionTimesKey"
     static let defaultSnapMarksKey = "defaultSnapMarksKey"
 
 
@@ -24,7 +25,8 @@ struct Preferences {
     static var cursorLineWidth: Int = 1
     static var showImpulseOrigin = false
     static var showBlock = false
-    static var showIntervals = false
+    static var showIntervals = true
+    static var showConductionTimes = true
     static var snapMarks = true
     
 //    var red = UIColor.systemRed
