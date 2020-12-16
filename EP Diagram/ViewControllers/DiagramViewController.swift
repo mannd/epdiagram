@@ -276,9 +276,15 @@ final class DiagramViewController: UIViewController {
         }
         setToolbarItems(selectMenuButtons, animated: false)
         navigationController?.setToolbarHidden(false, animated: false)
-        cursorView.cursorIsVisible = false
+        hideCursor()
         setMode(.select)
         setViewsNeedDisplay()
+    }
+
+    func hideCursor() {
+        guard cursorView.cursorIsVisible else { return } // don't bother if cursor not visible
+        cursorView.cursorIsVisible = false
+        ladderView.unhighlightAllMarks()
     }
 
     private func showLinkMenu() {
@@ -288,7 +294,7 @@ final class DiagramViewController: UIViewController {
             let cancelButton = UIBarButtonItem(title: cancelTitle, style: .plain, target: self, action: #selector(cancelLink))
             linkMenuButtons = [prompt, spacer, cancelButton]
         }
-        cursorView.cursorIsVisible = false
+        hideCursor()
         setToolbarItems(linkMenuButtons, animated: false)
         navigationController?.setToolbarHidden(false, animated: false)
     }
@@ -341,7 +347,7 @@ final class DiagramViewController: UIViewController {
 
     @objc func showSelectAlert() {
         os_log("selectMarks()", log: .action, type: .info)
-        cursorView.cursorIsVisible = false
+        hideCursor()
         let alert = UIAlertController(title: nil, message: nil, preferredStyle: .actionSheet)
         let selectMarksAction = UIAlertAction(title: L("Select Marks"), style: .default, handler: showSelectMarksMenu)
         let selectZoneAction = UIAlertAction(title: L("Select a Zone"), style: .default, handler: nil)
@@ -355,12 +361,10 @@ final class DiagramViewController: UIViewController {
 
     @objc func linkMarks() {
         os_log("linkMarks()", log: OSLog.action, type: .info)
-        cursorView.cursorIsVisible = false
+        hideCursor()
         showLinkMenu()
         setMode(.link)
-      setViewsNeedDisplay()
-//        cursorView.allowTaps = false
-        // Tap two marks and automatically generate a link between them.  Tap on and then the region in between and generate a blocked link.  Do this by setting link mode in the ladder view and have the ladder view handle the single taps.
+        setViewsNeedDisplay()
     }
 
     // FIXME: copy and paste should be long press menu items.
@@ -387,7 +391,6 @@ final class DiagramViewController: UIViewController {
         os_log("cancelLink()", log: OSLog.action, type: .info)
         showMainMenu()
         setMode(.normal)
-//        cursorView.allowTaps = true
         ladderView.unhighlightAllMarks()
         ladderView.setNeedsDisplay()
     }
@@ -422,7 +425,7 @@ final class DiagramViewController: UIViewController {
         os_log("undo action", log: OSLog.action, type: .info)
         if self.currentDocument?.undoManager?.canUndo ?? false {
             // Cursor doesn't track undo and redo well, so hide it!
-            cursorView.cursorIsVisible = false
+            hideCursor()
             self.currentDocument?.undoManager?.undo()
             setViewsNeedDisplay()
         }
@@ -431,7 +434,7 @@ final class DiagramViewController: UIViewController {
     @objc func redo() {
         os_log("redo action", log: OSLog.action, type: .info)
         if self.currentDocument?.undoManager?.canRedo ?? false {
-            cursorView.cursorIsVisible = false
+            hideCursor()
             self.currentDocument?.undoManager?.redo()
             setViewsNeedDisplay()
         }
@@ -461,7 +464,7 @@ final class DiagramViewController: UIViewController {
         }
         if cursorView.cursorIsVisible {
             ladderView.unattachAttachedMark()
-            cursorView.cursorIsVisible = false
+            hideCursor()
         }
         else {
             let position = tap.location(in: imageScrollView)
@@ -551,7 +554,7 @@ final class DiagramViewController: UIViewController {
         os_log("viewWillTransition", log: OSLog.viewCycle, type: .info)
         super.viewWillTransition(to: size, with: coordinator)
         // Hide cursor with rotation, to avoid redrawing it.
-        cursorView.cursorIsVisible = false
+        hideCursor()
         // Remove separatorView when rotating to let original constraints resume.
         // Otherwise, views are not laid out correctly.
         if let separatorView = separatorView {

@@ -41,7 +41,6 @@ struct LocationInLadder {
 extension LocationInLadder: CustomDebugStringConvertible {
     var debugDescription: String {
         let description = """
-
         region = \(region.debugDescription)
         mark = \(mark.debugDescription)
         ladder = \(ladder.debugDescription)
@@ -56,8 +55,7 @@ extension LocationInLadder: CustomDebugStringConvertible {
         labelWasTapped = \(labelWasTapped)
         markWasTapped = \(markWasTapped)
         ladderWasTapped = \(ladderWasTapped)
-        zoneWasTapped = \(zoneWasTapped)
-        
+        zoneWasTapped = \(zoneWasTapped)        
         """
         return description
     }

@@ -306,7 +306,7 @@ extension DiagramViewController: HamburgerTableDelegate, UIImagePickerController
         setImageViewImage(with: image)
         imageScrollView.zoomScale = 1.0
         imageScrollView.contentOffset = CGPoint()
-        cursorView.cursorIsVisible = false
+        hideCursor()
         clearCalibration()
         setViewsNeedDisplay()
     }
@@ -331,7 +331,7 @@ extension DiagramViewController: HamburgerTableDelegate, UIImagePickerController
         self.separatorView = nil
         navigationController?.setToolbarHidden(true, animated: true)
         // Always hide cursor when opening hamburger menu.
-        cursorView.cursorIsVisible = false
+        hideCursor()
         cursorView.setNeedsDisplay()
         UIView.animate(withDuration: 0.5, animations: {
             self.view.layoutIfNeeded()
