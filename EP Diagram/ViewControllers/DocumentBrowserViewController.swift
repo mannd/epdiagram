@@ -44,7 +44,7 @@ class DocumentBrowserViewController: UIDocumentBrowserViewController {
     }
 }
 
-protocol DiagramEditorDelegate {
+protocol DiagramEditorDelegate: AnyObject {
     func diagramEditorDidFinishEditing(_ controller: DiagramViewController, diagram: Diagram)
     func diagramEditorDidUpdateContent(_ controller: DiagramViewController, diagram: Diagram)
 }
@@ -64,7 +64,7 @@ extension DocumentBrowserViewController: DiagramEditorDelegate {
         editingDocument = true
         let controller = DiagramViewController.navigationControllerFactory()
         let diagramViewController = controller.viewControllers[0] as? DiagramViewController
-        diagramViewController?.delegate = self
+        diagramViewController?.diagramEditorDelegate = self
         diagramViewController?.diagram = document.diagram
         diagramViewController?.restorationInfo = restorationInfo
         diagramViewController?.restorationIdentifier = restorationIdentifier

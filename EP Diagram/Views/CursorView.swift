@@ -398,9 +398,7 @@ final class CursorView: ScaledView {
 extension CursorView: CursorViewDelegate {
     var cursorIsVisible: Bool {
         get { cursor.visible }
-        set(newValue) { cursor.visible = newValue
-            print("ˆˆˆˆˆˆˆ>>>>> cursor.visible = \(newValue)")
-        }
+        set(newValue) { cursor.visible = newValue }
     }
 
     func refresh() {

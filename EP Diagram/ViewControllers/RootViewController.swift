@@ -67,7 +67,6 @@ class RootViewController: UIViewController {
             fatalError("Project fault - could not instantiate DiagramViewController")
         }
         diagramViewController.restorationInfo = restorationInfo
-        diagramViewController.persistentID = persistentID
         // Best if view covers whole screen.
         navigationViewController.modalPresentationStyle = .fullScreen
         presenter.present(navigationViewController, animated: true)

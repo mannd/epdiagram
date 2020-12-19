@@ -7,10 +7,12 @@
 //
 
 import UIKit
+import OSLog
 
 // Note context menus seem to cause constraint warnings (non-fatal).  See https://github.com/apptekstudios/ASCollectionView/issues/77 .  Will ignore for now.
 extension LadderView: UIContextMenuInteractionDelegate {
     func contextMenuInteraction(_ interaction: UIContextMenuInteraction, configurationForMenuAtLocation location: CGPoint) -> UIContextMenuConfiguration? {
+        os_log("contextMenuInteraction(:configurationForMenuAtLocation:)", log: .action, type: .info)
         // Warning: don't hide cursor here, as this function is called during dragging on ladder view.
         let markWasLongPressed = positionIsNearMark(position: location)
         setPressedMark(position: location)

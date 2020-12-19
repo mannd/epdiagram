@@ -19,7 +19,6 @@ final class DiagramViewController: UIViewController {
     @IBOutlet var ladderView: LadderView!
     @IBOutlet var cursorView: CursorView!
     @IBOutlet var blackView: BlackView!
-
     var hamburgerTableViewController: HamburgerTableViewController? // We get this view via its embed segue!
     var separatorView: SeparatorView?
 
@@ -37,7 +36,7 @@ final class DiagramViewController: UIViewController {
     private var linkMenuButtons: [UIBarButtonItem]?
     private var calibrateMenuButtons: [UIBarButtonItem]?
 
-    var delegate: DiagramEditorDelegate?
+    weak var diagramEditorDelegate: DiagramEditorDelegate?
     var currentDocument: DiagramDocument?
 
     // PDF and launch from URL stuff
@@ -55,13 +54,16 @@ final class DiagramViewController: UIViewController {
     var diagramFilenames: [String] = []
     var diagram: Diagram = Diagram.blankDiagram() {
         didSet {
-            delegate?.diagramEditorDidUpdateContent(self, diagram: diagram)
+            diagramEditorDelegate?.diagramEditorDidUpdateContent(self, diagram: diagram)
         }
     }
     var calibration = Calibration() // reference to calibration is passed to ladderand cursor views
     var preferences: Preferences = Preferences()
+    // Set by screen delegate
+    var restorationInfo: [AnyHashable: Any]?
+    var viewClosed = false
 
-    // Stuff for state restoration
+    // Keys for state restoration
     static let restorationContentOffsetXKey = "restorationContentOffsetXKey"
     static let restorationContentOffsetYKey = "restorationContentOffsetYKey"
     static let restorationZoomKey = "restorationZoomKey"
@@ -70,53 +72,50 @@ final class DiagramViewController: UIViewController {
     static let restorationFileNameKey = "restorationFileNameKey"
     static let restorationNeededKey = "restorationNeededKey"
     static let restorationDoRestorationKey = "restorationDoRestorationKey"
-    // Set by screen delegate
-    var restorationInfo: [AnyHashable: Any]?
-    var persistentID = ""
-    var restorationFilename = ""
-    var viewClosed = false
 
     // Speed up appearance of image picker by initializing it here.
     let imagePicker: UIImagePickerController = UIImagePickerController()
+    private let maxZoom: CGFloat = 7.0
+    private let minZoom: CGFloat = 0.25
 
     override func viewDidLoad() {
         os_log("viewDidLoad() - ViewController", log: OSLog.viewCycle, type: .info)
         super.viewDidLoad()
-        viewClosed = false
+        viewClosed = false // if view closed view will not be restored
 
         //showRestorationInfo() // for debugging
 
-        // TODO: Lots of other customization for Mac version.
+        // TODO: customization for mac version
         if Common.isRunningOnMac() {
-//            navigationController?.setNavigationBarHidden(true, animated: false)
+            //navigationController?.setNavigationBarHidden(true, animated: false)
             // TODO: Need to convert hamburger menu to regular menu on Mac.
         }
 
-        // Setup cursor and ladder views.
-        // These 2 views are guaranteed to exist, so the delegates are IUOs.
+        // Setup cursor, ladder and image scroll views.
+        // These 2 views are guaranteed to exist, so the delegates are implicitly unwrapped optionals.
         cursorView.ladderViewDelegate = ladderView
         ladderView.cursorViewDelegate = cursorView
         cursorView.currentDocument = currentDocument
         ladderView.currentDocument = currentDocument
-        imageScrollView.delegate = self
         // These two views hold a common reference to calibration.
         cursorView.calibration = calibration
         ladderView.calibration = calibration
-        // Distinguish the two views using slightly different background colors.
-        imageScrollView.backgroundColor = UIColor.secondarySystemBackground
-        ladderView.backgroundColor = UIColor.tertiarySystemBackground
-        // Limit max and min scale of image.
-        imageScrollView.maximumZoomScale = 7.0
-        imageScrollView.minimumZoomScale = 0.25
         // Ensure there is a space for labels at the left margin.
         ladderView.leftMargin = leftMargin
         cursorView.leftMargin = leftMargin
         cursorView.caliperMaxY = imageScrollView.frame.height
-        // Pass diagram image and ladder to image and ladder views.
-        setImageViewImage(with: diagram.image)
-        ladderView.ladder = diagram.ladder
-        // Title is set to diagram name.
-        title = getTitle()
+        imageScrollView.delegate = self
+        // Distinguish the two views using slightly different background colors.
+        imageScrollView.backgroundColor = UIColor.secondarySystemBackground
+        ladderView.backgroundColor = UIColor.tertiarySystemBackground
+        // Limit max and min scale of image.
+        imageScrollView.maximumZoomScale = maxZoom
+        imageScrollView.minimumZoomScale = minZoom
+        // Pass diagram to image and ladder views.
+        setImageViewDiagram(diagram)
+        ladderView.diagram = diagram
+        // Title is set to diagram document name.
+        setTitle()
         // Get defaults and apply them to views.
         updatePreferences()
 
@@ -124,14 +123,15 @@ final class DiagramViewController: UIViewController {
         blackView.delegate = self
         blackView.alpha = 0.0
         _constraintHamburgerLeft.constant = -self._constraintHamburgerWidth.constant
+
+        // Navigation buttons
         // Hamburger menu is replaced by main menu on Mac.
         if !Common.isRunningOnMac() {
             navigationItem.setLeftBarButton(UIBarButtonItem(image: UIImage(named: "hamburger"), style: .plain, target: self, action: #selector(toggleHamburgerMenu)), animated: true)
         }
-
         navigationItem.setRightBarButton(UIBarButtonItem(image: UIImage(systemName: "xmark"), style: .plain, target: self, action: #selector(closeAction)), animated: true)
        
-        // Set up touches.
+        // Set up touches
         let singleTapRecognizer = UITapGestureRecognizer(target: self, action: #selector(self.singleTap))
         singleTapRecognizer.numberOfTapsRequired = 1
         imageScrollView.addGestureRecognizer(singleTapRecognizer)
@@ -152,14 +152,8 @@ final class DiagramViewController: UIViewController {
         }
     }
 
-    func getTitle() -> String {
-        guard let name = currentDocument?.name() else { return L("New Diagram", comment: "app name") }
-
-        return name
-    }
-
     func setTitle() {
-        title = getTitle()
+        title = currentDocument?.name() ?? L("EP Diagram")
     }
 
     func setMode(_ mode: Mode) {
@@ -170,33 +164,31 @@ final class DiagramViewController: UIViewController {
     override func viewDidAppear(_ animated: Bool) {
         os_log("viewDidAppear() - ViewController", log: OSLog.viewCycle, type: .info)
         super.viewDidAppear(animated)
-
-        // FIXME: leftMargin must adjust to zoom.
         // Need to set this here, after view draw, or Mac malpositions cursor at start of app.
         imageScrollView.contentInset = UIEdgeInsets(top: 0, left: leftMargin, bottom: 0, right: 0)
 
         self.userActivity = self.view.window?.windowScene?.userActivity
         // See https://github.com/mattneub/Programming-iOS-Book-Examples/blob/master/bk2ch06p357StateSaveAndRestoreWithNSUserActivity/ch19p626pageController/SceneDelegate.swift
-        if let zoomScale = restorationInfo?[DiagramViewController.restorationZoomKey] {
-            imageScrollView.zoomScale = zoomScale as? CGFloat ?? 1
-        }
-        var restorationContentOffset = CGPoint()
-        // FIXME: Do we have to correct content offset Y too?
-        if let contentOffsetX = restorationInfo?[DiagramViewController.restorationContentOffsetXKey] {
-            restorationContentOffset.x = (contentOffsetX as? CGFloat ?? 0) * imageScrollView.zoomScale
-            print("*********restorationContentOffset.x = \(restorationContentOffset.x)")
-        }
-        if let contentOffsetY = restorationInfo?[DiagramViewController.restorationContentOffsetYKey] {
-            restorationContentOffset.y = contentOffsetY as? CGFloat ?? 0
-        }
-        print("restorationContentOffset = \(restorationContentOffset)")
-        imageScrollView.setContentOffset(restorationContentOffset, animated: true)
+        if restorationInfo != nil {
+            if let zoomScale = restorationInfo?[DiagramViewController.restorationZoomKey] as? CGFloat {
+                imageScrollView.zoomScale = zoomScale
+            }
+            var restorationContentOffset = CGPoint()
+            // FIXME: Do we have to correct content offset Y too?
+            if let contentOffsetX = restorationInfo?[DiagramViewController.restorationContentOffsetXKey] {
+                restorationContentOffset.x = (contentOffsetX as? CGFloat ?? 0) * imageScrollView.zoomScale
+            }
+            if let contentOffsetY = restorationInfo?[DiagramViewController.restorationContentOffsetYKey] {
+                restorationContentOffset.y = contentOffsetY as? CGFloat ?? 0
+            }
+            imageScrollView.setContentOffset(restorationContentOffset, animated: true)
 
-        if let isCalibrated = restorationInfo?[DiagramViewController.restorationIsCalibratedKey] {
-            cursorView.setIsCalibrated(isCalibrated as? Bool ?? false)
-        }
-        if let calFactor = restorationInfo?[DiagramViewController.restorationCalFactorKey] {
-            cursorView.calFactor = calFactor as? CGFloat ?? 1.0
+            if let isCalibrated = restorationInfo?[DiagramViewController.restorationIsCalibratedKey] as? Bool {
+                cursorView.setIsCalibrated(isCalibrated)
+            }
+            if let calFactor = restorationInfo?[DiagramViewController.restorationCalFactorKey] as? CGFloat {
+                cursorView.calFactor = calFactor
+            }
         }
 
         self.restorationInfo = nil
@@ -206,8 +198,6 @@ final class DiagramViewController: UIViewController {
         updateUndoRedoButtons()
         resetViews()
     }
-
-
 
     // We only want to use the restorationInfo once when view controller first appears.
     var didFirstLayout = false
@@ -232,7 +222,7 @@ final class DiagramViewController: UIViewController {
         print(currentDocumentURL)
         super.updateUserActivityState(activity)
         let info: [AnyHashable: Any] = [
-            // FIXME: We are correcting just x for zoom scale.  Test if correcting is needed too.
+            // FIXME: We are correcting just x for zoom scale.  Test if correcting y is needed too.
             DiagramViewController.restorationContentOffsetXKey: imageScrollView.contentOffset.x / imageScrollView.zoomScale,
             DiagramViewController.restorationContentOffsetYKey: imageScrollView.contentOffset.y,
             DiagramViewController.restorationZoomKey: imageScrollView.zoomScale,
@@ -276,12 +266,13 @@ final class DiagramViewController: UIViewController {
         }
         setToolbarItems(selectMenuButtons, animated: false)
         navigationController?.setToolbarHidden(false, animated: false)
-        hideCursor()
+        hideCursorAndUnhighlightAllMarks()
         setMode(.select)
         setViewsNeedDisplay()
     }
 
-    func hideCursor() {
+    // Ideally this should be "private" however need access to it in hamburger delegate in another file.
+    func hideCursorAndUnhighlightAllMarks() {
         guard cursorView.cursorIsVisible else { return } // don't bother if cursor not visible
         cursorView.cursorIsVisible = false
         ladderView.unhighlightAllMarks()
@@ -294,7 +285,7 @@ final class DiagramViewController: UIViewController {
             let cancelButton = UIBarButtonItem(title: cancelTitle, style: .plain, target: self, action: #selector(cancelLink))
             linkMenuButtons = [prompt, spacer, cancelButton]
         }
-        hideCursor()
+        hideCursorAndUnhighlightAllMarks()
         setToolbarItems(linkMenuButtons, animated: false)
         navigationController?.setToolbarHidden(false, animated: false)
     }
@@ -336,7 +327,7 @@ final class DiagramViewController: UIViewController {
         os_log("CLOSE ACTION")
         viewClosed = true
         view.endEditing(true)
-        delegate?.diagramEditorDidFinishEditing(self, diagram: diagram)
+        diagramEditorDelegate?.diagramEditorDidFinishEditing(self, diagram: diagram)
     }
 
     @objc func calibrate() {
@@ -347,7 +338,7 @@ final class DiagramViewController: UIViewController {
 
     @objc func showSelectAlert() {
         os_log("selectMarks()", log: .action, type: .info)
-        hideCursor()
+        hideCursorAndUnhighlightAllMarks()
         let alert = UIAlertController(title: nil, message: nil, preferredStyle: .actionSheet)
         let selectMarksAction = UIAlertAction(title: L("Select Marks"), style: .default, handler: showSelectMarksMenu)
         let selectZoneAction = UIAlertAction(title: L("Select a Zone"), style: .default, handler: nil)
@@ -361,7 +352,7 @@ final class DiagramViewController: UIViewController {
 
     @objc func linkMarks() {
         os_log("linkMarks()", log: OSLog.action, type: .info)
-        hideCursor()
+        hideCursorAndUnhighlightAllMarks()
         showLinkMenu()
         setMode(.link)
         setViewsNeedDisplay()
@@ -425,7 +416,7 @@ final class DiagramViewController: UIViewController {
         os_log("undo action", log: OSLog.action, type: .info)
         if self.currentDocument?.undoManager?.canUndo ?? false {
             // Cursor doesn't track undo and redo well, so hide it!
-            hideCursor()
+            hideCursorAndUnhighlightAllMarks()
             self.currentDocument?.undoManager?.undo()
             setViewsNeedDisplay()
         }
@@ -434,7 +425,7 @@ final class DiagramViewController: UIViewController {
     @objc func redo() {
         os_log("redo action", log: OSLog.action, type: .info)
         if self.currentDocument?.undoManager?.canRedo ?? false {
-            hideCursor()
+            hideCursorAndUnhighlightAllMarks()
             self.currentDocument?.undoManager?.redo()
             setViewsNeedDisplay()
         }
@@ -464,7 +455,7 @@ final class DiagramViewController: UIViewController {
         }
         if cursorView.cursorIsVisible {
             ladderView.unattachAttachedMark()
-            hideCursor()
+            hideCursorAndUnhighlightAllMarks()
         }
         else {
             let position = tap.location(in: imageScrollView)
@@ -544,8 +535,8 @@ final class DiagramViewController: UIViewController {
         return document.page(at: pageNumber)
     }
 
-    func setImageViewImage(with image: UIImage?) {
-        imageView.image = image
+    func setImageViewDiagram(_ diagram: Diagram) {
+        imageView.image = diagram.image
     }
 
     // MARK: - Rotate view
@@ -554,7 +545,7 @@ final class DiagramViewController: UIViewController {
         os_log("viewWillTransition", log: OSLog.viewCycle, type: .info)
         super.viewWillTransition(to: size, with: coordinator)
         // Hide cursor with rotation, to avoid redrawing it.
-        hideCursor()
+        hideCursorAndUnhighlightAllMarks()
         // Remove separatorView when rotating to let original constraints resume.
         // Otherwise, views are not laid out correctly.
         if let separatorView = separatorView {
@@ -599,7 +590,7 @@ final class DiagramViewController: UIViewController {
         if ladderTemplates.isEmpty {
             ladderTemplates = LadderTemplate.defaultTemplates()
         }
-        var templateEditor = LadderTemplatesEditor(ladderTemplates: ladderTemplates, parentViewTitle: getTitle())
+        var templateEditor = LadderTemplatesEditor(ladderTemplates: ladderTemplates)
         templateEditor.delegate = self
         let hostingController = UIHostingController(coder: coder, rootView: templateEditor)
         return hostingController
@@ -784,46 +775,46 @@ extension DiagramViewController {
         }
     }
 
-    var defaultDocumentURL: URL? {
-        guard let docURL = FileIO.getCacheURL() else { return nil }
-        // FIXME: must account for multiple scenes, can't have just one default file.
-        let docPath = docURL.appendingPathComponent("\(restorationFilename).diagram")
-        return docPath
-    }
+//    var defaultDocumentURL: URL? {
+//        guard let docURL = FileIO.getCacheURL() else { return nil }
+//        // FIXME: must account for multiple scenes, can't have just one default file.
+//        let docPath = docURL.appendingPathComponent("\(restorationFilename).diagram")
+//        return docPath
+//    }
 
-    func loadDefaultDocument() -> Diagram? {
-        guard let defaultDocumentURL = defaultDocumentURL else { return nil }
-        do {
-            let decoder = JSONDecoder()
-            if let data = FileManager.default.contents(atPath: defaultDocumentURL.path) {
-                let documentData = try decoder.decode(Diagram.self, from: data)
-                return documentData
-            } else { return nil }
-        } catch {
-            return nil
-        }
-    }
+//    func loadDefaultDocument() -> Diagram? {
+//        guard let defaultDocumentURL = defaultDocumentURL else { return nil }
+//        do {
+//            let decoder = JSONDecoder()
+//            if let data = FileManager.default.contents(atPath: defaultDocumentURL.path) {
+//                let documentData = try decoder.decode(Diagram.self, from: data)
+//                return documentData
+//            } else { return nil }
+//        } catch {
+//            return nil
+//        }
+//    }
 
-    @discardableResult func saveDefaultDocument(_ content: Diagram) -> Bool {
-        guard let defaultDocumentURL = defaultDocumentURL else { return false }
-        do {
-            let encoder = JSONEncoder()
-            let documentData = try encoder.encode(content)
-            try documentData.write(to: defaultDocumentURL)
-            print("written to \(defaultDocumentURL)")
-            return true
-        } catch {
-            return false
-        }
-    }
+//    @discardableResult func saveDefaultDocument(_ content: Diagram) -> Bool {
+//        guard let defaultDocumentURL = defaultDocumentURL else { return false }
+//        do {
+//            let encoder = JSONEncoder()
+//            let documentData = try encoder.encode(content)
+//            try documentData.write(to: defaultDocumentURL)
+//            print("written to \(defaultDocumentURL)")
+//            return true
+//        } catch {
+//            return false
+//        }
+//    }
 
-    private func loadDocument() {
-        if let content = loadDefaultDocument() {
-            diagram = content
-        } else {
-            diagram = Diagram.blankDiagram()
-        }
-    }
+//    private func loadDocument() {
+//        if let content = loadDefaultDocument() {
+//            diagram = content
+//        } else {
+//            diagram = Diagram.blankDiagram()
+//        }
+//    }
 
 }
 

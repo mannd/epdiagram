@@ -14,7 +14,6 @@ struct LadderTemplatesEditor: View {
     @State private var editMode = EditMode.inactive
     @State private var fileSaveError = false
     @State private var errorMessage = String()
-    var parentViewTitle: String = "Back"
     @Environment(\.presentationMode) private var presentationMode: Binding<PresentationMode>
     @GestureState private var dragOffset = CGSize.zero
     weak var delegate: DiagramViewControllerDelegate?

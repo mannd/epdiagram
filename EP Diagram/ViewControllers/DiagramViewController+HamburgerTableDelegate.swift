@@ -16,7 +16,6 @@ protocol HamburgerTableDelegate: class {
     var maxBlackAlpha: CGFloat { get }
     var imageIsLocked: Bool { get set }
     var diagramIsLocked: Bool { get set }
-//    var diagramSaved: Bool { get }
 
     func takePhoto()
     func selectImage()
@@ -131,7 +130,7 @@ extension DiagramViewController: HamburgerTableDelegate, UIImagePickerController
                     diagram.name = newName
                     currentDocument?.updateChangeCount(.done)
 
-                    delegate?.diagramEditorDidUpdateContent(self, diagram: diagram)
+                    diagramEditorDelegate?.diagramEditorDidUpdateContent(self, diagram: diagram)
                     setTitle()
                 }
             }
@@ -303,10 +302,10 @@ extension DiagramViewController: HamburgerTableDelegate, UIImagePickerController
         updateUndoRedoButtons()
         diagram.ladder.clear()
         diagram.image = image
-        setImageViewImage(with: image)
+        setImageViewDiagram(diagram)
         imageScrollView.zoomScale = 1.0
         imageScrollView.contentOffset = CGPoint()
-        hideCursor()
+        hideCursorAndUnhighlightAllMarks()
         clearCalibration()
         setViewsNeedDisplay()
     }
@@ -331,7 +330,7 @@ extension DiagramViewController: HamburgerTableDelegate, UIImagePickerController
         self.separatorView = nil
         navigationController?.setToolbarHidden(true, animated: true)
         // Always hide cursor when opening hamburger menu.
-        hideCursor()
+        hideCursorAndUnhighlightAllMarks()
         cursorView.setNeedsDisplay()
         UIView.animate(withDuration: 0.5, animations: {
             self.view.layoutIfNeeded()

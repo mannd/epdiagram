@@ -88,6 +88,11 @@ final class LadderView: ScaledView {
         }
     }
 
+    var diagram: Diagram? {
+        didSet {
+            ladder = diagram?.ladder ?? Ladder.defaultLadder()
+        }
+    }
     var ladder: Ladder = Ladder.defaultLadder()
 
 
@@ -236,7 +241,7 @@ final class LadderView: ScaledView {
             assert(tapLocationInLadder.region != nil, "Label tapped, but region is nil!")
             if let region = tapLocationInLadder.region {
                 labelWasTapped(labelRegion: region)
-                hideCursor()
+                hideCursorAndUnhighlightAllMarks()
                 unattachAttachedMark()
             }
         }
@@ -247,7 +252,7 @@ final class LadderView: ScaledView {
         setNeedsDisplay()
     }
 
-    func hideCursor() {
+    private func hideCursorAndUnhighlightAllMarks() {
         guard cursorViewDelegate.cursorIsVisible else { return }
         cursorViewDelegate.cursorIsVisible = false
         unhighlightAllMarks()
@@ -323,7 +328,7 @@ final class LadderView: ScaledView {
                 markWasTapped(mark: mark, tapLocationInLadder: tapLocationInLadder)
             }
             else if cursorViewDelegate.cursorIsVisible {
-                hideCursor()
+                hideCursorAndUnhighlightAllMarks()
                 unattachAttachedMark()
             }
             else { // make mark and attach cursor
@@ -659,7 +664,7 @@ final class LadderView: ScaledView {
         os_log("deleteMark(mark:region:) - LadderView", log: OSLog.debugging, type: .debug)
         mark.attached = false
         ladder.deleteMark(mark, inRegion: region)
-        hideCursor()
+        hideCursorAndUnhighlightAllMarks()
         cursorViewDelegate.refresh()
     }
 
@@ -670,7 +675,7 @@ final class LadderView: ScaledView {
             mark.attached = false
             mark.highlight = .none
         }
-        hideCursor()
+        hideCursorAndUnhighlightAllMarks()
         cursorViewDelegate.refresh()
     }
 
@@ -711,7 +716,7 @@ final class LadderView: ScaledView {
                     }
                 }
                 else {  // We need to make a new mark.
-                    hideCursor()
+                    hideCursorAndUnhighlightAllMarks()
                     unattachAttachedMark()
                     // Get the third of region for endpoint of new mark.
                     dragOriginDivision = locationInLadder.regionDivision
@@ -1450,7 +1455,7 @@ final class LadderView: ScaledView {
             undoablyDeleteMark(mark: pressedMark, region: activeRegion)
             ladder.setHighlightForAllMarks(highlight: .none)
         }
-        hideCursor()
+        hideCursorAndUnhighlightAllMarks()
         cursorViewDelegate.refresh()
         setNeedsDisplay()
     }
@@ -1463,7 +1468,7 @@ final class LadderView: ScaledView {
                 undoablyDeleteMark(mark: mark, region: activeRegion)
             }
             undoManager?.endUndoGrouping()
-            hideCursor()
+            hideCursorAndUnhighlightAllMarks()
             cursorViewDelegate.refresh()
             setNeedsDisplay()
         }
@@ -1478,7 +1483,7 @@ final class LadderView: ScaledView {
             }
         }
         undoManager?.endUndoGrouping()
-        hideCursor()
+        hideCursorAndUnhighlightAllMarks()
         cursorViewDelegate.refresh()
         setNeedsDisplay()
     }
