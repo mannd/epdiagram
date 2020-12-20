@@ -67,8 +67,9 @@ extension DocumentBrowserViewController: DiagramEditorDelegate {
         diagramViewController?.diagramEditorDelegate = self
         diagramViewController?.diagram = document.diagram
         diagramViewController?.restorationInfo = restorationInfo
+        // FIXME: below needed?
         diagramViewController?.restorationIdentifier = restorationIdentifier
-        diagramViewController?.currentDocument = currentDocument
+        diagramViewController?.currentDocument = document
         controller.modalPresentationStyle = .fullScreen
         present(controller, animated: true)
     }

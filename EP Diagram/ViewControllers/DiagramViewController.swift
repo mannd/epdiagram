@@ -71,6 +71,7 @@ final class DiagramViewController: UIViewController {
     static let restorationCalFactorKey = "restorationCalFactorKey"
     static let restorationFileNameKey = "restorationFileNameKey"
     static let restorationNeededKey = "restorationNeededKey"
+//    static let restorationActiveRegionIndexKey = "restorationActiveRegionIndexKey"
     static let restorationDoRestorationKey = "restorationDoRestorationKey"
 
     // Speed up appearance of image picker by initializing it here.
@@ -103,7 +104,7 @@ final class DiagramViewController: UIViewController {
         // Ensure there is a space for labels at the left margin.
         ladderView.leftMargin = leftMargin
         cursorView.leftMargin = leftMargin
-        cursorView.caliperMaxY = imageScrollView.frame.height
+//        cursorView.caliperMaxY = imageScrollView.frame.height
         imageScrollView.delegate = self
         // Distinguish the two views using slightly different background colors.
         imageScrollView.backgroundColor = UIColor.secondarySystemBackground
@@ -139,9 +140,12 @@ final class DiagramViewController: UIViewController {
         // Set up context menu.
         let interaction = UIContextMenuInteraction(delegate: ladderView)
         ladderView.addInteraction(interaction)
+
+        // Notifications
+        setupNotifications()
     }
 
-    private func showRestorationInfo() {
+    private func showDebugRestorationInfo() {
         // For debugging
         if let restorationURL = DiagramIO.getRestorationURL() {
             os_log("restorationURL path = %s", log: .debugging, type: .debug, restorationURL.path)
@@ -190,11 +194,11 @@ final class DiagramViewController: UIViewController {
                 cursorView.calFactor = calFactor
             }
         }
-
-        self.restorationInfo = nil
-        assertDelegatesNonNil()
+        // FIXME: Need to actually activate activeRegion stored from ladderView.
+        // >>>>>>>>>>Issue is that after restart AV region may appear activated, but active region is actually set to A region.  So tapping on AV region does nothing.
+        // Only use the restorationInfo once
+        restorationInfo = nil
         showMainMenu()
-        setupNotifications()
         updateUndoRedoButtons()
         resetViews()
     }
@@ -233,11 +237,6 @@ final class DiagramViewController: UIViewController {
         ]
         activity.addUserInfoEntries(from: info)
         print(activity.userInfo as Any)
-    }
-
-    // Crash program at compile time if IUO delegates are nil.
-    private func assertDelegatesNonNil() {
-        assert(cursorView.ladderViewDelegate != nil && ladderView.cursorViewDelegate != nil, "LadderViewDelegate and/or CursorViewDelegate are nil")
     }
 
     private func showMainMenu() {
@@ -560,14 +559,13 @@ final class DiagramViewController: UIViewController {
     }
 
     private func resetViews() {
-        os_log("resetView() - ViewController", log: .action, type: .info)
+        os_log("resetViews() - ViewController", log: .action, type: .info)
         // Add back in separatorView after rotation.
         if (separatorView == nil) {
             separatorView = HorizontalSeparatorView.addSeparatorBetweenViews(separatorType: .horizontal, primaryView: imageScrollView, secondaryView: ladderView, parentView: self.view)
             separatorView?.cursorViewDelegate = cursorView
         }
         self.ladderView.resetSize()
-        // FIXME: save and restore scrollview offset so it is maintained with rotation.
         self.imageView.setNeedsDisplay()
         cursorView.caliperMaxY = imageScrollView.frame.height
         setViewsNeedDisplay()

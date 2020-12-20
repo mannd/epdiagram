@@ -80,11 +80,6 @@ final class CursorView: ScaledView {
         setupView()
     }
 
-    override init(frame: CGRect) {
-        super.init(frame: frame)
-        setupView()
-    }
-
     private func setupView() {
         self.isOpaque = false // CursorView is mostly transparent, so let iOS know.
         self.layer.masksToBounds = true // Draw a border around the view.
@@ -210,6 +205,7 @@ final class CursorView: ScaledView {
         text.draw(in: lockRect, withAttributes: attributes)
     }
 
+    // FIXME: When resizing ladder view, anchor position is miscalculated on slanted marks.  Fix may be simply to hide cursor when resizing views.
     func setCursorHeight(anchorPositionY: CGFloat? = nil) {
         if let anchorPositionY = anchorPositionY {
             let positionY = ladderViewDelegate.getPositionYInView(positionY: anchorPositionY, view: self)

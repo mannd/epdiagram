@@ -21,7 +21,7 @@ struct Diagram: Codable {
         }
     }
     var longDescription: String
-    var ladder: Ladder
+    var ladder: Ladder 
 
     init(name: String?, description: String, image: UIImage?, ladder: Ladder) {
         self.name = name

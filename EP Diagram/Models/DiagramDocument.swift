@@ -31,6 +31,7 @@ class DiagramDocument: UIDocument {
 
     var diagram = Diagram.blankDiagram() {
         didSet {
+            // FIXME: eliminate updateChangeCount( replaced by undo)
             updateChangeCount(.done)
         }
     }

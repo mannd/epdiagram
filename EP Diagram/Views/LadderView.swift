@@ -71,14 +71,6 @@ final class LadderView: ScaledView {
     var isZoning: Bool = false
     let zoneColor = UIColor.systemIndigo
 
-    var ladderIsDirty: Bool {
-        get {
-            ladder.isDirty
-        }
-        set(newValue) {
-            ladder.isDirty = newValue
-        }
-    }
     var marksAreVisible: Bool {
         get {
             ladder.marksAreVisible
@@ -93,11 +85,18 @@ final class LadderView: ScaledView {
             ladder = diagram?.ladder ?? Ladder.defaultLadder()
         }
     }
-    var ladder: Ladder = Ladder.defaultLadder()
+    var ladder: Ladder = Ladder.defaultLadder() {
+        didSet {
+            print("****new ladder is \(ladder.id)")
+        }
+    }
 
 
+    // FIXME: Need initial active region.
     private var activeRegion: Region? {
-        didSet { activateRegion(region: activeRegion)}
+        didSet {
+            activateRegion(region: activeRegion)
+        }
     }
     private var attachedMark: Mark? {
         get {
@@ -143,13 +142,6 @@ final class LadderView: ScaledView {
 
     // MARK: - init
 
-    // This is not called because view is created from storyboard.
-    override init(frame: CGRect) {
-        os_log("init(frame:) - LadderView", log: .viewCycle, type: .info)
-        super.init(frame: frame)
-        setupView()
-    }
-
     required init?(coder aDecoder: NSCoder) {
         os_log("init(coder:) - LadderView", log: .viewCycle, type: .info)
         super.init(coder: aDecoder)
@@ -161,7 +153,7 @@ final class LadderView: ScaledView {
     }
 
     private func setupView() {
-        os_log("didLoad() - LadderView", log: .action, type: .info)
+        os_log("setupView() - LadderView", log: .action, type: .info)
         ladderViewHeight = self.frame.height
         initializeRegions()
 
@@ -196,7 +188,7 @@ final class LadderView: ScaledView {
             region.distalBoundary = regionBoundary + regionHeight
             regionBoundary += regionHeight
         }
-        activeRegion = ladder.regions[0]
+        activeRegion = ladder.regions[ladder.getActiveRegionIndex() ?? 0]
     }
 
     internal func getRegionUnitHeight(ladder: Ladder) -> CGFloat {
@@ -288,7 +280,7 @@ final class LadderView: ScaledView {
             }
         }
         let location = LocationInLadder(region: tappedRegion, mark: tappedMark, ladder: ladder, regionSection: tappedRegionSection, regionDivision: tappedRegionDivision, markAnchor: tappedAnchor, unscaledPosition: position)
-        P("location in ladder = " + location.debugDescription)
+        print("location in ladder = " + location.debugDescription)
         return location
     }
 
@@ -334,7 +326,7 @@ final class LadderView: ScaledView {
             else { // make mark and attach cursor
                 let mark = addMark(scaledViewPositionX: positionX)
                 if let mark = mark {
-                    undoablyAddMark(mark: mark, region: activeRegion)
+                    undoablyAddMark(mark: mark, region: tappedRegion)
                     unhighlightAllMarks()
                     mark.anchor = ladder.defaultAnchor(forMark: mark)
                     attachMark(mark)
@@ -1169,7 +1161,6 @@ final class LadderView: ScaledView {
         context.setStrokeColor(getMarkColor(mark: mark))
         context.setFillColor(getMarkColor(mark: mark))
         context.setLineWidth(lineWidth)
-//        context.setLineWidth(getMarkLineWidth(mark))
         context.move(to: p1)
         context.addLine(to: p2)
         // Draw dashed line

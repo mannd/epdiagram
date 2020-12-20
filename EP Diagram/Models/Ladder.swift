@@ -56,8 +56,6 @@ class Ladder: Codable {
     var movingMark: Mark? // mark that is being dragged
     var selectedMarks = [Mark]() // mark(s) that have been selected
     var linkedMarks = [Mark]() // marks in the process of being linked
-    // isDirty will be true if there any changes made to ladder, even if they are reverted back.
-    var isDirty: Bool = false
     // marksAreVisible shows and hides all the marks.  You can toggle this for teaching purposes.
     var marksAreVisible: Bool = true
 
@@ -69,6 +67,7 @@ class Ladder: Codable {
 
     // MARK: methods
     init(template: LadderTemplate) {
+        os_log("init ladder from template", log: .action, type: .info)
         name = template.name
         longDescription = template.description
         for regionTemplate in template.regionTemplates {
@@ -76,6 +75,7 @@ class Ladder: Codable {
             regions.append(region)
         }
     }
+
 
     func registerMark(_ mark: Mark) {
         registry[mark.id] = mark
@@ -329,6 +329,20 @@ class Ladder: Codable {
         }
         // TODO: deal with middle marks
         return []
+    }
+
+    func getActiveRegion() -> Region? {
+        for region in regions {
+            if region.activated {
+                return region
+            }
+        }
+        return nil
+    }
+
+    func getActiveRegionIndex() -> Int? {
+        guard let activeRegion = getActiveRegion() else { return nil }
+        return getIndex(ofRegion: activeRegion)
     }
 
 

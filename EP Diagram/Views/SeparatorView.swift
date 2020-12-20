@@ -76,6 +76,11 @@ class SeparatorView: UIView {
         self.firstTouch = touches.first?.location(in: self.superview)
         self.startConstraint!.constant = self.oldPosition
         self.startConstraint!.isActive = true
+        cursorViewDelegate?.cursorIsVisible = false
+        let ladderView = secondaryView as? LadderView
+        ladderView?.unhighlightAllMarks()
+        ladderView?.refresh()
+        cursorViewDelegate?.refresh()
     }
 
     override func touchesMoved(_ touches: Set<UITouch>, with event: UIEvent?) {
@@ -98,7 +103,7 @@ class SeparatorView: UIView {
         ladderView?.resetSize()
         ladderView?.setCaliperMaxY(caliperMaxY)
         ladderView?.refresh()
-        cursorViewDelegate?.refresh()
+//        cursorViewDelegate?.refresh()
     }
 
     func drawSeparator(_ rect: CGRect, with color: UIColor) {
