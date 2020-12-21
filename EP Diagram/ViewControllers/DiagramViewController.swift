@@ -635,7 +635,6 @@ final class DiagramViewController: UIViewController {
 
     @IBSegueAction func performShowHelpSegueAction(_ coder: NSCoder) -> HelpViewController? {
         let helpViewController = HelpViewController(coder: coder)
-        currentDocument?.updateChangeCount(.done)
         helpViewController?.restorationInfo = self.restorationInfo
         return helpViewController
     }

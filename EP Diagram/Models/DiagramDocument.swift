@@ -29,12 +29,7 @@ enum DocumentError: Error {
 class DiagramDocument: UIDocument {
     static let extensionName = "diagram"
 
-    var diagram = Diagram.blankDiagram() {
-        didSet {
-            // FIXME: eliminate updateChangeCount( replaced by undo)
-            updateChangeCount(.done)
-        }
-    }
+    var diagram = Diagram.blankDiagram()
 
     func name() -> String {
         return fileURL.deletingPathExtension().lastPathComponent

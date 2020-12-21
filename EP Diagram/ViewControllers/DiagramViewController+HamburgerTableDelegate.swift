@@ -128,8 +128,6 @@ extension DiagramViewController: HamburgerTableDelegate, UIImagePickerController
                     renameDocument(oldURL: currentFileURL, newURL: newFileURL)
                     // FIXME: currentDocument.fileURL not changing to newURL.
                     diagram.name = newName
-                    currentDocument?.updateChangeCount(.done)
-
                     diagramEditorDelegate?.diagramEditorDidUpdateContent(self, diagram: diagram)
                     setTitle()
                 }
