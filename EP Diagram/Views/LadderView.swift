@@ -156,6 +156,7 @@ final class LadderView: ScaledView {
         os_log("setupView() - LadderView", log: .action, type: .info)
         ladderViewHeight = self.frame.height
         initializeRegions()
+        removeLinks()
 
         // Draw border around view.
         layer.masksToBounds = true
@@ -394,77 +395,110 @@ final class LadderView: ScaledView {
         return nil
     }
 
+    // TODO: handle link to adjacent region
+    // Examples:
+    /*
+     Mark -> Mark
+     Same region: do nothing (can't figure out where to attach in between mark)
+     One region apart: do nothing, same reason
+     Two regions apart: Link distal to proximal ends
+     Further apart: do nothing
+
+     Mark -> Region
+     Same region: do nothing
+     One region apart: draw mark, attach one end to first mark, other end near touch point
+     Two regions apart: make mark at x position, and link them.
+     Further apart: do nothing
+
+     Region -> Region
+     Do nothing
+
+     Region -> Mark
+     Do nothing
+
+     Note: unhighlight links when starting new link, or when doing illegal link.
+     */
     private func linkTappedMark(_ mark: Mark) {
-        if ladder.linkedMarks.count == 0 {
+        switch ladder.linkedMarks.count {
+        case 2...:
+            ladder.linkedMarks.removeAll()
+            unhighlightAllMarks()
             ladder.linkedMarks.append(mark)
             mark.highlight = .linked
-        }
-        else if ladder.linkedMarks.count == 1 {
-            // tap same mark, cancel linking
-            if mark == ladder.linkedMarks[0] {
-                ladder.linkedMarks.removeAll()
-                mark.highlight = .none
-            }
-            else {
-                // different mark tapped
-                // what region is the mark in?
-                let markRegionIndex = ladder.getRegionIndex(ofMark: mark)
-                let firstMarkRegionIndex = ladder.getRegionIndex(ofMark: ladder.linkedMarks[0])
-                os_log("markRegionIndex = %d, firstMarkRegionIndex = %d (-1 == nil)", log: OSLog.debugging, type: .info, markRegionIndex ?? -1, firstMarkRegionIndex ?? -1)
+            return
+        case 0:
+            ladder.linkedMarks.append(mark)
+            mark.highlight = .linked
+            return
+        case 1:
+            guard mark != ladder.linkedMarks[0] else { return }
+            // different mark tapped
+            // what region is the mark in?
+            if let markRegionIndex = ladder.getRegionIndex(ofMark: mark), let firstMarkRegionIndex = ladder.getRegionIndex(ofMark: ladder.linkedMarks[0]) {
                 // TODO: what about create mark with each tap?
-                ladder.linkedMarks.append(mark)
-                mark.highlight = .linked
-                if let linkedMark = link(marksToLink: ladder.linkedMarks) {
-                    ladder.linkedMarks.append(linkedMark)
-                    linkedMark.highlight = .linked
-                    groupNearbyMarks(mark: linkedMark)
-                    addGroupedMiddleMarks(ofMark: linkedMark)
+                let regionDistance = abs(markRegionIndex - firstMarkRegionIndex)
+                if regionDistance > 1 {
+                    ladder.linkedMarks.append(mark)
+                    mark.highlight = .linked
+                    if let linkedMark = link(marksToLink: ladder.linkedMarks) {
+                        ladder.linkedMarks.append(linkedMark)
+                        linkedMark.highlight = .linked
+                        groupNearbyMarks(mark: linkedMark)
+                        addGroupedMiddleMarks(ofMark: linkedMark)
+                    }
                 }
             }
+        // etc.
+        default:
+            assertionFailure("Impossible linked mark count.")
         }
-        else if ladder.linkedMarks.count >= 2 {
-            // start over
-            ladder.setHighlightForAllMarks(highlight: .none)
-            ladder.linkedMarks.removeAll()
-        }
+    }
+
+    func removeLinks() {
+        ladder.linkedMarks.removeAll()
     }
 
     private func performMarkLinking(_ tapLocationInLadder: LocationInLadder) {
         if let mark = tapLocationInLadder.mark {
+            activeRegion = tapLocationInLadder.region
             linkTappedMark(mark)
         }
         else if let region = tapLocationInLadder.region {
-            P("link tapped region")
+            // Regions are only used if a first mark is already chosen.
+            guard ladder.linkedMarks.count == 1 else { return }
+            let firstTappedMark = ladder.linkedMarks[0]
+            // Region must be adjacent to the first mark.
+            guard let firstTappedMarkRegionIndex = ladder.getRegionIndex(ofMark: firstTappedMark),
+                  let regionIndex = ladder.getIndex(ofRegion: region),
+                  abs(firstTappedMarkRegionIndex - regionIndex) == 1 else { return }
             activeRegion = region
-            if ladder.linkedMarks.count == 0 {
-                P("no linked marks so far")
-            }
-            else if ladder.linkedMarks.count == 1 {
-                // draw mark from end of previous linked mark
-                let firstTappedMark = ladder.linkedMarks[0]
-                if let firstTappedMarkRegionIndex = ladder.getRegionIndex(ofMark: firstTappedMark), let regionIndex = ladder.getIndex(ofRegion: region) {
-                    let tapRegionPosition = translateToRegionPosition(scaledViewPosition: tapLocationInLadder.unscaledPosition, region: region)
-                    if firstTappedMarkRegionIndex < regionIndex {
-                        P("add mark and link to distal end of linked mark")
-                        P("tapRegionPosition = \(tapRegionPosition)")
-                        if let newMark = addMark(regionPositionX: firstTappedMark.segment.distal.x) {
-                            newMark.segment.distal = tapRegionPosition
-                            undoablyAddMark(mark: newMark, region: region)
-                        }
-                    }
-                    else if firstTappedMarkRegionIndex > regionIndex {
-                        P("add mark and link to proximal end of linked mark")
-                    }
-                    else { // mark in same region
-                        P("add mark and link to linked mark in same region")
-                    }
-                    ladder.linkedMarks.removeAll()
+            // draw mark from end of previous linked mark
+            let tapRegionPosition = translateToRegionPosition(scaledViewPosition: tapLocationInLadder.unscaledPosition, region: region)
+            if firstTappedMarkRegionIndex < regionIndex {
+                guard firstTappedMark.segment.distal.y > 0.9 else { return }
+                if let newMark = addMark(regionPositionX: firstTappedMark.segment.distal.x) {
+                    newMark.segment.distal = tapRegionPosition
+                    newMark.highlight = .linked
+                    ladder.linkedMarks.append(newMark)
+                    undoablyAddMark(mark: newMark, region: region)
                 }
             }
+            else if firstTappedMarkRegionIndex > regionIndex {
+                guard firstTappedMark.segment.proximal.y < 0.1 else { return }
+                if let newMark = addMark(regionPositionX: firstTappedMark.segment.proximal.x) {
+                    newMark.segment.proximal = tapRegionPosition
+                    newMark.highlight = .linked
+                    ladder.linkedMarks.append(newMark)
+                    undoablyAddMark(mark: newMark, region: region)
+                }
+            }
+            // FIXME: what do do if something illegal tapped (same mark, illegal region).  Remove linked marks?
+            // Maybe displace red X if illegal spot.
+            else {            ladder.linkedMarks.removeAll() }
         }
         setNeedsDisplay()
-        return
     }
+
 
     private func performMarkSelecting(_ tapLocationInLadder: LocationInLadder) {
         if let mark = tapLocationInLadder.mark {
@@ -1054,12 +1088,7 @@ final class LadderView: ScaledView {
     // MARK: - draw
 
     override func draw(_ rect: CGRect) {
-        if let context = UIGraphicsGetCurrentContext() {
-            draw(rect: rect, context: context)
-        }
-    }
-
-    func draw(rect: CGRect, context: CGContext) {
+        guard let context = UIGraphicsGetCurrentContext() else { return }
         context.setStrokeColor(UIColor.label.cgColor)
         context.setLineWidth(1)
         let ladderWidth: CGFloat = rect.width

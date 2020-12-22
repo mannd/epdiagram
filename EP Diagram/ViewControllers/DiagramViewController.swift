@@ -170,6 +170,7 @@ final class DiagramViewController: UIViewController {
         super.viewDidAppear(animated)
         // Need to set this here, after view draw, or Mac malpositions cursor at start of app.
         imageScrollView.contentInset = UIEdgeInsets(top: 0, left: leftMargin, bottom: 0, right: 0)
+        ladderView.unhighlightAllMarks()
 
         self.userActivity = self.view.window?.windowScene?.userActivity
         // See https://github.com/mattneub/Programming-iOS-Book-Examples/blob/master/bk2ch06p357StateSaveAndRestoreWithNSUserActivity/ch19p626pageController/SceneDelegate.swift
@@ -352,6 +353,7 @@ final class DiagramViewController: UIViewController {
     @objc func linkMarks() {
         os_log("linkMarks()", log: OSLog.action, type: .info)
         hideCursorAndUnhighlightAllMarks()
+        ladderView.removeLinks()
         showLinkMenu()
         setMode(.link)
         setViewsNeedDisplay()
@@ -381,6 +383,7 @@ final class DiagramViewController: UIViewController {
         os_log("cancelLink()", log: OSLog.action, type: .info)
         showMainMenu()
         setMode(.normal)
+        ladderView.removeLinks()
         ladderView.unhighlightAllMarks()
         ladderView.setNeedsDisplay()
     }
