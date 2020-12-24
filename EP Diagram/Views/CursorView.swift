@@ -423,7 +423,6 @@ extension CursorView: CursorViewDelegate {
     }
 
     func intervalMeasurement(value: CGFloat) -> CGFloat {
-        guard let calibration = calibration else { return 0 }
-        return value * calibration.currentCalFactor
+        return value 
     }
 }

@@ -378,7 +378,6 @@ final class LadderView: ScaledView {
                 if let mark = mark {
                     undoablyAddMark(mark: mark, region: activeRegion)
                 }
-                mark?.highlight = .linked
                 return mark
             }
             if regionDifference < 0 {
@@ -388,36 +387,12 @@ final class LadderView: ScaledView {
                 if let mark = mark {
                     undoablyAddMark(mark: mark, region: activeRegion)
                 }
-                mark?.highlight = .linked
                 return mark
             }
         }
         return nil
     }
 
-    // TODO: handle link to adjacent region
-    // Examples:
-    /*
-     Mark -> Mark
-     Same region: do nothing (can't figure out where to attach in between mark)
-     One region apart: do nothing, same reason
-     Two regions apart: Link distal to proximal ends
-     Further apart: do nothing
-
-     Mark -> Region
-     Same region: do nothing
-     One region apart: draw mark, attach one end to first mark, other end near touch point
-     Two regions apart: make mark at x position, and link them.
-     Further apart: do nothing
-
-     Region -> Region
-     Do nothing
-
-     Region -> Mark
-     Do nothing
-
-     Note: unhighlight links when starting new link, or when doing illegal link.
-     */
     private func linkTappedMark(_ mark: Mark) {
         switch ladder.linkedMarks.count {
         case 2...:
@@ -475,7 +450,8 @@ final class LadderView: ScaledView {
             // draw mark from end of previous linked mark
             let tapRegionPosition = translateToRegionPosition(scaledViewPosition: tapLocationInLadder.unscaledPosition, region: region)
             if firstTappedMarkRegionIndex < regionIndex {
-                guard firstTappedMark.segment.distal.y > 0.9 else { return }
+                // marks must reach close enough to region boundary to be snapable
+                guard firstTappedMark.segment.distal.y > (1.0 - lowerLimitMarkHeight) else { return }
                 if let newMark = addMark(regionPositionX: firstTappedMark.segment.distal.x) {
                     newMark.segment.distal = tapRegionPosition
                     newMark.highlight = .linked
@@ -484,7 +460,7 @@ final class LadderView: ScaledView {
                 }
             }
             else if firstTappedMarkRegionIndex > regionIndex {
-                guard firstTappedMark.segment.proximal.y < 0.1 else { return }
+                guard firstTappedMark.segment.proximal.y < lowerLimitMarkHeight else { return }
                 if let newMark = addMark(regionPositionX: firstTappedMark.segment.proximal.x) {
                     newMark.segment.proximal = tapRegionPosition
                     newMark.highlight = .linked
@@ -1216,58 +1192,58 @@ final class LadderView: ScaledView {
         context.setStrokeColor(UIColor.label.cgColor)
     }
 
+
+    // FIXME: Calibration not restored after saving diagram
     fileprivate func drawIntervals(region: Region, context: CGContext) {
         guard showIntervals else { return }
         guard let calibration = calibration, calibration.isCalibrated else { return }
         let marks = region.marks
         let intervals = Interval.createIntervals(marks: marks)
+        let textFont = UIFont(name: "Helvetica Neue Medium", size: 14.0) ?? UIFont.systemFont(ofSize: 14, weight: UIFont.Weight.medium)
+        let paragraphStyle = NSParagraphStyle.default.mutableCopy() as! NSMutableParagraphStyle
+        var textRect: CGRect
+        var text: String
+        var attributes = [NSAttributedString.Key: Any]()
+        // FIXME: foreground color?  Crashes app???
+        attributes = [
+            NSAttributedString.Key.font: textFont,
+            NSAttributedString.Key.paragraphStyle: paragraphStyle,
+        ]
         for interval in intervals {
             if let firstProximalX = interval.proximalBoundary?.first, let secondProximalX = interval.proximalBoundary?.second {
                 let scaledFirstProximalX = translateToScaledViewPositionX(regionPositionX: firstProximalX)
                 let scaledSecondProximalX = translateToScaledViewPositionX(regionPositionX: secondProximalX)
                 let halfwayPosition = (scaledFirstProximalX + scaledSecondProximalX) / 2.0
-                let value = lround(Double(cursorViewDelegate.intervalMeasurement(value: interval.proximalValue ?? 0)))
-                let text = "\(value)"
+                let value = lround(Double(interval.proximalValue ?? 0))
+                text = "\(value)"
                 var origin = CGPoint(x: halfwayPosition, y: region.proximalBoundary)
-                var attributes = [NSAttributedString.Key: Any]()
-                let textFont = UIFont(name: "Helvetica Neue Medium", size: 14.0) ?? UIFont.systemFont(ofSize: 14, weight: UIFont.Weight.medium)
-                let paragraphStyle = NSParagraphStyle.default.mutableCopy() as! NSMutableParagraphStyle
-                // FIXME: foreground color?  Crashes app???
-                attributes = [
-                    NSAttributedString.Key.font: textFont,
-                    NSAttributedString.Key.paragraphStyle: paragraphStyle,
-                ]
+
                 let size = text.size(withAttributes: attributes)
                 // Center the origin.
                 origin = CGPoint(x: origin.x - size.width / 2, y: origin.y)
-                let textRect = CGRect(origin: origin, size: size)
-                text.draw(in: textRect, withAttributes: attributes)
-                context.strokePath()
+                textRect = CGRect(origin: origin, size: size)
+                if textRect.minX > leftMargin {
+                    text.draw(in: textRect, withAttributes: attributes)
+                    context.strokePath()
+                }
             }
             if let firstDistalX = interval.distalBoundary?.first, let secondDistalX = interval.distalBoundary?.second {
                 let scaledFirstDistalX = translateToScaledViewPositionX(regionPositionX: firstDistalX)
                 let scaledSecondDistalX = translateToScaledViewPositionX(regionPositionX: secondDistalX)
                 let halfwayPosition = (scaledFirstDistalX + scaledSecondDistalX) / 2.0
-                let value = lround(Double(cursorViewDelegate.intervalMeasurement(value: interval.distalValue ?? 0)))
-                let text = "\(value)"
+                let value = lround(Double(interval.distalValue ?? 0))
+                text = "\(value)"
                 var origin = CGPoint(x: halfwayPosition, y: region.distalBoundary)
-                var attributes = [NSAttributedString.Key: Any]()
-                let textFont = UIFont(name: "Helvetica Neue Medium", size: 14.0) ?? UIFont.systemFont(ofSize: 14, weight: UIFont.Weight.medium)
-                let paragraphStyle = NSParagraphStyle.default.mutableCopy() as! NSMutableParagraphStyle
-                // FIXME: foreground color?  Crashes app???
-                attributes = [
-                    NSAttributedString.Key.font: textFont,
-                    NSAttributedString.Key.paragraphStyle: paragraphStyle,
-                ]
                 let size = text.size(withAttributes: attributes)
                 // Center the origin.
                 origin = CGPoint(x: origin.x - size.width / 2, y: origin.y - size.height)
-                let textRect = CGRect(origin: origin, size: size)
-                text.draw(in: textRect, withAttributes: attributes)
-                context.strokePath()
+                textRect = CGRect(origin: origin, size: size)
+                if textRect.minX > leftMargin {
+                    text.draw(in: textRect, withAttributes: attributes)
+                    context.strokePath()
+                }
             }
         }
-
     }
 
     func showLockLadderWarning(rect: CGRect) {
@@ -1344,8 +1320,10 @@ final class LadderView: ScaledView {
         // Center the origin.
         origin = CGPoint(x: origin.x + 10, y: origin.y - size.height / 2)
         let textRect = CGRect(origin: origin, size: size)
-        text.draw(in: textRect, withAttributes: attributes)
-        context.strokePath()
+        if textRect.minX > leftMargin {
+            text.draw(in: textRect, withAttributes: attributes)
+            context.strokePath()
+        }
 
     }
 
@@ -1726,6 +1704,17 @@ extension LadderView: LadderViewDelegate {
         }
     }
 
+    // FIXME: this doesn't work :(
+    func groupAllMarks() {
+        print("groupAllMarks()")
+        for region in ladder.regions {
+            for mark in region.marks {
+                highlightNearbyMarks(mark)
+            }
+        }
+    }
+
+    // FIXME: after diagram saved and reopened, old grouped marks not working, including snapping, though newly created marks do work.
     func groupNearbyMarks(mark: Mark) {
         os_log("groupNearbyMarks(mark:) - LadderView", log: OSLog.debugging, type: .debug)
         guard snapMarks else { return }
