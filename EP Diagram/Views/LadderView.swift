@@ -1201,48 +1201,43 @@ final class LadderView: ScaledView {
         let intervals = Interval.createIntervals(marks: marks)
         let textFont = UIFont(name: "Helvetica Neue Medium", size: 14.0) ?? UIFont.systemFont(ofSize: 14, weight: UIFont.Weight.medium)
         let paragraphStyle = NSParagraphStyle.default.mutableCopy() as! NSMutableParagraphStyle
-        var textRect: CGRect
-        var text: String
-        var attributes = [NSAttributedString.Key: Any]()
-        // FIXME: foreground color?  Crashes app???
-        attributes = [
+        let attributes: [NSAttributedString.Key: Any] = [
             NSAttributedString.Key.font: textFont,
             NSAttributedString.Key.paragraphStyle: paragraphStyle,
         ]
         for interval in intervals {
             if let firstProximalX = interval.proximalBoundary?.first, let secondProximalX = interval.proximalBoundary?.second {
-                let scaledFirstProximalX = translateToScaledViewPositionX(regionPositionX: firstProximalX)
-                let scaledSecondProximalX = translateToScaledViewPositionX(regionPositionX: secondProximalX)
-                let halfwayPosition = (scaledFirstProximalX + scaledSecondProximalX) / 2.0
+                let scaledFirstX = translateToScaledViewPositionX(regionPositionX: firstProximalX)
+                let scaledSecondX = translateToScaledViewPositionX(regionPositionX: secondProximalX)
+                let halfwayPosition = (scaledFirstX + scaledSecondX) / 2.0
                 let value = lround(Double(interval.proximalValue ?? 0))
-                text = "\(value)"
+                let text = "\(value)"
                 var origin = CGPoint(x: halfwayPosition, y: region.proximalBoundary)
-
                 let size = text.size(withAttributes: attributes)
                 // Center the origin.
                 origin = CGPoint(x: origin.x - size.width / 2, y: origin.y)
-                textRect = CGRect(origin: origin, size: size)
-                if textRect.minX > leftMargin {
-                    text.draw(in: textRect, withAttributes: attributes)
-                    context.strokePath()
-                }
+                drawIntervalText(origin: origin, size: size, text: text, context: context, attributes: attributes)
             }
             if let firstDistalX = interval.distalBoundary?.first, let secondDistalX = interval.distalBoundary?.second {
-                let scaledFirstDistalX = translateToScaledViewPositionX(regionPositionX: firstDistalX)
-                let scaledSecondDistalX = translateToScaledViewPositionX(regionPositionX: secondDistalX)
-                let halfwayPosition = (scaledFirstDistalX + scaledSecondDistalX) / 2.0
+                let scaledFirstX = translateToScaledViewPositionX(regionPositionX: firstDistalX)
+                let scaledSecondX = translateToScaledViewPositionX(regionPositionX: secondDistalX)
+                let halfwayPosition = (scaledFirstX + scaledSecondX) / 2.0
                 let value = lround(Double(interval.distalValue ?? 0))
-                text = "\(value)"
+                let text = "\(value)"
                 var origin = CGPoint(x: halfwayPosition, y: region.distalBoundary)
                 let size = text.size(withAttributes: attributes)
                 // Center the origin.
                 origin = CGPoint(x: origin.x - size.width / 2, y: origin.y - size.height)
-                textRect = CGRect(origin: origin, size: size)
-                if textRect.minX > leftMargin {
-                    text.draw(in: textRect, withAttributes: attributes)
-                    context.strokePath()
-                }
+                drawIntervalText(origin: origin, size: size, text: text, context: context, attributes: attributes)
             }
+        }
+    }
+
+    private func drawIntervalText(origin: CGPoint, size: CGSize, text: String, context: CGContext, attributes: [NSAttributedString.Key: Any]) {
+        let textRect = CGRect(origin: origin, size: size)
+        if textRect.minX > leftMargin {
+            text.draw(in: textRect, withAttributes: attributes)
+            context.strokePath()
         }
     }
 
