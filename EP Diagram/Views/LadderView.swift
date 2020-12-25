@@ -1492,20 +1492,35 @@ final class LadderView: ScaledView {
         mark.groupedMarkIds = MarkIdGroup()
     }
 
+    // FIXME: make straightening undoable
     @objc func straightenToProximal() {
         if let pressedMark = pressedMark {
-            pressedMark.segment.distal.x = pressedMark.segment.proximal.x
-            cursorViewDelegate.moveCursor(cursorViewPositionX: pressedMark.segment.proximal.x)
-            cursorViewDelegate.refresh()
+            // don't bother if already straight
+            guard pressedMark.segment.distal.x != pressedMark.segment.proximal.x else { return }
+            hideCursorAndUnhighlightAllMarks()
+            let segment = Segment(proximal: pressedMark.segment.proximal, distal: CGPoint(x: pressedMark.segment.proximal.x, y: pressedMark.segment.distal.y))
+            setSegment(segment: segment, forMark: pressedMark)
+
         }
     }
 
     @objc func straightenToDistal() {
         if let pressedMark = pressedMark {
-            pressedMark.segment.proximal.x = pressedMark.segment.distal.x
-            cursorViewDelegate.moveCursor(cursorViewPositionX: pressedMark.segment.proximal.x)
-            cursorViewDelegate.refresh()
+            // don't bother if already straight
+            guard pressedMark.segment.proximal.x != pressedMark.segment.distal.x else { return }
+            hideCursorAndUnhighlightAllMarks()
+            let segment = Segment(proximal: CGPoint(x: pressedMark.segment.distal.x, y: pressedMark.segment.proximal.y), distal: pressedMark.segment.distal)
+            setSegment(segment: segment, forMark: pressedMark)
         }
+    }
+
+    private func setSegment(segment: Segment, forMark mark: Mark) {
+        let originalSegment = mark.segment
+        currentDocument?.undoManager?.registerUndo(withTarget: self, handler: { target in
+            target.setSegment(segment: originalSegment, forMark: mark)
+        })
+        NotificationCenter.default.post(name: .didUndoableAction, object: nil)
+        mark.segment = segment
     }
 }
 

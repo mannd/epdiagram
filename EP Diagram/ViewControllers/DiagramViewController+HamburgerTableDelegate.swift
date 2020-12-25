@@ -296,7 +296,7 @@ extension DiagramViewController: HamburgerTableDelegate, UIImagePickerController
         updateUndoRedoButtons()
         diagram.ladder.clear()
         diagram.image = image
-        setImageViewDiagram(diagram)
+        imageView.image = image
         imageScrollView.zoomScale = 1.0
         imageScrollView.contentOffset = CGPoint()
         hideCursorAndUnhighlightAllMarks()

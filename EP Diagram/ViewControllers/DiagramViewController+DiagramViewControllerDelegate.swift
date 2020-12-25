@@ -61,7 +61,7 @@ extension DiagramViewController: DiagramViewControllerDelegate {
         })
         NotificationCenter.default.post(name: .didUndoableAction, object: nil)
         self.diagram = diagram
-        self.setImageViewDiagram(diagram)
+        self.imageView.image = diagram.image
         self.ladderView.diagram = diagram
         setTitle()
         setViewsNeedDisplay()
