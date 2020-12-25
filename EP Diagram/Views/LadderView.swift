@@ -66,7 +66,11 @@ final class LadderView: ScaledView {
 
     var ladderIsLocked = false
 
-    var calibration: Calibration?
+//    var calibration: Calibration?
+//    {
+//        get { return ladder.calibration }
+//        set(newValue) { ladder.calibration = newValue }
+//    }
 
     var isZoning: Bool = false
     let zoneColor = UIColor.systemIndigo
@@ -85,11 +89,7 @@ final class LadderView: ScaledView {
             ladder = diagram?.ladder ?? Ladder.defaultLadder()
         }
     }
-    var ladder: Ladder = Ladder.defaultLadder() {
-        didSet {
-            print("****new ladder is \(ladder.id)")
-        }
-    }
+    var ladder: Ladder = Ladder.defaultLadder()
 
 
     // FIXME: Need initial active region.
@@ -1196,7 +1196,7 @@ final class LadderView: ScaledView {
     // FIXME: Calibration not restored after saving diagram
     fileprivate func drawIntervals(region: Region, context: CGContext) {
         guard showIntervals else { return }
-        guard let calibration = calibration, calibration.isCalibrated else { return }
+        guard let calibration = diagram?.calibration, calibration.isCalibrated else { return }
         let marks = region.marks
         let intervals = Interval.createIntervals(marks: marks)
         let textFont = UIFont(name: "Helvetica Neue Medium", size: 14.0) ?? UIFont.systemFont(ofSize: 14, weight: UIFont.Weight.medium)

@@ -60,7 +60,7 @@ extension DiagramViewController: UIScrollViewDelegate {
         cursorView.offsetX = scrollView.contentOffset.x
         cursorView.scale = scrollView.zoomScale
         ladderView.scale = scrollView.zoomScale
-        calibration.currentZoom = scrollView.zoomScale
+        diagram.calibration.currentZoom = scrollView.zoomScale
         setViewsNeedDisplay()
     }
 

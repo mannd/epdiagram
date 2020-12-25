@@ -58,7 +58,7 @@ class Ladder: Codable {
     var linkedMarks = [Mark]() // marks in the process of being linked
     // marksAreVisible shows and hides all the marks.  You can toggle this for teaching purposes.
     var marksAreVisible: Bool = true
-
+    
     // TODO: Zones are used to select parts of regions.
     var zone: Zone?
 

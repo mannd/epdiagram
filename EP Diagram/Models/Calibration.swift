@@ -8,7 +8,7 @@
 
 import UIKit
 
-class Calibration {
+class Calibration: Codable {
     var originalZoom: CGFloat = 1
     var currentZoom: CGFloat = 1
     var originalCalFactor: CGFloat = 1

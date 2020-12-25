@@ -35,6 +35,8 @@ final class CursorView: ScaledView {
     private let alphaValue: CGFloat = 0.8
     private let accuracy: CGFloat = 20 // How close a tap has to be to a cursor in unscaled view to register.
 
+    var diagram: Diagram?
+
     // Parameters that will eventually be preferences.
     var lineWidth: CGFloat = 1
     var color: UIColor = UIColor.systemBlue
@@ -50,14 +52,14 @@ final class CursorView: ScaledView {
         }
     }
 
-    var calibration: Calibration?
+//    var calibration: Calibration?
 
     var calFactor: CGFloat {
         get {
-            return calibration?.originalCalFactor ?? 1.0
+            return diagram?.calibration.originalCalFactor ?? 1.0
         }
         set(value) {
-            guard let calibration = calibration else { return }
+            guard let calibration = diagram?.calibration else { return }
             calibration.originalCalFactor = value
         }
     }
@@ -369,8 +371,9 @@ final class CursorView: ScaledView {
     }
 
     func setCalibration(zoom: CGFloat) {
-        calibration?.set(zoom: zoom, calFactor: Calibration.standardInterval / caliper.value)
-        calibration?.isCalibrated = true
+        guard let calibration = diagram?.calibration else { return }
+        calibration.set(zoom: zoom, calFactor: Calibration.standardInterval / caliper.value)
+        calibration.isCalibrated = true
         ladderViewDelegate.refresh()
         setNeedsDisplay()
     }
@@ -410,15 +413,15 @@ extension CursorView: CursorViewDelegate {
     }
 
     func isCalibrated() -> Bool {
-        return calibration?.isCalibrated ?? false
+        return diagram?.calibration.isCalibrated ?? false
     }
 
     func setIsCalibrated(_ value: Bool) {
-        calibration?.isCalibrated = value
+        diagram?.calibration.isCalibrated = value
     }
 
     func markMeasurement(segment: Segment) -> CGFloat {
-        guard let calibration = calibration else { return 0 }
+        guard let calibration = diagram?.calibration else { return 0 }
         return abs(segment.proximal.x - segment.distal.x) * calibration.currentCalFactor
     }
 

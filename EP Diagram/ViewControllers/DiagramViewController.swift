@@ -57,7 +57,7 @@ final class DiagramViewController: UIViewController {
             diagramEditorDelegate?.diagramEditorDidUpdateContent(self, diagram: diagram)
         }
     }
-    var calibration = Calibration() // reference to calibration is passed to ladderand cursor views
+//    var calibration = Calibration() // reference to calibration is passed to ladderand cursor views
     var preferences: Preferences = Preferences()
     // Set by screen delegate
     var restorationInfo: [AnyHashable: Any]?
@@ -98,9 +98,13 @@ final class DiagramViewController: UIViewController {
         ladderView.cursorViewDelegate = cursorView
         cursorView.currentDocument = currentDocument
         ladderView.currentDocument = currentDocument
+        // Use saved calibration
+//        if let ladderViewCalibration = ladderView.calibration {
+//            calibration = ladderViewCalibration
+//        }
         // These two views hold a common reference to calibration.
-        cursorView.calibration = calibration
-        ladderView.calibration = calibration
+//        cursorView.calibration = calibration
+//        ladderView.calibration = calibration
         // Ensure there is a space for labels at the left margin.
         ladderView.leftMargin = leftMargin
         cursorView.leftMargin = leftMargin
@@ -112,9 +116,10 @@ final class DiagramViewController: UIViewController {
         // Limit max and min scale of image.
         imageScrollView.maximumZoomScale = maxZoom
         imageScrollView.minimumZoomScale = minZoom
-        // Pass diagram to image and ladder views.
+        // Pass diagram to views.
         setImageViewDiagram(diagram)
         ladderView.diagram = diagram
+        cursorView.diagram = diagram
         // Title is set to diagram document name.
         setTitle()
         // Get defaults and apply them to views.
@@ -396,7 +401,7 @@ final class DiagramViewController: UIViewController {
 
     @objc func clearCalibration() {
         os_log("clearCalibration()", log: .action, type: .info)
-        calibration.reset()
+        diagram.calibration.reset()
         ladderView.refresh()
         cursorView.refresh()
 //        cursorView.clearCalibration()

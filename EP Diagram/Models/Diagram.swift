@@ -21,7 +21,8 @@ struct Diagram: Codable {
         }
     }
     var longDescription: String
-    var ladder: Ladder 
+    var ladder: Ladder
+    var calibration: Calibration = Calibration()
 
     init(name: String?, description: String, image: UIImage?, ladder: Ladder) {
         self.name = name
