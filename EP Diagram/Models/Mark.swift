@@ -101,6 +101,9 @@ class Mark: Codable {
     let id: UUID // each mark has a unique id to allow sets of marks
 
     var segment: Segment // where a mark is, using regional coordinates
+//    { didSet {
+//        print("test \(id) \(segment)")
+//    }}
 
     var attached: Bool = false // cursor attached and shown
     var selected: Bool = false // mark is selected for some action
@@ -112,11 +115,7 @@ class Mark: Codable {
     var text: String = ""  // text is usually a calibrated interval
     var showText: Bool = true
     // Ids of other marks that this mark is grouped with.
-    var groupedMarkIds: MarkIdGroup = MarkIdGroup() {
-        didSet {
-            print(groupedMarkIds)
-        }
-    }
+    var groupedMarkIds: MarkIdGroup = MarkIdGroup()
     var regionIndex: Int = -1 // keep track of which region mark is in a ladder, negative value should not occur, except on init.
 
     // Calculated properties
@@ -203,7 +202,14 @@ class Mark: Codable {
 // MARK: - extensions
 
 extension Mark: CustomDebugStringConvertible {
-    var debugDescription: String { "Mark ID " + id.debugDescription }
+    var debugDescription: String {
+        """
+        \(id.debugDescription)
+        \(segment)
+        attached = \(attached)
+
+        """
+    }
 }
 
 extension Mark: Comparable {

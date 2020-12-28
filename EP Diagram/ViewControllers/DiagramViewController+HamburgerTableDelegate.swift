@@ -226,8 +226,14 @@ extension DiagramViewController: HamburgerTableDelegate, UIImagePickerController
     #if DEBUG
     func test() {
         os_log("test()", log: .debugging, type: .debug)
-//        print(ladderView.ladder.regions[1].marks)
-        ladderView.groupAllMarks()
+        let ladder = ladderView.ladder
+        for region in ladder.regions {
+            for mark in region.marks {
+                os_log("%s", log: .test, type: .debug, mark.debugDescription)
+//                print("test \(mark.groupedMarkIds)")
+            }
+        }
+
 
     }
     #else

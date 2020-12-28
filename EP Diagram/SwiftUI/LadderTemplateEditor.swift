@@ -90,7 +90,6 @@ struct RegionListView: View {
         guard let index = self.ladderTemplate.regionTemplates.firstIndex(where: { $0.id == id }) else {
             fatalError("Region template doesn't exist.")
         }
-        print(index)
         return self.$ladderTemplate.regionTemplates[index]
     }
 

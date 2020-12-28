@@ -7,6 +7,7 @@
 //
 
 import UIKit
+import OSLog
 
 enum DocumentError: Error {
   case unrecognizedContent
@@ -62,6 +63,6 @@ class DiagramDocument: UIDocument {
 
     override func handleError(_ error: Error, userInteractionPermitted: Bool) {
         super.handleError(error, userInteractionPermitted: userInteractionPermitted)
-        print("handleError called \(error.localizedDescription)")
+        os_log("handleError called %s", log: OSLog.errors, type: .error, error.localizedDescription)
     }
 }

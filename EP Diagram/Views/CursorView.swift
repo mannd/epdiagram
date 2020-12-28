@@ -307,17 +307,15 @@ final class CursorView: ScaledView {
             cursorMove(delta: delta)
             cursorEndPointY += delta.y
             ladderViewDelegate.moveAttachedMark(position: CGPoint(x: translateToScaledViewPositionX(regionPositionX: cursor.positionX), y: cursorEndPointY))
-            ladderViewDelegate.refresh()
-            setNeedsDisplay()
             pan.setTranslation(CGPoint(x: 0,y: 0), in: self)
         }
         if pan.state == .ended {
             currentDocument?.undoManager?.endUndoGrouping()
             ladderViewDelegate.groupMarksNearbyAttachedMark()
-            ladderViewDelegate.refresh()
-            setNeedsDisplay()
             cursorEndPointY = 0
         }
+        ladderViewDelegate.refresh()
+        setNeedsDisplay()
     }
 
     private func dragCaliper(pan: UIPanGestureRecognizer) {

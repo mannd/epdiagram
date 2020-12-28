@@ -157,6 +157,8 @@ final class LadderView: ScaledView {
         ladderViewHeight = self.frame.height
         initializeRegions()
         removeLinks()
+        // FIXME: snap marks on startup
+       
 
         // Draw border around view.
         layer.masksToBounds = true
@@ -689,7 +691,6 @@ final class LadderView: ScaledView {
     }
 
     @objc func dragging(pan: UIPanGestureRecognizer) {
-        print("draggingggggggggg")
         if isZoning {
             print("zone drag")
             dragZone(pan: pan)
@@ -842,16 +843,16 @@ final class LadderView: ScaledView {
 
     private func highlightNearbyMarks(_ mark: Mark?) {
         guard let mark = mark else { return }
-        var nearbyDistance: CGFloat = 10
-        nearbyDistance = nearbyDistance / scale
+        let nearbyDistance = nearbyMarkAccuracy / scale
         let nearbyMarkIds = getNearbyMarkIds(mark: mark, nearbyDistance: nearbyDistance)
-//        let nearbyMarks = getNearbyMarks(mark: mark, nearbyDistance: nearbyDistance)
+        print(nearbyMarkIds)
         ladder.setHighlightForAllMarks(highlight: .none)
         ladder.setHighlightForMarkIdGroup(highlight: .grouped, markIdGroup: nearbyMarkIds)
-//        nearbyMarks.highlight(highlight: .grouped)
         setAttachedMarkAndGroupedMarksHighlights()
     }
 
+    // FIXME: middle marks end up with a copy of themselves in the neighboring mark group.
+    // Returns group of mark ids of marks close to passed in mark.
     func getNearbyMarkIds(mark: Mark, nearbyDistance: CGFloat) -> MarkIdGroup {
         guard let activeRegion = activeRegion else { return MarkIdGroup() }
         var proximalMarkIds = MarkIdSet()
@@ -875,7 +876,6 @@ final class LadderView: ScaledView {
         for neighboringMark in activeRegion.marks {
             if assessCloseness(ofMark: mark, inRegion: activeRegion, toNeighboringMark: neighboringMark, inNeighboringRegion: activeRegion, usingNearbyDistance: nearbyDistance) {
                 middleMarkIds.insert(neighboringMark.id)
-                P("found middle mark")
             }
         }
         return MarkIdGroup(proximal: proximalMarkIds, middle: middleMarkIds, distal: distalMarkIds)
@@ -971,6 +971,7 @@ final class LadderView: ScaledView {
         }
     }
 
+    // FIXME: After saving and reopening diagram, the group marks appear to have their segments adjusted appropriately, but nothing shows up on the screen.  The grouped marks don't move.  Why?
     private func moveGroupedMarks(forMark mark: Mark) {
         os_log("moveGroupedMarked(forMark:)", log: .action, type: .info)
         // adjust ends of mark segment.
@@ -997,6 +998,7 @@ final class LadderView: ScaledView {
                 }
             }
         }
+        setNeedsDisplay()
     }
 
     func moveMark(mark: Mark, scaledViewPosition: CGPoint) {
