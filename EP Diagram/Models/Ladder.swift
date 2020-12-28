@@ -64,7 +64,6 @@ class Ladder: Codable {
 
     private var registry: [UUID: Mark] = [:]
 
-
     // MARK: methods
     init(template: LadderTemplate) {
         os_log("init ladder from template", log: .action, type: .info)
@@ -87,6 +86,16 @@ class Ladder: Codable {
 
     func lookup(id: UUID) -> Mark? {
         return registry[id]
+    }
+
+    func resetRegistry() {
+        os_log("restoreRegistry", log: .action, type: .info)
+        registry.removeAll()
+        for region in regions {
+            for mark in region.marks {
+                registry[mark.id] = mark
+            }
+        }
     }
 
     func lookup(ids: MarkIdSet) -> MarkSet {

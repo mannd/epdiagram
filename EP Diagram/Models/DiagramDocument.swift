@@ -10,21 +10,20 @@ import UIKit
 import OSLog
 
 enum DocumentError: Error {
-  case unrecognizedContent
-  case corruptDocument
-  case archivingFailure
+    case unrecognizedContent
+    case corruptDocument
+    case archivingFailure
 
-  var localizedDescription: String {
-    switch self {
-
-    case .unrecognizedContent:
-      return L("File is an unrecognised format")
-    case .corruptDocument:
-      return L("File could not be read")
-    case .archivingFailure:
-      return L("File could not be saved")
+    var localizedDescription: String {
+        switch self {
+        case .unrecognizedContent:
+            return L("File is an unrecognised format")
+        case .corruptDocument:
+            return L("File could not be read")
+        case .archivingFailure:
+            return L("File could not be saved")
+        }
     }
-  }
 }
 
 class DiagramDocument: UIDocument {

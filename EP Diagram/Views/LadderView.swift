@@ -1194,8 +1194,6 @@ final class LadderView: ScaledView {
         context.setStrokeColor(UIColor.label.cgColor)
     }
 
-
-    // FIXME: Calibration not restored after saving diagram
     fileprivate func drawIntervals(region: Region, context: CGContext) {
         guard showIntervals else { return }
         guard let calibration = diagram?.calibration, calibration.isCalibrated else { return }
@@ -1726,9 +1724,13 @@ extension LadderView: LadderViewDelegate {
         }
     }
 
+    func resetRegistry() {
+        ladder.resetRegistry()
+    }
+
     // FIXME: after diagram saved and reopened, old grouped marks not working, including snapping, though newly created marks do work.
     func groupNearbyMarks(mark: Mark) {
-        os_log("groupNearbyMarks(mark:) - LadderView", log: OSLog.debugging, type: .debug)
+        os_log("groupNearbyMarks(mark:) - LadderView", log: .action, type: .info)
         guard snapMarks else { return }
         let minimum: CGFloat = nearbyMarkAccuracy / scale
         let nearbyMarkIds = getNearbyMarkIds(mark: mark, nearbyDistance: minimum)
@@ -1738,13 +1740,13 @@ extension LadderView: LadderViewDelegate {
 
     // FIXME: this should add all grouped middle marks together, but doesn't seem to work.
     func addGroupedMiddleMarks(ofMark mark: Mark) {
-//        var middleMarkIds = mark.groupedMarkIds.middle
-//        for id in middleMarkIds {
-//            if let middleSet = ladder.lookup(id: id)?.groupedMarkIds.middle {
-//                middleMarkIds = middleMarkIds.union(middleSet)
-//            }
-//        }
-//        mark.groupedMarkIds.middle = middleMarkIds
+        var middleMarkIds = mark.groupedMarkIds.middle
+        for id in middleMarkIds {
+            if let middleSet = ladder.lookup(id: id)?.groupedMarkIds.middle {
+                middleMarkIds = middleMarkIds.union(middleSet)
+            }
+        }
+        mark.groupedMarkIds.middle = middleMarkIds
     }
 
     func getPositionYInView(positionY: CGFloat, view: UIView) -> CGFloat {
