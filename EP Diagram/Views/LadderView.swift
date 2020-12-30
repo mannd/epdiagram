@@ -70,7 +70,7 @@ final class LadderView: ScaledView {
         get { return ladder.zone }
         set(newValue) { ladder.zone = newValue }
     }
-    var isZoning: Bool = false
+//    var isZoning: Bool = false
     let zoneColor = UIColor.systemIndigo
 
     var marksAreVisible: Bool {
@@ -230,7 +230,7 @@ final class LadderView: ScaledView {
 
     func performNormalTap(_ tapLocationInLadder: LocationInLadder) {
         unhighlightAllMarks()
-        if tapLocationInLadder.labelWasTapped {
+        if tapLocationInLadder.isLabel {
             assert(tapLocationInLadder.region != nil, "Label tapped, but region is nil!")
             if let region = tapLocationInLadder.region {
                 labelWasTapped(labelRegion: region)
@@ -238,7 +238,7 @@ final class LadderView: ScaledView {
                 unattachAttachedMark()
             }
         }
-        else if (tapLocationInLadder.regionWasTapped) {
+        else if (tapLocationInLadder.isRegion) {
             regionWasTapped(tapLocationInLadder: tapLocationInLadder, positionX: tapLocationInLadder.unscaledPosition.x)
         }
         cursorViewDelegate.refresh()
@@ -259,10 +259,16 @@ final class LadderView: ScaledView {
         var tappedRegionSection: RegionSection = .markSection
         var tappedRegionDivision: RegionDivision = .none
         var tappedAnchor: Anchor = .none
+        var tappedZone: Zone?
         for region in ladder.regions {
             if position.y > region.proximalBoundary && position.y < region.distalBoundary {
                 tappedRegion = region
                 tappedRegionDivision = getTappedRegionDivision(region: region, positionY: position.y)
+            }
+        }
+        if position.x > min(zone.start, zone.end) && position.x < max(zone.start, zone.end), let tappedRegion = tappedRegion {
+            if ladder.zone.regions.firstIndex(of: tappedRegion) != nil {
+                tappedZone = zone
             }
         }
         if let tappedRegion = tappedRegion {
@@ -280,8 +286,7 @@ final class LadderView: ScaledView {
                 }
             }
         }
-        let location = LocationInLadder(region: tappedRegion, mark: tappedMark, ladder: ladder, regionSection: tappedRegionSection, regionDivision: tappedRegionDivision, markAnchor: tappedAnchor, unscaledPosition: position)
-        print("location in ladder = " + location.debugDescription)
+        let location = LocationInLadder(region: tappedRegion, mark: tappedMark, ladder: ladder, zone: tappedZone, regionSection: tappedRegionSection, regionDivision: tappedRegionDivision, markAnchor: tappedAnchor, unscaledPosition: position)
         return location
     }
 
@@ -477,6 +482,8 @@ final class LadderView: ScaledView {
 
 
     private func performMarkSelecting(_ tapLocationInLadder: LocationInLadder) {
+        ladder.zone = Zone()
+        unselectAllMarks()
         if let mark = tapLocationInLadder.mark {
             // toggle mark selection
             mark.selected.toggle()
@@ -489,8 +496,8 @@ final class LadderView: ScaledView {
                     ladder.selectedMarks.remove(at: index)
                 }
             }
-            setNeedsDisplay()
         }
+        setNeedsDisplay()
     }
 
     private func unattachMarks() {
@@ -516,7 +523,7 @@ final class LadderView: ScaledView {
     }
 
     func positionIsNearMark(position: CGPoint) -> Bool {
-        return getLocationInLadder(position: position).markWasTapped
+        return getLocationInLadder(position: position).isMark
     }
 
     /// Determine which anchor a point is closest to.
@@ -607,7 +614,7 @@ final class LadderView: ScaledView {
         os_log("deleteMark(position:cursofViewDelegate:) - LadderView", log: OSLog.debugging, type: .debug)
         let tapLocationInLadder = getLocationInLadder(position: position)
         activeRegion = tapLocationInLadder.region
-        if tapLocationInLadder.markWasTapped {
+        if tapLocationInLadder.isMark {
             if let mark = tapLocationInLadder.mark {
                 let region = tapLocationInLadder.region
                 undoablyDeleteMark(mark: mark, region: region)
@@ -689,9 +696,12 @@ final class LadderView: ScaledView {
     }
 
     @objc func dragging(pan: UIPanGestureRecognizer) {
-        if isZoning {
+        if mode == .select {
             dragZone(pan: pan)
             return
+        }
+        if mode == .link {
+            return // so far, draggin does nothing while linking
         }
         let position = pan.location(in: self)
         let state = pan.state
@@ -801,44 +811,50 @@ final class LadderView: ScaledView {
 
     // TODO: fix zoning for scaling
     func dragZone(pan: UIPanGestureRecognizer) {
-        // drag zone
-        guard isZoning else { return }
         let position = pan.location(in: self)
         let state = pan.state
+        let regionPositionX = translateToRegionPositionX(scaledViewPositionX: position.x)
         let locationInLadder = getLocationInLadder(position: position)
+        guard locationInLadder.isRegionNotLabel else { return }
         if state == .began {
             guard let region = locationInLadder.region else { return }
             zone = Zone()
             zone.regions.append(region)
-            zone.start = position.x
-            zone.end = position.x
+            zone.start = regionPositionX
+            zone.end = regionPositionX
         }
         if state == .changed {
             guard let region = locationInLadder.region else { return }
             if (zone.regions.firstIndex(of: region) == nil) {
                 zone.regions.append(region)
             }
-            zone.end = position.x
+            zone.end = regionPositionX
             selectInZone()
         }
         if state == .ended {
         }
         setNeedsDisplay()
-
     }
 
+    // FIXME: need to append to ladder.selectedMarks also
     func selectInZone() {
+        let zoneMin = min(zone.start, zone.end)
+        let zoneMax = max(zone.start, zone.end)
         for region in zone.regions {
             for mark in region.marks {
-                if (mark.segment.distal.x > zone.start
-                    || mark.segment.proximal.x > zone.start)
-                    && (mark.segment.distal.x < zone.end
-                    || mark.segment.distal.x < zone.end) {
+                if (mark.segment.proximal.x > zoneMin
+                    || mark.segment.distal.x > zoneMin)
+                    && (mark.segment.proximal.x < zoneMax
+                    || mark.segment.distal.x < zoneMax) {
                     mark.highlight = .selected
                     mark.selected = true
+                    ladder.selectedMarks.append(mark)
                 } else {
                     mark.highlight = .none
                     mark.selected = false
+                    if let index = ladder.selectedMarks.firstIndex(of: mark) {
+                        ladder.selectedMarks.remove(at: index)
+                    }
                 }
             }
         }
@@ -1114,7 +1130,7 @@ final class LadderView: ScaledView {
             let lastRegion = index == ladder.regions.count - 1
             drawRegion(rect: regionRect, context: context, region: region, offset: offsetX, scale: scale, lastRegion: lastRegion)
         }
-        if isZoning {
+        if mode == .select {
             drawZone(context: context)
         }
         if ladderIsLocked {
@@ -1126,19 +1142,16 @@ final class LadderView: ScaledView {
     }
 
     func startZoning() {
-        isZoning = true
         zone = Zone()
     }
 
     func endZoning() {
-        isZoning = false
         zone = Zone()
     }
 
     fileprivate func drawZone(context: CGContext) {
-        guard isZoning else { return }
-        let start = zone.start // translateToRegionPositionX(scaledViewPositionX: zone.start)
-        let end = zone.end // translateToRegionPositionX(scaledViewPositionX: zone.end)
+        let start =  translateToScaledViewPositionX(regionPositionX: zone.start)
+        let end = translateToScaledViewPositionX(regionPositionX: zone.end)
         for region in zone.regions {
             let zoneRect = CGRect(x: start, y: region.proximalBoundary, width: end - start, height: region.distalBoundary - region.proximalBoundary)
             context.addRect(zoneRect)
@@ -1646,6 +1659,7 @@ extension LadderView: LadderViewDelegate {
 
     func unselectAllMarks() {
         ladder.unselectAllMarks()
+        unhighlightAllMarks()
     }
 
     func addAttachedMark(scaledViewPositionX positionX: CGFloat) {

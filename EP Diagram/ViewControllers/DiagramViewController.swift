@@ -455,19 +455,26 @@ final class DiagramViewController: UIViewController {
             print("is Calibrating")
             return
         }
-        guard cursorView.allowTaps else { return }
-        if !ladderView.hasActiveRegion() {
-            ladderView.setActiveRegion(regionNum: 0)
+        if ladderView.mode == .select {
+            ladderView.zone = Zone()
+            ladderView.unselectAllMarks()
+            ladderView.setNeedsDisplay()
         }
-        if cursorView.cursorIsVisible {
-            ladderView.unattachAttachedMark()
-            hideCursorAndUnhighlightAllMarks()
+        if ladderView.mode == .normal {
+            guard cursorView.allowTaps else { return }
+            if !ladderView.hasActiveRegion() {
+                ladderView.setActiveRegion(regionNum: 0)
+            }
+            if cursorView.cursorIsVisible {
+                ladderView.unattachAttachedMark()
+                hideCursorAndUnhighlightAllMarks()
+            }
+            else {
+                let position = tap.location(in: imageScrollView)
+                cursorView.addMarkWithAttachedCursor(position: position)
+            }
+            setViewsNeedDisplay()
         }
-        else {
-            let position = tap.location(in: imageScrollView)
-            cursorView.addMarkWithAttachedCursor(position: position)
-        }
-        setViewsNeedDisplay()
     }
 
     // MARK: - Handle PDFs, URLs at app startup

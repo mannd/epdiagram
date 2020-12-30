@@ -20,20 +20,25 @@ struct LocationInLadder {
     var regionDivision: RegionDivision
     var markAnchor: Anchor
     var unscaledPosition: CGPoint
-    var regionWasTapped: Bool {
+    var isRegion: Bool {
         region != nil
     }
-    var labelWasTapped: Bool {
+    var isRegionNotLabel: Bool {
+        isRegion && !isLabel
+    }
+    var isLabel: Bool {
         regionSection == .labelSection
     }
-    var markWasTapped: Bool {
+    var isMark: Bool {
         mark != nil
     }
-    var ladderWasTapped: Bool {
+    var isLadder: Bool {
         // If tapped outside of all regions, assume whole ladder tapped.
         region == nil
     }
-    var zoneWasTapped: Bool = false
+    var isZone: Bool {
+        zone != nil
+    }
 }
 
 // MARK: - extensions
@@ -51,11 +56,11 @@ extension LocationInLadder: CustomDebugStringConvertible {
 
         markAnchor = \(markAnchor)
         unscaledPosition = \(unscaledPosition)
-        regionWasTapped = \(regionWasTapped)
-        labelWasTapped = \(labelWasTapped)
-        markWasTapped = \(markWasTapped)
-        ladderWasTapped = \(ladderWasTapped)
-        zoneWasTapped = \(zoneWasTapped)        
+        isRegion = \(isRegion)
+        isLabel = \(isLabel)
+        isMark = \(isMark)
+        isLadder = \(isLadder)
+        isZone = \(isZone)
         """
         return description
     }
