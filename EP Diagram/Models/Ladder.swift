@@ -59,8 +59,7 @@ class Ladder: Codable {
     // marksAreVisible shows and hides all the marks.  You can toggle this for teaching purposes.
     var marksAreVisible: Bool = true
     
-    // TODO: Zones are used to select parts of regions.
-    var zone: Zone?
+    var zone: Zone = Zone()
 
     private var registry: [UUID: Mark] = [:]
 
@@ -88,7 +87,7 @@ class Ladder: Codable {
         return registry[id]
     }
 
-    func resetRegistry() {
+    func reregisterAllMarks() {
         os_log("restoreRegistry", log: .action, type: .info)
         registry.removeAll()
         for region in regions {

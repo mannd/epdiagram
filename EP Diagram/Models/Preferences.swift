@@ -18,6 +18,7 @@ struct Preferences {
     static let defaultShowIntervalsKey = "defaultShowIntervalsKey"
     static let defaultShowConductionTimesKey = "defaultShowConductionTimesKey"
     static let defaultSnapMarksKey = "defaultSnapMarksKey"
+    static let defaultGroupMarksKey = "defaultGroupMarksKey"
 
 
     // Stored as Int, converted to CGFloat when used.
@@ -36,8 +37,6 @@ struct Preferences {
 //    var linkColor = UIColor.systemGreen
 //    var selectedColor = UIColor.systemRed
 //    var groupedColor = UIColor.systemPurple
-//    var markLineWidth: CGFloat = 2
-//    var connectedLineWidth: CGFloat = 4
 //    var showPivots = false
     
 }

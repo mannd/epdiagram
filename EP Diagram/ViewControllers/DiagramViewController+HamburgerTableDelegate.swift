@@ -226,7 +226,7 @@ extension DiagramViewController: HamburgerTableDelegate, UIImagePickerController
     #if DEBUG
     func test() {
         os_log("test()", log: .debugging, type: .debug)
-        ladderView.ladder.resetRegistry()
+        ladderView.ladder.reregisterAllMarks()
 //        print(ladderView.ladder.registry)
 //        let ladder = ladderView.ladder
 //        for region in ladder.regions {

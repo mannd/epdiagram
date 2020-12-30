@@ -169,7 +169,6 @@ final class DiagramViewController: UIViewController {
         super.viewDidAppear(animated)
         // Need to set this here, after view draw, or Mac malpositions cursor at start of app.
         imageScrollView.contentInset = UIEdgeInsets(top: 0, left: leftMargin, bottom: 0, right: 0)
-        ladderView.resetRegistry()
         ladderView.unhighlightAllMarks()
 
 
@@ -211,6 +210,8 @@ final class DiagramViewController: UIViewController {
         os_log("viewDidLayoutSubviews() - ViewController", log: .viewCycle, type: .info)
         if didFirstLayout { return }
         didFirstLayout = true
+        // mark pointers in registry need to reestablished when diagram is reloaded
+        ladderView.reregisterAllMarks()
         let info = restorationInfo
         if let inHelp = info?[HelpViewController.inHelpKey] as? Bool, inHelp {
             performShowHelpSegue()
@@ -269,6 +270,7 @@ final class DiagramViewController: UIViewController {
         navigationController?.setToolbarHidden(false, animated: false)
         hideCursorAndUnhighlightAllMarks()
         setMode(.select)
+        ladderView.startZoning()
         setViewsNeedDisplay()
     }
 
@@ -337,19 +339,19 @@ final class DiagramViewController: UIViewController {
         cursorView.showCalipers()
     }
 
-    @objc func showSelectAlert() {
-        os_log("selectMarks()", log: .action, type: .info)
-        hideCursorAndUnhighlightAllMarks()
-        let alert = UIAlertController(title: nil, message: nil, preferredStyle: .actionSheet)
-        let selectMarksAction = UIAlertAction(title: L("Select Marks"), style: .default, handler: showSelectMarksMenu)
-        let selectZoneAction = UIAlertAction(title: L("Select a Zone"), style: .default, handler: nil)
-        let cancelAction = UIAlertAction(title: L("Cancel"), style: .cancel, handler: nil)
-        alert.addAction(selectMarksAction)
-        alert.addAction(selectZoneAction)
-        alert.addAction(cancelAction)
-        alert.popoverPresentationController?.barButtonItem = selectButton
-        present(alert, animated: true, completion: nil)
-    }
+//    @objc func showSelectAlert() {
+//        os_log("selectMarks()", log: .action, type: .info)
+//        hideCursorAndUnhighlightAllMarks()
+//        let alert = UIAlertController(title: nil, message: nil, preferredStyle: .actionSheet)
+//        let selectMarksAction = UIAlertAction(title: L("Select Marks"), style: .default, handler: showSelectMarksMenu)
+//        let selectZoneAction = UIAlertAction(title: L("Select a Zone"), style: .default, handler: nil)
+//        let cancelAction = UIAlertAction(title: L("Cancel"), style: .cancel, handler: nil)
+//        alert.addAction(selectMarksAction)
+//        alert.addAction(selectZoneAction)
+//        alert.addAction(cancelAction)
+//        alert.popoverPresentationController?.barButtonItem = selectButton
+//        present(alert, animated: true, completion: nil)
+//    }
 
     @objc func linkMarks() {
         os_log("linkMarks()", log: OSLog.action, type: .info)
@@ -375,6 +377,7 @@ final class DiagramViewController: UIViewController {
         os_log("cancelSelect()", log: OSLog.action, type: .info)
         showMainMenu()
         setMode(.normal)
+        ladderView.endZoning()
         ladderView.unhighlightAllMarks()
         ladderView.unselectAllMarks()
         ladderView.setNeedsDisplay()

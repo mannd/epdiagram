@@ -33,7 +33,6 @@ enum Movement {
 
 // See https://swiftrocks.com/weak-dictionary-values-in-swift for another solution.
 
-// FIXME: These sets are retaining strong references to marks, making deleting them problematic.  It may be necessary to make sets of mark ids to avoid this.
 // A mark may have up to three attachments to marks in the proximal and distal regions
 // and in its own region, i.e. reentry spawning a mark.
 struct MarkGroup: Codable {

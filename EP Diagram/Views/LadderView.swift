@@ -66,12 +66,10 @@ final class LadderView: ScaledView {
 
     var ladderIsLocked = false
 
-//    var calibration: Calibration?
-//    {
-//        get { return ladder.calibration }
-//        set(newValue) { ladder.calibration = newValue }
-//    }
-
+    var zone: Zone {
+        get { return ladder.zone }
+        set(newValue) { ladder.zone = newValue }
+    }
     var isZoning: Bool = false
     let zoneColor = UIColor.systemIndigo
 
@@ -692,7 +690,6 @@ final class LadderView: ScaledView {
 
     @objc func dragging(pan: UIPanGestureRecognizer) {
         if isZoning {
-            print("zone drag")
             dragZone(pan: pan)
             return
         }
@@ -802,9 +799,51 @@ final class LadderView: ScaledView {
         setNeedsDisplay()
     }
 
+    // TODO: fix zoning for scaling
     func dragZone(pan: UIPanGestureRecognizer) {
         // drag zone
+        guard isZoning else { return }
+        let position = pan.location(in: self)
+        let state = pan.state
+        let locationInLadder = getLocationInLadder(position: position)
+        if state == .began {
+            guard let region = locationInLadder.region else { return }
+            zone = Zone()
+            zone.regions.append(region)
+            zone.start = position.x
+            zone.end = position.x
+        }
+        if state == .changed {
+            guard let region = locationInLadder.region else { return }
+            if (zone.regions.firstIndex(of: region) == nil) {
+                zone.regions.append(region)
+            }
+            zone.end = position.x
+            selectInZone()
+        }
+        if state == .ended {
+        }
+        setNeedsDisplay()
+
     }
+
+    func selectInZone() {
+        for region in zone.regions {
+            for mark in region.marks {
+                if (mark.segment.distal.x > zone.start
+                    || mark.segment.proximal.x > zone.start)
+                    && (mark.segment.distal.x < zone.end
+                    || mark.segment.distal.x < zone.end) {
+                    mark.highlight = .selected
+                    mark.selected = true
+                } else {
+                    mark.highlight = .none
+                    mark.selected = false
+                }
+            }
+        }
+    }
+
 
     private func swapEndsIfNeeded(mark: Mark) {
         let proximalY = mark.segment.proximal.y
@@ -1086,10 +1125,20 @@ final class LadderView: ScaledView {
         }
     }
 
+    func startZoning() {
+        isZoning = true
+        zone = Zone()
+    }
+
+    func endZoning() {
+        isZoning = false
+        zone = Zone()
+    }
+
     fileprivate func drawZone(context: CGContext) {
-        guard let zone = ladder.zone else { return }
-        let start = translateToRegionPositionX(scaledViewPositionX: zone.start)
-        let end = translateToRegionPositionX(scaledViewPositionX: zone.end)
+        guard isZoning else { return }
+        let start = zone.start // translateToRegionPositionX(scaledViewPositionX: zone.start)
+        let end = zone.end // translateToRegionPositionX(scaledViewPositionX: zone.end)
         for region in zone.regions {
             let zoneRect = CGRect(x: start, y: region.proximalBoundary, width: end - start, height: region.distalBoundary - region.proximalBoundary)
             context.addRect(zoneRect)
@@ -1099,7 +1148,6 @@ final class LadderView: ScaledView {
         }
         context.setAlpha(1.0)
     }
-
 
     fileprivate func drawLabel(rect: CGRect, region: Region, context: CGContext) {
         let stringRect = CGRect(x: 0, y: rect.origin.y, width: rect.origin.x, height: rect.height)
@@ -1616,12 +1664,6 @@ extension LadderView: LadderViewDelegate {
     }
 
 
-
-    private func snap(movingMark: Mark, fixedMark: Mark) {
-
-    }
-
-
     func undoablySnapMarkToNearbyMarks(mark: Mark, nearbyMarks: MarkGroup) {
         currentDocument?.undoManager?.registerUndo(withTarget: self) { target in
             target.redoablyUnsnapMarkFromNearbyMarks(mark: mark, nearbyMarks: nearbyMarks)
@@ -1714,18 +1756,8 @@ extension LadderView: LadderViewDelegate {
         }
     }
 
-    // FIXME: this doesn't work :(
-    func groupAllMarks() {
-        print("groupAllMarks()")
-        for region in ladder.regions {
-            for mark in region.marks {
-                highlightNearbyMarks(mark)
-            }
-        }
-    }
-
-    func resetRegistry() {
-        ladder.resetRegistry()
+    func reregisterAllMarks() {
+        ladder.reregisterAllMarks()
     }
 
     // FIXME: after diagram saved and reopened, old grouped marks not working, including snapping, though newly created marks do work.

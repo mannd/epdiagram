@@ -38,7 +38,6 @@ struct Diagram: Codable {
 
     static func blankDiagram(name: String? = nil) -> Diagram {
         let diagram = Diagram(name: name, description: "Blank diagram", image: nil, ladder: Ladder.defaultLadder())
-//        diagram.ladder.zone = Zone(regions: [diagram.ladder.regions[0], diagram.ladder.regions[1]], start: 100, end: 250)
         return diagram
     }
 
