@@ -52,8 +52,6 @@ final class CursorView: ScaledView {
         }
     }
 
-//    var calibration: Calibration?
-
     var calFactor: CGFloat {
         get {
             return diagram?.calibration.originalCalFactor ?? 1.0
@@ -288,13 +286,17 @@ final class CursorView: ScaledView {
     }
 
     @objc func dragging(pan: UIPanGestureRecognizer) {
-        if mode == .calibration {
-            dragCaliper(pan: pan)
-            return
+        switch mode {
+        case .calibration:
+            calibrationModeDrag(pan)
+        case .normal:
+            normalModeDrag(pan)
+        case .link, .select:
+            break
         }
-        // TODO: Should be no dragging in link or select mode on cursor (and no cursor either).
-        guard mode == .normal else { return }
-        // Don't drag if no attached mark.
+    }
+
+    func normalModeDrag(_ pan: UIPanGestureRecognizer) {
         guard let attachedMarkAnchorPosition = ladderViewDelegate.getAttachedMarkScaledAnchorPosition() else { return }
         if pan.state == .began {
             currentDocument?.undoManager?.beginUndoGrouping()
@@ -318,7 +320,7 @@ final class CursorView: ScaledView {
         setNeedsDisplay()
     }
 
-    private func dragCaliper(pan: UIPanGestureRecognizer) {
+    private func calibrationModeDrag(_ pan: UIPanGestureRecognizer) {
         // No undo for calibration.
         if pan.state == .began {
             draggedComponent = caliper.isNearCaliperComponent(point: pan.location(in: self), accuracy: accuracy)
@@ -333,10 +335,8 @@ final class CursorView: ScaledView {
         else if pan.state == .ended {
             draggedComponent = nil
             caliper.color = UIColor.systemRed
-            P("caliper.value = \(caliper.value)")
         }
         setNeedsDisplay()
-
     }
 
     private func cursorMove(delta: CGPoint) {
@@ -360,7 +360,6 @@ final class CursorView: ScaledView {
 
     func showCalipers() {
         os_log("showCalipers()", log: .action, type: .info)
-        mode = .calibration
         let width = self.frame.width
         caliper.bar1Position = width / 3
         caliper.bar2Position = caliper.bar1Position + width / 3

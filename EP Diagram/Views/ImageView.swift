@@ -17,8 +17,5 @@ class ImageView: UIImageView {
         // Drawing code
     }
     */
-
-
-    
-
 }
+

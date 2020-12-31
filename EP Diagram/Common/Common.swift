@@ -224,6 +224,17 @@ class Common {
         })
         vc.present(alert, animated: true)
     }
+
+    static func initTextAttributes() -> [NSAttributedString.Key: Any] {
+        let textFont = UIFont(name: "Helvetica Neue Medium", size: 14.0) ?? UIFont.systemFont(ofSize: 14, weight: UIFont.Weight.medium)
+        let paragraphStyle = NSParagraphStyle.default.mutableCopy() as! NSMutableParagraphStyle
+        let attributes = [
+            NSAttributedString.Key.font: textFont,
+            NSAttributedString.Key.foregroundColor: UIColor.label,
+            NSAttributedString.Key.paragraphStyle: paragraphStyle,
+        ]
+        return attributes
+    }
 }
 
 // MARK: - Global namespace functions

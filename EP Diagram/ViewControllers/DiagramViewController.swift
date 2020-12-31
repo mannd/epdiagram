@@ -14,8 +14,8 @@ final class DiagramViewController: UIViewController {
     // View, outlets, constraints
     @IBOutlet var _constraintHamburgerWidth: NSLayoutConstraint!
     @IBOutlet var _constraintHamburgerLeft: NSLayoutConstraint!
-    @IBOutlet var imageScrollView: UIScrollView!
-    @IBOutlet var imageView: UIImageView!
+    @IBOutlet var imageScrollView: ImageScrollView!
+    @IBOutlet var imageView: ImageView!
     @IBOutlet var ladderView: LadderView!
     @IBOutlet var cursorView: CursorView!
     @IBOutlet var blackView: BlackView!
@@ -129,7 +129,9 @@ final class DiagramViewController: UIViewController {
         if !Common.isRunningOnMac() {
             navigationItem.setLeftBarButton(UIBarButtonItem(image: UIImage(named: "hamburger"), style: .plain, target: self, action: #selector(toggleHamburgerMenu)), animated: true)
         }
-        navigationItem.setRightBarButton(UIBarButtonItem(image: UIImage(systemName: "xmark"), style: .plain, target: self, action: #selector(closeAction)), animated: true)
+//        navigationItem.setRightBarButton(UIBarButtonItem(image: UIImage(systemName: "xmark"), style: .done, target: self, action: #selector(closeAction)), animated: true)
+
+        navigationItem.setRightBarButton(UIBarButtonItem(barButtonSystemItem: .done, target: self, action: #selector(closeAction)), animated: true)
        
         // Set up touches
         let singleTapRecognizer = UITapGestureRecognizer(target: self, action: #selector(self.singleTap))
@@ -139,6 +141,8 @@ final class DiagramViewController: UIViewController {
         // Set up context menu.
         let interaction = UIContextMenuInteraction(delegate: ladderView)
         ladderView.addInteraction(interaction)
+        let imageViewInteraction = UIContextMenuInteraction(delegate: imageScrollView)
+        imageScrollView.addInteraction(imageViewInteraction)
 
         // Notifications
         setupNotifications()
@@ -226,7 +230,6 @@ final class DiagramViewController: UIViewController {
     override func updateUserActivityState(_ activity: NSUserActivity) {
         os_log("updateUserActivityState called")
         let currentDocumentURL: String = currentDocument?.fileURL.lastPathComponent ?? ""
-        print(currentDocumentURL)
         super.updateUserActivityState(activity)
         let info: [AnyHashable: Any] = [
             // FIXME: We are correcting just x for zoom scale.  Test if correcting y is needed too.
@@ -239,7 +242,6 @@ final class DiagramViewController: UIViewController {
             DiagramViewController.restorationDoRestorationKey: !viewClosed
         ]
         activity.addUserInfoEntries(from: info)
-        print(activity.userInfo as Any)
     }
 
     private func showMainMenu() {
@@ -263,7 +265,7 @@ final class DiagramViewController: UIViewController {
         if selectMenuButtons == nil {
             let prompt = makePrompt(text: L("Tap marks to select"))
             let cancelTitle = L("Done")
-            let cancelButton = UIBarButtonItem(title: cancelTitle, style: UIBarButtonItem.Style.plain, target: self, action: #selector(cancelSelect))
+            let cancelButton = UIBarButtonItem(title: cancelTitle, style: .done, target: self, action: #selector(cancelSelect))
             selectMenuButtons = [prompt, spacer, cancelButton]
         }
         setToolbarItems(selectMenuButtons, animated: false)
@@ -285,7 +287,7 @@ final class DiagramViewController: UIViewController {
         if linkMenuButtons == nil {
             let prompt = makePrompt(text: L("Tap pairs of marks to link them"))
             let cancelTitle = L("Done")
-            let cancelButton = UIBarButtonItem(title: cancelTitle, style: .plain, target: self, action: #selector(cancelLink))
+            let cancelButton = UIBarButtonItem(title: cancelTitle, style: .done, target: self, action: #selector(cancelLink))
             linkMenuButtons = [prompt, spacer, cancelButton]
         }
         hideCursorAndUnhighlightAllMarks()
@@ -300,8 +302,8 @@ final class DiagramViewController: UIViewController {
             let setButton = UIBarButtonItem(title: setTitle, style: .plain, target: self, action: #selector(setCalibration))
             let clearTitle = L("Clear")
             let clearButton = UIBarButtonItem(title:clearTitle, style: .plain, target: self, action: #selector(clearCalibration))
-            let cancelTitle = L("Cancel")
-            let cancelButton = UIBarButtonItem(title: cancelTitle, style: .plain, target: self, action: #selector(cancelCalibration))
+            let cancelTitle = L("Done")
+            let cancelButton = UIBarButtonItem(title: cancelTitle, style: .done, target: self, action: #selector(cancelCalibration))
             calibrateMenuButtons = [promptButton, spacer, setButton, clearButton, cancelButton]
         }
         setToolbarItems(calibrateMenuButtons, animated: false)
@@ -337,21 +339,8 @@ final class DiagramViewController: UIViewController {
         os_log("calibrate()", log: OSLog.action, type: .info)
         showCalibrateMenu()
         cursorView.showCalipers()
+        setMode(.calibration)
     }
-
-//    @objc func showSelectAlert() {
-//        os_log("selectMarks()", log: .action, type: .info)
-//        hideCursorAndUnhighlightAllMarks()
-//        let alert = UIAlertController(title: nil, message: nil, preferredStyle: .actionSheet)
-//        let selectMarksAction = UIAlertAction(title: L("Select Marks"), style: .default, handler: showSelectMarksMenu)
-//        let selectZoneAction = UIAlertAction(title: L("Select a Zone"), style: .default, handler: nil)
-//        let cancelAction = UIAlertAction(title: L("Cancel"), style: .cancel, handler: nil)
-//        alert.addAction(selectMarksAction)
-//        alert.addAction(selectZoneAction)
-//        alert.addAction(cancelAction)
-//        alert.popoverPresentationController?.barButtonItem = selectButton
-//        present(alert, animated: true, completion: nil)
-//    }
 
     @objc func linkMarks() {
         os_log("linkMarks()", log: OSLog.action, type: .info)
@@ -452,7 +441,6 @@ final class DiagramViewController: UIViewController {
     @objc func singleTap(tap: UITapGestureRecognizer) {
         os_log("singleTap - ViewController", log: OSLog.touches, type: .info)
         if cursorView.mode == .calibration {
-            print("is Calibrating")
             return
         }
         if ladderView.mode == .select {

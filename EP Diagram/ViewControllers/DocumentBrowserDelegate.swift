@@ -51,7 +51,6 @@ class DocumentBrowserDelegate: NSObject, UIDocumentBrowserViewControllerDelegate
 
   func documentBrowser(_ controller: UIDocumentBrowserViewController, didPickDocumentURLs documentURLs: [URL]) {
     guard let pickedURL = documentURLs.first else { return }
-    print("pickedURL = \(pickedURL)")
     presentationHandler?(pickedURL, nil)
   }
 
@@ -91,7 +90,6 @@ extension DocumentBrowserDelegate {
             .appendingPathComponent(newName)
             .appendingPathExtension(DiagramDocument.extensionName)
         incrementNameCount()
-        print("tempURL = \(tempURL)")
         return tempURL
     }
 }

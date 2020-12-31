@@ -42,6 +42,8 @@ final class LadderView: ScaledView {
     private let lowerLimitMarkWidth: CGFloat = 20
     private let nearbyMarkAccuracy: CGFloat = 15
 
+    lazy var textAttributes: [NSAttributedString.Key: Any] = Common.initTextAttributes()
+
     // TODO: lineWidth vs markLineWidth??????
     // variables that need to eventually be preferences
     var markLineWidth: CGFloat = 2
@@ -70,7 +72,6 @@ final class LadderView: ScaledView {
         get { return ladder.zone }
         set(newValue) { ladder.zone = newValue }
     }
-//    var isZoning: Bool = false
     let zoneColor = UIColor.systemIndigo
 
     var marksAreVisible: Bool {
@@ -176,8 +177,8 @@ final class LadderView: ScaledView {
         let draggingPanRecognizer = UIPanGestureRecognizer(target: self, action: #selector(self.dragging))
         self.addGestureRecognizer(draggingPanRecognizer)
 
-        let longPressRecognizer = UILongPressGestureRecognizer(target: self, action: #selector(self.longPress))
-        self.addGestureRecognizer(longPressRecognizer)
+//        let longPressRecognizer = UILongPressGestureRecognizer(target: self, action: #selector(self.longPress))
+//        self.addGestureRecognizer(longPressRecognizer)
     }
 
     private func initializeRegions() {
@@ -190,6 +191,17 @@ final class LadderView: ScaledView {
             regionBoundary += regionHeight
         }
         activeRegion = ladder.regions[ladder.getActiveRegionIndex() ?? 0]
+    }
+
+    func initTextAttributes() -> [NSAttributedString.Key: Any] {
+        let textFont = UIFont(name: "Helvetica Neue Medium", size: 14.0) ?? UIFont.systemFont(ofSize: 14, weight: UIFont.Weight.medium)
+        let paragraphStyle = NSParagraphStyle.default.mutableCopy() as! NSMutableParagraphStyle
+        let attributes = [
+            NSAttributedString.Key.font: textFont,
+            NSAttributedString.Key.foregroundColor: UIColor.label,
+            NSAttributedString.Key.paragraphStyle: paragraphStyle,
+        ]
+        return attributes
     }
 
     internal func getRegionUnitHeight(ladder: Ladder) -> CGFloat {
@@ -621,8 +633,6 @@ final class LadderView: ScaledView {
                 return true
             }
         } else {
-            print("no mark tapped")
-
             // FIXME: refactor
             let region = tapLocationInLadder.region
             let scaledPositionX = translateToRegionPositionX(scaledViewPositionX: tapLocationInLadder.unscaledPosition.x)
@@ -695,14 +705,7 @@ final class LadderView: ScaledView {
         }
     }
 
-    @objc func dragging(pan: UIPanGestureRecognizer) {
-        if mode == .select {
-            dragZone(pan: pan)
-            return
-        }
-        if mode == .link {
-            return // so far, draggin does nothing while linking
-        }
+    fileprivate func normalModeDrag(_ pan: UIPanGestureRecognizer) {
         let position = pan.location(in: self)
         let state = pan.state
         let locationInLadder = getLocationInLadder(position: position)
@@ -809,8 +812,18 @@ final class LadderView: ScaledView {
         setNeedsDisplay()
     }
 
-    // TODO: fix zoning for scaling
-    func dragZone(pan: UIPanGestureRecognizer) {
+    @objc func dragging(pan: UIPanGestureRecognizer) {
+        switch mode {
+        case .select:
+            selectModeDrag(pan)
+        case .normal:
+            normalModeDrag(pan)
+        case .calibration, .link:
+            break
+        }
+    }
+
+    func selectModeDrag(_ pan: UIPanGestureRecognizer) {
         let position = pan.location(in: self)
         let state = pan.state
         let regionPositionX = translateToRegionPositionX(scaledViewPositionX: position.x)
@@ -900,7 +913,6 @@ final class LadderView: ScaledView {
         guard let mark = mark else { return }
         let nearbyDistance = nearbyMarkAccuracy / scale
         let nearbyMarkIds = getNearbyMarkIds(mark: mark, nearbyDistance: nearbyDistance)
-        print(nearbyMarkIds)
         ladder.setHighlightForAllMarks(highlight: .none)
         ladder.setHighlightForMarkIdGroup(highlight: .grouped, markIdGroup: nearbyMarkIds)
         setAttachedMarkAndGroupedMarksHighlights()
@@ -1065,12 +1077,12 @@ final class LadderView: ScaledView {
         highlightNearbyMarks(mark)
     }
 
-    @objc func longPress(press: UILongPressGestureRecognizer) {
-        self.becomeFirstResponder()
-        let position = press.location(in: self)
-        let locationInLadder = getLocationInLadder(position: position)
-        P("long press at \(locationInLadder) ")
-    }
+//    @objc func longPress(press: UILongPressGestureRecognizer) {
+//        self.becomeFirstResponder()
+//        let position = press.location(in: self)
+//        let locationInLadder = getLocationInLadder(position: position)
+//        P("long press at \(locationInLadder) ")
+//    }
 
     func setPressedMark(position: CGPoint) {
         let locationInLadder = getLocationInLadder(position: position)
@@ -1250,7 +1262,7 @@ final class LadderView: ScaledView {
         drawImpulseOrigin(context: context, mark: mark, segment: segment)
         // FIXME: this is just a sample pivot point.  Pivots need to be determined by ladder.
         drawPivots(forMark: mark, segment: Segment(proximal: p1, distal: p2), context: context)
-        drawMarkText(forMark: mark, segment: segment, context: context)
+        drawConductionTime(forMark: mark, segment: segment, context: context)
 
         context.setStrokeColor(UIColor.label.cgColor)
     }
@@ -1260,12 +1272,6 @@ final class LadderView: ScaledView {
         guard let calibration = diagram?.calibration, calibration.isCalibrated else { return }
         let marks = region.marks
         let intervals = Interval.createIntervals(marks: marks)
-        let textFont = UIFont(name: "Helvetica Neue Medium", size: 14.0) ?? UIFont.systemFont(ofSize: 14, weight: UIFont.Weight.medium)
-        let paragraphStyle = NSParagraphStyle.default.mutableCopy() as! NSMutableParagraphStyle
-        let attributes: [NSAttributedString.Key: Any] = [
-            NSAttributedString.Key.font: textFont,
-            NSAttributedString.Key.paragraphStyle: paragraphStyle,
-        ]
         for interval in intervals {
             if let firstProximalX = interval.proximalBoundary?.first, let secondProximalX = interval.proximalBoundary?.second {
                 let scaledFirstX = translateToScaledViewPositionX(regionPositionX: firstProximalX)
@@ -1274,10 +1280,10 @@ final class LadderView: ScaledView {
                 let value = lround(Double(interval.proximalValue ?? 0))
                 let text = "\(value)"
                 var origin = CGPoint(x: halfwayPosition, y: region.proximalBoundary)
-                let size = text.size(withAttributes: attributes)
+                let size = text.size(withAttributes: textAttributes)
                 // Center the origin.
                 origin = CGPoint(x: origin.x - size.width / 2, y: origin.y)
-                drawIntervalText(origin: origin, size: size, text: text, context: context, attributes: attributes)
+                drawIntervalText(origin: origin, size: size, text: text, context: context, attributes: textAttributes)
             }
             if let firstDistalX = interval.distalBoundary?.first, let secondDistalX = interval.distalBoundary?.second {
                 let scaledFirstX = translateToScaledViewPositionX(regionPositionX: firstDistalX)
@@ -1286,10 +1292,10 @@ final class LadderView: ScaledView {
                 let value = lround(Double(interval.distalValue ?? 0))
                 let text = "\(value)"
                 var origin = CGPoint(x: halfwayPosition, y: region.distalBoundary)
-                let size = text.size(withAttributes: attributes)
+                let size = text.size(withAttributes: textAttributes)
                 // Center the origin.
                 origin = CGPoint(x: origin.x - size.width / 2, y: origin.y - size.height)
-                drawIntervalText(origin: origin, size: size, text: text, context: context, attributes: attributes)
+                drawIntervalText(origin: origin, size: size, text: text, context: context, attributes: textAttributes)
             }
         }
     }
@@ -1359,25 +1365,17 @@ final class LadderView: ScaledView {
         }
     }
 
-    func drawMarkText(forMark mark: Mark, segment: Segment, context: CGContext) {
+    func drawConductionTime(forMark mark: Mark, segment: Segment, context: CGContext) {
         guard cursorViewDelegate.isCalibrated(), showConductionTimes, mark.showText else { return }
         let value = lround(Double(cursorViewDelegate.markMeasurement(segment: segment)))
         let text = "\(value)"
         var origin = Common.getSegmentMidpoint(segment)
-        var attributes = [NSAttributedString.Key: Any]()
-        let textFont = UIFont(name: "Helvetica Neue Medium", size: 14.0) ?? UIFont.systemFont(ofSize: 14, weight: UIFont.Weight.medium)
-        let paragraphStyle = NSParagraphStyle.default.mutableCopy() as! NSMutableParagraphStyle
-        // FIXME: foreground color?  Crashes app???
-        attributes = [
-            NSAttributedString.Key.font: textFont,
-            NSAttributedString.Key.paragraphStyle: paragraphStyle,
-        ]
-        let size = text.size(withAttributes: attributes)
+        let size = text.size(withAttributes: textAttributes)
         // Center the origin.
         origin = CGPoint(x: origin.x + 10, y: origin.y - size.height / 2)
         let textRect = CGRect(origin: origin, size: size)
         if textRect.minX > leftMargin {
-            text.draw(in: textRect, withAttributes: attributes)
+            text.draw(in: textRect, withAttributes: textAttributes)
             context.strokePath()
         }
 
