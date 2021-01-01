@@ -235,6 +235,9 @@ class Common {
         ]
         return attributes
     }
+
+    static func radians(degrees: Double) -> Double {
+        return degrees * Double.pi / 180}
 }
 
 // MARK: - Global namespace functions

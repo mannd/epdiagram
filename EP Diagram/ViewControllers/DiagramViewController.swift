@@ -113,6 +113,7 @@ final class DiagramViewController: UIViewController {
         // Limit max and min scale of image.
         imageScrollView.maximumZoomScale = maxZoom
         imageScrollView.minimumZoomScale = minZoom
+        imageScrollView.diagramViewControllerDelegate = self
 
         // Title is set to diagram document name.
         setTitle()
@@ -335,6 +336,7 @@ final class DiagramViewController: UIViewController {
         diagramEditorDelegate?.diagramEditorDidFinishEditing(self, diagram: diagram)
     }
 
+    // FIXME: Calibrate holds study with no image and zooming, but doesn't work with image!
     @objc func calibrate() {
         os_log("calibrate()", log: OSLog.action, type: .info)
         showCalibrateMenu()
@@ -392,7 +394,6 @@ final class DiagramViewController: UIViewController {
         diagram.calibration.reset()
         ladderView.refresh()
         cursorView.refresh()
-//        cursorView.clearCalibration()
         closeCalibrationMenu()
     }
 

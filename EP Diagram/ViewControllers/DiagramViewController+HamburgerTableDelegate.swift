@@ -308,7 +308,7 @@ extension DiagramViewController: HamburgerTableDelegate, UIImagePickerController
         imageScrollView.zoomScale = 1.0
         imageScrollView.contentOffset = CGPoint()
         hideCursorAndUnhighlightAllMarks()
-        clearCalibration()
+//        diagram.calibration.reset()
         setViewsNeedDisplay()
     }
 

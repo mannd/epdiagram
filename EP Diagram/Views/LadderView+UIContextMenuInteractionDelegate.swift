@@ -9,7 +9,8 @@
 import UIKit
 import OSLog
 
-// Note context menus seem to cause constraint warnings (non-fatal).  See https://github.com/apptekstudios/ASCollectionView/issues/77 .  Will ignore for now.
+// Note context menus seem to cause constraint warnings (non-fatal).  See https://github.com/apptekstudios/ASCollectionView/issues/77 .  Will ignore for now.//
+// FIXME: If we return nil no menu appears.  With single tap, drag, etc. maybe set flag to avoid this context menu from appearing.
 extension LadderView: UIContextMenuInteractionDelegate {
     func contextMenuInteraction(_ interaction: UIContextMenuInteraction, configurationForMenuAtLocation location: CGPoint) -> UIContextMenuConfiguration? {
         os_log("contextMenuInteraction(:configurationForMenuAtLocation:)", log: .action, type: .info)

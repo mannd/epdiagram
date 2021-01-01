@@ -31,7 +31,7 @@ class Calibration: Codable {
         currentZoom = 1
         isCalibrated = false
         // need below?
-        //originalCalFactor = 1
+        originalCalFactor = 1
     }
 
 }

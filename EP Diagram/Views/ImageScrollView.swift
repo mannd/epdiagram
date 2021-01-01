@@ -9,20 +9,33 @@
 import UIKit
 
 class ImageScrollView: UIScrollView {
-    
+    weak var diagramViewControllerDelegate: DiagramViewControllerDelegate?
 }
 
+// FIXME: Rotation moves image to left.  Zooming removes rotation.
 extension ImageScrollView: UIContextMenuInteractionDelegate {
     func contextMenuInteraction(_ interaction: UIContextMenuInteraction, configurationForMenuAtLocation location: CGPoint) -> UIContextMenuConfiguration? {
-        print("******long press")
         return UIContextMenuConfiguration(identifier: nil, previewProvider: nil) { suggestedActions in
-            let solid = UIAction(title: L("Rotate Image")) { action in
-                self.doNothing()
+            let rotate = UIAction(title: L("Rotate Image")) { action in
+                self.rotateImage()
             }
-            return UIMenu(title: "Rotation", children: [solid])
+            let reset = UIAction(title: L("Reset Image")) { action in
+                self.resetImage()
+            }
+            return UIMenu(title: "Rotation", children: [rotate, reset])
         }
     }
 
     func doNothing() {}
+
+    func rotateImage() {
+        let leftMargin: CGFloat = 50
+        diagramViewControllerDelegate?.rotateImage(degrees: 90)
+        contentInset = UIEdgeInsets(top: 0, left: leftMargin, bottom: 0, right: 0)
+    }
+
+    func resetImage() {
+        diagramViewControllerDelegate?.resetImage()
+    }
 }
 

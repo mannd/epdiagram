@@ -86,6 +86,7 @@ final class LadderView: ScaledView {
     var diagram: Diagram? {
         didSet {
             ladder = diagram?.ladder ?? Ladder.defaultLadder()
+            print("****ladderView calibration set")
         }
     }
     var ladder: Ladder = Ladder.defaultLadder()
@@ -1263,6 +1264,7 @@ final class LadderView: ScaledView {
         // FIXME: this is just a sample pivot point.  Pivots need to be determined by ladder.
         drawPivots(forMark: mark, segment: Segment(proximal: p1, distal: p2), context: context)
         drawConductionTime(forMark: mark, segment: segment, context: context)
+        drawIntervals(region: region, context: context)
 
         context.setStrokeColor(UIColor.label.cgColor)
     }
@@ -1366,7 +1368,7 @@ final class LadderView: ScaledView {
     }
 
     func drawConductionTime(forMark mark: Mark, segment: Segment, context: CGContext) {
-        guard cursorViewDelegate.isCalibrated(), showConductionTimes, mark.showText else { return }
+        guard let calibration = diagram?.calibration, calibration.isCalibrated, showConductionTimes, mark.showText else { return }
         let value = lround(Double(cursorViewDelegate.markMeasurement(segment: segment)))
         let text = "\(value)"
         var origin = Common.getSegmentMidpoint(segment)
@@ -1455,7 +1457,6 @@ final class LadderView: ScaledView {
         for mark: Mark in region.marks {
             drawMark(mark: mark, region: region, context: context)
         }
-        drawIntervals(region: region, context: context)
     }
 
     fileprivate func drawBottomLine(context: CGContext, lastRegion: Bool, rect: CGRect) {
