@@ -80,6 +80,12 @@ final class CursorView: ScaledView {
         setupView()
     }
 
+    // used for unit testing
+    override init(frame: CGRect) {
+        super.init(frame: frame)
+        setupView()
+    }
+
     private func setupView() {
         self.isOpaque = false // CursorView is mostly transparent, so let iOS know.
         self.layer.masksToBounds = true // Draw a border around the view.

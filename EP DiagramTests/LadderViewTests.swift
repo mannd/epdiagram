@@ -14,7 +14,7 @@ class LadderViewTests: XCTestCase {
 
     override func setUp() {
         super.setUp()
-        ladderView = LadderView()
+        ladderView = LadderView(frame: CGRect(origin: CGPoint(x: 0, y: 0), size: CGSize(width: 100, height: 100)))
     }
 
     override func tearDown() {

@@ -148,6 +148,12 @@ final class LadderView: ScaledView {
         setupView()
     }
 
+    // used for unit testing
+    override init(frame: CGRect) {
+        super.init(frame: frame)
+        setupView()
+    }
+
     func reset() {
         os_log("reset() - LadderView", log: .action, type: .info)
     }

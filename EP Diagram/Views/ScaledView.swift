@@ -12,6 +12,15 @@ class ScaledView: UIView {
     var scale: CGFloat = 1 // scale determined by pinch to zoom.
     var offsetX: CGFloat = 0 // offsetX determined by scrolling.
 
+
+    override init(frame: CGRect) {
+        super.init(frame: frame)
+    }
+
+    required init?(coder: NSCoder) {
+        super.init(coder: coder)
+    }
+
     // Translation functions.  These translate positions from Region coordinates (x = position in unzoomed, unscrolled region, y = 0..1.0 as a fraction of vertical height of region) to ScaledView (LadderView or CursorView) coordinates (the x,y position in the ScaledView) and vice versa.
 
     // PositionX functions.
