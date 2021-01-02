@@ -9,50 +9,10 @@
 import UIKit
 
 /// Namespace for global static functions, variables.
-class Common {
-    // Positions:
-    // There are 2 coordinate systems in use for positioning marks.
-    // Region position: A point with x coordinate starting at the left margin of a region, and a y coordinate between 0 and 1.0, spanning the proximal to distal borders of the region.
-    // Scaled position: A point in the coordinate system of the ladder view.
-    // Note that region positions are NOT affected by scrolling (content offset) and scaling (zoom).
-    // Functions below translate from one coordinate system to the other.
+enum Common {
+
+    // Most of these functions are unused at the moment.
     
-    // PositionX translation
-    static func translateToRegionPositionX(scaledViewPositionX: CGFloat, offset: CGFloat, scale: CGFloat) -> CGFloat {
-        return (scaledViewPositionX + offset) / scale
-    }
-
-    static func translateToScaledViewPositionX(regionPositionX: CGFloat, offset: CGFloat, scale: CGFloat) -> CGFloat {
-        return scale * regionPositionX - offset
-    }
-
-    // Position translation
-    static func translateToRegionPosition(scaledViewPosition: CGPoint, region: Region, offsetX offset: CGFloat, scale: CGFloat) -> CGPoint {
-        let x = translateToRegionPositionX(scaledViewPositionX: scaledViewPosition.x, offset: offset, scale: scale)
-        let y = (scaledViewPosition.y - region.proximalBoundary) / region.height
-        return CGPoint(x: x, y: y)
-    }
-
-    static func translateToScaledViewPosition(regionPosition: CGPoint, region: Region, offsetX offset: CGFloat, scale: CGFloat) -> CGPoint {
-        let x = translateToScaledViewPositionX(regionPositionX: regionPosition.x, offset: offset, scale: scale)
-        let y = region.proximalBoundary + regionPosition.y * region.height
-        return CGPoint(x: x, y: y)
-    }
-
-    // Segment translation
-    static func translateToScaledViewSegment(regionSegment: Segment, region: Region, offsetX offset: CGFloat, scale: CGFloat) -> Segment {
-        return Segment(proximal: translateToScaledViewPosition(regionPosition: regionSegment.proximal, region: region, offsetX: offset, scale: scale), distal: translateToScaledViewPosition(regionPosition: regionSegment.distal, region: region, offsetX: offset, scale: scale))
-    }
-
-    static func translateToRegionSegment(scaledViewSegment: Segment, region: Region, offsetX offset: CGFloat, scale: CGFloat) -> Segment {
-        return Segment(proximal: translateToRegionPosition(scaledViewPosition: scaledViewSegment.proximal, region: region, offsetX: offset, scale: scale), distal: translateToRegionPosition(scaledViewPosition: scaledViewSegment.distal, region: region, offsetX: offset, scale: scale))
-    }
-
-    // Agnostic math functions
-    static func getSegmentMidpoint(_ segment: Segment) -> CGPoint {
-        return CGPoint(x: (segment.proximal.x + segment.distal.x) / 2.0, y: (segment.proximal.y + segment.distal.y) / 2.0)
-    }
-
     // Measures shortest distance from a line defined by two points and a point.
     // See https://stackoverflow.com/questions/849211/shortest-distance-between-a-point-and-a-line-segment
     static func distanceSegmentToPoint(segment: Segment, point p: CGPoint) -> CGFloat {
@@ -79,12 +39,6 @@ class Common {
         let min2 = min(distanceSegmentToPoint(segment: s2, point: s1.proximal),
                        distanceSegmentToPoint(segment: s2, point: s1.distal))
         return min(min1, min2)
-    }
-
-    static func distanceBetweenPoints(_ p1: CGPoint, _ p2: CGPoint) -> CGFloat {
-        let diffX = p1.x - p2.x
-        let diffY = p1.y - p2.y
-        return sqrt(diffX * diffX + diffY * diffY)
     }
 
     // After https://math.stackexchange.com/questions/2193720/find-a-point-on-a-line-segment-which-is-the-closest-to-other-point-not-on-the-li
@@ -134,19 +88,7 @@ class Common {
         return intersection
     }
 
-    // Get x coordinate on segment, knowing endpoints and y coordinate.
-    // See https://math.stackexchange.com/questions/149333/calculate-third-point-with-two-given-point
-    static internal func getX(onSegment segment: Segment, fromY y: CGFloat) -> CGFloat? {
-        let x0 = segment.proximal.x
-        let x1 = segment.distal.x
-        let y0 = segment.proximal.y
-        let y1 = segment.distal.y
-        // Avoid getting close to dividing by zero.
-        guard abs(y1 - y0) > 0.001 else { return nil }
-        // Give up if y is not along segment.
-        guard y < max(y1, y0) && y > min(y1, y0) else { return nil }
-        return ((x1 - x0) * (y - y0)) / (y1 - y0) + x0
-    }
+    // Global namespace
 
     // OS functions
     /// Returns true if target is a Mac, false for iOS.
@@ -162,68 +104,6 @@ class Common {
         return UIDevice.current.userInterfaceIdiom == .pad
     }
     
-    // UI alerts
-    static func showMessage(viewController: UIViewController, title: String, message: String) {
-        let alert = UIAlertController(title: title, message: message, preferredStyle: .alert)
-        let okAction = UIAlertAction(title: L("OK"), style: .cancel, handler: nil)
-        alert.addAction(okAction)
-        viewController.present(alert, animated: true)
-    }
-
-    static func showWarning(viewController: UIViewController, title: String, message: String, okActionButtonTitle: String = L("OK"), action: ((UIAlertAction) -> Void)?, completion: (()->Void)? = nil) {
-        let alert = UIAlertController(title: title, message: message, preferredStyle: .alert)
-        let okAction = UIAlertAction(title: okActionButtonTitle, style: .default, handler: action)
-        let cancelAction = UIAlertAction(title: L("Cancel"), style: .cancel, handler: nil)
-        alert.addAction(okAction)
-        alert.addAction(cancelAction)
-        viewController.present(alert, animated: true, completion: completion)
-    }
-
-    static func showFileError(viewController: UIViewController, error: Error) {
-        showMessage(viewController: viewController, title: L("File Error"), message: L("Error: \(error.localizedDescription)"))
-    }
-
-    static func showTextAlert(viewController vc: UIViewController, title: String, message: String, placeholder: String? = nil, preferredStyle: UIAlertController.Style, handler: ((String) -> Void)?) {
-        let alert = UIAlertController(title: title, message: message, preferredStyle: preferredStyle)
-        alert.addAction(UIAlertAction(title: L("Cancel"), style: .cancel, handler: nil))
-        alert.addTextField { textField in
-            if let placeholder = placeholder {
-                textField.placeholder = placeholder
-            }
-        }
-        alert.addAction(UIAlertAction(title: L("Save"), style: .default) { action in
-            if let text = alert.textFields?.first?.text {
-                if let handler = handler {
-                    handler(text)
-                }
-            }
-        })
-        vc.present(alert, animated: true)
-    }
-
-    static func showNameDiagramAlert(viewController vc: UIViewController, diagram: Diagram, handler: ((String, String) -> Void)?) {
-        let alert = UIAlertController(title: L("Name Diagram"), message: L("Give a name and optional description to this diagram"), preferredStyle: .alert)
-        alert.addAction(UIAlertAction(title: L("Cancel"), style: .cancel, handler: nil))
-        alert.addTextField { textField in
-            textField.placeholder = L("Diagram name")
-            textField.text = diagram.name
-        }
-        alert.addTextField { textField in
-            textField.placeholder = L("Diagram description")
-            textField.text = diagram.longDescription
-        }
-        alert.addAction(UIAlertAction(title: L("Save"), style: .default) { action in
-            if let name = alert.textFields?.first?.text, let description = alert.textFields?[1].text {
-                if let handler = handler {
-                    handler(name, description)
-                }
-                else {
-                    P("name = \(name), description = \(description)")
-                }
-            }
-        })
-        vc.present(alert, animated: true)
-    }
 
     static func initTextAttributes() -> [NSAttributedString.Key: Any] {
         let textFont = UIFont(name: "Helvetica Neue Medium", size: 14.0) ?? UIFont.systemFont(ofSize: 14, weight: UIFont.Weight.medium)
@@ -240,29 +120,8 @@ class Common {
         return degrees * Double.pi / 180}
 }
 
-// MARK: - Global namespace functions
-
-// A few macro-like functions in the global namespace.
-
-/// Language localization "macro."
-/// - Parameters:
-///   - s: string to be translated
-///   - comment: optional comment for translator
-func L(_ s: String, comment: String = "") -> String {
-    return NSLocalizedString(s, comment: comment)
+extension FloatingPoint {
+    var degreesToRadians: Self { self * .pi / 180 }
+    var radiansToDegrees: Self { self * 180 / .pi }
 }
-
-#if DEBUG
-/// Print logging info only while in debug mode.
-/// - Parameter s: logging message to print
-// Make false to suppress printing of messages, even in debug mode.
-var printMessages = false
-func P(_ s: String) {
-    if printMessages {
-        print(s)
-    }
-}
-#else
-func P(_ s: String) {}
-#endif
 

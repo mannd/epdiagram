@@ -272,7 +272,7 @@ final class CursorView: ScaledView {
     }
 
     func isNearCursor(positionX: CGFloat, accuracy: CGFloat) -> Bool {
-        return positionX < translateToScaledViewPositionX(regionPositionX: cursor.positionX) + accuracy && positionX > translateToScaledViewPositionX(regionPositionX: cursor.positionX) - accuracy
+        return positionX < transformToScaledViewPositionX(regionPositionX: cursor.positionX) + accuracy && positionX > transformToScaledViewPositionX(regionPositionX: cursor.positionX) - accuracy
     }
 
     @objc func singleTap(tap: UITapGestureRecognizer) {
@@ -314,7 +314,7 @@ final class CursorView: ScaledView {
             let delta = pan.translation(in: self)
             cursorMove(delta: delta)
             cursorEndPointY += delta.y
-            ladderViewDelegate.moveAttachedMark(position: CGPoint(x: translateToScaledViewPositionX(regionPositionX: cursor.positionX), y: cursorEndPointY))
+            ladderViewDelegate.moveAttachedMark(position: CGPoint(x: transformToScaledViewPositionX(regionPositionX: cursor.positionX), y: cursorEndPointY))
             pan.setTranslation(CGPoint(x: 0,y: 0), in: self)
         }
         if pan.state == .ended {

@@ -25,13 +25,7 @@ enum Movement {
     case omnidirectional
 }
 
-// MARK: - classes
-
-// FIXME: This is problematic, see below.  For solutions see https://www.behindmedia.com/2017/12/22/implementing-a-weakly-referencing-set-in-swift/, which implements a set of generic weak references.  More practical is https://stackoverflow.com/questions/43306110/remove-duplicate-values-from-a-dictionary-in-swift-3 which uses a combination of a set and a dictionary to insure that the dictionary only includes unique items.
-
-// Actually we don't need a dictionary, just an array of UUID?
-
-// See https://swiftrocks.com/weak-dictionary-values-in-swift for another solution.
+// MARK: - structs, classes
 
 // A mark may have up to three attachments to marks in the proximal and distal regions
 // and in its own region, i.e. reentry spawning a mark.
@@ -100,10 +94,6 @@ class Mark: Codable {
     let id: UUID // each mark has a unique id to allow sets of marks
 
     var segment: Segment // where a mark is, using regional coordinates
-//    { didSet {
-//        print("test \(id) \(segment)")
-//    }}
-
     var attached: Bool = false // cursor attached and shown
     var selected: Bool = false // mark is selected for some action
     var highlight: Highlight = .none
@@ -196,6 +186,42 @@ class Mark: Codable {
         var denominator = pow((segment.distal.y - segment.proximal.y), 2) + pow((segment.distal.x - segment.proximal.x), 2)
         denominator = sqrt(denominator)
         return numerator / denominator
+    }
+
+    func move(movement: Movement, to position: CGPoint) {
+        if movement == .horizontal {
+            switch anchor {
+            case .proximal:
+                segment.proximal.x = position.x
+            case .middle:
+                // Determine halfway point between proximal and distal.
+                let differenceX = (segment.proximal.x - segment.distal.x) / 2
+                segment.proximal.x = position.x + differenceX
+                segment.distal.x = position.x - differenceX
+            case .distal:
+                segment.distal.x = position.x
+            case .none:
+                break
+            }
+        }
+        else if movement == .omnidirectional {
+            switch anchor {
+            case .proximal:
+                segment.proximal = position
+            case .middle:
+                // Determine halfway point between proximal and distal.
+                let differenceX = (segment.proximal.x - segment.distal.x) / 2
+                let differenceY = (segment.proximal.y - segment.distal.y) / 2
+                segment.proximal.x = position.x + differenceX
+                segment.distal.x = position.x - differenceX
+                segment.proximal.y = position.y + differenceY
+                segment.distal.y = position.y - differenceY
+            case .distal:
+                segment.distal = position
+            case .none:
+                break
+            }
+        }
     }
 }
 // MARK: - extensions

@@ -62,7 +62,7 @@ class ImageSaver: NSObject {
             message = L("Diagram snapshot saved to Photo Library.")
         }
         if let viewController = viewController {
-            Common.showMessage(viewController: viewController, title: title, message: message)
+            UserAlert.showMessage(viewController: viewController, title: title, message: message)
         }
     }
 }
@@ -216,7 +216,7 @@ extension DiagramViewController: HamburgerTableDelegate, UIImagePickerController
         let version = versionBuild.version ?? L("unknown")
         let build = versionBuild.build ?? L("unknown")
         os_log("EP Diagram: version = %s build = %s", log: OSLog.debugging, type: .info, version, build)
-        Common.showMessage(
+        UserAlert.showMessage(
             viewController: self,
             title: L("EP Diagram"),
             message: L("Copyright 2020 EP Studios, Inc.\nVersion \(version)"))
@@ -250,7 +250,7 @@ extension DiagramViewController: HamburgerTableDelegate, UIImagePickerController
         imagePicker.allowsEditing = true
         imagePicker.modalPresentationStyle = .fullScreen
         if !UIImagePickerController.isSourceTypeAvailable(.camera) {
-            Common.showMessage(
+            UserAlert.showMessage(
                 viewController: self,
                 title: L("Camera error"),
                 message: L("Camera not available"))
@@ -264,7 +264,7 @@ extension DiagramViewController: HamburgerTableDelegate, UIImagePickerController
     private func handleSelectImage() {
         os_log("handleSelectImage()", log: .action, type: .info)
         if !UIImagePickerController.isSourceTypeAvailable(.photoLibrary) {
-            Common.showMessage(
+            UserAlert.showMessage(
                 viewController: self,
                 title: L("Photo Library Not Available"),
                 message: L("Make sure you have enabled permission for EP Diagram to use the Photo Library in the Settings app."))

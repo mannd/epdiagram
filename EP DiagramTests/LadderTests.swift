@@ -83,7 +83,7 @@ class LadderTests: XCTestCase {
     }
 
     func testHasMarks() {
-        ladder = Ladder(template: LadderTemplate.defaultTemplate())
+//        ladder = Ladder(template: LadderTemplate.defaultTemplate())
         XCTAssertEqual(false, ladder.hasMarks())
         let segment: Segment = Segment(proximal: CGPoint(x: 0, y: 0), distal: CGPoint(x: 0, y: 1))
         let mark = ladder.addMark(fromSegment: segment, inRegion: ladder.regions[0])
@@ -108,5 +108,28 @@ class LadderTests: XCTestCase {
         XCTAssertEqual(Anchor.none, mark?.anchor)
         ladder.toggleAnchor(mark: mark)
         XCTAssertEqual(Anchor.middle, mark?.anchor)
+    }
+
+    func testMoveGroupedMarks() {
+        let mark = Mark(segment: Segment(proximal: CGPoint(x: 100, y: 0), distal: CGPoint(x: 100, y: 1)))
+        ladder.registerMark(mark)
+        let distalMark = Mark(segment: Segment(proximal: CGPoint(x: 100, y: 0), distal: CGPoint(x: 200, y: 1)))
+        ladder.registerMark(distalMark)
+        ladder.addMark(mark, toRegion: ladder.regions[0])
+        ladder.addMark(distalMark, toRegion: ladder.regions[1])
+        mark.groupedMarkIds.distal.insert(distalMark.id)
+        distalMark.groupedMarkIds.proximal.insert(mark.id)
+        mark.anchor = .middle
+        mark.move(movement: .horizontal, to: CGPoint(x: 200, y: 0))
+        XCTAssertEqual(mark.segment, Segment(proximal: CGPoint(x: 200, y: 0), distal: CGPoint(x: 200, y: 1)))
+        XCTAssertEqual(distalMark.segment, Segment(proximal: CGPoint(x: 100, y: 0), distal: CGPoint(x: 200, y: 1)))
+        ladder.moveGroupedMarks(forMark: mark)
+        XCTAssertEqual(distalMark.segment, Segment(proximal: CGPoint(x: 200, y: 0), distal: CGPoint(x: 200, y: 1)))
+        distalMark.anchor = .middle
+        distalMark.move(movement: .horizontal, to: CGPoint(x: 300, y: 0))
+        XCTAssertEqual(distalMark.segment, Segment(proximal: CGPoint(x: 300, y: 0), distal: CGPoint(x: 300, y: 1)))
+        ladder.moveGroupedMarks(forMark: distalMark)
+        XCTAssertEqual(mark.segment, Segment(proximal: CGPoint(x: 200, y: 0), distal: CGPoint(x: 300, y: 1)))
+
     }
 }

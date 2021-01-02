@@ -47,7 +47,7 @@ extension DiagramViewController: DiagramViewControllerDelegate {
             try FileIO.store(templates, to: .documents, withFileName: FileIO.userTemplateFile)
         } catch {
             os_log("File error: %s", log: .errors, type: .error, error.localizedDescription)
-            Common.showFileError(viewController: self, error: error)
+            UserAlert.showFileError(viewController: self, error: error)
         }
     }
 
@@ -88,7 +88,7 @@ extension DiagramViewController: DiagramViewControllerDelegate {
         //            self.imageView.image.transform = self.imageView.transform.image.rotated(by: CGFloat(Common.radians(degrees: degrees)))
 //        })
         if let image = imageView.image {
-            imageView.image = rotateUIImage(image: image, angleRadians: CGFloat(Common.radians(degrees: degrees)))
+            imageView.image = rotateUIImage(image: image, angleRadians: CGFloat(degrees.degreesToRadians))
         }
     }
 

@@ -54,12 +54,12 @@ class MarkTests: XCTestCase {
         let region = Region(template: RegionTemplate())
         region.proximalBoundary = 100
         region.distalBoundary = 500
-        let relativeMarkPosition = Common.translateToScaledViewSegment(regionSegment: mark.segment, region: region, offsetX: 0, scale: 1)
+        let relativeMarkPosition = Transform.toScaledViewSegment(regionSegment: mark.segment, region: region, offsetX: 0, scale: 1)
         P("relativeMarkPosition = \(relativeMarkPosition)")
-        let midPoint = Common.getSegmentMidpoint(relativeMarkPosition)
+        let midPoint = relativeMarkPosition.midpoint
         XCTAssertEqual(midPoint, CGPoint(x: 85, y: 318))
         let anotherMarkPosition = Segment(proximal: CGPoint(x: -3, y: 5), distal: CGPoint(x: 8, y: -1))
-        let anotherMidPoint = Common.getSegmentMidpoint(anotherMarkPosition)
+        let anotherMidPoint = anotherMarkPosition.midpoint
         XCTAssertEqual(anotherMidPoint, CGPoint(x: 2.5, y: 2))
     }
 
@@ -121,4 +121,28 @@ class MarkTests: XCTestCase {
         XCTAssertEqual(Ladder.getRelativeRegionBetweenMarks(mark: aMark, otherMark: vMark), RelativeRegion.distant)
     }
 
+    func testMovement() {
+        let mark = Mark(segment: Segment(proximal: CGPoint.zero, distal: CGPoint.zero))
+        mark.anchor = .middle
+        mark.move(movement: .horizontal, to: CGPoint(x: 100, y: 0))
+        XCTAssertEqual(mark.segment, Segment(proximal: CGPoint(x: 100, y: 0), distal: CGPoint(x: 100, y: 0)))
+        mark.anchor = .proximal
+        mark.move(movement: .horizontal, to: CGPoint(x: 200, y: 1))
+        XCTAssertEqual(mark.segment, Segment(proximal: CGPoint(x: 200, y: 0), distal: CGPoint(x: 100, y: 0)))
+        mark.anchor = .distal
+        mark.move(movement: .horizontal, to: CGPoint(x: 150, y: 0.5))
+        XCTAssertEqual(mark.segment, Segment(proximal: CGPoint(x: 200, y: 0), distal: CGPoint(x: 150, y: 0)))
+        mark.anchor = .middle
+        mark.move(movement: .horizontal, to: CGPoint(x: 100, y: 0.5))
+        XCTAssertEqual(mark.segment, Segment(proximal: CGPoint(x: 125, y: 0), distal: CGPoint(x: 75, y: 0)))
+        mark.segment = Segment(proximal: CGPoint.zero, distal: CGPoint(x: 0, y: 1.0))
+        mark.anchor = .middle
+        mark.move(movement: .omnidirectional, to: CGPoint(x: 100, y: 0.5))
+        XCTAssertEqual(mark.segment, Segment(proximal: CGPoint(x: 100, y: 0), distal: CGPoint(x: 100, y: 1.0)))
+        mark.move(movement: .omnidirectional, to: CGPoint(x: 100, y: 1.0))
+        XCTAssertEqual(mark.segment, Segment(proximal: CGPoint(x: 100, y: 0.5), distal: CGPoint(x: 100, y: 1.5)))
+        mark.anchor = .distal
+        mark.move(movement: .omnidirectional, to: CGPoint(x: 100, y: 1.0))
+        XCTAssertEqual(mark.segment, Segment(proximal: CGPoint(x: 100, y: 0.5), distal: CGPoint(x: 100, y: 1.0)))
+    }
 }

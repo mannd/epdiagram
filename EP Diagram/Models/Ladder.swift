@@ -353,6 +353,33 @@ class Ladder: Codable {
         return getIndex(ofRegion: activeRegion)
     }
 
+    func moveGroupedMarks(forMark mark: Mark) {
+        for proximalMark in getMarkSet(fromMarkIdSet: mark.groupedMarkIds.proximal) {
+            proximalMark.segment.distal.x = mark.segment.proximal.x
+        }
+        for distalMark in getMarkSet(fromMarkIdSet: mark.groupedMarkIds.distal) {
+            distalMark.segment.proximal.x = mark.segment.distal.x
+        }
+        for middleMark in getMarkSet(fromMarkIdSet:mark.groupedMarkIds.middle) {
+            if mark == middleMark { break }
+            let distanceToProximal = Common.distanceSegmentToPoint(segment: mark.segment, point: middleMark.segment.proximal)
+            let distanceToDistal = Common.distanceSegmentToPoint(segment: mark.segment, point: middleMark.segment.distal)
+            if distanceToProximal < distanceToDistal {
+                let x = mark.segment.getX(fromY: middleMark.segment.proximal.x)
+                if let x = x {
+                    middleMark.segment.proximal.x = x
+                }
+            }
+            else {
+                let x = mark.segment.getX(fromY: middleMark.segment.distal.y)
+                    if let x = x {
+                        middleMark.segment.distal.x = x
+                }
+            }
+        }
+ 
+    }
+
 
     // Returns a basic ladder (A, AV, V).
     static func defaultLadder() -> Ladder {

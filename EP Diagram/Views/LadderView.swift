@@ -44,10 +44,18 @@ final class LadderView: ScaledView {
 
     lazy var textAttributes: [NSAttributedString.Key: Any] = Common.initTextAttributes()
 
-    // TODO: lineWidth vs markLineWidth??????
-    // variables that need to eventually be preferences
+    // Controlled by Preferences at present.
     var markLineWidth: CGFloat = 2
-    var connectedLineWidth: CGFloat = 4
+    var showImpulseOrigin = true
+    var showBlock = true
+    var showPivots = true
+    var showIntervals = true
+    var showConductionTimes = true
+    var showMarkText = true
+    var snapMarks = true
+
+    // variables that need to eventually be preferences
+    // Colors
     var red = UIColor.systemRed
     var blue = UIColor.systemBlue
     var unhighlightedColor = UIColor.label
@@ -55,16 +63,6 @@ final class LadderView: ScaledView {
     var linkColor = UIColor.systemGreen
     var selectedColor = UIColor.systemRed
     var groupedColor = UIColor.systemPurple
-    var snapMarks = true
-
-    // Controlled by Preferences at present.
-    var lineWidth: CGFloat = 2
-    var showImpulseOrigin = true
-    var showBlock = true
-    var showPivots = true
-    var showIntervals = true
-    var showConductionTimes = true
-    var showMarkText = true
 
     var ladderIsLocked = false
 
@@ -106,7 +104,7 @@ final class LadderView: ScaledView {
             ladder.attachedMark = newValue
         }
     }
-    private var pressedMark: Mark? {
+    var pressedMark: Mark? {
         get {
             return ladder.pressedMark
         }
@@ -297,7 +295,7 @@ final class LadderView: ScaledView {
             else {
                 tappedRegionSection = .markSection
                 outerLoop: for mark in tappedRegion.marks {
-                    if nearMark(point: position, mark: mark, region: tappedRegion, accuracy: accuracy) {
+                    if nearMark(position: position, mark: mark, region: tappedRegion, accuracy: accuracy) {
                         tappedMark = mark
                         tappedAnchor = nearMarkPosition(point: position, mark: mark, region: tappedRegion)
                         break outerLoop
@@ -472,7 +470,7 @@ final class LadderView: ScaledView {
                   abs(firstTappedMarkRegionIndex - regionIndex) == 1 else { return }
             activeRegion = region
             // draw mark from end of previous linked mark
-            let tapRegionPosition = translateToRegionPosition(scaledViewPosition: tapLocationInLadder.unscaledPosition, region: region)
+            let tapRegionPosition = transformToRegionPosition(scaledViewPosition: tapLocationInLadder.unscaledPosition, region: region)
             if firstTappedMarkRegionIndex < regionIndex {
                 // marks must reach close enough to region boundary to be snapable
                 guard firstTappedMark.segment.distal.y > (1.0 - lowerLimitMarkHeight) else { return }
@@ -525,7 +523,7 @@ final class LadderView: ScaledView {
 
     private func adjustCursor(mark: Mark, region: Region) {
         let anchorPosition = mark.getAnchorPosition()
-        let scaledAnchorPositionY = translateToScaledViewPosition(regionPosition: anchorPosition, region: region).y
+        let scaledAnchorPositionY = transformToScaledViewPosition(regionPosition: anchorPosition, region: region).y
         cursorViewDelegate.moveCursor(cursorViewPositionX: anchorPosition.x)
         cursorViewDelegate.setCursorHeight(anchorPositionY: scaledAnchorPositionY)
     }
@@ -535,9 +533,9 @@ final class LadderView: ScaledView {
     ///   - mark: mark to check for proximity
     ///   - region: region in which mark is located
     ///   - accuracy: how close does it have to be?
-    func nearMark(point: CGPoint, mark: Mark, region: Region, accuracy: CGFloat) -> Bool {
-        let scaledViewMarkSegment = translateToScaledViewSegment(regionSegment: mark.segment, region: region)
-        let distance = Common.distanceSegmentToPoint(segment: scaledViewMarkSegment, point: point)
+    func nearMark(position: CGPoint, mark: Mark, region: Region, accuracy: CGFloat) -> Bool {
+        let scaledViewMarkSegment = transformToScaledViewSegment(regionSegment: mark.segment, region: region)
+        let distance = Common.distanceSegmentToPoint(segment: scaledViewMarkSegment, point: position)
         return distance < accuracy
     }
 
@@ -552,10 +550,10 @@ final class LadderView: ScaledView {
     ///   - region: region in which mark is located
     func nearMarkPosition(point: CGPoint, mark: Mark, region: Region) -> Anchor {
         // Use region coordinates
-        let regionPoint = translateToRegionPosition(scaledViewPosition: point, region: region)
-        let proximalDistance = Common.distanceBetweenPoints(mark.segment.proximal, regionPoint)
-        let middleDistance = Common.distanceBetweenPoints(mark.midpoint(), regionPoint)
-        let distalDistance = Common.distanceBetweenPoints(mark.segment.distal, regionPoint)
+        let regionPoint = transformToRegionPosition(scaledViewPosition: point, region: region)
+        let proximalDistance = CGPoint.distanceBetweenPoints(mark.segment.proximal, regionPoint)
+        let middleDistance = CGPoint.distanceBetweenPoints(mark.midpoint(), regionPoint)
+        let distalDistance = CGPoint.distanceBetweenPoints(mark.segment.distal, regionPoint)
         let minimumDistance = min(proximalDistance, middleDistance, distalDistance)
         if minimumDistance == proximalDistance {
             return .proximal
@@ -572,7 +570,7 @@ final class LadderView: ScaledView {
     }
 
     func addMark(scaledViewPositionX: CGFloat) -> Mark? {
-        return addMark(regionPositionX: translateToRegionPositionX(scaledViewPositionX: scaledViewPositionX))
+        return addMark(regionPositionX: transformToRegionPositionX(scaledViewPositionX: scaledViewPositionX))
     }
 
     func addMark(regionPositionX: CGFloat) -> Mark? {
@@ -642,7 +640,7 @@ final class LadderView: ScaledView {
         } else {
             // FIXME: refactor
             let region = tapLocationInLadder.region
-            let scaledPositionX = translateToRegionPositionX(scaledViewPositionX: tapLocationInLadder.unscaledPosition.x)
+            let scaledPositionX = transformToRegionPositionX(scaledViewPositionX: tapLocationInLadder.unscaledPosition.x)
             if let mark = ladder.addMark(at: scaledPositionX, inRegion: region) {
                 unhighlightAllMarks()
                 undoablyAddMark(mark: mark, region: region)
@@ -773,11 +771,11 @@ final class LadderView: ScaledView {
             else if regionOfDragOrigin == locationInLadder.region, let regionOfDragOrigin = regionOfDragOrigin {
                 switch dragOriginDivision {
                 case .proximal:
-                    dragCreatedMark?.segment.distal = translateToRegionPosition(scaledViewPosition: position, region: regionOfDragOrigin)
+                    dragCreatedMark?.segment.distal = transformToRegionPosition(scaledViewPosition: position, region: regionOfDragOrigin)
                 case .distal:
-                    dragCreatedMark?.segment.proximal = translateToRegionPosition(scaledViewPosition: position, region: regionOfDragOrigin)
+                    dragCreatedMark?.segment.proximal = transformToRegionPosition(scaledViewPosition: position, region: regionOfDragOrigin)
                 case .middle:
-                    dragCreatedMark?.segment.distal = translateToRegionPosition(scaledViewPosition: position, region: regionOfDragOrigin)
+                    dragCreatedMark?.segment.distal = transformToRegionPosition(scaledViewPosition: position, region: regionOfDragOrigin)
                 default:
                     break
                 }
@@ -833,7 +831,7 @@ final class LadderView: ScaledView {
     func selectModeDrag(_ pan: UIPanGestureRecognizer) {
         let position = pan.location(in: self)
         let state = pan.state
-        let regionPositionX = translateToRegionPositionX(scaledViewPositionX: position.x)
+        let regionPositionX = transformToRegionPositionX(scaledViewPositionX: position.x)
         let locationInLadder = getLocationInLadder(position: position)
         guard locationInLadder.isRegionNotLabel else { return }
         if state == .began {
@@ -959,15 +957,15 @@ final class LadderView: ScaledView {
         guard mark != neighboringMark else { return false }
         var isClose = false
         // To get minimum distance between two line segments, must get minimum distances between each segment and each endpoint of the other segment, and take minimum of all those.
-        let ladderViewPositionNeighboringMarkSegment = translateToScaledViewSegment(regionSegment: neighboringMark.segment, region: neighboringRegion)
-        let ladderViewPositionMarkProximal = translateToScaledViewPosition(regionPosition: mark.segment.proximal, region: region)
-        let ladderViewPositionMarkDistal = translateToScaledViewPosition(regionPosition: mark.segment.distal, region: region)
+        let ladderViewPositionNeighboringMarkSegment = transformToScaledViewSegment(regionSegment: neighboringMark.segment, region: neighboringRegion)
+        let ladderViewPositionMarkProximal = transformToScaledViewPosition(regionPosition: mark.segment.proximal, region: region)
+        let ladderViewPositionMarkDistal = transformToScaledViewPosition(regionPosition: mark.segment.distal, region: region)
         let distanceToNeighboringMarkSegmentProximal = Common.distanceSegmentToPoint(segment: ladderViewPositionNeighboringMarkSegment, point: ladderViewPositionMarkProximal)
         let distanceToNeighboringMarkSegmentDistal = Common.distanceSegmentToPoint(segment: ladderViewPositionNeighboringMarkSegment, point: ladderViewPositionMarkDistal)
 
-        let ladderViewPositionMarkSegment = translateToScaledViewSegment(regionSegment: mark.segment, region: region)
-        let ladderViewPositionNeighboringMarkProximal = translateToScaledViewPosition(regionPosition: neighboringMark.segment.proximal, region: neighboringRegion)
-        let ladderViewPositionNeighboringMarkDistal = translateToScaledViewPosition(regionPosition: neighboringMark.segment.distal, region: neighboringRegion)
+        let ladderViewPositionMarkSegment = transformToScaledViewSegment(regionSegment: mark.segment, region: region)
+        let ladderViewPositionNeighboringMarkProximal = transformToScaledViewPosition(regionPosition: neighboringMark.segment.proximal, region: neighboringRegion)
+        let ladderViewPositionNeighboringMarkDistal = transformToScaledViewPosition(regionPosition: neighboringMark.segment.distal, region: neighboringRegion)
         let distanceToMarkSegmentProximal = Common.distanceSegmentToPoint(segment: ladderViewPositionMarkSegment, point: ladderViewPositionNeighboringMarkProximal)
         let distanceToMarkSegmentDistal = Common.distanceSegmentToPoint(segment: ladderViewPositionMarkSegment, point: ladderViewPositionNeighboringMarkDistal)
 
@@ -1005,39 +1003,7 @@ final class LadderView: ScaledView {
     }
 
     private func moveMark(movement: Movement, mark: Mark, regionPosition: CGPoint) {
-        if movement == .horizontal {
-            switch mark.anchor {
-            case .proximal:
-                mark.segment.proximal.x = regionPosition.x
-            case .middle:
-                // Determine halfway point between proximal and distal.
-                let differenceX = (mark.segment.proximal.x - mark.segment.distal.x) / 2
-                mark.segment.proximal.x = regionPosition.x + differenceX
-                mark.segment.distal.x = regionPosition.x - differenceX
-            case .distal:
-                mark.segment.distal.x = regionPosition.x
-            case .none:
-                break
-            }
-        }
-        else if movement == .omnidirectional {
-            switch mark.anchor {
-            case .proximal:
-                mark.segment.proximal = regionPosition
-            case .middle:
-                // Determine halfway point between proximal and distal.
-                let differenceX = (mark.segment.proximal.x - mark.segment.distal.x) / 2
-                let differenceY = (mark.segment.proximal.y - mark.segment.distal.y) / 2
-                mark.segment.proximal.x = regionPosition.x + differenceX
-                mark.segment.distal.x = regionPosition.x - differenceX
-                mark.segment.proximal.y = regionPosition.y + differenceY
-                mark.segment.distal.y = regionPosition.y - differenceY
-            case .distal:
-                mark.segment.distal = regionPosition
-            case .none:
-                break
-            }
-        }
+        mark.move(movement: movement, to: regionPosition)
         moveGroupedMarks(forMark: mark)
         if let activeRegion = activeRegion {
             adjustCursor(mark: mark, region: activeRegion)
@@ -1048,36 +1014,13 @@ final class LadderView: ScaledView {
     // FIXME: After saving and reopening diagram, the group marks appear to have their segments adjusted appropriately, but nothing shows up on the screen.  The grouped marks don't move.  Why?
     private func moveGroupedMarks(forMark mark: Mark) {
         os_log("moveGroupedMarked(forMark:)", log: .action, type: .info)
-        // adjust ends of mark segment.
-        for proximalMark in ladder.getMarkSet(fromMarkIdSet: mark.groupedMarkIds.proximal) {
-            proximalMark.segment.distal.x = mark.segment.proximal.x
-        }
-        for distalMark in ladder.getMarkSet(fromMarkIdSet: mark.groupedMarkIds.distal) {
-            distalMark.segment.proximal.x = mark.segment.distal.x
-        }
-        for middleMark in ladder.getMarkSet(fromMarkIdSet:mark.groupedMarkIds.middle) {
-            if mark == middleMark { break }
-            let distanceToProximal = Common.distanceSegmentToPoint(segment: mark.segment, point: middleMark.segment.proximal)
-            let distanceToDistal = Common.distanceSegmentToPoint(segment: mark.segment, point: middleMark.segment.distal)
-            if distanceToProximal < distanceToDistal {
-                let x = Common.getX(onSegment: mark.segment, fromY: middleMark.segment.proximal.y)
-                if let x = x {
-                    middleMark.segment.proximal.x = x
-                }
-            }
-            else {
-                    let x = Common.getX(onSegment: mark.segment, fromY: middleMark.segment.distal.y)
-                    if let x = x {
-                        middleMark.segment.distal.x = x
-                }
-            }
-        }
+        ladder.moveGroupedMarks(forMark: mark)
         setNeedsDisplay()
     }
 
     func moveMark(mark: Mark, scaledViewPosition: CGPoint) {
         guard let activeRegion = activeRegion else { return }
-        let regionPosition = translateToRegionPosition(scaledViewPosition: scaledViewPosition, region: activeRegion)
+        let regionPosition = transformToRegionPosition(scaledViewPosition: scaledViewPosition, region: activeRegion)
         if cursorViewDelegate.cursorIsVisible {
             undoablyMoveMark(movement: cursorViewDelegate.cursorMovement(), mark: mark, regionPosition: regionPosition)
         }
@@ -1169,8 +1112,8 @@ final class LadderView: ScaledView {
     }
 
     fileprivate func drawZone(context: CGContext) {
-        let start =  translateToScaledViewPositionX(regionPositionX: zone.start)
-        let end = translateToScaledViewPositionX(regionPositionX: zone.end)
+        let start =  transformToScaledViewPositionX(regionPositionX: zone.start)
+        let end = transformToScaledViewPositionX(regionPositionX: zone.end)
         for region in zone.regions {
             let zoneRect = CGRect(x: start, y: region.proximalBoundary, width: end - start, height: region.distalBoundary - region.proximalBoundary)
             context.addRect(zoneRect)
@@ -1225,7 +1168,7 @@ final class LadderView: ScaledView {
     fileprivate func drawMark(mark: Mark, region: Region, context: CGContext) {
         // Don't draw outside bounds of region, fix out of bounds segments at end of mark movement.
         let normalizedSegment = mark.segment.normalized()
-        let segment = translateToScaledViewSegment(regionSegment: normalizedSegment, region: region)
+        let segment = transformToScaledViewSegment(regionSegment: normalizedSegment, region: region)
         // Don't bother drawing marks in margin.
         if segment.proximal.x <= leftMargin && segment.distal.x <= leftMargin {
             return
@@ -1247,7 +1190,7 @@ final class LadderView: ScaledView {
         }
         context.setStrokeColor(getMarkColor(mark: mark))
         context.setFillColor(getMarkColor(mark: mark))
-        context.setLineWidth(lineWidth)
+        context.setLineWidth(markLineWidth)
         context.move(to: p1)
         context.addLine(to: p2)
         // Draw dashed line
@@ -1282,8 +1225,8 @@ final class LadderView: ScaledView {
         let intervals = Interval.createIntervals(marks: marks)
         for interval in intervals {
             if let firstProximalX = interval.proximalBoundary?.first, let secondProximalX = interval.proximalBoundary?.second {
-                let scaledFirstX = translateToScaledViewPositionX(regionPositionX: firstProximalX)
-                let scaledSecondX = translateToScaledViewPositionX(regionPositionX: secondProximalX)
+                let scaledFirstX = transformToScaledViewPositionX(regionPositionX: firstProximalX)
+                let scaledSecondX = transformToScaledViewPositionX(regionPositionX: secondProximalX)
                 let halfwayPosition = (scaledFirstX + scaledSecondX) / 2.0
                 let value = lround(Double(interval.proximalValue ?? 0))
                 let text = "\(value)"
@@ -1294,8 +1237,8 @@ final class LadderView: ScaledView {
                 drawIntervalText(origin: origin, size: size, text: text, context: context, attributes: textAttributes)
             }
             if let firstDistalX = interval.distalBoundary?.first, let secondDistalX = interval.distalBoundary?.second {
-                let scaledFirstX = translateToScaledViewPositionX(regionPositionX: firstDistalX)
-                let scaledSecondX = translateToScaledViewPositionX(regionPositionX: secondDistalX)
+                let scaledFirstX = transformToScaledViewPositionX(regionPositionX: firstDistalX)
+                let scaledSecondX = transformToScaledViewPositionX(regionPositionX: secondDistalX)
                 let halfwayPosition = (scaledFirstX + scaledSecondX) / 2.0
                 let value = lround(Double(interval.distalValue ?? 0))
                 let text = "\(value)"
@@ -1377,7 +1320,7 @@ final class LadderView: ScaledView {
         guard let calibration = diagram?.calibration, calibration.isCalibrated, showConductionTimes, mark.showText else { return }
         let value = lround(Double(cursorViewDelegate.markMeasurement(segment: segment)))
         let text = "\(value)"
-        var origin = Common.getSegmentMidpoint(segment)
+        var origin = segment.midpoint
         let size = text.size(withAttributes: textAttributes)
         // Center the origin.
         origin = CGPoint(x: origin.x + 10, y: origin.y - size.height / 2)
@@ -1625,7 +1568,7 @@ extension LadderView: LadderViewDelegate {
     func getMarkAnchorLadderViewPosition(mark: Mark?, region: Region?) -> CGPoint? {
         guard let mark = mark, let region = region else { return nil }
         var anchorPosition = getMarkAnchorRegionPosition(mark)
-        anchorPosition = translateToScaledViewPosition(regionPosition: anchorPosition, region: region)
+        anchorPosition = transformToScaledViewPosition(regionPosition: anchorPosition, region: region)
         return anchorPosition
     }
 
@@ -1751,7 +1694,7 @@ extension LadderView: LadderViewDelegate {
             var distanceToDistal = Common.distanceSegmentToPoint(segment: middleMark.segment, point: mark.segment.distal)
             distanceToDistal = min(distanceToDistal, Common.distanceSegmentToPoint(segment: mark.segment, point: middleMark.segment.distal))
             if distanceToProximal < distanceToDistal {
-                let x = Common.getX(onSegment: middleMark.segment, fromY: mark.segment.proximal.y)
+                let x = middleMark.segment.getX(fromY: mark.segment.proximal.y)
                 if let x = x {
                     mark.segment.proximal.x = x
                 }
@@ -1762,7 +1705,7 @@ extension LadderView: LadderViewDelegate {
                 }
             }
             else {
-                let x = Common.getX(onSegment: middleMark.segment, fromY: mark.segment.distal.y)
+                let x = middleMark.segment.getX(fromY: mark.segment.distal.y)
                 if let x = x {
                     mark.segment.distal.x = x
                 }
@@ -1811,7 +1754,7 @@ extension LadderView: LadderViewDelegate {
 
     func getMarkScaledAnchorPosition(_ mark: Mark?) -> CGPoint? {
         guard let mark = mark, let activeRegion = activeRegion else { return nil}
-        return translateToScaledViewPosition(regionPosition: mark.getAnchorPosition(), region: activeRegion)
+        return transformToScaledViewPosition(regionPosition: mark.getAnchorPosition(), region: activeRegion)
     }
 
     func getAttachedMarkAnchor() -> Anchor {

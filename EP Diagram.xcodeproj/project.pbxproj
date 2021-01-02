@@ -64,6 +64,9 @@
 		8E8248DD23B53B55001A85F9 /* SeparatorView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8E8248DC23B53B55001A85F9 /* SeparatorView.swift */; };
 		8E856CF224EDC53D0064121F /* CGPoint+clampY.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8E856CF124EDC53D0064121F /* CGPoint+clampY.swift */; };
 		8E856CF424EDC5E10064121F /* Segment.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8E856CF324EDC5E10064121F /* Segment.swift */; };
+		8E93CA7C25A00C0E00C74F1F /* UserAlert.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8E93CA7B25A00C0E00C74F1F /* UserAlert.swift */; };
+		8E93CA8D25A0157F00C74F1F /* Transform.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8E93CA8C25A0157F00C74F1F /* Transform.swift */; };
+		8E93CA9225A0227100C74F1F /* Global.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8E93CA9125A0227100C74F1F /* Global.swift */; };
 		8E9550BD2474B22000E1B125 /* FileIO.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8E9550BC2474B22000E1B125 /* FileIO.swift */; };
 		8E9550BF2474B69900E1B125 /* FileIOTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8E9550BE2474B69900E1B125 /* FileIOTests.swift */; };
 		8E973F9B24C4BF0800AB41C3 /* String+isBlank.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8E973F9A24C4BF0800AB41C3 /* String+isBlank.swift */; };
@@ -173,6 +176,9 @@
 		8E8248DC23B53B55001A85F9 /* SeparatorView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SeparatorView.swift; sourceTree = "<group>"; };
 		8E856CF124EDC53D0064121F /* CGPoint+clampY.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "CGPoint+clampY.swift"; sourceTree = "<group>"; };
 		8E856CF324EDC5E10064121F /* Segment.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Segment.swift; sourceTree = "<group>"; };
+		8E93CA7B25A00C0E00C74F1F /* UserAlert.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserAlert.swift; sourceTree = "<group>"; };
+		8E93CA8C25A0157F00C74F1F /* Transform.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Transform.swift; sourceTree = "<group>"; };
+		8E93CA9125A0227100C74F1F /* Global.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Global.swift; sourceTree = "<group>"; };
 		8E9550BC2474B22000E1B125 /* FileIO.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FileIO.swift; sourceTree = "<group>"; };
 		8E9550BE2474B69900E1B125 /* FileIOTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FileIOTests.swift; sourceTree = "<group>"; };
 		8E973F9A24C4BF0800AB41C3 /* String+isBlank.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "String+isBlank.swift"; sourceTree = "<group>"; };
@@ -292,6 +298,9 @@
 				8E74D58F244FD55E00641E0A /* Logging.swift */,
 				8EBC824224E6EBA700B5CA29 /* Sounds.swift */,
 				8E253DD4244A8B17008CC56B /* Version.swift */,
+				8E93CA7B25A00C0E00C74F1F /* UserAlert.swift */,
+				8E93CA8C25A0157F00C74F1F /* Transform.swift */,
+				8E93CA9125A0227100C74F1F /* Global.swift */,
 			);
 			path = Common;
 			sourceTree = "<group>";
@@ -611,6 +620,7 @@
 				8E9F0984253CF483009BC968 /* UINavigationController+gestureRecognizerShouldBegin.swift in Sources */,
 				8E3AD1372459CABF0085BDD4 /* LocationInLadder.swift in Sources */,
 				8E15013724F2C7CF000CF90E /* Mode.swift in Sources */,
+				8E93CA7C25A00C0E00C74F1F /* UserAlert.swift in Sources */,
 				8E253DD5244A8B17008CC56B /* Version.swift in Sources */,
 				8E6EB6C2248477D500E5F883 /* DiagramViewController+DiagramViewControllerDelegate.swift in Sources */,
 				8E4A52EF24886B16007406F5 /* Diagram.swift in Sources */,
@@ -623,6 +633,7 @@
 				8E671D5224814BB700784EB7 /* LadderTemplatesEditor.swift in Sources */,
 				8E7214DE22E95C860062C094 /* Common.swift in Sources */,
 				8E9B8043228345B5008873BB /* Mark.swift in Sources */,
+				8E93CA8D25A0157F00C74F1F /* Transform.swift in Sources */,
 				8E4ACA8224478D7C00575538 /* HamburgerTableViewController.swift in Sources */,
 				8EC5D288256B149C00F49865 /* DocumentBrowserDelegate.swift in Sources */,
 				8E9B804722834870008873BB /* Ladder.swift in Sources */,
@@ -645,6 +656,7 @@
 				8EBC824124E5E04800B5CA29 /* UIImage+emptyImage.swift in Sources */,
 				8E74D58E244FBE2500641E0A /* LadderView+UIContextMenuInteractionDelegate.swift in Sources */,
 				8E982F9324EAF8B500E94F71 /* Zone.swift in Sources */,
+				8E93CA9225A0227100C74F1F /* Global.swift in Sources */,
 				8E033CEA24AC10A300BE6D6F /* Calibration.swift in Sources */,
 				8E9B8045228347DE008873BB /* Region.swift in Sources */,
 				8E856CF424EDC5E10064121F /* Segment.swift in Sources */,

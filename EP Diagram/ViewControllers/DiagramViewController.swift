@@ -746,7 +746,7 @@ extension DiagramViewController {
 
     @objc func updatePreferences() {
         os_log("updatePreferences()", log: .action, type: .info)
-        ladderView.lineWidth = CGFloat(UserDefaults.standard.double(forKey: Preferences.defaultLineWidthKey))
+        ladderView.markLineWidth = CGFloat(UserDefaults.standard.double(forKey: Preferences.defaultLineWidthKey))
         cursorView.lineWidth = CGFloat(UserDefaults.standard.double(forKey: Preferences.defaultCursorLineWidthKey))
         ladderView.showBlock = UserDefaults.standard.bool(forKey: Preferences.defaultShowBlockKey)
         ladderView.showImpulseOrigin = UserDefaults.standard.bool(forKey: Preferences.defaultShowImpulseOriginKey)

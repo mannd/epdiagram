@@ -26,8 +26,8 @@ class LadderViewTests: XCTestCase {
         let positionX: CGFloat = 134.56
         ladderView.scale = 1.78
         ladderView.offsetX = 333.45
-        let regionPositionX = ladderView.translateToRegionPositionX(scaledViewPositionX: positionX)
-        let scaledViewPositionX = ladderView.translateToScaledViewPositionX(regionPositionX: regionPositionX)
+        let regionPositionX = ladderView.transformToRegionPositionX(scaledViewPositionX: positionX)
+        let scaledViewPositionX = ladderView.transformToScaledViewPositionX(regionPositionX: regionPositionX)
         XCTAssertEqual(positionX, scaledViewPositionX, accuracy: 0.0001)
     }
 
@@ -57,11 +57,19 @@ class LadderViewTests: XCTestCase {
         let region = Region(template: RegionTemplate())
         region.proximalBoundary = 0
         region.distalBoundary = 300
-        let regionSegment = Common.translateToRegionSegment(scaledViewSegment: markPosition, region: region, offsetX: offset, scale: scale)
-        let scaledViewSegment = Common.translateToScaledViewSegment(regionSegment: regionSegment, region: region, offsetX: offset, scale: scale)
+        let regionSegment = Transform.toRegionSegment(scaledViewSegment: markPosition, region: region, offsetX: offset, scale: scale)
+        let scaledViewSegment = Transform.toScaledViewSegment(regionSegment: regionSegment, region: region, offsetX: offset, scale: scale)
         XCTAssertEqual(markPosition.proximal.x, scaledViewSegment.proximal.x, accuracy: 0.0001)
         XCTAssertEqual(markPosition.proximal.y, scaledViewSegment.proximal.y, accuracy: 0.0001)
         XCTAssertEqual(markPosition.distal.x, scaledViewSegment.distal.x, accuracy: 0.001)
         XCTAssertEqual(markPosition.distal.y, scaledViewSegment.distal.y, accuracy: 0.001)
     }
+
+    // TODO: this is not working.
+//    func testSetPressedMark() {
+//        ladderView.setActiveRegion(regionNum: 0)
+//        let mark = ladderView.addMark(scaledViewPositionX: 0)
+//        ladderView.setPressedMark(position: CGPoint(x: 0, y: 0))
+//        XCTAssertEqual(ladderView.pressedMark, mark)
+//    }
 }
