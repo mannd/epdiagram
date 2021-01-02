@@ -159,9 +159,7 @@ class Mark: Codable {
     }
 
     func swapEnds() {
-        let tmp = segment.proximal
-        segment.proximal = segment.distal
-        segment.distal = tmp
+        (segment.proximal, segment.distal) = (segment.distal, segment.proximal)
     }
 
     func getAnchorPosition() -> CGPoint {

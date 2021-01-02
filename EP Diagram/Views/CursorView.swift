@@ -7,28 +7,7 @@
 //
 
 import UIKit
-import os.log
-
-protocol CursorViewDelegate: AnyObject {
-    var cursorIsVisible: Bool { get set }
-
-    func refresh()
-    func moveCursor(cursorViewPositionX positionX: CGFloat)
-    func setCursorHeight(anchorPositionY: CGFloat?)
-    func setCaliperMaxY(_ maxY: CGFloat)
-    func cursorMovement() -> Movement
-    func isCalibrated() -> Bool
-    func setIsCalibrated(_ value: Bool)
-    func markMeasurement(segment: Segment) -> CGFloat
-    func intervalMeasurement(value: CGFloat) -> CGFloat
-}
-
-extension CursorViewDelegate {
-    // Must be declared here, before class definition of setCursorHeight
-    func setCursorHeight(anchorPositionY: CGFloat? = nil) {
-        return setCursorHeight(anchorPositionY: anchorPositionY)
-    }
-}
+import OSLog
 
 final class CursorView: ScaledView {
     private let rightMargin: CGFloat = 5 // unused?
@@ -395,7 +374,30 @@ final class CursorView: ScaledView {
     }
 }
 
-// MARK: - CursorView delegate methods
+// MARK: - CursorViewDelegate protocol
+
+protocol CursorViewDelegate: AnyObject {
+    var cursorIsVisible: Bool { get set }
+
+    func refresh()
+    func moveCursor(cursorViewPositionX positionX: CGFloat)
+    func setCursorHeight(anchorPositionY: CGFloat?)
+    func setCaliperMaxY(_ maxY: CGFloat)
+    func cursorMovement() -> Movement
+    func isCalibrated() -> Bool
+    func setIsCalibrated(_ value: Bool)
+    func markMeasurement(segment: Segment) -> CGFloat
+    func intervalMeasurement(value: CGFloat) -> CGFloat
+}
+
+extension CursorViewDelegate {
+    // Must be declared here, before class definition of setCursorHeight
+    func setCursorHeight(anchorPositionY: CGFloat? = nil) {
+        return setCursorHeight(anchorPositionY: anchorPositionY)
+    }
+}
+
+// MARK: - CursorViewDelegate implementation
 
 extension CursorView: CursorViewDelegate {
     var cursorIsVisible: Bool {

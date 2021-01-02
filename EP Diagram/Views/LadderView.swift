@@ -7,42 +7,26 @@
 //
 
 import UIKit
-import os.log
-
-protocol LadderViewDelegate: AnyObject {
-    func getRegionProximalBoundary(view: UIView) -> CGFloat
-    func getRegionDistalBoundary(view: UIView) -> CGFloat
-    func getRegionMidPoint(view: UIView) -> CGFloat
-    func getAttachedMarkLadderViewPositionY(view: UIView) -> CGPoint?
-    func getPositionYInView(positionY: CGFloat, view: UIView) -> CGFloat
-    func getTopOfLadder(view: UIView) -> CGFloat
-
-    func refresh()
-    func setActiveRegion(regionNum: Int)
-    func hasActiveRegion() -> Bool
-    func unhighlightAllMarks()
-    func deleteAttachedMark()
-    func groupMarksNearbyAttachedMark()
-    func addAttachedMark(scaledViewPositionX: CGFloat)
-    func unattachAttachedMark()
-    func groupNearbyMarks(mark: Mark)
-    func moveAttachedMark(position: CGPoint)
-    func fixBoundsOfAttachedMark()
-    func getAttachedMarkAnchor() -> Anchor
-    func assessBlockAndImpulseOrigin(mark: Mark?)
-    func getAttachedMarkScaledAnchorPosition() -> CGPoint?
-    func setAttachedMarkAndGroupedMarksHighlights()
-    func toggleAttachedMarkAnchor()
-}
+import OSLog
 
 final class LadderView: ScaledView {
+    // TODO: These all may need some tweaking...
     private let ladderPaddingMultiplier: CGFloat = 0.5
     private let accuracy: CGFloat = 20
     private let lowerLimitMarkHeight: CGFloat = 0.1
     private let lowerLimitMarkWidth: CGFloat = 20
     private let nearbyMarkAccuracy: CGFloat = 15
 
-    lazy var textAttributes: [NSAttributedString.Key: Any] = Common.initTextAttributes()
+    lazy var measurementTextAttributes: [NSAttributedString.Key: Any] = {
+        let textFont = UIFont(name: "Helvetica Neue Medium", size: 14.0) ?? UIFont.systemFont(ofSize: 14, weight: UIFont.Weight.medium)
+        let paragraphStyle = NSParagraphStyle.default.mutableCopy() as! NSMutableParagraphStyle
+        let attributes = [
+            NSAttributedString.Key.font: textFont,
+            NSAttributedString.Key.foregroundColor: UIColor.label,
+            NSAttributedString.Key.paragraphStyle: paragraphStyle,
+        ]
+        return attributes
+    }()
 
     // Controlled by Preferences at present.
     var markLineWidth: CGFloat = 2
@@ -196,17 +180,6 @@ final class LadderView: ScaledView {
             regionBoundary += regionHeight
         }
         activeRegion = ladder.regions[ladder.getActiveRegionIndex() ?? 0]
-    }
-
-    func initTextAttributes() -> [NSAttributedString.Key: Any] {
-        let textFont = UIFont(name: "Helvetica Neue Medium", size: 14.0) ?? UIFont.systemFont(ofSize: 14, weight: UIFont.Weight.medium)
-        let paragraphStyle = NSParagraphStyle.default.mutableCopy() as! NSMutableParagraphStyle
-        let attributes = [
-            NSAttributedString.Key.font: textFont,
-            NSAttributedString.Key.foregroundColor: UIColor.label,
-            NSAttributedString.Key.paragraphStyle: paragraphStyle,
-        ]
-        return attributes
     }
 
     internal func getRegionUnitHeight(ladder: Ladder) -> CGFloat {
@@ -1231,10 +1204,10 @@ final class LadderView: ScaledView {
                 let value = lround(Double(interval.proximalValue ?? 0))
                 let text = "\(value)"
                 var origin = CGPoint(x: halfwayPosition, y: region.proximalBoundary)
-                let size = text.size(withAttributes: textAttributes)
+                let size = text.size(withAttributes: measurementTextAttributes)
                 // Center the origin.
                 origin = CGPoint(x: origin.x - size.width / 2, y: origin.y)
-                drawIntervalText(origin: origin, size: size, text: text, context: context, attributes: textAttributes)
+                drawIntervalText(origin: origin, size: size, text: text, context: context, attributes: measurementTextAttributes)
             }
             if let firstDistalX = interval.distalBoundary?.first, let secondDistalX = interval.distalBoundary?.second {
                 let scaledFirstX = transformToScaledViewPositionX(regionPositionX: firstDistalX)
@@ -1243,10 +1216,10 @@ final class LadderView: ScaledView {
                 let value = lround(Double(interval.distalValue ?? 0))
                 let text = "\(value)"
                 var origin = CGPoint(x: halfwayPosition, y: region.distalBoundary)
-                let size = text.size(withAttributes: textAttributes)
+                let size = text.size(withAttributes: measurementTextAttributes)
                 // Center the origin.
                 origin = CGPoint(x: origin.x - size.width / 2, y: origin.y - size.height)
-                drawIntervalText(origin: origin, size: size, text: text, context: context, attributes: textAttributes)
+                drawIntervalText(origin: origin, size: size, text: text, context: context, attributes: measurementTextAttributes)
             }
         }
     }
@@ -1321,12 +1294,12 @@ final class LadderView: ScaledView {
         let value = lround(Double(cursorViewDelegate.markMeasurement(segment: segment)))
         let text = "\(value)"
         var origin = segment.midpoint
-        let size = text.size(withAttributes: textAttributes)
+        let size = text.size(withAttributes: measurementTextAttributes)
         // Center the origin.
         origin = CGPoint(x: origin.x + 10, y: origin.y - size.height / 2)
         let textRect = CGRect(origin: origin, size: size)
         if textRect.minX > leftMargin {
-            text.draw(in: textRect, withAttributes: textAttributes)
+            text.draw(in: textRect, withAttributes: measurementTextAttributes)
             context.strokePath()
         }
 
@@ -1532,6 +1505,36 @@ final class LadderView: ScaledView {
         mark.segment = segment
     }
 }
+
+// MARK: - LadderViewDelegate protocol
+
+protocol LadderViewDelegate: AnyObject {
+    func getRegionProximalBoundary(view: UIView) -> CGFloat
+    func getRegionDistalBoundary(view: UIView) -> CGFloat
+    func getRegionMidPoint(view: UIView) -> CGFloat
+    func getAttachedMarkLadderViewPositionY(view: UIView) -> CGPoint?
+    func getPositionYInView(positionY: CGFloat, view: UIView) -> CGFloat
+    func getTopOfLadder(view: UIView) -> CGFloat
+
+    func refresh()
+    func setActiveRegion(regionNum: Int)
+    func hasActiveRegion() -> Bool
+    func unhighlightAllMarks()
+    func deleteAttachedMark()
+    func groupMarksNearbyAttachedMark()
+    func addAttachedMark(scaledViewPositionX: CGFloat)
+    func unattachAttachedMark()
+    func groupNearbyMarks(mark: Mark)
+    func moveAttachedMark(position: CGPoint)
+    func fixBoundsOfAttachedMark()
+    func getAttachedMarkAnchor() -> Anchor
+    func assessBlockAndImpulseOrigin(mark: Mark?)
+    func getAttachedMarkScaledAnchorPosition() -> CGPoint?
+    func setAttachedMarkAndGroupedMarksHighlights()
+    func toggleAttachedMarkAnchor()
+}
+
+// MARK: LadderViewDelegate implementation
 
 extension LadderView: LadderViewDelegate {
 

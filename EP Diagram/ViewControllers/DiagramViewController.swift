@@ -86,7 +86,7 @@ final class DiagramViewController: UIViewController {
         //showRestorationInfo() // for debugging
 
         // TODO: customization for mac version
-        if Common.isRunningOnMac() {
+        if isRunningOnMac() {
             //navigationController?.setNavigationBarHidden(true, animated: false)
             // TODO: Need to convert hamburger menu to regular menu on Mac.
         }
@@ -127,7 +127,7 @@ final class DiagramViewController: UIViewController {
 
         // Navigation buttons
         // Hamburger menu is replaced by main menu on Mac.
-        if !Common.isRunningOnMac() {
+        if !isRunningOnMac() {
             navigationItem.setLeftBarButton(UIBarButtonItem(image: UIImage(named: "hamburger"), style: .plain, target: self, action: #selector(toggleHamburgerMenu)), animated: true)
         }
 //        navigationItem.setRightBarButton(UIBarButtonItem(image: UIImage(systemName: "xmark"), style: .done, target: self, action: #selector(closeAction)), animated: true)
@@ -321,7 +321,7 @@ final class DiagramViewController: UIViewController {
     private func centerImage() {
         // This centers image, as opposed to starting with it at the upper left
         // hand corner of the screen.
-        if !Common.isRunningOnMac() {
+        if !isRunningOnMac() {
             let newContentOffsetX = (imageScrollView.contentSize.width/2) - (imageScrollView.bounds.size.width/2);
             imageScrollView.contentOffset = CGPoint(x: newContentOffsetX, y: 0)
         }

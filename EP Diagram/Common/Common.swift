@@ -92,32 +92,7 @@ enum Common {
 
     // OS functions
     /// Returns true if target is a Mac, false for iOS.
-    static func isRunningOnMac() -> Bool {
-        #if targetEnvironment(macCatalyst)
-        return true
-        #else
-        return false
-        #endif
-    }
-
-    static func isIPad() -> Bool {
-        return UIDevice.current.userInterfaceIdiom == .pad
-    }
-    
-
-    static func initTextAttributes() -> [NSAttributedString.Key: Any] {
-        let textFont = UIFont(name: "Helvetica Neue Medium", size: 14.0) ?? UIFont.systemFont(ofSize: 14, weight: UIFont.Weight.medium)
-        let paragraphStyle = NSParagraphStyle.default.mutableCopy() as! NSMutableParagraphStyle
-        let attributes = [
-            NSAttributedString.Key.font: textFont,
-            NSAttributedString.Key.foregroundColor: UIColor.label,
-            NSAttributedString.Key.paragraphStyle: paragraphStyle,
-        ]
-        return attributes
-    }
-
-    static func radians(degrees: Double) -> Double {
-        return degrees * Double.pi / 180}
+ 
 }
 
 extension FloatingPoint {

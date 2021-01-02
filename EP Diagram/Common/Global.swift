@@ -6,7 +6,7 @@
 //  Copyright © 2021 EP Studios. All rights reserved.
 //
 
-import Foundation
+import UIKit
 
 // MARK: - Global namespace functions
 
@@ -36,3 +36,15 @@ func P(_ s: String) {
 #else
 func P(_ s: String) {}
 #endif
+
+func isRunningOnMac() -> Bool {
+    #if targetEnvironment(macCatalyst)
+    return true
+    #else
+    return false
+    #endif
+}
+
+func isIPad() -> Bool {
+    return UIDevice.current.userInterfaceIdiom == .pad
+}

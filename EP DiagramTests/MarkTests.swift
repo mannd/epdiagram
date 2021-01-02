@@ -145,4 +145,11 @@ class MarkTests: XCTestCase {
         mark.move(movement: .omnidirectional, to: CGPoint(x: 100, y: 1.0))
         XCTAssertEqual(mark.segment, Segment(proximal: CGPoint(x: 100, y: 0.5), distal: CGPoint(x: 100, y: 1.0)))
     }
+
+    func testSwapEnds() {
+        let mark = Mark(segment: Segment(proximal: CGPoint(x: 100, y: 0), distal: CGPoint(x: 200, y: 1)))
+        mark.swapEnds()
+        XCTAssertEqual(mark.segment.proximal, CGPoint(x: 200, y: 1))
+        XCTAssertEqual(mark.segment.distal, CGPoint(x: 100, y: 0))
+    }
 }
