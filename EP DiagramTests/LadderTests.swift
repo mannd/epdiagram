@@ -83,12 +83,36 @@ class LadderTests: XCTestCase {
     }
 
     func testHasMarks() {
-//        ladder = Ladder(template: LadderTemplate.defaultTemplate())
         XCTAssertEqual(false, ladder.hasMarks())
         let segment: Segment = Segment(proximal: CGPoint(x: 0, y: 0), distal: CGPoint(x: 0, y: 1))
         let mark = ladder.addMark(fromSegment: segment, inRegion: ladder.regions[0])
         XCTAssertEqual(true, ladder.hasMarks())
         ladder.deleteMark(mark, inRegion: ladder.regions[0])
+        XCTAssertEqual(false, ladder.hasMarks())
+        // Make sure delete does nothing if mark or region is nil.
+        let mark1 = ladder.addMark(fromSegment: segment, inRegion: ladder.regions[0])
+        XCTAssertEqual(true, ladder.hasMarks())
+        ladder.deleteMark(mark1, inRegion: nil)
+        XCTAssertEqual(true, ladder.hasMarks())
+        ladder.deleteMark(nil, inRegion: ladder.regions[0])
+        XCTAssertEqual(true, ladder.hasMarks())
+        ladder.deleteMark(mark1, inRegion: ladder.regions[0])
+        XCTAssertEqual(false, ladder.hasMarks())
+        ladder.addMark(fromSegment: segment, inRegion: ladder.regions[0])
+        ladder.addMark(fromSegment: segment, inRegion: ladder.regions[0])
+        ladder.addMark(fromSegment: segment, inRegion: ladder.regions[1])
+        ladder.addMark(fromSegment: segment, inRegion: ladder.regions[1])
+        XCTAssertEqual(true, ladder.hasMarks())
+        ladder.deleteMarksInRegion(ladder.regions[0])
+        XCTAssertEqual(true, ladder.hasMarks())
+        ladder.deleteMarksInRegion(ladder.regions[1])
+        XCTAssertEqual(false, ladder.hasMarks())
+        ladder.addMark(fromSegment: segment, inRegion: ladder.regions[0])
+        ladder.addMark(fromSegment: segment, inRegion: ladder.regions[0])
+        ladder.addMark(fromSegment: segment, inRegion: ladder.regions[1])
+        ladder.addMark(fromSegment: segment, inRegion: ladder.regions[1])
+        XCTAssertEqual(true, ladder.hasMarks())
+        ladder.clear()
         XCTAssertEqual(false, ladder.hasMarks())
     }
 
@@ -130,6 +154,23 @@ class LadderTests: XCTestCase {
         XCTAssertEqual(distalMark.segment, Segment(proximal: CGPoint(x: 300, y: 0), distal: CGPoint(x: 300, y: 1)))
         ladder.moveGroupedMarks(forMark: distalMark)
         XCTAssertEqual(mark.segment, Segment(proximal: CGPoint(x: 200, y: 0), distal: CGPoint(x: 300, y: 1)))
+    }
 
+    func testGetMarkGroup() {
+        let mark1 = Mark()
+        let mark2 = Mark()
+        let mark3 = Mark()
+        ladder.registerMark(mark1)
+        ladder.registerMark(mark2)
+        ladder.registerMark(mark3)
+        var mig = MarkIdGroup()
+        mig.proximal.insert(mark1.id)
+        mig.middle.insert(mark2.id)
+        mig.distal.insert(mark3.id)
+        let mg = ladder.getMarkGroup(fromMarkIdGroup: mig)
+        XCTAssert(mg.proximal.contains(mark1))
+        XCTAssert(mg.middle.contains(mark2))
+        XCTAssert(mg.distal.contains(mark3))
+        XCTAssert(mg.count == 3)
     }
 }

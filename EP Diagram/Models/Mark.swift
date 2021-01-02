@@ -260,11 +260,11 @@ extension Mark {
         var description: String {
             switch self {
             case .solid:
-                return "Solid"
+                return L("Solid")
             case .dashed:
-                return "Dashed"
+                return L("Dashed")
             case .dotted:
-                return "Dotted"
+                return L("Dotted")
             }
         }
 

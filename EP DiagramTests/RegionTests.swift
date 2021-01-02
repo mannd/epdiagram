@@ -36,7 +36,10 @@ class RegionTests: XCTestCase {
         region.proximalBoundary = 200
         region.distalBoundary = 500
         XCTAssertNotNil(region.getRelativeYPosition(y: 300))
+        XCTAssertNotNil(region.getRelativeYPosition(y: 200))
+        XCTAssertNotNil(region.getRelativeYPosition(y: 500))
         XCTAssertEqual(region.getRelativeYPosition(y: 300)!, 0.3333, accuracy: 0.001)
+        XCTAssertNil(region.getRelativeYPosition(y: 199))
     }
 
 }

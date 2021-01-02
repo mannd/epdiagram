@@ -61,6 +61,10 @@ class MarkTests: XCTestCase {
         let anotherMarkPosition = Segment(proximal: CGPoint(x: -3, y: 5), distal: CGPoint(x: 8, y: -1))
         let anotherMidPoint = anotherMarkPosition.midpoint
         XCTAssertEqual(anotherMidPoint, CGPoint(x: 2.5, y: 2))
+        let mark1 = Mark(segment: Segment(proximal: CGPoint.zero, distal: CGPoint(x: 100, y: 1)))
+        let mark1MidPoint = mark1.midpoint()
+        XCTAssertEqual(mark1MidPoint, CGPoint(x: 50, y: 0.5))
+        XCTAssertEqual(mark1.midpointX(), 50)
     }
 
     func testNormalization() {
@@ -126,6 +130,12 @@ class MarkTests: XCTestCase {
         mark.anchor = .middle
         mark.move(movement: .horizontal, to: CGPoint(x: 100, y: 0))
         XCTAssertEqual(mark.segment, Segment(proximal: CGPoint(x: 100, y: 0), distal: CGPoint(x: 100, y: 0)))
+        mark.anchor = .none // no movement
+        mark.move(movement: .horizontal, to: CGPoint(x: 500, y: 0))
+        XCTAssertEqual(mark.segment, Segment(proximal: CGPoint(x: 100, y: 0), distal: CGPoint(x: 100, y: 0)))
+        mark.anchor = .none
+        mark.move(movement: .omnidirectional, to: CGPoint(x: 800, y: 0))
+        XCTAssertEqual(mark.segment, Segment(proximal: CGPoint(x: 100, y: 0), distal: CGPoint(x: 100, y: 0)))
         mark.anchor = .proximal
         mark.move(movement: .horizontal, to: CGPoint(x: 200, y: 1))
         XCTAssertEqual(mark.segment, Segment(proximal: CGPoint(x: 200, y: 0), distal: CGPoint(x: 100, y: 0)))
@@ -144,6 +154,9 @@ class MarkTests: XCTestCase {
         mark.anchor = .distal
         mark.move(movement: .omnidirectional, to: CGPoint(x: 100, y: 1.0))
         XCTAssertEqual(mark.segment, Segment(proximal: CGPoint(x: 100, y: 0.5), distal: CGPoint(x: 100, y: 1.0)))
+        mark.anchor = .proximal
+        mark.move(movement: .omnidirectional, to: CGPoint(x: 200, y: 1.0))
+        XCTAssertEqual(mark.segment, Segment(proximal: CGPoint(x: 200, y: 1.0), distal: CGPoint(x: 100, y: 1.0)))
     }
 
     func testSwapEnds() {
@@ -151,5 +164,74 @@ class MarkTests: XCTestCase {
         mark.swapEnds()
         XCTAssertEqual(mark.segment.proximal, CGPoint(x: 200, y: 1))
         XCTAssertEqual(mark.segment.distal, CGPoint(x: 100, y: 0))
+    }
+
+    func testMarkGroup() {
+        var mg = MarkGroup()
+        XCTAssertEqual(mg.count, 0)
+        mg.proximal.insert(Mark())
+        mg.middle.insert(Mark())
+        let newMark = Mark()
+        mg.distal.insert(newMark)
+        XCTAssertEqual(mg.count, 3)
+        mg.remove(mark: newMark)
+        XCTAssertEqual(mg.count, 2)
+        mg.highlight(highlight: .selected)
+        let allMarks = mg.allMarks
+        for mark in allMarks {
+            XCTAssertEqual(mark.highlight, .selected)
+        }
+    }
+
+    func testMarkIDGroup() {
+        var mig = MarkIdGroup()
+        XCTAssertEqual(mig.count, 0)
+        mig.proximal.insert(Mark().id)
+        mig.middle.insert(Mark().id)
+        let newMark = Mark()
+        mig.distal.insert(newMark.id)
+        XCTAssertEqual(mig.count, 3)
+        mig.remove(id: newMark.id)
+        XCTAssertEqual(mig.count, 2)
+    }
+
+    func testMarkDimensions() {
+        let mark = Mark(segment: Segment(proximal: CGPoint(x: 0, y: 0), distal: CGPoint(x: 100, y: 1)))
+        XCTAssertEqual(mark.width, 100)
+        XCTAssertEqual(mark.height, 1)
+        XCTAssertEqual(mark.length, sqrt(10_001), accuracy: 0.00001)
+    }
+
+    func testAnchorPosition() {
+        let mark = Mark(segment: Segment(proximal: CGPoint.zero, distal: CGPoint(x: 0, y: 1)))
+        // test default anchor position
+        XCTAssertEqual(mark.anchor, .middle)
+        XCTAssertEqual(mark.getAnchorPosition(), CGPoint(x: 0, y: 0.5))
+        mark.anchor = .proximal
+        XCTAssertEqual(mark.getAnchorPosition(), CGPoint(x: 0, y: 0))
+        mark.anchor = .distal
+        XCTAssertEqual(mark.getAnchorPosition(), CGPoint(x: 0, y: 1))
+        let mark1 = Mark(segment: Segment(proximal: CGPoint(x: 320, y: 0.2), distal: CGPoint(x: 115, y: 0.7)))
+        mark1.anchor = .proximal
+        XCTAssertEqual(mark1.getAnchorPosition(), CGPoint(x: 320, y: 0.2))
+        mark1.anchor = .none
+        // For now Anchor.none defaults to same as .proximal.  Might refactor out .none in future.
+        XCTAssertEqual(mark1.getAnchorPosition(), CGPoint(x: 320, y: 0.2))
+        mark1.anchor = .distal
+        XCTAssertEqual(mark1.getAnchorPosition(), CGPoint(x: 115, y: 0.7))
+        mark1.anchor = .middle
+        XCTAssertEqual(mark1.getAnchorPosition().x, 217.5, accuracy: 0.0001)
+        XCTAssertEqual(mark1.getAnchorPosition().y, 0.45, accuracy: 0.0001)
+    }
+
+    func testLineStyles() {
+        let mark = Mark()
+        XCTAssertEqual(mark.lineStyle, .solid)
+        XCTAssertEqual(mark.lineStyle.description, L("Solid"))
+        mark.lineStyle = .dashed
+        XCTAssertEqual(mark.lineStyle.description, L("Dashed"))
+        mark.lineStyle = .dotted
+        XCTAssertEqual(mark.lineStyle.description, L("Dotted"))
+        XCTAssertEqual(mark.lineStyle.id, .dotted)
     }
 }

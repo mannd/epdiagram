@@ -13,5 +13,5 @@ enum Anchor: Int, Codable {
     case middle
     case proximal
     case distal
-    case none
+    case none // Do we really need a 'none' here?
 }

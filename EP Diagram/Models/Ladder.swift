@@ -167,7 +167,7 @@ class Ladder: Codable {
         return addMark(Mark(positionX: positionX), toRegion: region)
     }
 
-     func addMark(fromSegment segment: Segment, inRegion region: Region?) -> Mark? {
+    @discardableResult func addMark(fromSegment segment: Segment, inRegion region: Region?) -> Mark? {
         let mark = Mark(segment: segment)
         return addMark(mark, toRegion: region)
     }

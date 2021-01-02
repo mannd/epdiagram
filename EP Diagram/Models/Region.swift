@@ -63,32 +63,14 @@ class Region: Codable {
         guard y >= proximalBoundary && y <= distalBoundary else { return nil }
         return (y - proximalBoundary) / (distalBoundary - proximalBoundary)
     }
-
-    // Two functions to use while moving marks to see is we are close to another mark
-    // for purposes of highlighting them for connection.
-    func getMarkProximalXPositions() -> [CGFloat] {
-        var points = [CGFloat]()
-        for mark in marks {
-            points.append(mark.segment.proximal.x)
-        }
-        return points
-    }
-
-    func getMarkDistalXPositions() -> [CGFloat] {
-        var points = [CGFloat]()
-        for mark in marks {
-            points.append(mark.segment.distal.x)
-        }
-        return points
-    }
 }
 
 // MARK: - Extensions
 
-//extension Region: CustomDebugStringConvertible {
-//    var debugDescription: String { "Region ID " + id.debugDescription }
-//}
-//
+extension Region: CustomDebugStringConvertible {
+    var debugDescription: String { "Region ID " + id.debugDescription }
+}
+
 extension Region: Equatable {
     static func == (lhs: Region, rhs: Region) -> Bool {
         return lhs.id == rhs.id
