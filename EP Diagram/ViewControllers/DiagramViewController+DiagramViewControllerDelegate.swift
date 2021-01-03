@@ -87,14 +87,17 @@ extension DiagramViewController: DiagramViewControllerDelegate {
 //        self.imageView.image = newImage
         //            self.imageView.image.transform = self.imageView.transform.image.rotated(by: CGFloat(Common.radians(degrees: degrees)))
 //        })
-        if let image = imageView.image {
-            imageView.image = rotateUIImage(image: image, angleRadians: CGFloat(degrees.degreesToRadians))
-        }
+        newRotateImage(radians: CGFloat(degrees.degreesToRadians))
+//        if let image = imageView.image {
+//            setDiagramImage(rotateUIImage(image: image, angleRadians: CGFloat(degrees.degreesToRadians)))
+//        }
     }
 
     func resetImage() {
         UIView.animate(withDuration: 0.5) {
             self.imageView.transform = CGAffineTransform.identity
+            self.imageScrollView.zoomScale = 1.0
+            self.imageScrollView.contentOffset = CGPoint.zero
         }
     }
 
@@ -114,30 +117,14 @@ extension DiagramViewController: DiagramViewControllerDelegate {
         let newImage: UIImage? = UIGraphicsGetImageFromCurrentImageContext()
         UIGraphicsEndImageContext()
         return newImage ?? image
-
     }
 
-//    UIImage* rotateUIImage(const UIImage* src, float angleDegrees)  {
-//        UIView* rotatedViewBox = [[UIView alloc] initWithFrame: CGRectMake(0, 0, src.size.width, src.size.height)];
-//        float angleRadians = angleDegrees * ((float)M_PI / 180.0f);
-//        CGAffineTransform t = CGAffineTransformMakeRotation(angleRadians);
-//        rotatedViewBox.transform = t;
-//        CGSize rotatedSize = rotatedViewBox.frame.size;
-//        [rotatedViewBox release];
-//
-//        UIGraphicsBeginImageContext(rotatedSize);
-//        CGContextRef bitmap = UIGraphicsGetCurrentContext();
-//        CGContextTranslateCTM(bitmap, rotatedSize.width/2, rotatedSize.height/2);
-//        CGContextRotateCTM(bitmap, angleRadians);
-//
-//        CGContextScaleCTM(bitmap, 1.0, -1.0);
-//        CGContextDrawImage(bitmap, CGRectMake(-src.size.width / 2, -src.size.height / 2, src.size.width, src.size.height), [src CGImage]);
-//
-//        UIImage *newImage = UIGraphicsGetImageFromCurrentImageContext();
-//        UIGraphicsEndImageContext();
-//
-//        return newImage;
-//    }
+    func newRotateImage(radians: CGFloat) {
+        UIView.animate(withDuration: 0.4)  {
+            self.imageView.transform = self.imageView.transform.rotated(by: radians)
+        }
+    }
+//    self.imageView.transform = CGAffineTransformRotate(self.imageView.transform, radians(degrees));
 
 
     

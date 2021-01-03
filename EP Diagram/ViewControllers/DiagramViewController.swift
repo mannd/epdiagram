@@ -109,6 +109,7 @@ final class DiagramViewController: UIViewController {
         imageScrollView.delegate = self
         // Distinguish the two views using slightly different background colors.
         imageScrollView.backgroundColor = UIColor.secondarySystemBackground
+        imageView.backgroundColor = UIColor.secondarySystemBackground
         ladderView.backgroundColor = UIColor.tertiarySystemBackground
         // Limit max and min scale of image.
         imageScrollView.maximumZoomScale = maxZoom
@@ -132,7 +133,7 @@ final class DiagramViewController: UIViewController {
         }
 //        navigationItem.setRightBarButton(UIBarButtonItem(image: UIImage(systemName: "xmark"), style: .done, target: self, action: #selector(closeAction)), animated: true)
 
-        navigationItem.setRightBarButton(UIBarButtonItem(barButtonSystemItem: .done, target: self, action: #selector(closeAction)), animated: true)
+        navigationItem.setRightBarButton(UIBarButtonItem(barButtonSystemItem: .close, target: self, action: #selector(closeAction)), animated: true)
        
         // Set up touches
         let singleTapRecognizer = UITapGestureRecognizer(target: self, action: #selector(self.singleTap))
@@ -389,9 +390,11 @@ final class DiagramViewController: UIViewController {
         closeCalibrationMenu()
     }
 
+    // FIXME: clear calibration but calibration returns after saving and reopening diagram
     @objc func clearCalibration() {
         os_log("clearCalibration()", log: .action, type: .info)
         diagram.calibration.reset()
+        hideCursorAndUnhighlightAllMarks()
         ladderView.refresh()
         cursorView.refresh()
         closeCalibrationMenu()
@@ -537,7 +540,7 @@ final class DiagramViewController: UIViewController {
         return document.page(at: pageNumber)
     }
 
-    // MARK: - Rotate view
+    // MARK: - Rotate screen
 
     override func viewWillTransition(to size: CGSize, with coordinator: UIViewControllerTransitionCoordinator) {
         os_log("viewWillTransition", log: OSLog.viewCycle, type: .info)

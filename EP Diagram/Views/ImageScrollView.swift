@@ -16,21 +16,38 @@ class ImageScrollView: UIScrollView {
 extension ImageScrollView: UIContextMenuInteractionDelegate {
     func contextMenuInteraction(_ interaction: UIContextMenuInteraction, configurationForMenuAtLocation location: CGPoint) -> UIContextMenuConfiguration? {
         return UIContextMenuConfiguration(identifier: nil, previewProvider: nil) { suggestedActions in
-            let rotate = UIAction(title: L("Rotate Image")) { action in
-                self.rotateImage()
+            let rotate90R = UIAction(title: L("Rotate 90 R")) { action in
+                self.rotateImage(degrees: 90)
             }
-            let reset = UIAction(title: L("Reset Image")) { action in
+            let rotate90L = UIAction(title: L("Rotate 90 L")) { action in
+                self.rotateImage(degrees: -90)
+            }
+            let rotate1R = UIAction(title: L("Rotate 1 R")) { action in
+                self.rotateImage(degrees: 1)
+            }
+            let rotate1L = UIAction(title: L("Rotate 1 L")) { action in
+                self.rotateImage(degrees: -1)
+            }
+            let rotate01R = UIAction(title: L("Rotate 0.1 R")) { action in
+                self.rotateImage(degrees: 0.1)
+            }
+            let rotate01L = UIAction(title: L("Rotate 0.1 L")) { action in
+                self.rotateImage(degrees: -0.1)
+            }
+            let reset = UIAction(title: L("Reset")) { action in
                 self.resetImage()
             }
-            return UIMenu(title: "Rotation", children: [rotate, reset])
+            let rotate = UIMenu(title: L("Rotate..."), image: UIImage(systemName: "rotate.right"), children: [rotate90R, rotate90L, rotate1R, rotate1L, rotate01R, rotate01L, reset])
+            
+            return UIMenu(title: "", children: [rotate, reset])
         }
     }
 
     func doNothing() {}
 
-    func rotateImage() {
+    func rotateImage(degrees: Double) {
         let leftMargin: CGFloat = 50
-        diagramViewControllerDelegate?.rotateImage(degrees: 90)
+        diagramViewControllerDelegate?.rotateImage(degrees: degrees)
         contentInset = UIEdgeInsets(top: 0, left: leftMargin, bottom: 0, right: 0)
     }
 
