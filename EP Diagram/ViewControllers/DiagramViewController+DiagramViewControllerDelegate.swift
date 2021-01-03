@@ -15,7 +15,7 @@ protocol DiagramViewControllerDelegate: class {
     func saveTemplates(_ templates: [LadderTemplate])
     func selectSampleDiagram(_ diagram: Diagram?)
     func setViewsNeedDisplay()
-    func rotateImage(degrees: Double)
+    func rotateImage(degrees: CGFloat)
     func resetImage()
 }
 
@@ -32,7 +32,7 @@ extension DiagramViewController: DiagramViewControllerDelegate {
 
     private func setLadder(ladder: Ladder) {
         let oldLadder = diagram.ladder
-        currentDocument?.undoManager?.registerUndo(withTarget: self, handler: { target in
+        currentDocument?.undoManager.registerUndo(withTarget: self, handler: { target in
             target.setLadder(ladder: oldLadder)
         })
         NotificationCenter.default.post(name: .didUndoableAction, object: nil)
@@ -77,23 +77,12 @@ extension DiagramViewController: DiagramViewControllerDelegate {
         ladderView.setNeedsDisplay()
     }
 
-    func rotateImage(degrees: Double) {
-        //        UIView.animate(withDuration: 0.5, animations: {
-//        let transform: CGAffineTransform = CGAffineTransform(rotationAngle: CGFloat(Common.radians(degrees: degrees)))
-//        guard let image = self.imageView.image?.cgImage else { return }
-//        let ciImage = CIImage(cgImage: image)
-//        let newCiImage = ciImage.transformed(by: transform)
-//        let newImage = UIImage(ciImage: newCiImage)
-//        self.imageView.image = newImage
-        //            self.imageView.image.transform = self.imageView.transform.image.rotated(by: CGFloat(Common.radians(degrees: degrees)))
-//        })
-        newRotateImage(radians: CGFloat(degrees.degreesToRadians))
-//        if let image = imageView.image {
-//            setDiagramImage(rotateUIImage(image: image, angleRadians: CGFloat(degrees.degreesToRadians)))
-//        }
+    // TODO: make undoable
+    func rotateImage(degrees: CGFloat) {
+        newRotateImage(radians: degrees.degreesToRadians)
     }
 
-    func resetImage() {
+    @objc func resetImage() {
         UIView.animate(withDuration: 0.5) {
             self.imageView.transform = CGAffineTransform.identity
             self.imageScrollView.zoomScale = 1.0
@@ -120,13 +109,33 @@ extension DiagramViewController: DiagramViewControllerDelegate {
     }
 
     func newRotateImage(radians: CGFloat) {
-        UIView.animate(withDuration: 0.4)  {
-            self.imageView.transform = self.imageView.transform.rotated(by: radians)
+        let transfrom = self.imageView.transform.rotated(by: radians)
+        setTransform(transform: transfrom)
+    }
+
+    func setTransform(transform: CGAffineTransform) {
+        let originalTransform = self.imageView.transform
+        currentDocument?.undoManager?.registerUndo(withTarget: self) { target in
+            target.setTransform(transform: originalTransform)
+        }
+        NotificationCenter.default.post(name: .didUndoableAction, object: nil)
+        UIView.animate(withDuration: 0.4) {
+            self.imageView.transform = transform
+            self.centerContent()
         }
     }
-//    self.imageView.transform = CGAffineTransformRotate(self.imageView.transform, radians(degrees));
 
-
-    
+    func centerContent() {
+        return
+        var top: CGFloat = 0
+        var left: CGFloat = 0
+        if (self.imageScrollView.contentSize.width < self.imageScrollView.bounds.size.width) {
+            left = (self.imageScrollView.bounds.size.width - self.imageScrollView.contentSize.width) * 0.5
+        }
+        if (self.imageScrollView.contentSize.height < self.imageScrollView.bounds.size.height) {
+            top = (self.imageScrollView.bounds.size.height-self.imageScrollView.contentSize.height) * 0.5
+        }
+        self.imageScrollView.contentInset = UIEdgeInsets(top: top, left: left + (leftMargin * imageScrollView.zoomScale), bottom: top, right: left)
+    }
 
 }

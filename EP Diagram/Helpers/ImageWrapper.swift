@@ -41,6 +41,10 @@ struct ImageWrapper: Codable {
             return
         }
         try container.encode(false, forKey: .null)
+        // TODO: which of the below is better?
+//        guard let data = image.pngData() else {
+//            throw FileIOError.encodingFailed
+//        }
         guard let data = image.jpegData(compressionQuality: 1.0) else {
             throw FileIOError.encodingFailed
         }

@@ -24,7 +24,7 @@ final class DiagramViewController: UIViewController {
 
     // This margin is passed to other views.
     // TODO: Possibly change this to property of ladder, since it might depend on label width (# of chars)?
-    private let leftMargin: CGFloat = 40
+    let leftMargin: CGFloat = 40
 
     // Buttons, menus
     private let spacer = UIBarButtonItem(barButtonSystemItem: .flexibleSpace, target: nil, action: nil)
@@ -143,11 +143,37 @@ final class DiagramViewController: UIViewController {
         // Set up context menu.
         let interaction = UIContextMenuInteraction(delegate: ladderView)
         ladderView.addInteraction(interaction)
-        let imageViewInteraction = UIContextMenuInteraction(delegate: imageScrollView)
-        imageScrollView.addInteraction(imageViewInteraction)
+//        let imageViewInteraction = UIContextMenuInteraction(delegate: imageScrollView)
+//        imageScrollView.addInteraction(imageViewInteraction)
+        let longPress = UILongPressGestureRecognizer(target: self, action: #selector(self.doImageScrollViewLongPress))
+        self.imageScrollView.addGestureRecognizer(longPress)
 
         // Notifications
         setupNotifications()
+    }
+
+    @IBAction func doImageScrollViewLongPress(sender: UILongPressGestureRecognizer) {
+        print("long press")
+        guard sender.state == .began else { return }
+        sender.view?.becomeFirstResponder()
+        let menu = UIMenuController.shared
+        let rotateMenuItem = UIMenuItem(title: L("Rotate"), action: #selector(rotateAction))
+        let doneMenuItem = UIMenuItem(title: L("Done"), action: #selector(doneAction))
+        let resetMenuItem = UIMenuItem(title: L("Reset"), action: #selector(resetImage))
+        menu.menuItems = [rotateMenuItem, doneMenuItem, resetMenuItem]
+        let location = sender.location(in: sender.view)
+        let rect = CGRect(x: location.x, y: location.y , width: 0, height: 0)
+        menu.showMenu(from: sender.view!, rect: rect)
+
+    }
+
+    @objc func doneAction() {
+        imageScrollView.resignFirstResponder()
+    }
+
+    @objc func rotateAction() {
+        print("rotating")
+        rotateImage(degrees: 90)
     }
 
     private func showDebugRestorationInfo() {
@@ -206,7 +232,8 @@ final class DiagramViewController: UIViewController {
         // Only use the restorationInfo once
         restorationInfo = nil
         showMainMenu()
-        updateUndoRedoButtons()
+//        updateUndoRedoButtons()
+        centerContent()
         resetViews()
     }
 
