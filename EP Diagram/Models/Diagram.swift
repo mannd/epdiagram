@@ -23,12 +23,14 @@ struct Diagram: Codable {
     var longDescription: String
     var ladder: Ladder
     var calibration: Calibration = Calibration()
+    var transform: CGAffineTransform
 
     init(name: String?, description: String, image: UIImage?, ladder: Ladder) {
         self.name = name
         self.longDescription = description
         self.imageWrapper = ImageWrapper(image: image)
         self.ladder = ladder
+        self.transform = CGAffineTransform.identity
     }
 
     static func defaultDiagram(name: String? = nil) -> Diagram {

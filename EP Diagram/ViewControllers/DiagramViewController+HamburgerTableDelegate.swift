@@ -300,12 +300,14 @@ extension DiagramViewController: HamburgerTableDelegate, UIImagePickerController
 //    }
 
     @objc func setDiagramImage(_ image: UIImage?) {
+        print("****setDiagramImage")
         currentDocument?.undoManager.registerUndo(withTarget: self, selector: #selector(setDiagramImage), object: imageView.image)
         NotificationCenter.default.post(name: .didUndoableAction, object: nil)
 //        updateUndoRedoButtons()
         diagram.ladder.clear()
         diagram.image = image
         imageView.image = image
+//        imageView.transform = diagram.transform
         imageScrollView.zoomScale = 1.0
         imageScrollView.contentOffset = CGPoint.zero
         centerContent()

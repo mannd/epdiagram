@@ -20,11 +20,10 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         guard let scene = (scene as? UIWindowScene) else { return }
         scene.title = L("EP Diagram")
         scene.userActivity = session.stateRestorationActivity ?? NSUserActivity(activityType: "org.epstudios.epdiagram.mainActivity")
-        if let rvc = window?.rootViewController as? RootViewController {
-            rvc.restorationInfo = scene.userActivity?.userInfo
-            rvc.persistentID = scene.session.persistentIdentifier
-        }
-
+        // FIXME: temporary change
+//        if let rvc = window?.rootViewController as? RootViewController {
+//            rvc.restorationInfo = scene.userActivity?.userInfo
+//        }
     }
 
     func stateRestorationActivity(for scene: UIScene) -> NSUserActivity? {

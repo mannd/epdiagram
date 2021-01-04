@@ -15,7 +15,6 @@ class DocumentBrowserViewController: UIDocumentBrowserViewController {
     var editingDocument = false
     var browserDelegate = DocumentBrowserDelegate()
     var restorationInfo: [AnyHashable: Any]?
-    var persistentID: String = ""
 
     override func viewDidLoad() {
         super.viewDidLoad()

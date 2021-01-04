@@ -22,9 +22,9 @@ final class DiagramViewController: UIViewController {
     var hamburgerTableViewController: HamburgerTableViewController? // We get this view via its embed segue!
     var separatorView: SeparatorView?
 
-    // This margin is passed to other views.
     // TODO: Possibly change this to property of ladder, since it might depend on label width (# of chars)?
-    let leftMargin: CGFloat = 40
+    // This margin is passed to other views.
+    let leftMargin: CGFloat = 50
 
     // Buttons, menus
     private let spacer = UIBarButtonItem(barButtonSystemItem: .flexibleSpace, target: nil, action: nil)
@@ -51,7 +51,6 @@ final class DiagramViewController: UIViewController {
     var _ladderIsLocked: Bool = false
     let _maxBlackAlpha: CGFloat = 0.4
 
-    var diagramFilenames: [String] = []
     var diagram: Diagram = Diagram.blankDiagram() {
         didSet {
             diagramEditorDelegate?.diagramEditorDidUpdateContent(self, diagram: diagram)
@@ -70,6 +69,7 @@ final class DiagramViewController: UIViewController {
     static let restorationCalFactorKey = "restorationCalFactorKey"
     static let restorationFileNameKey = "restorationFileNameKey"
     static let restorationNeededKey = "restorationNeededKey"
+    static let restorationTransformKey = "restorationTranslateKey"
 //    static let restorationActiveRegionIndexKey = "restorationActiveRegionIndexKey"
     static let restorationDoRestorationKey = "restorationDoRestorationKey"
 
@@ -95,29 +95,30 @@ final class DiagramViewController: UIViewController {
         // These 2 views are guaranteed to exist, so the delegates are implicitly unwrapped optionals.
         cursorView.ladderViewDelegate = ladderView
         ladderView.cursorViewDelegate = cursorView
+
+        // FIXME: Do these views really need currentDocument _and_ diagram?
         cursorView.currentDocument = currentDocument
         ladderView.currentDocument = currentDocument
-        // FIXME: Do these views really need currentDocument _and_ diagram?
-        // Pass diagram to views.
-        ladderView.diagram = diagram
-        cursorView.diagram = diagram
-        // And image to imageView
-        imageView.image = diagram.image
-        // Ensure there is a space for labels at the left margin.
+
         ladderView.leftMargin = leftMargin
         cursorView.leftMargin = leftMargin
+        imageScrollView.leftMargin = leftMargin
+
         imageScrollView.delegate = self
+
         // Distinguish the two views using slightly different background colors.
         imageScrollView.backgroundColor = UIColor.secondarySystemBackground
         imageView.backgroundColor = UIColor.secondarySystemBackground
         ladderView.backgroundColor = UIColor.tertiarySystemBackground
+
         // Limit max and min scale of image.
         imageScrollView.maximumZoomScale = maxZoom
         imageScrollView.minimumZoomScale = minZoom
         imageScrollView.diagramViewControllerDelegate = self
 
-        // Title is set to diagram document name.
-        setTitle()
+        // Pass diagram to views.
+        setDiagram(diagram)
+
         // Get defaults and apply them to views.
         updatePreferences()
 
@@ -131,8 +132,6 @@ final class DiagramViewController: UIViewController {
         if !isRunningOnMac() {
             navigationItem.setLeftBarButton(UIBarButtonItem(image: UIImage(named: "hamburger"), style: .plain, target: self, action: #selector(toggleHamburgerMenu)), animated: true)
         }
-//        navigationItem.setRightBarButton(UIBarButtonItem(image: UIImage(systemName: "xmark"), style: .done, target: self, action: #selector(closeAction)), animated: true)
-
         navigationItem.setRightBarButton(UIBarButtonItem(barButtonSystemItem: .close, target: self, action: #selector(closeAction)), animated: true)
        
         // Set up touches
@@ -150,6 +149,32 @@ final class DiagramViewController: UIViewController {
 
         // Notifications
         setupNotifications()
+
+    }
+
+    func undoablySetDiagram(_ diagram: Diagram) {
+        print("****undoablySetDiagram")
+//        let oldDiagram = self.diagram
+        currentDocument?.undoManager.registerUndo(withTarget: self, handler: { target in
+            target.undoablySetDiagram(target.diagram)
+        })
+        NotificationCenter.default.post(name: .didUndoableAction, object: nil)
+        setDiagram(diagram)
+    }
+
+    func setDiagram(_ diagram: Diagram) {
+        print("****setDiagram******")
+//        self.diagram = diagram
+        ladderView.diagram = diagram
+        cursorView.diagram = diagram
+        imageView.image = diagram.image
+//        imageView.transform = diagram.transform
+        imageScrollView.contentInset = UIEdgeInsets(top: 0, left: leftMargin, bottom: 0, right: 0)
+
+        ladderView.ladder = diagram.ladder
+        hideCursorAndUnhighlightAllMarks()
+        setTitle()
+        setViewsNeedDisplay()
     }
 
     @IBAction func doImageScrollViewLongPress(sender: UILongPressGestureRecognizer) {
@@ -174,6 +199,7 @@ final class DiagramViewController: UIViewController {
     @objc func rotateAction() {
         print("rotating")
         rotateImage(degrees: 90)
+        imageScrollView.resignFirstResponder()
     }
 
     private func showDebugRestorationInfo() {
@@ -196,14 +222,13 @@ final class DiagramViewController: UIViewController {
         ladderView.mode = mode
     }
 
+
+    // FIXME: Create new diagram, add image.  Put into background, the restart.  We just go to the the files screen.  However 2nd time it happens, we get the desired result, with diagram loading with zoom, etc.
     override func viewDidAppear(_ animated: Bool) {
         os_log("viewDidAppear() - ViewController", log: OSLog.viewCycle, type: .info)
         super.viewDidAppear(animated)
         // Need to set this here, after view draw, or Mac malpositions cursor at start of app.
-        imageScrollView.contentInset = UIEdgeInsets(top: 0, left: leftMargin, bottom: 0, right: 0)
         ladderView.unhighlightAllMarks()
-
-
         self.userActivity = self.view.window?.windowScene?.userActivity
         // See https://github.com/mattneub/Programming-iOS-Book-Examples/blob/master/bk2ch06p357StateSaveAndRestoreWithNSUserActivity/ch19p626pageController/SceneDelegate.swift
         if restorationInfo != nil {
@@ -218,7 +243,8 @@ final class DiagramViewController: UIViewController {
             if let contentOffsetY = restorationInfo?[DiagramViewController.restorationContentOffsetYKey] {
                 restorationContentOffset.y = contentOffsetY as? CGFloat ?? 0
             }
-            imageScrollView.setContentOffset(restorationContentOffset, animated: true)
+            // FIXME: Temporary
+//            imageScrollView.setContentOffset(restorationContentOffset, animated: true)
 
             if let isCalibrated = restorationInfo?[DiagramViewController.restorationIsCalibratedKey] as? Bool {
                 cursorView.setIsCalibrated(isCalibrated)
@@ -226,13 +252,17 @@ final class DiagramViewController: UIViewController {
             if let calFactor = restorationInfo?[DiagramViewController.restorationCalFactorKey] as? CGFloat {
                 cursorView.calFactor = calFactor
             }
+            if let transformString = restorationInfo?[DiagramViewController.restorationTransformKey] as? String {
+                let transform = NSCoder.cgAffineTransform(for: transformString)
+                imageView.transform = transform
+            }
         }
         // FIXME: Need to actually activate activeRegion stored from ladderView.
         // >>>>>>>>>>Issue is that after restart AV region may appear activated, but active region is actually set to A region.  So tapping on AV region does nothing.
         // Only use the restorationInfo once
         restorationInfo = nil
         showMainMenu()
-//        updateUndoRedoButtons()
+        updateUndoRedoButtons()
         centerContent()
         resetViews()
     }
@@ -268,7 +298,8 @@ final class DiagramViewController: UIViewController {
             DiagramViewController.restorationIsCalibratedKey: cursorView.isCalibrated(),
             DiagramViewController.restorationCalFactorKey: cursorView.calFactor,
             DiagramViewController.restorationFileNameKey: currentDocumentURL,
-            DiagramViewController.restorationDoRestorationKey: !viewClosed
+            DiagramViewController.restorationDoRestorationKey: !viewClosed,
+            DiagramViewController.restorationTransformKey: NSCoder.string(for: imageView.transform),
         ]
         activity.addUserInfoEntries(from: info)
     }
@@ -783,7 +814,6 @@ extension DiagramViewController {
         ladderView.showIntervals = UserDefaults.standard.bool(forKey: Preferences.defaultShowIntervalsKey)
         ladderView.showConductionTimes = UserDefaults.standard.bool(forKey: Preferences.defaultShowConductionTimesKey)
         ladderView.snapMarks = UserDefaults.standard.bool(forKey: Preferences.defaultSnapMarksKey)
-        setViewsNeedDisplay()
     }
 
     @objc func resolveFileConflicts() {

@@ -1438,11 +1438,11 @@ final class LadderView: ScaledView {
     @objc func deleteAllInRegion() {
         os_log("deleteAllInRegion() - LadderView", log: OSLog.debugging, type: .debug)
         if let activeRegion = activeRegion {
-            undoManager?.beginUndoGrouping()
+            currentDocument?.undoManager?.beginUndoGrouping()
             for mark in activeRegion.marks {
                 undoablyDeleteMark(mark: mark, region: activeRegion)
             }
-            undoManager?.endUndoGrouping()
+            currentDocument?.undoManager?.endUndoGrouping()
             hideCursorAndUnhighlightAllMarks()
             cursorViewDelegate.refresh()
             setNeedsDisplay()
@@ -1451,13 +1451,13 @@ final class LadderView: ScaledView {
 
     @objc func deleteAllInLadder() {
         os_log("deleteAllInLadder() - LadderView", log: OSLog.debugging, type: .debug)
-        undoManager?.beginUndoGrouping()
+        currentDocument?.undoManager?.beginUndoGrouping()
         for region in ladder.regions {
             for mark in region.marks {
                 undoablyDeleteMark(mark: mark, region: region)
             }
         }
-        undoManager?.endUndoGrouping()
+        currentDocument?.undoManager?.endUndoGrouping()
         hideCursorAndUnhighlightAllMarks()
         cursorViewDelegate.refresh()
         setNeedsDisplay()

@@ -22,7 +22,6 @@ class RootViewController: UIViewController {
     }()
     // These arrive from SceneDelegate and have to eventually get to the diagram vc.
     var restorationInfo: [AnyHashable: Any]?
-    var persistentID: String = ""
 
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -50,7 +49,6 @@ class RootViewController: UIViewController {
     func displayDocumentBrowser(inboundURL: URL? = nil, importIfNeeded: Bool = true) {
         if presentationContext == .launched {
             documentBrowser.restorationInfo = restorationInfo
-            documentBrowser.persistentID = persistentID
             documentBrowser.modalPresentationStyle = .fullScreen
             present(documentBrowser, animated: false)
         }

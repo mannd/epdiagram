@@ -54,22 +54,7 @@ extension DiagramViewController: DiagramViewControllerDelegate {
     func selectSampleDiagram(_ diagram: Diagram?) {
         os_log("selectSampleDiagram()", log: .action, type: .info)
         guard let diagram = diagram else { return }
-        setDiagram(diagram)
-    }
-
-    func setDiagram(_ diagram: Diagram) {
-        let oldDiagram = self.diagram
-        currentDocument?.undoManager?.registerUndo(withTarget: self, handler: { target in
-            target.setDiagram(oldDiagram)
-        })
-        NotificationCenter.default.post(name: .didUndoableAction, object: nil)
-        self.diagram = diagram
-        self.imageView.image = diagram.image
-        self.imageScrollView.zoomScale = 1.0
-        self.ladderView.diagram = diagram
-//        self.diagram.calibration.reset()
-        setTitle()
-        setViewsNeedDisplay()
+        undoablySetDiagram(diagram)
     }
 
     func setViewsNeedDisplay() {
@@ -79,15 +64,22 @@ extension DiagramViewController: DiagramViewControllerDelegate {
 
     // TODO: make undoable
     func rotateImage(degrees: CGFloat) {
-        newRotateImage(radians: degrees.degreesToRadians)
+//        newRotateImage(radians: degrees.degreesToRadians)
+        imageScrollView.resignFirstResponder()
+
     }
 
     @objc func resetImage() {
-        UIView.animate(withDuration: 0.5) {
-            self.imageView.transform = CGAffineTransform.identity
-            self.imageScrollView.zoomScale = 1.0
-            self.imageScrollView.contentOffset = CGPoint.zero
-        }
+//        setTransform(transform: CGAffineTransform.identity)
+//        UIView.animate(withDuration: 0.5) {
+//
+////            self.imageView.transform = CGAffineTransform.identity
+////            self.diagram.transform = CGAffineTransform.identity
+////            self.imageScrollView.zoomScale = 1.0
+////            self.imageScrollView.contentOffset = CGPoint.zero
+////            self.imageScrollView.contentInset = UIEdgeInsets(top: 0, left: self.leftMargin, bottom: 0, right: 0)
+//        }
+        imageScrollView.resignFirstResponder()
     }
 
     // See https://stackoverflow.com/questions/5017540/how-to-i-rotate-uiimageview-by-90-degrees-inside-a-uiscrollview-with-correct-ima
@@ -121,21 +113,24 @@ extension DiagramViewController: DiagramViewControllerDelegate {
         NotificationCenter.default.post(name: .didUndoableAction, object: nil)
         UIView.animate(withDuration: 0.4) {
             self.imageView.transform = transform
-            self.centerContent()
+            self.diagram.transform = transform
+            self.imageScrollView.sizeToFit()
+            self.imageScrollView.contentOffset = CGPoint.zero
+            self.imageScrollView.contentInset = UIEdgeInsets(top: 0, left: self.leftMargin, bottom: 0, right: 0)
+//            self.centerContent()
         }
     }
 
     func centerContent() {
-        return
-        var top: CGFloat = 0
-        var left: CGFloat = 0
-        if (self.imageScrollView.contentSize.width < self.imageScrollView.bounds.size.width) {
-            left = (self.imageScrollView.bounds.size.width - self.imageScrollView.contentSize.width) * 0.5
-        }
-        if (self.imageScrollView.contentSize.height < self.imageScrollView.bounds.size.height) {
-            top = (self.imageScrollView.bounds.size.height-self.imageScrollView.contentSize.height) * 0.5
-        }
-        self.imageScrollView.contentInset = UIEdgeInsets(top: top, left: left + (leftMargin * imageScrollView.zoomScale), bottom: top, right: left)
+//        var top: CGFloat = 0
+//        var left: CGFloat = 0
+//        if (self.imageScrollView.contentSize.width < self.imageScrollView.bounds.size.width) {
+//            left = (self.imageScrollView.bounds.size.width - self.imageScrollView.contentSize.width) * 0.5
+//        }
+//        if (self.imageScrollView.contentSize.height < self.imageScrollView.bounds.size.height) {
+//            top = (self.imageScrollView.bounds.size.height-self.imageScrollView.contentSize.height) * 0.5
+//        }
+//        self.imageScrollView.contentInset = UIEdgeInsets(top: top, left: left, bottom: top, right: left)
     }
 
 }
