@@ -104,6 +104,11 @@ final class DiagramViewController: UIViewController {
         cursorView.leftMargin = leftMargin
         imageScrollView.leftMargin = leftMargin
 
+        cursorView.calibration = diagram.calibration
+        ladderView.calibration = diagram.calibration
+        ladderView.ladder = diagram.ladder
+        imageView.image = diagram.image
+
         imageScrollView.delegate = self
 
         // Distinguish the two views using slightly different background colors.
@@ -116,8 +121,6 @@ final class DiagramViewController: UIViewController {
         imageScrollView.minimumZoomScale = minZoom
         imageScrollView.diagramViewControllerDelegate = self
 
-        // Pass diagram to views.
-        setDiagram(diagram)
 
         // Get defaults and apply them to views.
         updatePreferences()
@@ -152,29 +155,22 @@ final class DiagramViewController: UIViewController {
 
     }
 
-    func undoablySetDiagram(_ diagram: Diagram) {
-        print("****undoablySetDiagram")
-//        let oldDiagram = self.diagram
-        currentDocument?.undoManager.registerUndo(withTarget: self, handler: { target in
-            target.undoablySetDiagram(target.diagram)
-        })
-        NotificationCenter.default.post(name: .didUndoableAction, object: nil)
-        setDiagram(diagram)
-    }
-
-    func setDiagram(_ diagram: Diagram) {
+    // FIXME: This is not undoable.
+    func setupDiagram(_ diagram: Diagram) {
         print("****setDiagram******")
-//        self.diagram = diagram
-        ladderView.diagram = diagram
-        cursorView.diagram = diagram
-        imageView.image = diagram.image
+        currentDocument?.undoManager.beginUndoGrouping()
+        self.diagram.calibration = diagram.calibration
+        self.diagram.ladder = diagram.ladder
+        setDiagramImage(diagram.image)
+        setLadder(ladder: diagram.ladder)
+//        imageView.image = diagram.image
 //        imageView.transform = diagram.transform
         imageScrollView.contentInset = UIEdgeInsets(top: 0, left: leftMargin, bottom: 0, right: 0)
-
-        ladderView.ladder = diagram.ladder
+//        ladderView.ladder = diagram.ladder
         hideCursorAndUnhighlightAllMarks()
         setTitle()
         setViewsNeedDisplay()
+        currentDocument?.undoManager.endUndoGrouping()
     }
 
     @IBAction func doImageScrollViewLongPress(sender: UILongPressGestureRecognizer) {
@@ -228,6 +224,7 @@ final class DiagramViewController: UIViewController {
         os_log("viewDidAppear() - ViewController", log: OSLog.viewCycle, type: .info)
         super.viewDidAppear(animated)
         // Need to set this here, after view draw, or Mac malpositions cursor at start of app.
+        imageScrollView.contentInset = UIEdgeInsets(top: 0, left: leftMargin, bottom: 0, right: 0)
         ladderView.unhighlightAllMarks()
         self.userActivity = self.view.window?.windowScene?.userActivity
         // See https://github.com/mattneub/Programming-iOS-Book-Examples/blob/master/bk2ch06p357StateSaveAndRestoreWithNSUserActivity/ch19p626pageController/SceneDelegate.swift

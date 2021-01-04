@@ -14,8 +14,7 @@ final class CursorView: ScaledView {
     private let alphaValue: CGFloat = 0.8
     private let accuracy: CGFloat = 20 // How close a tap has to be to a cursor in unscaled view to register.
 
-    var diagram: Diagram?
-
+    var calibration: Calibration?
     // Parameters that will eventually be preferences.
     var lineWidth: CGFloat = 1
     var color: UIColor = UIColor.systemBlue
@@ -33,10 +32,10 @@ final class CursorView: ScaledView {
 
     var calFactor: CGFloat {
         get {
-            return diagram?.calibration.originalCalFactor ?? 1.0
+            return calibration?.originalCalFactor ?? 1.0
         }
         set(value) {
-            guard let calibration = diagram?.calibration else { return }
+            guard let calibration = calibration else { return }
             calibration.originalCalFactor = value
         }
     }
@@ -353,7 +352,7 @@ final class CursorView: ScaledView {
     }
 
     func setCalibration(zoom: CGFloat) {
-        guard let calibration = diagram?.calibration else { return }
+        guard let calibration = calibration else { return }
         calibration.set(zoom: zoom, calFactor: Calibration.standardInterval / caliper.value)
         calibration.isCalibrated = true
         ladderViewDelegate.refresh()
@@ -418,15 +417,15 @@ extension CursorView: CursorViewDelegate {
     }
 
     func isCalibrated() -> Bool {
-        return diagram?.calibration.isCalibrated ?? false
+        return calibration?.isCalibrated ?? false
     }
 
     func setIsCalibrated(_ value: Bool) {
-        diagram?.calibration.isCalibrated = value
+        calibration?.isCalibrated = value
     }
 
     func markMeasurement(segment: Segment) -> CGFloat {
-        guard let calibration = diagram?.calibration else { return 0 }
+        guard let calibration = calibration else { return 0 }
         return abs(segment.proximal.x - segment.distal.x) * calibration.currentCalFactor
     }
 

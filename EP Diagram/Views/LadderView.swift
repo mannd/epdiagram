@@ -65,12 +65,13 @@ final class LadderView: ScaledView {
         }
     }
 
-    var diagram: Diagram? {
-        didSet {
-            ladder = diagram?.ladder ?? Ladder.defaultLadder()
-            print("****ladderView calibration set")
-        }
-    }
+//    var diagram: Diagram? {
+//        didSet {
+//            ladder = diagram?.ladder ?? Ladder.defaultLadder()
+//            print("****ladderView calibration set")
+//        }
+//    }
+    var calibration: Calibration?
     var ladder: Ladder = Ladder.defaultLadder()
 
 
@@ -1193,7 +1194,7 @@ final class LadderView: ScaledView {
 
     fileprivate func drawIntervals(region: Region, context: CGContext) {
         guard showIntervals else { return }
-        guard let calibration = diagram?.calibration, calibration.isCalibrated else { return }
+        guard let calibration = calibration, calibration.isCalibrated else { return }
         let marks = region.marks
         let intervals = Interval.createIntervals(marks: marks)
         for interval in intervals {
@@ -1290,7 +1291,7 @@ final class LadderView: ScaledView {
     }
 
     func drawConductionTime(forMark mark: Mark, segment: Segment, context: CGContext) {
-        guard let calibration = diagram?.calibration, calibration.isCalibrated, showConductionTimes, mark.showText else { return }
+        guard let calibration = calibration, calibration.isCalibrated, showConductionTimes, mark.showText else { return }
         let value = lround(Double(cursorViewDelegate.markMeasurement(segment: segment)))
         let text = "\(value)"
         var origin = segment.midpoint

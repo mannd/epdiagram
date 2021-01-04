@@ -30,7 +30,7 @@ extension DiagramViewController: DiagramViewControllerDelegate {
         }
     }
 
-    private func setLadder(ladder: Ladder) {
+    func setLadder(ladder: Ladder) {
         let oldLadder = diagram.ladder
         currentDocument?.undoManager.registerUndo(withTarget: self, handler: { target in
             target.setLadder(ladder: oldLadder)
@@ -54,7 +54,8 @@ extension DiagramViewController: DiagramViewControllerDelegate {
     func selectSampleDiagram(_ diagram: Diagram?) {
         os_log("selectSampleDiagram()", log: .action, type: .info)
         guard let diagram = diagram else { return }
-        undoablySetDiagram(diagram)
+        // FIXME: This is not undoable
+        setupDiagram(diagram)
     }
 
     func setViewsNeedDisplay() {
