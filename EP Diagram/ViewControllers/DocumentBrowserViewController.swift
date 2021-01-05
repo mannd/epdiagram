@@ -70,16 +70,33 @@ extension DocumentBrowserViewController: DiagramEditorDelegate {
         diagramViewController?.restorationIdentifier = restorationIdentifier
         diagramViewController?.currentDocument = document
         controller.modalPresentationStyle = .fullScreen
-        present(controller, animated: true)
+        let topVC = topMostController()
+        topVC.present(controller, animated: true)
     }
 
+    // See https://developer.apple.com/forums/thread/114337 and https://stackoverflow.com/questions/57134259/how-to-resolve-keywindow-was-deprecated-in-ios-13-0
+    func topMostController() -> UIViewController {
+        //        return UIApplication.shared.windows.first(where: \.isKeyWindow)!.rootViewController!
+        var topController: UIViewController = keyWindow().rootViewController!
+        while (topController.presentedViewController != nil) {
+            topController = topController.presentedViewController!
+        }
+        return topController
+    }
+
+    func keyWindow() -> UIWindow {
+        return UIApplication.shared.windows.first(where: \.isKeyWindow)!
+
+    }
+
+
+    // FIXME: editing document not set right on mac when closing opened (not new) document.
     func closeDiagramController(completion: (()->Void)? = nil) {
         let compositeClosure = {
             self.closeCurrentDocument()
             self.editingDocument = false
             completion?()
         }
-
         if editingDocument {
             dismiss(animated: true) {
                 compositeClosure()

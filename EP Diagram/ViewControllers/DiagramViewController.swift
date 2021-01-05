@@ -132,9 +132,12 @@ final class DiagramViewController: UIViewController {
 
         // Navigation buttons
         // Hamburger menu is replaced by main menu on Mac.
-        if !isRunningOnMac() {
-            navigationItem.setLeftBarButton(UIBarButtonItem(image: UIImage(named: "hamburger"), style: .plain, target: self, action: #selector(toggleHamburgerMenu)), animated: true)
-        }
+        // TODO: Replace hamburger menu with real menu on Mac.
+//        if !isRunningOnMac() {
+//            navigationItem.setLeftBarButton(UIBarButtonItem(image: UIImage(named: "hamburger"), style: .plain, target: self, action: #selector(toggleHamburgerMenu)), animated: true)
+//        }
+        navigationItem.setLeftBarButton(UIBarButtonItem(image: UIImage(named: "hamburger"), style: .plain, target: self, action: #selector(toggleHamburgerMenu)), animated: true)
+
         navigationItem.setRightBarButton(UIBarButtonItem(barButtonSystemItem: .close, target: self, action: #selector(closeAction)), animated: true)
        
         // Set up touches
