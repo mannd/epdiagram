@@ -156,13 +156,14 @@ final class DiagramViewController: UIViewController {
     }
 
     // FIXME: This is not undoable.
+    // Make each component being set undoable, group them together.
     func setupDiagram(_ diagram: Diagram) {
         print("****setDiagram******")
         currentDocument?.undoManager.beginUndoGrouping()
         self.diagram.calibration = diagram.calibration
         self.diagram.ladder = diagram.ladder
         setDiagramImage(diagram.image)
-        setLadder(ladder: diagram.ladder)
+//        setLadder(ladder: diagram.ladder)
 //        imageView.image = diagram.image
 //        imageView.transform = diagram.transform
         imageScrollView.contentInset = UIEdgeInsets(top: 0, left: leftMargin, bottom: 0, right: 0)
