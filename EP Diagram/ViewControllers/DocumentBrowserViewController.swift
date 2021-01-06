@@ -98,7 +98,10 @@ extension DocumentBrowserViewController: DiagramEditorDelegate {
             completion?()
         }
         if editingDocument {
-            dismiss(animated: true) {
+            print("****dismiss called")
+            self.present(self, animated: true, completion: compositeClosure)
+            let topVC = topMostController()
+            topVC.dismiss(animated: true) {
                 compositeClosure()
             }
         } else {

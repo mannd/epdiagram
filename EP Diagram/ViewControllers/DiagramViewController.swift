@@ -394,6 +394,7 @@ final class DiagramViewController: UIViewController {
         viewClosed = true
         view.endEditing(true)
         diagramEditorDelegate?.diagramEditorDidFinishEditing(self, diagram: diagram)
+//        dismiss(animated: true, completion: nil)
     }
 
     // FIXME: Calibrate holds study with no image and zooming, but doesn't work with image!
