@@ -26,19 +26,20 @@ extension DiagramViewController: DiagramViewControllerDelegate {
 
         if let ladderTemplate = ladderTemplate {
             let ladder = Ladder(template: ladderTemplate)
-            setLadder(ladder: ladder)
+            setLadder(ladder)
         }
     }
 
-    func setLadder(ladder: Ladder) {
+    @objc func setLadder(_ ladder: Ladder) {
         let oldLadder = diagram.ladder
-        currentDocument?.undoManager.registerUndo(withTarget: self, handler: { target in
-            target.setLadder(ladder: oldLadder)
-        })
+        print("oldLadder = \(oldLadder)")
+        currentDocument?.undoManager.registerUndo(withTarget: self, selector: #selector(setLadder), object: oldLadder)
         NotificationCenter.default.post(name: .didUndoableAction, object: nil)
+        print("newLadder = \(ladder)")
         diagram.ladder = ladder
         ladderView.ladder = ladder
         setViewsNeedDisplay()
+//        updateUndoRedoButtons()
     }
 
     func saveTemplates(_ templates: [LadderTemplate]) {

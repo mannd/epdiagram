@@ -8,11 +8,11 @@
 
 import UIKit
 
-enum NavigationContext {
-  case launched
-  case browsing
-  case editing
-}
+//enum NavigationContext {
+//  case launched
+//  case browsing
+//  case editing
+//}
 
 class RootViewController: UIViewController {
 

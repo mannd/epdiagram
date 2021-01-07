@@ -13,54 +13,36 @@ class DocumentBrowserDelegate: NSObject, UIDocumentBrowserViewControllerDelegate
 
     func documentBrowser(_ controller: UIDocumentBrowserViewController, didRequestDocumentCreationWithHandler importHandler: @escaping (URL?, UIDocumentBrowserViewController.ImportMode) -> Void) {
 
-        var documentName: String = ""
-        let alert = UIAlertController(title: "Name New Diagram", message: "Pick a name for this diagram", preferredStyle: .alert)
-        // FIXME: This causes constraint warnings, but it appears to be an Apple bug.
-        // Only way around this would be to create a custom UIAlertController.
-        alert.addTextField { textField in
-            documentName = self.getDocumentName()
-            textField.placeholder = L("Document name")
-            textField.text = documentName
-        }
-        alert.addAction(UIAlertAction(title: L("Cancel"), style: .cancel) {_ in
-            importHandler(nil, .none)
-            return
-        })
-        alert.addAction(UIAlertAction(title: L("OK"), style: .default) {_ in
-            if let name = alert.textFields?.first?.text {
-                documentName = name
+        let documentName = getDocumentName()
+        let cacheDocumentURL = self.createNewDocumentURL(name: documentName)
+        let newDocument = DiagramDocument(fileURL: cacheDocumentURL)
+        newDocument.save(to: cacheDocumentURL, for: .forCreating) { saveSuccess in
+            guard saveSuccess else {
+                importHandler(nil, .none)
+                return
             }
-            let cacheDocumentURL = self.createNewDocumentURL(name: documentName)
-            let newDocument = DiagramDocument(fileURL: cacheDocumentURL)
-            newDocument.save(to: cacheDocumentURL, for: .forCreating) { saveSuccess in
-                guard saveSuccess else {
+            newDocument.close { closeSuccess in
+                guard closeSuccess else {
                     importHandler(nil, .none)
                     return
                 }
-                newDocument.close { closeSuccess in
-                    guard closeSuccess else {
-                        importHandler(nil, .none)
-                        return
-                    }
-                    importHandler(cacheDocumentURL, .move)
-                }
+                importHandler(cacheDocumentURL, .move)
             }
-        })
-        controller.present(alert, animated: true)
-  }
+        }
+    }
 
-  func documentBrowser(_ controller: UIDocumentBrowserViewController, didPickDocumentURLs documentURLs: [URL]) {
-    guard let pickedURL = documentURLs.first else { return }
-    presentationHandler?(pickedURL, nil)
-  }
+    func documentBrowser(_ controller: UIDocumentBrowserViewController, didPickDocumentURLs documentURLs: [URL]) {
+        guard let pickedURL = documentURLs.first else { return }
+        presentationHandler?(pickedURL, nil)
+    }
 
-  func documentBrowser(_ controller: UIDocumentBrowserViewController, didImportDocumentAt sourceURL: URL, toDestinationURL destinationURL: URL) {
-    presentationHandler?(destinationURL, nil)
-  }
+    func documentBrowser(_ controller: UIDocumentBrowserViewController, didImportDocumentAt sourceURL: URL, toDestinationURL destinationURL: URL) {
+        presentationHandler?(destinationURL, nil)
+    }
 
-  func documentBrowser(_ controller: UIDocumentBrowserViewController, failedToImportDocumentAt documentURL: URL, error: Error?) {
-    presentationHandler?(documentURL, error)
-  }
+    func documentBrowser(_ controller: UIDocumentBrowserViewController, failedToImportDocumentAt documentURL: URL, error: Error?) {
+        presentationHandler?(documentURL, error)
+    }
 
 }
 

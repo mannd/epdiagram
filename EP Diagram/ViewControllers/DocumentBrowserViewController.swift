@@ -9,8 +9,15 @@
 import UIKit
 import os.log
 
+enum NavigationContext {
+  case launched
+  case browsing
+  case editing
+}
+
 class DocumentBrowserViewController: UIDocumentBrowserViewController {
 
+    var presentationContest: NavigationContext = .launched
     var currentDocument: DiagramDocument?
     var editingDocument = false
     var browserDelegate = DocumentBrowserDelegate()
@@ -24,6 +31,26 @@ class DocumentBrowserViewController: UIDocumentBrowserViewController {
         delegate = browserDelegate
         view.tintColor = .green
         installDocumentBrowser()
+    }
+
+    override func viewDidAppear(_ animated: Bool) {
+        super.viewDidAppear(animated)
+        // Fail gently if cached file no longer exists.
+        if let lastDocumentURLPath = restorationInfo?[DiagramViewController.restorationFileNameKey] as? String,
+           !lastDocumentURLPath.isEmpty,
+           restorationInfo?[DiagramViewController.restorationDoRestorationKey] as? Bool ?? false  {
+            if let docURL = FileIO.getDocumentsURL() {
+                let fileURL = docURL.appendingPathComponent(lastDocumentURLPath)
+                if FileManager.default.fileExists(atPath: fileURL.path) {
+                    openDocument(url: fileURL)
+//                    openRemoteDocument(fileURL, importIfNeeded: true)
+                } else {
+//                    installDocumentBrowser()
+                }
+            }
+        } else {
+//            installDocumentBrowser()
+        }
     }
 
     func installDocumentBrowser() {
@@ -70,7 +97,7 @@ extension DocumentBrowserViewController: DiagramEditorDelegate {
         diagramViewController?.restorationIdentifier = restorationIdentifier
         diagramViewController?.currentDocument = document
         controller.modalPresentationStyle = .fullScreen
-        present(controller, animated: true)
+        self.present(controller, animated: true)
     }
 
     func closeDiagramController(completion: (()->Void)? = nil) {
@@ -79,9 +106,8 @@ extension DocumentBrowserViewController: DiagramEditorDelegate {
             self.editingDocument = false
             completion?()
         }
-
         if editingDocument {
-            dismiss(animated: true) {
+            self.dismiss(animated: true) {
                 compositeClosure()
             }
         } else {

@@ -43,6 +43,7 @@
 		8E5918BC24AEAB0B00D8ABA3 /* Caliper.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8E5918BB24AEAB0B00D8ABA3 /* Caliper.swift */; };
 		8E5918BE24AEAFE100D8ABA3 /* CaliperTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8E5918BD24AEAFE100D8ABA3 /* CaliperTests.swift */; };
 		8E5D0ABD2464F2CD00FE78A2 /* RegionTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8E5D0ABC2464F2CD00FE78A2 /* RegionTests.swift */; };
+		8E61C3D725A6260D0064ADC1 /* Startup2.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 8E61C3D625A6260D0064ADC1 /* Startup2.storyboard */; };
 		8E6570FB24A99B8A001358F6 /* FileTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8E6570FA24A99B8A001358F6 /* FileTests.swift */; };
 		8E671D5224814BB700784EB7 /* LadderTemplatesEditor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8E671D5124814BB700784EB7 /* LadderTemplatesEditor.swift */; };
 		8E6A0298246DFB3700A10C9F /* LadderTemplateEditor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8E6A0297246DFB3700A10C9F /* LadderTemplateEditor.swift */; };
@@ -148,6 +149,7 @@
 		8E5918BB24AEAB0B00D8ABA3 /* Caliper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Caliper.swift; sourceTree = "<group>"; };
 		8E5918BD24AEAFE100D8ABA3 /* CaliperTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CaliperTests.swift; sourceTree = "<group>"; };
 		8E5D0ABC2464F2CD00FE78A2 /* RegionTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RegionTests.swift; sourceTree = "<group>"; };
+		8E61C3D625A6260D0064ADC1 /* Startup2.storyboard */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; path = Startup2.storyboard; sourceTree = "<group>"; };
 		8E6570FA24A99B8A001358F6 /* FileTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FileTests.swift; sourceTree = "<group>"; };
 		8E671D5124814BB700784EB7 /* LadderTemplatesEditor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LadderTemplatesEditor.swift; sourceTree = "<group>"; };
 		8E689C4F23B498A10042A3F1 /* EP Diagram.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = "EP Diagram.entitlements"; sourceTree = "<group>"; };
@@ -408,6 +410,7 @@
 				8E7D24C622779DBD005A1729 /* Main.storyboard */,
 				8E7D24CB22779DBF005A1729 /* LaunchScreen.storyboard */,
 				8E04C5CA2569947100946348 /* Startup.storyboard */,
+				8E61C3D625A6260D0064ADC1 /* Startup2.storyboard */,
 			);
 			path = Storyboards;
 			sourceTree = "<group>";
@@ -578,6 +581,7 @@
 				8E7D24CA22779DBF005A1729 /* Assets.xcassets in Resources */,
 				8E7D24C822779DBD005A1729 /* Main.storyboard in Resources */,
 				8E1276DB24D46C2000AC4B8F /* help.org in Resources */,
+				8E61C3D725A6260D0064ADC1 /* Startup2.storyboard in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
