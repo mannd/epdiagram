@@ -9,8 +9,15 @@
 import UIKit
 import os.log
 
+enum NavigationContext {
+  case launched
+  case browsing
+  case editing
+}
+
 class DocumentBrowserViewController: UIDocumentBrowserViewController {
 
+    var presentationContest: NavigationContext = .launched
     var currentDocument: DiagramDocument?
     var editingDocument = false
     var browserDelegate = DocumentBrowserDelegate()
@@ -23,7 +30,7 @@ class DocumentBrowserViewController: UIDocumentBrowserViewController {
         browserUserInterfaceStyle = .dark
         delegate = browserDelegate
         view.tintColor = .green
-//        installDocumentBrowser()
+        installDocumentBrowser()
     }
 
     override func viewDidAppear(_ animated: Bool) {
@@ -35,13 +42,14 @@ class DocumentBrowserViewController: UIDocumentBrowserViewController {
             if let docURL = FileIO.getDocumentsURL() {
                 let fileURL = docURL.appendingPathComponent(lastDocumentURLPath)
                 if FileManager.default.fileExists(atPath: fileURL.path) {
-                    openRemoteDocument(fileURL, importIfNeeded: true)
+                    openDocument(url: fileURL)
+//                    openRemoteDocument(fileURL, importIfNeeded: true)
                 } else {
-                    installDocumentBrowser()
+//                    installDocumentBrowser()
                 }
             }
         } else {
-            installDocumentBrowser()
+//            installDocumentBrowser()
         }
     }
 

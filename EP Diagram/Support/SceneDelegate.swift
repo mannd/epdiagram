@@ -21,9 +21,9 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         scene.title = L("EP Diagram")
         scene.userActivity = session.stateRestorationActivity ?? NSUserActivity(activityType: "org.epstudios.epdiagram.mainActivity")
         // FIXME: temporary change
-//        if let rvc = window?.rootViewController as? DocumentBrowserViewController {
-//            rvc.restorationInfo = scene.userActivity?.userInfo
-//        }
+        if let rvc = window?.rootViewController as? DocumentBrowserViewController {
+            rvc.restorationInfo = scene.userActivity?.userInfo
+        }
     }
 
     func stateRestorationActivity(for scene: UIScene) -> NSUserActivity? {
@@ -33,7 +33,7 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
 
     func scene(_ scene: UIScene, openURLContexts URLContexts: Set<UIOpenURLContext>) {
         os_log("scene(_:openURLContexts), %s", log: .lifeCycle, type: .info, scene.session.persistentIdentifier)
-        guard let rootViewController = self.window?.rootViewController as? RootViewController else { return }
+        guard let rootViewController = self.window?.rootViewController as? DocumentBrowserViewController else { return }
         for context in URLContexts {
             let url = context.url
             if url.isFileURL {
