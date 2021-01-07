@@ -301,6 +301,7 @@ final class DiagramViewController: UIViewController {
             DiagramViewController.restorationCalFactorKey: cursorView.calFactor,
             DiagramViewController.restorationFileNameKey: currentDocumentURL,
             DiagramViewController.restorationDoRestorationKey: !viewClosed,
+            HelpViewController.inHelpKey: false,
             DiagramViewController.restorationTransformKey: NSCoder.string(for: imageView.transform),
         ]
         activity.addUserInfoEntries(from: info)
