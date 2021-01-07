@@ -41,7 +41,7 @@ enum RelativeRegion {
 // MARK: - classes
 
 // A Ladder is simply a collection of Regions in top down order.
-class Ladder: Codable {
+class Ladder: NSObject, Codable {
 
     // MARK: constants
     private(set) var id = UUID()
@@ -385,10 +385,4 @@ class Ladder: Codable {
     static func defaultLadder() -> Ladder {
         return Ladder(template: LadderTemplate.defaultTemplate())
     }
-}
-
-// MARK: - extensions
-
-extension Ladder: CustomDebugStringConvertible {
-    var debugDescription: String { "Ladder ID " + id.debugDescription}
 }

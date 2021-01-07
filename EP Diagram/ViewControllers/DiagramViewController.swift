@@ -152,10 +152,11 @@ final class DiagramViewController: UIViewController {
 //        imageScrollView.addInteraction(imageViewInteraction)
         let longPress = UILongPressGestureRecognizer(target: self, action: #selector(self.doImageScrollViewLongPress))
         self.imageScrollView.addGestureRecognizer(longPress)
+    }
 
-        // Notifications
+    override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
         setupNotifications()
-
     }
 
     // FIXME: This is not undoable.
@@ -791,6 +792,8 @@ extension DiagramViewController {
     }
 
     func updateUndoRedoButtons() {
+//        undoButton.isEnabled = true
+//        redoButton.isEnabled = true
         // DispatchQueue here forces UI to finish up its tasks before performing below on the main thread.
         DispatchQueue.main.async {
             self.undoButton.isEnabled = self.currentDocument?.undoManager?.canUndo ?? false

@@ -21,7 +21,7 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         scene.title = L("EP Diagram")
         scene.userActivity = session.stateRestorationActivity ?? NSUserActivity(activityType: "org.epstudios.epdiagram.mainActivity")
         // FIXME: temporary change
-//        if let rvc = window?.rootViewController as? RootViewController {
+//        if let rvc = window?.rootViewController as? DocumentBrowserViewController {
 //            rvc.restorationInfo = scene.userActivity?.userInfo
 //        }
     }
