@@ -583,7 +583,8 @@ final class DiagramViewController: UIViewController {
         if let page = page {
             let sourceRect: CGRect = page.getBoxRect(.mediaBox)
             // FIXME: scale factor was originally 5, but everything too big on reopening image.
-            let scaleFactor: CGFloat = 1.0
+            // FIXME: However, scaleFactor of 1.0 is too blurry.  Need to scale down pdfs on opening file.
+            let scaleFactor: CGFloat = 5.0
             //                let sourceRectSize = CGSize(width: sourceRect.size.width, height: sourceRect.size.height)
             let sourceRectSize = sourceRect.size
             UIGraphicsBeginImageContextWithOptions(sourceRectSize, false, scaleFactor)
@@ -886,8 +887,7 @@ extension DiagramViewController {
 
 extension DiagramViewController: UIDropInteractionDelegate {
     func dropInteraction(_ interaction: UIDropInteraction, canHandle session: UIDropSession) -> Bool {
-        let typeIdentifiers = [kUTTypeImage as String]
-//        let typeIdentifiers = [UTType.image.identifier, UTType.pdf.identifier]
+        let typeIdentifiers = [UTType.image.identifier]
         return session.hasItemsConforming(toTypeIdentifiers: typeIdentifiers ) && session.items.count == 1
     }
 
@@ -896,13 +896,8 @@ extension DiagramViewController: UIDropInteractionDelegate {
 
         let operation: UIDropOperation
 
-        if imageView.frame.contains(dropLocation) {
-            /*
-                 If you add in-app drag-and-drop support for the .move operation,
-                 you must write code to coordinate between the drag interaction
-                 delegate and the drop interaction delegate.
-            */
-            operation = session.localDragSession == nil ? .copy : .move
+        if imageScrollView.frame.contains(dropLocation) {
+            operation =  .copy
         } else {
             // Do not allow dropping outside of the image view.
             operation = .cancel
@@ -914,19 +909,12 @@ extension DiagramViewController: UIDropInteractionDelegate {
     func dropInteraction(_ interaction: UIDropInteraction, performDrop session: UIDropSession) {
         // Consume drag items (in this example, of type UIImage).
         session.loadObjects(ofClass: UIImage.self) { imageItems in
-            let images = imageItems as! [UIImage]
-
-            /*
-                 If you do not employ the loadObjects(ofClass:completion:) convenience
-                 method of the UIDropSession class, which automatically employs
-                 the main thread, explicitly dispatch UI work to the main thread.
-                 For example, you can use `DispatchQueue.main.async` method.
-            */
-            self.setDiagramImage(images.first)
+            print("load image")
+            if let images = imageItems as? [UIImage] {
+                self.setDiagramImage(images.first)
+                return
+            }
         }
-//        session.loadObjects(ofClass: URL.self) { items in
-//            print("url objects")
-//        }
     }
 }
 
