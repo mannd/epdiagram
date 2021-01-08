@@ -886,7 +886,8 @@ extension DiagramViewController {
 
 extension DiagramViewController: UIDropInteractionDelegate {
     func dropInteraction(_ interaction: UIDropInteraction, canHandle session: UIDropSession) -> Bool {
-        let typeIdentifiers = [UTType.image.identifier]
+        let typeIdentifiers = [kUTTypeImage as String]
+//        let typeIdentifiers = [UTType.image.identifier, UTType.pdf.identifier]
         return session.hasItemsConforming(toTypeIdentifiers: typeIdentifiers ) && session.items.count == 1
     }
 
@@ -921,9 +922,11 @@ extension DiagramViewController: UIDropInteractionDelegate {
                  the main thread, explicitly dispatch UI work to the main thread.
                  For example, you can use `DispatchQueue.main.async` method.
             */
-            self .setDiagramImage(images.first)
-//            self.imageView.image = images.first
+            self.setDiagramImage(images.first)
         }
+//        session.loadObjects(ofClass: URL.self) { items in
+//            print("url objects")
+//        }
     }
 }
 
