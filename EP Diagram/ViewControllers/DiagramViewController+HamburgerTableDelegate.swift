@@ -7,6 +7,7 @@
 //
 
 import UIKit
+import UniformTypeIdentifiers
 import os.log
 
 protocol HamburgerTableDelegate: class {
@@ -69,7 +70,7 @@ class ImageSaver: NSObject {
 
 // MARK: -
 
-extension DiagramViewController: HamburgerTableDelegate, UIImagePickerControllerDelegate & UINavigationControllerDelegate {
+extension DiagramViewController: HamburgerTableDelegate, UIImagePickerControllerDelegate & UINavigationControllerDelegate, UIDocumentPickerDelegate {
     
     var imageIsLocked: Bool {
         get { _imageIsLocked }
@@ -102,7 +103,8 @@ extension DiagramViewController: HamburgerTableDelegate, UIImagePickerController
 
     func selectImage() {
         os_log("selectImage()", log: OSLog.action, type: .info)
-        handleSelectImage()
+//        handleSelectImage()
+        chooseSource()
     }
 
     func selectLadder() {
@@ -259,6 +261,36 @@ extension DiagramViewController: HamburgerTableDelegate, UIImagePickerController
         }
         imagePicker.sourceType = .camera
         present(imagePicker, animated: true)
+    }
+
+    private func chooseSource() {
+        let chooser = UIAlertController(title: NSLocalizedString("Image Source", comment: ""), message:nil, preferredStyle: .actionSheet)
+        chooser.modalPresentationStyle = .popover
+        chooser.popoverPresentationController?.barButtonItem = navigationItem.leftBarButtonItem
+        chooser.addAction(UIAlertAction(title: NSLocalizedString("Photos", comment: ""), style: .default, handler: { _ in
+            self.handleSelectImage()
+        }))
+        chooser.addAction(UIAlertAction(title: NSLocalizedString("Files", comment: ""), style: .default, handler: { _ in
+            self.handleSelectFile()
+        }))
+        present(chooser, animated: true, completion: nil)
+    }
+
+    private func handleSelectFile() {
+        let supportedTypes: [UTType] = [UTType.image, UTType.pdf]
+        let documentPicker = UIDocumentPickerViewController(forOpeningContentTypes: supportedTypes, asCopy: true)
+        documentPicker.delegate = self
+
+        // Set the initial directory.
+        documentPicker.directoryURL = FileIO.getDocumentsURL()
+
+        // Present the document picker.
+        present(documentPicker, animated: true, completion: nil)
+    }
+
+    func documentPicker(_ controller: UIDocumentPickerViewController, didPickDocumentsAt urls: [URL]) {
+        print("urls = \(urls)")
+        self.openURL(url: urls[0])
     }
 
     private func handleSelectImage() {

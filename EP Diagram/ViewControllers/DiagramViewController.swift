@@ -8,6 +8,7 @@
 
 import UIKit
 import SwiftUI
+import UniformTypeIdentifiers
 import os.log
 
 final class DiagramViewController: UIViewController {
@@ -885,7 +886,8 @@ extension DiagramViewController {
 
 extension DiagramViewController: UIDropInteractionDelegate {
     func dropInteraction(_ interaction: UIDropInteraction, canHandle session: UIDropSession) -> Bool {
-        return session.hasItemsConforming(toTypeIdentifiers: [kUTTypeImage as String]) && session.items.count == 1
+        let typeIdentifiers = [UTType.image.identifier]
+        return session.hasItemsConforming(toTypeIdentifiers: typeIdentifiers ) && session.items.count == 1
     }
 
     func dropInteraction(_ interaction: UIDropInteraction, sessionDidUpdate session: UIDropSession) -> UIDropProposal {
