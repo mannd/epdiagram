@@ -20,9 +20,12 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         guard let scene = (scene as? UIWindowScene) else { return }
         scene.title = L("EP Diagram")
         scene.userActivity = session.stateRestorationActivity ?? NSUserActivity(activityType: "org.epstudios.epdiagram.mainActivity")
+        self.scene(scene, openURLContexts: connectionOptions.urlContexts)
+
+
         // FIXME: temporary change
-        if let rvc = window?.rootViewController as? DocumentBrowserViewController {
-            rvc.restorationInfo = scene.userActivity?.userInfo
+        if let documentBrowserViewController = window?.rootViewController as? DocumentBrowserViewController {
+            documentBrowserViewController.restorationInfo = scene.userActivity?.userInfo
         }
     }
 
@@ -33,11 +36,11 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
 
     func scene(_ scene: UIScene, openURLContexts URLContexts: Set<UIOpenURLContext>) {
         os_log("scene(_:openURLContexts), %s", log: .lifeCycle, type: .info, scene.session.persistentIdentifier)
-        guard let rootViewController = self.window?.rootViewController as? DocumentBrowserViewController else { return }
+        guard let documentBrowserViewController = self.window?.rootViewController as? DocumentBrowserViewController else { return }
         for context in URLContexts {
             let url = context.url
             if url.isFileURL {
-                rootViewController.openRemoteDocument(url, importIfNeeded: true)
+                documentBrowserViewController.externalURL = url
             }
         }
     }

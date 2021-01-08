@@ -23,6 +23,8 @@ class DocumentBrowserViewController: UIDocumentBrowserViewController {
     var browserDelegate = DocumentBrowserDelegate()
     var restorationInfo: [AnyHashable: Any]?
 
+    var externalURL: URL?
+
     override func viewDidLoad() {
         super.viewDidLoad()
         allowsDocumentCreation = true
@@ -35,6 +37,12 @@ class DocumentBrowserViewController: UIDocumentBrowserViewController {
 
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
+        if let externalURL = externalURL {
+            if FileManager.default.fileExists(atPath: externalURL.path) {
+                openDocument(url: externalURL)
+                return
+            }
+        }
         // Fail gently if cached file no longer exists.
         if let lastDocumentURLPath = restorationInfo?[DiagramViewController.restorationFileNameKey] as? String,
            !lastDocumentURLPath.isEmpty,
@@ -43,13 +51,8 @@ class DocumentBrowserViewController: UIDocumentBrowserViewController {
                 let fileURL = docURL.appendingPathComponent(lastDocumentURLPath)
                 if FileManager.default.fileExists(atPath: fileURL.path) {
                     openDocument(url: fileURL)
-//                    openRemoteDocument(fileURL, importIfNeeded: true)
-                } else {
-//                    installDocumentBrowser()
                 }
             }
-        } else {
-//            installDocumentBrowser()
         }
     }
 
