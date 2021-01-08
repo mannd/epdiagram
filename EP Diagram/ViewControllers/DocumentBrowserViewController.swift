@@ -118,6 +118,7 @@ extension DocumentBrowserViewController: DiagramEditorDelegate {
         }
     }
 
+    // FIXME: on mac need to
     private func closeCurrentDocument() {
         currentDocument?.close()
         currentDocument = nil

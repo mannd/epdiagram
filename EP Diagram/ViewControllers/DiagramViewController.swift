@@ -121,6 +121,9 @@ final class DiagramViewController: UIViewController {
         imageScrollView.minimumZoomScale = minZoom
         imageScrollView.diagramViewControllerDelegate = self
 
+        let dropInteraction = UIDropInteraction(delegate: self)
+        view.addInteraction(dropInteraction)
+        imageView.isUserInteractionEnabled = true
 
         // Get defaults and apply them to views.
         updatePreferences()
@@ -878,6 +881,48 @@ extension DiagramViewController {
 //        }
 //    }
 
+}
+
+extension DiagramViewController: UIDropInteractionDelegate {
+    func dropInteraction(_ interaction: UIDropInteraction, canHandle session: UIDropSession) -> Bool {
+        return session.hasItemsConforming(toTypeIdentifiers: [kUTTypeImage as String]) && session.items.count == 1
+    }
+
+    func dropInteraction(_ interaction: UIDropInteraction, sessionDidUpdate session: UIDropSession) -> UIDropProposal {
+        let dropLocation = session.location(in: view)
+
+        let operation: UIDropOperation
+
+        if imageView.frame.contains(dropLocation) {
+            /*
+                 If you add in-app drag-and-drop support for the .move operation,
+                 you must write code to coordinate between the drag interaction
+                 delegate and the drop interaction delegate.
+            */
+            operation = session.localDragSession == nil ? .copy : .move
+        } else {
+            // Do not allow dropping outside of the image view.
+            operation = .cancel
+        }
+
+        return UIDropProposal(operation: operation)
+    }
+
+    func dropInteraction(_ interaction: UIDropInteraction, performDrop session: UIDropSession) {
+        // Consume drag items (in this example, of type UIImage).
+        session.loadObjects(ofClass: UIImage.self) { imageItems in
+            let images = imageItems as! [UIImage]
+
+            /*
+                 If you do not employ the loadObjects(ofClass:completion:) convenience
+                 method of the UIDropSession class, which automatically employs
+                 the main thread, explicitly dispatch UI work to the main thread.
+                 For example, you can use `DispatchQueue.main.async` method.
+            */
+            self .setDiagramImage(images.first)
+//            self.imageView.image = images.first
+        }
+    }
 }
 
 extension DiagramViewController {
