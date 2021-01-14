@@ -20,6 +20,11 @@ struct Diagram: Codable {
             imageWrapper = ImageWrapper(image: newValue)
         }
     }
+    var imageIsUpscaled: Bool = false {
+        didSet {
+            print("************imageIsUpscaled = \(imageIsUpscaled)")
+        }
+    }
     var longDescription: String
     var ladder: Ladder
     var calibration: Calibration = Calibration()

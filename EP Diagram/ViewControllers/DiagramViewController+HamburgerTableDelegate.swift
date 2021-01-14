@@ -348,6 +348,31 @@ extension DiagramViewController: HamburgerTableDelegate, UIImagePickerController
         setViewsNeedDisplay()
     }
 
+    func scaleImageForImageView(_ image: UIImage?) -> UIImage? {
+        os_log("scaleImageForImageView", log: .action, type: .info)
+        guard let image = image else { return nil }
+        // Downscale upscaled images
+        if diagram.imageIsUpscaled {
+            print(">>>> downscaling image")
+            if let cgImage = image.cgImage {
+                return UIImage(cgImage: cgImage, scale: pdfScaleFactor, orientation: .up)
+            }
+        }
+        return image
+    }
+
+    //    - (UIImage *)scaleImageForImageView:(UIImage *)image {
+    //        EPSLog(@"scaleImageForImageView");
+    //        // Downscale upscaled images.
+    //        if (self.imageIsUpscaled) {
+    //            EPSLog(@">>>>>>Downscaling image");
+    //            CGImageRef imageRef = image.CGImage;
+    //            return [UIImage imageWithCGImage:(CGImageRef)imageRef scale:PDF_UPSCALE_FACTOR orientation:UIImageOrientationUp];
+    //        }
+    //        return image;
+    //    }
+
+
  
     // MARK: - Hamburger menu functions
 
@@ -393,7 +418,9 @@ extension DiagramViewController: HamburgerTableDelegate, UIImagePickerController
 
     func imagePickerController(_ picker: UIImagePickerController, didFinishPickingMediaWithInfo info: [UIImagePickerController.InfoKey : Any]) {
         let chosenImage = info[.editedImage] as? UIImage
-        setDiagramImage(chosenImage)
+        // Images from photos are never upscaled.
+        diagram.imageIsUpscaled = false
+        setDiagramImage(scaleImageForImageView(chosenImage))
         picker.dismiss(animated: true, completion: nil)
     }
 

@@ -78,6 +78,7 @@ final class DiagramViewController: UIViewController {
     let imagePicker: UIImagePickerController = UIImagePickerController()
     private let maxZoom: CGFloat = 7.0
     private let minZoom: CGFloat = 0.25
+    let pdfScaleFactor: CGFloat = 5.0
 
     override func viewDidLoad() {
         os_log("viewDidLoad() - ViewController", log: OSLog.viewCycle, type: .info)
@@ -108,7 +109,8 @@ final class DiagramViewController: UIViewController {
         cursorView.calibration = diagram.calibration
         ladderView.calibration = diagram.calibration
         ladderView.ladder = diagram.ladder
-        imageView.image = diagram.image
+
+        imageView.image = scaleImageForImageView(diagram.image)
 
         imageScrollView.delegate = self
 
@@ -166,11 +168,12 @@ final class DiagramViewController: UIViewController {
     // FIXME: This is not undoable.
     // Make each component being set undoable, group them together.
     func setupDiagram(_ diagram: Diagram) {
-        print("****setDiagram******")
+        print("****setupDiagram******")
         currentDocument?.undoManager.beginUndoGrouping()
         self.diagram.calibration = diagram.calibration
         self.diagram.ladder = diagram.ladder
-        setDiagramImage(diagram.image)
+
+        setDiagramImage(scaleImageForImageView(diagram.image))
 //        setLadder(ladder: diagram.ladder)
 //        imageView.image = diagram.image
 //        imageView.transform = diagram.transform
@@ -232,6 +235,9 @@ final class DiagramViewController: UIViewController {
     override func viewDidAppear(_ animated: Bool) {
         os_log("viewDidAppear() - ViewController", log: OSLog.viewCycle, type: .info)
         super.viewDidAppear(animated)
+
+
+
         // Need to set this here, after view draw, or Mac malpositions cursor at start of app.
         imageScrollView.contentInset = UIEdgeInsets(top: 0, left: leftMargin, bottom: 0, right: 0)
         ladderView.unhighlightAllMarks()
@@ -543,7 +549,8 @@ final class DiagramViewController: UIViewController {
         let ext = url.pathExtension.uppercased()
         if ext != "PDF" {
             // self.enablePageButtons = false
-            setDiagramImage(UIImage(contentsOfFile: url.path))
+            diagram.imageIsUpscaled = false
+            setDiagramImage(scaleImageForImageView(UIImage(contentsOfFile: url.path)))
         }
         else {
             // self.numberOfPages = 0
@@ -577,6 +584,26 @@ final class DiagramViewController: UIViewController {
         return document
     }
 
+    // FIXME: See this from EP Calipers:
+//    - (UIImage *)scaleImageForImageView:(UIImage *)image {
+//        EPSLog(@"scaleImageForImageView");
+//        // Downscale upscaled images.
+//        if (self.imageIsUpscaled) {
+//            EPSLog(@">>>>>>Downscaling image");
+//            CGImageRef imageRef = image.CGImage;
+//            return [UIImage imageWithCGImage:(CGImageRef)imageRef scale:PDF_UPSCALE_FACTOR orientation:UIImageOrientationUp];
+//        }
+//        return image;
+//    }
+
+    // and
+//    UIImage *image = UIGraphicsGetImageFromCurrentImageContext();
+//    // first scale as usual, but image still too large since scaled up when created for better quality
+//    image = [self scaleImageForImageView:image];
+//    // now correct for scale factor when creating image
+//    image = [UIImage imageWithCGImage:(CGImageRef)image.CGImage scale:scaleFactor orientation:UIImageOrientationUp];
+//    self.imageView.image = image;
+
     private func openPDFPage(_ documentRef: CGPDFDocument?, atPage pageNum: Int) {
         guard let documentRef = documentRef else { return }
         let page: CGPDFPage? = getPDFPage(documentRef, pageNumber: pageNum)
@@ -584,8 +611,7 @@ final class DiagramViewController: UIViewController {
             let sourceRect: CGRect = page.getBoxRect(.mediaBox)
             // FIXME: scale factor was originally 5, but everything too big on reopening image.
             // FIXME: However, scaleFactor of 1.0 is too blurry.  Need to scale down pdfs on opening file.
-            let scaleFactor: CGFloat = 5.0
-            //                let sourceRectSize = CGSize(width: sourceRect.size.width, height: sourceRect.size.height)
+            let scaleFactor: CGFloat = pdfScaleFactor
             let sourceRectSize = sourceRect.size
             UIGraphicsBeginImageContextWithOptions(sourceRectSize, false, scaleFactor)
             let currentContext = UIGraphicsGetCurrentContext()
@@ -596,8 +622,12 @@ final class DiagramViewController: UIViewController {
             currentContext?.scaleBy(x: 1.0, y: -1.0)
             currentContext?.drawPDFPage(page)
             let image: UIImage? = UIGraphicsGetImageFromCurrentImageContext()
-            if image != nil {
-                setDiagramImage(image)
+            let scaledImage = scaleImageForImageView(image)
+            // correct for scale factor
+            if let scaledImage = scaledImage, let cgImage = scaledImage.cgImage {
+                let rescaledImage = UIImage(cgImage: cgImage, scale: scaleFactor, orientation: .up)
+                setDiagramImage(rescaledImage)
+                diagram.imageIsUpscaled = true
             }
             UIGraphicsEndImageContext()
         }
