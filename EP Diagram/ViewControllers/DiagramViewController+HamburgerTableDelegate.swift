@@ -166,8 +166,10 @@ extension DiagramViewController: HamburgerTableDelegate, UIImagePickerController
         os_log("getDiagramInfo()", log: .action, type: .info)
         // TODO: If there are more fields, then include this and add SwiftUI view.
         // show dialog with diagram info here.
-        P("Name = \(diagram.name ?? "unnamed")")
-        P("Description = \(diagram.longDescription)")
+        // TODO: Option to edit diagram info?
+        // also consider killing this.  File app gives file info.
+        print("Name = \(diagram.name ?? "unnamed")")
+        print("Description = \(diagram.longDescription)")
     }
 
 
@@ -295,26 +297,7 @@ extension DiagramViewController: HamburgerTableDelegate, UIImagePickerController
 
     private func handleSelectImage() {
         os_log("handleSelectImage()", log: .action, type: .info)
-        if !UIImagePickerController.isSourceTypeAvailable(.photoLibrary) {
-            UserAlert.showMessage(
-                viewController: self,
-                title: L("Photo Library Not Available"),
-                message: L("Make sure you have enabled permission for EP Diagram to use the Photo Library in the Settings app."))
-            os_log("Photo library not available", log: .debugging, type: .debug)
-            return
-        }
-        // By default picker.mediaTypes == ["public.image"], i.e. videos aren't shown.  So no need to check UIImagePickerController.availableMediaTypes(for:) or set picker.mediaTypes.
-        imagePicker.delegate = self
-        imagePicker.sourceType = .photoLibrary
-        // TODO: Test editing on real devices (doesn't work on simulator).
-        // Must allow editing because edited image is used by UIImagePickerController delegate.
-        imagePicker.allowsEditing = true
-        // Need to use popover for iPads, according to docs, but .fullscreen seems to work too.
-        if UIDevice.current.userInterfaceIdiom == .pad {
-            imagePicker.modalPresentationStyle = .popover
-            imagePicker.popoverPresentationController?.barButtonItem = navigationItem.leftBarButtonItem
-        }
-        present(imagePicker, animated: true)
+        presentPhotosForImages()
     }
 
     func sampleDiagrams() {
@@ -342,7 +325,6 @@ extension DiagramViewController: HamburgerTableDelegate, UIImagePickerController
 //        imageView.transform = diagram.transform
         imageScrollView.zoomScale = 1.0
         imageScrollView.contentOffset = CGPoint.zero
-        centerContent()
         hideCursorAndUnhighlightAllMarks()
 //        diagram.calibration.reset()
         setViewsNeedDisplay()
@@ -427,5 +409,46 @@ extension DiagramViewController: HamburgerTableDelegate, UIImagePickerController
     func imagePickerControllerDidCancel(_ picker: UIImagePickerController) {
         picker.dismiss(animated: true, completion: nil)
     }
+
 }
 
+import PhotosUI
+
+extension DiagramViewController: PHPickerViewControllerDelegate {
+    func picker(_ picker: PHPickerViewController, didFinishPicking results: [PHPickerResult]) {
+        dismiss(animated: true)
+        if let itemProvider = results.first?.itemProvider {
+            if itemProvider.canLoadObject(ofClass: UIImage.self) {
+                itemProvider.loadObject(ofClass: UIImage.self) { [weak self] image, error in
+                    DispatchQueue.main.async {
+                        guard let self = self else { return }
+                        if let image = image as? UIImage {
+                            // Only PDFs are upscaled
+                            self.diagram.imageIsUpscaled = false
+                            self.setDiagramImage(image)
+                        } else {
+                            os_log("Error displaying image", log: .errors, type: .error)
+                            UserAlert.showMessage(viewController: self, title: L("Error Loading Image"), message: L("Selected image could not be loaded."))
+                        }
+                    }
+                }
+            } else {
+                os_log("Can't load item provider", log: .errors, type: .error)
+            }
+        }
+    }
+
+    func presentPhotosForImages() {
+        presentPhotosPicker(filter: .images)
+    }
+
+    func presentPhotosPicker(filter: PHPickerFilter) {
+        var configuration = PHPickerConfiguration()
+        configuration.filter = filter
+        // .selectionLimit defaults to 1, single selection
+
+        let picker = PHPickerViewController(configuration: configuration)
+        picker.delegate = self
+        present(picker, animated: true)
+    }
+}

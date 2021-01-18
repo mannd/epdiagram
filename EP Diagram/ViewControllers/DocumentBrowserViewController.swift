@@ -29,9 +29,9 @@ class DocumentBrowserViewController: UIDocumentBrowserViewController {
         super.viewDidLoad()
         allowsDocumentCreation = true
         localizedCreateDocumentActionTitle = L("Create New Diagram")
-        browserUserInterfaceStyle = .dark
+        browserUserInterfaceStyle = .light
         delegate = browserDelegate
-        view.tintColor = .green
+        view.tintColor = .systemBlue
         installDocumentBrowser()
     }
 

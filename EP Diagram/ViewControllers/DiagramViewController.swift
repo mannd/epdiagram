@@ -145,7 +145,7 @@ final class DiagramViewController: UIViewController {
         navigationItem.setLeftBarButton(UIBarButtonItem(image: UIImage(named: "hamburger"), style: .plain, target: self, action: #selector(toggleHamburgerMenu)), animated: true)
 
         let snapshotButton = UIBarButtonItem(image: UIImage(systemName: "photo.on.rectangle"), style: .plain, target: self, action: #selector(snapshotDiagram))
-        let closeButton = UIBarButtonItem(barButtonSystemItem: .close, target: self, action: #selector(closeAction))
+        let closeButton = UIBarButtonItem(image: UIImage(systemName: "xmark"), style: .done, target: self, action: #selector(closeAction))
         navigationItem.setRightBarButtonItems([closeButton, snapshotButton], animated: true)
        
         // Set up touches
@@ -170,22 +170,14 @@ final class DiagramViewController: UIViewController {
         setupNotifications()
     }
 
-    // FIXME: This is not undoable.
-    // Make each component being set undoable, group them together.
-    func setupDiagram(_ diagram: Diagram) {
-        print("****setupDiagram******")
+    func loadSampleDiagram(_ diagram: Diagram) {
         currentDocument?.undoManager.beginUndoGrouping()
+        // FIXME: make set calibration undoable...
         self.diagram.calibration = diagram.calibration
-        self.diagram.ladder = diagram.ladder
-
+        setLadder(diagram.ladder)
         setDiagramImage(scaleImageForImageView(diagram.image))
-//        setLadder(ladder: diagram.ladder)
-//        imageView.image = diagram.image
-//        imageView.transform = diagram.transform
         imageScrollView.contentInset = UIEdgeInsets(top: 0, left: leftMargin, bottom: 0, right: 0)
-//        ladderView.ladder = diagram.ladder
         hideCursorAndUnhighlightAllMarks()
-        setTitle()
         setViewsNeedDisplay()
         currentDocument?.undoManager.endUndoGrouping()
     }
@@ -198,6 +190,10 @@ final class DiagramViewController: UIViewController {
         let rotateMenuItem = UIMenuItem(title: L("Rotate"), action: #selector(rotateAction))
         let doneMenuItem = UIMenuItem(title: L("Done"), action: #selector(doneAction))
         let resetMenuItem = UIMenuItem(title: L("Reset"), action: #selector(resetImage))
+        let testMenu = UIMenuController.shared
+        let test1MenuItem = UIMenuItem(title: "test1", action: #selector(rotateAction))
+        let test2MenuItem = UIMenuItem(title: "test2", action: #selector(rotateAction))
+        testMenu.menuItems = [test1MenuItem, test2MenuItem]
         menu.menuItems = [rotateMenuItem, doneMenuItem, resetMenuItem]
         let location = sender.location(in: sender.view)
         let rect = CGRect(x: location.x, y: location.y , width: 0, height: 0)
@@ -278,13 +274,10 @@ final class DiagramViewController: UIViewController {
                 imageView.transform = transform
             }
         }
-        // FIXME: Need to actually activate activeRegion stored from ladderView.
-        // >>>>>>>>>>Issue is that after restart AV region may appear activated, but active region is actually set to A region.  So tapping on AV region does nothing.
         // Only use the restorationInfo once
         restorationInfo = nil
         showMainMenu()
         updateUndoRedoButtons()
-        centerContent()
         resetViews()
     }
 
