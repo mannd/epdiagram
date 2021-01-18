@@ -9,6 +9,7 @@
 import UIKit
 import SwiftUI
 import UniformTypeIdentifiers
+import Photos
 import os.log
 
 final class DiagramViewController: UIViewController {
@@ -416,6 +417,64 @@ final class DiagramViewController: UIViewController {
         diagramEditorDelegate?.diagramEditorDidFinishEditing(self, diagram: diagram)
 //        dismiss(animated: true, completion: nil)
     }
+
+    @objc func snapshotDiagram() {
+        checkPhotoLibraryStatus()
+    }
+
+    func handleSnapshotDiagram() {
+        let topRenderer = UIGraphicsImageRenderer(size: imageScrollView.bounds.size)
+        let originX = imageScrollView.bounds.minX - imageScrollView.contentOffset.x
+        let originY = imageScrollView.bounds.minY - imageScrollView.contentOffset.y
+        let bounds = CGRect(x: originX, y: originY, width: imageScrollView.bounds.width, height: imageScrollView.bounds.height)
+        let topImage = topRenderer.image { ctx in
+            imageScrollView.drawHierarchy(in: bounds, afterScreenUpdates: true)
+        }
+        let bottomRenderer = UIGraphicsImageRenderer(size: ladderView.bounds.size)
+        let bottomImage = bottomRenderer.image { ctx in
+            ladderView.drawHierarchy(in: ladderView.bounds, afterScreenUpdates: true)
+        }
+        let size = CGSize(width: ladderView.bounds.size.width, height: imageScrollView.bounds.size.height + ladderView.bounds.size.height)
+        UIGraphicsBeginImageContext(size)
+        let topRect = CGRect(x: 0, y: 0, width: ladderView.bounds.size.width, height: imageScrollView.bounds.size.height)
+        topImage.draw(in: topRect)
+        let bottomRect = CGRect(x: 0, y: imageScrollView.bounds.size.height, width: ladderView.bounds.size.width, height: ladderView.bounds.size.height)
+        bottomImage.draw(in: bottomRect)
+        let newImage = UIGraphicsGetImageFromCurrentImageContext()
+        UIGraphicsEndImageContext()
+        if let newImage = newImage {
+            let imageSaver = ImageSaver()
+            imageSaver.writeToPhotoAlbum(image: newImage, viewController: self)
+        }
+    }
+
+    func checkPhotoLibraryStatus() {
+        let status = PHPhotoLibrary.authorizationStatus()
+        switch status {
+        case .authorized:
+            os_log("Photo library status authorized.", log: .default, type: .default)
+            handleSnapshotDiagram()
+        case .denied:
+            os_log("Photo library status denied.", log: .default, type: .default)
+            UserAlert.showMessage(viewController: self, title: L("Photo Library Access Not Authorized"), message: L("Please authorize photo library access in the Settings app."))
+        case .restricted:
+            os_log("Photo library status restricted.", log: .default, type: .default)
+        case .limited:
+            os_log("Photo library status limited.", log: .default, type: .default)
+        case .notDetermined:
+            os_log("Photo library status not determined.", log: .default, type: .default)
+            PHPhotoLibrary.requestAuthorization { (status) in
+                if status == .authorized {
+                    DispatchQueue.main.async {
+                        self.handleSnapshotDiagram()
+                    }
+                }
+            }
+        @unknown default:
+            fatalError("Unknown checkPhotoLibaryStatus case")
+        }
+    }
+
 
     // FIXME: Calibrate holds study with no image and zooming, but doesn't work with image!
     @objc func calibrate() {

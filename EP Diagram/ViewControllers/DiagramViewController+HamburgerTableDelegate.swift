@@ -8,6 +8,7 @@
 
 import UIKit
 import UniformTypeIdentifiers
+import AVFoundation
 import os.log
 
 protocol HamburgerTableDelegate: class {
@@ -24,7 +25,6 @@ protocol HamburgerTableDelegate: class {
     func renameDiagram()
     func about()
     func test()
-    func snapshotDiagram()
     func getDiagramInfo()
     func lockLadder()
     func editLadder()
@@ -98,7 +98,32 @@ extension DiagramViewController: HamburgerTableDelegate, UIImagePickerController
 
     func takePhoto() {
         os_log("takePhoto()", log: OSLog.action, type: .info)
-        handleTakePhoto()
+        checkCameraPermissions()
+    }
+
+    func checkCameraPermissions() {
+        switch AVCaptureDevice.authorizationStatus(for: .video) {
+        case .notDetermined:
+            os_log("Camera access not determined", log: .default, type: .default)
+            AVCaptureDevice.requestAccess(for: .video, completionHandler: { granted in
+                if granted {
+                    DispatchQueue.main.async {
+                        self.handleTakePhoto()
+                    }
+
+                }
+            })
+        case .restricted:
+            os_log("Camera access restricted", log: .default, type: .default)
+        case .denied:
+            os_log("Camera access denied", log: .default, type: .default)
+            UserAlert.showMessage(viewController: self, title: L("Camera Permission Denied"), message: L("Please set camera permission in Settings app."))
+        case .authorized:
+            os_log("Camera access authorized", log: .default, type: .default)
+            self.handleTakePhoto()
+        @unknown default:
+            fatalError("Unhandled default in checkCameraPermissions()")
+        }
     }
 
     func selectImage() {
@@ -145,31 +170,6 @@ extension DiagramViewController: HamburgerTableDelegate, UIImagePickerController
         P("Description = \(diagram.longDescription)")
     }
 
-    @objc func snapshotDiagram() {
-        let topRenderer = UIGraphicsImageRenderer(size: imageScrollView.bounds.size)
-        let originX = imageScrollView.bounds.minX - imageScrollView.contentOffset.x
-        let originY = imageScrollView.bounds.minY - imageScrollView.contentOffset.y
-        let bounds = CGRect(x: originX, y: originY, width: imageScrollView.bounds.width, height: imageScrollView.bounds.height)
-        let topImage = topRenderer.image { ctx in
-            imageScrollView.drawHierarchy(in: bounds, afterScreenUpdates: true)
-        }
-        let bottomRenderer = UIGraphicsImageRenderer(size: ladderView.bounds.size)
-        let bottomImage = bottomRenderer.image { ctx in
-            ladderView.drawHierarchy(in: ladderView.bounds, afterScreenUpdates: true)
-        }
-        let size = CGSize(width: ladderView.bounds.size.width, height: imageScrollView.bounds.size.height + ladderView.bounds.size.height)
-        UIGraphicsBeginImageContext(size)
-        let topRect = CGRect(x: 0, y: 0, width: ladderView.bounds.size.width, height: imageScrollView.bounds.size.height)
-        topImage.draw(in: topRect)
-        let bottomRect = CGRect(x: 0, y: imageScrollView.bounds.size.height, width: ladderView.bounds.size.width, height: ladderView.bounds.size.height)
-        bottomImage.draw(in: bottomRect)
-        let newImage = UIGraphicsGetImageFromCurrentImageContext()
-        UIGraphicsEndImageContext()
-        if let newImage = newImage {
-            let imageSaver = ImageSaver()
-            imageSaver.writeToPhotoAlbum(image: newImage, viewController: self)
-        }
-    }
 
     func lockImage() {
         imageIsLocked.toggle()
