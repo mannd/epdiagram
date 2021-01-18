@@ -95,8 +95,6 @@ class HamburgerTableViewController: UITableViewController {
             delegate?.lockLadder()
         case .sample:
             delegate?.sampleDiagrams()
-        case .snapshot:
-            delegate?.snapshotDiagram()
         case .preferences:
             delegate?.showPreferences()
         case .templates:

@@ -14,7 +14,6 @@ enum Layer {
     case selectLadder
     case renameDiagram
     case getInfo
-    case snapshot
     case sample
     case templates
     case lockImage

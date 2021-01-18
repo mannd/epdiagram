@@ -26,8 +26,6 @@ struct HamburgerViewModel {
         array.append(renameDiagramLayer)
         let getInfoLayer = HamburgerLayer(withName: L("Diagram info"), icon: UIImage(systemName: "questionmark.square"), layer: .getInfo)
         array.append(getInfoLayer)
-        let saveImageLayer = HamburgerLayer(withName: L("Snapshot diagram"), icon: UIImage(systemName: "photo.on.rectangle"), layer: .snapshot)
-        array.append(saveImageLayer)
         let sampleLayer = HamburgerLayer(withName: L("Sample diagrams"), icon: UIImage(systemName: "waveform.path.ecg"), layer: .sample)
         array.append(sampleLayer)
         let lockImageLayer = HamburgerLayer(withName: L("Lock image"), icon: UIImage(systemName: "lock"), layer: .lockImage, altName: L("Unlock image"), altIcon: UIImage(systemName: "lock.open"))

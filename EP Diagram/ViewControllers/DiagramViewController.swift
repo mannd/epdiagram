@@ -109,7 +109,6 @@ final class DiagramViewController: UIViewController {
         cursorView.calibration = diagram.calibration
         ladderView.calibration = diagram.calibration
         ladderView.ladder = diagram.ladder
-
         imageView.image = scaleImageForImageView(diagram.image)
 
         imageScrollView.delegate = self
@@ -144,7 +143,9 @@ final class DiagramViewController: UIViewController {
 //        }
         navigationItem.setLeftBarButton(UIBarButtonItem(image: UIImage(named: "hamburger"), style: .plain, target: self, action: #selector(toggleHamburgerMenu)), animated: true)
 
-        navigationItem.setRightBarButton(UIBarButtonItem(barButtonSystemItem: .close, target: self, action: #selector(closeAction)), animated: true)
+        let snapshotButton = UIBarButtonItem(image: UIImage(systemName: "photo.on.rectangle"), style: .plain, target: self, action: #selector(snapshotDiagram))
+        let closeButton = UIBarButtonItem(barButtonSystemItem: .close, target: self, action: #selector(closeAction))
+        navigationItem.setRightBarButtonItems([closeButton, snapshotButton], animated: true)
        
         // Set up touches
         let singleTapRecognizer = UITapGestureRecognizer(target: self, action: #selector(self.singleTap))
@@ -154,10 +155,13 @@ final class DiagramViewController: UIViewController {
         // Set up context menu.
         let interaction = UIContextMenuInteraction(delegate: ladderView)
         ladderView.addInteraction(interaction)
+        // Context menu not great here, prefer long press gesture
 //        let imageViewInteraction = UIContextMenuInteraction(delegate: imageScrollView)
 //        imageScrollView.addInteraction(imageViewInteraction)
         let longPress = UILongPressGestureRecognizer(target: self, action: #selector(self.doImageScrollViewLongPress))
         self.imageScrollView.addGestureRecognizer(longPress)
+
+        setTitle()
     }
 
     override func viewWillAppear(_ animated: Bool) {
@@ -222,7 +226,11 @@ final class DiagramViewController: UIViewController {
     }
 
     func setTitle() {
-        title = currentDocument?.name() ?? L("EP Diagram")
+        if let name = currentDocument?.name(), !name.isEmpty {
+            title = isIPad() ? L("EP Diagram - \(name)") : name
+        } else {
+            title = L("EP Diagram")
+        }
     }
 
     func setMode(_ mode: Mode) {
@@ -545,9 +553,11 @@ final class DiagramViewController: UIViewController {
 
     func openURL(url: URL) {
         os_log("openURL action", log: OSLog.action, type: .info)
+        // FIXME: self.resetImage sets transform to CGAffineTransformIdentity
         // self.resetImage
         let ext = url.pathExtension.uppercased()
         if ext != "PDF" {
+            // TODO: implement multipage PDF
             // self.enablePageButtons = false
             diagram.imageIsUpscaled = false
             setDiagramImage(scaleImageForImageView(UIImage(contentsOfFile: url.path)))
@@ -583,26 +593,6 @@ final class DiagramViewController: UIViewController {
         }
         return document
     }
-
-    // FIXME: See this from EP Calipers:
-//    - (UIImage *)scaleImageForImageView:(UIImage *)image {
-//        EPSLog(@"scaleImageForImageView");
-//        // Downscale upscaled images.
-//        if (self.imageIsUpscaled) {
-//            EPSLog(@">>>>>>Downscaling image");
-//            CGImageRef imageRef = image.CGImage;
-//            return [UIImage imageWithCGImage:(CGImageRef)imageRef scale:PDF_UPSCALE_FACTOR orientation:UIImageOrientationUp];
-//        }
-//        return image;
-//    }
-
-    // and
-//    UIImage *image = UIGraphicsGetImageFromCurrentImageContext();
-//    // first scale as usual, but image still too large since scaled up when created for better quality
-//    image = [self scaleImageForImageView:image];
-//    // now correct for scale factor when creating image
-//    image = [UIImage imageWithCGImage:(CGImageRef)image.CGImage scale:scaleFactor orientation:UIImageOrientationUp];
-//    self.imageView.image = image;
 
     private func openPDFPage(_ documentRef: CGPDFDocument?, atPage pageNum: Int) {
         guard let documentRef = documentRef else { return }
@@ -782,10 +772,6 @@ final class DiagramViewController: UIViewController {
 
     @IBAction func sampleDiagrams(_ sender: Any) {
         sampleDiagrams()
-    }
-
-    @IBAction func snapShotDiagram(_ sender: Any) {
-        snapshotDiagram()
     }
 
     @IBAction func openImage(_ sender: AnyObject) {

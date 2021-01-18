@@ -20,6 +20,7 @@ struct Diagram: Codable {
             imageWrapper = ImageWrapper(image: newValue)
         }
     }
+    // FIXME: remove didSet
     var imageIsUpscaled: Bool = false {
         didSet {
             print("************imageIsUpscaled = \(imageIsUpscaled)")

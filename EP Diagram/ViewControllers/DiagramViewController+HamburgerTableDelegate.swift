@@ -103,7 +103,6 @@ extension DiagramViewController: HamburgerTableDelegate, UIImagePickerController
 
     func selectImage() {
         os_log("selectImage()", log: OSLog.action, type: .info)
-//        handleSelectImage()
         chooseSource()
     }
 
@@ -146,7 +145,7 @@ extension DiagramViewController: HamburgerTableDelegate, UIImagePickerController
         P("Description = \(diagram.longDescription)")
     }
 
-    func snapshotDiagram() {
+    @objc func snapshotDiagram() {
         let topRenderer = UIGraphicsImageRenderer(size: imageScrollView.bounds.size)
         let originX = imageScrollView.bounds.minX - imageScrollView.contentOffset.x
         let originY = imageScrollView.bounds.minY - imageScrollView.contentOffset.y
@@ -264,16 +263,17 @@ extension DiagramViewController: HamburgerTableDelegate, UIImagePickerController
     }
 
     private func chooseSource() {
-        let chooser = UIAlertController(title: NSLocalizedString("Image Source", comment: ""), message:nil, preferredStyle: .actionSheet)
-        chooser.modalPresentationStyle = .popover
-        chooser.popoverPresentationController?.barButtonItem = navigationItem.leftBarButtonItem
-        chooser.addAction(UIAlertAction(title: NSLocalizedString("Photos", comment: ""), style: .default, handler: { _ in
+        let alert = UIAlertController(title: NSLocalizedString("Image Source", comment: ""), message:nil, preferredStyle: .actionSheet)
+        alert.modalPresentationStyle = .popover
+        alert.popoverPresentationController?.barButtonItem = navigationItem.leftBarButtonItem
+        alert.addAction(UIAlertAction(title: NSLocalizedString("Photos", comment: ""), style: .default, handler: { _ in
             self.handleSelectImage()
         }))
-        chooser.addAction(UIAlertAction(title: NSLocalizedString("Files", comment: ""), style: .default, handler: { _ in
+        alert.addAction(UIAlertAction(title: NSLocalizedString("Files", comment: ""), style: .default, handler: { _ in
             self.handleSelectFile()
         }))
-        present(chooser, animated: true, completion: nil)
+        alert.addAction(UIAlertAction(title: L("Cancel"), style: .cancel, handler: nil))
+        present(alert, animated: true, completion: nil)
     }
 
     private func handleSelectFile() {
