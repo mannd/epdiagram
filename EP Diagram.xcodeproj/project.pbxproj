@@ -18,8 +18,6 @@
 		8E1276DB24D46C2000AC4B8F /* help.org in Resources */ = {isa = PBXBuildFile; fileRef = 8E1276DA24D46C2000AC4B8F /* help.org */; };
 		8E1276DD24D46F4200AC4B8F /* help.html in Resources */ = {isa = PBXBuildFile; fileRef = 8E1276DC24D46F4200AC4B8F /* help.html */; };
 		8E1276DF24D4734E00AC4B8F /* HelpViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8E1276DE24D4734E00AC4B8F /* HelpViewController.swift */; };
-		8E1276E124D4758B00AC4B8F /* WebKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 8E1276E024D4758A00AC4B8F /* WebKit.framework */; };
-		8E12DA64259E685900A7D4E5 /* CoreImage.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 8E12DA63259E685900A7D4E5 /* CoreImage.framework */; };
 		8E15013724F2C7CF000CF90E /* Mode.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8E15013624F2C7CF000CF90E /* Mode.swift */; };
 		8E1B6CB8240CAE5300EA88A6 /* ScaledView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8E1B6CB7240CAE5300EA88A6 /* ScaledView.swift */; };
 		8E217D98245B306200CD0CBF /* MathTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8E217D97245B306200CD0CBF /* MathTests.swift */; };
@@ -90,7 +88,6 @@
 		8ECA9FB72470A1020016D939 /* LadderTemplate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8ECA9FB62470A1020016D939 /* LadderTemplate.swift */; };
 		8ECB309925462C2D00DC79A8 /* SaveButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8ECB309825462C2D00DC79A8 /* SaveButton.swift */; };
 		8ED3B1B62360DA0D00549381 /* Anchor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8ED3B1B52360DA0D00549381 /* Anchor.swift */; };
-		8EE311E624A8FE01003C7AF6 /* AudioToolbox.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 8EE311E524A8FE01003C7AF6 /* AudioToolbox.framework */; };
 		8EF8B5B72330739F00ADB77A /* ViewControllerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8EF8B5B62330739F00ADB77A /* ViewControllerTests.swift */; };
 		8EF9166B227926BC00B51F17 /* LadderView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8EF9166A227926BC00B51F17 /* LadderView.swift */; };
 /* End PBXBuildFile section */
@@ -200,6 +197,8 @@
 		8EBC824224E6EBA700B5CA29 /* Sounds.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Sounds.swift; sourceTree = "<group>"; };
 		8EC5D287256B149C00F49865 /* DocumentBrowserDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DocumentBrowserDelegate.swift; sourceTree = "<group>"; };
 		8EC5D28C256B154E00F49865 /* UIView+PinToInside.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "UIView+PinToInside.swift"; sourceTree = "<group>"; };
+		8EC8768225B5106800F3D5C2 /* AVFoundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AVFoundation.framework; path = Platforms/MacOSX.platform/Developer/SDKs/MacOSX11.1.sdk/System/Library/Frameworks/AVFoundation.framework; sourceTree = DEVELOPER_DIR; };
+		8EC8768725B5112000F3D5C2 /* Photos.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Photos.framework; path = Platforms/MacOSX.platform/Developer/SDKs/MacOSX11.1.sdk/System/Library/Frameworks/Photos.framework; sourceTree = DEVELOPER_DIR; };
 		8ECA9FB42470A07B0016D939 /* RegionTemplate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RegionTemplate.swift; sourceTree = "<group>"; };
 		8ECA9FB62470A1020016D939 /* LadderTemplate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LadderTemplate.swift; sourceTree = "<group>"; };
 		8ECB309825462C2D00DC79A8 /* SaveButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SaveButton.swift; sourceTree = "<group>"; };
@@ -216,9 +215,6 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				8E1276E124D4758B00AC4B8F /* WebKit.framework in Frameworks */,
-				8EE311E624A8FE01003C7AF6 /* AudioToolbox.framework in Frameworks */,
-				8E12DA64259E685900A7D4E5 /* CoreImage.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -467,6 +463,8 @@
 		8EE311E424A8FE01003C7AF6 /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				8EC8768725B5112000F3D5C2 /* Photos.framework */,
+				8EC8768225B5106800F3D5C2 /* AVFoundation.framework */,
 				8E068D4925A9016300EB863D /* UniformTypeIdentifiers.framework */,
 				8EF6B10125A8CAA600DCA91C /* CoreServices.framework */,
 				8EF6B0F925A8CA7800DCA91C /* MobileCoreServices.framework */,
