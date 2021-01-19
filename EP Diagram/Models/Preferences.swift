@@ -20,7 +20,6 @@ struct Preferences {
     static let defaultSnapMarksKey = "defaultSnapMarksKey"
     static let defaultGroupMarksKey = "defaultGroupMarksKey"
 
-
     // Stored as Int, converted to CGFloat when used.
     static var lineWidth: Int = 2
     static var cursorLineWidth: Int = 1
@@ -29,6 +28,20 @@ struct Preferences {
     static var showIntervals = true
     static var showConductionTimes = true
     static var snapMarks = true
+
+    // TODO: Update when new prefs added.
+    static func defaults() -> [String: Any] {
+        let defaultPreferences: [String: Any] = [
+            Preferences.defaultLineWidthKey: Preferences.lineWidth,
+            Preferences.defaultCursorLineWidthKey: Preferences.cursorLineWidth,
+            Preferences.defaultShowImpulseOriginKey: Preferences.showImpulseOrigin,
+            Preferences.defaultShowBlockKey: Preferences.showBlock,
+            Preferences.defaultShowIntervalsKey: Preferences.showIntervals,
+            Preferences.defaultShowConductionTimesKey: Preferences.showConductionTimes,
+            Preferences.defaultSnapMarksKey: Preferences.snapMarks,
+        ]
+        return defaultPreferences
+    }
     
 //    var red = UIColor.systemRed
 //    var blue = UIColor.systemBlue

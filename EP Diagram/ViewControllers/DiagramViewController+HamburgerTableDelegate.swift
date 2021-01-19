@@ -315,13 +315,13 @@ extension DiagramViewController: HamburgerTableDelegate, UIImagePickerController
 //    }
 
     @objc func setDiagramImage(_ image: UIImage?) {
-        print("****setDiagramImage")
+        os_log("setDiagramImage(_:)", log: .action, type: .info)
         currentDocument?.undoManager.registerUndo(withTarget: self, selector: #selector(setDiagramImage), object: imageView.image)
         NotificationCenter.default.post(name: .didUndoableAction, object: nil)
-//        updateUndoRedoButtons()
         diagram.ladder.clear()
-        diagram.image = image
-        imageView.image = image
+        let scaledImage = scaleImageForImageView(image)
+        diagram.image = scaledImage
+        imageView.image = scaledImage
 //        imageView.transform = diagram.transform
         imageScrollView.zoomScale = 1.0
         imageScrollView.contentOffset = CGPoint.zero
@@ -402,7 +402,7 @@ extension DiagramViewController: HamburgerTableDelegate, UIImagePickerController
         let chosenImage = info[.editedImage] as? UIImage
         // Images from photos are never upscaled.
         diagram.imageIsUpscaled = false
-        setDiagramImage(scaleImageForImageView(chosenImage))
+        setDiagramImage(chosenImage)
         picker.dismiss(animated: true, completion: nil)
     }
 

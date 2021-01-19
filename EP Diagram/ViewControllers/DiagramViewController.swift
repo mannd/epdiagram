@@ -61,7 +61,6 @@ final class DiagramViewController: UIViewController {
     var preferences: Preferences = Preferences()
     // Set by screen delegate
     var restorationInfo: [AnyHashable: Any]?
-    var viewClosed = false
 
     // Keys for state restoration
     static let restorationContentOffsetXKey = "restorationContentOffsetXKey"
@@ -78,13 +77,12 @@ final class DiagramViewController: UIViewController {
     // Speed up appearance of image picker by initializing it here.
     let imagePicker: UIImagePickerController = UIImagePickerController()
     private let maxZoom: CGFloat = 7.0
-    private let minZoom: CGFloat = 0.25
+    private let minZoom: CGFloat = 0.2
     let pdfScaleFactor: CGFloat = 5.0
 
     override func viewDidLoad() {
         os_log("viewDidLoad() - ViewController", log: OSLog.viewCycle, type: .info)
         super.viewDidLoad()
-        viewClosed = false // if view closed view will not be restored
 
         //showRestorationInfo() // for debugging
 
@@ -175,7 +173,7 @@ final class DiagramViewController: UIViewController {
         // FIXME: make set calibration undoable...
         self.diagram.calibration = diagram.calibration
         setLadder(diagram.ladder)
-        setDiagramImage(scaleImageForImageView(diagram.image))
+        setDiagramImage(diagram.image)
         imageScrollView.contentInset = UIEdgeInsets(top: 0, left: leftMargin, bottom: 0, right: 0)
         hideCursorAndUnhighlightAllMarks()
         setViewsNeedDisplay()
@@ -312,7 +310,7 @@ final class DiagramViewController: UIViewController {
             DiagramViewController.restorationIsCalibratedKey: cursorView.isCalibrated(),
             DiagramViewController.restorationCalFactorKey: cursorView.calFactor,
             DiagramViewController.restorationFileNameKey: currentDocumentURL,
-            DiagramViewController.restorationDoRestorationKey: !viewClosed,
+            DiagramViewController.restorationDoRestorationKey: true,
             HelpViewController.inHelpKey: false,
             DiagramViewController.restorationTransformKey: NSCoder.string(for: imageView.transform),
         ]
@@ -405,10 +403,11 @@ final class DiagramViewController: UIViewController {
 
     @objc func closeAction() {
         os_log("CLOSE ACTION")
-        viewClosed = true
+        let info: [AnyHashable: Any] = [
+            DiagramViewController.restorationDoRestorationKey: false]
+        self.userActivity?.addUserInfoEntries(from: info)
         view.endEditing(true)
         diagramEditorDelegate?.diagramEditorDidFinishEditing(self, diagram: diagram)
-//        dismiss(animated: true, completion: nil)
     }
 
     @objc func snapshotDiagram() {
@@ -612,7 +611,7 @@ final class DiagramViewController: UIViewController {
             // TODO: implement multipage PDF
             // self.enablePageButtons = false
             diagram.imageIsUpscaled = false
-            setDiagramImage(scaleImageForImageView(UIImage(contentsOfFile: url.path)))
+            setDiagramImage(UIImage(contentsOfFile: url.path))
         }
         else {
             // self.numberOfPages = 0
@@ -651,8 +650,6 @@ final class DiagramViewController: UIViewController {
         let page: CGPDFPage? = getPDFPage(documentRef, pageNumber: pageNum)
         if let page = page {
             let sourceRect: CGRect = page.getBoxRect(.mediaBox)
-            // FIXME: scale factor was originally 5, but everything too big on reopening image.
-            // FIXME: However, scaleFactor of 1.0 is too blurry.  Need to scale down pdfs on opening file.
             let scaleFactor: CGFloat = pdfScaleFactor
             let sourceRectSize = sourceRect.size
             UIGraphicsBeginImageContextWithOptions(sourceRectSize, false, scaleFactor)
@@ -979,6 +976,7 @@ extension DiagramViewController: UIDropInteractionDelegate {
         session.loadObjects(ofClass: UIImage.self) { imageItems in
             print("load image")
             if let images = imageItems as? [UIImage] {
+                self.diagram.imageIsUpscaled = false
                 self.setDiagramImage(images.first)
                 return
             }
