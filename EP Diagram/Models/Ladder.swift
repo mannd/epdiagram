@@ -19,17 +19,6 @@ struct NearbyMarks {
 
 // MARK: - enums
 
-private enum Keys: String, CustomStringConvertible {
-    case name = "ladderName"
-    case longDescription = "ladderLongDescription"
-    case regions = "ladderRegions"
-    // etc.
-
-    var description: String {
-        return self.rawValue
-    }
-}
-
 // Is a mark in the region before, same region, region after, or farther away?
 enum RelativeRegion {
     case before
@@ -60,6 +49,8 @@ class Ladder: NSObject, Codable {
     var marksAreVisible: Bool = true
     
     var zone: Zone = Zone()
+
+    override var debugDescription: String { "Ladder ID " + id.debugDescription }
 
     private var registry: [UUID: Mark] = [:]
 

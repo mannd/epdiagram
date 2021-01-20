@@ -221,7 +221,7 @@ final class LadderView: ScaledView {
 
     func performNormalTap(_ tapLocationInLadder: LocationInLadder) {
         unhighlightAllMarks()
-        if tapLocationInLadder.isLabel {
+        if tapLocationInLadder.specificLocation == .label {
             assert(tapLocationInLadder.region != nil, "Label tapped, but region is nil!")
             if let region = tapLocationInLadder.region {
                 labelWasTapped(labelRegion: region)
@@ -229,7 +229,7 @@ final class LadderView: ScaledView {
                 unattachAttachedMark()
             }
         }
-        else if (tapLocationInLadder.isRegion) {
+        else if (tapLocationInLadder.specificLocation == .region) {
             regionWasTapped(tapLocationInLadder: tapLocationInLadder, positionX: tapLocationInLadder.unscaledPosition.x)
         }
         cursorViewDelegate.refresh()
@@ -514,7 +514,7 @@ final class LadderView: ScaledView {
     }
 
     func positionIsNearMark(position: CGPoint) -> Bool {
-        return getLocationInLadder(position: position).isMark
+        return getLocationInLadder(position: position).specificLocation == .mark
     }
 
     /// Determine which anchor a point is closest to.
@@ -605,7 +605,7 @@ final class LadderView: ScaledView {
         os_log("deleteMark(position:cursofViewDelegate:) - LadderView", log: OSLog.debugging, type: .debug)
         let tapLocationInLadder = getLocationInLadder(position: position)
         activeRegion = tapLocationInLadder.region
-        if tapLocationInLadder.isMark {
+        if tapLocationInLadder.specificLocation == .mark {
             if let mark = tapLocationInLadder.mark {
                 let region = tapLocationInLadder.region
                 undoablyDeleteMark(mark: mark, region: region)
@@ -807,7 +807,7 @@ final class LadderView: ScaledView {
         let state = pan.state
         let regionPositionX = transformToRegionPositionX(scaledViewPositionX: position.x)
         let locationInLadder = getLocationInLadder(position: position)
-        guard locationInLadder.isRegionNotLabel else { return }
+        guard locationInLadder.specificLocation == .region else { return }
         if state == .began {
             guard let region = locationInLadder.region else { return }
             zone = Zone()

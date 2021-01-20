@@ -161,6 +161,8 @@ final class DiagramViewController: UIViewController {
         self.imageScrollView.addGestureRecognizer(longPress)
 
         setTitle()
+
+        currentDocument?.undoManager.removeAllActions()
     }
 
     override func viewWillAppear(_ animated: Bool) {
@@ -336,7 +338,7 @@ final class DiagramViewController: UIViewController {
 
     @objc func showSelectMarksMenu(_: UIAlertAction) {
         if selectMenuButtons == nil {
-            let prompt = makePrompt(text: L("Tap marks to select"))
+            let prompt = makePrompt(text: L("Tap or drag over marks to select"))
             let cancelTitle = L("Done")
             let cancelButton = UIBarButtonItem(title: cancelTitle, style: .done, target: self, action: #selector(cancelSelect))
             selectMenuButtons = [prompt, spacer, cancelButton]
