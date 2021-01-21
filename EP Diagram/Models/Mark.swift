@@ -98,7 +98,7 @@ class Mark: Codable {
     var selected: Bool = false // mark is selected for some action
     var highlight: Highlight = .none
     var anchor: Anchor = .middle // Anchor point for movement and to attach a cursor
-    var lineStyle: LineStyle = .solid
+    var lineStyle: Style = .solid
     var block: Block = .none
     var impulseOrigin: ImpulseOrigin = .none
     var text: String = ""  // text is usually a calibrated interval
@@ -221,6 +221,15 @@ class Mark: Codable {
             }
         }
     }
+
+    // Must normalize x and y??
+    func applyAngle(_ angle: CGFloat) {
+        let y0 = segment.proximal.y
+        let y1 = segment.distal.y
+        let height = y1 - y0
+        let delta = Geometry.rightTriangleBase(withAngle: angle, height: height)
+        segment.distal.x += delta
+    }
 }
 // MARK: - extensions
 
@@ -254,8 +263,8 @@ extension Mark: Hashable {
 // enums for Mark
 extension Mark {
     /// Draw a solid or dashed line when drawing a mark.
-    enum LineStyle: Int, Codable, CustomStringConvertible, CaseIterable, Identifiable {
-        var id: LineStyle { self }
+    enum Style: Int, Codable, CustomStringConvertible, CaseIterable, Identifiable {
+        var id: Style { self }
 
         var description: String {
             switch self {

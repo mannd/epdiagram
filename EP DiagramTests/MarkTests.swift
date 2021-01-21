@@ -10,6 +10,7 @@ import XCTest
 @testable import EP_Diagram
 
 class MarkTests: XCTestCase {
+    let accuracy: CGFloat = 0.00001 // floating point accuracy
 
     override func setUp() {
         // Put setup code here. This method is called before the invocation of each test method in the class.
@@ -29,24 +30,24 @@ class MarkTests: XCTestCase {
         let mark = Mark(positionX: 0)
         XCTAssertEqual(mark.height, 1.0)
         let mark2 = Mark(segment: Segment(proximal: CGPoint(x: 1, y: 0.25), distal: CGPoint(x: 2, y: 0.75)))
-        XCTAssertEqual(mark2.height, 0.5, accuracy: 0.001)
+        XCTAssertEqual(mark2.height, 0.5, accuracy: accuracy)
     }
 
     func testMarkLength() {
         let mark = Mark(segment: Segment(proximal: CGPoint(x: 0.5, y: 0.8), distal: CGPoint(x: 0.9, y: 0.2)))
-        XCTAssertEqual(mark.length, 0.721110255092798, accuracy: 0.001)
+        XCTAssertEqual(mark.length, 0.721110255092798, accuracy: accuracy)
     }
 
     func testMarkDistanceToPoint() {
         let mark = Mark(segment: Segment(proximal: CGPoint(x: 1, y: 0), distal: CGPoint(x: 1, y: 1)))
         let point = CGPoint(x: 1.5, y: 0.5)
-        XCTAssertEqual(mark.distance(point: point), 0.5, accuracy: 0.001)
+        XCTAssertEqual(mark.distance(point: point), 0.5, accuracy: accuracy)
         let point2 = CGPoint(x: 1, y: 0.5)
         let mark2 = Mark(segment: Segment(proximal: CGPoint(x: 0, y: 0), distal: CGPoint(x: 2, y: 1)))
-        XCTAssertEqual(mark2.distance(point: point2), 0, accuracy: 0.001)
+        XCTAssertEqual(mark2.distance(point: point2), 0, accuracy: accuracy)
         let mark3 = Mark(segment: Segment(proximal: CGPoint(x: 1, y: 0.7), distal: CGPoint(x: 2, y: 0.9)))
         let point3 = CGPoint(x: 2, y: 0.7)
-        XCTAssertEqual(mark3.distance(point: point3), 0.1961, accuracy: 0.001)
+        XCTAssertEqual(mark3.distance(point: point3), 0.19612, accuracy: accuracy)
     }
 
     func testMidpoint() {
@@ -69,16 +70,16 @@ class MarkTests: XCTestCase {
 
     func testNormalization() {
         let p1 = CGPoint(x: 1, y: 1.5)
-        XCTAssertEqual(p1.clampY().y, 1.0, accuracy: 0.00001)
+        XCTAssertEqual(p1.clampY().y, 1.0, accuracy: accuracy)
         let p2 = CGPoint(x: 2, y: -1.5)
-        XCTAssertEqual(p2.clampY().y, 0, accuracy: 0.00001)
+        XCTAssertEqual(p2.clampY().y, 0, accuracy: accuracy)
         let s1 = Segment(proximal: p1, distal: p2)
         let normalizedS1 = s1.normalized()
-        XCTAssertEqual(normalizedS1.proximal.y, 1.0, accuracy: 0.00001)
-        XCTAssertEqual(normalizedS1.distal.y, 0, accuracy: 0.00001)
+        XCTAssertEqual(normalizedS1.proximal.y, 1.0, accuracy: accuracy)
+        XCTAssertEqual(normalizedS1.distal.y, 0, accuracy: accuracy)
         let p3 = CGPoint(x: 100, y: 0.7)
-        XCTAssertEqual(p3.y, 0.7, accuracy: 0.00001)
-        XCTAssertEqual(p3.x, 100, accuracy: 0.00001)
+        XCTAssertEqual(p3.y, 0.7, accuracy: accuracy)
+        XCTAssertEqual(p3.x, 100, accuracy: accuracy)
     }
 
     func testMarkSet() {
@@ -199,7 +200,7 @@ class MarkTests: XCTestCase {
         let mark = Mark(segment: Segment(proximal: CGPoint(x: 0, y: 0), distal: CGPoint(x: 100, y: 1)))
         XCTAssertEqual(mark.width, 100)
         XCTAssertEqual(mark.height, 1)
-        XCTAssertEqual(mark.length, sqrt(10_001), accuracy: 0.00001)
+        XCTAssertEqual(mark.length, sqrt(10_001), accuracy: accuracy)
     }
 
     func testAnchorPosition() {
@@ -220,8 +221,8 @@ class MarkTests: XCTestCase {
         mark1.anchor = .distal
         XCTAssertEqual(mark1.getAnchorPosition(), CGPoint(x: 115, y: 0.7))
         mark1.anchor = .middle
-        XCTAssertEqual(mark1.getAnchorPosition().x, 217.5, accuracy: 0.0001)
-        XCTAssertEqual(mark1.getAnchorPosition().y, 0.45, accuracy: 0.0001)
+        XCTAssertEqual(mark1.getAnchorPosition().x, 217.5, accuracy: accuracy)
+        XCTAssertEqual(mark1.getAnchorPosition().y, 0.45, accuracy: accuracy)
     }
 
     func testLineStyles() {
@@ -233,5 +234,15 @@ class MarkTests: XCTestCase {
         mark.lineStyle = .dotted
         XCTAssertEqual(mark.lineStyle.description, L("Dotted"))
         XCTAssertEqual(mark.lineStyle.id, .dotted)
+    }
+
+    func testRightTriangleBase() {
+        let height: CGFloat = 1.0
+        var result = Geometry.rightTriangleBase(withAngle: 45, height: height)
+        XCTAssertEqual(result, 1.0, accuracy: accuracy)
+        result = Geometry.rightTriangleBase(withAngle: 30, height: height)
+        XCTAssertEqual(result, 0.57735, accuracy: accuracy)
+        result = Geometry.rightTriangleBase(withAngle: 0, height: height)
+        XCTAssertEqual(result, 0, accuracy: accuracy)
     }
 }

@@ -45,7 +45,7 @@ class Region: Codable {
     var height: CGFloat { distalBoundary - proximalBoundary }
     // TODO: Add style to region, which can be overrident, and set as a default in preferences
     // TODO: We can init lineStyle with the template lineStyle, but we need to be able to set it as well.
-    var lineStyle: Mark.LineStyle = .solid
+    var lineStyle: Mark.Style = .solid
 
     // A region is copied from a template, after which the template is no longer referenced.
     init(template: RegionTemplate) {

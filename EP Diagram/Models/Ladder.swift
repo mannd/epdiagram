@@ -353,8 +353,8 @@ class Ladder: NSObject, Codable {
         }
         for middleMark in getMarkSet(fromMarkIdSet:mark.groupedMarkIds.middle) {
             if mark == middleMark { break }
-            let distanceToProximal = Common.distanceSegmentToPoint(segment: mark.segment, point: middleMark.segment.proximal)
-            let distanceToDistal = Common.distanceSegmentToPoint(segment: mark.segment, point: middleMark.segment.distal)
+            let distanceToProximal = Geometry.distanceSegmentToPoint(segment: mark.segment, point: middleMark.segment.proximal)
+            let distanceToDistal = Geometry.distanceSegmentToPoint(segment: mark.segment, point: middleMark.segment.distal)
             if distanceToProximal < distanceToDistal {
                 let x = mark.segment.getX(fromY: middleMark.segment.proximal.x)
                 if let x = x {

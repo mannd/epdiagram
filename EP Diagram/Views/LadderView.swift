@@ -45,7 +45,7 @@ final class LadderView: ScaledView {
     var unhighlightedColor = UIColor.label
     var attachedColor = UIColor.systemOrange
     var linkColor = UIColor.systemGreen
-    var selectedColor = UIColor.systemRed
+    var selectedColor = UIColor.systemBlue
     var groupedColor = UIColor.systemPurple
 
     var ladderIsLocked = false
@@ -509,7 +509,7 @@ final class LadderView: ScaledView {
     ///   - accuracy: how close does it have to be?
     func nearMark(position: CGPoint, mark: Mark, region: Region, accuracy: CGFloat) -> Bool {
         let scaledViewMarkSegment = transformToScaledViewSegment(regionSegment: mark.segment, region: region)
-        let distance = Common.distanceSegmentToPoint(segment: scaledViewMarkSegment, point: position)
+        let distance = Geometry.distanceSegmentToPoint(segment: scaledViewMarkSegment, point: position)
         return distance < accuracy
     }
 
@@ -934,14 +934,14 @@ final class LadderView: ScaledView {
         let ladderViewPositionNeighboringMarkSegment = transformToScaledViewSegment(regionSegment: neighboringMark.segment, region: neighboringRegion)
         let ladderViewPositionMarkProximal = transformToScaledViewPosition(regionPosition: mark.segment.proximal, region: region)
         let ladderViewPositionMarkDistal = transformToScaledViewPosition(regionPosition: mark.segment.distal, region: region)
-        let distanceToNeighboringMarkSegmentProximal = Common.distanceSegmentToPoint(segment: ladderViewPositionNeighboringMarkSegment, point: ladderViewPositionMarkProximal)
-        let distanceToNeighboringMarkSegmentDistal = Common.distanceSegmentToPoint(segment: ladderViewPositionNeighboringMarkSegment, point: ladderViewPositionMarkDistal)
+        let distanceToNeighboringMarkSegmentProximal = Geometry.distanceSegmentToPoint(segment: ladderViewPositionNeighboringMarkSegment, point: ladderViewPositionMarkProximal)
+        let distanceToNeighboringMarkSegmentDistal = Geometry.distanceSegmentToPoint(segment: ladderViewPositionNeighboringMarkSegment, point: ladderViewPositionMarkDistal)
 
         let ladderViewPositionMarkSegment = transformToScaledViewSegment(regionSegment: mark.segment, region: region)
         let ladderViewPositionNeighboringMarkProximal = transformToScaledViewPosition(regionPosition: neighboringMark.segment.proximal, region: neighboringRegion)
         let ladderViewPositionNeighboringMarkDistal = transformToScaledViewPosition(regionPosition: neighboringMark.segment.distal, region: neighboringRegion)
-        let distanceToMarkSegmentProximal = Common.distanceSegmentToPoint(segment: ladderViewPositionMarkSegment, point: ladderViewPositionNeighboringMarkProximal)
-        let distanceToMarkSegmentDistal = Common.distanceSegmentToPoint(segment: ladderViewPositionMarkSegment, point: ladderViewPositionNeighboringMarkDistal)
+        let distanceToMarkSegmentProximal = Geometry.distanceSegmentToPoint(segment: ladderViewPositionMarkSegment, point: ladderViewPositionNeighboringMarkProximal)
+        let distanceToMarkSegmentDistal = Geometry.distanceSegmentToPoint(segment: ladderViewPositionMarkSegment, point: ladderViewPositionNeighboringMarkDistal)
 
         if distanceToNeighboringMarkSegmentProximal < nearbyDistance
             || distanceToNeighboringMarkSegmentDistal < nearbyDistance
@@ -1021,7 +1021,7 @@ final class LadderView: ScaledView {
         }
     }
 
-    func setPressedMarkStyle(style: Mark.LineStyle) {
+    func setPressedMarkStyle(style: Mark.Style) {
         if let pressedMark = pressedMark {
             pressedMark.lineStyle = style
             if mode == .select {
@@ -1034,19 +1034,28 @@ final class LadderView: ScaledView {
 
     @objc func setSolid() {
         setPressedMarkStyle(style: .solid)
-        nullifyPressedMark()
+        self.nullifyPressedMark()
+
         setNeedsDisplay()
+    }
+
+    func setStyleToMarks(style: Mark.Style, marks: [Mark]) {
+        for mark in marks {
+            mark.lineStyle = style
+        }
     }
 
     @objc func setDashed() {
         setPressedMarkStyle(style: .dashed)
-        nullifyPressedMark()
+        self.nullifyPressedMark()
+
         setNeedsDisplay()
     }
 
     @objc func setDotted() {
         setPressedMarkStyle(style: .dotted)
-        nullifyPressedMark()
+        self.nullifyPressedMark()
+
         setNeedsDisplay()
     }
 
@@ -1258,7 +1267,7 @@ final class LadderView: ScaledView {
     }
 
     func getTruncatedPosition(segment: Segment) -> CGPoint? {
-        let intersection = Common.getIntersection(ofLineFrom: CGPoint(x: leftMargin, y: 0), to: CGPoint(x: leftMargin, y: ladderViewHeight), withLineFrom: segment.proximal, to: segment.distal)
+        let intersection = Geometry.getIntersection(ofLineFrom: CGPoint(x: leftMargin, y: 0), to: CGPoint(x: leftMargin, y: ladderViewHeight), withLineFrom: segment.proximal, to: segment.distal)
         return intersection
     }
 
@@ -1473,6 +1482,12 @@ final class LadderView: ScaledView {
     func ungroupMarks(mark: Mark) {
         ladder.setHighlightForAllMarks(highlight: .none)
         mark.groupedMarkIds = MarkIdGroup()
+    }
+
+    func slantMark() {
+        if let pressedMark = pressedMark {
+            slantMark(angle: 2, mark: pressedMark, region: ladder.regions[pressedMark.regionIndex])
+        }
     }
 
     // FIXME: make straightening undoable
@@ -1693,10 +1708,10 @@ extension LadderView: LadderViewDelegate {
             // FIXME: this doesn't work for vertical mark.
             mark.groupedMarkIds.middle.insert(middleMark.id)
             middleMark.groupedMarkIds.middle.insert(mark.id)
-            var distanceToProximal = Common.distanceSegmentToPoint(segment: middleMark.segment, point: mark.segment.proximal)
-            distanceToProximal = min(distanceToProximal, Common.distanceSegmentToPoint(segment: mark.segment, point: middleMark.segment.proximal))
-            var distanceToDistal = Common.distanceSegmentToPoint(segment: middleMark.segment, point: mark.segment.distal)
-            distanceToDistal = min(distanceToDistal, Common.distanceSegmentToPoint(segment: mark.segment, point: middleMark.segment.distal))
+            var distanceToProximal = Geometry.distanceSegmentToPoint(segment: middleMark.segment, point: mark.segment.proximal)
+            distanceToProximal = min(distanceToProximal, Geometry.distanceSegmentToPoint(segment: mark.segment, point: middleMark.segment.proximal))
+            var distanceToDistal = Geometry.distanceSegmentToPoint(segment: middleMark.segment, point: mark.segment.distal)
+            distanceToDistal = min(distanceToDistal, Geometry.distanceSegmentToPoint(segment: mark.segment, point: middleMark.segment.distal))
             if distanceToProximal < distanceToDistal {
                 let x = middleMark.segment.getX(fromY: mark.segment.proximal.y)
                 if let x = x {

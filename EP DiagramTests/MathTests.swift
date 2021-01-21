@@ -47,9 +47,9 @@ class MathTests: XCTestCase {
         // parallel lines
         let s1 = Segment(proximal: CGPoint(x: 0, y: 100), distal: CGPoint(x: 0, y: 50))
         let s2 = Segment(proximal: CGPoint(x: 50, y: 100), distal: CGPoint(x: 50, y: 50))
-        XCTAssertTrue(Common.distance(fromSegment: s1, toSegment: s2) == 50, "should be 50")
+        XCTAssertTrue(Geometry.distance(fromSegment: s1, toSegment: s2) == 50, "should be 50")
         let s3 = s1
-        XCTAssertTrue(Common.distance(fromSegment: s1, toSegment: s3) == 0, "segments are equal")
+        XCTAssertTrue(Geometry.distance(fromSegment: s1, toSegment: s3) == 0, "segments are equal")
         // segments intersect
         // Right now not testing for segment intersection, as intersecting segments are not considered to be nearby segments.  I.e. we don't want to group together intersecting segments.
 //        let s4 = Segment(proximal: CGPoint(x: 0, y: 0), distal: CGPoint(x: 1, y: 1))

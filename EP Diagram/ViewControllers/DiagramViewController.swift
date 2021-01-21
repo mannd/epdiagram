@@ -162,7 +162,6 @@ final class DiagramViewController: UIViewController {
 
         setTitle()
 
-        currentDocument?.undoManager.removeAllActions()
     }
 
     override func viewWillAppear(_ animated: Bool) {
@@ -409,6 +408,7 @@ final class DiagramViewController: UIViewController {
             DiagramViewController.restorationDoRestorationKey: false]
         self.userActivity?.addUserInfoEntries(from: info)
         view.endEditing(true)
+        currentDocument?.undoManager.removeAllActions()
         diagramEditorDelegate?.diagramEditorDidFinishEditing(self, diagram: diagram)
     }
 

@@ -9,7 +9,7 @@
 import UIKit
 
 /// Namespace for global static functions, variables.
-enum Common {
+enum Geometry {
 
     // Most of these functions are unused at the moment.
     
@@ -88,11 +88,10 @@ enum Common {
         return intersection
     }
 
-    // Global namespace
-
-    // OS functions
-    /// Returns true if target is a Mac, false for iOS.
- 
+    // precondition, keep angle < 90 degrees
+    static func rightTriangleBase(withAngle angle: CGFloat, height: CGFloat) -> CGFloat {
+        return tan(angle.degreesToRadians) * abs(height)
+    }
 }
 
 extension FloatingPoint {

@@ -29,7 +29,7 @@ struct RegionTemplateEditor: View {
                 }
                 Section(header: Text("Line style")) {
                     Picker(selection: $regionTemplate.lineStyle, label: Text("Line style"), content: {
-                        ForEach(Mark.LineStyle.allCases) { style in
+                        ForEach(Mark.Style.allCases) { style in
                             Text(style.description)
 
                         }

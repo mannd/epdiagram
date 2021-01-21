@@ -47,7 +47,7 @@
 		8E6A0298246DFB3700A10C9F /* LadderTemplateEditor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8E6A0297246DFB3700A10C9F /* LadderTemplateEditor.swift */; };
 		8E6EB6C02484778E00E5F883 /* Notification+didUndoableAction.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8E6EB6BF2484778E00E5F883 /* Notification+didUndoableAction.swift */; };
 		8E6EB6C2248477D500E5F883 /* DiagramViewController+DiagramViewControllerDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8E6EB6C1248477D500E5F883 /* DiagramViewController+DiagramViewControllerDelegate.swift */; };
-		8E7214DE22E95C860062C094 /* Common.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8E7214DD22E95C860062C094 /* Common.swift */; };
+		8E7214DE22E95C860062C094 /* Geometry.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8E7214DD22E95C860062C094 /* Geometry.swift */; };
 		8E7214E022EB57FC0062C094 /* MarkTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8E7214DF22EB57FC0062C094 /* MarkTests.swift */; };
 		8E74D58E244FBE2500641E0A /* LadderView+UIContextMenuInteractionDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8E74D58D244FBE2500641E0A /* LadderView+UIContextMenuInteractionDelegate.swift */; };
 		8E74D590244FD55E00641E0A /* Logging.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8E74D58F244FD55E00641E0A /* Logging.swift */; };
@@ -154,7 +154,7 @@
 		8E6A0297246DFB3700A10C9F /* LadderTemplateEditor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LadderTemplateEditor.swift; sourceTree = "<group>"; };
 		8E6EB6BF2484778E00E5F883 /* Notification+didUndoableAction.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Notification+didUndoableAction.swift"; sourceTree = "<group>"; };
 		8E6EB6C1248477D500E5F883 /* DiagramViewController+DiagramViewControllerDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "DiagramViewController+DiagramViewControllerDelegate.swift"; sourceTree = "<group>"; };
-		8E7214DD22E95C860062C094 /* Common.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Common.swift; sourceTree = "<group>"; };
+		8E7214DD22E95C860062C094 /* Geometry.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Geometry.swift; sourceTree = "<group>"; };
 		8E7214DF22EB57FC0062C094 /* MarkTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MarkTests.swift; sourceTree = "<group>"; };
 		8E74D58D244FBE2500641E0A /* LadderView+UIContextMenuInteractionDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "LadderView+UIContextMenuInteractionDelegate.swift"; sourceTree = "<group>"; };
 		8E74D58F244FD55E00641E0A /* Logging.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Logging.swift; sourceTree = "<group>"; };
@@ -293,7 +293,7 @@
 		8E7214DC22E95C630062C094 /* Common */ = {
 			isa = PBXGroup;
 			children = (
-				8E7214DD22E95C860062C094 /* Common.swift */,
+				8E7214DD22E95C860062C094 /* Geometry.swift */,
 				8E35924824BE9B27001E23D5 /* DiagramIO.swift */,
 				8E9550BC2474B22000E1B125 /* FileIO.swift */,
 				8E74D58F244FD55E00641E0A /* Logging.swift */,
@@ -381,12 +381,12 @@
 		8E9B803F22834431008873BB /* Models */ = {
 			isa = PBXGroup;
 			children = (
-				8E04C5DA256996E400946348 /* DiagramDocument.swift */,
 				8ED3B1B52360DA0D00549381 /* Anchor.swift */,
 				8E033CE924AC10A300BE6D6F /* Calibration.swift */,
 				8E5918BB24AEAB0B00D8ABA3 /* Caliper.swift */,
 				8E55612822A5FEDC00C4D391 /* Cursor.swift */,
 				8E4A52EE24886B16007406F5 /* Diagram.swift */,
+				8E04C5DA256996E400946348 /* DiagramDocument.swift */,
 				8E4ACA852447935600575538 /* HamburgerLayer.swift */,
 				8E2439F524B14F770044AEAB /* Interval.swift */,
 				8E9B804622834870008873BB /* Ladder.swift */,
@@ -639,7 +639,7 @@
 				8E1B6CB8240CAE5300EA88A6 /* ScaledView.swift in Sources */,
 				8E8248DD23B53B55001A85F9 /* SeparatorView.swift in Sources */,
 				8E671D5224814BB700784EB7 /* LadderTemplatesEditor.swift in Sources */,
-				8E7214DE22E95C860062C094 /* Common.swift in Sources */,
+				8E7214DE22E95C860062C094 /* Geometry.swift in Sources */,
 				8E9B8043228345B5008873BB /* Mark.swift in Sources */,
 				8E93CA8D25A0157F00C74F1F /* Transform.swift in Sources */,
 				8E4ACA8224478D7C00575538 /* HamburgerTableViewController.swift in Sources */,
