@@ -1512,6 +1512,14 @@ final class LadderView: ScaledView {
         }
     }
 
+    func slantMark(angle: CGFloat, mark: Mark, region: Region) {
+        let segment = transformToScaledViewSegment(regionSegment: mark.segment, region: region)
+        let height = segment.distal.y - segment.proximal.y
+        let delta = Geometry.rightTriangleBase(withAngle: angle, height: height)
+        let newSegment = Segment(proximal: segment.proximal, distal: CGPoint(x: segment.distal.x + delta, y: segment.distal.y))
+        mark.segment = transformToRegionSegment(scaledViewSegment: newSegment, region: region)
+    }
+
     private func setSegment(segment: Segment, forMark mark: Mark) {
         let originalSegment = mark.segment
         currentDocument?.undoManager?.registerUndo(withTarget: self, handler: { target in

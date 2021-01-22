@@ -152,7 +152,7 @@ final class DiagramViewController: UIViewController {
         imageScrollView.addGestureRecognizer(singleTapRecognizer)
 
         // Set up context menu.
-        let interaction = UIContextMenuInteraction(delegate: ladderView)
+        let interaction = UIContextMenuInteraction(delegate: self)
         ladderView.addInteraction(interaction)
         // Context menu not great here, prefer long press gesture
 //        let imageViewInteraction = UIContextMenuInteraction(delegate: imageScrollView)
@@ -283,7 +283,8 @@ final class DiagramViewController: UIViewController {
     // We only want to use the restorationInfo once when view controller first appears.
     var didFirstLayout = false
     override func viewDidLayoutSubviews() {
-        os_log("viewDidLayoutSubviews() - ViewController", log: .viewCycle, type: .info)
+        // Called multiple times when showing context menu, so comment out for now.
+//        os_log("viewDidLayoutSubviews() - ViewController", log: .viewCycle, type: .info)
         if didFirstLayout { return }
         didFirstLayout = true
         // mark pointers in registry need to reestablished when diagram is reloaded
@@ -318,7 +319,7 @@ final class DiagramViewController: UIViewController {
         activity.addUserInfoEntries(from: info)
     }
 
-    private func showMainMenu() {
+    @objc func showMainMenu() {
         if mainMenuButtons == nil {
             let calibrateTitle = L("Calibrate", comment: "calibrate button label title")
             let selectTitle = L("Select", comment: "select button label title")
@@ -333,6 +334,24 @@ final class DiagramViewController: UIViewController {
         // Note: set toolbar items this way, not directly (i.e. toolbar.items = something).
         setToolbarItems(mainMenuButtons, animated: false)
         navigationController?.setToolbarHidden(false, animated: false)
+    }
+
+    func showAngleMenu() {
+        guard let toolbar = navigationController?.toolbar else { return }
+        let slider = UISlider()
+        slider.minimumValue = -45
+        slider.maximumValue = 45
+        slider.setValue(0, animated: false)
+        let doneButton = UIButton(type: .system)
+        doneButton.setTitle(L("Done"), for: .normal)
+        doneButton.addTarget(self, action: #selector(showMainMenu), for: .touchUpInside)
+        let stackView = UIStackView(frame: toolbar.frame)
+        stackView.distribution = .fill
+        stackView.axis = .horizontal
+        stackView.spacing = 8
+        stackView.addArrangedSubview(slider)
+        stackView.addArrangedSubview(doneButton)
+        setToolbarItems([UIBarButtonItem(customView: stackView)], animated: true)
     }
 
     @objc func showSelectMarksMenu(_: UIAlertAction) {
@@ -908,47 +927,6 @@ extension DiagramViewController {
             currentDocument.diagram = diagram
         }
     }
-
-//    var defaultDocumentURL: URL? {
-//        guard let docURL = FileIO.getCacheURL() else { return nil }
-//        // FIXME: must account for multiple scenes, can't have just one default file.
-//        let docPath = docURL.appendingPathComponent("\(restorationFilename).diagram")
-//        return docPath
-//    }
-
-//    func loadDefaultDocument() -> Diagram? {
-//        guard let defaultDocumentURL = defaultDocumentURL else { return nil }
-//        do {
-//            let decoder = JSONDecoder()
-//            if let data = FileManager.default.contents(atPath: defaultDocumentURL.path) {
-//                let documentData = try decoder.decode(Diagram.self, from: data)
-//                return documentData
-//            } else { return nil }
-//        } catch {
-//            return nil
-//        }
-//    }
-
-//    @discardableResult func saveDefaultDocument(_ content: Diagram) -> Bool {
-//        guard let defaultDocumentURL = defaultDocumentURL else { return false }
-//        do {
-//            let encoder = JSONEncoder()
-//            let documentData = try encoder.encode(content)
-//            try documentData.write(to: defaultDocumentURL)
-//            print("written to \(defaultDocumentURL)")
-//            return true
-//        } catch {
-//            return false
-//        }
-//    }
-
-//    private func loadDocument() {
-//        if let content = loadDefaultDocument() {
-//            diagram = content
-//        } else {
-//            diagram = Diagram.blankDiagram()
-//        }
-//    }
 
 }
 
