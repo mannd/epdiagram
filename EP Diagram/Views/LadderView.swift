@@ -38,7 +38,7 @@ final class LadderView: ScaledView {
     var showMarkText = true
     var snapMarks = true
 
-    // variables that need to eventually be preferences
+    // TODO: make user preferences
     // Colors
     var red = UIColor.systemRed
     var blue = UIColor.systemBlue
@@ -54,6 +54,7 @@ final class LadderView: ScaledView {
         get { return ladder.zone }
         set(newValue) { ladder.zone = newValue }
     }
+    // TODO: make zone color blue with reduced alpha
     let zoneColor = UIColor.systemIndigo
 
     var marksAreVisible: Bool {
@@ -65,15 +66,8 @@ final class LadderView: ScaledView {
         }
     }
 
-//    var diagram: Diagram? {
-//        didSet {
-//            ladder = diagram?.ladder ?? Ladder.defaultLadder()
-//            print("****ladderView calibration set")
-//        }
-//    }
     var calibration: Calibration?
     var ladder: Ladder = Ladder.defaultLadder()
-
 
     // FIXME: Need initial active region.
     private var activeRegion: Region? {
@@ -89,6 +83,7 @@ final class LadderView: ScaledView {
             ladder.attachedMark = newValue
         }
     }
+    // TODO: not pressed, make array of selected marks
     var pressedMark: Mark? {
         get {
             return ladder.pressedMark
@@ -229,7 +224,7 @@ final class LadderView: ScaledView {
                 unattachAttachedMark()
             }
         }
-        else if (tapLocationInLadder.specificLocation == .region) {
+        else if (tapLocationInLadder.region != nil) { // tap is in a region
             regionWasTapped(tapLocationInLadder: tapLocationInLadder, positionX: tapLocationInLadder.unscaledPosition.x)
         }
         cursorViewDelegate.refresh()
@@ -1512,12 +1507,23 @@ final class LadderView: ScaledView {
         }
     }
 
+    @objc func slantPressedMark(angle: CGFloat) {
+        if let pressedMark = pressedMark {
+            slantMark(angle: angle, mark: pressedMark, region: ladder.regions[pressedMark.regionIndex])
+        }
+    }
+
     func slantMark(angle: CGFloat, mark: Mark, region: Region) {
         let segment = transformToScaledViewSegment(regionSegment: mark.segment, region: region)
         let height = segment.distal.y - segment.proximal.y
         let delta = Geometry.rightTriangleBase(withAngle: angle, height: height)
-        let newSegment = Segment(proximal: segment.proximal, distal: CGPoint(x: segment.distal.x + delta, y: segment.distal.y))
+        // We add delta to proximal x, not distal x, because we always start with a vertical mark.
+        let newSegment = Segment(proximal: segment.proximal, distal: CGPoint(x: segment.proximal.x + delta, y: segment.distal.y))
         mark.segment = transformToRegionSegment(scaledViewSegment: newSegment, region: region)
+    }
+
+    func getMarkSlantAngle(mark: Mark, region: Region) -> CGFloat {
+        return 0
     }
 
     private func setSegment(segment: Segment, forMark mark: Mark) {

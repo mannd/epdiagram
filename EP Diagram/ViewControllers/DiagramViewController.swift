@@ -336,15 +336,17 @@ final class DiagramViewController: UIViewController {
         navigationController?.setToolbarHidden(false, animated: false)
     }
 
+    // FIXME: can't single tap on mark in ladder after finished with context menu.
     func showAngleMenu() {
         guard let toolbar = navigationController?.toolbar else { return }
         let slider = UISlider()
         slider.minimumValue = -45
         slider.maximumValue = 45
         slider.setValue(0, animated: false)
+        slider.addTarget(self, action: #selector(sliderValueDidChange(_:)), for: .valueChanged)
         let doneButton = UIButton(type: .system)
         doneButton.setTitle(L("Done"), for: .normal)
-        doneButton.addTarget(self, action: #selector(showMainMenu), for: .touchUpInside)
+        doneButton.addTarget(self, action: #selector(closeAngleMenu(_:)), for: .touchUpInside)
         let stackView = UIStackView(frame: toolbar.frame)
         stackView.distribution = .fill
         stackView.axis = .horizontal
@@ -352,6 +354,18 @@ final class DiagramViewController: UIViewController {
         stackView.addArrangedSubview(slider)
         stackView.addArrangedSubview(doneButton)
         setToolbarItems([UIBarButtonItem(customView: stackView)], animated: true)
+    }
+
+    @objc func closeAngleMenu(_ sender: UIAlertAction) {
+        hideCursorAndUnhighlightAllMarks()
+        ladderView.nullifyPressedMark()
+        showMainMenu()
+    }
+
+    @objc func sliderValueDidChange(_ sender: UISlider!) {
+        let value: CGFloat = CGFloat(sender.value)
+        ladderView.slantPressedMark(angle: value)
+        ladderView.refresh()
     }
 
     @objc func showSelectMarksMenu(_: UIAlertAction) {

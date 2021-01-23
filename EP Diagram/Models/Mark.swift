@@ -264,8 +264,11 @@ extension Mark: Hashable {
 extension Mark {
     /// Draw a solid or dashed line when drawing a mark.
     enum Style: Int, Codable, CustomStringConvertible, CaseIterable, Identifiable {
-        var id: Style { self }
+        case solid
+        case dashed
+        case dotted
 
+        var id: Style { self }
         var description: String {
             switch self {
             case .solid:
@@ -276,19 +279,15 @@ extension Mark {
                 return L("Dotted")
             }
         }
-
-        case solid
-        case dashed
-        case dotted
     }
 
     // Highlight is used to show state of a mark visibly.
     enum Highlight: Int, Codable {
         case attached // cursor attached
-        case grouped // mark attached to cursor and
-        case selected
-        case linked
-        case none
+        case grouped // is part of a mark group
+        case selected // selected for some action
+        case linked // linked together in link mode
+        case none // plain old mark
     }
 
     // Site of block
@@ -305,4 +304,12 @@ extension Mark {
         case none
     }
 
+    // Mutually exclusive modes that determine behavior and appears of marks.
+    enum Mode: Int, Codable {
+        case attached
+        case grouped
+        case selected
+        case linked
+        case normal
+    }
 }
