@@ -25,67 +25,7 @@ enum Movement {
     case omnidirectional
 }
 
-// MARK: - structs, classes
-
-// A mark may have up to three attachments to marks in the proximal and distal regions
-// and in its own region, i.e. reentry spawning a mark.
-struct MarkGroup: Codable {
-    var proximal: MarkSet
-    var middle: MarkSet
-    var distal: MarkSet
-
-    var allMarks: MarkSet {
-        get {
-            proximal.union(middle.union(distal))
-        }
-    }
-
-    init(proximal: MarkSet = MarkSet(), middle: MarkSet = MarkSet(), distal: MarkSet = MarkSet()) {
-        self.proximal = proximal
-        self.middle = middle
-        self.distal = distal
-    }
-
-    mutating func remove(mark: Mark) {
-        proximal.remove(mark)
-        middle.remove(mark)
-        distal.remove(mark)
-    }
-
-    var count: Int { allMarks.count }
-
-    func setMode(_ mode: Mark.Mode) {
-        allMarks.forEach { mark in mark.mode = mode }
-    }
-}
-
-struct MarkIdGroup: Codable {
-    var proximal: MarkIdSet
-    var middle: MarkIdSet
-    var distal: MarkIdSet
-
-    var allMarkIds: MarkIdSet {
-        proximal.union(middle.union(distal))
-    }
-    var count: Int {
-        allMarkIds.count
-    }
-
-    init(proximal: MarkIdSet = MarkIdSet(),
-         middle: MarkIdSet = MarkIdSet(),
-         distal: MarkIdSet = MarkIdSet()) {
-        self.proximal = proximal
-        self.middle = middle
-        self.distal = distal
-    }
-
-    mutating func remove(id: UUID) {
-        proximal.remove(id)
-        middle.remove(id)
-        distal.remove(id)
-    }
-    
-}
+// MARK: - classes, stucts
 
 // The mark is a fundamental component of a ladder diagram.
 class Mark: Codable {
@@ -93,17 +33,14 @@ class Mark: Codable {
 
     var segment: Segment // where a mark is, using regional coordinates
 
-    var mode: Mode = .normal {
-        didSet {
-            print("mark mode is now \(mode)")
-        }
-    }
+    var mode: Mode = .normal
     var anchor: Anchor = .middle // Anchor point for movement and to attach a cursor
     var lineStyle: Style = .solid
     var block: Block = .none
     var impulseOrigin: ImpulseOrigin = .none
-    var text: String = ""  // text is usually a calibrated interval
-    var showText: Bool = true
+    var measurementText: String = ""
+    var showMeasurementText: Bool = true
+
     // Ids of other marks that this mark is grouped with.
     var groupedMarkIds: MarkIdGroup = MarkIdGroup()
     var regionIndex: Int = -1 // keep track of which region mark is in a ladder, negative value should not occur, except on init.
@@ -232,6 +169,66 @@ class Mark: Codable {
         segment.distal.x += delta
     }
 }
+
+// A mark may have up to three attachments to marks in the proximal and distal regions
+// and in its own region, i.e. reentry spawning a mark.
+struct MarkGroup: Codable {
+    var proximal: MarkSet
+    var middle: MarkSet
+    var distal: MarkSet
+
+    var allMarks: MarkSet {
+        get {
+            proximal.union(middle.union(distal))
+        }
+    }
+
+    init(proximal: MarkSet = MarkSet(), middle: MarkSet = MarkSet(), distal: MarkSet = MarkSet()) {
+        self.proximal = proximal
+        self.middle = middle
+        self.distal = distal
+    }
+
+    mutating func remove(mark: Mark) {
+        proximal.remove(mark)
+        middle.remove(mark)
+        distal.remove(mark)
+    }
+
+    var count: Int { allMarks.count }
+
+    func setMode(_ mode: Mark.Mode) {
+        allMarks.forEach { mark in mark.mode = mode }
+    }
+}
+
+struct MarkIdGroup: Codable {
+    var proximal: MarkIdSet
+    var middle: MarkIdSet
+    var distal: MarkIdSet
+
+    var allMarkIds: MarkIdSet {
+        proximal.union(middle.union(distal))
+    }
+    var count: Int {
+        allMarkIds.count
+    }
+
+    init(proximal: MarkIdSet = MarkIdSet(),
+         middle: MarkIdSet = MarkIdSet(),
+         distal: MarkIdSet = MarkIdSet()) {
+        self.proximal = proximal
+        self.middle = middle
+        self.distal = distal
+    }
+
+    mutating func remove(id: UUID) {
+        proximal.remove(id)
+        middle.remove(id)
+        distal.remove(id)
+    }
+}
+
 // MARK: - extensions
 
 extension Mark: CustomDebugStringConvertible {
@@ -244,7 +241,7 @@ extension Mark: CustomDebugStringConvertible {
     }
 }
 
-extension Mark: Comparable {
+extension Mark: Comparable, Hashable {
     static func < (lhs: Mark, rhs: Mark) -> Bool {
         return lhs.segment.proximal.x < rhs.segment.proximal.x && lhs.segment.distal.x < rhs.segment.distal.x
     }
@@ -252,9 +249,7 @@ extension Mark: Comparable {
     static func == (lhs: Mark, rhs: Mark) -> Bool {
         return lhs.id == rhs.id
     }
-}
 
-extension Mark: Hashable {
     func hash(into hasher: inout Hasher) {
         hasher.combine(id)
     }

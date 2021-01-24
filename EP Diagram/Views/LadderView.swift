@@ -75,14 +75,6 @@ final class LadderView: ScaledView {
             activateRegion(region: activeRegion)
         }
     }
-    private var attachedMark: Mark? {
-        get {
-            return ladder.attachedMark
-        }
-        set(newValue) {
-            ladder.attachedMark = newValue
-        }
-    }
     // TODO: not pressed, make array of selected marks
     var pressedMark: Mark? {
         get {
@@ -567,7 +559,7 @@ final class LadderView: ScaledView {
 
     func setAttachedMarkAndGroupedMarksModes() {
         print("setAttachedMarkAndGroupedMarksModes()")
-        if let attachedMark = attachedMark {
+        if let attachedMark = ladder.attachedMark {
             let groupedMarkIds = attachedMark.groupedMarkIds
             // Note that the order below is important.  An attached mark can be in its own groupedMarks.  But we always want the attached mark to have an .attached highlight.
             ladder.setModeForMarkIdGroup(mode: .grouped, markIdGroup: groupedMarkIds)
@@ -577,8 +569,7 @@ final class LadderView: ScaledView {
 
     func attachMark(_ mark: Mark?) {
         print("attachMark()")
-//        mark?.mode = .attached
-        attachedMark = mark
+        ladder.attachedMark = mark
         setAttachedMarkAndGroupedMarksModes()
     }
 
@@ -937,13 +928,13 @@ final class LadderView: ScaledView {
     }
 
     func moveAttachedMark(position: CGPoint) {
-        if let attachedMark = attachedMark {
+        if let attachedMark = ladder.attachedMark {
             moveMark(mark: attachedMark, scaledViewPosition: position)
         }
     }
 
     func fixBoundsOfAttachedMark() {
-        if let attachedMark = attachedMark {
+        if let attachedMark = ladder.attachedMark {
             fixBoundsOfMark(attachedMark)
         }
     }
@@ -1285,7 +1276,7 @@ final class LadderView: ScaledView {
     }
 
     func drawConductionTime(forMark mark: Mark, segment: Segment, context: CGContext) {
-        guard let calibration = calibration, calibration.isCalibrated, showConductionTimes, mark.showText else { return }
+        guard let calibration = calibration, calibration.isCalibrated, showConductionTimes, mark.showMeasurementText else { return }
         let value = lround(Double(cursorViewDelegate.markMeasurement(segment: segment)))
         let text = "\(value)"
         var origin = segment.midpoint
@@ -1565,7 +1556,7 @@ extension LadderView: LadderViewDelegate {
     }
 
     func getAttachedMarkLadderViewPositionY(view: UIView) -> CGPoint? {
-        guard let position = getMarkAnchorLadderViewPosition(mark: attachedMark, region: activeRegion) else {
+        guard let position = getMarkAnchorLadderViewPosition(mark: ladder.attachedMark, region: activeRegion) else {
             return nil
         }
         return convert(position, to: view)
@@ -1628,15 +1619,15 @@ extension LadderView: LadderViewDelegate {
     }
 
     func addAttachedMark(scaledViewPositionX positionX: CGFloat) {
-        attachedMark = ladder.addMark(at: positionX / scale, inRegion: activeRegion)
-        if let attachedMark = attachedMark {
+        ladder.attachedMark = ladder.addMark(at: positionX / scale, inRegion: activeRegion)
+        if let attachedMark = ladder.attachedMark {
             undoablyAddMark(mark: attachedMark, region: activeRegion)
             attachedMark.mode = .attached
         }
     }
 
     func groupMarksNearbyAttachedMark() {
-        guard let attachedMark = attachedMark else { return }
+        guard let attachedMark = ladder.attachedMark else { return }
         groupNearbyMarks(mark: attachedMark)
         addGroupedMiddleMarks(ofMark: attachedMark)
     }
@@ -1764,7 +1755,7 @@ extension LadderView: LadderViewDelegate {
     }
 
     func getAttachedMarkScaledAnchorPosition() -> CGPoint? {
-        return getMarkScaledAnchorPosition(attachedMark)
+        return getMarkScaledAnchorPosition(ladder.attachedMark)
     }
 
     func getMarkScaledAnchorPosition(_ mark: Mark?) -> CGPoint? {
@@ -1773,24 +1764,24 @@ extension LadderView: LadderViewDelegate {
     }
 
     func getAttachedMarkAnchor() -> Anchor {
-        guard let attachedMark = attachedMark else { return .none }
+        guard let attachedMark = ladder.attachedMark else { return .none }
         return attachedMark.anchor
     }
 
     func unattachAttachedMark() {
-        assessBlockAndImpulseOrigin(mark: attachedMark)
-        attachedMark?.mode = .normal
-        attachedMark = nil
+        assessBlockAndImpulseOrigin(mark: ladder.attachedMark)
+        ladder.attachedMark?.mode = .normal
+        ladder.attachedMark = nil
     }
 
     func deleteAttachedMark() {
         os_log("deleteAttachedMark() - LadderView", log: OSLog.debugging, type: .debug)
-        deleteMark(attachedMark)
+        deleteMark(ladder.attachedMark)
     }
 
     func toggleAttachedMarkAnchor() {
-        toggleAnchor(mark: attachedMark)
-        if let attachedMark = attachedMark, let activeRegion = activeRegion {
+        toggleAnchor(mark: ladder.attachedMark)
+        if let attachedMark = ladder.attachedMark, let activeRegion = activeRegion {
             adjustCursor(mark: attachedMark, region: activeRegion)
         }
     }

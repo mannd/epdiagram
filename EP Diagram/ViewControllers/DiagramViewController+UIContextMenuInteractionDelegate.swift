@@ -11,6 +11,17 @@ import os.log
 
 // TODO: Move all context menu functions here, implement through LadderView
 extension DiagramViewController: UIContextMenuInteractionDelegate {
+    // Need to select marks after menu appears.
+    func contextMenuInteraction(_ interaction: UIContextMenuInteraction, willDisplayMenuFor configuration: UIContextMenuConfiguration, animator: UIContextMenuInteractionAnimating?) {
+        animator?.addCompletion {
+            print("completion")
+            if let location = self.menuPressLocation {
+                self.ladderView.setPressedMark(position: location)
+                self.ladderView.refresh()
+            }
+        }
+    }
+
     func contextMenuInteraction(_ interaction: UIContextMenuInteraction, configurationForMenuAtLocation location: CGPoint) -> UIContextMenuConfiguration? {
         os_log("contextMenuInteraction(:configurationForMenuAtLocation:)", log: .action, type: .info)
         // Warning: don't hide cursor here, as this function is called during dragging on ladder view.
@@ -29,11 +40,17 @@ extension DiagramViewController: UIContextMenuInteractionDelegate {
         case .error:
             return nil
         }
+    }
 
+    // Unselect here too
+    func contextMenuInteraction(_ interaction: UIContextMenuInteraction, willEndFor configuration: UIContextMenuConfiguration, animator: UIContextMenuInteractionAnimating?) {
+        ladderView.normalizeAllMarks()
     }
 
     func handleMarkPressed(at location: CGPoint) -> UIContextMenuConfiguration {
-        ladderView.setPressedMark(position: location)
+        // FIXME: can't clear marks here
+        menuPressLocation = location
+//        ladderView.setPressedMark(position: location)
         return UIContextMenuConfiguration(identifier: nil, previewProvider: nil) {_ in
             let solid = self.getSolidAction()
             let dashed = self.getDashedAction()
@@ -122,13 +139,6 @@ extension DiagramViewController: UIContextMenuInteractionDelegate {
         return UIAction(title: L("Dotted")) { action in
             self.ladderView.setDotted()
         }
-    }
-
-    
-
-    // Unselect here too
-    func contextMenuInteraction(_ interaction: UIContextMenuInteraction, willEndFor configuration: UIContextMenuConfiguration, animator: UIContextMenuInteractionAnimating?) {
-        ladderView.normalizeAllMarks()
     }
 }
 

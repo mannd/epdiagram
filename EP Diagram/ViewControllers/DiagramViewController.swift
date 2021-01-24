@@ -41,6 +41,8 @@ final class DiagramViewController: UIViewController {
     weak var diagramEditorDelegate: DiagramEditorDelegate?
     var currentDocument: DiagramDocument?
 
+    var menuPressLocation: CGPoint?
+
     // PDF and launch from URL stuff
     var pdfRef: CGPDFDocument?
     var launchFromURL: Bool = false
