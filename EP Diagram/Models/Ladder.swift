@@ -43,7 +43,6 @@ class Ladder: NSObject, Codable {
     var attachedMark: Mark? // cursor is attached to a most 1 mark at a time
     var pressedMark: Mark? // mark that is long-pressed
     var movingMark: Mark? // mark that is being dragged
-    var selectedMarks = [Mark]() // mark(s) that have been selected
     var linkedMarks = [Mark]() // marks in the process of being linked
     // marksAreVisible shows and hides all the marks.  You can toggle this for teaching purposes.
     var marksAreVisible: Bool = true
@@ -76,6 +75,22 @@ class Ladder: NSObject, Codable {
 
     func lookup(id: UUID) -> Mark? {
         return registry[id]
+    }
+
+    // TODO: do we need registry.  With the small number of marks, might be simpler to just search the array of marks...
+    func altLookup(id: UUID) -> Mark? {
+        var foundMarks = [Mark]()
+        for region in regions {
+            foundMarks = region.marks.filter { mark in mark.id == id }
+            if foundMarks.count > 0 {
+                break
+            }
+        }
+        if foundMarks.count == 1 { // all ids should be unique
+            return foundMarks[0]
+        } else {
+            return nil
+        }
     }
 
     func reregisterAllMarks() {
@@ -177,7 +192,7 @@ class Ladder: NSObject, Codable {
 
     func deleteMark(_ mark: Mark?, inRegion region: Region?) {
         guard let mark = mark, let region = region else { return }
-        setHighlightForAllMarks(highlight: .none)
+        normalizeAllMarks()
         unregisterMark(mark)
         if let index = region.marks.firstIndex(where: {$0 === mark}) {
             region.marks.remove(at: index)
@@ -186,7 +201,7 @@ class Ladder: NSObject, Codable {
     }
 
     func deleteMarksInRegion(_ region: Region) {
-        setHighlightForAllMarks(highlight: .none)
+        normalizeAllMarks()
         for mark: Mark in region.marks {
             removeMarkIdReferences(toMarkId: mark.id)
         }
@@ -245,33 +260,33 @@ class Ladder: NSObject, Codable {
         else { return nil }
     }
 
-    func setHighlightForMarks(highlight: Mark.Highlight, inRegion region: Region?) {
-        guard let region = region else { return }
-        region.marks.forEach { item in item.highlight = highlight }
-    }
-
-    func setHighlightForAllMarks(highlight: Mark.Highlight) {
-        for region in regions {
-            setHighlightForMarks(highlight: highlight, inRegion: region)
-        }
-    }
-
-    func setHighlightForMarkIdGroup(highlight: Mark.Highlight, markIdGroup: MarkIdGroup) {
+    func setModeForMarkIdGroup(mode: Mark.Mode, markIdGroup: MarkIdGroup) {
         let markGroup = getMarkGroup(fromMarkIdGroup: markIdGroup)
-        markGroup.highlight(highlight: highlight)
+        markGroup.setMode(mode)
     }
 
-    func unattachAllMarks() {
-        for region in regions {
-            region.marks.forEach { item in item.attached = false }
+    func normalizeAllMarks() {
+        setAllMarksWithMode(.normal)
+    }
+
+    // Will have ladder store and set mark modes
+    func setAllMarksWithMode(_ mode: Mark.Mode) {
+        regions.forEach {
+            region in region.marks.forEach { mark in mark.mode = mode }
         }
     }
 
-    func unselectAllMarks() {
+    func getMarksWithMode(_ mode: Mark.Mode, inRegion region: Region) -> [Mark] {
+        let marks = region.marks.filter { mark in mark.mode == mode }
+        return marks
+    }
+
+    func getAllMarksWithMode(_ mode: Mark.Mode) -> [Mark] {
+        var marks = [Mark]()
         for region in regions {
-            region.marks.forEach { item in item.selected = false }
+            marks.append(contentsOf: getMarksWithMode(mode, inRegion: region))
         }
-        selectedMarks = []
+        return marks
     }
 
     func getAvailableAnchors(forMark mark: Mark) -> [Anchor] {

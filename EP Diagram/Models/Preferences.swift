@@ -45,7 +45,7 @@ struct Preferences {
     
 //    var red = UIColor.systemRed
 //    var blue = UIColor.systemBlue
-//    var unhighlightedColor = UIColor.label
+//    var normalColor = UIColor.label
 //    var attachedColor = UIColor.systemOrange
 //    var linkColor = UIColor.systemGreen
 //    var selectedColor = UIColor.systemRed

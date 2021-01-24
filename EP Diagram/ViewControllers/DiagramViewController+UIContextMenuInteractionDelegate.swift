@@ -128,7 +128,7 @@ extension DiagramViewController: UIContextMenuInteractionDelegate {
 
     // Unselect here too
     func contextMenuInteraction(_ interaction: UIContextMenuInteraction, willEndFor configuration: UIContextMenuConfiguration, animator: UIContextMenuInteractionAnimating?) {
-        ladderView.unhighlightAllMarks()
+        ladderView.normalizeAllMarks()
     }
 }
 

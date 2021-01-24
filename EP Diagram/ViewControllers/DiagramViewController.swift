@@ -176,7 +176,7 @@ final class DiagramViewController: UIViewController {
         setLadder(diagram.ladder)
         setDiagramImage(diagram.image)
         imageScrollView.contentInset = UIEdgeInsets(top: 0, left: leftMargin, bottom: 0, right: 0)
-        hideCursorAndUnhighlightAllMarks()
+        hideCursorAndNormalizeAllMarks()
         setViewsNeedDisplay()
         currentDocument?.undoManager.endUndoGrouping()
     }
@@ -244,7 +244,7 @@ final class DiagramViewController: UIViewController {
 
         // Need to set this here, after view draw, or Mac malpositions cursor at start of app.
         imageScrollView.contentInset = UIEdgeInsets(top: 0, left: leftMargin, bottom: 0, right: 0)
-        ladderView.unhighlightAllMarks()
+        ladderView.normalizeAllMarks()
         self.userActivity = self.view.window?.windowScene?.userActivity
         // See https://github.com/mattneub/Programming-iOS-Book-Examples/blob/master/bk2ch06p357StateSaveAndRestoreWithNSUserActivity/ch19p626pageController/SceneDelegate.swift
         if restorationInfo != nil {
@@ -357,7 +357,7 @@ final class DiagramViewController: UIViewController {
     }
 
     @objc func closeAngleMenu(_ sender: UIAlertAction) {
-        hideCursorAndUnhighlightAllMarks()
+        hideCursorAndNormalizeAllMarks()
         ladderView.nullifyPressedMark()
         showMainMenu()
     }
@@ -377,17 +377,17 @@ final class DiagramViewController: UIViewController {
         }
         setToolbarItems(selectMenuButtons, animated: false)
         navigationController?.setToolbarHidden(false, animated: false)
-        hideCursorAndUnhighlightAllMarks()
+        hideCursorAndNormalizeAllMarks()
         setMode(.select)
         ladderView.startZoning()
         setViewsNeedDisplay()
     }
 
     // Ideally this should be "private" however need access to it in hamburger delegate in another file.
-    func hideCursorAndUnhighlightAllMarks() {
+    func hideCursorAndNormalizeAllMarks() {
         guard cursorView.cursorIsVisible else { return } // don't bother if cursor not visible
         cursorView.cursorIsVisible = false
-        ladderView.unhighlightAllMarks()
+        ladderView.normalizeAllMarks()
     }
 
     private func showLinkMenu() {
@@ -397,7 +397,7 @@ final class DiagramViewController: UIViewController {
             let cancelButton = UIBarButtonItem(title: cancelTitle, style: .done, target: self, action: #selector(cancelLink))
             linkMenuButtons = [prompt, spacer, cancelButton]
         }
-        hideCursorAndUnhighlightAllMarks()
+        hideCursorAndNormalizeAllMarks()
         setToolbarItems(linkMenuButtons, animated: false)
         navigationController?.setToolbarHidden(false, animated: false)
     }
@@ -513,7 +513,7 @@ final class DiagramViewController: UIViewController {
 
     @objc func linkMarks() {
         os_log("linkMarks()", log: OSLog.action, type: .info)
-        hideCursorAndUnhighlightAllMarks()
+        hideCursorAndNormalizeAllMarks()
         ladderView.removeLinks()
         showLinkMenu()
         setMode(.link)
@@ -536,8 +536,7 @@ final class DiagramViewController: UIViewController {
         showMainMenu()
         setMode(.normal)
         ladderView.endZoning()
-        ladderView.unhighlightAllMarks()
-        ladderView.unselectAllMarks()
+        ladderView.normalizeAllMarks()
         ladderView.setNeedsDisplay()
     }
 
@@ -546,7 +545,7 @@ final class DiagramViewController: UIViewController {
         showMainMenu()
         setMode(.normal)
         ladderView.removeLinks()
-        ladderView.unhighlightAllMarks()
+        ladderView.normalizeAllMarks()
         ladderView.setNeedsDisplay()
     }
 
@@ -560,7 +559,7 @@ final class DiagramViewController: UIViewController {
     @objc func clearCalibration() {
         os_log("clearCalibration()", log: .action, type: .info)
         diagram.calibration.reset()
-        hideCursorAndUnhighlightAllMarks()
+        hideCursorAndNormalizeAllMarks()
         ladderView.refresh()
         cursorView.refresh()
         closeCalibrationMenu()
@@ -581,7 +580,7 @@ final class DiagramViewController: UIViewController {
         os_log("undo action", log: OSLog.action, type: .info)
         if self.currentDocument?.undoManager?.canUndo ?? false {
             // Cursor doesn't track undo and redo well, so hide it!
-            hideCursorAndUnhighlightAllMarks()
+            hideCursorAndNormalizeAllMarks()
             self.currentDocument?.undoManager?.undo()
             setViewsNeedDisplay()
         }
@@ -590,7 +589,7 @@ final class DiagramViewController: UIViewController {
     @objc func redo() {
         os_log("redo action", log: OSLog.action, type: .info)
         if self.currentDocument?.undoManager?.canRedo ?? false {
-            hideCursorAndUnhighlightAllMarks()
+            hideCursorAndNormalizeAllMarks()
             self.currentDocument?.undoManager?.redo()
             setViewsNeedDisplay()
         }
@@ -615,7 +614,7 @@ final class DiagramViewController: UIViewController {
         }
         if ladderView.mode == .select {
             ladderView.zone = Zone()
-            ladderView.unselectAllMarks()
+            ladderView.normalizeAllMarks()
             ladderView.setNeedsDisplay()
         }
         if ladderView.mode == .normal {
@@ -625,7 +624,7 @@ final class DiagramViewController: UIViewController {
             }
             if cursorView.cursorIsVisible {
                 ladderView.unattachAttachedMark()
-                hideCursorAndUnhighlightAllMarks()
+                hideCursorAndNormalizeAllMarks()
             }
             else {
                 let position = tap.location(in: imageScrollView)
@@ -717,7 +716,7 @@ final class DiagramViewController: UIViewController {
         os_log("viewWillTransition", log: OSLog.viewCycle, type: .info)
         super.viewWillTransition(to: size, with: coordinator)
         // Hide cursor with rotation, to avoid redrawing it.
-        hideCursorAndUnhighlightAllMarks()
+        hideCursorAndNormalizeAllMarks()
         // Remove separatorView when rotating to let original constraints resume.
         // Otherwise, views are not laid out correctly.
         if let separatorView = separatorView {

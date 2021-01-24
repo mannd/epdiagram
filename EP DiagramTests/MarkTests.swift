@@ -112,6 +112,21 @@ class MarkTests: XCTestCase {
         XCTAssertEqual(ladder.lookup(id: mark1.id), nil)
     }
 
+    func testAltLookup() {
+        let ladder = Ladder.defaultLadder()
+        let mark1 = Mark()
+        ladder.addMark(mark1, toRegion: ladder.regions[0])
+        let mark2 = Mark()
+        ladder.addMark(mark2, toRegion: ladder.regions[1])
+        let mark3 = Mark()
+        ladder.addMark(mark3, toRegion: ladder.regions[2])
+        XCTAssertEqual(ladder.altLookup(id: mark1.id), mark1)
+        XCTAssertEqual(ladder.altLookup(id: mark2.id), mark2)
+        XCTAssertEqual(ladder.altLookup(id: mark3.id), mark3)
+        ladder.deleteMark(mark1, inRegion: ladder.regions[0])
+        XCTAssertEqual(ladder.altLookup(id: mark1.id), nil)
+    }
+
     func testRelativeRegions() {
         let ladder = Ladder.defaultLadder()
         let aMark = Mark()
@@ -177,10 +192,10 @@ class MarkTests: XCTestCase {
         XCTAssertEqual(mg.count, 3)
         mg.remove(mark: newMark)
         XCTAssertEqual(mg.count, 2)
-        mg.highlight(highlight: .selected)
+        mg.setMode(.selected)
         let allMarks = mg.allMarks
         for mark in allMarks {
-            XCTAssertEqual(mark.highlight, .selected)
+            XCTAssertEqual(mark.mode, .selected)
         }
     }
 
@@ -244,5 +259,29 @@ class MarkTests: XCTestCase {
         XCTAssertEqual(result, 0.57735, accuracy: accuracy)
         result = Geometry.rightTriangleBase(withAngle: 0, height: height)
         XCTAssertEqual(result, 0, accuracy: accuracy)
+    }
+
+    func testMarkMode() {
+        let ladder = Ladder.defaultLadder()
+        ladder.addMark(Mark(), toRegion: ladder.regions[0])
+        ladder.addMark(Mark(), toRegion: ladder.regions[1])
+        ladder.addMark(Mark(), toRegion: ladder.regions[1])
+        for region in ladder.regions {
+            for mark in region.marks {
+                XCTAssertEqual(mark.mode, .normal)
+            }
+        }
+        ladder.setAllMarksWithMode(.attached)
+        for region in ladder.regions {
+            for mark in region.marks {
+                XCTAssertEqual(mark.mode, .attached)
+            }
+        }
+        let normalMarks = ladder.getAllMarksWithMode(.normal)
+        XCTAssertEqual(normalMarks.count, 0)
+        let attachedMarks = ladder.getAllMarksWithMode(.attached)
+        XCTAssertEqual(attachedMarks.count, 3)
+        let region1AttachedMarks = ladder.getMarksWithMode(.attached, inRegion: ladder.regions[1])
+        XCTAssertEqual(region1AttachedMarks.count, 2)
     }
 }

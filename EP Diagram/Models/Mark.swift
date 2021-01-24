@@ -54,10 +54,8 @@ struct MarkGroup: Codable {
 
     var count: Int { allMarks.count }
 
-    func highlight(highlight: Mark.Highlight) {
-        for mark in allMarks {
-            mark.highlight = highlight
-        }
+    func setMode(_ mode: Mark.Mode) {
+        allMarks.forEach { mark in mark.mode = mode }
     }
 }
 
@@ -94,9 +92,12 @@ class Mark: Codable {
     let id: UUID // each mark has a unique id to allow sets of marks
 
     var segment: Segment // where a mark is, using regional coordinates
-    var attached: Bool = false // cursor attached and shown
-    var selected: Bool = false // mark is selected for some action
-    var highlight: Highlight = .none
+
+    var mode: Mode = .normal {
+        didSet {
+            print("mark mode is now \(mode)")
+        }
+    }
     var anchor: Anchor = .middle // Anchor point for movement and to attach a cursor
     var lineStyle: Style = .solid
     var block: Block = .none
@@ -238,8 +239,7 @@ extension Mark: CustomDebugStringConvertible {
         """
         \(id.debugDescription)
         \(segment)
-        attached = \(attached)
-
+        mode = \(mode)
         """
     }
 }
@@ -279,15 +279,6 @@ extension Mark {
                 return L("Dotted")
             }
         }
-    }
-
-    // Highlight is used to show state of a mark visibly.
-    enum Highlight: Int, Codable {
-        case attached // cursor attached
-        case grouped // is part of a mark group
-        case selected // selected for some action
-        case linked // linked together in link mode
-        case none // plain old mark
     }
 
     // Site of block
