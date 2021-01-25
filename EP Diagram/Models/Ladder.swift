@@ -41,8 +41,6 @@ class Ladder: NSObject, Codable {
     var regions = [Region]()
     var numRegions: Int { regions.count }
     var attachedMark: Mark? // cursor is attached to a most 1 mark at a time
-    var pressedMark: Mark? // mark that is long-pressed
-    var movingMark: Mark? // mark that is being dragged
     var linkedMarks = [Mark]() // marks in the process of being linked
     // marksAreVisible shows and hides all the marks.  You can toggle this for teaching purposes.
     var marksAreVisible: Bool = true

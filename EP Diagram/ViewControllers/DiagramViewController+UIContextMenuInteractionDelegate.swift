@@ -15,8 +15,9 @@ extension DiagramViewController: UIContextMenuInteractionDelegate {
     func contextMenuInteraction(_ interaction: UIContextMenuInteraction, willDisplayMenuFor configuration: UIContextMenuConfiguration, animator: UIContextMenuInteractionAnimating?) {
         animator?.addCompletion {
             print("completion")
+            // FIXME: need to get selected marks, region, label, etc. here
             if let location = self.menuPressLocation {
-                self.ladderView.setPressedMark(position: location)
+                self.ladderView.setSelectedMark(position: location)
                 self.ladderView.refresh()
             }
         }
@@ -24,7 +25,6 @@ extension DiagramViewController: UIContextMenuInteractionDelegate {
 
     func contextMenuInteraction(_ interaction: UIContextMenuInteraction, configurationForMenuAtLocation location: CGPoint) -> UIContextMenuConfiguration? {
         os_log("contextMenuInteraction(:configurationForMenuAtLocation:)", log: .action, type: .info)
-        // Warning: don't hide cursor here, as this function is called during dragging on ladder view.
         let locationInLadder = ladderView.getLocationInLadder(position: location)
         switch locationInLadder.specificLocation {
         case .mark:
@@ -50,7 +50,6 @@ extension DiagramViewController: UIContextMenuInteractionDelegate {
     func handleMarkPressed(at location: CGPoint) -> UIContextMenuConfiguration {
         // FIXME: can't clear marks here
         menuPressLocation = location
-//        ladderView.setPressedMark(position: location)
         return UIContextMenuConfiguration(identifier: nil, previewProvider: nil) {_ in
             let solid = self.getSolidAction()
             let dashed = self.getDashedAction()
@@ -61,7 +60,7 @@ extension DiagramViewController: UIContextMenuInteractionDelegate {
                 self.showAngleMenu()
             }
             let unlink = UIAction(title: L("Unlink")) { action in
-                self.ladderView.ungroupPressedMark()
+                self.ladderView.ungroupSelectedMarks()
             }
             // FIXME: make sure we won't move grouped marks, or disconnect them when straightening.
             let straightenToProximal = UIAction(title: L("Straighten mark to proximal endpoint")) { action in
@@ -71,7 +70,7 @@ extension DiagramViewController: UIContextMenuInteractionDelegate {
                 self.ladderView.straightenToDistal()
             }
             let delete = UIAction(title: L("Delete"), image: UIImage(systemName: "trash"), attributes: .destructive) { action in
-                self.ladderView.deletePressedMark()
+                self.ladderView.deleteSelectedMarks()
             }
             return UIMenu(title: L("Edit mark"), children: [style, straightenToProximal, straightenToDistal, slantMark, unlink, delete])
         }
@@ -79,6 +78,7 @@ extension DiagramViewController: UIContextMenuInteractionDelegate {
 
     // TODO: Need to highlight region, make sure deletion is in correct region, turn off highlight when doen with menu item.
     func handleRegionPressed(at location: CGPoint) -> UIContextMenuConfiguration {
+        menuPressLocation = location
         return UIContextMenuConfiguration(identifier: nil, previewProvider: nil) { suggestedActions in
 //            let solid = UIAction(title: L("Solid")) { action in
 ////                self.setSolid()
@@ -93,7 +93,7 @@ extension DiagramViewController: UIContextMenuInteractionDelegate {
             // Use .displayInline option to show menu inline with separator.
             //           let style = UIMenu(title: L("Style..."), options: .displayInline,  children: [solid, dashed, dotted])
 //            let unlink = UIAction(title: L("Unlink")) { action in
-//                self.ungroupPressedMark()
+//                self.ungroupSelectedMarks()
 //            }
             let paste = UIAction(title: L("Paste")) { action in
 
@@ -102,7 +102,7 @@ extension DiagramViewController: UIContextMenuInteractionDelegate {
 
             }
 //            let delete = UIAction(title: L("Delete"), image: UIImage(systemName: "trash"), attributes: .destructive) { action in
-//                self.ladderView.deletePressedMark()
+//                self.ladderView.deleteSelectedMarks()
 //            }
             let deleteAllInRegion = UIAction(title: L("Delete all in region"), image: UIImage(systemName: "trash"), attributes: .destructive) { action in
                 self.ladderView.deleteAllInRegion()

@@ -75,24 +75,7 @@ final class LadderView: ScaledView {
             activateRegion(region: activeRegion)
         }
     }
-    // TODO: not pressed, make array of selected marks
-    var pressedMark: Mark? {
-        get {
-            return ladder.pressedMark
-        }
-        set(newValue) {
-            ladder.pressedMark = newValue
-        }
-    }
-    private var movingMark: Mark? {
-        get {
-            return ladder.movingMark
-        }
-        set(newValue) {
-            ladder.movingMark = newValue
-        }
-    }
-
+    private var movingMark: Mark?
     private var regionOfDragOrigin: Region?
     private var regionProximalToDragOrigin: Region?
     private var regionDistalToDragOrigin: Region?
@@ -983,34 +966,25 @@ final class LadderView: ScaledView {
 //        P("long press at \(locationInLadder) ")
 //    }
 
-    func setPressedMark(position: CGPoint) {
+    func setSelectedMark(position: CGPoint) {
         let locationInLadder = getLocationInLadder(position: position)
         // Need to activate region that was pressed.
-        if let region = locationInLadder.region {
-            activeRegion = region
-        }
+//        if let region = locationInLadder.region {
+//            activeRegion = region
+//        }
         if let mark = locationInLadder.mark {
             normalizeAllMarks()
-            pressedMark = mark
             mark.mode = .selected
         }
     }
 
-    func setPressedMarkStyle(style: Mark.Style) {
-        if let pressedMark = pressedMark {
-            pressedMark.lineStyle = style
-            if mode == .select {
-                // TODO: Fix
-//                for mark in ladder.selectedMarks {
-//                    mark.lineStyle = style
-//                }
-            }
-        }
+    func setSelectedMarksStyle(style: Mark.Style) {
+        let selectedMarks: [Mark] = ladder.allMarksWithMode(.selected)
+        selectedMarks.forEach { mark in mark.lineStyle = style }
     }
 
     @objc func setSolid() {
-        setPressedMarkStyle(style: .solid)
-        self.nullifyPressedMark()
+        setSelectedMarksStyle(style: .solid)
 
         setNeedsDisplay()
     }
@@ -1022,21 +996,15 @@ final class LadderView: ScaledView {
     }
 
     @objc func setDashed() {
-        setPressedMarkStyle(style: .dashed)
-        self.nullifyPressedMark()
+        setSelectedMarksStyle(style: .dashed)
 
         setNeedsDisplay()
     }
 
     @objc func setDotted() {
-        setPressedMarkStyle(style: .dotted)
-        self.nullifyPressedMark()
+        setSelectedMarksStyle(style: .dotted)
 
         setNeedsDisplay()
-    }
-
-    func nullifyPressedMark() {
-        pressedMark = nil
     }
 
     // MARK: - draw
@@ -1410,12 +1378,11 @@ final class LadderView: ScaledView {
         cursorViewDelegate.setCaliperMaxY(maxY)
     }
 
-    @objc func deletePressedMark() {
-        os_log("deletePressedMark() - LadderView", log: OSLog.debugging, type: .debug)
-        if let pressedMark = pressedMark {
-            undoablyDeleteMark(mark: pressedMark, region: activeRegion)
-            ladder.normalizeAllMarks()
-        }
+    @objc func deleteSelectedMarks() {
+        os_log("deleteSelectedMarks() - LadderView", log: OSLog.debugging, type: .debug)
+        guard let activeRegion = activeRegion else { return }
+        let selectedMarks = ladder.marksWithMode(.selected, inRegion: activeRegion)
+        selectedMarks.forEach { mark in self.undoablyDeleteMark(mark: mark, region: activeRegion) }
         hideCursorAndNormalizeAllMarks()
         cursorViewDelegate.refresh()
         setNeedsDisplay()
@@ -1449,10 +1416,9 @@ final class LadderView: ScaledView {
         setNeedsDisplay()
     }
 
-    @objc func ungroupPressedMark() {
-        if let pressedMark = pressedMark {
-            ungroupMarks(mark: pressedMark)
-        }
+    @objc func ungroupSelectedMarks() {
+        let selectedMarks = ladder.allMarksWithMode(.selected)
+        selectedMarks.forEach { mark in ungroupMarks(mark: mark) }
     }
 
     func ungroupMarks(mark: Mark) {
@@ -1461,37 +1427,30 @@ final class LadderView: ScaledView {
     }
 
     func slantMark() {
-        if let pressedMark = pressedMark {
-            slantMark(angle: 2, mark: pressedMark, region: ladder.regions[pressedMark.regionIndex])
-        }
+        let selectedMarks = ladder.allMarksWithMode(.selected)
+        selectedMarks.forEach { mark in self.slantMark(angle: 2, mark: mark, region: ladder.regions[mark.regionIndex]) }
     }
 
     // FIXME: make straightening undoable
     @objc func straightenToProximal() {
-        if let pressedMark = pressedMark {
-            // don't bother if already straight
-            guard pressedMark.segment.distal.x != pressedMark.segment.proximal.x else { return }
-            hideCursorAndNormalizeAllMarks()
-            let segment = Segment(proximal: pressedMark.segment.proximal, distal: CGPoint(x: pressedMark.segment.proximal.x, y: pressedMark.segment.distal.y))
-            setSegment(segment: segment, forMark: pressedMark)
-
+        let selectedMarks = ladder.allMarksWithMode(.selected)
+        selectedMarks.forEach { mark in
+            let segment = Segment(proximal: mark.segment.proximal, distal: CGPoint(x: mark.segment.proximal.x, y: mark.segment.distal.y))
+            self.setSegment(segment: segment, forMark: mark)
         }
     }
 
     @objc func straightenToDistal() {
-        if let pressedMark = pressedMark {
-            // don't bother if already straight
-            guard pressedMark.segment.proximal.x != pressedMark.segment.distal.x else { return }
-            hideCursorAndNormalizeAllMarks()
-            let segment = Segment(proximal: CGPoint(x: pressedMark.segment.distal.x, y: pressedMark.segment.proximal.y), distal: pressedMark.segment.distal)
-            setSegment(segment: segment, forMark: pressedMark)
+        let selectedMarks = ladder.allMarksWithMode(.selected)
+        selectedMarks.forEach { mark in
+            let segment = Segment(proximal: CGPoint(x: mark.segment.distal.x, y: mark.segment.proximal.y), distal: mark.segment.distal)
+            self.setSegment(segment: segment, forMark: mark)
         }
     }
 
-    @objc func slantPressedMark(angle: CGFloat) {
-        if let pressedMark = pressedMark {
-            slantMark(angle: angle, mark: pressedMark, region: ladder.regions[pressedMark.regionIndex])
-        }
+    @objc func slantSelectedMarks(angle: CGFloat) {
+        let selectedMarks = ladder.allMarksWithMode(.selected)
+        selectedMarks.forEach { mark in slantMark(angle: angle, mark: mark, region: ladder.regions[mark.regionIndex]) }
     }
 
     func slantMark(angle: CGFloat, mark: Mark, region: Region) {

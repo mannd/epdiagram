@@ -360,13 +360,12 @@ final class DiagramViewController: UIViewController {
 
     @objc func closeAngleMenu(_ sender: UIAlertAction) {
         hideCursorAndNormalizeAllMarks()
-        ladderView.nullifyPressedMark()
         showMainMenu()
     }
 
     @objc func sliderValueDidChange(_ sender: UISlider!) {
         let value: CGFloat = CGFloat(sender.value)
-        ladderView.slantPressedMark(angle: value)
+        ladderView.slantSelectedMarks(angle: value)
         ladderView.refresh()
     }
 

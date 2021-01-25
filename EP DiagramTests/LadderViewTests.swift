@@ -64,12 +64,4 @@ class LadderViewTests: XCTestCase {
         XCTAssertEqual(markPosition.distal.x, scaledViewSegment.distal.x, accuracy: 0.001)
         XCTAssertEqual(markPosition.distal.y, scaledViewSegment.distal.y, accuracy: 0.001)
     }
-
-    // TODO: this is not working.
-//    func testSetPressedMark() {
-//        ladderView.setActiveRegion(regionNum: 0)
-//        let mark = ladderView.addMark(scaledViewPositionX: 0)
-//        ladderView.setPressedMark(position: CGPoint(x: 0, y: 0))
-//        XCTAssertEqual(ladderView.pressedMark, mark)
-//    }
 }
