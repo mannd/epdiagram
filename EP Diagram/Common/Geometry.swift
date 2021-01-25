@@ -69,7 +69,7 @@ enum Geometry {
 
     // Algorithm from: https://stackoverflow.com/questions/15690103/intersection-between-two-lines-in-coordinates
     // Returns intersection point of two line segments, nil if no intersection.
-    static func getIntersection(ofLineFrom p1: CGPoint, to p2: CGPoint, withLineFrom p3: CGPoint, to p4: CGPoint) -> CGPoint? {
+    static func intersection(ofLineFrom p1: CGPoint, to p2: CGPoint, withLineFrom p3: CGPoint, to p4: CGPoint) -> CGPoint? {
         let d: CGFloat = (p2.x - p1.x) * (p4.y - p3.y) - (p2.y - p1.y) * (p4.x - p3.x)
         if d == 0 {
             return nil; // parallel lines

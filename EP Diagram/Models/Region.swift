@@ -59,7 +59,7 @@ class Region: Codable {
         marks.append(mark)
     }
 
-    func getRelativeYPosition(y: CGFloat) -> CGFloat? {
+    func relativeYPosition(y: CGFloat) -> CGFloat? {
         guard y >= proximalBoundary && y <= distalBoundary else { return nil }
         return (y - proximalBoundary) / (distalBoundary - proximalBoundary)
     }

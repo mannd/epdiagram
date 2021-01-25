@@ -167,7 +167,7 @@ final class LadderView: ScaledView {
             region.distalBoundary = regionBoundary + regionHeight
             regionBoundary += regionHeight
         }
-        activeRegion = ladder.regions[ladder.getActiveRegionIndex() ?? 0]
+        activeRegion = ladder.regions[ladder.activeRegionIndex() ?? 0]
     }
 
     internal func getRegionUnitHeight(ladder: Ladder) -> CGFloat {
@@ -234,13 +234,13 @@ final class LadderView: ScaledView {
         var tappedRegion: Region?
         var tappedMark: Mark?
         var tappedRegionSection: RegionSection = .markSection
-        var tappedRegionDivision: RegionDivision = .none
+        var tappedDivision: RegionDivision = .none
         var tappedAnchor: Anchor = .none
         var tappedZone: Zone?
         for region in ladder.regions {
             if position.y > region.proximalBoundary && position.y < region.distalBoundary {
                 tappedRegion = region
-                tappedRegionDivision = getTappedRegionDivision(region: region, positionY: position.y)
+                tappedDivision = tappedRegionDivision(region: region, positionY: position.y)
             }
         }
         if position.x > min(zone.start, zone.end) && position.x < max(zone.start, zone.end), let tappedRegion = tappedRegion {
@@ -263,11 +263,11 @@ final class LadderView: ScaledView {
                 }
             }
         }
-        let location = LocationInLadder(region: tappedRegion, mark: tappedMark, ladder: ladder, zone: tappedZone, regionSection: tappedRegionSection, regionDivision: tappedRegionDivision, markAnchor: tappedAnchor, unscaledPosition: position)
+        let location = LocationInLadder(region: tappedRegion, mark: tappedMark, ladder: ladder, zone: tappedZone, regionSection: tappedRegionSection, regionDivision: tappedDivision, markAnchor: tappedAnchor, unscaledPosition: position)
         return location
     }
 
-    private func getTappedRegionDivision(region: Region, positionY: CGFloat) -> RegionDivision {
+    private func tappedRegionDivision(region: Region, positionY: CGFloat) -> RegionDivision {
         guard  positionY > region.proximalBoundary && positionY < region.distalBoundary else {
             return .none
         }
@@ -343,17 +343,17 @@ final class LadderView: ScaledView {
     private func link(marksToLink marks: [Mark]) -> Mark? {
         // Should not be called unless two marks to link are in marks.
         guard marks.count == 2 else { return nil }
-        guard let firstRegionIndex = ladder.getRegionIndex(ofMark: marks[0]) else {
+        guard let firstRegionIndex = ladder.regionIndex(ofMark: marks[0]) else {
             return nil
         }
-        guard let secondRegionIndex = ladder.getRegionIndex(ofMark: marks[1]) else {
+        guard let secondRegionIndex = ladder.regionIndex(ofMark: marks[1]) else {
             return nil
         }
         let regionDifference = secondRegionIndex - firstRegionIndex
         // ignore same region for now.  Only allow diff of 2 regions
         if abs(regionDifference) == 2 {
             if regionDifference > 0 {
-                activeRegion = ladder.getRegion(index: firstRegionIndex + 1)
+                activeRegion = ladder.region(at: firstRegionIndex + 1)
                 let segment = Segment(proximal: CGPoint(x: marks[0].segment.distal.x, y: 0), distal: CGPoint(x: marks[1].segment.proximal.x, y: 1.0))
                 let mark = ladder.addMark(fromSegment: segment, inRegion: activeRegion)
                 if let mark = mark {
@@ -362,7 +362,7 @@ final class LadderView: ScaledView {
                 return mark
             }
             if regionDifference < 0 {
-                activeRegion = ladder.getRegion(index: firstRegionIndex - 1)
+                activeRegion = ladder.region(at: firstRegionIndex - 1)
                 let segment = Segment(proximal: CGPoint(x: marks[1].segment.distal.x, y: 0), distal: CGPoint(x: marks[0].segment.proximal.x, y: 1.0))
                 let mark = ladder.addMark(fromSegment: segment, inRegion: activeRegion)
                 if let mark = mark {
@@ -390,7 +390,7 @@ final class LadderView: ScaledView {
             guard mark != ladder.linkedMarks[0] else { return }
             // different mark tapped
             // what region is the mark in?
-            if let markRegionIndex = ladder.getRegionIndex(ofMark: mark), let firstMarkRegionIndex = ladder.getRegionIndex(ofMark: ladder.linkedMarks[0]) {
+            if let markRegionIndex = ladder.regionIndex(ofMark: mark), let firstMarkRegionIndex = ladder.regionIndex(ofMark: ladder.linkedMarks[0]) {
                 // TODO: what about create mark with each tap?
                 let regionDistance = abs(markRegionIndex - firstMarkRegionIndex)
                 if regionDistance > 1 {
@@ -424,8 +424,8 @@ final class LadderView: ScaledView {
             guard ladder.linkedMarks.count == 1 else { return }
             let firstTappedMark = ladder.linkedMarks[0]
             // Region must be adjacent to the first mark.
-            guard let firstTappedMarkRegionIndex = ladder.getRegionIndex(ofMark: firstTappedMark),
-                  let regionIndex = ladder.getIndex(ofRegion: region),
+            guard let firstTappedMarkRegionIndex = ladder.regionIndex(ofMark: firstTappedMark),
+                  let regionIndex = ladder.regionIndex(ofRegion: region),
                   abs(firstTappedMarkRegionIndex - regionIndex) == 1 else { return }
             activeRegion = region
             // draw mark from end of previous linked mark
@@ -674,8 +674,8 @@ final class LadderView: ScaledView {
             // Activate region and get regions proximal and distal.
             if let region = locationInLadder.region {
                 regionOfDragOrigin = region
-                regionProximalToDragOrigin = ladder.getRegionBefore(region: region)
-                regionDistalToDragOrigin = ladder.getRegionAfter(region: region)
+                regionProximalToDragOrigin = ladder.regionBefore(region: region)
+                regionDistalToDragOrigin = ladder.regionAfter(region: region)
                 activeRegion = region
             }
             if let regionOfDragOrigin = regionOfDragOrigin {
@@ -866,27 +866,27 @@ final class LadderView: ScaledView {
     private func setModeOfNearbyMarks(_ mark: Mark?) {
         guard let mark = mark else { return }
         let nearbyDistance = nearbyMarkAccuracy / scale
-        let nearbyMarkIds = getNearbyMarkIds(mark: mark, nearbyDistance: nearbyDistance)
+        let markIds = nearbyMarkIds(mark: mark, nearbyDistance: nearbyDistance)
         ladder.normalizeAllMarks()
-        ladder.setModeForMarkIdGroup(mode: .grouped, markIdGroup: nearbyMarkIds)
+        ladder.setModeForMarkIdGroup(mode: .grouped, markIdGroup: markIds)
         setAttachedMarkAndGroupedMarksModes()
     }
 
     // FIXME: middle marks end up with a copy of themselves in the neighboring mark group.
     // Returns group of mark ids of marks close to passed in mark.
-    func getNearbyMarkIds(mark: Mark, nearbyDistance: CGFloat) -> MarkIdGroup {
+    func nearbyMarkIds(mark: Mark, nearbyDistance: CGFloat) -> MarkIdGroup {
         guard let activeRegion = activeRegion else { return MarkIdGroup() }
         var proximalMarkIds = MarkIdSet()
         var distalMarkIds = MarkIdSet()
         var middleMarkIds = MarkIdSet()
-        if let proximalRegion = ladder.getRegionBefore(region: activeRegion) {
+        if let proximalRegion = ladder.regionBefore(region: activeRegion) {
             for neighboringMark in proximalRegion.marks {
                 if assessCloseness(ofMark: mark, inRegion: activeRegion, toNeighboringMark: neighboringMark, inNeighboringRegion: proximalRegion, usingNearbyDistance: nearbyDistance) {
                     proximalMarkIds.insert(neighboringMark.id)
                 }
             }
         }
-        if let distalRegion = ladder.getRegionAfter(region: activeRegion) {
+        if let distalRegion = ladder.regionAfter(region: activeRegion) {
             for neighboringMark in distalRegion.marks {
                 if assessCloseness(ofMark: mark, inRegion: activeRegion, toNeighboringMark: neighboringMark, inNeighboringRegion: distalRegion, usingNearbyDistance: nearbyDistance) {
                     distalMarkIds.insert(neighboringMark.id)
@@ -1243,7 +1243,7 @@ final class LadderView: ScaledView {
     }
 
     func getTruncatedPosition(segment: Segment) -> CGPoint? {
-        let intersection = Geometry.getIntersection(ofLineFrom: CGPoint(x: leftMargin, y: 0), to: CGPoint(x: leftMargin, y: ladderViewHeight), withLineFrom: segment.proximal, to: segment.distal)
+        let intersection = Geometry.intersection(ofLineFrom: CGPoint(x: leftMargin, y: 0), to: CGPoint(x: leftMargin, y: ladderViewHeight), withLineFrom: segment.proximal, to: segment.distal)
         return intersection
     }
 
@@ -1728,13 +1728,12 @@ extension LadderView: LadderViewDelegate {
         ladder.reregisterAllMarks()
     }
 
-    // FIXME: after diagram saved and reopened, old grouped marks not working, including snapping, though newly created marks do work.
     func groupNearbyMarks(mark: Mark) {
         os_log("groupNearbyMarks(mark:) - LadderView", log: .action, type: .info)
         guard snapMarks else { return }
         let minimum: CGFloat = nearbyMarkAccuracy / scale
-        let nearbyMarkIds = getNearbyMarkIds(mark: mark, nearbyDistance: minimum)
-        let nearbyMarks = ladder.getMarkGroup(fromMarkIdGroup: nearbyMarkIds)
+        let markIds = nearbyMarkIds(mark: mark, nearbyDistance: minimum)
+        let nearbyMarks = ladder.getMarkGroup(fromMarkIdGroup: markIds)
         undoablySnapMarkToNearbyMarks(mark: mark, nearbyMarks: nearbyMarks)
     }
 

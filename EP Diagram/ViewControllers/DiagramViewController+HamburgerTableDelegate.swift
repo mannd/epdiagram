@@ -215,7 +215,7 @@ extension DiagramViewController: HamburgerTableDelegate, UIImagePickerController
     }
 
     func about() {
-        let versionBuild = Version.getAppVersion()
+        let versionBuild = Version.appVersion()
         let version = versionBuild.version ?? L("unknown")
         let build = versionBuild.build ?? L("unknown")
         os_log("EP Diagram: version = %s build = %s", log: OSLog.debugging, type: .info, version, build)

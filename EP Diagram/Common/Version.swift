@@ -11,7 +11,7 @@ import UIKit
 class Version: NSObject {
 
     typealias VersionBuild = (version: String?, build: String?)
-    static func getAppVersion() -> VersionBuild {
+    static func appVersion() -> VersionBuild {
         let dictionary = Bundle.main.infoDictionary
         let version = dictionary?["CFBundleShortVersionString"] as? String
         let build = dictionary?["CFBundleVersion"] as? String

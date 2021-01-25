@@ -135,10 +135,10 @@ class MarkTests: XCTestCase {
         ladder.addMark(aMark, toRegion: ladder.regions[0])
         ladder.addMark(avMark, toRegion: ladder.regions[1])
         ladder.addMark(vMark, toRegion: ladder.regions[2])
-        XCTAssertEqual(Ladder.getRelativeRegionBetweenMarks(mark: aMark, otherMark: aMark), RelativeRegion.same)
-        XCTAssertEqual(Ladder.getRelativeRegionBetweenMarks(mark: aMark, otherMark: avMark), RelativeRegion.after)
-        XCTAssertEqual(Ladder.getRelativeRegionBetweenMarks(mark: avMark, otherMark: aMark), RelativeRegion.before)
-        XCTAssertEqual(Ladder.getRelativeRegionBetweenMarks(mark: aMark, otherMark: vMark), RelativeRegion.distant)
+        XCTAssertEqual(Ladder.getRelativeRegionBetweenMarks(mark: aMark, otherMark: aMark), RegionRelation.same)
+        XCTAssertEqual(Ladder.getRelativeRegionBetweenMarks(mark: aMark, otherMark: avMark), RegionRelation.after)
+        XCTAssertEqual(Ladder.getRelativeRegionBetweenMarks(mark: avMark, otherMark: aMark), RegionRelation.before)
+        XCTAssertEqual(Ladder.getRelativeRegionBetweenMarks(mark: aMark, otherMark: vMark), RegionRelation.distant)
     }
 
     func testMovement() {
@@ -277,11 +277,11 @@ class MarkTests: XCTestCase {
                 XCTAssertEqual(mark.mode, .attached)
             }
         }
-        let normalMarks = ladder.getAllMarksWithMode(.normal)
+        let normalMarks = ladder.allMarksWithMode(.normal)
         XCTAssertEqual(normalMarks.count, 0)
-        let attachedMarks = ladder.getAllMarksWithMode(.attached)
+        let attachedMarks = ladder.allMarksWithMode(.attached)
         XCTAssertEqual(attachedMarks.count, 3)
-        let region1AttachedMarks = ladder.getMarksWithMode(.attached, inRegion: ladder.regions[1])
+        let region1AttachedMarks = ladder.marksWithMode(.attached, inRegion: ladder.regions[1])
         XCTAssertEqual(region1AttachedMarks.count, 2)
     }
 }
