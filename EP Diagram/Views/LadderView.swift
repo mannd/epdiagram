@@ -82,6 +82,9 @@ final class LadderView: ScaledView {
     private var dragCreatedMark: Mark?
     private var dragOriginDivision: RegionDivision = .none
 
+    private var savedActiveRegion: Region?
+    private var savedAttachedMark: Mark?
+
     var mode: Mode = .normal
 
     var leftMargin: CGFloat = 0
@@ -959,19 +962,8 @@ final class LadderView: ScaledView {
         setModeOfNearbyMarks(mark)
     }
 
-//    @objc func longPress(press: UILongPressGestureRecognizer) {
-//        self.becomeFirstResponder()
-//        let position = press.location(in: self)
-//        let locationInLadder = getLocationInLadder(position: position)
-//        P("long press at \(locationInLadder) ")
-//    }
-
     func setSelectedMark(position: CGPoint) {
         let locationInLadder = getLocationInLadder(position: position)
-        // Need to activate region that was pressed.
-//        if let region = locationInLadder.region {
-//            activeRegion = region
-//        }
         if let mark = locationInLadder.mark {
             normalizeAllMarks()
             mark.mode = .selected
@@ -985,8 +977,6 @@ final class LadderView: ScaledView {
 
     @objc func setSolid() {
         setSelectedMarksStyle(style: .solid)
-
-        setNeedsDisplay()
     }
 
     func setStyleToMarks(style: Mark.Style, marks: [Mark]) {
@@ -997,14 +987,10 @@ final class LadderView: ScaledView {
 
     @objc func setDashed() {
         setSelectedMarksStyle(style: .dashed)
-
-        setNeedsDisplay()
     }
 
     @objc func setDotted() {
         setSelectedMarksStyle(style: .dotted)
-
-        setNeedsDisplay()
     }
 
     // MARK: - draw
@@ -1081,12 +1067,19 @@ final class LadderView: ScaledView {
         context.addLine(to: CGPoint(x: rect.width, y: rect.origin.y))
         context.strokePath()
 
+        let regionRect = CGRect(x: rect.origin.x, y: rect.origin.y, width: rect.width, height: rect.height)
+
         // Highlight region if selected
         if region.activated {
-            let regionRect = CGRect(x: rect.origin.x, y: rect.origin.y, width: rect.width, height: rect.height)
             context.setAlpha(0.2)
             context.addRect(regionRect)
             context.setFillColor(red.cgColor)
+            context.drawPath(using: .fillStroke)
+        }
+        if region.mode == .selected {
+            context.setAlpha(0.2)
+            context.addRect(regionRect)
+            context.setFillColor(blue.cgColor)
             context.drawPath(using: .fillStroke)
         }
         context.setAlpha(1)
@@ -1371,7 +1364,6 @@ final class LadderView: ScaledView {
         ladderViewHeight = self.frame.height
         initializeRegions()
         cursorViewDelegate.setCursorHeight()
-
     }
 
     func setCaliperMaxY(_ maxY: CGFloat) {
@@ -1380,9 +1372,8 @@ final class LadderView: ScaledView {
 
     @objc func deleteSelectedMarks() {
         os_log("deleteSelectedMarks() - LadderView", log: OSLog.debugging, type: .debug)
-        guard let activeRegion = activeRegion else { return }
-        let selectedMarks = ladder.marksWithMode(.selected, inRegion: activeRegion)
-        selectedMarks.forEach { mark in self.undoablyDeleteMark(mark: mark, region: activeRegion) }
+        let selectedMarks = ladder.allMarksWithMode(.selected)
+        selectedMarks.forEach { mark in self.undoablyDeleteMark(mark: mark, region: ladder.regions[mark.regionIndex]) }
         hideCursorAndNormalizeAllMarks()
         cursorViewDelegate.refresh()
         setNeedsDisplay()
@@ -1742,5 +1733,31 @@ extension LadderView: LadderViewDelegate {
         if let attachedMark = ladder.attachedMark, let activeRegion = activeRegion {
             adjustCursor(mark: attachedMark, region: activeRegion)
         }
+    }
+
+    func saveState() {
+        os_log("saveState() - LadderView", log: .default, type: .default)
+        savedActiveRegion = activeRegion
+        activeRegion?.activated = false
+        activeRegion = nil
+        for region in ladder.regions {
+            region.mode = .normal
+        }
+        savedAttachedMark = ladder.attachedMark
+        ladder.normalizeAllMarks()
+        setNeedsDisplay()
+    }
+
+    func restoreState() {
+        os_log("restoreState() - LadderView", log: .default, type: .default)
+        ladder.normalizeAllMarks()
+        for region in ladder.regions {
+            region.mode = .normal
+        }
+        activeRegion = savedActiveRegion
+        activeRegion?.activated = true
+        ladder.attachedMark = savedAttachedMark
+        savedAttachedMark?.mode = .attached
+        setNeedsDisplay()
     }
 }

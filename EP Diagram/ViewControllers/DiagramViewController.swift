@@ -42,6 +42,7 @@ final class DiagramViewController: UIViewController {
     var currentDocument: DiagramDocument?
 
     var menuPressLocation: CGPoint?
+    var longPressLocationInLadder: LocationInLadder?
 
     // PDF and launch from URL stuff
     var pdfRef: CGPDFDocument?

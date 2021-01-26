@@ -14,11 +14,30 @@ extension DiagramViewController: UIContextMenuInteractionDelegate {
     // Need to select marks after menu appears.
     func contextMenuInteraction(_ interaction: UIContextMenuInteraction, willDisplayMenuFor configuration: UIContextMenuConfiguration, animator: UIContextMenuInteractionAnimating?) {
         animator?.addCompletion {
-            print("completion")
-            // FIXME: need to get selected marks, region, label, etc. here
-            if let location = self.menuPressLocation {
-                self.ladderView.setSelectedMark(position: location)
-                self.ladderView.refresh()
+            guard let locationInLadder = self.longPressLocationInLadder else { return }
+            self.ladderView.saveState()
+            switch locationInLadder.specificLocation {
+            case .mark:
+                if let location = self.menuPressLocation {
+                    self.ladderView.setSelectedMark(position: location)
+//                    self.ladderView.refresh()
+                }
+            case .region:
+                if let region = locationInLadder.region {
+                    self.ladderView.ladder.setMarksWithMode(.selected, inRegion: region)
+                    region.mode = .selected
+                }
+            case .label:
+                break
+            case .zone:
+                break
+            case .ladder:
+                self.ladderView.ladder.setAllMarksWithMode(.selected)
+                for region in self.ladderView.ladder.regions {
+                    region.mode = .selected
+                }
+            default:
+                break
             }
         }
     }
@@ -26,17 +45,19 @@ extension DiagramViewController: UIContextMenuInteractionDelegate {
     func contextMenuInteraction(_ interaction: UIContextMenuInteraction, configurationForMenuAtLocation location: CGPoint) -> UIContextMenuConfiguration? {
         os_log("contextMenuInteraction(:configurationForMenuAtLocation:)", log: .action, type: .info)
         let locationInLadder = ladderView.getLocationInLadder(position: location)
+        longPressLocationInLadder = locationInLadder
+
         switch locationInLadder.specificLocation {
         case .mark:
-            return handleMarkPressed(at: location)
+            return showMarkContextMenu(at: location)
         case .region:
-            return handleRegionPressed(at: location)
+            return showRegionContextMenu(at: location)
         case .label:
-            return nil
+            return showLabelContextMenu(at: location)
         case .zone:
-            return nil
+            return showZoneContextMenu(at: location)
         case .ladder:
-            return nil
+            return showLadderContextMenu(at: location)
         case .error:
             return nil
         }
@@ -44,10 +65,10 @@ extension DiagramViewController: UIContextMenuInteractionDelegate {
 
     // Unselect here too
     func contextMenuInteraction(_ interaction: UIContextMenuInteraction, willEndFor configuration: UIContextMenuConfiguration, animator: UIContextMenuInteractionAnimating?) {
-        ladderView.normalizeAllMarks()
+        ladderView.restoreState()
     }
 
-    func handleMarkPressed(at location: CGPoint) -> UIContextMenuConfiguration {
+    func showMarkContextMenu(at location: CGPoint) -> UIContextMenuConfiguration {
         // FIXME: can't clear marks here
         menuPressLocation = location
         return UIContextMenuConfiguration(identifier: nil, previewProvider: nil) {_ in
@@ -77,7 +98,7 @@ extension DiagramViewController: UIContextMenuInteractionDelegate {
     }
 
     // TODO: Need to highlight region, make sure deletion is in correct region, turn off highlight when doen with menu item.
-    func handleRegionPressed(at location: CGPoint) -> UIContextMenuConfiguration {
+    func showRegionContextMenu(at location: CGPoint) -> UIContextMenuConfiguration {
         menuPressLocation = location
         return UIContextMenuConfiguration(identifier: nil, previewProvider: nil) { suggestedActions in
 //            let solid = UIAction(title: L("Solid")) { action in
@@ -120,6 +141,23 @@ extension DiagramViewController: UIContextMenuInteractionDelegate {
             // TODO: Must distinguish long press on mark, label, region, zone, whole ladder (outside of ladder).
             // Create and return a UIMenu with all of the actions as children
             return UIMenu(title: "", children: [paste, rhythm, deleteAllInRegion, deleteAllInLadder])
+        }
+    }
+
+    func showLabelContextMenu(at location: CGPoint) -> UIContextMenuConfiguration {
+        return UIContextMenuConfiguration()
+    }
+
+    func showZoneContextMenu(at location: CGPoint) -> UIContextMenuConfiguration {
+        return UIContextMenuConfiguration()
+    }
+
+    func showLadderContextMenu(at location: CGPoint) -> UIContextMenuConfiguration {
+        return UIContextMenuConfiguration(identifier: nil, previewProvider: nil) { suggestedActions in
+            let deleteAllInLadder = UIAction(title: L("Clear ladder"), image: UIImage(systemName: "trash"), attributes: .destructive) { action in
+                self.ladderView.deleteAllInLadder()
+            }
+            return UIMenu(title: "", children: [deleteAllInLadder])
         }
     }
 

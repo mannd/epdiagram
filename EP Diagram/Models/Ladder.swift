@@ -274,6 +274,10 @@ class Ladder: NSObject, Codable {
         }
     }
 
+    func setMarksWithMode(_ mode: Mark.Mode, inRegion region: Region) {
+        region.marks.forEach { mark in mark.mode = mode }
+    }
+
     func marksWithMode(_ mode: Mark.Mode, inRegion region: Region) -> [Mark] {
         let marks = region.marks.filter { mark in mark.mode == mode }
         return marks

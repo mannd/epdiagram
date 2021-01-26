@@ -24,14 +24,13 @@ enum RegionDivision {
     case none
 }
 
-
-
 // MARK: - classes
 
 // A Region is a row of a ladder corresponding to an anatomic substrate.
 // A Region has a labelSection such as "A" or "AV" and
 // a markSection.  Region boundaries are set by the calling ScaledView.
 class Region: Codable {
+
     private(set) var id = UUID()
 
     var name: String
@@ -39,6 +38,8 @@ class Region: Codable {
     var unitHeight: Int = 1
     var proximalBoundary: CGFloat = 0
     var distalBoundary: CGFloat = 0
+    var mode: Mode = .normal
+
     var activated: Bool = false
     var marks = [Mark]()
     var markable: Bool = true
@@ -74,6 +75,14 @@ extension Region: CustomDebugStringConvertible {
 extension Region: Equatable {
     static func == (lhs: Region, rhs: Region) -> Bool {
         return lhs.id == rhs.id
+    }
+}
+
+extension Region {
+    enum Mode: Int, Codable {
+        case active
+        case selected
+        case normal
     }
 }
 
