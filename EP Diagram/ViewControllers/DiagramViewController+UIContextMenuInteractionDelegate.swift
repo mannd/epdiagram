@@ -28,8 +28,8 @@ extension DiagramViewController: UIContextMenuInteractionDelegate {
                     self.ladderView.ladder.setMarksWithMode(.selected, inRegion: region)
                     region.mode = .selected
                 }
-            case .zone:
-                break
+            case .zone: break
+                // set selected marks in zone
             case .ladder:
                 self.ladderView.ladder.setAllMarksWithMode(.selected)
                 for region in self.ladderView.ladder.regions {
@@ -53,9 +53,9 @@ extension DiagramViewController: UIContextMenuInteractionDelegate {
         case .region, .label:
             return regionContextMenuConfiguration(at: location)
         case .zone:
-            return showZoneContextMenu(at: location)
+            return zoneContextMenuConfiguration(at: location)
         case .ladder:
-            return showLadderContextMenu(at: location)
+            return ladderContextMenuConfiguration(at: location)
         case .error:
             return nil
         }
@@ -78,31 +78,19 @@ extension DiagramViewController: UIContextMenuInteractionDelegate {
         }
     }
 
-
-
     func regionContextMenuConfiguration(at location: CGPoint) -> UIContextMenuConfiguration {
         return UIContextMenuConfiguration(identifier: nil, previewProvider: nil) { suggestedActions in
-
-            let deleteAllInRegion = UIAction(title: L("Delete all in region"), image: UIImage(systemName: "trash"), attributes: .destructive) { action in
-                self.ladderView.deleteAllInRegion()
-            }
-            let deleteAllInLadder = UIAction(title: L("Delete all marks in ladder"), image: UIImage(systemName: "trash"), attributes: .destructive) { action in
-                self.ladderView.deleteAllInLadder()
-            }
             // FIXME: make sure we won't move grouped marks, or disconnect them when straightening.
-            return UIMenu(title: "", children: [self.styleMenu, self.rhythmAction, deleteAllInRegion, deleteAllInLadder])
+            return UIMenu(title: "", children: [self.styleMenu, self.regionStyleMenu, self.straightenToProximalAction, self.straightenToDistalAction, self.rhythmAction, self.deleteAllInRegion])
         }
     }
 
-    func showLabelContextMenu(at location: CGPoint) -> UIContextMenuConfiguration {
+    func zoneContextMenuConfiguration(at location: CGPoint) -> UIContextMenuConfiguration {
+        print("zone selected")
         return UIContextMenuConfiguration()
     }
 
-    func showZoneContextMenu(at location: CGPoint) -> UIContextMenuConfiguration {
-        return UIContextMenuConfiguration()
-    }
-
-    func showLadderContextMenu(at location: CGPoint) -> UIContextMenuConfiguration {
+    func ladderContextMenuConfiguration(at location: CGPoint) -> UIContextMenuConfiguration {
         return UIContextMenuConfiguration(identifier: nil, previewProvider: nil) { suggestedActions in
             let deleteAllInLadder = UIAction(title: L("Clear ladder"), image: UIImage(systemName: "trash"), attributes: .destructive) { action in
                 self.ladderView.deleteAllInLadder()
@@ -110,23 +98,5 @@ extension DiagramViewController: UIContextMenuInteractionDelegate {
             return UIMenu(title: "", children: [deleteAllInLadder])
         }
     }
-
-//    func getSolidAction() -> UIAction {
-//        return UIAction(title: L("Solid")) { action in
-//            self.ladderView.setSolid()
-//        }
-//    }
-//
-//    func getDashedAction() -> UIAction {
-//        return UIAction(title: L("Dashed")) { action in
-//            self.ladderView.setDashed()
-//        }
-//    }
-//
-//    func getDottedAction() -> UIAction {
-//        return UIAction(title: L("Dotted")) { action in
-//            self.ladderView.setDotted()
-//        }
-//    }
 }
 

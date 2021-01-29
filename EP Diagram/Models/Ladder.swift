@@ -179,7 +179,7 @@ class Ladder: NSObject, Codable {
     @discardableResult func addMark(_ mark: Mark, toRegion region: Region?) -> Mark? {
         os_log("addMark(_:toRegion:) - Ladder", log: .action, type: .info)
         guard let region = region else { return nil }
-        mark.lineStyle = region.lineStyle
+        mark.style = region.style
         region.appendMark(mark)
         registerMark(mark)
         if let index = regionIndex(ofRegion: region) {
@@ -289,6 +289,17 @@ class Ladder: NSObject, Codable {
             marks.append(contentsOf: marksWithMode(mode, inRegion: region))
         }
         return marks
+    }
+
+    func allRegionsWithMode(_ mode: Region.Mode) -> [Region] {
+        let selectedRegions = regions.filter { $0.mode == mode }
+//        var selectedRegions = [Region]()
+//        for region in regions {
+//            if region.mode == mode {
+//                selectedRegions.append(region)
+//            }
+//        }
+        return selectedRegions
     }
 
     func availableAnchors(forMark mark: Mark) -> [Anchor] {

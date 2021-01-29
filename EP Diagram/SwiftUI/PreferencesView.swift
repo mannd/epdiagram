@@ -42,7 +42,7 @@ struct PreferencesView: View {
                         Toggle(isOn: $snapMarks) {
                             Text("Snap marks")
                         }
-                        Picker(selection: $markStyle, label: Text("Style"), content: {
+                        Picker(selection: $markStyle, label: Text("Default style"), content: {
                             Text("Solid").tag(Mark.Style.solid.rawValue)
                             Text("Dashed").tag(Mark.Style.dashed.rawValue)
                             Text("Dotted").tag(Mark.Style.dotted.rawValue)

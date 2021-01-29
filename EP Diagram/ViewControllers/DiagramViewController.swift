@@ -88,16 +88,36 @@ final class DiagramViewController: UIViewController {
     lazy var deleteAction = UIAction(title: L("Delete"), image: UIImage(systemName: "trash"), attributes: .destructive) { action in
         self.ladderView.deleteSelectedMarks()
     }
+    lazy var deleteAllInRegion = UIAction(title: L("Delete all in region"), image: UIImage(systemName: "trash"), attributes: .destructive) { action in
+        self.ladderView.deleteAllInRegion()
+    }
+    lazy var deleteAllInLadder = UIAction(title: L("Delete all marks in ladder"), image: UIImage(systemName: "trash"), attributes: .destructive) { action in
+        self.ladderView.deleteAllInLadder()
+    }
     lazy var solidAction = UIAction(title: L("Solid")) { action in
-        self.ladderView.setSolid()
+        self.ladderView.setSelectedMarksStyle(style: .solid)
     }
     lazy var dashedAction = UIAction(title: L("Dashed")) { action in
-        self.ladderView.setDashed()
+        self.ladderView.setSelectedMarksStyle(style: .dashed)
     }
     lazy var dottedAction = UIAction(title: L("Dotted")) { action in
-        self.ladderView.setDotted()
+        self.ladderView.setSelectedMarksStyle(style: .dotted)
     }
     lazy var styleMenu = UIMenu(title: L("Style..."), children: [self.solidAction, self.dashedAction, self.dottedAction])
+
+    lazy var regionSolidStyleAction = UIAction(title: L("Solid")) { action in
+        self.ladderView.setSelectedRegionsStyle(style: .solid)
+    }
+    lazy var regionDashedStyleAction = UIAction(title: L("Dashed")) { action in
+        self.ladderView.setSelectedRegionsStyle(style: .dashed)
+    }
+    lazy var regionDottedStyleAction = UIAction(title: L("Dotted")) { action in
+        self.ladderView.setSelectedRegionsStyle(style: .dotted)
+    }
+    lazy var regionInheritedStyleAction = UIAction(title: L("Inherited")) { action in
+        self.ladderView.setSelectedRegionsStyle(style: .inherited)
+    }
+    lazy var regionStyleMenu = UIMenu(title: L("Default region style..."), children: [self.regionSolidStyleAction, self.regionDashedStyleAction, self.regionDottedStyleAction, self.regionInheritedStyleAction])
 
     lazy var slantMenuAction = UIAction(title: L("Slant")) { action in
         self.showSlantMenu()
@@ -114,6 +134,7 @@ final class DiagramViewController: UIViewController {
     lazy var rhythmAction = UIAction(title: L("Rhythm")) { action in
         // TODO: implement
     }
+    
 
 
 override func viewDidLoad() {

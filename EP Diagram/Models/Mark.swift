@@ -35,7 +35,7 @@ class Mark: Codable {
 
     var mode: Mode = .normal
     var anchor: Anchor = .middle // Anchor point for movement and to attach a cursor
-    var lineStyle: Style = .solid
+    var style: Style = .solid
     var block: Block = .none
     var impulseOrigin: ImpulseOrigin = .none
     var measurementText: String = ""
@@ -262,6 +262,7 @@ extension Mark {
         case solid
         case dashed
         case dotted
+        case inherited
 
         var id: Style { self }
         var description: String {
@@ -272,7 +273,10 @@ extension Mark {
                 return L("Dashed")
             case .dotted:
                 return L("Dotted")
+            case .inherited:
+                return L("Inherited")
             }
+
         }
     }
 

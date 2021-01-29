@@ -40,7 +40,7 @@ final class LadderView: ScaledView {
     var defaultMarkStyle = Mark.Style.solid {
         didSet {
             for region in ladder.regions {
-                region.lineStyle = defaultMarkStyle
+                region.style = defaultMarkStyle
             }
         }
     }
@@ -973,26 +973,23 @@ final class LadderView: ScaledView {
 
     func setSelectedMarksStyle(style: Mark.Style) {
         let selectedMarks: [Mark] = ladder.allMarksWithMode(.selected)
-        selectedMarks.forEach { mark in mark.lineStyle = style }
-    }
-
-    @objc func setSolid() {
-        setSelectedMarksStyle(style: .solid)
+        selectedMarks.forEach { mark in mark.style = style }
     }
 
     func setStyleToMarks(style: Mark.Style, marks: [Mark]) {
         for mark in marks {
-            mark.lineStyle = style
+            mark.style = style
         }
     }
 
-    @objc func setDashed() {
-        setSelectedMarksStyle(style: .dashed)
+    func setSelectedRegionsStyle(style: Mark.Style) {
+        let selectedRegions: [Region] = ladder.allRegionsWithMode(.selected)
+        selectedRegions.forEach { region in region.style = style }
     }
 
-    @objc func setDotted() {
-        setSelectedMarksStyle(style: .dotted)
-    }
+//    func setRegionStyle(style: Mark.Style, region: Region) {
+//        region.style = style
+//    }
 
     // MARK: - draw
 
@@ -1115,11 +1112,11 @@ final class LadderView: ScaledView {
         context.move(to: p1)
         context.addLine(to: p2)
         // Draw dashed line
-        if mark.lineStyle == .dashed {
+        if mark.style == .dashed {
             let dashes: [CGFloat] = [5, 5]
             context.setLineDash(phase: 0, lengths: dashes)
         }
-        else if mark.lineStyle == .dotted {
+        else if mark.style == .dotted {
             let dots: [CGFloat] = [2, 2]
             context.setLineDash(phase: 0, lengths: dots)
         }

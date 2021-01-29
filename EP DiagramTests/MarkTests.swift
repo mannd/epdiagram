@@ -242,13 +242,13 @@ class MarkTests: XCTestCase {
 
     func testLineStyles() {
         let mark = Mark()
-        XCTAssertEqual(mark.lineStyle, .solid)
-        XCTAssertEqual(mark.lineStyle.description, L("Solid"))
-        mark.lineStyle = .dashed
-        XCTAssertEqual(mark.lineStyle.description, L("Dashed"))
-        mark.lineStyle = .dotted
-        XCTAssertEqual(mark.lineStyle.description, L("Dotted"))
-        XCTAssertEqual(mark.lineStyle.id, .dotted)
+        XCTAssertEqual(mark.style, .solid)
+        XCTAssertEqual(mark.style.description, L("Solid"))
+        mark.style = .dashed
+        XCTAssertEqual(mark.style.description, L("Dashed"))
+        mark.style = .dotted
+        XCTAssertEqual(mark.style.description, L("Dotted"))
+        XCTAssertEqual(mark.style.id, .dotted)
     }
 
     func testRightTriangleBase() {

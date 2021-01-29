@@ -44,16 +44,27 @@ class Region: Codable {
     var marks = [Mark]()
     var markable: Bool = true
     var height: CGFloat { distalBoundary - proximalBoundary }
-    // TODO: Add style to region, which can be overrident, and set as a default in preferences
+    // TODO: Add style to region, which can be overridden, and set as a default in preferences
     // TODO: We can init lineStyle with the template lineStyle, but we need to be able to set it as well.
-    var lineStyle: Mark.Style = Mark.Style(rawValue: Preferences.markStyle) ?? .solid
+    private var _style: Mark.Style = .inherited
+    var style: Mark.Style {
+        get {
+            if _style == .inherited {
+                return Mark.Style(rawValue: Preferences.markStyle) ?? .solid
+            }
+            return _style
+        }
+        set(newValue) {
+            _style = newValue
+        }
+    }
 
     // A region is copied from a template, after which the template is no longer referenced.
     init(template: RegionTemplate) {
         self.name = template.name
         self.longDescription = template.description
         self.unitHeight = template.unitHeight
-        self.lineStyle = template.lineStyle
+        self.style = template.style
     }
 
     func appendMark(_ mark: Mark) {
