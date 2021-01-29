@@ -9,8 +9,8 @@
 import UIKit
 import os.log
 
-// TODO: Move all context menu functions here, implement through LadderView
 extension DiagramViewController: UIContextMenuInteractionDelegate {
+
     // Need to select marks after menu appears.
     func contextMenuInteraction(_ interaction: UIContextMenuInteraction, willDisplayMenuFor configuration: UIContextMenuConfiguration, animator: UIContextMenuInteractionAnimating?) {
         animator?.addCompletion {
@@ -23,13 +23,11 @@ extension DiagramViewController: UIContextMenuInteractionDelegate {
                     self.ladderView.setSelectedMark(position: location)
 //                    self.ladderView.refresh()
                 }
-            case .region:
+            case .region, .label:
                 if let region = locationInLadder.region {
                     self.ladderView.ladder.setMarksWithMode(.selected, inRegion: region)
                     region.mode = .selected
                 }
-            case .label:
-                break
             case .zone:
                 break
             case .ladder:
@@ -43,18 +41,17 @@ extension DiagramViewController: UIContextMenuInteractionDelegate {
         }
     }
 
+    // FIXME: Add default style for region, for new marks.
     func contextMenuInteraction(_ interaction: UIContextMenuInteraction, configurationForMenuAtLocation location: CGPoint) -> UIContextMenuConfiguration? {
         os_log("contextMenuInteraction(:configurationForMenuAtLocation:)", log: .action, type: .info)
         let locationInLadder = ladderView.getLocationInLadder(position: location)
         longPressLocationInLadder = locationInLadder
-
+        menuPressLocation = location
         switch locationInLadder.specificLocation {
         case .mark:
-            return showMarkContextMenu(at: location)
-        case .region:
-            return showRegionContextMenu(at: location)
-        case .label:
-            return showLabelContextMenu(at: location)
+            return markContextMenuConfiguration(at: location)
+        case .region, .label:
+            return regionContextMenuConfiguration(at: location)
         case .zone:
             return showZoneContextMenu(at: location)
         case .ladder:
@@ -74,63 +71,18 @@ extension DiagramViewController: UIContextMenuInteractionDelegate {
 
     }
 
-    func showMarkContextMenu(at location: CGPoint) -> UIContextMenuConfiguration {
-        // FIXME: can't clear marks here
-        menuPressLocation = location
+    func markContextMenuConfiguration(at location: CGPoint) -> UIContextMenuConfiguration {
         return UIContextMenuConfiguration(identifier: nil, previewProvider: nil) {_ in
-            let solid = self.getSolidAction()
-            let dashed = self.getDashedAction()
-            let dotted = self.getDottedAction()
-            // TODO: implement set slope
-            let style = UIMenu(title: L("Style..."), children: [solid, dashed, dotted])
-            let slantMark = UIAction(title: L("Slant")) { action in
-                self.showAngleMenu()
-            }
-            let unlink = UIAction(title: L("Unlink")) { action in
-                self.ladderView.ungroupSelectedMarks()
-            }
             // FIXME: make sure we won't move grouped marks, or disconnect them when straightening.
-            let straightenToProximal = UIAction(title: L("Straighten mark to proximal endpoint")) { action in
-                self.ladderView.straightenToProximal()
-            }
-            let straightenToDistal = UIAction(title: L("Straighten mark to distal endpoint")) { action in
-                self.ladderView.straightenToDistal()
-            }
-            let delete = UIAction(title: L("Delete"), image: UIImage(systemName: "trash"), attributes: .destructive) { action in
-                self.ladderView.deleteSelectedMarks()
-            }
-            return UIMenu(title: L("Edit mark"), children: [style, straightenToProximal, straightenToDistal, slantMark, unlink, delete])
+            return UIMenu(title: L("Edit mark"), children: [self.styleMenu, self.straightenToProximalAction, self.straightenToDistalAction, self.slantMenuAction, self.unlinkAction, self.deleteAction])
         }
     }
 
-    // TODO: Need to highlight region, make sure deletion is in correct region, turn off highlight when doen with menu item.
-    func showRegionContextMenu(at location: CGPoint) -> UIContextMenuConfiguration {
-        menuPressLocation = location
+
+
+    func regionContextMenuConfiguration(at location: CGPoint) -> UIContextMenuConfiguration {
         return UIContextMenuConfiguration(identifier: nil, previewProvider: nil) { suggestedActions in
-//            let solid = UIAction(title: L("Solid")) { action in
-////                self.setSolid()
-//            }
-//            let dashed = UIAction(title: L("Dashed")) { action in
-////                self.setDashed()
-//            }
-//            let dotted = UIAction(title: L("Dotted")) { action in
-////                self.setDotted()
-//            }
-//            let style = UIMenu(title: L("Style..."), children: [solid, dashed, dotted])
-            // Use .displayInline option to show menu inline with separator.
-            //           let style = UIMenu(title: L("Style..."), options: .displayInline,  children: [solid, dashed, dotted])
-//            let unlink = UIAction(title: L("Unlink")) { action in
-//                self.ungroupSelectedMarks()
-//            }
-            let paste = UIAction(title: L("Paste")) { action in
 
-            }
-            let rhythm = UIAction(title: L("Rhythm")) { action in
-
-            }
-//            let delete = UIAction(title: L("Delete"), image: UIImage(systemName: "trash"), attributes: .destructive) { action in
-//                self.ladderView.deleteSelectedMarks()
-//            }
             let deleteAllInRegion = UIAction(title: L("Delete all in region"), image: UIImage(systemName: "trash"), attributes: .destructive) { action in
                 self.ladderView.deleteAllInRegion()
             }
@@ -138,15 +90,7 @@ extension DiagramViewController: UIContextMenuInteractionDelegate {
                 self.ladderView.deleteAllInLadder()
             }
             // FIXME: make sure we won't move grouped marks, or disconnect them when straightening.
-//            let straightenToProximal = UIAction(title: L("Straighten mark to proximal endpoint")) { action in
-//                self.straightenToProximal()
-//            }
-//            let straightenToDistal = UIAction(title: L("Straighten mark to distal endpoint")) { action in
-//                self.straightenToDistal()
-//            }
-            // TODO: Must distinguish long press on mark, label, region, zone, whole ladder (outside of ladder).
-            // Create and return a UIMenu with all of the actions as children
-            return UIMenu(title: "", children: [paste, rhythm, deleteAllInRegion, deleteAllInLadder])
+            return UIMenu(title: "", children: [self.styleMenu, self.rhythmAction, deleteAllInRegion, deleteAllInLadder])
         }
     }
 
@@ -167,22 +111,22 @@ extension DiagramViewController: UIContextMenuInteractionDelegate {
         }
     }
 
-    func getSolidAction() -> UIAction {
-        return UIAction(title: L("Solid")) { action in
-            self.ladderView.setSolid()
-        }
-    }
-
-    func getDashedAction() -> UIAction {
-        return UIAction(title: L("Dashed")) { action in
-            self.ladderView.setDashed()
-        }
-    }
-
-    func getDottedAction() -> UIAction {
-        return UIAction(title: L("Dotted")) { action in
-            self.ladderView.setDotted()
-        }
-    }
+//    func getSolidAction() -> UIAction {
+//        return UIAction(title: L("Solid")) { action in
+//            self.ladderView.setSolid()
+//        }
+//    }
+//
+//    func getDashedAction() -> UIAction {
+//        return UIAction(title: L("Dashed")) { action in
+//            self.ladderView.setDashed()
+//        }
+//    }
+//
+//    func getDottedAction() -> UIAction {
+//        return UIAction(title: L("Dotted")) { action in
+//            self.ladderView.setDotted()
+//        }
+//    }
 }
 

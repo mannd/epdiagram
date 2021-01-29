@@ -37,6 +37,13 @@ final class LadderView: ScaledView {
     var showConductionTimes = true
     var showMarkText = true
     var snapMarks = true
+    var defaultMarkStyle = Mark.Style.solid {
+        didSet {
+            for region in ladder.regions {
+                region.lineStyle = defaultMarkStyle
+            }
+        }
+    }
 
     // TODO: make user preferences
     // Colors

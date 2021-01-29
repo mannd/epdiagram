@@ -229,7 +229,7 @@ extension DiagramViewController: HamburgerTableDelegate, UIImagePickerController
     #if DEBUG
     func test() {
         os_log("test()", log: .debugging, type: .debug)
-        showAngleMenu()
+        showSlantMenu()
 //        ladderView.ladder.reregisterAllMarks()
 //        print(ladderView.ladder.registry)
 //        let ladder = ladderView.ladder

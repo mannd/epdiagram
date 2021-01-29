@@ -84,7 +84,39 @@ final class DiagramViewController: UIViewController {
     private let minZoom: CGFloat = 0.2
     let pdfScaleFactor: CGFloat = 5.0
 
-    override func viewDidLoad() {
+    // Context menu actions
+    lazy var deleteAction = UIAction(title: L("Delete"), image: UIImage(systemName: "trash"), attributes: .destructive) { action in
+        self.ladderView.deleteSelectedMarks()
+    }
+    lazy var solidAction = UIAction(title: L("Solid")) { action in
+        self.ladderView.setSolid()
+    }
+    lazy var dashedAction = UIAction(title: L("Dashed")) { action in
+        self.ladderView.setDashed()
+    }
+    lazy var dottedAction = UIAction(title: L("Dotted")) { action in
+        self.ladderView.setDotted()
+    }
+    lazy var styleMenu = UIMenu(title: L("Style..."), children: [self.solidAction, self.dashedAction, self.dottedAction])
+
+    lazy var slantMenuAction = UIAction(title: L("Slant")) { action in
+        self.showSlantMenu()
+    }
+    lazy var unlinkAction = UIAction(title: L("Unlink")) { action in
+        self.ladderView.ungroupSelectedMarks()
+    }
+    lazy var straightenToProximalAction = UIAction(title: L("Straighten mark to proximal endpoint")) { action in
+        self.ladderView.straightenToProximal()
+    }
+    lazy var straightenToDistalAction = UIAction(title: L("Straighten mark to distal endpoint")) { action in
+        self.ladderView.straightenToDistal()
+    }
+    lazy var rhythmAction = UIAction(title: L("Rhythm")) { action in
+        // TODO: implement
+    }
+
+
+override func viewDidLoad() {
         os_log("viewDidLoad() - ViewController", log: OSLog.viewCycle, type: .info)
         super.viewDidLoad()
 
@@ -341,7 +373,7 @@ final class DiagramViewController: UIViewController {
     }
 
     // FIXME: can't single tap on mark in ladder after finished with context menu.
-    func showAngleMenu() {
+    func showSlantMenu() {
         guard let toolbar = navigationController?.toolbar else { return }
         let slider = UISlider()
         slider.minimumValue = -45
@@ -927,6 +959,7 @@ extension DiagramViewController {
         ladderView.showIntervals = UserDefaults.standard.bool(forKey: Preferences.defaultShowIntervalsKey)
         ladderView.showConductionTimes = UserDefaults.standard.bool(forKey: Preferences.defaultShowConductionTimesKey)
         ladderView.snapMarks = UserDefaults.standard.bool(forKey: Preferences.defaultSnapMarksKey)
+        ladderView.defaultMarkStyle = Mark.Style(rawValue: UserDefaults.standard.integer(forKey: Preferences.defaultMarkStyleKey)) ?? .solid
     }
 
     @objc func resolveFileConflicts() {

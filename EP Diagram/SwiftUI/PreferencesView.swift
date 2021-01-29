@@ -16,6 +16,8 @@ struct PreferencesView: View {
     @AppStorage(Preferences.defaultShowIntervalsKey) var showIntervals: Bool = Preferences.showIntervals
     @AppStorage(Preferences.defaultShowConductionTimesKey) var showConductionTimes: Bool = Preferences.showConductionTimes
     @AppStorage(Preferences.defaultSnapMarksKey) var snapMarks: Bool = Preferences.snapMarks
+    @AppStorage(Preferences.defaultMarkStyleKey) var markStyle = Preferences.markStyle
+
     @Environment(\.presentationMode) private var presentationMode: Binding<PresentationMode>
 
     var body: some View {
@@ -40,6 +42,11 @@ struct PreferencesView: View {
                         Toggle(isOn: $snapMarks) {
                             Text("Snap marks")
                         }
+                        Picker(selection: $markStyle, label: Text("Style"), content: {
+                            Text("Solid").tag(Mark.Style.solid.rawValue)
+                            Text("Dashed").tag(Mark.Style.dashed.rawValue)
+                            Text("Dotted").tag(Mark.Style.dotted.rawValue)
+                        })
                     }
                 }
             }
