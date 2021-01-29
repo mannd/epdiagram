@@ -17,7 +17,7 @@ protocol HamburgerTableDelegate: class {
     var constraintHamburgerWidth: NSLayoutConstraint { get set }
     var maxBlackAlpha: CGFloat { get }
     var imageIsLocked: Bool { get set }
-    var diagramIsLocked: Bool { get set }
+    var ladderIsLocked: Bool { get set }
 
     func takePhoto()
     func selectImage()
@@ -77,7 +77,7 @@ extension DiagramViewController: HamburgerTableDelegate, UIImagePickerController
         set(newValue) { _imageIsLocked = newValue}
     }
 
-    var diagramIsLocked: Bool {
+    var ladderIsLocked: Bool {
         get { _ladderIsLocked }
         set(newValue) { _ladderIsLocked = newValue }
     }

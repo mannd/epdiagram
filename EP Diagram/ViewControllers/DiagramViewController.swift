@@ -43,6 +43,7 @@ final class DiagramViewController: UIViewController {
 
     var menuPressLocation: CGPoint?
     var longPressLocationInLadder: LocationInLadder?
+    var menuAppeared = false // track when context menu appears
 
     // PDF and launch from URL stuff
     var pdfRef: CGPDFDocument?

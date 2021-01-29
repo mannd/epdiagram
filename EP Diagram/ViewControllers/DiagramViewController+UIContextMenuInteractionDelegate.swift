@@ -15,6 +15,7 @@ extension DiagramViewController: UIContextMenuInteractionDelegate {
     func contextMenuInteraction(_ interaction: UIContextMenuInteraction, willDisplayMenuFor configuration: UIContextMenuConfiguration, animator: UIContextMenuInteractionAnimating?) {
         animator?.addCompletion {
             guard let locationInLadder = self.longPressLocationInLadder else { return }
+            self.menuAppeared = true
             self.ladderView.saveState()
             switch locationInLadder.specificLocation {
             case .mark:
@@ -63,9 +64,14 @@ extension DiagramViewController: UIContextMenuInteractionDelegate {
         }
     }
 
-    // Unselect here too
+    // This is called with each drag.
     func contextMenuInteraction(_ interaction: UIContextMenuInteraction, willEndFor configuration: UIContextMenuConfiguration, animator: UIContextMenuInteractionAnimating?) {
-        ladderView.restoreState()
+        animator?.addCompletion {
+            guard self.menuAppeared else { return }
+            self.ladderView.restoreState()
+            self.menuAppeared = false
+        }
+
     }
 
     func showMarkContextMenu(at location: CGPoint) -> UIContextMenuConfiguration {

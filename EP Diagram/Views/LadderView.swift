@@ -87,6 +87,8 @@ final class LadderView: ScaledView {
 
     var mode: Mode = .normal
 
+
+
     var leftMargin: CGFloat = 0
     internal var ladderViewHeight: CGFloat = 0
     private var regionUnitHeight: CGFloat = 0
@@ -445,20 +447,9 @@ final class LadderView: ScaledView {
 
     private func performMarkSelecting(_ tapLocationInLadder: LocationInLadder) {
         ladder.zone = Zone()
-        normalizeAllMarks()
         if let mark = tapLocationInLadder.mark {
             // toggle mark selection
-            mark.mode = .selected
-//            mark.selected.toggle()
-//            mark.highlight = mark.selected ? .selected : .none
-//            if mark.selected {
-//                ladder.selectedMarks.append(mark)
-//            }
-//            else {
-//                if let index = ladder.selectedMarks.firstIndex(of: mark) {
-//                    ladder.selectedMarks.remove(at: index)
-//                }
-//            }
+            mark.mode = mark.mode == .selected ? .normal :  .selected
         }
         setNeedsDisplay()
     }
@@ -562,8 +553,13 @@ final class LadderView: ScaledView {
 
     @objc func doubleTap(tap: UITapGestureRecognizer) {
         os_log("doubleTap(tap:) - LadderView", log: OSLog.touches, type: .info)
-        if deleteOrAddMark(position: tap.location(in: self), cursorViewDelegate: cursorViewDelegate) {
-            setNeedsDisplay()
+        switch mode {
+        case .normal:
+            if deleteOrAddMark(position: tap.location(in: self), cursorViewDelegate: cursorViewDelegate) {
+                setNeedsDisplay()
+            }
+        default:
+            break
         }
     }
 
@@ -587,8 +583,6 @@ final class LadderView: ScaledView {
                 normalizeAllMarks()
                 undoablyAddMark(mark: mark, region: region)
                 attachMark(mark)
-//                attachedMark = mark
-//                mark.mode = .attached
                 cursorViewDelegate.moveCursor(cursorViewPositionX: scaledPositionX)
                 cursorViewDelegate.cursorIsVisible = true
                 cursorViewDelegate.setCursorHeight()
@@ -745,7 +739,6 @@ final class LadderView: ScaledView {
             if !cursorViewDelegate.cursorIsVisible {
                 normalizeAllMarks()
             }
-            movingMark?.mode = .normal
             dragCreatedMark?.mode = .normal
             movingMark = nil
             dragCreatedMark = nil
@@ -764,7 +757,7 @@ final class LadderView: ScaledView {
             selectModeDrag(pan)
         case .normal:
             normalModeDrag(pan)
-        case .calibration, .link:
+        default:
             break
         }
     }
@@ -853,6 +846,7 @@ final class LadderView: ScaledView {
         guard let mark = mark else { return }
         let nearbyDistance = nearbyMarkAccuracy / scale
         let markIds = nearbyMarkIds(mark: mark, nearbyDistance: nearbyDistance)
+        // FIXME: xxx
         ladder.normalizeAllMarks()
         ladder.setModeForMarkIdGroup(mode: .grouped, markIdGroup: markIds)
         setAttachedMarkAndGroupedMarksModes()
@@ -1745,6 +1739,7 @@ extension LadderView: LadderViewDelegate {
         }
         savedAttachedMark = ladder.attachedMark
         ladder.normalizeAllMarks()
+
         setNeedsDisplay()
     }
 
@@ -1757,7 +1752,7 @@ extension LadderView: LadderViewDelegate {
         activeRegion = savedActiveRegion
         activeRegion?.activated = true
         ladder.attachedMark = savedAttachedMark
-        savedAttachedMark?.mode = .attached
+        attachMark(savedAttachedMark)
         setNeedsDisplay()
     }
 }
