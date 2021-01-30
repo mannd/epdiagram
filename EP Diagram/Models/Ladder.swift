@@ -357,7 +357,7 @@ class Ladder: NSObject, Codable {
 
     func activeRegion() -> Region? {
         for region in regions {
-            if region.activated {
+            if region.mode == .active {  // should be only one active region at a time
                 return region
             }
         }

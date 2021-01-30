@@ -278,8 +278,8 @@ final class LadderView: ScaledView {
     }
 
     private func labelWasTapped(labelRegion: Region) {
-        if labelRegion.activated {
-            labelRegion.activated = false
+        if labelRegion.mode == .active {
+            labelRegion.mode = .normal
             activeRegion = nil
         }
         else {
@@ -290,7 +290,7 @@ final class LadderView: ScaledView {
     private func regionWasTapped(tapLocationInLadder: LocationInLadder, positionX: CGFloat) {
         assert(tapLocationInLadder.region != nil, "Region tapped, but is nil!")
         if let tappedRegion = tapLocationInLadder.region {
-            if !tappedRegion.activated {
+            if tappedRegion.mode != .active {
                 activeRegion = tappedRegion
             }
             if let mark = tapLocationInLadder.mark {
@@ -1042,7 +1042,7 @@ final class LadderView: ScaledView {
         let attributes: [NSAttributedString.Key: Any] = [
             .paragraphStyle: paragraphStyle,
             .font: UIFont.systemFont(ofSize: 18.0),
-            .foregroundColor: region.activated ? red : blue
+            .foregroundColor: region.mode == .active ? red : blue
         ]
         let text = region.name
         let labelText = NSAttributedString(string: text, attributes: attributes)
@@ -1067,7 +1067,7 @@ final class LadderView: ScaledView {
         let regionRect = CGRect(x: rect.origin.x, y: rect.origin.y, width: rect.width, height: rect.height)
 
         // Highlight region if selected
-        if region.activated {
+        if region.mode == .active {
             context.setAlpha(0.2)
             context.addRect(regionRect)
             context.setFillColor(red.cgColor)
@@ -1347,12 +1347,12 @@ final class LadderView: ScaledView {
     func activateRegion(region: Region?) {
         guard let region = region else { return }
         inactivateRegions()
-        region.activated = true
+        region.mode = .active
     }
 
     func inactivateRegions() {
         for region in ladder.regions {
-            region.activated = false
+            region.mode = .normal
         }
     }
 
@@ -1554,7 +1554,7 @@ extension LadderView: LadderViewDelegate {
 
     func setActiveRegion(regionNum: Int) {
         activeRegion = ladder.regions[regionNum]
-        activeRegion?.activated = true
+        activeRegion?.mode = .active
     }
 
     func hasActiveRegion() -> Bool {
@@ -1735,7 +1735,6 @@ extension LadderView: LadderViewDelegate {
     func saveState() {
         os_log("saveState() - LadderView", log: .default, type: .default)
         savedActiveRegion = activeRegion
-        activeRegion?.activated = false
         activeRegion = nil
         for region in ladder.regions {
             region.mode = .normal
@@ -1753,7 +1752,7 @@ extension LadderView: LadderViewDelegate {
             region.mode = .normal
         }
         activeRegion = savedActiveRegion
-        activeRegion?.activated = true
+        activeRegion?.mode = .active
         ladder.attachedMark = savedAttachedMark
         attachMark(savedAttachedMark)
         setNeedsDisplay()

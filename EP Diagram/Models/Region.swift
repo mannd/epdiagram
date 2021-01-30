@@ -30,7 +30,6 @@ enum RegionDivision {
 // A Region has a labelSection such as "A" or "AV" and
 // a markSection.  Region boundaries are set by the calling ScaledView.
 class Region: Codable {
-
     private(set) var id = UUID()
 
     var name: String
@@ -39,14 +38,10 @@ class Region: Codable {
     var proximalBoundary: CGFloat = 0
     var distalBoundary: CGFloat = 0
     var mode: Mode = .normal
-
-    var activated: Bool = false
     var marks = [Mark]()
-    var markable: Bool = true
     var height: CGFloat { distalBoundary - proximalBoundary }
-    // TODO: Add style to region, which can be overridden, and set as a default in preferences
-    // TODO: We can init lineStyle with the template lineStyle, but we need to be able to set it as well.
     private var _style: Mark.Style = .inherited
+
     var style: Mark.Style {
         get {
             if _style == .inherited {
