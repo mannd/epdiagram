@@ -25,11 +25,13 @@ extension DiagramViewController: UIContextMenuInteractionDelegate {
                 }
             case .region, .label:
                 if let region = locationInLadder.region {
+                    self.ladderView.ladder.zone = Zone() // hide zone
                     self.ladderView.ladder.setMarksWithMode(.selected, inRegion: region)
                     region.mode = .selected
                 }
-            case .zone: break
-                // set selected marks in zone
+            case .zone:
+                // zoning selects marks automatically
+                break
             case .ladder:
                 self.ladderView.ladder.setAllMarksWithMode(.selected)
                 for region in self.ladderView.ladder.regions {

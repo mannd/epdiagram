@@ -434,6 +434,7 @@ override func viewDidLoad() {
         setToolbarItems(selectMenuButtons, animated: false)
         navigationController?.setToolbarHidden(false, animated: false)
         hideCursorAndNormalizeAllMarks()
+        ladderView.inactivateRegions()
         setMode(.select)
         ladderView.startZoning()
         setViewsNeedDisplay()
@@ -454,6 +455,7 @@ override func viewDidLoad() {
             linkMenuButtons = [prompt, spacer, cancelButton]
         }
         hideCursorAndNormalizeAllMarks()
+        ladderView.inactivateRegions()
         setToolbarItems(linkMenuButtons, animated: false)
         navigationController?.setToolbarHidden(false, animated: false)
     }
@@ -575,17 +577,6 @@ override func viewDidLoad() {
         setMode(.link)
         setViewsNeedDisplay()
     }
-
-    // FIXME: copy and paste should be long press menu items.
-//    @objc func copyMarks() {
-//        os_log("copyMarks()", log: OSLog.action, type: .info)
-//        showPasteMarksMenu()
-//    }
-//
-//    @objc func showPasteMarksMenu() {
-//        os_log("showPasteMarksMenu()", log: .action, type: .info)
-//        // "Paste marks: Tap on ladder to paste copied mark(s) Done"
-//    }
 
     @objc func cancelSelect() {
         os_log("cancelSelect()", log: OSLog.action, type: .info)

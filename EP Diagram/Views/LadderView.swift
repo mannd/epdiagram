@@ -277,7 +277,6 @@ final class LadderView: ScaledView {
         }
     }
 
-
     private func labelWasTapped(labelRegion: Region) {
         if labelRegion.activated {
             labelRegion.activated = false

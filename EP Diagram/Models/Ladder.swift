@@ -278,6 +278,10 @@ class Ladder: NSObject, Codable {
         region.marks.forEach { mark in mark.mode = mode }
     }
 
+    func setMarkwWithMode(_ mode: Mark.Mode, inZone zone: Zone) {
+        
+    }
+
     func marksWithMode(_ mode: Mark.Mode, inRegion region: Region) -> [Mark] {
         let marks = region.marks.filter { mark in mark.mode == mode }
         return marks
@@ -292,14 +296,7 @@ class Ladder: NSObject, Codable {
     }
 
     func allRegionsWithMode(_ mode: Region.Mode) -> [Region] {
-        let selectedRegions = regions.filter { $0.mode == mode }
-//        var selectedRegions = [Region]()
-//        for region in regions {
-//            if region.mode == mode {
-//                selectedRegions.append(region)
-//            }
-//        }
-        return selectedRegions
+        return  regions.filter { $0.mode == mode }
     }
 
     func availableAnchors(forMark mark: Mark) -> [Anchor] {
