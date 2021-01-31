@@ -12,6 +12,15 @@ import UIKit
 
 /// Struct that pinpoints a point in a ladder.  Note that these tapped areas overlap (labels and marks are in regions).
 struct LocationInLadder {
+    enum SpecificLocation {
+        case ladder
+        case label
+        case region
+        case zone
+        case mark
+        case error
+    }
+
     var region: Region?
     var mark: Mark?
     var ladder: Ladder?
@@ -20,24 +29,23 @@ struct LocationInLadder {
     var regionDivision: RegionDivision
     var markAnchor: Anchor
     var unscaledPosition: CGPoint
-    var isRegion: Bool {
-        region != nil
-    }
-    var isRegionNotLabel: Bool {
-        isRegion && !isLabel
-    }
-    var isLabel: Bool {
-        regionSection == .labelSection
-    }
-    var isMark: Bool {
-        mark != nil
-    }
-    var isLadder: Bool {
-        // If tapped outside of all regions, assume whole ladder tapped.
-        region == nil
-    }
-    var isZone: Bool {
-        zone != nil
+    var specificLocation: SpecificLocation {
+        if mark != nil {
+            return .mark
+        }
+        if zone != nil {
+            return .zone
+        }
+        if regionSection == .labelSection {
+            return .label
+        }
+        if region != nil {
+            return .region
+        }
+        if region == nil {
+            return .ladder
+        }
+        return .error
     }
 }
 
@@ -46,6 +54,8 @@ struct LocationInLadder {
 extension LocationInLadder: CustomDebugStringConvertible {
     var debugDescription: String {
         let description = """
+        LocationInLadder ------
+        -----------------------
         region = \(region.debugDescription)
         mark = \(mark.debugDescription)
         ladder = \(ladder.debugDescription)
@@ -56,11 +66,7 @@ extension LocationInLadder: CustomDebugStringConvertible {
 
         markAnchor = \(markAnchor)
         unscaledPosition = \(unscaledPosition)
-        isRegion = \(isRegion)
-        isLabel = \(isLabel)
-        isMark = \(isMark)
-        isLadder = \(isLadder)
-        isZone = \(isZone)
+        specificLocation = \(specificLocation)
         """
         return description
     }

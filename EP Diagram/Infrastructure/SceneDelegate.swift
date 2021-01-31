@@ -13,29 +13,24 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
     var window: UIWindow?
 
     func scene(_ scene: UIScene, willConnectTo session: UISceneSession, options connectionOptions: UIScene.ConnectionOptions) {
-        // Use this method to optionally configure and attach the UIWindow `window` to the provided UIWindowScene `scene`.
-        // If using a storyboard, the `window` property will automatically be initialized and attached to the scene.
-        // This delegate does not imply the connecting scene or session are new (see `application:configurationForConnectingSceneSession` instead).
-        os_log("scene(scene:willConnectTo:options:), %s", log: .lifeCycle, type: .info, scene.session.persistentIdentifier)
+        os_log("scene(scene:willConnectTo:options:) - SceneDelegate", log: .lifeCycle, type: .info)
         guard let scene = (scene as? UIWindowScene) else { return }
         scene.title = L("EP Diagram")
         scene.userActivity = session.stateRestorationActivity ?? NSUserActivity(activityType: "org.epstudios.epdiagram.mainActivity")
         self.scene(scene, openURLContexts: connectionOptions.urlContexts)
 
-
-        // FIXME: temporary change
         if let documentBrowserViewController = window?.rootViewController as? DocumentBrowserViewController {
             documentBrowserViewController.restorationInfo = scene.userActivity?.userInfo
         }
     }
 
     func stateRestorationActivity(for scene: UIScene) -> NSUserActivity? {
-        os_log("stateRestorationActivity(scene:), %s", log: .lifeCycle, type: .info, scene.session.persistentIdentifier)
+        os_log("stateRestorationActivity(scene:) - SceneDelegate", log: .lifeCycle, type: .info)
         return scene.userActivity
     }
 
     func scene(_ scene: UIScene, openURLContexts URLContexts: Set<UIOpenURLContext>) {
-        os_log("scene(_:openURLContexts), %s", log: .lifeCycle, type: .info, scene.session.persistentIdentifier)
+        os_log("scene(_:openURLContexts:) - SceneDelegate", log: .lifeCycle, type: .info)
         guard let documentBrowserViewController = self.window?.rootViewController as? DocumentBrowserViewController else { return }
         for context in URLContexts {
             let url = context.url
@@ -45,11 +40,13 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         }
     }
 
-//    func scene(_ scene: UIScene, continue userActivity: NSUserActivity) {
-//        if let window = self.window {
-//            window.rootViewController?.restoreUserActivityState(userActivity)
-//        }
-//    }
+    func scene(_ scene: UIScene, continue userActivity: NSUserActivity) {
+        os_log("scene(_:continue:) - SceneDelegate, %s", log: .lifeCycle, type: .info, scene.session.persistentIdentifier)
+
+        if let window = self.window {
+            window.rootViewController?.restoreUserActivityState(userActivity)
+        }
+    }
 
     //    override func buildMenu(with builder: UIMenuBuilder) {
     //        super.buildMenu(with: builder)

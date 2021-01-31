@@ -67,7 +67,7 @@ struct RegionListView: View {
                         Text(regionTemplate.name).bold().foregroundColor(.red)
                         Text(regionTemplate.description).bold()
                         Text("Height: ") + Text("\(regionTemplate.unitHeight)").bold()
-                        Text("Line style: ") + Text("\(regionTemplate.lineStyle.description)").bold()
+                        Text("Line style: ") + Text("\(regionTemplate.style.description)").bold()
                     }
                 }.alert(isPresented: $tooFewRegionTemplates) { Alert(title: Text("Too Few Regions"), message: Text("You have to have at least 1 region in your ladder."), dismissButton: .default(Text("OK")))
                 }

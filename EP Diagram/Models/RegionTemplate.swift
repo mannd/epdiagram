@@ -12,6 +12,6 @@ struct RegionTemplate: Codable, Equatable, Hashable {
     var name: String = ""
     var description: String = ""
     var unitHeight: Int = 1
-    var lineStyle: Mark.LineStyle = .solid
+    var style: Mark.Style = .inherited
     private(set) var id = UUID()
 }

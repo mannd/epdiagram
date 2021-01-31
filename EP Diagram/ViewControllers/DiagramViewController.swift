@@ -41,6 +41,10 @@ final class DiagramViewController: UIViewController {
     weak var diagramEditorDelegate: DiagramEditorDelegate?
     var currentDocument: DiagramDocument?
 
+    var menuPressLocation: CGPoint?
+    var longPressLocationInLadder: LocationInLadder?
+    var menuAppeared = false // track when context menu appears
+
     // PDF and launch from URL stuff
     var pdfRef: CGPDFDocument?
     var launchFromURL: Bool = false
@@ -61,7 +65,6 @@ final class DiagramViewController: UIViewController {
     var preferences: Preferences = Preferences()
     // Set by screen delegate
     var restorationInfo: [AnyHashable: Any]?
-    var viewClosed = false
 
     // Keys for state restoration
     static let restorationContentOffsetXKey = "restorationContentOffsetXKey"
@@ -78,13 +81,68 @@ final class DiagramViewController: UIViewController {
     // Speed up appearance of image picker by initializing it here.
     let imagePicker: UIImagePickerController = UIImagePickerController()
     private let maxZoom: CGFloat = 7.0
-    private let minZoom: CGFloat = 0.25
+    private let minZoom: CGFloat = 0.2
     let pdfScaleFactor: CGFloat = 5.0
 
-    override func viewDidLoad() {
+    // Context menu actions
+    lazy var deleteAction = UIAction(title: L("Delete selected mark(s)"), image: UIImage(systemName: "trash"), attributes: .destructive) { action in
+        self.ladderView.deleteSelectedMarks()
+    }
+    lazy var deleteAllInRegion = UIAction(title: L("Clear region"), image: UIImage(systemName: "trash"), attributes: .destructive) { action in
+        self.ladderView.deleteAllInSelectedRegion()
+    }
+    lazy var deleteAllInLadder = UIAction(title: L("Clear ladder"), image: UIImage(systemName: "trash"), attributes: .destructive) { action in
+        self.ladderView.deleteAllInLadder()
+    }
+    lazy var solidAction = UIAction(title: L("Solid")) { action in
+        self.ladderView.setSelectedMarksStyle(style: .solid)
+    }
+    lazy var dashedAction = UIAction(title: L("Dashed")) { action in
+        self.ladderView.setSelectedMarksStyle(style: .dashed)
+    }
+    lazy var dottedAction = UIAction(title: L("Dotted")) { action in
+        self.ladderView.setSelectedMarksStyle(style: .dotted)
+    }
+    lazy var styleMenu = UIMenu(title: L("Style..."), children: [self.solidAction, self.dashedAction, self.dottedAction])
+
+    lazy var regionSolidStyleAction = UIAction(title: L("Solid")) { action in
+        self.ladderView.setSelectedRegionsStyle(style: .solid)
+    }
+    lazy var regionDashedStyleAction = UIAction(title: L("Dashed")) { action in
+        self.ladderView.setSelectedRegionsStyle(style: .dashed)
+    }
+    lazy var regionDottedStyleAction = UIAction(title: L("Dotted")) { action in
+        self.ladderView.setSelectedRegionsStyle(style: .dotted)
+    }
+    lazy var regionInheritedStyleAction = UIAction(title: L("Inherited")) { action in
+        self.ladderView.setSelectedRegionsStyle(style: .inherited)
+    }
+    lazy var regionStyleMenu = UIMenu(title: L("Default region style..."), children: [self.regionSolidStyleAction, self.regionDashedStyleAction, self.regionDottedStyleAction, self.regionInheritedStyleAction])
+
+    lazy var slantMenuAction = UIAction(title: L("Slant")) { action in
+        self.showSlantMenu()
+    }
+    lazy var unlinkAction = UIAction(title: L("Unlink")) { action in
+        self.ladderView.ungroupSelectedMarks()
+    }
+    lazy var straightenToProximalAction = UIAction(title: L("Straighten mark to proximal endpoint")) { action in
+        self.ladderView.straightenToProximal()
+    }
+    lazy var straightenToDistalAction = UIAction(title: L("Straighten mark to distal endpoint")) { action in
+        self.ladderView.straightenToDistal()
+    }
+    lazy var rhythmAction = UIAction(title: L("Rhythm")) { action in
+        // TODO: implement
+    }
+    lazy var editLabelAction = UIAction(title: L("Edit label")) { action in
+        // TODO: implement
+    }
+    
+
+
+override func viewDidLoad() {
         os_log("viewDidLoad() - ViewController", log: OSLog.viewCycle, type: .info)
         super.viewDidLoad()
-        viewClosed = false // if view closed view will not be restored
 
         //showRestorationInfo() // for debugging
 
@@ -145,7 +203,7 @@ final class DiagramViewController: UIViewController {
         navigationItem.setLeftBarButton(UIBarButtonItem(image: UIImage(named: "hamburger"), style: .plain, target: self, action: #selector(toggleHamburgerMenu)), animated: true)
 
         let snapshotButton = UIBarButtonItem(image: UIImage(systemName: "photo.on.rectangle"), style: .plain, target: self, action: #selector(snapshotDiagram))
-        let closeButton = UIBarButtonItem(barButtonSystemItem: .close, target: self, action: #selector(closeAction))
+        let closeButton = UIBarButtonItem(image: UIImage(systemName: "xmark"), style: .done, target: self, action: #selector(closeAction))
         navigationItem.setRightBarButtonItems([closeButton, snapshotButton], animated: true)
        
         // Set up touches
@@ -154,7 +212,7 @@ final class DiagramViewController: UIViewController {
         imageScrollView.addGestureRecognizer(singleTapRecognizer)
 
         // Set up context menu.
-        let interaction = UIContextMenuInteraction(delegate: ladderView)
+        let interaction = UIContextMenuInteraction(delegate: self)
         ladderView.addInteraction(interaction)
         // Context menu not great here, prefer long press gesture
 //        let imageViewInteraction = UIContextMenuInteraction(delegate: imageScrollView)
@@ -163,6 +221,7 @@ final class DiagramViewController: UIViewController {
         self.imageScrollView.addGestureRecognizer(longPress)
 
         setTitle()
+
     }
 
     override func viewWillAppear(_ animated: Bool) {
@@ -170,22 +229,14 @@ final class DiagramViewController: UIViewController {
         setupNotifications()
     }
 
-    // FIXME: This is not undoable.
-    // Make each component being set undoable, group them together.
-    func setupDiagram(_ diagram: Diagram) {
-        print("****setupDiagram******")
+    func loadSampleDiagram(_ diagram: Diagram) {
         currentDocument?.undoManager.beginUndoGrouping()
+        // FIXME: make set calibration undoable...
         self.diagram.calibration = diagram.calibration
-        self.diagram.ladder = diagram.ladder
-
-        setDiagramImage(scaleImageForImageView(diagram.image))
-//        setLadder(ladder: diagram.ladder)
-//        imageView.image = diagram.image
-//        imageView.transform = diagram.transform
+        setLadder(diagram.ladder)
+        setDiagramImage(diagram.image)
         imageScrollView.contentInset = UIEdgeInsets(top: 0, left: leftMargin, bottom: 0, right: 0)
-//        ladderView.ladder = diagram.ladder
-        hideCursorAndUnhighlightAllMarks()
-        setTitle()
+        hideCursorAndNormalizeAllMarks()
         setViewsNeedDisplay()
         currentDocument?.undoManager.endUndoGrouping()
     }
@@ -198,6 +249,10 @@ final class DiagramViewController: UIViewController {
         let rotateMenuItem = UIMenuItem(title: L("Rotate"), action: #selector(rotateAction))
         let doneMenuItem = UIMenuItem(title: L("Done"), action: #selector(doneAction))
         let resetMenuItem = UIMenuItem(title: L("Reset"), action: #selector(resetImage))
+        let testMenu = UIMenuController.shared
+        let test1MenuItem = UIMenuItem(title: "test1", action: #selector(rotateAction))
+        let test2MenuItem = UIMenuItem(title: "test2", action: #selector(rotateAction))
+        testMenu.menuItems = [test1MenuItem, test2MenuItem]
         menu.menuItems = [rotateMenuItem, doneMenuItem, resetMenuItem]
         let location = sender.location(in: sender.view)
         let rect = CGRect(x: location.x, y: location.y , width: 0, height: 0)
@@ -249,7 +304,7 @@ final class DiagramViewController: UIViewController {
 
         // Need to set this here, after view draw, or Mac malpositions cursor at start of app.
         imageScrollView.contentInset = UIEdgeInsets(top: 0, left: leftMargin, bottom: 0, right: 0)
-        ladderView.unhighlightAllMarks()
+        ladderView.normalizeAllMarks()
         self.userActivity = self.view.window?.windowScene?.userActivity
         // See https://github.com/mattneub/Programming-iOS-Book-Examples/blob/master/bk2ch06p357StateSaveAndRestoreWithNSUserActivity/ch19p626pageController/SceneDelegate.swift
         if restorationInfo != nil {
@@ -278,20 +333,18 @@ final class DiagramViewController: UIViewController {
                 imageView.transform = transform
             }
         }
-        // FIXME: Need to actually activate activeRegion stored from ladderView.
-        // >>>>>>>>>>Issue is that after restart AV region may appear activated, but active region is actually set to A region.  So tapping on AV region does nothing.
         // Only use the restorationInfo once
         restorationInfo = nil
         showMainMenu()
         updateUndoRedoButtons()
-        centerContent()
         resetViews()
     }
 
     // We only want to use the restorationInfo once when view controller first appears.
     var didFirstLayout = false
     override func viewDidLayoutSubviews() {
-        os_log("viewDidLayoutSubviews() - ViewController", log: .viewCycle, type: .info)
+        // Called multiple times when showing context menu, so comment out for now.
+//        os_log("viewDidLayoutSubviews() - ViewController", log: .viewCycle, type: .info)
         if didFirstLayout { return }
         didFirstLayout = true
         // mark pointers in registry need to reestablished when diagram is reloaded
@@ -319,14 +372,14 @@ final class DiagramViewController: UIViewController {
             DiagramViewController.restorationIsCalibratedKey: cursorView.isCalibrated(),
             DiagramViewController.restorationCalFactorKey: cursorView.calFactor,
             DiagramViewController.restorationFileNameKey: currentDocumentURL,
-            DiagramViewController.restorationDoRestorationKey: !viewClosed,
+            DiagramViewController.restorationDoRestorationKey: true,
             HelpViewController.inHelpKey: false,
             DiagramViewController.restorationTransformKey: NSCoder.string(for: imageView.transform),
         ]
         activity.addUserInfoEntries(from: info)
     }
 
-    private func showMainMenu() {
+    @objc func showMainMenu() {
         if mainMenuButtons == nil {
             let calibrateTitle = L("Calibrate", comment: "calibrate button label title")
             let selectTitle = L("Select", comment: "select button label title")
@@ -343,26 +396,58 @@ final class DiagramViewController: UIViewController {
         navigationController?.setToolbarHidden(false, animated: false)
     }
 
+    // FIXME: can't single tap on mark in ladder after finished with context menu.
+    func showSlantMenu() {
+        guard let toolbar = navigationController?.toolbar else { return }
+        let slider = UISlider()
+        slider.minimumValue = -45
+        slider.maximumValue = 45
+        slider.setValue(0, animated: false)
+        slider.addTarget(self, action: #selector(sliderValueDidChange(_:)), for: .valueChanged)
+        let doneButton = UIButton(type: .system)
+        doneButton.setTitle(L("Done"), for: .normal)
+        doneButton.addTarget(self, action: #selector(closeAngleMenu(_:)), for: .touchUpInside)
+        let stackView = UIStackView(frame: toolbar.frame)
+        stackView.distribution = .fill
+        stackView.axis = .horizontal
+        stackView.spacing = 8
+        stackView.addArrangedSubview(slider)
+        stackView.addArrangedSubview(doneButton)
+        setToolbarItems([UIBarButtonItem(customView: stackView)], animated: true)
+    }
+
+    @objc func closeAngleMenu(_ sender: UIAlertAction) {
+        hideCursorAndNormalizeAllMarks()
+        showMainMenu()
+    }
+
+    @objc func sliderValueDidChange(_ sender: UISlider!) {
+        let value: CGFloat = CGFloat(sender.value)
+        ladderView.slantSelectedMarks(angle: value)
+        ladderView.refresh()
+    }
+
     @objc func showSelectMarksMenu(_: UIAlertAction) {
         if selectMenuButtons == nil {
-            let prompt = makePrompt(text: L("Tap marks to select"))
+            let prompt = makePrompt(text: L("Tap or drag over marks to select"))
             let cancelTitle = L("Done")
             let cancelButton = UIBarButtonItem(title: cancelTitle, style: .done, target: self, action: #selector(cancelSelect))
             selectMenuButtons = [prompt, spacer, cancelButton]
         }
         setToolbarItems(selectMenuButtons, animated: false)
         navigationController?.setToolbarHidden(false, animated: false)
-        hideCursorAndUnhighlightAllMarks()
+        hideCursorAndNormalizeAllMarks()
+        ladderView.normalizeRegions()
         setMode(.select)
         ladderView.startZoning()
         setViewsNeedDisplay()
     }
 
     // Ideally this should be "private" however need access to it in hamburger delegate in another file.
-    func hideCursorAndUnhighlightAllMarks() {
+    func hideCursorAndNormalizeAllMarks() {
         guard cursorView.cursorIsVisible else { return } // don't bother if cursor not visible
         cursorView.cursorIsVisible = false
-        ladderView.unhighlightAllMarks()
+        ladderView.normalizeAllMarks()
     }
 
     private func showLinkMenu() {
@@ -372,7 +457,8 @@ final class DiagramViewController: UIViewController {
             let cancelButton = UIBarButtonItem(title: cancelTitle, style: .done, target: self, action: #selector(cancelLink))
             linkMenuButtons = [prompt, spacer, cancelButton]
         }
-        hideCursorAndUnhighlightAllMarks()
+        hideCursorAndNormalizeAllMarks()
+        ladderView.normalizeRegions()
         setToolbarItems(linkMenuButtons, animated: false)
         navigationController?.setToolbarHidden(false, animated: false)
     }
@@ -412,10 +498,12 @@ final class DiagramViewController: UIViewController {
 
     @objc func closeAction() {
         os_log("CLOSE ACTION")
-        viewClosed = true
+        let info: [AnyHashable: Any] = [
+            DiagramViewController.restorationDoRestorationKey: false]
+        self.userActivity?.addUserInfoEntries(from: info)
         view.endEditing(true)
+        currentDocument?.undoManager.removeAllActions()
         diagramEditorDelegate?.diagramEditorDidFinishEditing(self, diagram: diagram)
-//        dismiss(animated: true, completion: nil)
     }
 
     @objc func snapshotDiagram() {
@@ -486,31 +574,19 @@ final class DiagramViewController: UIViewController {
 
     @objc func linkMarks() {
         os_log("linkMarks()", log: OSLog.action, type: .info)
-        hideCursorAndUnhighlightAllMarks()
+        hideCursorAndNormalizeAllMarks()
         ladderView.removeLinks()
         showLinkMenu()
         setMode(.link)
         setViewsNeedDisplay()
     }
 
-    // FIXME: copy and paste should be long press menu items.
-//    @objc func copyMarks() {
-//        os_log("copyMarks()", log: OSLog.action, type: .info)
-//        showPasteMarksMenu()
-//    }
-//
-//    @objc func showPasteMarksMenu() {
-//        os_log("showPasteMarksMenu()", log: .action, type: .info)
-//        // "Paste marks: Tap on ladder to paste copied mark(s) Done"
-//    }
-
     @objc func cancelSelect() {
         os_log("cancelSelect()", log: OSLog.action, type: .info)
         showMainMenu()
         setMode(.normal)
         ladderView.endZoning()
-        ladderView.unhighlightAllMarks()
-        ladderView.unselectAllMarks()
+        ladderView.normalizeAllMarks()
         ladderView.setNeedsDisplay()
     }
 
@@ -519,7 +595,7 @@ final class DiagramViewController: UIViewController {
         showMainMenu()
         setMode(.normal)
         ladderView.removeLinks()
-        ladderView.unhighlightAllMarks()
+        ladderView.normalizeAllMarks()
         ladderView.setNeedsDisplay()
     }
 
@@ -533,7 +609,7 @@ final class DiagramViewController: UIViewController {
     @objc func clearCalibration() {
         os_log("clearCalibration()", log: .action, type: .info)
         diagram.calibration.reset()
-        hideCursorAndUnhighlightAllMarks()
+        hideCursorAndNormalizeAllMarks()
         ladderView.refresh()
         cursorView.refresh()
         closeCalibrationMenu()
@@ -554,7 +630,7 @@ final class DiagramViewController: UIViewController {
         os_log("undo action", log: OSLog.action, type: .info)
         if self.currentDocument?.undoManager?.canUndo ?? false {
             // Cursor doesn't track undo and redo well, so hide it!
-            hideCursorAndUnhighlightAllMarks()
+            hideCursorAndNormalizeAllMarks()
             self.currentDocument?.undoManager?.undo()
             setViewsNeedDisplay()
         }
@@ -563,7 +639,7 @@ final class DiagramViewController: UIViewController {
     @objc func redo() {
         os_log("redo action", log: OSLog.action, type: .info)
         if self.currentDocument?.undoManager?.canRedo ?? false {
-            hideCursorAndUnhighlightAllMarks()
+            hideCursorAndNormalizeAllMarks()
             self.currentDocument?.undoManager?.redo()
             setViewsNeedDisplay()
         }
@@ -588,7 +664,7 @@ final class DiagramViewController: UIViewController {
         }
         if ladderView.mode == .select {
             ladderView.zone = Zone()
-            ladderView.unselectAllMarks()
+            ladderView.normalizeAllMarks()
             ladderView.setNeedsDisplay()
         }
         if ladderView.mode == .normal {
@@ -598,7 +674,7 @@ final class DiagramViewController: UIViewController {
             }
             if cursorView.cursorIsVisible {
                 ladderView.unattachAttachedMark()
-                hideCursorAndUnhighlightAllMarks()
+                hideCursorAndNormalizeAllMarks()
             }
             else {
                 let position = tap.location(in: imageScrollView)
@@ -619,7 +695,7 @@ final class DiagramViewController: UIViewController {
             // TODO: implement multipage PDF
             // self.enablePageButtons = false
             diagram.imageIsUpscaled = false
-            setDiagramImage(scaleImageForImageView(UIImage(contentsOfFile: url.path)))
+            setDiagramImage(UIImage(contentsOfFile: url.path))
         }
         else {
             // self.numberOfPages = 0
@@ -658,8 +734,6 @@ final class DiagramViewController: UIViewController {
         let page: CGPDFPage? = getPDFPage(documentRef, pageNumber: pageNum)
         if let page = page {
             let sourceRect: CGRect = page.getBoxRect(.mediaBox)
-            // FIXME: scale factor was originally 5, but everything too big on reopening image.
-            // FIXME: However, scaleFactor of 1.0 is too blurry.  Need to scale down pdfs on opening file.
             let scaleFactor: CGFloat = pdfScaleFactor
             let sourceRectSize = sourceRect.size
             UIGraphicsBeginImageContextWithOptions(sourceRectSize, false, scaleFactor)
@@ -692,7 +766,7 @@ final class DiagramViewController: UIViewController {
         os_log("viewWillTransition", log: OSLog.viewCycle, type: .info)
         super.viewWillTransition(to: size, with: coordinator)
         // Hide cursor with rotation, to avoid redrawing it.
-        hideCursorAndUnhighlightAllMarks()
+        hideCursorAndNormalizeAllMarks()
         // Remove separatorView when rotating to let original constraints resume.
         // Otherwise, views are not laid out correctly.
         if let separatorView = separatorView {
@@ -900,6 +974,7 @@ extension DiagramViewController {
         ladderView.showIntervals = UserDefaults.standard.bool(forKey: Preferences.defaultShowIntervalsKey)
         ladderView.showConductionTimes = UserDefaults.standard.bool(forKey: Preferences.defaultShowConductionTimesKey)
         ladderView.snapMarks = UserDefaults.standard.bool(forKey: Preferences.defaultSnapMarksKey)
+        ladderView.defaultMarkStyle = Mark.Style(rawValue: UserDefaults.standard.integer(forKey: Preferences.defaultMarkStyleKey)) ?? .solid
     }
 
     @objc func resolveFileConflicts() {
@@ -916,47 +991,6 @@ extension DiagramViewController {
             currentDocument.diagram = diagram
         }
     }
-
-//    var defaultDocumentURL: URL? {
-//        guard let docURL = FileIO.getCacheURL() else { return nil }
-//        // FIXME: must account for multiple scenes, can't have just one default file.
-//        let docPath = docURL.appendingPathComponent("\(restorationFilename).diagram")
-//        return docPath
-//    }
-
-//    func loadDefaultDocument() -> Diagram? {
-//        guard let defaultDocumentURL = defaultDocumentURL else { return nil }
-//        do {
-//            let decoder = JSONDecoder()
-//            if let data = FileManager.default.contents(atPath: defaultDocumentURL.path) {
-//                let documentData = try decoder.decode(Diagram.self, from: data)
-//                return documentData
-//            } else { return nil }
-//        } catch {
-//            return nil
-//        }
-//    }
-
-//    @discardableResult func saveDefaultDocument(_ content: Diagram) -> Bool {
-//        guard let defaultDocumentURL = defaultDocumentURL else { return false }
-//        do {
-//            let encoder = JSONEncoder()
-//            let documentData = try encoder.encode(content)
-//            try documentData.write(to: defaultDocumentURL)
-//            print("written to \(defaultDocumentURL)")
-//            return true
-//        } catch {
-//            return false
-//        }
-//    }
-
-//    private func loadDocument() {
-//        if let content = loadDefaultDocument() {
-//            diagram = content
-//        } else {
-//            diagram = Diagram.blankDiagram()
-//        }
-//    }
 
 }
 
@@ -986,6 +1020,7 @@ extension DiagramViewController: UIDropInteractionDelegate {
         session.loadObjects(ofClass: UIImage.self) { imageItems in
             print("load image")
             if let images = imageItems as? [UIImage] {
+                self.diagram.imageIsUpscaled = false
                 self.setDiagramImage(images.first)
                 return
             }

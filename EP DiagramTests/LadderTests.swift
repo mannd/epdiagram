@@ -16,7 +16,7 @@ class LadderTests: XCTestCase {
         super.setUp()
         ladder = Ladder.defaultLadder()
         for region: Region in ladder.regions {
-            assert(ladder.getIndex(ofRegion: region)! >= 0, String(format: "region %@ index negative, = %d", region.name, ladder.getIndex(ofRegion: region)!))
+            assert(ladder.regionIndex(ofRegion: region)! >= 0, String(format: "region %@ index negative, = %d", region.name, ladder.regionIndex(ofRegion: region)!))
         }
     }
 
@@ -57,19 +57,19 @@ class LadderTests: XCTestCase {
 
     func testGetRegionIndex() {
         let region = ladder.regions[1]
-        XCTAssertEqual(ladder.getIndex(ofRegion: region), 1)
-        XCTAssert(ladder.getRegionAfter(region: region) == ladder.regions[2])
-        XCTAssert(ladder.getRegionBefore(region: region) == ladder.regions[0])
-        let regionBefore = ladder.getRegionBefore(region: region)
-        XCTAssertNil(ladder.getRegionBefore(region: regionBefore!))
-        let regionAfter = ladder.getRegionAfter(region: region)
-        XCTAssertNil(ladder.getRegionAfter(region: regionAfter!))
+        XCTAssertEqual(ladder.regionIndex(ofRegion: region), 1)
+        XCTAssert(ladder.regionAfter(region: region) == ladder.regions[2])
+        XCTAssert(ladder.regionBefore(region: region) == ladder.regions[0])
+        let regionBefore = ladder.regionBefore(region: region)
+        XCTAssertNil(ladder.regionBefore(region: regionBefore!))
+        let regionAfter = ladder.regionAfter(region: region)
+        XCTAssertNil(ladder.regionAfter(region: regionAfter!))
     }
 
     func testRegionIndicesUniqueInLadder() {
         var lastIndex = 0
         for region in ladder.regions {
-            XCTAssert(ladder.getIndex(ofRegion: region) == lastIndex)
+            XCTAssert(ladder.regionIndex(ofRegion: region) == lastIndex)
             lastIndex += 1
         }
     }
@@ -172,5 +172,27 @@ class LadderTests: XCTestCase {
         XCTAssert(mg.middle.contains(mark2))
         XCTAssert(mg.distal.contains(mark3))
         XCTAssert(mg.count == 3)
+    }
+
+    func testMarkIndexing() {
+        let mark = Mark()
+        XCTAssertEqual(mark.regionIndex, -1)
+        // make sure we can't add a mark without indexing the region properly
+        ladder.addMark(mark, toRegion: nil)
+        XCTAssertEqual(mark.regionIndex, -1)
+        ladder.addMark(mark, toRegion: ladder.regions[0])
+        XCTAssertEqual(mark.regionIndex, 0)
+        let mark2 = ladder.addMark(at: 10, inRegion: ladder.regions[1])
+        XCTAssertEqual(mark2?.regionIndex, 1)
+        let segment = Segment(proximal: CGPoint.zero, distal: CGPoint.zero)
+        let mark3 = ladder.addMark(fromSegment: segment, inRegion: ladder.regions[0])
+        XCTAssertEqual(mark3?.regionIndex, 0)
+        // test region(atIndex:) function
+        ladder.addMark(mark, toRegion: ladder.region(atIndex: 0))
+        XCTAssertEqual(mark.regionIndex, 0)
+        ladder.addMark(mark, toRegion: ladder.region(atIndex: 1))
+        XCTAssertEqual(mark.regionIndex, 1)
+
+
     }
 }

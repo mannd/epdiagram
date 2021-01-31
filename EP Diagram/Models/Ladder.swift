@@ -9,61 +9,31 @@
 import UIKit
 import os.log
 
-// MARK: - structs
-
-struct NearbyMarks {
-    var proximal = [Mark]()
-    var middle = [Mark]()
-    var distal = [Mark]()
-}
-
-// MARK: - enums
-
-private enum Keys: String, CustomStringConvertible {
-    case name = "ladderName"
-    case longDescription = "ladderLongDescription"
-    case regions = "ladderRegions"
-    // etc.
-
-    var description: String {
-        return self.rawValue
-    }
-}
-
-// Is a mark in the region before, same region, region after, or farther away?
-enum RelativeRegion {
-    case before
-    case same
-    case after
-    case distant
-}
-
 // MARK: - classes
 
-// A Ladder is simply a collection of Regions in top down order.
+/// A Ladder is simply a collection of Regions in top down order.
 class Ladder: NSObject, Codable {
-
-    // MARK: constants
     private(set) var id = UUID()
 
-    // MARK: variables
     var name: String
     var longDescription: String = ""
     var regions = [Region]()
     var numRegions: Int { regions.count }
     var attachedMark: Mark? // cursor is attached to a most 1 mark at a time
-    var pressedMark: Mark? // mark that is long-pressed
-    var movingMark: Mark? // mark that is being dragged
-    var selectedMarks = [Mark]() // mark(s) that have been selected
     var linkedMarks = [Mark]() // marks in the process of being linked
-    // marksAreVisible shows and hides all the marks.  You can toggle this for teaching purposes.
-    var marksAreVisible: Bool = true
-    
+    var marksAreVisible: Bool = true    // shows and hides all the marks.  You can toggle this for teaching purposes.
+    var activeRegion: Region? {  // ladder model enforces at most one region can be active
+        didSet {
+            regions.forEach { region in region.mode = .normal }
+            // All regions are set to normal mode if activeRegion set to nil.
+            guard let activeRegion = activeRegion else { return }
+            activeRegion.mode = .active
+        }
+    }
     var zone: Zone = Zone()
+    override var debugDescription: String { "Ladder ID " + id.debugDescription }
+    private var registry: [UUID: Mark] = [:] // marks are registered for quick lookup
 
-    private var registry: [UUID: Mark] = [:]
-
-    // MARK: methods
     init(template: LadderTemplate) {
         os_log("init ladder from template", log: .action, type: .info)
         name = template.name
@@ -73,7 +43,6 @@ class Ladder: NSObject, Codable {
             regions.append(region)
         }
     }
-
 
     func registerMark(_ mark: Mark) {
         registry[mark.id] = mark
@@ -85,6 +54,22 @@ class Ladder: NSObject, Codable {
 
     func lookup(id: UUID) -> Mark? {
         return registry[id]
+    }
+
+    // TODO: do we need registry.  With the small number of marks, might be simpler to just search the array of marks...
+    func altLookup(id: UUID) -> Mark? {
+        var foundMarks = [Mark]()
+        for region in regions {
+            foundMarks = region.marks.filter { mark in mark.id == id }
+            if foundMarks.count > 0 {
+                break
+            }
+        }
+        if foundMarks.count == 1 { // all ids should be unique
+            return foundMarks[0]
+        } else {
+            return nil
+        }
     }
 
     func reregisterAllMarks() {
@@ -145,20 +130,20 @@ class Ladder: NSObject, Codable {
         fatalError("not implemented")
     }
 
-    static func getRelativeRegionBetweenMarks(mark: Mark, otherMark: Mark) -> RelativeRegion {
-        var relativeRegion: RelativeRegion = .distant
+    static func regionRelationBetweenMarks(mark: Mark, otherMark: Mark) -> RegionRelation {
+        var regionRelation: RegionRelation = .distant
         let regionDiff = otherMark.regionIndex - mark.regionIndex
         switch regionDiff {
         case 1:
-            relativeRegion = .after
+            regionRelation = .after
         case 0:
-            relativeRegion = .same
+            regionRelation = .same
         case -1:
-            relativeRegion = .before
+            regionRelation = .before
         default:
-            relativeRegion = .distant
+            regionRelation = .distant
         }
-        return relativeRegion
+        return regionRelation
     }
     
     // TODO: Does region have to be optional?  Consider refactor away optionality.
@@ -175,10 +160,10 @@ class Ladder: NSObject, Codable {
     @discardableResult func addMark(_ mark: Mark, toRegion region: Region?) -> Mark? {
         os_log("addMark(_:toRegion:) - Ladder", log: .action, type: .info)
         guard let region = region else { return nil }
-        mark.lineStyle = region.lineStyle
+        mark.style = region.style
         region.appendMark(mark)
         registerMark(mark)
-        if let index = getIndex(ofRegion: region) {
+        if let index = regionIndex(ofRegion: region) {
             mark.regionIndex = index
         }
         return mark
@@ -186,7 +171,7 @@ class Ladder: NSObject, Codable {
 
     func deleteMark(_ mark: Mark?, inRegion region: Region?) {
         guard let mark = mark, let region = region else { return }
-        setHighlightForAllMarks(highlight: .none)
+        normalizeAllMarks()
         unregisterMark(mark)
         if let index = region.marks.firstIndex(where: {$0 === mark}) {
             region.marks.remove(at: index)
@@ -195,7 +180,7 @@ class Ladder: NSObject, Codable {
     }
 
     func deleteMarksInRegion(_ region: Region) {
-        setHighlightForAllMarks(highlight: .none)
+        normalizeAllMarks()
         for mark: Mark in region.marks {
             removeMarkIdReferences(toMarkId: mark.id)
         }
@@ -217,73 +202,83 @@ class Ladder: NSObject, Codable {
         }
     }
 
-    func getIndex(ofRegion region: Region?) -> Int? {
+    func regionIndex(ofRegion region: Region?) -> Int? {
         guard let region = region else { return nil }
         return regions.firstIndex(of: region)
     }
 
-    func getRegionIndex(ofMark mark: Mark) -> Int? {
+    func regionIndex(ofMark mark: Mark) -> Int {
         let index = mark.regionIndex
         return index
     }
 
-    func getRegion(index: Int) -> Region? {
+    func region(atIndex index: Int) -> Region {
+        precondition(index < regions.count && index >= 0, "Region index out of range")
         return regions[index]
     }
 
-    func getRegion(ofMark mark: Mark) -> Region? {
-        if let index = getRegionIndex(ofMark: mark) {
-            return getRegion(index: index)
-        }
-        else { return nil }
+    func region(ofMark mark: Mark) -> Region {
+        return region(atIndex: regionIndex(ofMark: mark))
     }
 
-    func getRegionBefore(region: Region) -> Region? {
-        guard let index = getIndex(ofRegion: region) else { return nil }
+    func regionBefore(region: Region) -> Region? {
+        guard let index = regionIndex(ofRegion: region) else { return nil }
         if index > 0 {
             return regions[index - 1]
         }
         else { return nil }
     }
 
-    func getRegionAfter(region: Region) -> Region? {
-        guard let index = getIndex(ofRegion: region) else { return nil}
+    func regionAfter(region: Region) -> Region? {
+        guard let index = regionIndex(ofRegion: region) else { return nil}
         if index < regions.count - 1 {
             return regions[index + 1]
         }
         else { return nil }
     }
 
-    func setHighlightForMarks(highlight: Mark.Highlight, inRegion region: Region?) {
-        guard let region = region else { return }
-        region.marks.forEach { item in item.highlight = highlight }
-    }
-
-    func setHighlightForAllMarks(highlight: Mark.Highlight) {
-        for region in regions {
-            setHighlightForMarks(highlight: highlight, inRegion: region)
-        }
-    }
-
-    func setHighlightForMarkIdGroup(highlight: Mark.Highlight, markIdGroup: MarkIdGroup) {
+    func setModeForMarkIdGroup(mode: Mark.Mode, markIdGroup: MarkIdGroup) {
         let markGroup = getMarkGroup(fromMarkIdGroup: markIdGroup)
-        markGroup.highlight(highlight: highlight)
+        markGroup.setMode(mode)
     }
 
-    func unattachAllMarks() {
-        for region in regions {
-            region.marks.forEach { item in item.attached = false }
+    func normalizeAllMarks() {
+        setAllMarksWithMode(.normal)
+    }
+
+    // Will have ladder store and set mark modes
+    func setAllMarksWithMode(_ mode: Mark.Mode) {
+        regions.forEach {
+            region in region.marks.forEach { mark in mark.mode = mode }
         }
     }
 
-    func unselectAllMarks() {
-        for region in regions {
-            region.marks.forEach { item in item.selected = false }
-        }
-        selectedMarks = []
+    func setMarksWithMode(_ mode: Mark.Mode, inRegion region: Region) {
+        region.marks.forEach { mark in mark.mode = mode }
     }
 
-    func getAvailableAnchors(forMark mark: Mark) -> [Anchor] {
+    func setMarkwWithMode(_ mode: Mark.Mode, inZone zone: Zone) {
+        
+    }
+
+    func marksWithMode(_ mode: Mark.Mode, inRegion region: Region) -> [Mark] {
+        let marks = region.marks.filter { mark in mark.mode == mode }
+        return marks
+    }
+
+    func allMarksWithMode(_ mode: Mark.Mode) -> [Mark] {
+        var marks = [Mark]()
+        for region in regions {
+            marks.append(contentsOf: marksWithMode(mode, inRegion: region))
+        }
+        return marks
+    }
+
+    func allRegionsWithMode(_ mode: Region.Mode) -> [Region] {
+        return  regions.filter { $0.mode == mode }
+    }
+
+    func availableAnchors(forMark mark: Mark) -> [Anchor] {
         let groupedMarkIds = mark.groupedMarkIds
         // FIXME: if attachment is in middle, only allow other end to move
         if groupedMarkIds.count < 2 {
@@ -296,19 +291,19 @@ class Ladder: NSObject, Codable {
 
     func toggleAnchor(mark: Mark?) {
         guard let mark = mark else { return }
-        let availableAnchors = getAvailableAnchors(forMark: mark)
-        assert(availableAnchors.count == 2 || availableAnchors.count == 3, "Impossible anchor count!")
+        let anchors = availableAnchors(forMark: mark)
+        assert(anchors.count == 2 || anchors.count == 3, "Impossible anchor count!")
         let currentAnchor = mark.anchor
-        if availableAnchors.contains(currentAnchor) {
-            guard let currentAnchorIndex = availableAnchors.firstIndex(of: currentAnchor) else { mark.anchor = availableAnchors [0]; return }
-            if currentAnchorIndex == availableAnchors.count - 1 {
-                mark.anchor = availableAnchors[0] // last anchor, scroll around
+        if anchors.contains(currentAnchor) {
+            guard let currentAnchorIndex = anchors.firstIndex(of: currentAnchor) else { mark.anchor = anchors [0]; return }
+            if currentAnchorIndex == anchors.count - 1 {
+                mark.anchor = anchors[0] // last anchor, scroll around
             } else {
-                mark.anchor = availableAnchors[currentAnchorIndex + 1]
+                mark.anchor = anchors[currentAnchorIndex + 1]
             }
         }
         else {
-            mark.anchor = availableAnchors[0]
+            mark.anchor = anchors[0]
         }
     }
 
@@ -317,7 +312,7 @@ class Ladder: NSObject, Codable {
     }
 
     func defaultAnchor(forMark mark: Mark) -> Anchor {
-        return getAvailableAnchors(forMark: mark)[0]
+        return availableAnchors(forMark: mark)[0]
     }
 
     // Pivot points are really fixed points (rename?) that can't move during mark movement.
@@ -339,20 +334,6 @@ class Ladder: NSObject, Codable {
         return []
     }
 
-    func getActiveRegion() -> Region? {
-        for region in regions {
-            if region.activated {
-                return region
-            }
-        }
-        return nil
-    }
-
-    func getActiveRegionIndex() -> Int? {
-        guard let activeRegion = getActiveRegion() else { return nil }
-        return getIndex(ofRegion: activeRegion)
-    }
-
     func moveGroupedMarks(forMark mark: Mark) {
         for proximalMark in getMarkSet(fromMarkIdSet: mark.groupedMarkIds.proximal) {
             proximalMark.segment.distal.x = mark.segment.proximal.x
@@ -362,8 +343,8 @@ class Ladder: NSObject, Codable {
         }
         for middleMark in getMarkSet(fromMarkIdSet:mark.groupedMarkIds.middle) {
             if mark == middleMark { break }
-            let distanceToProximal = Common.distanceSegmentToPoint(segment: mark.segment, point: middleMark.segment.proximal)
-            let distanceToDistal = Common.distanceSegmentToPoint(segment: mark.segment, point: middleMark.segment.distal)
+            let distanceToProximal = Geometry.distanceSegmentToPoint(segment: mark.segment, point: middleMark.segment.proximal)
+            let distanceToDistal = Geometry.distanceSegmentToPoint(segment: mark.segment, point: middleMark.segment.distal)
             if distanceToProximal < distanceToDistal {
                 let x = mark.segment.getX(fromY: middleMark.segment.proximal.x)
                 if let x = x {
@@ -380,9 +361,26 @@ class Ladder: NSObject, Codable {
  
     }
 
-
     // Returns a basic ladder (A, AV, V).
     static func defaultLadder() -> Ladder {
         return Ladder(template: LadderTemplate.defaultTemplate())
     }
+}
+
+// MARK: - structs
+
+struct NearbyMarks {
+    var proximal = [Mark]()
+    var middle = [Mark]()
+    var distal = [Mark]()
+}
+
+// MARK: - enums
+
+// Is a mark in the region before, same region, region after, or farther away?
+enum RegionRelation {
+    case before
+    case same
+    case after
+    case distant
 }

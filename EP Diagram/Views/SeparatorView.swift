@@ -78,7 +78,7 @@ class SeparatorView: UIView {
         self.startConstraint!.isActive = true
         cursorViewDelegate?.cursorIsVisible = false
         let ladderView = secondaryView as? LadderView
-        ladderView?.unhighlightAllMarks()
+        ladderView?.normalizeAllMarks()
         ladderView?.refresh()
         cursorViewDelegate?.refresh()
     }

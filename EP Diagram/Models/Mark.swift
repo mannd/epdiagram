@@ -8,7 +8,7 @@
 
 // See this attempt at a ladder diagram program, the only one I can find: https://epfellow.wordpress.com/2010/11/04/electrocardiogram-ecgekg-ladder-diagrams/
 
-// We import UIKit here and elsewhere to use CGFloat and avoid conversions
+// We import UIKit here and elsewhere to use CGFloat consistently and avoid conversions
 // of Double to CGFloat.
 import UIKit
 import os.log
@@ -18,91 +18,21 @@ import os.log
 typealias MarkSet = Set<Mark>
 typealias MarkIdSet = Set<UUID>
 
-// MARK: - enums
+// MARK: - classes, structs
 
-enum Movement {
-    case horizontal
-    case omnidirectional
-}
-
-// MARK: - structs, classes
-
-// A mark may have up to three attachments to marks in the proximal and distal regions
-// and in its own region, i.e. reentry spawning a mark.
-struct MarkGroup: Codable {
-    var proximal: MarkSet
-    var middle: MarkSet
-    var distal: MarkSet
-
-    var allMarks: MarkSet {
-        get {
-            proximal.union(middle.union(distal))
-        }
-    }
-
-    init(proximal: MarkSet = MarkSet(), middle: MarkSet = MarkSet(), distal: MarkSet = MarkSet()) {
-        self.proximal = proximal
-        self.middle = middle
-        self.distal = distal
-    }
-
-    mutating func remove(mark: Mark) {
-        proximal.remove(mark)
-        middle.remove(mark)
-        distal.remove(mark)
-    }
-
-    var count: Int { allMarks.count }
-
-    func highlight(highlight: Mark.Highlight) {
-        for mark in allMarks {
-            mark.highlight = highlight
-        }
-    }
-}
-
-struct MarkIdGroup: Codable {
-    var proximal: MarkIdSet
-    var middle: MarkIdSet
-    var distal: MarkIdSet
-
-    var allMarkIds: MarkIdSet {
-        proximal.union(middle.union(distal))
-    }
-    var count: Int {
-        allMarkIds.count
-    }
-
-    init(proximal: MarkIdSet = MarkIdSet(),
-         middle: MarkIdSet = MarkIdSet(),
-         distal: MarkIdSet = MarkIdSet()) {
-        self.proximal = proximal
-        self.middle = middle
-        self.distal = distal
-    }
-
-    mutating func remove(id: UUID) {
-        proximal.remove(id)
-        middle.remove(id)
-        distal.remove(id)
-    }
-    
-}
-
-// The mark is a fundamental component of a ladder diagram.
+/// The mark is a fundamental component of a ladder diagram.
 class Mark: Codable {
     let id: UUID // each mark has a unique id to allow sets of marks
 
     var segment: Segment // where a mark is, using regional coordinates
-    var attached: Bool = false // cursor attached and shown
-    var selected: Bool = false // mark is selected for some action
-    var highlight: Highlight = .none
+    var mode: Mode = .normal
     var anchor: Anchor = .middle // Anchor point for movement and to attach a cursor
-    var lineStyle: LineStyle = .solid
+    var style: Style = .solid
     var block: Block = .none
     var impulseOrigin: ImpulseOrigin = .none
-    var text: String = ""  // text is usually a calibrated interval
-    var showText: Bool = true
+    var measurementText: String = ""
+    var showMeasurementText: Bool = true
+
     // Ids of other marks that this mark is grouped with.
     var groupedMarkIds: MarkIdGroup = MarkIdGroup()
     var regionIndex: Int = -1 // keep track of which region mark is in a ladder, negative value should not occur, except on init.
@@ -221,7 +151,76 @@ class Mark: Codable {
             }
         }
     }
+
+    // Must normalize x and y??
+    func applyAngle(_ angle: CGFloat) {
+        let y0 = segment.proximal.y
+        let y1 = segment.distal.y
+        let height = y1 - y0
+        let delta = Geometry.rightTriangleBase(withAngle: angle, height: height)
+        segment.distal.x += delta
+    }
 }
+
+// A mark may have up to three attachments to marks in the proximal and distal regions
+// and in its own region, i.e. reentry spawning a mark.
+struct MarkGroup: Codable {
+    var proximal: MarkSet
+    var middle: MarkSet
+    var distal: MarkSet
+
+    var allMarks: MarkSet {
+        get {
+            proximal.union(middle.union(distal))
+        }
+    }
+
+    init(proximal: MarkSet = MarkSet(), middle: MarkSet = MarkSet(), distal: MarkSet = MarkSet()) {
+        self.proximal = proximal
+        self.middle = middle
+        self.distal = distal
+    }
+
+    mutating func remove(mark: Mark) {
+        proximal.remove(mark)
+        middle.remove(mark)
+        distal.remove(mark)
+    }
+
+    var count: Int { allMarks.count }
+
+    func setMode(_ mode: Mark.Mode) {
+        allMarks.forEach { mark in mark.mode = mode }
+    }
+}
+
+struct MarkIdGroup: Codable {
+    var proximal: MarkIdSet
+    var middle: MarkIdSet
+    var distal: MarkIdSet
+
+    var allMarkIds: MarkIdSet {
+        proximal.union(middle.union(distal))
+    }
+    var count: Int {
+        allMarkIds.count
+    }
+
+    init(proximal: MarkIdSet = MarkIdSet(),
+         middle: MarkIdSet = MarkIdSet(),
+         distal: MarkIdSet = MarkIdSet()) {
+        self.proximal = proximal
+        self.middle = middle
+        self.distal = distal
+    }
+
+    mutating func remove(id: UUID) {
+        proximal.remove(id)
+        middle.remove(id)
+        distal.remove(id)
+    }
+}
+
 // MARK: - extensions
 
 extension Mark: CustomDebugStringConvertible {
@@ -229,13 +228,12 @@ extension Mark: CustomDebugStringConvertible {
         """
         \(id.debugDescription)
         \(segment)
-        attached = \(attached)
-
+        mode = \(mode)
         """
     }
 }
 
-extension Mark: Comparable {
+extension Mark: Comparable, Hashable {
     static func < (lhs: Mark, rhs: Mark) -> Bool {
         return lhs.segment.proximal.x < rhs.segment.proximal.x && lhs.segment.distal.x < rhs.segment.distal.x
     }
@@ -243,9 +241,7 @@ extension Mark: Comparable {
     static func == (lhs: Mark, rhs: Mark) -> Bool {
         return lhs.id == rhs.id
     }
-}
 
-extension Mark: Hashable {
     func hash(into hasher: inout Hasher) {
         hasher.combine(id)
     }
@@ -254,9 +250,13 @@ extension Mark: Hashable {
 // enums for Mark
 extension Mark {
     /// Draw a solid or dashed line when drawing a mark.
-    enum LineStyle: Int, Codable, CustomStringConvertible, CaseIterable, Identifiable {
-        var id: LineStyle { self }
+    enum Style: Int, Codable, CustomStringConvertible, CaseIterable, Identifiable {
+        case solid
+        case dashed
+        case dotted
+        case inherited
 
+        var id: Style { self }
         var description: String {
             switch self {
             case .solid:
@@ -265,21 +265,11 @@ extension Mark {
                 return L("Dashed")
             case .dotted:
                 return L("Dotted")
+            case .inherited:
+                return L("Inherited")
             }
+
         }
-
-        case solid
-        case dashed
-        case dotted
-    }
-
-    // Highlight is used to show state of a mark visibly.
-    enum Highlight: Int, Codable {
-        case attached // cursor attached
-        case grouped // mark attached to cursor and
-        case selected
-        case linked
-        case none
     }
 
     // Site of block
@@ -296,4 +286,19 @@ extension Mark {
         case none
     }
 
+    // Mutually exclusive modes that determine behavior and appears of marks.
+    enum Mode: Int, Codable {
+        case attached
+        case grouped
+        case selected
+        case linked
+        case normal
+    }
+}
+
+// MARK: - enums
+
+enum Movement {
+    case horizontal
+    case omnidirectional
 }

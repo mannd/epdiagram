@@ -56,7 +56,7 @@ extension DiagramViewController: DiagramViewControllerDelegate {
         os_log("selectSampleDiagram()", log: .action, type: .info)
         guard let diagram = diagram else { return }
         // FIXME: This is not undoable
-        setupDiagram(diagram)
+        loadSampleDiagram(diagram)
     }
 
     func setViewsNeedDisplay() {
@@ -123,16 +123,5 @@ extension DiagramViewController: DiagramViewControllerDelegate {
         }
     }
 
-    func centerContent() {
-//        var top: CGFloat = 0
-//        var left: CGFloat = 0
-//        if (self.imageScrollView.contentSize.width < self.imageScrollView.bounds.size.width) {
-//            left = (self.imageScrollView.bounds.size.width - self.imageScrollView.contentSize.width) * 0.5
-//        }
-//        if (self.imageScrollView.contentSize.height < self.imageScrollView.bounds.size.height) {
-//            top = (self.imageScrollView.bounds.size.height-self.imageScrollView.contentSize.height) * 0.5
-//        }
-//        self.imageScrollView.contentInset = UIEdgeInsets(top: top, left: left, bottom: top, right: left)
-    }
-
 }
+

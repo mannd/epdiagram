@@ -256,17 +256,27 @@ final class CursorView: ScaledView {
     @objc func singleTap(tap: UITapGestureRecognizer) {
         os_log("singleTap(tap:) - CursorView", log: OSLog.touches, type: .info)
         guard allowTaps else { return } // Taps do nothing when ladder is locked.
+        switch mode {
+        case .normal:
+            ladderViewDelegate.toggleAttachedMarkAnchor()
+            ladderViewDelegate.refresh()
+            setNeedsDisplay()
+        default:
+            break
+        }
         guard mode == .normal else { return } // Single tap does nothing during calibration.
-        ladderViewDelegate.toggleAttachedMarkAnchor()
-        ladderViewDelegate.refresh()
-        setNeedsDisplay()
     }
 
     @objc func doubleTap(tap: UITapGestureRecognizer) {
         os_log("doubleTap(tap:) - CursorView", log: OSLog.touches, type: .info)
-        ladderViewDelegate.deleteAttachedMark()
-        ladderViewDelegate.refresh()
-        setNeedsDisplay()
+        guard allowTaps else { return } // Taps do nothing when ladder is locked.
+        switch mode {
+        case .normal:
+            ladderViewDelegate.deleteAttachedMark()
+            ladderViewDelegate.refresh()
+            setNeedsDisplay()
+        default:
+            break}
     }
 
     @objc func dragging(pan: UIPanGestureRecognizer) {
@@ -275,7 +285,7 @@ final class CursorView: ScaledView {
             calibrationModeDrag(pan)
         case .normal:
             normalModeDrag(pan)
-        case .link, .select:
+        default:
             break
         }
     }
@@ -285,7 +295,7 @@ final class CursorView: ScaledView {
         if pan.state == .began {
             currentDocument?.undoManager?.beginUndoGrouping()
             cursorEndPointY = attachedMarkAnchorPosition.y
-            ladderViewDelegate.setAttachedMarkAndGroupedMarksHighlights()
+            ladderViewDelegate.setAttachedMarkAndGroupedMarksModes()
             ladderViewDelegate.moveAttachedMark(position: attachedMarkAnchorPosition) // This has to be here for undo to work.
         }
         if pan.state == .changed {

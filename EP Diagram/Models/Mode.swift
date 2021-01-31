@@ -8,7 +8,7 @@
 
 import Foundation
 
-// FIXME: This is used by both LadderView and CursorView.
+// Mode is used by both LadderView and CalipersView, and set by DiagramView.
 enum Mode {
     case normal
     case calibration

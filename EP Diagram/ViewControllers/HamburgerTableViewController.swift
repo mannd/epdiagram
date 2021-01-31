@@ -14,7 +14,7 @@ class HamburgerTableViewController: UITableViewController {
     var rows = [HamburgerLayer]()
     var delegate: HamburgerTableDelegate?
     var imageIsLocked: Bool = false
-    var diagramIsLocked: Bool = false
+    var ladderIsLocked: Bool = false
 
     override func viewDidLoad() {
         os_log("viewDidLoad() - HamburgerView", log: OSLog.viewCycle, type: .info)
@@ -34,8 +34,7 @@ class HamburgerTableViewController: UITableViewController {
 
     private func loadData() {
         imageIsLocked = delegate?.imageIsLocked ?? false
-        diagramIsLocked = delegate?.diagramIsLocked ?? false
-//        hamburgerViewModel.diagramSaved = delegate?.diagramSaved ?? false
+        ladderIsLocked = delegate?.ladderIsLocked ?? false
         rows = hamburgerViewModel.allLayers()
     }
 
@@ -54,7 +53,7 @@ class HamburgerTableViewController: UITableViewController {
 
         let row = rows[indexPath.row]
 
-        if (row.layer == .lockImage && imageIsLocked) || (row.layer == .lockLadder && diagramIsLocked) {
+        if (row.layer == .lockImage && imageIsLocked) || (row.layer == .lockLadder && ladderIsLocked) {
             cell.label?.text = row.altName
             cell.icon?.image = row.altIcon
         }

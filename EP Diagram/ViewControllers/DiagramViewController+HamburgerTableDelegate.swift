@@ -17,7 +17,7 @@ protocol HamburgerTableDelegate: class {
     var constraintHamburgerWidth: NSLayoutConstraint { get set }
     var maxBlackAlpha: CGFloat { get }
     var imageIsLocked: Bool { get set }
-    var diagramIsLocked: Bool { get set }
+    var ladderIsLocked: Bool { get set }
 
     func takePhoto()
     func selectImage()
@@ -77,7 +77,7 @@ extension DiagramViewController: HamburgerTableDelegate, UIImagePickerController
         set(newValue) { _imageIsLocked = newValue}
     }
 
-    var diagramIsLocked: Bool {
+    var ladderIsLocked: Bool {
         get { _ladderIsLocked }
         set(newValue) { _ladderIsLocked = newValue }
     }
@@ -166,8 +166,10 @@ extension DiagramViewController: HamburgerTableDelegate, UIImagePickerController
         os_log("getDiagramInfo()", log: .action, type: .info)
         // TODO: If there are more fields, then include this and add SwiftUI view.
         // show dialog with diagram info here.
-        P("Name = \(diagram.name ?? "unnamed")")
-        P("Description = \(diagram.longDescription)")
+        // TODO: Option to edit diagram info?
+        // also consider killing this.  File app gives file info.
+        print("Name = \(diagram.name ?? "unnamed")")
+        print("Description = \(diagram.longDescription)")
     }
 
 
@@ -213,7 +215,7 @@ extension DiagramViewController: HamburgerTableDelegate, UIImagePickerController
     }
 
     func about() {
-        let versionBuild = Version.getAppVersion()
+        let versionBuild = Version.appVersion()
         let version = versionBuild.version ?? L("unknown")
         let build = versionBuild.build ?? L("unknown")
         os_log("EP Diagram: version = %s build = %s", log: OSLog.debugging, type: .info, version, build)
@@ -227,7 +229,8 @@ extension DiagramViewController: HamburgerTableDelegate, UIImagePickerController
     #if DEBUG
     func test() {
         os_log("test()", log: .debugging, type: .debug)
-        ladderView.ladder.reregisterAllMarks()
+        showSlantMenu()
+//        ladderView.ladder.reregisterAllMarks()
 //        print(ladderView.ladder.registry)
 //        let ladder = ladderView.ladder
 //        for region in ladder.regions {
@@ -295,26 +298,7 @@ extension DiagramViewController: HamburgerTableDelegate, UIImagePickerController
 
     private func handleSelectImage() {
         os_log("handleSelectImage()", log: .action, type: .info)
-        if !UIImagePickerController.isSourceTypeAvailable(.photoLibrary) {
-            UserAlert.showMessage(
-                viewController: self,
-                title: L("Photo Library Not Available"),
-                message: L("Make sure you have enabled permission for EP Diagram to use the Photo Library in the Settings app."))
-            os_log("Photo library not available", log: .debugging, type: .debug)
-            return
-        }
-        // By default picker.mediaTypes == ["public.image"], i.e. videos aren't shown.  So no need to check UIImagePickerController.availableMediaTypes(for:) or set picker.mediaTypes.
-        imagePicker.delegate = self
-        imagePicker.sourceType = .photoLibrary
-        // TODO: Test editing on real devices (doesn't work on simulator).
-        // Must allow editing because edited image is used by UIImagePickerController delegate.
-        imagePicker.allowsEditing = true
-        // Need to use popover for iPads, according to docs, but .fullscreen seems to work too.
-        if UIDevice.current.userInterfaceIdiom == .pad {
-            imagePicker.modalPresentationStyle = .popover
-            imagePicker.popoverPresentationController?.barButtonItem = navigationItem.leftBarButtonItem
-        }
-        present(imagePicker, animated: true)
+        presentPhotosForImages()
     }
 
     func sampleDiagrams() {
@@ -332,18 +316,17 @@ extension DiagramViewController: HamburgerTableDelegate, UIImagePickerController
 //    }
 
     @objc func setDiagramImage(_ image: UIImage?) {
-        print("****setDiagramImage")
+        os_log("setDiagramImage(_:)", log: .action, type: .info)
         currentDocument?.undoManager.registerUndo(withTarget: self, selector: #selector(setDiagramImage), object: imageView.image)
         NotificationCenter.default.post(name: .didUndoableAction, object: nil)
-//        updateUndoRedoButtons()
         diagram.ladder.clear()
-        diagram.image = image
-        imageView.image = image
+        let scaledImage = scaleImageForImageView(image)
+        diagram.image = scaledImage
+        imageView.image = scaledImage
 //        imageView.transform = diagram.transform
         imageScrollView.zoomScale = 1.0
         imageScrollView.contentOffset = CGPoint.zero
-        centerContent()
-        hideCursorAndUnhighlightAllMarks()
+        hideCursorAndNormalizeAllMarks()
 //        diagram.calibration.reset()
         setViewsNeedDisplay()
     }
@@ -393,7 +376,7 @@ extension DiagramViewController: HamburgerTableDelegate, UIImagePickerController
         self.separatorView = nil
         navigationController?.setToolbarHidden(true, animated: true)
         // Always hide cursor when opening hamburger menu.
-        hideCursorAndUnhighlightAllMarks()
+        hideCursorAndNormalizeAllMarks()
         cursorView.setNeedsDisplay()
         UIView.animate(withDuration: 0.5, animations: {
             self.view.layoutIfNeeded()
@@ -420,12 +403,53 @@ extension DiagramViewController: HamburgerTableDelegate, UIImagePickerController
         let chosenImage = info[.editedImage] as? UIImage
         // Images from photos are never upscaled.
         diagram.imageIsUpscaled = false
-        setDiagramImage(scaleImageForImageView(chosenImage))
+        setDiagramImage(chosenImage)
         picker.dismiss(animated: true, completion: nil)
     }
 
     func imagePickerControllerDidCancel(_ picker: UIImagePickerController) {
         picker.dismiss(animated: true, completion: nil)
     }
+
 }
 
+import PhotosUI
+
+extension DiagramViewController: PHPickerViewControllerDelegate {
+    func picker(_ picker: PHPickerViewController, didFinishPicking results: [PHPickerResult]) {
+        dismiss(animated: true)
+        if let itemProvider = results.first?.itemProvider {
+            if itemProvider.canLoadObject(ofClass: UIImage.self) {
+                itemProvider.loadObject(ofClass: UIImage.self) { [weak self] image, error in
+                    DispatchQueue.main.async {
+                        guard let self = self else { return }
+                        if let image = image as? UIImage {
+                            // Only PDFs are upscaled
+                            self.diagram.imageIsUpscaled = false
+                            self.setDiagramImage(image)
+                        } else {
+                            os_log("Error displaying image", log: .errors, type: .error)
+                            UserAlert.showMessage(viewController: self, title: L("Error Loading Image"), message: L("Selected image could not be loaded."))
+                        }
+                    }
+                }
+            } else {
+                os_log("Can't load item provider", log: .errors, type: .error)
+            }
+        }
+    }
+
+    func presentPhotosForImages() {
+        presentPhotosPicker(filter: .images)
+    }
+
+    func presentPhotosPicker(filter: PHPickerFilter) {
+        var configuration = PHPickerConfiguration()
+        configuration.filter = filter
+        // .selectionLimit defaults to 1, single selection
+
+        let picker = PHPickerViewController(configuration: configuration)
+        picker.delegate = self
+        present(picker, animated: true)
+    }
+}

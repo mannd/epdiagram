@@ -10,23 +10,13 @@ import UIKit
 import os.log
 
 struct Diagram: Codable {
-    var name: String?
+    var name: String? // Not used except for samples.  document.name used instead.
+    var longDescription: String // Not used except for samples.
+
     var imageWrapper: ImageWrapper
-    var image: UIImage? {
-        get {
-            return imageWrapper.image
-        }
-        set(newValue) {
-            imageWrapper = ImageWrapper(image: newValue)
-        }
-    }
-    // FIXME: remove didSet
-    var imageIsUpscaled: Bool = false {
-        didSet {
-            print("************imageIsUpscaled = \(imageIsUpscaled)")
-        }
-    }
-    var longDescription: String
+    var image: UIImage? { get { imageWrapper.image }
+        set(newValue) { imageWrapper = ImageWrapper(image: newValue) } }
+    var imageIsUpscaled: Bool = false
     var ladder: Ladder
     var calibration: Calibration = Calibration()
     var transform: CGAffineTransform
@@ -43,7 +33,6 @@ struct Diagram: Codable {
         return Diagram(name: name, description: "Normal ECG", image: UIImage(named: "SampleECG")!, ladder: Ladder.defaultLadder())
     }
 
-
     static func blankDiagram(name: String? = nil) -> Diagram {
         let diagram = Diagram(name: name, description: "Blank diagram", image: nil, ladder: Ladder.defaultLadder())
         return diagram
@@ -52,6 +41,4 @@ struct Diagram: Codable {
     static func scrollableBlankDiagram() -> Diagram {
         return Diagram(name: L("Scrollable Blank Diagram"), description: L("Wide scrollable blank image"), image: UIImage.emptyImage(size: CGSize(width: 1, height: 1), color: UIColor.systemTeal), ladder: Ladder.defaultLadder())
     }
-
-
 }
