@@ -173,4 +173,26 @@ class LadderTests: XCTestCase {
         XCTAssert(mg.distal.contains(mark3))
         XCTAssert(mg.count == 3)
     }
+
+    func testMarkIndexing() {
+        let mark = Mark()
+        XCTAssertEqual(mark.regionIndex, -1)
+        // make sure we can't add a mark without indexing the region properly
+        ladder.addMark(mark, toRegion: nil)
+        XCTAssertEqual(mark.regionIndex, -1)
+        ladder.addMark(mark, toRegion: ladder.regions[0])
+        XCTAssertEqual(mark.regionIndex, 0)
+        let mark2 = ladder.addMark(at: 10, inRegion: ladder.regions[1])
+        XCTAssertEqual(mark2?.regionIndex, 1)
+        let segment = Segment(proximal: CGPoint.zero, distal: CGPoint.zero)
+        let mark3 = ladder.addMark(fromSegment: segment, inRegion: ladder.regions[0])
+        XCTAssertEqual(mark3?.regionIndex, 0)
+        // test region(atIndex:) function
+        ladder.addMark(mark, toRegion: ladder.region(atIndex: 0))
+        XCTAssertEqual(mark.regionIndex, 0)
+        ladder.addMark(mark, toRegion: ladder.region(atIndex: 1))
+        XCTAssertEqual(mark.regionIndex, 1)
+
+
+    }
 }

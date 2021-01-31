@@ -96,8 +96,87 @@ class LadderViewTests: XCTestCase {
         XCTAssertEqual(ladderView.ladder.regions[0].mode, .normal)
         XCTAssertEqual(ladderView.ladder.regions[1].mode, .active)
         XCTAssertEqual(ladderView.activeRegion, ladderView.ladder.regions[1])
+        // test setActiveRegion
+        ladderView.setActiveRegion(regionNum: 0)
+        XCTAssertEqual(ladderView.activeRegion, ladderView.ladder.region(atIndex: 0))
+        XCTAssertEqual(ladderView.hasActiveRegion(), true)
+        ladderView.activeRegion = nil
+        XCTAssertEqual(ladderView.hasActiveRegion(), false)
+    }
 
+    func testNormalizeMarks() {
+        ladderView.activeRegion = nil
+        let mark1 = ladderView.addMarkToActiveRegion(regionPositionX: 0)
+        XCTAssertNil(mark1)
+        ladderView.activeRegion = ladderView.ladder.region(atIndex: 0)
+        let mark2 = ladderView.addMarkToActiveRegion(regionPositionX: 10)
+        let mark3 = Mark()
+        ladderView.ladder.addMark(mark3, toRegion: ladderView.activeRegion)
+        XCTAssertNotNil(mark2)
+        XCTAssertNotNil(mark3)
+        mark2!.mode = Mark.Mode.attached
+        mark3.mode = Mark.Mode.grouped
+        ladderView.normalizeAllMarks()
+        XCTAssertEqual(mark2!.mode, .normal)
+        XCTAssertEqual(mark3.mode, .normal)
+    }
 
+    func testDeleteSelectedMarks() {
+        let mark1 = Mark()
+        let mark2 = Mark()
+        let mark3 = Mark()
+        ladderView.ladder.addMark(mark1, toRegion: ladderView.ladder.region(atIndex: 0))
+        ladderView.ladder.addMark(mark2, toRegion: ladderView.ladder.region(atIndex: 1))
+        ladderView.ladder.addMark(mark3, toRegion: ladderView.ladder.region(atIndex: 0))
+        let cursorView = CursorView()
+        ladderView.cursorViewDelegate = cursorView
+        mark1.mode = .selected
+        var marksCount = ladderView.ladder.region(atIndex: 0).marks.count
+        XCTAssertEqual(marksCount, 2)
+        ladderView.deleteSelectedMarks()
+        marksCount = ladderView.ladder.region(atIndex: 0).marks.count
+        XCTAssertEqual(marksCount, 1)
+        mark2.mode = .selected
+        mark3.mode = .selected
+        ladderView.deleteSelectedMarks()
+        marksCount = ladderView.ladder.region(atIndex: 0).marks.count
+        XCTAssertEqual(marksCount, 0)
+        marksCount = ladderView.ladder.region(atIndex: 1).marks.count
+        XCTAssertEqual(marksCount, 0)
+    }
 
+    func testDeleteAllInRegion() {
+        let cursorView = CursorView()
+        ladderView.cursorViewDelegate = cursorView
+        ladderView.ladder.region(atIndex: 0).mode = .selected
+        ladderView.ladder.activeRegion = ladderView.ladder.region(atIndex: 0)
+        _ = ladderView.addMarkToActiveRegion(regionPositionX: 0)
+        _ = ladderView.addMarkToActiveRegion(regionPositionX: 1)
+        _ = ladderView.addMarkToActiveRegion(regionPositionX: 2)
+        ladderView.ladder.activeRegion = ladderView.ladder.region(atIndex: 1)
+        _ = ladderView.addMarkToActiveRegion(regionPositionX: 3)
+        ladderView.ladder.region(atIndex: 0).mode = .selected
+        var count = ladderView.ladder.region(atIndex: 0).marks.count
+        XCTAssertEqual(count, 3)
+        ladderView.deleteAllInSelectedRegion()
+        count = ladderView.ladder.region(atIndex: 0).marks.count
+        XCTAssertEqual(count, 0)
+        ladderView.deleteAllInSelectedRegion()
+        count = ladderView.ladder.region(atIndex: 1).marks.count
+        XCTAssertEqual(count, 1)
+        ladderView.ladder.region(atIndex: 1).mode = .selected
+        ladderView.deleteAllInSelectedRegion()
+        count = ladderView.ladder.region(atIndex: 1).marks.count
+        XCTAssertEqual(count, 1)
+        ladderView.normalizeRegions()
+        // No selected region, so delete doesn't do anything
+        _ = ladderView.addMarkToActiveRegion(regionPositionX: 4)
+        ladderView.deleteAllInSelectedRegion()
+        count = ladderView.ladder.region(atIndex: 1).marks.count
+        XCTAssertEqual(count, 2)
+        ladderView.ladder.region(atIndex: 1).mode = .selected
+        ladderView.deleteAllInSelectedRegion()
+        count = ladderView.ladder.region(atIndex: 1).marks.count
+        XCTAssertEqual(count, 0)
     }
 }

@@ -89,7 +89,7 @@ final class DiagramViewController: UIViewController {
         self.ladderView.deleteSelectedMarks()
     }
     lazy var deleteAllInRegion = UIAction(title: L("Clear region"), image: UIImage(systemName: "trash"), attributes: .destructive) { action in
-        self.ladderView.deleteAllInRegion()
+        self.ladderView.deleteAllInSelectedRegion()
     }
     lazy var deleteAllInLadder = UIAction(title: L("Clear ladder"), image: UIImage(systemName: "trash"), attributes: .destructive) { action in
         self.ladderView.deleteAllInLadder()

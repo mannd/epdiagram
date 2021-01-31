@@ -25,7 +25,6 @@ class Mark: Codable {
     let id: UUID // each mark has a unique id to allow sets of marks
 
     var segment: Segment // where a mark is, using regional coordinates
-
     var mode: Mode = .normal
     var anchor: Anchor = .middle // Anchor point for movement and to attach a cursor
     var style: Style = .solid

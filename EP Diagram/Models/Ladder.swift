@@ -207,20 +207,18 @@ class Ladder: NSObject, Codable {
         return regions.firstIndex(of: region)
     }
 
-    func regionIndex(ofMark mark: Mark) -> Int? {
+    func regionIndex(ofMark mark: Mark) -> Int {
         let index = mark.regionIndex
         return index
     }
 
-    func region(at index: Int) -> Region? {
+    func region(atIndex index: Int) -> Region {
+        precondition(index < regions.count && index >= 0, "Region index out of range")
         return regions[index]
     }
 
-    func region(ofMark mark: Mark) -> Region? {
-        if let index = regionIndex(ofMark: mark) {
-            return region(at: index)
-        }
-        else { return nil }
+    func region(ofMark mark: Mark) -> Region {
+        return region(atIndex: regionIndex(ofMark: mark))
     }
 
     func regionBefore(region: Region) -> Region? {
