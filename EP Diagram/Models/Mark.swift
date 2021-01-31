@@ -8,7 +8,7 @@
 
 // See this attempt at a ladder diagram program, the only one I can find: https://epfellow.wordpress.com/2010/11/04/electrocardiogram-ecgekg-ladder-diagrams/
 
-// We import UIKit here and elsewhere to use CGFloat and avoid conversions
+// We import UIKit here and elsewhere to use CGFloat consistently and avoid conversions
 // of Double to CGFloat.
 import UIKit
 import os.log
@@ -18,16 +18,9 @@ import os.log
 typealias MarkSet = Set<Mark>
 typealias MarkIdSet = Set<UUID>
 
-// MARK: - enums
+// MARK: - classes, structs
 
-enum Movement {
-    case horizontal
-    case omnidirectional
-}
-
-// MARK: - classes, stucts
-
-// The mark is a fundamental component of a ladder diagram.
+/// The mark is a fundamental component of a ladder diagram.
 class Mark: Codable {
     let id: UUID // each mark has a unique id to allow sets of marks
 
@@ -302,4 +295,11 @@ extension Mark {
         case linked
         case normal
     }
+}
+
+// MARK: - enums
+
+enum Movement {
+    case horizontal
+    case omnidirectional
 }

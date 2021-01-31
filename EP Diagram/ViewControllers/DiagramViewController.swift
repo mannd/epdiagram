@@ -85,13 +85,13 @@ final class DiagramViewController: UIViewController {
     let pdfScaleFactor: CGFloat = 5.0
 
     // Context menu actions
-    lazy var deleteAction = UIAction(title: L("Delete"), image: UIImage(systemName: "trash"), attributes: .destructive) { action in
+    lazy var deleteAction = UIAction(title: L("Delete selected mark(s)"), image: UIImage(systemName: "trash"), attributes: .destructive) { action in
         self.ladderView.deleteSelectedMarks()
     }
-    lazy var deleteAllInRegion = UIAction(title: L("Delete all in region"), image: UIImage(systemName: "trash"), attributes: .destructive) { action in
+    lazy var deleteAllInRegion = UIAction(title: L("Clear region"), image: UIImage(systemName: "trash"), attributes: .destructive) { action in
         self.ladderView.deleteAllInRegion()
     }
-    lazy var deleteAllInLadder = UIAction(title: L("Delete all marks in ladder"), image: UIImage(systemName: "trash"), attributes: .destructive) { action in
+    lazy var deleteAllInLadder = UIAction(title: L("Clear ladder"), image: UIImage(systemName: "trash"), attributes: .destructive) { action in
         self.ladderView.deleteAllInLadder()
     }
     lazy var solidAction = UIAction(title: L("Solid")) { action in
@@ -132,6 +132,9 @@ final class DiagramViewController: UIViewController {
         self.ladderView.straightenToDistal()
     }
     lazy var rhythmAction = UIAction(title: L("Rhythm")) { action in
+        // TODO: implement
+    }
+    lazy var editLabelAction = UIAction(title: L("Edit label")) { action in
         // TODO: implement
     }
     
@@ -434,7 +437,7 @@ override func viewDidLoad() {
         setToolbarItems(selectMenuButtons, animated: false)
         navigationController?.setToolbarHidden(false, animated: false)
         hideCursorAndNormalizeAllMarks()
-        ladderView.inactivateRegions()
+        ladderView.normalizeRegions()
         setMode(.select)
         ladderView.startZoning()
         setViewsNeedDisplay()
@@ -455,7 +458,7 @@ override func viewDidLoad() {
             linkMenuButtons = [prompt, spacer, cancelButton]
         }
         hideCursorAndNormalizeAllMarks()
-        ladderView.inactivateRegions()
+        ladderView.normalizeRegions()
         setToolbarItems(linkMenuButtons, animated: false)
         navigationController?.setToolbarHidden(false, animated: false)
     }

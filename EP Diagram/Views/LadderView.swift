@@ -61,26 +61,12 @@ final class LadderView: ScaledView {
         get { return ladder.zone }
         set(newValue) { ladder.zone = newValue }
     }
-    // TODO: make zone color blue with reduced alpha
-    let zoneColor = UIColor.systemIndigo
-
-    var marksAreVisible: Bool {
-        get {
-            ladder.marksAreVisible
-        }
-        set(newValue) {
-            ladder.marksAreVisible = newValue
-        }
-    }
-
+    let zoneColor = UIColor.systemBlue
     var calibration: Calibration?
     var ladder: Ladder = Ladder.defaultLadder()
-
-    // FIXME: Need initial active region.
-    private var activeRegion: Region? {
-        didSet {
-            activateRegion(region: activeRegion)
-        }
+    var activeRegion: Region? {
+        get { ladder.activeRegion }
+        set(newValue) { ladder.activeRegion = newValue }
     }
     private var movingMark: Mark?
     private var regionOfDragOrigin: Region?
@@ -93,8 +79,6 @@ final class LadderView: ScaledView {
     private var savedAttachedMark: Mark?
 
     var mode: Mode = .normal
-
-
 
     var leftMargin: CGFloat = 0
     internal var ladderViewHeight: CGFloat = 0
@@ -130,7 +114,6 @@ final class LadderView: ScaledView {
         removeLinks()
         // FIXME: snap marks on startup
        
-
         // Draw border around view.
         layer.masksToBounds = true
         layer.borderColor = UIColor.systemBlue.cgColor
@@ -162,7 +145,7 @@ final class LadderView: ScaledView {
             region.distalBoundary = regionBoundary + regionHeight
             regionBoundary += regionHeight
         }
-        activeRegion = ladder.regions[ladder.activeRegionIndex() ?? 0]
+        activeRegion = ladder.regions[0]
     }
 
     internal func getRegionUnitHeight(ladder: Ladder) -> CGFloat {
@@ -175,13 +158,6 @@ final class LadderView: ScaledView {
         numRegionUnits += padding
         return ladderViewHeight / CGFloat(numRegionUnits)
     }
-
-//    func resetLadder() {
-//        ladder = Ladder.defaultLadder()
-//        activeRegion = ladder.regions[0]
-//        cursorViewDelegate.cursorIsVisible = false
-//        setupView()
-//    }
 
     // MARK: - Touches
 
@@ -277,9 +253,8 @@ final class LadderView: ScaledView {
         }
     }
 
-    private func labelWasTapped(labelRegion: Region) {
+    func labelWasTapped(labelRegion: Region) {
         if labelRegion.mode == .active {
-            labelRegion.mode = .normal
             activeRegion = nil
         }
         else {
@@ -334,6 +309,7 @@ final class LadderView: ScaledView {
         }
     }
 
+    // FIXME: Don't use active region in link mode
     private func link(marksToLink marks: [Mark]) -> Mark? {
         // Should not be called unless two marks to link are in marks.
         guard marks.count == 2 else { return nil }
@@ -1008,7 +984,7 @@ final class LadderView: ScaledView {
         if ladderIsLocked {
             showLockLadderWarning(rect: rect)
         }
-        if !marksAreVisible {
+        if !ladder.marksAreVisible {
             showMarksAreHiddenWarning(rect: rect)
         }
     }
@@ -1344,13 +1320,7 @@ final class LadderView: ScaledView {
         drawBottomLine(context: context, lastRegion: lastRegion, rect: rect)
     }
 
-    func activateRegion(region: Region?) {
-        guard let region = region else { return }
-        inactivateRegions()
-        region.mode = .active
-    }
-
-    func inactivateRegions() {
+    func normalizeRegions() {
         for region in ladder.regions {
             region.mode = .normal
         }
@@ -1378,10 +1348,13 @@ final class LadderView: ScaledView {
 
     @objc func deleteAllInRegion() {
         os_log("deleteAllInRegion() - LadderView", log: OSLog.debugging, type: .debug)
-        if let activeRegion = activeRegion {
+        let selectedRegions = ladder.allRegionsWithMode(.selected)
+        // assume only one selected region
+        guard selectedRegions.count > 0 else { return }
+        if let selectedRegion = selectedRegions.first {
             currentDocument?.undoManager?.beginUndoGrouping()
-            for mark in activeRegion.marks {
-                undoablyDeleteMark(mark: mark, region: activeRegion)
+            for mark in selectedRegion.marks {
+                undoablyDeleteMark(mark: mark, region: selectedRegion)
             }
             currentDocument?.undoManager?.endUndoGrouping()
             hideCursorAndNormalizeAllMarks()
@@ -1554,7 +1527,6 @@ extension LadderView: LadderViewDelegate {
 
     func setActiveRegion(regionNum: Int) {
         activeRegion = ladder.regions[regionNum]
-        activeRegion?.mode = .active
     }
 
     func hasActiveRegion() -> Bool {
@@ -1736,9 +1708,6 @@ extension LadderView: LadderViewDelegate {
         os_log("saveState() - LadderView", log: .default, type: .default)
         savedActiveRegion = activeRegion
         activeRegion = nil
-        for region in ladder.regions {
-            region.mode = .normal
-        }
         savedAttachedMark = ladder.attachedMark
         ladder.normalizeAllMarks()
 
@@ -1748,11 +1717,7 @@ extension LadderView: LadderViewDelegate {
     func restoreState() {
         os_log("restoreState() - LadderView", log: .default, type: .default)
         ladder.normalizeAllMarks()
-        for region in ladder.regions {
-            region.mode = .normal
-        }
         activeRegion = savedActiveRegion
-        activeRegion?.mode = .active
         ladder.attachedMark = savedAttachedMark
         attachMark(savedAttachedMark)
         setNeedsDisplay()

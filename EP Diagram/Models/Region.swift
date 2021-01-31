@@ -8,27 +8,11 @@
 
 import UIKit
 
-// MARK: - enums
-
-// The two parts of a region.
-enum RegionSection {
-    case labelSection
-    case markSection
-}
-
-/// All regions are divided vertically into three parts...
-enum RegionDivision {
-    case proximal
-    case middle
-    case distal
-    case none
-}
-
 // MARK: - classes
 
-// A Region is a row of a ladder corresponding to an anatomic substrate.
-// A Region has a labelSection such as "A" or "AV" and
-// a markSection.  Region boundaries are set by the calling ScaledView.
+/// A Region is a row of a ladder corresponding to an anatomic substrate.
+/// A Region has a labelSection such as "A" or "AV" and
+/// a markSection.  Region boundaries are set by the calling ScaledView.
 class Region: Codable {
     private(set) var id = UUID()
 
@@ -72,7 +56,7 @@ class Region: Codable {
     }
 }
 
-// MARK: - Extensions
+// MARK: - extensions
 
 extension Region: CustomDebugStringConvertible {
     var debugDescription: String { "Region ID " + id.debugDescription }
@@ -91,4 +75,21 @@ extension Region {
         case normal
     }
 }
+
+// MARK: - enums
+
+// The two parts of a region.
+enum RegionSection {
+    case labelSection
+    case markSection
+}
+
+/// All regions are divided vertically into three parts...
+enum RegionDivision {
+    case proximal
+    case middle
+    case distal
+    case none
+}
+
 

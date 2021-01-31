@@ -9,49 +9,31 @@
 import UIKit
 import os.log
 
-// MARK: - structs
-
-struct NearbyMarks {
-    var proximal = [Mark]()
-    var middle = [Mark]()
-    var distal = [Mark]()
-}
-
-// MARK: - enums
-
-// Is a mark in the region before, same region, region after, or farther away?
-enum RegionRelation {
-    case before
-    case same
-    case after
-    case distant
-}
-
 // MARK: - classes
 
-// A Ladder is simply a collection of Regions in top down order.
+/// A Ladder is simply a collection of Regions in top down order.
 class Ladder: NSObject, Codable {
-
-    // MARK: constants
     private(set) var id = UUID()
 
-    // MARK: variables
     var name: String
     var longDescription: String = ""
     var regions = [Region]()
     var numRegions: Int { regions.count }
     var attachedMark: Mark? // cursor is attached to a most 1 mark at a time
     var linkedMarks = [Mark]() // marks in the process of being linked
-    // marksAreVisible shows and hides all the marks.  You can toggle this for teaching purposes.
-    var marksAreVisible: Bool = true
-    
+    var marksAreVisible: Bool = true    // shows and hides all the marks.  You can toggle this for teaching purposes.
+    var activeRegion: Region? {  // ladder model enforces at most one region can be active
+        didSet {
+            regions.forEach { region in region.mode = .normal }
+            // All regions are set to normal mode if activeRegion set to nil.
+            guard let activeRegion = activeRegion else { return }
+            activeRegion.mode = .active
+        }
+    }
     var zone: Zone = Zone()
-
     override var debugDescription: String { "Ladder ID " + id.debugDescription }
+    private var registry: [UUID: Mark] = [:] // marks are registered for quick lookup
 
-    private var registry: [UUID: Mark] = [:]
-
-    // MARK: methods
     init(template: LadderTemplate) {
         os_log("init ladder from template", log: .action, type: .info)
         name = template.name
@@ -61,7 +43,6 @@ class Ladder: NSObject, Codable {
             regions.append(region)
         }
     }
-
 
     func registerMark(_ mark: Mark) {
         registry[mark.id] = mark
@@ -355,20 +336,6 @@ class Ladder: NSObject, Codable {
         return []
     }
 
-    func activeRegion() -> Region? {
-        for region in regions {
-            if region.mode == .active {  // should be only one active region at a time
-                return region
-            }
-        }
-        return nil
-    }
-
-    func activeRegionIndex() -> Int? {
-        guard let activeRegion = activeRegion() else { return nil }
-        return regionIndex(ofRegion: activeRegion)
-    }
-
     func moveGroupedMarks(forMark mark: Mark) {
         for proximalMark in getMarkSet(fromMarkIdSet: mark.groupedMarkIds.proximal) {
             proximalMark.segment.distal.x = mark.segment.proximal.x
@@ -400,4 +367,22 @@ class Ladder: NSObject, Codable {
     static func defaultLadder() -> Ladder {
         return Ladder(template: LadderTemplate.defaultTemplate())
     }
+}
+
+// MARK: - structs
+
+struct NearbyMarks {
+    var proximal = [Mark]()
+    var middle = [Mark]()
+    var distal = [Mark]()
+}
+
+// MARK: - enums
+
+// Is a mark in the region before, same region, region after, or farther away?
+enum RegionRelation {
+    case before
+    case same
+    case after
+    case distant
 }

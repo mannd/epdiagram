@@ -64,4 +64,40 @@ class LadderViewTests: XCTestCase {
         XCTAssertEqual(markPosition.distal.x, scaledViewSegment.distal.x, accuracy: 0.001)
         XCTAssertEqual(markPosition.distal.y, scaledViewSegment.distal.y, accuracy: 0.001)
     }
+
+    func testActiveRegion() {
+        guard let activeRegion = ladderView.activeRegion else { XCTFail("activeRegion shouldn't be nil"); return }
+        XCTAssertEqual(activeRegion, ladderView.ladder.regions[0])
+        XCTAssertEqual(activeRegion.mode, Region.Mode.active)
+        XCTAssertEqual(ladderView.ladder.regions[1].mode, .normal)
+        // make sure only 1 active region at a time
+        ladderView.activeRegion = ladderView.ladder.regions[1]
+        XCTAssertEqual(ladderView.ladder.regions[0].mode, .normal)
+        XCTAssertEqual(ladderView.ladder.regions[1].mode, .active)
+        ladderView.activeRegion = nil
+        XCTAssertEqual(ladderView.ladder.regions[0].mode, .normal)
+        XCTAssertEqual(ladderView.ladder.regions[1].mode, .normal)
+        ladderView.setActiveRegion(regionNum: 0)
+        XCTAssertEqual(ladderView.ladder.regions[0].mode, .active)
+        XCTAssertEqual(ladderView.ladder.regions[1].mode, .normal)
+        ladderView.saveState()
+        ladderView.activeRegion = ladderView.ladder.regions[1]
+        XCTAssertEqual(ladderView.ladder.regions[0].mode, .normal)
+        XCTAssertEqual(ladderView.ladder.regions[1].mode, .active)
+        ladderView.restoreState()
+        XCTAssertEqual(ladderView.ladder.regions[0].mode, .active)
+        XCTAssertEqual(ladderView.ladder.regions[1].mode, .normal)
+        // Tapping active label should inactivate it
+        ladderView.labelWasTapped(labelRegion: ladderView.ladder.regions[0])
+        XCTAssertEqual(ladderView.ladder.regions[0].mode, .normal)
+        XCTAssertEqual(ladderView.ladder.regions[1].mode, .normal)
+        XCTAssertEqual(ladderView.activeRegion, nil)
+        ladderView.labelWasTapped(labelRegion: ladderView.ladder.regions[1])
+        XCTAssertEqual(ladderView.ladder.regions[0].mode, .normal)
+        XCTAssertEqual(ladderView.ladder.regions[1].mode, .active)
+        XCTAssertEqual(ladderView.activeRegion, ladderView.ladder.regions[1])
+
+
+
+    }
 }

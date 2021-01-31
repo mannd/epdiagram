@@ -83,7 +83,7 @@ extension DiagramViewController: UIContextMenuInteractionDelegate {
     func regionContextMenuConfiguration(at location: CGPoint) -> UIContextMenuConfiguration {
         return UIContextMenuConfiguration(identifier: nil, previewProvider: nil) { suggestedActions in
             // FIXME: make sure we won't move grouped marks, or disconnect them when straightening.
-            return UIMenu(title: "", children: [self.styleMenu, self.regionStyleMenu, self.straightenToProximalAction, self.straightenToDistalAction, self.rhythmAction, self.deleteAllInRegion])
+            return UIMenu(title: "", children: [self.styleMenu, self.regionStyleMenu, self.straightenToProximalAction, self.straightenToDistalAction, self.editLabelAction, self.rhythmAction, self.deleteAllInRegion])
         }
     }
 
@@ -94,10 +94,7 @@ extension DiagramViewController: UIContextMenuInteractionDelegate {
 
     func ladderContextMenuConfiguration(at location: CGPoint) -> UIContextMenuConfiguration {
         return UIContextMenuConfiguration(identifier: nil, previewProvider: nil) { suggestedActions in
-            let deleteAllInLadder = UIAction(title: L("Clear ladder"), image: UIImage(systemName: "trash"), attributes: .destructive) { action in
-                self.ladderView.deleteAllInLadder()
-            }
-            return UIMenu(title: "", children: [deleteAllInLadder])
+            return UIMenu(title: "", children: [self.deleteAllInLadder])
         }
     }
 }

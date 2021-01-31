@@ -135,10 +135,10 @@ class MarkTests: XCTestCase {
         ladder.addMark(aMark, toRegion: ladder.regions[0])
         ladder.addMark(avMark, toRegion: ladder.regions[1])
         ladder.addMark(vMark, toRegion: ladder.regions[2])
-        XCTAssertEqual(Ladder.getRelativeRegionBetweenMarks(mark: aMark, otherMark: aMark), RegionRelation.same)
-        XCTAssertEqual(Ladder.getRelativeRegionBetweenMarks(mark: aMark, otherMark: avMark), RegionRelation.after)
-        XCTAssertEqual(Ladder.getRelativeRegionBetweenMarks(mark: avMark, otherMark: aMark), RegionRelation.before)
-        XCTAssertEqual(Ladder.getRelativeRegionBetweenMarks(mark: aMark, otherMark: vMark), RegionRelation.distant)
+        XCTAssertEqual(Ladder.regionRelationBetweenMarks(mark: aMark, otherMark: aMark), RegionRelation.same)
+        XCTAssertEqual(Ladder.regionRelationBetweenMarks(mark: aMark, otherMark: avMark), RegionRelation.after)
+        XCTAssertEqual(Ladder.regionRelationBetweenMarks(mark: avMark, otherMark: aMark), RegionRelation.before)
+        XCTAssertEqual(Ladder.regionRelationBetweenMarks(mark: aMark, otherMark: vMark), RegionRelation.distant)
     }
 
     func testMovement() {
