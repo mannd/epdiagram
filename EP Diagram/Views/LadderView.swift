@@ -1011,6 +1011,7 @@ final class LadderView: ScaledView {
         context.setAlpha(1.0)
     }
 
+    // TODO: implement fitting longer label text into labels
     fileprivate func drawLabel(rect: CGRect, region: Region, context: CGContext) {
         let stringRect = CGRect(x: 0, y: rect.origin.y, width: rect.origin.x, height: rect.height)
         // TODO: refactor out constant attributes.
@@ -1364,6 +1365,17 @@ final class LadderView: ScaledView {
         }
     }
 
+    func selectedRegion() -> Region? {
+        let selectedRegions = ladder.allRegionsWithMode(.selected)
+        // assume only one selected region
+        guard selectedRegions.count > 0 else { return nil }
+        if let region = selectedRegions.first {
+            return region
+        } else {
+            return nil
+        }
+    }
+
     @objc func deleteAllInLadder() {
         os_log("deleteAllInLadder() - LadderView", log: OSLog.debugging, type: .debug)
         currentDocument?.undoManager?.beginUndoGrouping()
@@ -1410,6 +1422,7 @@ final class LadderView: ScaledView {
         }
     }
 
+   
     @objc func slantSelectedMarks(angle: CGFloat) {
         let selectedMarks = ladder.allMarksWithMode(.selected)
         selectedMarks.forEach { mark in slantMark(angle: angle, mark: mark, region: ladder.regions[mark.regionIndex]) }
@@ -1436,6 +1449,18 @@ final class LadderView: ScaledView {
         NotificationCenter.default.post(name: .didUndoableAction, object: nil)
         mark.segment = segment
     }
+
+    func undoablySetLabel(_ label: String, forRegion region: Region) {
+        let originalName = region.name
+        currentDocument?.undoManager.registerUndo(withTarget: self) {target in
+            target.undoablySetLabel(originalName, forRegion: region)
+        }
+        NotificationCenter.default.post(name: .didUndoableAction, object: nil)
+        region.name = label
+        setNeedsDisplay()
+    }
+
+
 }
 
 // MARK: - LadderViewDelegate protocol

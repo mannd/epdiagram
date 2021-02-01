@@ -103,7 +103,7 @@ final class DiagramViewController: UIViewController {
     lazy var dottedAction = UIAction(title: L("Dotted")) { action in
         self.ladderView.setSelectedMarksStyle(style: .dotted)
     }
-    lazy var styleMenu = UIMenu(title: L("Style..."), children: [self.solidAction, self.dashedAction, self.dottedAction])
+    lazy var styleMenu = UIMenu(title: L("Style..."), children: [self.solidAction, self.dashedAction, self.dottedAction, self.regionStyleMenu])
 
     lazy var regionSolidStyleAction = UIAction(title: L("Solid")) { action in
         self.ladderView.setSelectedRegionsStyle(style: .solid)
@@ -119,9 +119,13 @@ final class DiagramViewController: UIViewController {
     }
     lazy var regionStyleMenu = UIMenu(title: L("Default region style..."), children: [self.regionSolidStyleAction, self.regionDashedStyleAction, self.regionDottedStyleAction, self.regionInheritedStyleAction])
 
-    lazy var slantMenuAction = UIAction(title: L("Slant")) { action in
+    lazy var slantProximalPivotAction = UIAction(title: L("Slant proximal pivot point")) { action in
         self.showSlantMenu()
     }
+    lazy var slantDistalPivotAction = UIAction(title: L("Slant distal pivot point")) { action in
+
+    }
+    lazy var slantMenu = UIMenu(title: L("Slant mark(s)..."), children: [self.slantProximalPivotAction, self.slantDistalPivotAction])
     lazy var unlinkAction = UIAction(title: L("Unlink")) { action in
         self.ladderView.ungroupSelectedMarks()
     }
@@ -131,12 +135,22 @@ final class DiagramViewController: UIViewController {
     lazy var straightenToDistalAction = UIAction(title: L("Straighten mark to distal endpoint")) { action in
         self.ladderView.straightenToDistal()
     }
+    lazy var straightenMenu = UIMenu(title: L("Straighten mark(s)..."), children: [self.straightenToDistalAction, self.straightenToProximalAction])
+
     lazy var rhythmAction = UIAction(title: L("Rhythm")) { action in
         // TODO: implement
     }
-    lazy var editLabelAction = UIAction(title: L("Edit label")) { action in
-        // TODO: implement
+    lazy var editLabelAction = UIAction(title: L("Edit label"), image: UIImage(systemName: "pencil")) { action in
+        self.editLabel()
     }
+    lazy var addRegionAboveAction = UIAction(title: L("Add region above")) { action in
+
+    }
+    lazy var addRegionBelowAction = UIAction(title: L("Add region below")) { action in
+        
+    }
+    lazy var addRegionMenu = UIMenu(title: L("Add Region..."), image: UIImage(systemName: "plus"), children: [self.addRegionAboveAction, self.addRegionBelowAction])
+
     
 
 
@@ -416,6 +430,14 @@ override func viewDidLoad() {
         setToolbarItems([UIBarButtonItem(customView: stackView)], animated: true)
     }
 
+    func editLabel() {
+        print("edit label")
+        guard let selectedRegion = ladderView.selectedRegion() else { return }
+        UserAlert.showTextAlert(viewController: self, title: L("Edit Label"), message: L("Enter new label text for \"\(selectedRegion.name).\""), defaultText: selectedRegion.name, preferredStyle: .alert, handler: { newLabel in
+            self.ladderView.undoablySetLabel(newLabel, forRegion: selectedRegion)
+        })
+    }
+  
     @objc func closeAngleMenu(_ sender: UIAlertAction) {
         hideCursorAndNormalizeAllMarks()
         showMainMenu()

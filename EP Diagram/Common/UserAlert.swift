@@ -32,12 +32,15 @@ enum UserAlert {
         os_log("File error %s", log: .errors, type: .error, error.localizedDescription)
     }
 
-    static func showTextAlert(viewController vc: UIViewController, title: String, message: String, placeholder: String? = nil, preferredStyle: UIAlertController.Style, handler: ((String) -> Void)?) {
+    static func showTextAlert(viewController vc: UIViewController, title: String, message: String, placeholder: String? = nil, defaultText: String? = nil, preferredStyle: UIAlertController.Style, handler: ((String) -> Void)?) {
         let alert = UIAlertController(title: title, message: message, preferredStyle: preferredStyle)
         alert.addAction(UIAlertAction(title: L("Cancel"), style: .cancel, handler: nil))
         alert.addTextField { textField in
             if let placeholder = placeholder {
                 textField.placeholder = placeholder
+            }
+            if let defaultText = defaultText {
+                textField.text = defaultText
             }
         }
         alert.addAction(UIAlertAction(title: L("Save"), style: .default) { action in
