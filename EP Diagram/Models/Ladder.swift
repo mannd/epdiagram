@@ -148,11 +148,11 @@ class Ladder: NSObject, Codable {
     
     // TODO: Does region have to be optional?  Consider refactor away optionality.
     // addMark() functions.  All require a Region in which to add the mark.  Each new mark is registered to that region.  All return addedMark or nil if region is nil.
-    func addMark(at positionX: CGFloat, inRegion region: Region?) -> Mark? {
+    func addMark(at positionX: CGFloat, toRegion region: Region?) -> Mark? {
         return addMark(Mark(positionX: positionX), toRegion: region)
     }
 
-    @discardableResult func addMark(fromSegment segment: Segment, inRegion region: Region?) -> Mark? {
+    @discardableResult func addMark(fromSegment segment: Segment, toRegion region: Region?) -> Mark? {
         let mark = Mark(segment: segment)
         return addMark(mark, toRegion: region)
     }
@@ -358,7 +358,24 @@ class Ladder: NSObject, Codable {
                 }
             }
         }
- 
+    }
+
+    func removeRegion(_ region: Region) {
+        regions.removeAll(where: { $0 == region })
+        reindexMarks()
+    }
+
+    func insertRegion(_ region: Region, at index: Int) {
+
+
+    }
+
+    private func reindexMarks() {
+        for region in regions {
+            for mark in region.marks {
+                mark.regionIndex = regionIndex(ofRegion: region) ?? -1
+            }
+        }
     }
 
     // Returns a basic ladder (A, AV, V).

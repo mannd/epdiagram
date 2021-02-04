@@ -76,14 +76,20 @@ extension DiagramViewController: UIContextMenuInteractionDelegate {
     func markContextMenuConfiguration(at location: CGPoint) -> UIContextMenuConfiguration {
         return UIContextMenuConfiguration(identifier: nil, previewProvider: nil) {_ in
             // FIXME: make sure we won't move grouped marks, or disconnect them when straightening.
-            return UIMenu(title: L("Edit mark"), children: [self.styleMenu, self.straightenMenu, self.slantMenu, self.unlinkAction, self.deleteAction])
+            return UIMenu(title: L("Mark"), children: [self.styleMenu, self.straightenMenu, self.slantMenu, self.unlinkAction, self.deleteAction])
         }
     }
 
     func regionContextMenuConfiguration(at location: CGPoint) -> UIContextMenuConfiguration {
         return UIContextMenuConfiguration(identifier: nil, previewProvider: nil) { suggestedActions in
             // FIXME: make sure we won't move grouped marks, or disconnect them when straightening.
-            return UIMenu(title: "", children: [self.styleMenu, self.straightenMenu, self.slantMenu, self.editLabelAction, self.addRegionMenu, self.rhythmAction, self.deleteAllInRegion])
+            let title: String
+            if let region = self.longPressLocationInLadder?.region {
+                title = L("\(region.name) Region\n\(region.longDescription)")
+            } else {
+                title = L("Region")
+            }
+            return UIMenu(title: title, children: [self.styleMenu, self.straightenMenu, self.slantMenu, self.editLabelAction, self.addRegionMenu, self.removeRegionAction, self.rhythmAction, self.deleteAllInRegion])
         }
     }
 

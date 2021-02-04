@@ -103,7 +103,7 @@ final class DiagramViewController: UIViewController {
     lazy var dottedAction = UIAction(title: L("Dotted")) { action in
         self.ladderView.setSelectedMarksStyle(style: .dotted)
     }
-    lazy var styleMenu = UIMenu(title: L("Style..."), children: [self.solidAction, self.dashedAction, self.dottedAction, self.regionStyleMenu])
+    lazy var styleMenu = UIMenu(title: L("Style..."), image: UIImage(systemName: "scribble"), children: [self.solidAction, self.dashedAction, self.dottedAction, self.regionStyleMenu])
 
     lazy var regionSolidStyleAction = UIAction(title: L("Solid")) { action in
         self.ladderView.setSelectedRegionsStyle(style: .solid)
@@ -125,8 +125,8 @@ final class DiagramViewController: UIViewController {
     lazy var slantDistalPivotAction = UIAction(title: L("Slant distal pivot point")) { action in
 
     }
-    lazy var slantMenu = UIMenu(title: L("Slant mark(s)..."), children: [self.slantProximalPivotAction, self.slantDistalPivotAction])
-    lazy var unlinkAction = UIAction(title: L("Unlink")) { action in
+    lazy var slantMenu = UIMenu(title: L("Slant mark(s)..."), image: UIImage(systemName: "line.diagonal"), children: [self.slantProximalPivotAction, self.slantDistalPivotAction])
+    lazy var unlinkAction = UIAction(title: L("Unlink"), image: UIImage(systemName: "link")) { action in
         self.ladderView.ungroupSelectedMarks()
     }
     lazy var straightenToProximalAction = UIAction(title: L("Straighten mark to proximal endpoint")) { action in
@@ -135,23 +135,25 @@ final class DiagramViewController: UIViewController {
     lazy var straightenToDistalAction = UIAction(title: L("Straighten mark to distal endpoint")) { action in
         self.ladderView.straightenToDistal()
     }
-    lazy var straightenMenu = UIMenu(title: L("Straighten mark(s)..."), children: [self.straightenToDistalAction, self.straightenToProximalAction])
+    lazy var straightenMenu = UIMenu(title: L("Straighten mark(s)..."), image: UIImage(systemName: "arrow.up.arrow.down"), children: [self.straightenToDistalAction, self.straightenToProximalAction])
 
-    lazy var rhythmAction = UIAction(title: L("Rhythm")) { action in
+    lazy var rhythmAction = UIAction(title: L("Rhythm"), image: UIImage(systemName: "waveform.path.ecg")) { action in
         // TODO: implement
     }
-    lazy var editLabelAction = UIAction(title: L("Edit label"), image: UIImage(systemName: "pencil")) { action in
+    lazy var editLabelAction = UIAction(title: L("Edit label"), image: UIImage(systemName: "pencil.circle")) { action in
         self.editLabel()
     }
     lazy var addRegionAboveAction = UIAction(title: L("Add region above")) { action in
-
+        self.addRegion(relation: .before)
     }
     lazy var addRegionBelowAction = UIAction(title: L("Add region below")) { action in
-        
+        self.addRegion(relation: .after)
     }
     lazy var addRegionMenu = UIMenu(title: L("Add Region..."), image: UIImage(systemName: "plus"), children: [self.addRegionAboveAction, self.addRegionBelowAction])
+    lazy var removeRegionAction = UIAction(title: L("Remove region")) { action in
+        self.removeRegion()
+    }
 
-    
 
 
 override func viewDidLoad() {
@@ -437,6 +439,30 @@ override func viewDidLoad() {
             self.ladderView.undoablySetLabel(newLabel, forRegion: selectedRegion)
         })
     }
+
+    func addRegion(relation: RegionRelation) {
+        guard relation == .after || relation == .before else { return }
+        guard let selectedRegion = ladderView.selectedRegion() else { return }
+        // TODO: implement
+        // ok here is proposed process:
+        /*
+         selectedRegion is passed to ladderView.undoablyAddRegion
+         undo is set up using complementary undoablyRemoveRegion as counterpoint
+         ladder does the add
+         First duplicate region from its template (giving duplicate region without marks)
+         Possibly adjust name, longdescription, height, and style from dialog?
+         Alternative is to make all those adjustable with long press (all but description and height are already).
+         Add the region, initialize the view, etc.
+         */
+        
+//        ladderView.addRegion(relation: relation, forRegion: selectedRegion)
+    }
+
+    func removeRegion() {
+        guard let selectedRegion = ladderView.selectedRegion() else { return }
+        ladderView.removeRegion(selectedRegion)
+    }
+
   
     @objc func closeAngleMenu(_ sender: UIAlertAction) {
         hideCursorAndNormalizeAllMarks()
@@ -857,7 +883,6 @@ override func viewDidLoad() {
 
 
     @IBSegueAction func showPreferences(_ coder: NSCoder) -> UIViewController? {
-//        preferences.retrieve()
         let preferencesView = PreferencesView()
         let hostingController = UIHostingController(coder: coder, rootView: preferencesView)
         return hostingController
@@ -969,8 +994,6 @@ extension DiagramViewController {
     }
 
     func updateUndoRedoButtons() {
-//        undoButton.isEnabled = true
-//        redoButton.isEnabled = true
         // DispatchQueue here forces UI to finish up its tasks before performing below on the main thread.
         DispatchQueue.main.async {
             self.undoButton.isEnabled = self.currentDocument?.undoManager?.canUndo ?? false

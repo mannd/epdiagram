@@ -292,25 +292,24 @@ final class LadderView: ScaledView {
     }
 
     private func markWasTapped(mark: Mark?, tapLocationInLadder: LocationInLadder) {
-        if let mark = mark, let activeRegion = activeRegion {
+        if let mark = mark {
             if mark.mode == .attached {
                 attachMark(mark)
                 // TODO: Consider using RegionDivision to position Anchor.  Tapping on cursor it makes sense to just toggle the anchor, but tapping on the mark itself it might be better to position anchor near where you tap.  On other hand, it might be easy to miss the mark division zone.  Also, if not all anchors are available (say the .middle anchor is missing), which anchor do you switch to?  Maybe default to toggleAnchor() if anchor not available.
                 toggleAnchor(mark: mark)
-                adjustCursor(mark: mark, region: activeRegion)
+                adjustCursor(mark: mark)
                 cursorViewDelegate.cursorIsVisible = true
             }
             else { // mark wasn't already attached.
                 normalizeAllMarks()
                 attachMark(mark)
                 mark.anchor = ladder.defaultAnchor(forMark: mark)
-                adjustCursor(mark: mark, region: activeRegion)
+                adjustCursor(mark: mark)
                 cursorViewDelegate.cursorIsVisible = true
             }
         }
     }
 
-    // FIXME: Don't use active region in link mode
     private func link(marksToLink marks: [Mark]) -> Mark? {
         // Should not be called unless two marks to link are in marks.
         guard marks.count == 2 else { return nil }
@@ -321,23 +320,21 @@ final class LadderView: ScaledView {
         if abs(regionDifference) == 2 {
             if regionDifference > 0 {
                 // FIXME: do we exclude region index out of range?
-                activeRegion = ladder.region(atIndex: firstRegionIndex + 1)
+                let markRegion = ladder.region(atIndex: firstRegionIndex + 1)
                 let segment = Segment(proximal: CGPoint(x: marks[0].segment.distal.x, y: 0), distal: CGPoint(x: marks[1].segment.proximal.x, y: 1.0))
-                let mark = ladder.addMark(fromSegment: segment, inRegion: activeRegion)
-                if let mark = mark {
-                    undoablyAddMark(mark: mark, region: activeRegion)
+                if let mark = ladder.addMark(fromSegment: segment, toRegion: markRegion) {
+                    undoablyAddMark(mark: mark, region: markRegion)
+                    return mark
                 }
-                return mark
             }
             if regionDifference < 0 {
                 // FIXME: do we exclude region index out of range?
-                activeRegion = ladder.region(atIndex: firstRegionIndex - 1)
+                let markRegion = ladder.region(atIndex: firstRegionIndex - 1)
                 let segment = Segment(proximal: CGPoint(x: marks[1].segment.distal.x, y: 0), distal: CGPoint(x: marks[0].segment.proximal.x, y: 1.0))
-                let mark = ladder.addMark(fromSegment: segment, inRegion: activeRegion)
-                if let mark = mark {
-                    undoablyAddMark(mark: mark, region: activeRegion)
+                if let mark = ladder.addMark(fromSegment: segment, toRegion: markRegion) {
+                    undoablyAddMark(mark: mark, region: markRegion)
+                    return mark
                 }
-                return mark
             }
         }
         return nil
@@ -386,7 +383,6 @@ final class LadderView: ScaledView {
 
     private func performMarkLinking(_ tapLocationInLadder: LocationInLadder) {
         if let mark = tapLocationInLadder.mark {
-            activeRegion = tapLocationInLadder.region
             linkTappedMark(mark)
         }
         else if let region = tapLocationInLadder.region {
@@ -436,7 +432,7 @@ final class LadderView: ScaledView {
         setNeedsDisplay()
     }
 
-    private func adjustCursor(mark: Mark, region: Region) {
+    func adjustCursor(mark: Mark) {
         let anchorPosition = mark.getAnchorPosition()
         let theRegion = ladder.region(ofMark: mark)
         let scaledAnchorPositionY = transformToScaledViewPosition(regionPosition: anchorPosition, region: theRegion).y
@@ -490,7 +486,7 @@ final class LadderView: ScaledView {
     }
 
     func addMarkToActiveRegion(regionPositionX: CGFloat) -> Mark? {
-        if let mark = ladder.addMark(at: regionPositionX, inRegion: activeRegion) {
+        if let mark = ladder.addMark(at: regionPositionX, toRegion: activeRegion) {
             mark.mode = .attached
             return mark
         }
@@ -562,7 +558,7 @@ final class LadderView: ScaledView {
             // FIXME: refactor
             let region = tapLocationInLadder.region
             let scaledPositionX = transformToRegionPositionX(scaledViewPositionX: tapLocationInLadder.unscaledPosition.x)
-            if let mark = ladder.addMark(at: scaledPositionX, inRegion: region) {
+            if let mark = ladder.addMark(at: scaledPositionX, toRegion: region) {
                 normalizeAllMarks()
                 undoablyAddMark(mark: mark, region: region)
                 attachMark(mark)
@@ -658,7 +654,6 @@ final class LadderView: ScaledView {
                     dragOriginDivision = locationInLadder.regionDivision
                     switch dragOriginDivision {
                     case .proximal:
-                        // FIXME: undoablyAddMark()???
                         dragCreatedMark = addMarkToActiveRegion(scaledViewPositionX: position.x)
                         dragCreatedMark?.segment.proximal.y = 0
                         dragCreatedMark?.segment.distal.y = 0.5
@@ -917,10 +912,8 @@ final class LadderView: ScaledView {
     private func moveMark(movement: Movement, mark: Mark, regionPosition: CGPoint) {
         mark.move(movement: movement, to: regionPosition)
         moveGroupedMarks(forMark: mark)
-        if let activeRegion = activeRegion {
-            adjustCursor(mark: mark, region: activeRegion)
-            cursorViewDelegate.refresh()
-        }
+        adjustCursor(mark: mark)
+        cursorViewDelegate.refresh()
     }
 
     // FIXME: After saving and reopening diagram, the group marks appear to have their segments adjusted appropriately, but nothing shows up on the screen.  The grouped marks don't move.  Why?
@@ -962,10 +955,6 @@ final class LadderView: ScaledView {
         let selectedRegions: [Region] = ladder.allRegionsWithMode(.selected)
         selectedRegions.forEach { region in region.style = style }
     }
-
-//    func setRegionStyle(style: Mark.Style, region: Region) {
-//        region.style = style
-//    }
 
     // MARK: - draw
 
@@ -1328,6 +1317,8 @@ final class LadderView: ScaledView {
         }
     }
 
+
+
     func resetSize() {
         os_log("resetSize() - LadderView", log: .action, type: .info)
         ladderViewHeight = self.frame.height
@@ -1460,6 +1451,44 @@ final class LadderView: ScaledView {
         setNeedsDisplay()
     }
 
+    func addRegion(relation: RegionRelation, forRegion region: Region) {
+//        let originalRegion = region
+//        currentDocument?.undoManager.registerUndo(withTarget: self) {target in
+//            target.removeRegion(region)
+//        }
+        NotificationCenter.default.post(name: .didUndoableAction, object: nil)
+        // get clean duplicated region
+        let newRegion = Region(template: region.regionTemplate())
+        // etc.
+        if let index = ladder.regionIndex(ofRegion: region) {
+            switch relation {
+            case .after:
+                ladder.insertRegion(region, at: index - 1)
+            case .before:
+                ladder.insertRegion(region, at: index + 1)
+            default:
+                break
+            }
+            // add region to ladder.regions
+            // ungroup all marks
+            // reindex marks that need to be reindexed
+            setNeedsDisplay()
+        }
+    }
+
+    func removeRegion(_ region: Region) {
+//        guard ladder.regions.count > 1 else { return }
+//        let originalRegion = region
+//        let originalIndex = regionIndex()
+//        currentDocument?.undoManager.registerUndo(withTarget: self) {target in
+//            target.addRegion(originalRegion)
+//        }
+        NotificationCenter.default.post(name: .didUndoableAction, object: nil)
+        ladder.removeRegion(region)
+        initializeRegions()
+        setNeedsDisplay()
+    }
+
 
 }
 
@@ -1564,7 +1593,7 @@ extension LadderView: LadderViewDelegate {
     }
 
     func addAttachedMark(scaledViewPositionX positionX: CGFloat) {
-        ladder.attachedMark = ladder.addMark(at: positionX / scale, inRegion: activeRegion)
+        ladder.attachedMark = ladder.addMark(at: positionX / scale, toRegion: activeRegion)
         if let attachedMark = ladder.attachedMark {
             undoablyAddMark(mark: attachedMark, region: activeRegion)
             attachedMark.mode = .attached
@@ -1725,8 +1754,8 @@ extension LadderView: LadderViewDelegate {
 
     func toggleAttachedMarkAnchor() {
         toggleAnchor(mark: ladder.attachedMark)
-        if let attachedMark = ladder.attachedMark, let activeRegion = activeRegion {
-            adjustCursor(mark: attachedMark, region: activeRegion)
+        if let attachedMark = ladder.attachedMark {
+            adjustCursor(mark: attachedMark)
         }
     }
 

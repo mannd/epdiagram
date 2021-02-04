@@ -11,14 +11,19 @@ import XCTest
 
 class LadderViewTests: XCTestCase {
     private var ladderView: LadderView!
+    private var cursorView: CursorView!
 
     override func setUp() {
         super.setUp()
         ladderView = LadderView(frame: CGRect(origin: CGPoint(x: 0, y: 0), size: CGSize(width: 100, height: 100)))
+        cursorView = CursorView()
+        ladderView.cursorViewDelegate = cursorView
+        cursorView.ladderViewDelegate = ladderView
     }
 
     override func tearDown() {
         ladderView = nil
+        cursorView = nil
         super.tearDown()
     }
 
@@ -128,8 +133,6 @@ class LadderViewTests: XCTestCase {
         ladderView.ladder.addMark(mark1, toRegion: ladderView.ladder.region(atIndex: 0))
         ladderView.ladder.addMark(mark2, toRegion: ladderView.ladder.region(atIndex: 1))
         ladderView.ladder.addMark(mark3, toRegion: ladderView.ladder.region(atIndex: 0))
-        let cursorView = CursorView()
-        ladderView.cursorViewDelegate = cursorView
         mark1.mode = .selected
         var marksCount = ladderView.ladder.region(atIndex: 0).marks.count
         XCTAssertEqual(marksCount, 2)
@@ -146,8 +149,6 @@ class LadderViewTests: XCTestCase {
     }
 
     func testDeleteAllInRegion() {
-        let cursorView = CursorView()
-        ladderView.cursorViewDelegate = cursorView
         ladderView.ladder.region(atIndex: 0).mode = .selected
         ladderView.ladder.activeRegion = ladderView.ladder.region(atIndex: 0)
         _ = ladderView.addMarkToActiveRegion(regionPositionX: 0)
@@ -178,5 +179,19 @@ class LadderViewTests: XCTestCase {
         ladderView.deleteAllInSelectedRegion()
         count = ladderView.ladder.region(atIndex: 1).marks.count
         XCTAssertEqual(count, 0)
+    }
+
+    func testAdjustCursor() {
+        let mark = Mark(segment: Segment(proximal: CGPoint(x: 100, y: 0), distal: CGPoint(x: 100, y: 1)))
+        ladderView.ladder.addMark(mark, toRegion: ladderView.ladder.regions[1])
+        ladderView.adjustCursor(mark: mark)
+        // cursor should move to mark positionX
+        XCTAssertEqual(cursorView.isNearCursor(positionX: 100, accuracy: 0.001), true)
+    }
+
+    func testNearMarkPosition() {
+        let mark = Mark(segment: Segment(proximal: CGPoint(x: 100, y: 0), distal: CGPoint(x: 100, y: 1)))
+        // TODO: etc.
+
     }
 }

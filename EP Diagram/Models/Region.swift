@@ -38,12 +38,24 @@ class Region: Codable {
         }
     }
 
-    // A region is copied from a template, after which the template is no longer referenced.
+    /// A region is copied from a template, after which the template is no longer referenced.
+    /// Used to add regions on the fly.
     init(template: RegionTemplate) {
         self.name = template.name
         self.longDescription = template.description
         self.unitHeight = template.unitHeight
         self.style = template.style
+    }
+
+    /// Creates a template from a region.
+    func regionTemplate() -> RegionTemplate {
+        let template = RegionTemplate(
+            name: self.name,
+            description: self.longDescription,
+            unitHeight: self.unitHeight,
+            style: self.style
+        )
+        return template
     }
 
     func appendMark(_ mark: Mark) {
