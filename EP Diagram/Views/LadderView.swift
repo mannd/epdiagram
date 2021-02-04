@@ -131,12 +131,9 @@ final class LadderView: ScaledView {
 
         let draggingPanRecognizer = UIPanGestureRecognizer(target: self, action: #selector(self.dragging))
         self.addGestureRecognizer(draggingPanRecognizer)
-
-//        let longPressRecognizer = UILongPressGestureRecognizer(target: self, action: #selector(self.longPress))
-//        self.addGestureRecognizer(longPressRecognizer)
     }
 
-    private func initializeRegions() {
+    func initializeRegions() {
         regionUnitHeight = getRegionUnitHeight(ladder: ladder)
         var regionBoundary = regionUnitHeight * ladderPaddingMultiplier
         for region: Region in ladder.regions {
@@ -417,7 +414,9 @@ final class LadderView: ScaledView {
             }
             // FIXME: what do do if something illegal tapped (same mark, illegal region).  Remove linked marks?
             // Maybe displace red X if illegal spot.
-            else {            ladder.linkedMarks.removeAll() }
+            else {
+                ladder.linkedMarks.removeAll()
+            }
         }
         setNeedsDisplay()
     }

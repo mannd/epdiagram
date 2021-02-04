@@ -370,7 +370,7 @@ class Ladder: NSObject, Codable {
 
     }
 
-    private func reindexMarks() {
+    func reindexMarks() {
         for region in regions {
             for mark in region.marks {
                 mark.regionIndex = regionIndex(ofRegion: region) ?? -1

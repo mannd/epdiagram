@@ -441,8 +441,22 @@ override func viewDidLoad() {
     }
 
     func addRegion(relation: RegionRelation) {
+        let maxRegionCount = 5
+        guard ladderView.ladder.regions.count < maxRegionCount else { return }
         guard relation == .after || relation == .before else { return }
         guard let selectedRegion = ladderView.selectedRegion() else { return }
+        guard let selectedIndex = ladderView.ladder.regionIndex(ofRegion: selectedRegion) else { return }
+        let selectedRegionTemplate = selectedRegion.regionTemplate()
+        let newRegion = Region(template: selectedRegionTemplate)
+        // TODO: figure out where to insert new region.
+        // if .before, do it at the selected index, if .after do it at selected index + 1
+        let insertIndex = relation == .before ? selectedIndex : selectedIndex + 1
+        ladderView.ladder.regions.insert(newRegion, at: insertIndex)
+        ladderView.initializeRegions()
+        // TODO: reindexing needed?
+        ladderView.ladder.reindexMarks()
+        // also need to regroup marks
+        ladderView.refresh()
         // TODO: implement
         // ok here is proposed process:
         /*
