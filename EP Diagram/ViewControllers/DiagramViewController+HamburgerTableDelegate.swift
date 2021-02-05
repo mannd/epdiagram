@@ -236,7 +236,7 @@ extension DiagramViewController: HamburgerTableDelegate, UIImagePickerController
 //        for region in ladder.regions {
 //            for mark in region.marks {
 //                os_log("%s", log: .test, type: .debug, mark.debugDescription)
-////                print("test \(mark.groupedMarkIds)")
+////                print("test \(mark.linkedMarkIDs)")
 //            }
 //        }
 

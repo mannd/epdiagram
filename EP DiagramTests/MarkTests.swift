@@ -86,11 +86,11 @@ class MarkTests: XCTestCase {
         let mark1 = Mark()
         let mark2 = Mark()
         let mark3 = Mark()
-        var markGroup = MarkGroup()
-        markGroup.proximal.insert(mark1)
-        markGroup.middle.insert(mark2)
-        markGroup.distal.insert(mark3)
-        let allMarks = markGroup.allMarks
+        var linkedMarks = LinkedMarks()
+        linkedMarks.proximal.insert(mark1)
+        linkedMarks.middle.insert(mark2)
+        linkedMarks.distal.insert(mark3)
+        let allMarks = linkedMarks.allMarks
         XCTAssert(allMarks.count == 3, "should be 3 elements in allMarks")
         XCTAssert(allMarks.contains(mark1))
         XCTAssert(allMarks.contains(mark2))
@@ -182,8 +182,8 @@ class MarkTests: XCTestCase {
         XCTAssertEqual(mark.segment.distal, CGPoint(x: 100, y: 0))
     }
 
-    func testMarkGroup() {
-        var mg = MarkGroup()
+    func testLinkedMarks() {
+        var mg = LinkedMarks()
         XCTAssertEqual(mg.count, 0)
         mg.proximal.insert(Mark())
         mg.middle.insert(Mark())
@@ -199,8 +199,8 @@ class MarkTests: XCTestCase {
         }
     }
 
-    func testMarkIDGroup() {
-        var mig = MarkIdGroup()
+    func testLinkedMarkIDs() {
+        var mig = LinkedMarkIDs()
         XCTAssertEqual(mig.count, 0)
         mig.proximal.insert(Mark().id)
         mig.middle.insert(Mark().id)

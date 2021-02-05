@@ -127,7 +127,7 @@ final class DiagramViewController: UIViewController {
     }
     lazy var slantMenu = UIMenu(title: L("Slant mark(s)..."), image: UIImage(systemName: "line.diagonal"), children: [self.slantProximalPivotAction, self.slantDistalPivotAction])
     lazy var unlinkAction = UIAction(title: L("Unlink"), image: UIImage(systemName: "link")) { action in
-        self.ladderView.ungroupSelectedMarks()
+        self.ladderView.unlinkSelectedMarks()
     }
     lazy var straightenToProximalAction = UIAction(title: L("Straighten mark to proximal endpoint")) { action in
         self.ladderView.straightenToProximal()
@@ -455,8 +455,8 @@ override func viewDidLoad() {
         ladderView.ladder.regions.insert(newRegion, at: insertIndex)
         ladderView.initializeRegions()
         // TODO: reindexing needed?
-//        ladderView.ladder.clearGroupedMarks
-//        ladderView.ladder.groupMarks
+//        ladderView.ladder.clearLinkedMarks
+//        ladderView.ladder.linkMarks
 
 
         ladderView.ladder.reindexMarks()

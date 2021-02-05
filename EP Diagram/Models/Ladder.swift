@@ -92,13 +92,13 @@ class Ladder: NSObject, Codable {
         return markSet
     }
 
-    // Convert a MarkIdGroup to a MarkGroup
-    func getMarkGroup(fromMarkIdGroup markIdGroup: MarkIdGroup) -> MarkGroup {
-        var markGroup = MarkGroup()
-        markGroup.proximal = lookup(ids: markIdGroup.proximal)
-        markGroup.middle = lookup(ids: markIdGroup.middle)
-        markGroup.distal = lookup(ids: markIdGroup.distal)
-        return markGroup
+    // Convert a LinkedMarkIDs to LinkedMarks
+    func getLinkedMarks(fromLinkedMarkIDs linkedMarkIDs: LinkedMarkIDs) -> LinkedMarks {
+        var linkedMarks = LinkedMarks()
+        linkedMarks.proximal = lookup(ids: linkedMarkIDs.proximal)
+        linkedMarks.middle = lookup(ids: linkedMarkIDs.middle)
+        linkedMarks.distal = lookup(ids: linkedMarkIDs.distal)
+        return linkedMarks
     }
 
     func getMarkSet(fromMarkIdSet markIdSet: MarkIdSet) -> MarkSet {
@@ -190,7 +190,7 @@ class Ladder: NSObject, Codable {
     func removeMarkIdReferences(toMarkId id: UUID) {
         for region in regions {
             for mark in region.marks {
-                mark.groupedMarkIds.remove(id: id)
+                mark.linkedMarkIDs.remove(id: id)
             }
         }
     }
@@ -237,9 +237,9 @@ class Ladder: NSObject, Codable {
         else { return nil }
     }
 
-    func setModeForMarkIdGroup(mode: Mark.Mode, markIdGroup: MarkIdGroup) {
-        let markGroup = getMarkGroup(fromMarkIdGroup: markIdGroup)
-        markGroup.setMode(mode)
+    func setModeForLinkedMarkIDs(mode: Mark.Mode, linkedMarkIDs: LinkedMarkIDs) {
+        let linkedMarks = getLinkedMarks(fromLinkedMarkIDs: linkedMarkIDs)
+        linkedMarks.setMode(mode)
     }
 
     func normalizeAllMarks() {
@@ -279,9 +279,9 @@ class Ladder: NSObject, Codable {
     }
 
     func availableAnchors(forMark mark: Mark) -> [Anchor] {
-        let groupedMarkIds = mark.groupedMarkIds
+        let linkedMarkIDs = mark.linkedMarkIDs
         // FIXME: if attachment is in middle, only allow other end to move
-        if groupedMarkIds.count < 2 {
+        if linkedMarkIDs.count < 2 {
             return defaultAnchors()
         }
         else {
@@ -317,31 +317,31 @@ class Ladder: NSObject, Codable {
 
     // Pivot points are really fixed points (rename?) that can't move during mark movement.
     func pivotPoints(forMark mark: Mark) -> [Anchor] {
-        // No pivot points, i.e. full freedom of movement if no grouped marks.
-        if mark.groupedMarkIds.count == 0 {
+        // No pivot points, i.e. full freedom of movement if no linked marks.
+        if mark.linkedMarkIDs.count == 0 {
             return []
         }
-        if mark.groupedMarkIds.proximal.count > 0 && mark.groupedMarkIds.distal.count > 0 {
+        if mark.linkedMarkIDs.proximal.count > 0 && mark.linkedMarkIDs.distal.count > 0 {
             return [.proximal, .distal]
         }
-        else if mark.groupedMarkIds.proximal.count > 0 {
+        else if mark.linkedMarkIDs.proximal.count > 0 {
             return [.distal]
         }
-        else if mark.groupedMarkIds.distal.count > 0 {
+        else if mark.linkedMarkIDs.distal.count > 0 {
             return [.proximal]
         }
         // TODO: deal with middle marks
         return []
     }
 
-    func moveGroupedMarks(forMark mark: Mark) {
-        for proximalMark in getMarkSet(fromMarkIdSet: mark.groupedMarkIds.proximal) {
+    func moveLinkedMarks(forMark mark: Mark) {
+        for proximalMark in getMarkSet(fromMarkIdSet: mark.linkedMarkIDs.proximal) {
             proximalMark.segment.distal.x = mark.segment.proximal.x
         }
-        for distalMark in getMarkSet(fromMarkIdSet: mark.groupedMarkIds.distal) {
+        for distalMark in getMarkSet(fromMarkIdSet: mark.linkedMarkIDs.distal) {
             distalMark.segment.proximal.x = mark.segment.distal.x
         }
-        for middleMark in getMarkSet(fromMarkIdSet:mark.groupedMarkIds.middle) {
+        for middleMark in getMarkSet(fromMarkIdSet:mark.linkedMarkIDs.middle) {
             if mark == middleMark { break }
             let distanceToProximal = Geometry.distanceSegmentToPoint(segment: mark.segment, point: middleMark.segment.proximal)
             let distanceToDistal = Geometry.distanceSegmentToPoint(segment: mark.segment, point: middleMark.segment.distal)
@@ -363,7 +363,7 @@ class Ladder: NSObject, Codable {
     func removeRegion(_ region: Region) {
         regions.removeAll(where: { $0 == region })
         reindexMarks()
-        // regroup marks
+        // relink marks
     }
 
     func insertRegion(_ region: Region, at index: Int) {
