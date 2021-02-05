@@ -1476,7 +1476,8 @@ final class LadderView: ScaledView {
     }
 
     func removeRegion(_ region: Region) {
-//        guard ladder.regions.count > 1 else { return }
+        // Can't remove last region
+        guard ladder.regions.count > 1 else { return }
 //        let originalRegion = region
 //        let originalIndex = regionIndex()
 //        currentDocument?.undoManager.registerUndo(withTarget: self) {target in

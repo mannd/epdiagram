@@ -151,7 +151,8 @@ final class DiagramViewController: UIViewController {
     }
     lazy var addRegionMenu = UIMenu(title: L("Add Region..."), image: UIImage(systemName: "plus"), children: [self.addRegionAboveAction, self.addRegionBelowAction])
     lazy var removeRegionAction = UIAction(title: L("Remove region")) { action in
-        self.removeRegion()
+        guard let selectedRegion = self.ladderView.selectedRegion() else { return }
+        self.ladderView.removeRegion(selectedRegion)
     }
 
 
@@ -454,29 +455,14 @@ override func viewDidLoad() {
         ladderView.ladder.regions.insert(newRegion, at: insertIndex)
         ladderView.initializeRegions()
         // TODO: reindexing needed?
+//        ladderView.ladder.clearGroupedMarks
+//        ladderView.ladder.groupMarks
+
+
         ladderView.ladder.reindexMarks()
         // also need to regroup marks
         ladderView.refresh()
-        // TODO: implement
-        // ok here is proposed process:
-        /*
-         selectedRegion is passed to ladderView.undoablyAddRegion
-         undo is set up using complementary undoablyRemoveRegion as counterpoint
-         ladder does the add
-         First duplicate region from its template (giving duplicate region without marks)
-         Possibly adjust name, longdescription, height, and style from dialog?
-         Alternative is to make all those adjustable with long press (all but description and height are already).
-         Add the region, initialize the view, etc.
-         */
-        
-//        ladderView.addRegion(relation: relation, forRegion: selectedRegion)
     }
-
-    func removeRegion() {
-        guard let selectedRegion = ladderView.selectedRegion() else { return }
-        ladderView.removeRegion(selectedRegion)
-    }
-
   
     @objc func closeAngleMenu(_ sender: UIAlertAction) {
         hideCursorAndNormalizeAllMarks()
