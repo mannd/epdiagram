@@ -189,9 +189,5 @@ class LadderViewTests: XCTestCase {
         XCTAssertEqual(cursorView.isNearCursor(positionX: 100, accuracy: 0.001), true)
     }
 
-//    func testNearMarkPosition() {
-//        let mark = Mark(segment: Segment(proximal: CGPoint(x: 100, y: 0), distal: CGPoint(x: 100, y: 1)))
-//        // TODO: etc.
-//
-//    }
+
 }

@@ -51,7 +51,7 @@ final class LadderView: ScaledView {
     var blue = UIColor.systemBlue
     var normalColor = UIColor.label
     var attachedColor = UIColor.systemOrange
-    var linkColor = UIColor.systemGreen
+    var connectedColor = UIColor.systemGreen
     var selectedColor = UIColor.systemBlue
     var groupedColor = UIColor.systemPurple
 
@@ -111,7 +111,7 @@ final class LadderView: ScaledView {
         os_log("setupView() - LadderView", log: .action, type: .info)
         ladderViewHeight = self.frame.height
         initializeRegions()
-        removeLinks()
+        removeConnectedMarks()
         // FIXME: snap marks on startup
        
         // Draw border around view.
@@ -166,8 +166,8 @@ final class LadderView: ScaledView {
         switch mode {
         case .select:
             performMarkSelecting(tapLocationInLadder)
-        case .link:
-            performMarkLinking(tapLocationInLadder)
+        case .connect:
+            performMarkConnecting(tapLocationInLadder)
         case .normal:
             performNormalTap(tapLocationInLadder)
         default:
@@ -307,8 +307,8 @@ final class LadderView: ScaledView {
         }
     }
 
-    private func link(marksToLink marks: [Mark]) -> Mark? {
-        // Should not be called unless two marks to link are in marks.
+    private func connect(marksToConnect marks: [Mark]) -> Mark? {
+        // Should not be called unless two marks to connect are in marks.
         guard marks.count == 2 else { return nil }
         let firstRegionIndex = ladder.regionIndex(ofMark: marks[0])
         let secondRegionIndex = ladder.regionIndex(ofMark: marks[1])
@@ -337,69 +337,69 @@ final class LadderView: ScaledView {
         return nil
     }
 
-    private func linkTappedMark(_ mark: Mark) {
-        switch ladder.linkedMarks.count {
+    private func connectTappedMark(_ mark: Mark) {
+        switch ladder.connectedMarks.count {
         case 2...:
-            ladder.linkedMarks.removeAll()
+            ladder.connectedMarks.removeAll()
             normalizeAllMarks()
-            ladder.linkedMarks.append(mark)
-            mark.mode = .linked
+            ladder.connectedMarks.append(mark)
+            mark.mode = .connected
             return
         case 0:
-            ladder.linkedMarks.append(mark)
-            mark.mode = .linked
+            ladder.connectedMarks.append(mark)
+            mark.mode = .connected
             return
         case 1:
-            guard mark != ladder.linkedMarks[0] else { return }
+            guard mark != ladder.connectedMarks[0] else { return }
             // different mark tapped
             // what region is the mark in?
             let markRegionIndex = ladder.regionIndex(ofMark: mark)
-            let firstMarkRegionIndex = ladder.regionIndex(ofMark: ladder.linkedMarks[0])
+            let firstMarkRegionIndex = ladder.regionIndex(ofMark: ladder.connectedMarks[0])
             // TODO: what about create mark with each tap?
             let regionDistance = abs(markRegionIndex - firstMarkRegionIndex)
             if regionDistance > 1 {
-                ladder.linkedMarks.append(mark)
-                mark.mode = .linked
-                if let linkedMark = link(marksToLink: ladder.linkedMarks) {
-                    ladder.linkedMarks.append(linkedMark)
-                    linkedMark.mode = .linked
-                    groupNearbyMarks(mark: linkedMark)
-                    addGroupedMiddleMarks(ofMark: linkedMark)
+                ladder.connectedMarks.append(mark)
+                mark.mode = .connected
+                if let connectedMark = connect(marksToConnect: ladder.connectedMarks) {
+                    ladder.connectedMarks.append(connectedMark)
+                    connectedMark.mode = .connected
+                    groupNearbyMarks(mark: connectedMark)
+                    addGroupedMiddleMarks(ofMark: connectedMark)
                 }
             }
 
         // etc.
         default:
-            assertionFailure("Impossible linked mark count.")
+            assertionFailure("Impossible connected mark count.")
         }
     }
 
-    func removeLinks() {
-        ladder.linkedMarks.removeAll()
+    func removeConnectedMarks() {
+        ladder.connectedMarks.removeAll()
     }
 
-    private func performMarkLinking(_ tapLocationInLadder: LocationInLadder) {
+    private func performMarkConnecting(_ tapLocationInLadder: LocationInLadder) {
         if let mark = tapLocationInLadder.mark {
-            linkTappedMark(mark)
+            connectTappedMark(mark)
         }
         else if let region = tapLocationInLadder.region {
             // Regions are only used if a first mark is already chosen.
-            guard ladder.linkedMarks.count == 1 else { return }
-            let firstTappedMark = ladder.linkedMarks[0]
+            guard ladder.connectedMarks.count == 1 else { return }
+            let firstTappedMark = ladder.connectedMarks[0]
             // Region must be adjacent to the first mark.
             let firstTappedMarkRegionIndex = ladder.regionIndex(ofMark: firstTappedMark)
             guard let regionIndex = ladder.regionIndex(ofRegion: region),
                   abs(firstTappedMarkRegionIndex - regionIndex) == 1 else { return }
             activeRegion = region
-            // draw mark from end of previous linked mark
+            // draw mark from end of previous connecteded mark
             let tapRegionPosition = transformToRegionPosition(scaledViewPosition: tapLocationInLadder.unscaledPosition, region: region)
             if firstTappedMarkRegionIndex < regionIndex {
                 // marks must reach close enough to region boundary to be snapable
                 guard firstTappedMark.segment.distal.y > (1.0 - lowerLimitMarkHeight) else { return }
                 if let newMark = addMarkToActiveRegion(regionPositionX: firstTappedMark.segment.distal.x) {
                     newMark.segment.distal = tapRegionPosition
-                    newMark.mode = .linked
-                    ladder.linkedMarks.append(newMark)
+                    newMark.mode = .connected
+                    ladder.connectedMarks.append(newMark)
                     undoablyAddMark(mark: newMark, region: region)
                 }
             }
@@ -407,15 +407,15 @@ final class LadderView: ScaledView {
                 guard firstTappedMark.segment.proximal.y < lowerLimitMarkHeight else { return }
                 if let newMark = addMarkToActiveRegion(regionPositionX: firstTappedMark.segment.proximal.x) {
                     newMark.segment.proximal = tapRegionPosition
-                    newMark.mode = .linked
-                    ladder.linkedMarks.append(newMark)
+                    newMark.mode = .connected
+                    ladder.connectedMarks.append(newMark)
                     undoablyAddMark(mark: newMark, region: region)
                 }
             }
-            // FIXME: what do do if something illegal tapped (same mark, illegal region).  Remove linked marks?
+            // FIXME: what do do if something illegal tapped (same mark, illegal region).  Remove connected marks?
             // Maybe displace red X if illegal spot.
             else {
-                ladder.linkedMarks.removeAll()
+                ladder.connectedMarks.removeAll()
             }
         }
         setNeedsDisplay()
@@ -1277,8 +1277,8 @@ final class LadderView: ScaledView {
             return attachedColor.cgColor
         case .selected:
             return selectedColor.cgColor
-        case .linked:
-            return linkColor.cgColor
+        case .connected:
+            return connectedColor.cgColor
         case .normal:
             return normalColor.cgColor
         }

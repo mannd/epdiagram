@@ -291,7 +291,7 @@ extension Mark {
         case attached
         case grouped
         case selected
-        case linked
+        case connected
         case normal
     }
 }
