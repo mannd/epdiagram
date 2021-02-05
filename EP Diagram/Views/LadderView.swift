@@ -517,7 +517,7 @@ final class LadderView: ScaledView {
         if let attachedMark = ladder.attachedMark {
             let linkedMarkIDs = attachedMark.linkedMarkIDs
             // Note that the order below is important.  An attached mark can be in its own linkedMarks.  But we always want the attached mark to have an .attached highlight.
-            ladder.setModeForLinkedMarkIDs(mode: .grouped, linkedMarkIDs: linkedMarkIDs)
+            ladder.setModeForLinkedMarkIDs(mode: .linked, linkedMarkIDs: linkedMarkIDs)
             attachedMark.mode = .attached
         }
     }
@@ -825,7 +825,7 @@ final class LadderView: ScaledView {
         let markIds = nearbyMarkIds(mark: mark, nearbyDistance: nearbyDistance)
         // FIXME: xxx
         ladder.normalizeAllMarks()
-        ladder.setModeForLinkedMarkIDs(mode: .grouped, linkedMarkIDs: markIds)
+        ladder.setModeForLinkedMarkIDs(mode: .linked, linkedMarkIDs: markIds)
         setAttachedMarkAndLinkedMarksModes()
     }
 
@@ -1271,7 +1271,7 @@ final class LadderView: ScaledView {
 
     private func getMarkColor(mark: Mark) -> CGColor {
         switch mark.mode {
-        case .grouped:
+        case .linked:
             return linkedColor.cgColor
         case .attached:
             return attachedColor.cgColor

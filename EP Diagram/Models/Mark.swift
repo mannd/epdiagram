@@ -289,8 +289,7 @@ extension Mark {
     // Mutually exclusive modes that determine behavior and appears of marks.
     enum Mode: Int, Codable {
         case attached
-        // TODO: change grouped to linked
-        case grouped
+        case linked
         case selected
         case connected
         case normal

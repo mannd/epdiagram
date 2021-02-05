@@ -120,7 +120,7 @@ class LadderViewTests: XCTestCase {
         XCTAssertNotNil(mark2)
         XCTAssertNotNil(mark3)
         mark2!.mode = Mark.Mode.attached
-        mark3.mode = Mark.Mode.grouped
+        mark3.mode = Mark.Mode.linked
         ladderView.normalizeAllMarks()
         XCTAssertEqual(mark2!.mode, .normal)
         XCTAssertEqual(mark3.mode, .normal)
