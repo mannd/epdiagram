@@ -35,7 +35,7 @@ final class DiagramViewController: UIViewController {
     private var selectButton: UIBarButtonItem = UIBarButtonItem()
     private var mainMenuButtons: [UIBarButtonItem]?
     private var selectMenuButtons: [UIBarButtonItem]?
-    private var linkMenuButtons: [UIBarButtonItem]?
+    private var connectMenuButtons: [UIBarButtonItem]?
     private var calibrateMenuButtons: [UIBarButtonItem]?
 
     weak var diagramEditorDelegate: DiagramEditorDelegate?
@@ -127,7 +127,7 @@ final class DiagramViewController: UIViewController {
     }
     lazy var slantMenu = UIMenu(title: L("Slant mark(s)..."), image: UIImage(systemName: "line.diagonal"), children: [self.slantProximalPivotAction, self.slantDistalPivotAction])
     lazy var unlinkAction = UIAction(title: L("Unlink"), image: UIImage(systemName: "link")) { action in
-        self.ladderView.ungroupSelectedMarks()
+        self.ladderView.unlinkSelectedMarks()
     }
     lazy var straightenToProximalAction = UIAction(title: L("Straighten mark to proximal endpoint")) { action in
         self.ladderView.straightenToProximal()
@@ -400,13 +400,13 @@ override func viewDidLoad() {
         if mainMenuButtons == nil {
             let calibrateTitle = L("Calibrate", comment: "calibrate button label title")
             let selectTitle = L("Select", comment: "select button label title")
-            let linkTitle = L("Link", comment: "link button label title")
+            let connectTitle = L("Connect", comment: "connect button label title")
             let calibrateButton = UIBarButtonItem(title: calibrateTitle, style: UIBarButtonItem.Style.plain, target: self, action: #selector(calibrate))
             selectButton = UIBarButtonItem(title: selectTitle, style: .plain, target: self, action: #selector(showSelectMarksMenu))
-            let linkButton = UIBarButtonItem(title: linkTitle, style: .plain, target: self, action: #selector(linkMarks))
+            let connectButton = UIBarButtonItem(title: connectTitle, style: .plain, target: self, action: #selector(connectMarks))
             undoButton = UIBarButtonItem(barButtonSystemItem: .undo, target: self, action: #selector(undo))
             redoButton = UIBarButtonItem(barButtonSystemItem: .redo, target: self, action: #selector(redo))
-            mainMenuButtons = [calibrateButton, spacer, selectButton, spacer, linkButton, spacer, undoButton, spacer, redoButton]
+            mainMenuButtons = [calibrateButton, spacer, selectButton, spacer, connectButton, spacer, undoButton, spacer, redoButton]
         }
         // Note: set toolbar items this way, not directly (i.e. toolbar.items = something).
         setToolbarItems(mainMenuButtons, animated: false)
@@ -455,8 +455,8 @@ override func viewDidLoad() {
         ladderView.ladder.regions.insert(newRegion, at: insertIndex)
         ladderView.initializeRegions()
         // TODO: reindexing needed?
-//        ladderView.ladder.clearGroupedMarks
-//        ladderView.ladder.groupMarks
+//        ladderView.ladder.clearLinkedMarks
+//        ladderView.ladder.linkMarks
 
 
         ladderView.ladder.reindexMarks()
@@ -498,16 +498,16 @@ override func viewDidLoad() {
         ladderView.normalizeAllMarks()
     }
 
-    private func showLinkMenu() {
-        if linkMenuButtons == nil {
-            let prompt = makePrompt(text: L("Tap pairs of marks to link them"))
+    private func showConnectMenu() {
+        if connectMenuButtons == nil {
+            let prompt = makePrompt(text: L("Tap pairs of marks to connect them"))
             let cancelTitle = L("Done")
-            let cancelButton = UIBarButtonItem(title: cancelTitle, style: .done, target: self, action: #selector(cancelLink))
-            linkMenuButtons = [prompt, spacer, cancelButton]
+            let cancelButton = UIBarButtonItem(title: cancelTitle, style: .done, target: self, action: #selector(cancelConnectMode))
+            connectMenuButtons = [prompt, spacer, cancelButton]
         }
         hideCursorAndNormalizeAllMarks()
         ladderView.normalizeRegions()
-        setToolbarItems(linkMenuButtons, animated: false)
+        setToolbarItems(connectMenuButtons, animated: false)
         navigationController?.setToolbarHidden(false, animated: false)
     }
 
@@ -620,12 +620,12 @@ override func viewDidLoad() {
         setMode(.calibration)
     }
 
-    @objc func linkMarks() {
-        os_log("linkMarks()", log: OSLog.action, type: .info)
+    @objc func connectMarks() {
+        os_log("connectMarks()", log: .action, type: .info)
         hideCursorAndNormalizeAllMarks()
-        ladderView.removeLinks()
-        showLinkMenu()
-        setMode(.link)
+        ladderView.removeConnectedMarks()
+        showConnectMenu()
+        setMode(.connect)
         setViewsNeedDisplay()
     }
 
@@ -638,11 +638,11 @@ override func viewDidLoad() {
         ladderView.setNeedsDisplay()
     }
 
-    @objc func cancelLink() {
+    @objc func cancelConnectMode() {
         os_log("cancelLink()", log: OSLog.action, type: .info)
         showMainMenu()
         setMode(.normal)
-        ladderView.removeLinks()
+        ladderView.removeConnectedMarks()
         ladderView.normalizeAllMarks()
         ladderView.setNeedsDisplay()
     }

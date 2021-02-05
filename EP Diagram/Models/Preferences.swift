@@ -18,7 +18,7 @@ struct Preferences {
     static let defaultShowIntervalsKey = "defaultShowIntervalsKey"
     static let defaultShowConductionTimesKey = "defaultShowConductionTimesKey"
     static let defaultSnapMarksKey = "defaultSnapMarksKey"
-    static let defaultGroupMarksKey = "defaultGroupMarksKey"
+    static let defaultLinkMarksKey = "defaultLinkMarksKey"
     static let defaultMarkStyleKey = "defaultMarkStyleKey"
 
     // Stored as Int, converted to CGFloat when used.

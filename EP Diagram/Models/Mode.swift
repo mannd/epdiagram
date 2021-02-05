@@ -12,7 +12,7 @@ import Foundation
 enum Mode {
     case normal
     case calibration
-    case link
+    case connect
     case select
 }
 

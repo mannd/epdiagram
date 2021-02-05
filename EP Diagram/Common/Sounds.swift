@@ -11,7 +11,7 @@ import AudioToolbox
 // TODO: consider preference to turn on/off sounds (they can be annoying).
 class Sounds {
     static func playShutterSound() {
-        // Magic code to play system shutter sound.  We link AudioToolbox framework to make this work.  See http://iphonedevwiki.net/index.php/AudioServices for complete list os system sounds.
+        // See http://iphonedevwiki.net/index.php/AudioServices for complete list os system sounds.
         AudioServicesPlaySystemSoundWithCompletion(SystemSoundID(1108), nil)
     }
 

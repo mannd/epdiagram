@@ -33,8 +33,8 @@ class Mark: Codable {
     var measurementText: String = ""
     var showMeasurementText: Bool = true
 
-    // Ids of other marks that this mark is grouped with.
-    var groupedMarkIds: MarkIdGroup = MarkIdGroup()
+    // Ids of other marks that this mark is linked with.
+    var linkedMarkIDs: LinkedMarkIDs = LinkedMarkIDs()
     var regionIndex: Int = -1 // keep track of which region mark is in a ladder, negative value should not occur, except on init.
 
     // Calculated properties
@@ -58,7 +58,7 @@ class Mark: Codable {
     init(segment: Segment) {
         self.segment = segment
         self.id = UUID()
-        groupedMarkIds = MarkIdGroup()
+        linkedMarkIDs = LinkedMarkIDs()
         anchor = .middle
     }
 
@@ -164,7 +164,7 @@ class Mark: Codable {
 
 // A mark may have up to three attachments to marks in the proximal and distal regions
 // and in its own region, i.e. reentry spawning a mark.
-struct MarkGroup: Codable {
+struct LinkedMarks: Codable {
     var proximal: MarkSet
     var middle: MarkSet
     var distal: MarkSet
@@ -194,7 +194,7 @@ struct MarkGroup: Codable {
     }
 }
 
-struct MarkIdGroup: Codable {
+struct LinkedMarkIDs: Codable {
     var proximal: MarkIdSet
     var middle: MarkIdSet
     var distal: MarkIdSet
@@ -289,9 +289,9 @@ extension Mark {
     // Mutually exclusive modes that determine behavior and appears of marks.
     enum Mode: Int, Codable {
         case attached
-        case grouped
-        case selected
         case linked
+        case selected
+        case connected
         case normal
     }
 }

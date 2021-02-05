@@ -134,40 +134,40 @@ class LadderTests: XCTestCase {
         XCTAssertEqual(Anchor.middle, mark?.anchor)
     }
 
-    func testMoveGroupedMarks() {
+    func testMoveLinkedMarks() {
         let mark = Mark(segment: Segment(proximal: CGPoint(x: 100, y: 0), distal: CGPoint(x: 100, y: 1)))
         ladder.registerMark(mark)
         let distalMark = Mark(segment: Segment(proximal: CGPoint(x: 100, y: 0), distal: CGPoint(x: 200, y: 1)))
         ladder.registerMark(distalMark)
         ladder.addMark(mark, toRegion: ladder.regions[0])
         ladder.addMark(distalMark, toRegion: ladder.regions[1])
-        mark.groupedMarkIds.distal.insert(distalMark.id)
-        distalMark.groupedMarkIds.proximal.insert(mark.id)
+        mark.linkedMarkIDs.distal.insert(distalMark.id)
+        distalMark.linkedMarkIDs.proximal.insert(mark.id)
         mark.anchor = .middle
         mark.move(movement: .horizontal, to: CGPoint(x: 200, y: 0))
         XCTAssertEqual(mark.segment, Segment(proximal: CGPoint(x: 200, y: 0), distal: CGPoint(x: 200, y: 1)))
         XCTAssertEqual(distalMark.segment, Segment(proximal: CGPoint(x: 100, y: 0), distal: CGPoint(x: 200, y: 1)))
-        ladder.moveGroupedMarks(forMark: mark)
+        ladder.moveLinkedMarks(forMark: mark)
         XCTAssertEqual(distalMark.segment, Segment(proximal: CGPoint(x: 200, y: 0), distal: CGPoint(x: 200, y: 1)))
         distalMark.anchor = .middle
         distalMark.move(movement: .horizontal, to: CGPoint(x: 300, y: 0))
         XCTAssertEqual(distalMark.segment, Segment(proximal: CGPoint(x: 300, y: 0), distal: CGPoint(x: 300, y: 1)))
-        ladder.moveGroupedMarks(forMark: distalMark)
+        ladder.moveLinkedMarks(forMark: distalMark)
         XCTAssertEqual(mark.segment, Segment(proximal: CGPoint(x: 200, y: 0), distal: CGPoint(x: 300, y: 1)))
     }
 
-    func testGetMarkGroup() {
+    func testLinkedMarks() {
         let mark1 = Mark()
         let mark2 = Mark()
         let mark3 = Mark()
         ladder.registerMark(mark1)
         ladder.registerMark(mark2)
         ladder.registerMark(mark3)
-        var mig = MarkIdGroup()
+        var mig = LinkedMarkIDs()
         mig.proximal.insert(mark1.id)
         mig.middle.insert(mark2.id)
         mig.distal.insert(mark3.id)
-        let mg = ladder.getMarkGroup(fromMarkIdGroup: mig)
+        let mg = ladder.getLinkedMarks(fromLinkedMarkIDs: mig)
         XCTAssert(mg.proximal.contains(mark1))
         XCTAssert(mg.middle.contains(mark2))
         XCTAssert(mg.distal.contains(mark3))
