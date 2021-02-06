@@ -94,6 +94,7 @@ final class DiagramViewController: UIViewController {
     lazy var deleteAllInLadder = UIAction(title: L("Clear ladder"), image: UIImage(systemName: "trash"), attributes: .destructive) { action in
         self.ladderView.deleteAllInLadder()
     }
+
     lazy var solidAction = UIAction(title: L("Solid")) { action in
         self.ladderView.setSelectedMarksStyle(style: .solid)
     }
@@ -125,10 +126,30 @@ final class DiagramViewController: UIViewController {
     lazy var slantDistalPivotAction = UIAction(title: L("Slant distal pivot point")) { action in
 
     }
+
+    lazy var oneRegionHeightAction = UIAction(title: L("1 unit")) { action in
+        guard let selectedRegion = self.ladderView.selectedRegion() else { return }
+        self.ladderView.setRegionHeight(1, forRegion: selectedRegion)
+    }
+    lazy var twoRegionHeightAction = UIAction(title: L("2 units")) { action in
+        guard let selectedRegion = self.ladderView.selectedRegion() else { return }
+        self.ladderView.setRegionHeight(2, forRegion: selectedRegion)
+    }
+    lazy var threeRegionHeightAction = UIAction(title: L("3 units")) { action in
+        guard let selectedRegion = self.ladderView.selectedRegion() else { return }
+        self.ladderView.setRegionHeight(3, forRegion: selectedRegion)
+    }
+    lazy var fourRegionHeightAction = UIAction(title: L("4 units")) { action in
+        guard let selectedRegion = self.ladderView.selectedRegion() else { return }
+        self.ladderView.setRegionHeight(4, forRegion: selectedRegion)
+    }
+    lazy var regionHeightMenu = UIMenu(title: L("Region height..."), image: UIImage(systemName: "arrow.up.arrow.down.square"), children: [self.oneRegionHeightAction, self.twoRegionHeightAction, self.threeRegionHeightAction, self.fourRegionHeightAction])
+
     lazy var slantMenu = UIMenu(title: L("Slant mark(s)..."), image: UIImage(systemName: "line.diagonal"), children: [self.slantProximalPivotAction, self.slantDistalPivotAction])
     lazy var unlinkAction = UIAction(title: L("Unlink"), image: UIImage(systemName: "link")) { action in
         self.ladderView.unlinkSelectedMarks()
     }
+
     lazy var straightenToProximalAction = UIAction(title: L("Straighten mark to proximal endpoint")) { action in
         self.ladderView.straightenToProximal()
     }
@@ -143,19 +164,19 @@ final class DiagramViewController: UIViewController {
     lazy var editLabelAction = UIAction(title: L("Edit label"), image: UIImage(systemName: "pencil.circle")) { action in
         self.editLabel()
     }
+
     lazy var addRegionAboveAction = UIAction(title: L("Add region above")) { action in
-        self.addRegion(relation: .before)
+        self.ladderView.addRegion(relation: .before)
     }
     lazy var addRegionBelowAction = UIAction(title: L("Add region below")) { action in
-        self.addRegion(relation: .after)
+        self.ladderView.addRegion(relation: .after)
     }
     lazy var addRegionMenu = UIMenu(title: L("Add Region..."), image: UIImage(systemName: "plus"), children: [self.addRegionAboveAction, self.addRegionBelowAction])
-    lazy var removeRegionAction = UIAction(title: L("Remove region")) { action in
+
+    lazy var removeRegionAction = UIAction(title: L("Remove region"), image: UIImage(systemName: "minus")) { action in
         guard let selectedRegion = self.ladderView.selectedRegion() else { return }
         self.ladderView.removeRegion(selectedRegion)
     }
-
-
 
 override func viewDidLoad() {
         os_log("viewDidLoad() - ViewController", log: OSLog.viewCycle, type: .info)

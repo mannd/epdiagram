@@ -1450,29 +1450,25 @@ final class LadderView: ScaledView {
         setNeedsDisplay()
     }
 
-    func addRegion(relation: RegionRelation, forRegion region: Region) {
-//        let originalRegion = region
-//        currentDocument?.undoManager.registerUndo(withTarget: self) {target in
-//            target.removeRegion(region)
-//        }
-        NotificationCenter.default.post(name: .didUndoableAction, object: nil)
-        // get clean duplicated region
-        let newRegion = Region(template: region.regionTemplate())
-        // etc.
-        if let index = ladder.regionIndex(ofRegion: region) {
-            switch relation {
-            case .after:
-                ladder.insertRegion(region, at: index - 1)
-            case .before:
-                ladder.insertRegion(region, at: index + 1)
-            default:
-                break
-            }
-            // add region to ladder.regions
-            // unlink all marks
-            // reindex marks that need to be reindexed
-            setNeedsDisplay()
-        }
+    func addRegion(relation: RegionRelation) {
+        let maxRegionCount = 5
+        guard ladder.regions.count < maxRegionCount else { return }
+        guard relation == .after || relation == .before else { return }
+        guard let selectedRegion = selectedRegion() else { return }
+        guard let selectedIndex = ladder.regionIndex(ofRegion: selectedRegion) else { return }
+        let selectedRegionTemplate = selectedRegion.regionTemplate()
+        let newRegion = Region(template: selectedRegionTemplate)
+        // TODO: figure out where to insert new region.
+        // if .before, do it at the selected index, if .after do it at selected index + 1
+        let insertIndex = relation == .before ? selectedIndex : selectedIndex + 1
+        ladder.regions.insert(newRegion, at: insertIndex)
+        initializeRegions()
+        // TODO: reindexing needed?
+//        ladderView.ladder.clearLinkedMarks
+//        ladderView.ladder.linkMarks
+        ladder.reindexMarks()
+        // also need to regroup marks
+        setNeedsDisplay()
     }
 
     func removeRegion(_ region: Region) {
@@ -1485,6 +1481,18 @@ final class LadderView: ScaledView {
 //        }
         NotificationCenter.default.post(name: .didUndoableAction, object: nil)
         ladder.removeRegion(region)
+        initializeRegions()
+        setNeedsDisplay()
+    }
+
+    func setRegionHeight(_ height: Int, forRegion region: Region) {
+        let originalRegion = region
+        let originalHeight = region.unitHeight
+        currentDocument?.undoManager.registerUndo(withTarget: self) {target in
+            target.setRegionHeight(originalHeight, forRegion: originalRegion)
+        }
+        NotificationCenter.default.post(name: .didUndoableAction, object: nil)
+        region.unitHeight = height
         initializeRegions()
         setNeedsDisplay()
     }

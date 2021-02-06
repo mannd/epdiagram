@@ -89,7 +89,7 @@ extension DiagramViewController: UIContextMenuInteractionDelegate {
             } else {
                 title = L("Region")
             }
-            return UIMenu(title: title, children: [self.styleMenu, self.straightenMenu, self.slantMenu, self.editLabelAction, self.addRegionMenu, self.removeRegionAction, self.rhythmAction, self.deleteAllInRegion])
+            return UIMenu(title: title, children: [self.styleMenu, self.straightenMenu, self.slantMenu, self.editLabelAction, self.addRegionMenu, self.removeRegionAction, self.regionHeightMenu, self.rhythmAction, self.deleteAllInRegion])
         }
     }
 

@@ -114,17 +114,6 @@ class Ladder: NSObject, Codable {
         return false
     }
 
-    // TODO: Need editing facility of ladder: add, delete Regions, edit labels, edit region parameters.  This is important because rather than starting a ladder over from a new blank template, someone may just want to add a region.  Thus, eg.:
-    func addRegion() {
-        os_log("addRegion()", log: .action, type: .info)
-        fatalError("not implemented")
-    }
-
-    func deleteRegion(region: Region) {
-        os_log("deleteRegion(region:)", log: .action, type: .info)
-        fatalError("not implemented")
-    }
-
     func editRegion(region: Region) {
         os_log("editRegion(region:)", log: .action, type: .info)
         fatalError("not implemented")
