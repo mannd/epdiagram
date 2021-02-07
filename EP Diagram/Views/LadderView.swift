@@ -388,7 +388,7 @@ final class LadderView: ScaledView {
             let firstTappedMark = ladder.connectedMarks[0]
             // Region must be adjacent to the first mark.
             let firstTappedMarkRegionIndex = ladder.regionIndex(ofMark: firstTappedMark)
-            guard let regionIndex = ladder.regionIndex(ofRegion: region),
+            guard let regionIndex = ladder.index(ofRegion: region),
                   abs(firstTappedMarkRegionIndex - regionIndex) == 1 else { return }
             activeRegion = region
             // draw mark from end of previous connecteded mark
@@ -1385,6 +1385,14 @@ final class LadderView: ScaledView {
         selectedMarks.forEach { mark in unlinkMarks(mark: mark) }
     }
 
+    func unlinkAllMarks() {
+        ladder.unlinkAllMarks()
+    }
+
+    func linkAllMarks() {
+        // scan all marks, link them if possible
+    }
+
     func unlinkMarks(mark: Mark) {
         normalizeAllMarks()
         mark.linkedMarkIDs = LinkedMarkIDs()
@@ -1395,24 +1403,28 @@ final class LadderView: ScaledView {
         selectedMarks.forEach { mark in self.slantMark(angle: 2, mark: mark, region: ladder.regions[mark.regionIndex]) }
     }
 
-    // FIXME: make straightening undoable
-    @objc func straightenToProximal() {
+    // FIXME: cursor malpositioned after straightening.
+    func straightenToEndpoint(_ endpoint: Mark.Endpoint) {
         let selectedMarks = ladder.allMarksWithMode(.selected)
+        currentDocument?.undoManager.beginUndoGrouping()
         selectedMarks.forEach { mark in
-            let segment = Segment(proximal: mark.segment.proximal, distal: CGPoint(x: mark.segment.proximal.x, y: mark.segment.distal.y))
+            let originalSegment = mark.segment
+            currentDocument?.undoManager.registerUndo(withTarget: self, handler: { target in
+                self.setSegment(segment: originalSegment, forMark: mark)
+            })
+            NotificationCenter.default.post(name: .didUndoableAction, object: nil)
+            let segment: Segment
+            switch endpoint {
+            case .proximal:
+                segment = Segment(proximal: mark.segment.proximal, distal: CGPoint(x: mark.segment.proximal.x, y: mark.segment.distal.y))
+            case .distal:
+                segment = Segment(proximal: CGPoint(x: mark.segment.distal.x, y: mark.segment.proximal.y), distal: mark.segment.distal)
+            }
             self.setSegment(segment: segment, forMark: mark)
         }
+        currentDocument?.undoManager.endUndoGrouping()
     }
 
-    @objc func straightenToDistal() {
-        let selectedMarks = ladder.allMarksWithMode(.selected)
-        selectedMarks.forEach { mark in
-            let segment = Segment(proximal: CGPoint(x: mark.segment.distal.x, y: mark.segment.proximal.y), distal: mark.segment.distal)
-            self.setSegment(segment: segment, forMark: mark)
-        }
-    }
-
-   
     @objc func slantSelectedMarks(angle: CGFloat) {
         let selectedMarks = ladder.allMarksWithMode(.selected)
         selectedMarks.forEach { mark in slantMark(angle: angle, mark: mark, region: ladder.regions[mark.regionIndex]) }
@@ -1463,9 +1475,11 @@ final class LadderView: ScaledView {
         NotificationCenter.default.post(name: .didUndoableAction, object: nil)
         ladder.regions.insert(region, at: index)
         initializeRegions()
+
         // TODO: reindexing needed?
         //        ladderView.ladder.clearLinkedMarks
         //        ladderView.ladder.linkMarks
+        // TODO: need relink mark function
         ladder.reindexMarks()
         // also need to regroup marks
         setNeedsDisplay()
@@ -1473,7 +1487,7 @@ final class LadderView: ScaledView {
 
     func undoablyRemoveRegion(_ region: Region) {
         let originalRegion = region
-        let index = ladder.regionIndex(ofRegion: originalRegion)!
+        let index = ladder.index(ofRegion: originalRegion)!
         currentDocument?.undoManager.registerUndo(withTarget: self) { target in
             target.undoablyAddRegion(region, atIndex: index)
         }
@@ -1487,11 +1501,10 @@ final class LadderView: ScaledView {
     }
 
     func addRegion(relation: RegionRelation) {
-        let maxRegionCount = 5
-        guard ladder.regions.count < maxRegionCount else { return }
+        guard ladder.regions.count < Ladder.maxRegionCount else { return }
         guard relation == .after || relation == .before else { return }
         guard let selectedRegion = selectedRegion() else { return }
-        guard var selectedIndex = ladder.regionIndex(ofRegion: selectedRegion) else { return }
+        guard var selectedIndex = ladder.index(ofRegion: selectedRegion) else { return }
         if relation == .after {
             selectedIndex += 1
         }
@@ -1504,7 +1517,7 @@ final class LadderView: ScaledView {
 
     func removeRegion() {
         // Can't remove last region
-        guard ladder.regions.count > 1 else { return }
+        guard ladder.regions.count > Ladder.minRegionCount else { return }
         guard let selectedRegion = selectedRegion() else { return }
         undoablyRemoveRegion(selectedRegion)
     }

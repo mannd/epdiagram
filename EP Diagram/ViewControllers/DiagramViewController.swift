@@ -95,6 +95,13 @@ final class DiagramViewController: UIViewController {
         self.ladderView.deleteAllInLadder()
     }
 
+    lazy var unlinkAll = UIAction(title: L("Unlink all marks")) { action in
+        self.ladderView.unlinkAllMarks()
+    }
+    lazy var linkAll = UIAction(title: L("Link all marks")) { action in
+        self.ladderView.linkAllMarks()
+    }
+
     lazy var solidAction = UIAction(title: L("Solid")) { action in
         self.ladderView.setSelectedMarksStyle(style: .solid)
     }
@@ -151,12 +158,12 @@ final class DiagramViewController: UIViewController {
     }
 
     lazy var straightenToProximalAction = UIAction(title: L("Straighten mark to proximal endpoint")) { action in
-        self.ladderView.straightenToProximal()
+        self.ladderView.straightenToEndpoint(.proximal)
     }
     lazy var straightenToDistalAction = UIAction(title: L("Straighten mark to distal endpoint")) { action in
-        self.ladderView.straightenToDistal()
+        self.ladderView.straightenToEndpoint(.distal)
     }
-    lazy var straightenMenu = UIMenu(title: L("Straighten mark(s)..."), image: UIImage(systemName: "arrow.up.arrow.down"), children: [self.straightenToDistalAction, self.straightenToProximalAction])
+    lazy var straightenMenu = UIMenu(title: L("Straighten mark(s)..."), image: UIImage(systemName: "arrow.up.arrow.down"), children: [self.straightenToProximalAction, self.straightenToDistalAction])
 
     lazy var rhythmAction = UIAction(title: L("Rhythm"), image: UIImage(systemName: "waveform.path.ecg")) { action in
         // TODO: implement
@@ -459,29 +466,6 @@ override func viewDidLoad() {
         UserAlert.showTextAlert(viewController: self, title: L("Edit Label"), message: L("Enter new label text for \"\(selectedRegion.name).\""), defaultText: selectedRegion.name, preferredStyle: .alert, handler: { newLabel in
             self.ladderView.undoablySetLabel(newLabel, forRegion: selectedRegion)
         })
-    }
-
-    func addRegion(relation: RegionRelation) {
-        let maxRegionCount = 5
-        guard ladderView.ladder.regions.count < maxRegionCount else { return }
-        guard relation == .after || relation == .before else { return }
-        guard let selectedRegion = ladderView.selectedRegion() else { return }
-        guard let selectedIndex = ladderView.ladder.regionIndex(ofRegion: selectedRegion) else { return }
-        let selectedRegionTemplate = selectedRegion.regionTemplate()
-        let newRegion = Region(template: selectedRegionTemplate)
-        // TODO: figure out where to insert new region.
-        // if .before, do it at the selected index, if .after do it at selected index + 1
-        let insertIndex = relation == .before ? selectedIndex : selectedIndex + 1
-        ladderView.ladder.regions.insert(newRegion, at: insertIndex)
-        ladderView.initializeRegions()
-        // TODO: reindexing needed?
-//        ladderView.ladder.clearLinkedMarks
-//        ladderView.ladder.linkMarks
-
-
-        ladderView.ladder.reindexMarks()
-        // also need to regroup marks
-        ladderView.refresh()
     }
   
     @objc func closeAngleMenu(_ sender: UIAlertAction) {

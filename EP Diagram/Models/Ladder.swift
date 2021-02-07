@@ -15,10 +15,14 @@ import os.log
 class Ladder: NSObject, Codable {
     private(set) var id = UUID()
 
+    // Hard limit on maximum and minimum number of regions in a ladder (for space reasons).
+    static let maxRegionCount = 5
+    static let minRegionCount = 1
+
     var name: String
     var longDescription: String = ""
     var regions = [Region]()
-    var numRegions: Int { regions.count }
+    var regionCount: Int { regions.count }
     var attachedMark: Mark? // cursor is attached to a most 1 mark at a time
     var connectedMarks = [Mark]() // marks in the process of being connected
     var marksAreVisible: Bool = true    // shows and hides all the marks.  You can toggle this for teaching purposes.
@@ -30,7 +34,7 @@ class Ladder: NSObject, Codable {
             activeRegion.mode = .active
         }
     }
-    var zone: Zone = Zone()
+    var zone: Zone = Zone() // at most one selection zone, which may be invisible.
     override var debugDescription: String { "Ladder ID " + id.debugDescription }
     private var registry: [UUID: Mark] = [:] // marks are registered for quick lookup
 
@@ -152,7 +156,7 @@ class Ladder: NSObject, Codable {
         mark.style = region.style
         region.appendMark(mark)
         registerMark(mark)
-        if let index = regionIndex(ofRegion: region) {
+        if let index = index(ofRegion: region) {
             mark.regionIndex = index
         }
         return mark
@@ -191,7 +195,7 @@ class Ladder: NSObject, Codable {
         }
     }
 
-    func regionIndex(ofRegion region: Region?) -> Int? {
+    func index(ofRegion region: Region?) -> Int? {
         guard let region = region else { return nil }
         return regions.firstIndex(of: region)
     }
@@ -211,7 +215,7 @@ class Ladder: NSObject, Codable {
     }
 
     func regionBefore(region: Region) -> Region? {
-        guard let index = regionIndex(ofRegion: region) else { return nil }
+        guard let index = index(ofRegion: region) else { return nil }
         if index > 0 {
             return regions[index - 1]
         }
@@ -219,7 +223,7 @@ class Ladder: NSObject, Codable {
     }
 
     func regionAfter(region: Region) -> Region? {
-        guard let index = regionIndex(ofRegion: region) else { return nil}
+        guard let index = index(ofRegion: region) else { return nil}
         if index < regions.count - 1 {
             return regions[index + 1]
         }
@@ -355,15 +359,19 @@ class Ladder: NSObject, Codable {
         // relink marks
     }
 
-    func insertRegion(_ region: Region, at index: Int) {
+    func unlinkAllMarks() {
+        regions.forEach {
+            region in region.marks.forEach {
+                mark in mark.linkedMarkIDs.removeAll()
+            }
 
-
+        }
     }
 
     func reindexMarks() {
         for region in regions {
             for mark in region.marks {
-                mark.regionIndex = regionIndex(ofRegion: region) ?? -1
+                mark.regionIndex = index(ofRegion: region) ?? -1
             }
         }
     }
@@ -372,14 +380,6 @@ class Ladder: NSObject, Codable {
     static func defaultLadder() -> Ladder {
         return Ladder(template: LadderTemplate.defaultTemplate())
     }
-}
-
-// MARK: - structs
-
-struct NearbyMarks {
-    var proximal = [Mark]()
-    var middle = [Mark]()
-    var distal = [Mark]()
 }
 
 // MARK: - enums

@@ -100,7 +100,7 @@ extension DiagramViewController: UIContextMenuInteractionDelegate {
 
     func ladderContextMenuConfiguration(at location: CGPoint) -> UIContextMenuConfiguration {
         return UIContextMenuConfiguration(identifier: nil, previewProvider: nil) { suggestedActions in
-            return UIMenu(title: "", children: [self.deleteAllInLadder])
+            return UIMenu(title: "", children: [self.linkAll, self.unlinkAll, self.deleteAllInLadder])
         }
     }
 }

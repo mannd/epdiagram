@@ -219,6 +219,12 @@ struct LinkedMarkIDs: Codable {
         middle.remove(id)
         distal.remove(id)
     }
+
+    mutating func removeAll() {
+        proximal.removeAll()
+        middle.removeAll()
+        distal.removeAll()
+    }
 }
 
 // MARK: - extensions
@@ -293,6 +299,12 @@ extension Mark {
         case selected
         case connected
         case normal
+    }
+
+    // Show which end of a mark is affected by an action.
+    enum Endpoint: Int, Codable {
+        case proximal
+        case distal
     }
 }
 
