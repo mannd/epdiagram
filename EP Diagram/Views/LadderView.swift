@@ -1442,11 +1442,47 @@ final class LadderView: ScaledView {
 
     func undoablySetLabel(_ label: String, forRegion region: Region) {
         let originalName = region.name
-        currentDocument?.undoManager.registerUndo(withTarget: self) {target in
+        currentDocument?.undoManager.registerUndo(withTarget: self) { target in
             target.undoablySetLabel(originalName, forRegion: region)
         }
         NotificationCenter.default.post(name: .didUndoableAction, object: nil)
         region.name = label
+        setNeedsDisplay()
+    }
+
+    // TODO: skeleton for add/remove region
+    // region = new region to add.  Index is where to add.  E.g.
+    // 0 is before first region, shift other regions forward by 1
+    // If N is last region index, add to N + 1, as long as N + 1 < max number of regions.
+    // So need to calculate index before calling, and make sure it is legit.
+    func undoablyAddRegion(_ region: Region, atIndex index: Int) {
+        let originalRegion = region
+        currentDocument?.undoManager.registerUndo(withTarget: self) { target in
+            target.undoablyRemoveRegion(originalRegion)
+        }
+        NotificationCenter.default.post(name: .didUndoableAction, object: nil)
+        ladder.regions.insert(region, at: index)
+        initializeRegions()
+        // TODO: reindexing needed?
+        //        ladderView.ladder.clearLinkedMarks
+        //        ladderView.ladder.linkMarks
+        ladder.reindexMarks()
+        // also need to regroup marks
+        setNeedsDisplay()
+    }
+
+    func undoablyRemoveRegion(_ region: Region) {
+        let originalRegion = region
+        let index = ladder.regionIndex(ofRegion: originalRegion)!
+        currentDocument?.undoManager.registerUndo(withTarget: self) { target in
+            target.undoablyAddRegion(region, atIndex: index)
+        }
+        NotificationCenter.default.post(name: .didUndoableAction, object: nil)
+        // Can't remove last region
+        guard ladder.regions.count > 1 else { return }
+        NotificationCenter.default.post(name: .didUndoableAction, object: nil)
+        ladder.removeRegion(region)
+        initializeRegions()
         setNeedsDisplay()
     }
 
@@ -1455,34 +1491,22 @@ final class LadderView: ScaledView {
         guard ladder.regions.count < maxRegionCount else { return }
         guard relation == .after || relation == .before else { return }
         guard let selectedRegion = selectedRegion() else { return }
-        guard let selectedIndex = ladder.regionIndex(ofRegion: selectedRegion) else { return }
-        let selectedRegionTemplate = selectedRegion.regionTemplate()
+        guard var selectedIndex = ladder.regionIndex(ofRegion: selectedRegion) else { return }
+        if relation == .after {
+            selectedIndex += 1
+        }
+        var selectedRegionTemplate = selectedRegion.regionTemplate()
+        selectedRegionTemplate.name = ""
+        selectedRegionTemplate.description = ""
         let newRegion = Region(template: selectedRegionTemplate)
-        // TODO: figure out where to insert new region.
-        // if .before, do it at the selected index, if .after do it at selected index + 1
-        let insertIndex = relation == .before ? selectedIndex : selectedIndex + 1
-        ladder.regions.insert(newRegion, at: insertIndex)
-        initializeRegions()
-        // TODO: reindexing needed?
-//        ladderView.ladder.clearLinkedMarks
-//        ladderView.ladder.linkMarks
-        ladder.reindexMarks()
-        // also need to regroup marks
-        setNeedsDisplay()
+        undoablyAddRegion(newRegion, atIndex: selectedIndex)
     }
 
-    func removeRegion(_ region: Region) {
+    func removeRegion() {
         // Can't remove last region
         guard ladder.regions.count > 1 else { return }
-//        let originalRegion = region
-//        let originalIndex = regionIndex()
-//        currentDocument?.undoManager.registerUndo(withTarget: self) {target in
-//            target.addRegion(originalRegion)
-//        }
-        NotificationCenter.default.post(name: .didUndoableAction, object: nil)
-        ladder.removeRegion(region)
-        initializeRegions()
-        setNeedsDisplay()
+        guard let selectedRegion = selectedRegion() else { return }
+        undoablyRemoveRegion(selectedRegion)
     }
 
     func setRegionHeight(_ height: Int, forRegion region: Region) {

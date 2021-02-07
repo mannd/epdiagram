@@ -174,8 +174,7 @@ final class DiagramViewController: UIViewController {
     lazy var addRegionMenu = UIMenu(title: L("Add Region..."), image: UIImage(systemName: "plus"), children: [self.addRegionAboveAction, self.addRegionBelowAction])
 
     lazy var removeRegionAction = UIAction(title: L("Remove region"), image: UIImage(systemName: "minus")) { action in
-        guard let selectedRegion = self.ladderView.selectedRegion() else { return }
-        self.ladderView.removeRegion(selectedRegion)
+        self.ladderView.removeRegion()
     }
 
 override func viewDidLoad() {

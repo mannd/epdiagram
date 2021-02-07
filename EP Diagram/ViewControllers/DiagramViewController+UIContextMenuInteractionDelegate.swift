@@ -85,7 +85,7 @@ extension DiagramViewController: UIContextMenuInteractionDelegate {
             // FIXME: make sure we won't move linked marks, or disconnect them when straightening.
             let title: String
             if let region = self.longPressLocationInLadder?.region {
-                title = L("\(region.name) Region\n\(region.longDescription)")
+                title = L("\(region.name) — \(region.longDescription)")
             } else {
                 title = L("Region")
             }
