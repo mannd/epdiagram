@@ -108,7 +108,7 @@ class MarkTests: XCTestCase {
         XCTAssertEqual(ladder.lookup(id: mark1.id), mark1)
         XCTAssertEqual(ladder.lookup(id: mark2.id), mark2)
         XCTAssertEqual(ladder.lookup(id: mark3.id), mark3)
-        ladder.deleteMark(mark1, inRegion: ladder.regions[0])
+        ladder.deleteMark(mark1)
         XCTAssertEqual(ladder.lookup(id: mark1.id), nil)
     }
 
@@ -123,7 +123,7 @@ class MarkTests: XCTestCase {
         XCTAssertEqual(ladder.altLookup(id: mark1.id), mark1)
         XCTAssertEqual(ladder.altLookup(id: mark2.id), mark2)
         XCTAssertEqual(ladder.altLookup(id: mark3.id), mark3)
-        ladder.deleteMark(mark1, inRegion: ladder.regions[0])
+        ladder.deleteMark(mark1)
         XCTAssertEqual(ladder.altLookup(id: mark1.id), nil)
     }
 

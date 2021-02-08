@@ -226,7 +226,7 @@ final class LadderView: ScaledView {
                 outerLoop: for mark in tappedRegion.marks {
                     if nearMark(position: position, mark: mark, region: tappedRegion, accuracy: accuracy) {
                         tappedMark = mark
-                        tappedAnchor = nearMarkPosition(point: position, mark: mark, region: tappedRegion)
+                        tappedAnchor = nearestAnchor(position: position, mark: mark)
                         break outerLoop
                     }
                 }
@@ -459,9 +459,9 @@ final class LadderView: ScaledView {
     ///   - point: a point in ladder view coordinates
     ///   - mark: mark to check for proximity
     ///   - region: region in which mark is located
-    func nearMarkPosition(point: CGPoint, mark: Mark, region: Region) -> Anchor {
-        // Use region coordinates
-        let regionPoint = transformToRegionPosition(scaledViewPosition: point, region: region)
+    func nearestAnchor(position: CGPoint, mark: Mark) -> Anchor {
+        let region = ladder.region(ofMark: mark)
+        let regionPoint = transformToRegionPosition(scaledViewPosition: position, region: region)
         let proximalDistance = CGPoint.distanceBetweenPoints(mark.segment.proximal, regionPoint)
         let middleDistance = CGPoint.distanceBetweenPoints(mark.midpoint(), regionPoint)
         let distalDistance = CGPoint.distanceBetweenPoints(mark.segment.distal, regionPoint)
@@ -549,8 +549,7 @@ final class LadderView: ScaledView {
         activeRegion = tapLocationInLadder.region
         if tapLocationInLadder.specificLocation == .mark {
             if let mark = tapLocationInLadder.mark {
-                let region = tapLocationInLadder.region
-                undoablyDeleteMark(mark: mark, region: region)
+                undoablyDeleteMark(mark: mark)
                 return true
             }
         } else {
@@ -571,19 +570,20 @@ final class LadderView: ScaledView {
     }
 
     // See https://stackoverflow.com/questions/36491789/using-nsundomanager-how-to-register-undos-using-swift-closures/36492619#36492619
-    private func undoablyDeleteMark(mark: Mark, region: Region?) {
+    func undoablyDeleteMark(mark: Mark) {
         os_log("undoablyDeleteMark(mark:region:) - LadderView", log: OSLog.debugging, type: .debug)
         currentDocument?.undoManager?.registerUndo(withTarget: self, handler: { target in
-            target.redoablyUndeleteMark(mark: mark, region: region)
+            target.redoablyUndeleteMark(mark: mark)
         })
         NotificationCenter.default.post(name: .didUndoableAction, object: nil)
-        deleteMark(mark: mark, region: region)
+        deleteMark(mark)
     }
 
-    private func redoablyUndeleteMark(mark: Mark, region: Region?) {
+    func redoablyUndeleteMark(mark: Mark) {
         os_log("redoablyUndeleteMark(mark:region:) - LadderView", log: OSLog.debugging, type: .debug)
+        let region = ladder.region(ofMark: mark)
         currentDocument?.undoManager?.registerUndo(withTarget: self, handler: { target in
-            target.undoablyDeleteMark(mark: mark, region: region)
+            target.undoablyDeleteMark(mark: mark)
         })
         NotificationCenter.default.post(name: .didUndoableAction, object: nil)
         undeleteMark(mark: mark, region: region)
@@ -592,16 +592,16 @@ final class LadderView: ScaledView {
     private func undoablyAddMark(mark: Mark, region: Region?) {
         os_log("undoablyAddMark(mark:region:) - LadderView", log: OSLog.debugging, type: .debug)
         currentDocument?.undoManager?.registerUndo(withTarget: self, handler: { target in
-            target.undoablyDeleteMark(mark: mark, region: region)
+            target.undoablyDeleteMark(mark: mark)
         })
         NotificationCenter.default.post(name: .didUndoableAction, object: nil)
         // Note no call here because calling function needs to actually add the mark.
     }
 
-    private func deleteMark(mark: Mark, region: Region?) {
-        os_log("deleteMark(mark:region:) - LadderView", log: OSLog.debugging, type: .debug)
+    private func deleteMark(_ mark: Mark) {
+        os_log("deleteMark(mark:) - LadderView", log: OSLog.debugging, type: .debug)
         mark.mode = .normal
-        ladder.deleteMark(mark, inRegion: region)
+        ladder.deleteMark(mark)
         hideCursorAndNormalizeAllMarks()
         cursorViewDelegate.refresh()
     }
@@ -616,12 +616,6 @@ final class LadderView: ScaledView {
         cursorViewDelegate.refresh()
     }
 
-    private func deleteMark(_ mark: Mark?) {
-        os_log("deleteMark(_:) - LadderView", log: OSLog.debugging, type: .debug)
-        if let mark = mark {
-            undoablyDeleteMark(mark: mark, region: activeRegion)
-        }
-    }
 
     fileprivate func normalModeDrag(_ pan: UIPanGestureRecognizer) {
         let position = pan.location(in: self)
@@ -704,7 +698,7 @@ final class LadderView: ScaledView {
             }
             else if let dragCreatedMark = dragCreatedMark {
                 if dragCreatedMark.height < lowerLimitMarkHeight && dragCreatedMark.width < lowerLimitMarkWidth {
-                    deleteMark(dragCreatedMark)
+                    undoablyDeleteMark(mark: dragCreatedMark)
                 }
                 else {
                     swapEndsIfNeeded(mark: dragCreatedMark)
@@ -1338,7 +1332,7 @@ final class LadderView: ScaledView {
     @objc func deleteSelectedMarks() {
         os_log("deleteSelectedMarks() - LadderView", log: OSLog.debugging, type: .debug)
         let selectedMarks = ladder.allMarksWithMode(.selected)
-        selectedMarks.forEach { mark in self.undoablyDeleteMark(mark: mark, region: ladder.region(ofMark: mark)) }
+        selectedMarks.forEach { mark in self.undoablyDeleteMark(mark: mark) }
         hideCursorAndNormalizeAllMarks()
         cursorViewDelegate.refresh()
         setNeedsDisplay()
@@ -1352,7 +1346,7 @@ final class LadderView: ScaledView {
         if let selectedRegion = selectedRegions.first {
             currentDocument?.undoManager?.beginUndoGrouping()
             for mark in selectedRegion.marks {
-                undoablyDeleteMark(mark: mark, region: selectedRegion)
+                undoablyDeleteMark(mark: mark)
             }
             currentDocument?.undoManager?.endUndoGrouping()
             hideCursorAndNormalizeAllMarks()
@@ -1377,7 +1371,7 @@ final class LadderView: ScaledView {
         currentDocument?.undoManager?.beginUndoGrouping()
         for region in ladder.regions {
             for mark in region.marks {
-                undoablyDeleteMark(mark: mark, region: region)
+                undoablyDeleteMark(mark: mark)
             }
         }
         currentDocument?.undoManager?.endUndoGrouping()
@@ -1581,13 +1575,13 @@ extension LadderView: LadderViewDelegate {
     }
 
     func getAttachedMarkLadderViewPositionY(view: UIView) -> CGPoint? {
-        guard let position = getMarkAnchorLadderViewPosition(mark: ladder.attachedMark, region: activeRegion) else {
+        guard let position = anchorLadderViewPosition(ofMark: ladder.attachedMark) else {
             return nil
         }
         return convert(position, to: view)
     }
 
-    func getMarkAnchorRegionPosition(_ mark: Mark) -> CGPoint {
+    func anchorRegionPosition(ofMark mark: Mark) -> CGPoint {
         let anchor = mark.anchor
         let anchorPosition: CGPoint
         switch anchor {
@@ -1603,9 +1597,10 @@ extension LadderView: LadderViewDelegate {
         return anchorPosition
     }
 
-    func getMarkAnchorLadderViewPosition(mark: Mark?, region: Region?) -> CGPoint? {
-        guard let mark = mark, let region = region else { return nil }
-        var anchorPosition = getMarkAnchorRegionPosition(mark)
+    func anchorLadderViewPosition(ofMark mark: Mark?) -> CGPoint? {
+        guard let mark = mark else { return nil }
+        let region = ladder.region(ofMark: mark)
+        var anchorPosition = anchorRegionPosition(ofMark: mark)
         anchorPosition = transformToScaledViewPosition(regionPosition: anchorPosition, region: region)
         return anchorPosition
     }
@@ -1800,7 +1795,9 @@ extension LadderView: LadderViewDelegate {
 
     func deleteAttachedMark() {
         os_log("deleteAttachedMark() - LadderView", log: OSLog.debugging, type: .debug)
-        deleteMark(ladder.attachedMark)
+        if let mark = ladder.attachedMark {
+            undoablyDeleteMark(mark: mark)
+        }
     }
 
     func toggleAttachedMarkAnchor() {

@@ -210,11 +210,61 @@ class LadderViewTests: XCTestCase {
         ladderView.ladder.addMark(mark4, toRegion: ladderView.ladder.regions[0])
         closeness = ladderView.assessCloseness(ofMark: mark1, toNeighboringMark: mark4, usingNearbyDistance: 2)
         XCTAssertFalse(closeness)
-
-
-
     }
 
+    func testNearestAnchor() {
+        let mark = Mark(segment: Segment(proximal: CGPoint(x:100, y: 0), distal: CGPoint(x: 150, y: 1)))
+        ladderView.ladder.addMark(mark, toRegion: ladderView.ladder.regions[0])
+        var scaledPosition = ladderView.transformToScaledViewPosition(regionPosition: CGPoint(x: 101, y: 0), region: ladderView.ladder.regions[0])
+        print(scaledPosition)
+        var anchor = ladderView.nearestAnchor(position: scaledPosition, mark: mark)
+        XCTAssertEqual(anchor, .proximal)
+        scaledPosition = ladderView.transformToScaledViewPosition(regionPosition: CGPoint(x: 152, y: 1), region: ladderView.ladder.regions[0])
+        anchor = ladderView.nearestAnchor(position: scaledPosition, mark: mark)
+        XCTAssertEqual(anchor, .distal)
+        scaledPosition = ladderView.transformToScaledViewPosition(regionPosition: CGPoint(x: 125, y: 0.5), region: ladderView.ladder.regions[0])
+        anchor = ladderView.nearestAnchor(position: scaledPosition, mark: mark)
+        XCTAssertEqual(anchor, .middle)
+    }
+
+    func testUndoablyDeleteMark() {
+        let mark = Mark(segment: Segment(proximal: CGPoint(x:100, y: 0), distal: CGPoint(x: 150, y: 1)))
+        ladderView.ladder.addMark(mark, toRegion: ladderView.ladder.regions[0])
+        XCTAssertEqual(ladderView.ladder.regions[0].marks.count, 1)
+        ladderView.undoablyDeleteMark(mark: mark)
+        XCTAssertEqual(ladderView.ladder.regions[0].marks.count, 0)
+        ladderView.redoablyUndeleteMark(mark: mark)
+        XCTAssertEqual(ladderView.ladder.regions[0].marks.count, 1)
+    }
+
+    func testAnchorLadderViewPosition() {
+        let mark = Mark(segment: Segment(proximal: CGPoint(x:100, y: 0), distal: CGPoint(x: 100, y: 1)))
+        ladderView.ladder.addMark(mark, toRegion: ladderView.ladder.regions[0])
+        var anchorPosition = ladderView.anchorLadderViewPosition(ofMark: mark)
+        let scaledMidpoint = ladderView.transformToScaledViewPosition(regionPosition: CGPoint(x: 100, y: 0.5), region: ladderView.ladder.regions[0])
+        XCTAssertEqual(anchorPosition, scaledMidpoint)
+        mark.anchor = .proximal
+        anchorPosition = ladderView.anchorLadderViewPosition(ofMark: mark)
+        let scaledProximalEndpoint = ladderView.transformToScaledViewPosition(regionPosition: CGPoint(x: 100, y: 0), region: ladderView.ladder.regions[0])
+        XCTAssertEqual(anchorPosition, scaledProximalEndpoint)
+        mark.anchor = .distal
+        anchorPosition = ladderView.anchorLadderViewPosition(ofMark: mark)
+        let scaledDistalEndpoint = ladderView.transformToScaledViewPosition(regionPosition: CGPoint(x: 100, y: 1), region: ladderView.ladder.regions[0])
+        XCTAssertEqual(anchorPosition, scaledDistalEndpoint)
+    }
+
+    func testAnchorRegionPosition() {
+        let mark = Mark(segment: Segment(proximal: CGPoint(x:100, y: 0), distal: CGPoint(x: 100, y: 1)))
+        ladderView.ladder.addMark(mark, toRegion: ladderView.ladder.regions[0])
+        var anchorPosition = ladderView.anchorRegionPosition(ofMark: mark)
+        XCTAssertEqual(anchorPosition, CGPoint(x: 100, y: 0.5))
+        mark.anchor = .proximal
+        anchorPosition = ladderView.anchorRegionPosition(ofMark: mark)
+        XCTAssertEqual(anchorPosition, mark.segment.proximal)
+        mark.anchor = .distal
+        anchorPosition = ladderView.anchorRegionPosition(ofMark: mark)
+        XCTAssertEqual(anchorPosition, mark.segment.distal)
+    }
 
 
 }
