@@ -126,10 +126,8 @@ class LadderTests: XCTestCase {
         XCTAssertEqual(Anchor.middle, mark?.anchor)
         ladder.toggleAnchor(mark: mark)
         XCTAssertEqual(Anchor.proximal, mark?.anchor)
-        mark?.anchor = .none
-        XCTAssertEqual(Anchor.none, mark?.anchor)
         ladder.toggleAnchor(mark: mark)
-        XCTAssertEqual(Anchor.middle, mark?.anchor)
+        XCTAssertEqual(Anchor.distal, mark?.anchor)
     }
 
     func testMoveLinkedMarks() {

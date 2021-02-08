@@ -101,8 +101,6 @@ class Mark: Codable {
             anchorPosition = midpoint()
         case .proximal:
             anchorPosition = segment.proximal.clampY()
-        case .none:
-            anchorPosition = segment.proximal.clampY()
         }
         return anchorPosition
     }
@@ -128,8 +126,6 @@ class Mark: Codable {
                 segment.distal.x = position.x - differenceX
             case .distal:
                 segment.distal.x = position.x
-            case .none:
-                break
             }
         }
         else if movement == .omnidirectional {
@@ -146,8 +142,6 @@ class Mark: Codable {
                 segment.distal.y = position.y - differenceY
             case .distal:
                 segment.distal = position
-            case .none:
-                break
             }
         }
     }

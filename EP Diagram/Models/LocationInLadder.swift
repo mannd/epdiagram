@@ -27,7 +27,7 @@ struct LocationInLadder {
     var zone: Zone?
     var regionSection: RegionSection
     var regionDivision: RegionDivision
-    var markAnchor: Anchor
+    var markAnchor: Anchor?
     var unscaledPosition: CGPoint
     var specificLocation: SpecificLocation {
         if mark != nil {
@@ -64,7 +64,7 @@ extension LocationInLadder: CustomDebugStringConvertible {
         regionSection = \(regionSection)
         regionDivision = \(regionDivision)
 
-        markAnchor = \(markAnchor)
+        markAnchor = \(markAnchor.debugDescription)
         unscaledPosition = \(unscaledPosition)
         specificLocation = \(specificLocation)
         """

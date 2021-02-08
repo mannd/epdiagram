@@ -191,12 +191,13 @@ final class CursorView: ScaledView {
 
     // FIXME: When resizing ladder view, anchor position is miscalculated on slanted marks.  Fix may be simply to hide cursor when resizing views.
     func setCursorHeight(anchorPositionY: CGFloat? = nil) {
+        guard let attachedMarkAnchor = getAttachedMarkAnchor() else { return }
         if let anchorPositionY = anchorPositionY {
             let positionY = ladderViewDelegate.getPositionYInView(positionY: anchorPositionY, view: self)
             cursor.markIntersectionPositionY = positionY
         }
         else {
-            let cursorHeight = getCursorHeight(anchor: getAttachedMarkAnchor())
+            let cursorHeight = getCursorHeight(anchor: attachedMarkAnchor)
             cursor.markIntersectionPositionY = cursorHeight ?? 0
         }
     }
@@ -211,7 +212,7 @@ final class CursorView: ScaledView {
         context.strokePath()
     }
 
-    func getAttachedMarkAnchor() -> Anchor {
+    func getAttachedMarkAnchor() -> Anchor? {
         return ladderViewDelegate.getAttachedMarkAnchor()
     }
 
@@ -224,8 +225,6 @@ final class CursorView: ScaledView {
             anchorY = ladderViewDelegate.getRegionMidPoint(view: self)
         case .distal:
             anchorY = ladderViewDelegate.getRegionDistalBoundary(view: self)
-        case .none:
-            anchorY = nil
         }
         return anchorY
     }

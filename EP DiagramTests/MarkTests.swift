@@ -146,12 +146,6 @@ class MarkTests: XCTestCase {
         mark.anchor = .middle
         mark.move(movement: .horizontal, to: CGPoint(x: 100, y: 0))
         XCTAssertEqual(mark.segment, Segment(proximal: CGPoint(x: 100, y: 0), distal: CGPoint(x: 100, y: 0)))
-        mark.anchor = .none // no movement
-        mark.move(movement: .horizontal, to: CGPoint(x: 500, y: 0))
-        XCTAssertEqual(mark.segment, Segment(proximal: CGPoint(x: 100, y: 0), distal: CGPoint(x: 100, y: 0)))
-        mark.anchor = .none
-        mark.move(movement: .omnidirectional, to: CGPoint(x: 800, y: 0))
-        XCTAssertEqual(mark.segment, Segment(proximal: CGPoint(x: 100, y: 0), distal: CGPoint(x: 100, y: 0)))
         mark.anchor = .proximal
         mark.move(movement: .horizontal, to: CGPoint(x: 200, y: 1))
         XCTAssertEqual(mark.segment, Segment(proximal: CGPoint(x: 200, y: 0), distal: CGPoint(x: 100, y: 0)))
@@ -229,9 +223,6 @@ class MarkTests: XCTestCase {
         XCTAssertEqual(mark.getAnchorPosition(), CGPoint(x: 0, y: 1))
         let mark1 = Mark(segment: Segment(proximal: CGPoint(x: 320, y: 0.2), distal: CGPoint(x: 115, y: 0.7)))
         mark1.anchor = .proximal
-        XCTAssertEqual(mark1.getAnchorPosition(), CGPoint(x: 320, y: 0.2))
-        mark1.anchor = .none
-        // For now Anchor.none defaults to same as .proximal.  Might refactor out .none in future.
         XCTAssertEqual(mark1.getAnchorPosition(), CGPoint(x: 320, y: 0.2))
         mark1.anchor = .distal
         XCTAssertEqual(mark1.getAnchorPosition(), CGPoint(x: 115, y: 0.7))

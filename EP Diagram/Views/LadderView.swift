@@ -204,7 +204,7 @@ final class LadderView: ScaledView {
         var tappedMark: Mark?
         var tappedRegionSection: RegionSection = .markSection
         var tappedDivision: RegionDivision = .none
-        var tappedAnchor: Anchor = .none
+        var tappedAnchor: Anchor?
         var tappedZone: Zone?
         for region in ladder.regions {
             if position.y > region.proximalBoundary && position.y < region.distalBoundary {
@@ -459,7 +459,7 @@ final class LadderView: ScaledView {
     ///   - point: a point in ladder view coordinates
     ///   - mark: mark to check for proximity
     ///   - region: region in which mark is located
-    func nearestAnchor(position: CGPoint, mark: Mark) -> Anchor {
+    func nearestAnchor(position: CGPoint, mark: Mark) -> Anchor? {
         let region = ladder.region(ofMark: mark)
         let regionPoint = transformToRegionPosition(scaledViewPosition: position, region: region)
         let proximalDistance = CGPoint.distanceBetweenPoints(mark.segment.proximal, regionPoint)
@@ -476,7 +476,7 @@ final class LadderView: ScaledView {
             return .distal
         }
         else {
-            return .none
+            return nil
         }
     }
 
@@ -493,8 +493,8 @@ final class LadderView: ScaledView {
     }
 
     @available(*, deprecated, message: "Used for setting anchor depending on tap location, not used.")
-    func getAnchor(regionDivision: RegionDivision) -> Anchor {
-        let anchor: Anchor
+    func getAnchor(regionDivision: RegionDivision) -> Anchor? {
+        let anchor: Anchor?
         switch regionDivision {
         case .proximal:
             anchor = .proximal
@@ -503,7 +503,7 @@ final class LadderView: ScaledView {
         case .distal:
             anchor = .distal
         case .none:
-            anchor = .none
+            anchor = nil
         }
         return anchor
     }
@@ -1556,7 +1556,7 @@ protocol LadderViewDelegate: AnyObject {
     func linkNearbyMarks(mark: Mark)
     func moveAttachedMark(position: CGPoint)
     func fixBoundsOfAttachedMark()
-    func getAttachedMarkAnchor() -> Anchor
+    func getAttachedMarkAnchor() -> Anchor?
     func assessBlockAndImpulseOrigin(mark: Mark?)
     func getAttachedMarkScaledAnchorPosition() -> CGPoint?
     func setAttachedMarkAndLinkedMarksModes()
@@ -1591,8 +1591,6 @@ extension LadderView: LadderViewDelegate {
             anchorPosition = mark.midpoint()
         case .distal:
             anchorPosition = mark.segment.distal
-        case .none:
-            anchorPosition = mark.segment.proximal
         }
         return anchorPosition
     }
@@ -1782,8 +1780,8 @@ extension LadderView: LadderViewDelegate {
         return transformToScaledViewPosition(regionPosition: mark.getAnchorPosition(), region: activeRegion)
     }
 
-    func getAttachedMarkAnchor() -> Anchor {
-        guard let attachedMark = ladder.attachedMark else { return .none }
+    func getAttachedMarkAnchor() -> Anchor? {
+        guard let attachedMark = ladder.attachedMark else { return nil }
         return attachedMark.anchor
     }
 
