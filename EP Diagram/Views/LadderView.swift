@@ -838,29 +838,35 @@ final class LadderView: ScaledView {
         var middleMarkIds = MarkIdSet()
         if let proximalRegion = ladder.regionBefore(region: activeRegion) {
             for neighboringMark in proximalRegion.marks {
-                if assessCloseness(ofMark: mark, inRegion: activeRegion, toNeighboringMark: neighboringMark, inNeighboringRegion: proximalRegion, usingNearbyDistance: nearbyDistance) {
+                if assessCloseness(ofMark: mark, toNeighboringMark: neighboringMark, usingNearbyDistance: nearbyDistance) {
                     proximalMarkIds.insert(neighboringMark.id)
                 }
             }
         }
         if let distalRegion = ladder.regionAfter(region: activeRegion) {
             for neighboringMark in distalRegion.marks {
-                if assessCloseness(ofMark: mark, inRegion: activeRegion, toNeighboringMark: neighboringMark, inNeighboringRegion: distalRegion, usingNearbyDistance: nearbyDistance) {
+                if assessCloseness(ofMark: mark, toNeighboringMark: neighboringMark, usingNearbyDistance: nearbyDistance) {
                     distalMarkIds.insert(neighboringMark.id)
                 }
             }
         }
         // check in the same region ("middle region", same as activeRegion)
         for neighboringMark in activeRegion.marks {
-            if assessCloseness(ofMark: mark, inRegion: activeRegion, toNeighboringMark: neighboringMark, inNeighboringRegion: activeRegion, usingNearbyDistance: nearbyDistance) {
+            if assessCloseness(ofMark: mark, toNeighboringMark: neighboringMark, usingNearbyDistance: nearbyDistance) {
                 middleMarkIds.insert(neighboringMark.id)
             }
         }
         return LinkedMarkIDs(proximal: proximalMarkIds, middle: middleMarkIds, distal: distalMarkIds)
     }
 
-    private func assessCloseness(ofMark mark: Mark, inRegion region: Region, toNeighboringMark neighboringMark: Mark, inNeighboringRegion neighboringRegion: Region, usingNearbyDistance nearbyDistance: CGFloat) -> Bool {
+    func assessCloseness(ofMark mark: Mark, toNeighboringMark neighboringMark: Mark, usingNearbyDistance nearbyDistance: CGFloat) -> Bool {
         guard mark != neighboringMark else { return false }
+        let region = ladder.region(ofMark: mark)
+        let neighboringRegion = ladder.region(ofMark: neighboringMark)
+        // parallel marks in the same region are by definition not close
+        if (region == neighboringRegion) && (Geometry.areParallel(mark.segment, neighboringMark.segment)) {
+            return false
+        }
         var isClose = false
         // To get minimum distance between two line segments, must get minimum distances between each segment and each endpoint of the other segment, and take minimum of all those.
         let ladderViewPositionNeighboringMarkSegment = transformToScaledViewSegment(regionSegment: neighboringMark.segment, region: neighboringRegion)
@@ -1486,14 +1492,13 @@ final class LadderView: ScaledView {
     }
 
     func undoablyRemoveRegion(_ region: Region) {
+        assert(ladder.regions.count > Ladder.minRegionCount)
         let originalRegion = region
         let index = ladder.index(ofRegion: originalRegion)!
         currentDocument?.undoManager.registerUndo(withTarget: self) { target in
             target.undoablyAddRegion(region, atIndex: index)
         }
         NotificationCenter.default.post(name: .didUndoableAction, object: nil)
-        // Can't remove last region
-        guard ladder.regions.count > 1 else { return }
         NotificationCenter.default.post(name: .didUndoableAction, object: nil)
         ladder.removeRegion(region)
         initializeRegions()
@@ -1724,6 +1729,7 @@ extension LadderView: LadderViewDelegate {
                     mark.segment.proximal.x = x
                 }
                 // FIXME: This causes unexpected straightening of mark
+                // Should not link vertical marks.  Handle in assessCloseness.50
                 else { // vertical mark
 //                    mark.segment.proximal.x = middleMark.segment.proximal.x
 //                    mark.segment.distal.x = middleMark.segment.proximal.x

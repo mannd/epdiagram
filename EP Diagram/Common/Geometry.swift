@@ -88,9 +88,19 @@ enum Geometry {
         return intersection
     }
 
-    // precondition, keep angle < 90 degrees
     static func rightTriangleBase(withAngle angle: CGFloat, height: CGFloat) -> CGFloat {
+        precondition(angle < 90)     // precondition, keep angle < 90 degrees
         return tan(angle.degreesToRadians) * abs(height)
+    }
+
+    static func areParallel(_ s1: Segment, _ s2: Segment) -> Bool {
+        // exclude situation of vertical segments
+        if s1.proximal.x == s1.distal.x {
+            return s2.proximal.x == s2.distal.x ? true : false
+        }
+        let a1 = (s1.proximal.y - s1.distal.y) / (s1.proximal.x - s1.distal.x)
+        let a2 = (s2.proximal.y - s2.distal.y) / (s2.proximal.x - s2.distal.x)
+        return a1 == a2
     }
 }
 

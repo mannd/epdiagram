@@ -189,5 +189,32 @@ class LadderViewTests: XCTestCase {
         XCTAssertEqual(cursorView.isNearCursor(positionX: 100, accuracy: 0.001), true)
     }
 
+    func testAssessCloseness() {
+        let mark1 = Mark(positionX: 10)
+        let mark2 = Mark(positionX: 15)
+        ladderView.ladder.addMark(mark1, toRegion: ladderView.ladder.regions[0])
+        ladderView.ladder.addMark(mark2, toRegion: ladderView.ladder.regions[1])
+        var closeness = ladderView.assessCloseness(ofMark: mark1, toNeighboringMark: mark2, usingNearbyDistance: 4.9)
+        XCTAssertFalse(closeness)
+        closeness = ladderView.assessCloseness(ofMark: mark1, toNeighboringMark: mark2, usingNearbyDistance: 5.1)
+        XCTAssertTrue(closeness)
+        // a mark can't be assessed as close to itself
+        XCTAssertFalse(ladderView.assessCloseness(ofMark: mark1, toNeighboringMark: mark1, usingNearbyDistance: 0))
+        // test closeness of marks in same region
+        let mark3 = Mark(segment: Segment(proximal: CGPoint(x: 12, y: 0), distal: CGPoint(x: 22, y: 0.5)))
+        ladderView.ladder.addMark(mark3, toRegion: ladderView.ladder.regions[0])
+        closeness = ladderView.assessCloseness(ofMark: mark1, toNeighboringMark: mark3, usingNearbyDistance: 3)
+        XCTAssertTrue(closeness)
+        // Parallel marks in same region should not link, so reject closeness
+        let mark4 = Mark(positionX: 11)
+        ladderView.ladder.addMark(mark4, toRegion: ladderView.ladder.regions[0])
+        closeness = ladderView.assessCloseness(ofMark: mark1, toNeighboringMark: mark4, usingNearbyDistance: 2)
+        XCTAssertFalse(closeness)
+
+
+
+    }
+
+
 
 }

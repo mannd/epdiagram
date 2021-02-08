@@ -58,4 +58,22 @@ class MathTests: XCTestCase {
 //        XCTAssertTrue(Common.distance(fromSegment: s4, toSegment: s5) == 0, "segments intersect")
     }
 
+    func testParallelSegments() {
+        let s1 = Segment(proximal: CGPoint(x: 100, y: 100), distal: CGPoint(x: 100, y: 100))
+        XCTAssertTrue(Geometry.areParallel(s1, s1))
+        let s2 = Segment(proximal: CGPoint(x: 200, y: 100), distal: CGPoint(x: 200, y: 50))
+        XCTAssertTrue(Geometry.areParallel(s1, s2))
+        let s3 = Segment(proximal: CGPoint(x: 200, y: 100), distal: CGPoint(x: 201, y: 50))
+        XCTAssertFalse(Geometry.areParallel(s1, s3))
+        let s4 = Segment(proximal: CGPoint(x: 100, y: 50), distal: CGPoint(x: 150, y: 100))
+        let s5 = Segment(proximal: CGPoint(x: 110, y: 50), distal: CGPoint(x: 160, y: 100))
+        XCTAssertTrue(Geometry.areParallel(s4, s5))
+        let s6 = Segment(proximal: CGPoint(x: 110, y: 50), distal: CGPoint(x: 160.1, y: 100))
+        XCTAssertFalse(Geometry.areParallel(s4, s6))
+
+
+
+
+    }
+
 }
