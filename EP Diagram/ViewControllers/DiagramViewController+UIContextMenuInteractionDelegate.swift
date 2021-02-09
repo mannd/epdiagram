@@ -66,7 +66,7 @@ extension DiagramViewController: UIContextMenuInteractionDelegate {
     // This is called with each drag.
     func contextMenuInteraction(_ interaction: UIContextMenuInteraction, willEndFor configuration: UIContextMenuConfiguration, animator: UIContextMenuInteractionAnimating?) {
         animator?.addCompletion {
-            guard self.menuAppeared else { return }
+            guard self.menuAppeared, !self.prolongSelectState else { return }
             self.ladderView.restoreState()
             self.menuAppeared = false
         }

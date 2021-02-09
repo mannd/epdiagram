@@ -24,11 +24,11 @@ final class CursorView: ScaledView {
 
     private var caliper: Caliper = Caliper()
     private var draggedComponent: Caliper.Component?
-    var caliperMaxY: CGFloat = 0 {
-        didSet {
-            caliper.maxY = caliperMaxY
-        }
-    }
+//    var caliperMaxY: CGFloat = 0 {
+//        didSet {
+//            caliper.maxY = caliperMaxY
+//        }
+//    }
 
     var calFactor: CGFloat {
         get {
@@ -191,20 +191,20 @@ final class CursorView: ScaledView {
 
     // FIXME: When resizing ladder view, anchor position is miscalculated on slanted marks.  Fix may be simply to hide cursor when resizing views.
     func setCursorHeight(anchorPositionY: CGFloat? = nil) {
-        guard let attachedMarkAnchor = getAttachedMarkAnchor() else { return }
+        guard let anchor = attachedMarkAnchor() else { return }
         if let anchorPositionY = anchorPositionY {
             let positionY = ladderViewDelegate.getPositionYInView(positionY: anchorPositionY, view: self)
             cursor.markIntersectionPositionY = positionY
         }
         else {
-            let cursorHeight = getCursorHeight(anchor: attachedMarkAnchor)
+            let cursorHeight = getCursorHeight(anchor: anchor)
             cursor.markIntersectionPositionY = cursorHeight ?? 0
         }
     }
 
-    func setCaliperMaxY(_ maxY: CGFloat) {
-        caliperMaxY = maxY
-    }
+//    func setCaliperMaxY(_ maxY: CGFloat) {
+//        caliperMaxY = maxY
+//    }
 
     // Add tiny circle around intersection of cursor and mark.
     private func drawCircle(context: CGContext, center: CGPoint, radius: CGFloat) {
@@ -212,11 +212,11 @@ final class CursorView: ScaledView {
         context.strokePath()
     }
 
-    func getAttachedMarkAnchor() -> Anchor? {
-        return ladderViewDelegate.getAttachedMarkAnchor()
+    func attachedMarkAnchor() -> Anchor? {
+        return ladderViewDelegate.attachedMarkAnchor()
     }
 
-    private func getAnchorPositionY(_ anchor: Anchor, _ ladderViewDelegate: LadderViewDelegate) -> CGFloat? {
+    private func anchorPositionY(_ anchor: Anchor, _ ladderViewDelegate: LadderViewDelegate) -> CGFloat? {
         let anchorY: CGFloat?
         switch anchor {
         case .proximal:
@@ -230,7 +230,7 @@ final class CursorView: ScaledView {
     }
 
     private func getCursorHeight(anchor: Anchor) -> CGFloat? {
-        return getAnchorPositionY(anchor, ladderViewDelegate)
+        return anchorPositionY(anchor, ladderViewDelegate)
     }
 
     // MARK: - touches
@@ -386,11 +386,12 @@ final class CursorView: ScaledView {
 
 protocol CursorViewDelegate: AnyObject {
     var cursorIsVisible: Bool { get set }
+    var caliperMaxY: CGFloat { get set }
+       
 
     func refresh()
     func moveCursor(cursorViewPositionX positionX: CGFloat)
     func setCursorHeight(anchorPositionY: CGFloat?)
-    func setCaliperMaxY(_ maxY: CGFloat)
     func cursorMovement() -> Movement
     func isCalibrated() -> Bool
     func setIsCalibrated(_ value: Bool)
@@ -408,9 +409,15 @@ extension CursorViewDelegate {
 // MARK: - CursorViewDelegate implementation
 
 extension CursorView: CursorViewDelegate {
+
     var cursorIsVisible: Bool {
         get { cursor.visible }
         set(newValue) { cursor.visible = newValue }
+    }
+
+    var caliperMaxY: CGFloat {
+        get { caliper.maxY ?? 0 }
+        set(newValue) { caliper.maxY = newValue}
     }
 
     func refresh() {

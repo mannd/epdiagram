@@ -84,6 +84,8 @@ final class DiagramViewController: UIViewController {
     private let minZoom: CGFloat = 0.2
     let pdfScaleFactor: CGFloat = 5.0
 
+    var prolongSelectState = false // used to allow menus like slant to complete actions on selected marks
+    var slantEndpoint: Mark.Endpoint = .proximal
     // Context menu actions
     lazy var deleteAction = UIAction(title: L("Delete selected mark(s)"), image: UIImage(systemName: "trash"), attributes: .destructive) { action in
         self.ladderView.deleteSelectedMarks()
@@ -128,10 +130,12 @@ final class DiagramViewController: UIViewController {
     lazy var regionStyleMenu = UIMenu(title: L("Default region style..."), children: [self.regionSolidStyleAction, self.regionDashedStyleAction, self.regionDottedStyleAction, self.regionInheritedStyleAction])
 
     lazy var slantProximalPivotAction = UIAction(title: L("Slant proximal pivot point")) { action in
+        self.slantEndpoint = .proximal
         self.showSlantMenu()
     }
     lazy var slantDistalPivotAction = UIAction(title: L("Slant distal pivot point")) { action in
-
+        self.slantEndpoint = .distal
+        self.showSlantMenu()
     }
 
     lazy var oneRegionHeightAction = UIAction(title: L("1 unit")) { action in
@@ -443,6 +447,8 @@ override func viewDidLoad() {
     // FIXME: can't single tap on mark in ladder after finished with context menu.
     func showSlantMenu() {
         guard let toolbar = navigationController?.toolbar else { return }
+        currentDocument?.undoManager.beginUndoGrouping()
+        prolongSelectState = true
         let slider = UISlider()
         slider.minimumValue = -45
         slider.maximumValue = 45
@@ -469,13 +475,18 @@ override func viewDidLoad() {
     }
   
     @objc func closeAngleMenu(_ sender: UIAlertAction) {
+        currentDocument?.undoManager.endUndoGrouping()
         hideCursorAndNormalizeAllMarks()
+        prolongSelectState = false
+        ladderView.restoreState()
         showMainMenu()
     }
 
     @objc func sliderValueDidChange(_ sender: UISlider!) {
         let value: CGFloat = CGFloat(sender.value)
-        ladderView.slantSelectedMarks(angle: value)
+
+        ladderView.slantSelectedMarks(angle: value, endpoint: slantEndpoint)
+
         ladderView.refresh()
     }
 

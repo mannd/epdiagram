@@ -68,6 +68,10 @@ final class LadderView: ScaledView {
         get { ladder.activeRegion }
         set(newValue) { ladder.activeRegion = newValue }
     }
+    var caliperMaxY: CGFloat {
+        get { cursorViewDelegate.caliperMaxY }
+        set(newValue) { cursorViewDelegate.caliperMaxY = newValue }
+    }
     private var movingMark: Mark?
     private var regionOfDragOrigin: Region?
     private var regionProximalToDragOrigin: Region?
@@ -1316,17 +1320,11 @@ final class LadderView: ScaledView {
         }
     }
 
-
-
     func resetSize() {
         os_log("resetSize() - LadderView", log: .action, type: .info)
         ladderViewHeight = self.frame.height
         initializeRegions()
         cursorViewDelegate.setCursorHeight()
-    }
-
-    func setCaliperMaxY(_ maxY: CGFloat) {
-        cursorViewDelegate.setCaliperMaxY(maxY)
     }
 
     @objc func deleteSelectedMarks() {
@@ -1398,11 +1396,6 @@ final class LadderView: ScaledView {
         mark.linkedMarkIDs = LinkedMarkIDs()
     }
 
-    func slantMark() {
-        let selectedMarks = ladder.allMarksWithMode(.selected)
-        selectedMarks.forEach { mark in self.slantMark(angle: 2, mark: mark, region: ladder.regions[mark.regionIndex]) }
-    }
-
     // FIXME: cursor malpositioned after straightening.
     func straightenToEndpoint(_ endpoint: Mark.Endpoint) {
         let selectedMarks = ladder.allMarksWithMode(.selected)
@@ -1425,22 +1418,32 @@ final class LadderView: ScaledView {
         currentDocument?.undoManager.endUndoGrouping()
     }
 
-    @objc func slantSelectedMarks(angle: CGFloat) {
+    func slantSelectedMarks(angle: CGFloat, endpoint: Mark.Endpoint) {
         let selectedMarks = ladder.allMarksWithMode(.selected)
-        selectedMarks.forEach { mark in slantMark(angle: angle, mark: mark, region: ladder.regions[mark.regionIndex]) }
+        selectedMarks.forEach { mark in
+            let originalSegment = mark.segment
+            currentDocument?.undoManager.registerUndo(withTarget: self, handler: { target in
+                self.setSegment(segment: originalSegment, forMark: mark)
+            })
+            NotificationCenter.default.post(name: .didUndoableAction, object: nil)
+            slantMark(angle: angle, mark: mark, endpoint: endpoint)
+        }
     }
 
-    func slantMark(angle: CGFloat, mark: Mark, region: Region) {
+    func slantMark(angle: CGFloat, mark: Mark, endpoint: Mark.Endpoint = .proximal) {
+        let region = ladder.region(ofMark: mark)
         let segment = transformToScaledViewSegment(regionSegment: mark.segment, region: region)
         let height = segment.distal.y - segment.proximal.y
         let delta = Geometry.rightTriangleBase(withAngle: angle, height: height)
         // We add delta to proximal x, not distal x, because we always start with a vertical mark.
-        let newSegment = Segment(proximal: segment.proximal, distal: CGPoint(x: segment.proximal.x + delta, y: segment.distal.y))
+        let newSegment: Segment
+        switch endpoint {
+        case .proximal:
+            newSegment = Segment(proximal: segment.proximal, distal: CGPoint(x: segment.proximal.x + delta, y: segment.distal.y))
+        case .distal:
+            newSegment = Segment(proximal: CGPoint(x: segment.distal.x + delta, y: segment.proximal.y), distal: segment.distal)
+        }
         mark.segment = transformToRegionSegment(scaledViewSegment: newSegment, region: region)
-    }
-
-    func getMarkSlantAngle(mark: Mark, region: Region) -> CGFloat {
-        return 0
     }
 
     private func setSegment(segment: Segment, forMark mark: Mark) {
@@ -1556,7 +1559,7 @@ protocol LadderViewDelegate: AnyObject {
     func linkNearbyMarks(mark: Mark)
     func moveAttachedMark(position: CGPoint)
     func fixBoundsOfAttachedMark()
-    func getAttachedMarkAnchor() -> Anchor?
+    func attachedMarkAnchor() -> Anchor?
     func assessBlockAndImpulseOrigin(mark: Mark?)
     func getAttachedMarkScaledAnchorPosition() -> CGPoint?
     func setAttachedMarkAndLinkedMarksModes()
@@ -1780,7 +1783,7 @@ extension LadderView: LadderViewDelegate {
         return transformToScaledViewPosition(regionPosition: mark.getAnchorPosition(), region: activeRegion)
     }
 
-    func getAttachedMarkAnchor() -> Anchor? {
+    func attachedMarkAnchor() -> Anchor? {
         guard let attachedMark = ladder.attachedMark else { return nil }
         return attachedMark.anchor
     }

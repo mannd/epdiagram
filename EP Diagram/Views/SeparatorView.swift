@@ -101,7 +101,7 @@ class SeparatorView: UIView {
         let ladderView = secondaryView as? LadderView
         let caliperMaxY = primaryView.frame.height
         ladderView?.resetSize()
-        ladderView?.setCaliperMaxY(caliperMaxY)
+        ladderView?.caliperMaxY = caliperMaxY
         ladderView?.refresh()
 //        cursorViewDelegate?.refresh()
     }
