@@ -137,6 +137,7 @@ final class DiagramViewController: UIViewController {
         self.slantEndpoint = .distal
         self.showSlantMenu()
     }
+    lazy var slantMenu = UIMenu(title: L("Slant mark(s)..."), image: UIImage(systemName: "line.diagonal"), children: [self.slantProximalPivotAction, self.slantDistalPivotAction])
 
     lazy var oneRegionHeightAction = UIAction(title: L("1 unit")) { action in
         guard let selectedRegion = self.ladderView.selectedRegion() else { return }
@@ -156,7 +157,7 @@ final class DiagramViewController: UIViewController {
     }
     lazy var regionHeightMenu = UIMenu(title: L("Region height..."), image: UIImage(systemName: "arrow.up.arrow.down.square"), children: [self.oneRegionHeightAction, self.twoRegionHeightAction, self.threeRegionHeightAction, self.fourRegionHeightAction])
 
-    lazy var slantMenu = UIMenu(title: L("Slant mark(s)..."), image: UIImage(systemName: "line.diagonal"), children: [self.slantProximalPivotAction, self.slantDistalPivotAction])
+
     lazy var unlinkAction = UIAction(title: L("Unlink"), image: UIImage(systemName: "link")) { action in
         self.ladderView.unlinkSelectedMarks()
     }
@@ -502,6 +503,8 @@ override func viewDidLoad() {
         hideCursorAndNormalizeAllMarks()
         ladderView.normalizeRegions()
         setMode(.select)
+        // FIXME: This approximates what we want, but is redundant.  Refine.
+        ladderView.saveState()
         ladderView.startZoning()
         setViewsNeedDisplay()
     }
@@ -648,9 +651,11 @@ override func viewDidLoad() {
         os_log("cancelSelect()", log: OSLog.action, type: .info)
         showMainMenu()
         setMode(.normal)
-        ladderView.endZoning()
-        ladderView.normalizeAllMarks()
-        ladderView.setNeedsDisplay()
+        // FIXME: This doesn't restore state
+        ladderView.restoreState()
+//        ladderView.endZoning()
+//        ladderView.normalizeAllMarks()
+//        ladderView.setNeedsDisplay()
     }
 
     @objc func cancelConnectMode() {
@@ -726,7 +731,7 @@ override func viewDidLoad() {
             return
         }
         if ladderView.mode == .select {
-            ladderView.zone = Zone()
+            ladderView.endZoning()
             ladderView.normalizeAllMarks()
             ladderView.setNeedsDisplay()
         }

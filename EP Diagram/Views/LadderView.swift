@@ -280,7 +280,7 @@ final class LadderView: ScaledView {
             else { // make mark and attach cursor
                 let mark = addMarkToActiveRegion(scaledViewPositionX: positionX)
                 if let mark = mark {
-                    undoablyAddMark(mark: mark, region: tappedRegion)
+                    undoablyAddMark(mark: mark)
                     normalizeAllMarks()
                     mark.anchor = ladder.defaultAnchor(forMark: mark)
                     attachMark(mark)
@@ -324,7 +324,7 @@ final class LadderView: ScaledView {
                 let markRegion = ladder.region(atIndex: firstRegionIndex + 1)
                 let segment = Segment(proximal: CGPoint(x: marks[0].segment.distal.x, y: 0), distal: CGPoint(x: marks[1].segment.proximal.x, y: 1.0))
                 if let mark = ladder.addMark(fromSegment: segment, toRegion: markRegion) {
-                    undoablyAddMark(mark: mark, region: markRegion)
+                    undoablyAddMark(mark: mark)
                     return mark
                 }
             }
@@ -333,7 +333,7 @@ final class LadderView: ScaledView {
                 let markRegion = ladder.region(atIndex: firstRegionIndex - 1)
                 let segment = Segment(proximal: CGPoint(x: marks[1].segment.distal.x, y: 0), distal: CGPoint(x: marks[0].segment.proximal.x, y: 1.0))
                 if let mark = ladder.addMark(fromSegment: segment, toRegion: markRegion) {
-                    undoablyAddMark(mark: mark, region: markRegion)
+                    undoablyAddMark(mark: mark)
                     return mark
                 }
             }
@@ -404,7 +404,7 @@ final class LadderView: ScaledView {
                     newMark.segment.distal = tapRegionPosition
                     newMark.mode = .connected
                     ladder.connectedMarks.append(newMark)
-                    undoablyAddMark(mark: newMark, region: region)
+                    undoablyAddMark(mark: newMark)
                 }
             }
             else if firstTappedMarkRegionIndex > regionIndex {
@@ -413,7 +413,7 @@ final class LadderView: ScaledView {
                     newMark.segment.proximal = tapRegionPosition
                     newMark.mode = .connected
                     ladder.connectedMarks.append(newMark)
-                    undoablyAddMark(mark: newMark, region: region)
+                    undoablyAddMark(mark: newMark)
                 }
             }
             // FIXME: what do do if something illegal tapped (same mark, illegal region).  Remove connected marks?
@@ -562,7 +562,7 @@ final class LadderView: ScaledView {
             let scaledPositionX = transformToRegionPositionX(scaledViewPositionX: tapLocationInLadder.unscaledPosition.x)
             if let mark = ladder.addMark(at: scaledPositionX, toRegion: region) {
                 normalizeAllMarks()
-                undoablyAddMark(mark: mark, region: region)
+                undoablyAddMark(mark: mark)
                 attachMark(mark)
                 cursorViewDelegate.moveCursor(cursorViewPositionX: scaledPositionX)
                 cursorViewDelegate.cursorIsVisible = true
@@ -585,16 +585,15 @@ final class LadderView: ScaledView {
 
     func redoablyUndeleteMark(mark: Mark) {
         os_log("redoablyUndeleteMark(mark:region:) - LadderView", log: OSLog.debugging, type: .debug)
-        let region = ladder.region(ofMark: mark)
         currentDocument?.undoManager?.registerUndo(withTarget: self, handler: { target in
             target.undoablyDeleteMark(mark: mark)
         })
         NotificationCenter.default.post(name: .didUndoableAction, object: nil)
-        undeleteMark(mark: mark, region: region)
+        undeleteMark(mark: mark)
     }
 
-    private func undoablyAddMark(mark: Mark, region: Region?) {
-        os_log("undoablyAddMark(mark:region:) - LadderView", log: OSLog.debugging, type: .debug)
+    private func undoablyAddMark(mark: Mark) {
+        os_log("undoablyAddMark(mark:) - LadderView", log: OSLog.debugging, type: .debug)
         currentDocument?.undoManager?.registerUndo(withTarget: self, handler: { target in
             target.undoablyDeleteMark(mark: mark)
         })
@@ -610,12 +609,11 @@ final class LadderView: ScaledView {
         cursorViewDelegate.refresh()
     }
 
-    private func undeleteMark(mark: Mark, region: Region?) {
-        os_log("undeleteMark(mark:region:) - LadderView", log: OSLog.debugging, type: .debug)
-        if let region = region {
-            ladder.addMark(mark, toRegion: region)
-            mark.mode = .normal
-        }
+    private func undeleteMark(mark: Mark) {
+        os_log("undeleteMark(mark:) - LadderView", log: OSLog.debugging, type: .debug)
+        let region = ladder.region(ofMark: mark)
+        ladder.addMark(mark, toRegion: region)
+        mark.mode = .normal
         hideCursorAndNormalizeAllMarks()
         cursorViewDelegate.refresh()
     }
@@ -667,7 +665,7 @@ final class LadderView: ScaledView {
                         assert(false, "Making a mark with a .none regionDivision!")
                     }
                     if let dragCreatedMark = dragCreatedMark {
-                        undoablyAddMark(mark: dragCreatedMark, region: activeRegion)
+                        undoablyAddMark(mark: dragCreatedMark)
                     }
                     dragCreatedMark?.mode = .attached
                 }
@@ -742,23 +740,23 @@ final class LadderView: ScaledView {
         let state = pan.state
         let regionPositionX = transformToRegionPositionX(scaledViewPositionX: position.x)
         let locationInLadder = getLocationInLadder(position: position)
-        guard locationInLadder.specificLocation == .region else { return }
+        guard let region = locationInLadder.region else { return }
         if state == .began {
-            guard let region = locationInLadder.region else { return }
             zone = Zone()
-            zone.regions.append(region)
+            zone.startingRegion = region
+            zone.regions.insert(region)
             zone.start = regionPositionX
             zone.end = regionPositionX
         }
         if state == .changed {
-            guard let region = locationInLadder.region else { return }
-            if (zone.regions.firstIndex(of: region) == nil) {
-                zone.regions.append(region)
+            if !zone.regions.contains(region) {
+                self.zone.regions.insert(region)
             }
             zone.end = regionPositionX
             selectInZone()
         }
         if state == .ended {
+            selectInZone()
         }
         setNeedsDisplay()
     }
@@ -991,7 +989,7 @@ final class LadderView: ScaledView {
     }
 
     fileprivate func drawZone(context: CGContext) {
-        let start =  transformToScaledViewPositionX(regionPositionX: zone.start)
+        let start = transformToScaledViewPositionX(regionPositionX: zone.start)
         let end = transformToScaledViewPositionX(regionPositionX: zone.end)
         for region in zone.regions {
             let zoneRect = CGRect(x: start, y: region.proximalBoundary, width: end - start, height: region.distalBoundary - region.proximalBoundary)
@@ -1641,7 +1639,7 @@ extension LadderView: LadderViewDelegate {
     func addAttachedMark(scaledViewPositionX positionX: CGFloat) {
         ladder.attachedMark = ladder.addMark(at: positionX / scale, toRegion: activeRegion)
         if let attachedMark = ladder.attachedMark {
-            undoablyAddMark(mark: attachedMark, region: activeRegion)
+            undoablyAddMark(mark: attachedMark)
             attachedMark.mode = .attached
         }
     }
@@ -1814,16 +1812,19 @@ extension LadderView: LadderViewDelegate {
         activeRegion = nil
         savedAttachedMark = ladder.attachedMark
         ladder.normalizeAllMarks()
-
         setNeedsDisplay()
     }
 
     func restoreState() {
         os_log("restoreState() - LadderView", log: .default, type: .default)
-        ladder.normalizeAllMarks()
-        activeRegion = savedActiveRegion
-        ladder.attachedMark = savedAttachedMark
-        attachMark(savedAttachedMark)
-        setNeedsDisplay()
+        // FIXME: this isn't right.  Need to do this on return to normal state.
+        if mode == .normal {
+            ladder.normalizeAllMarks()
+            ladder.zone = Zone()
+            activeRegion = savedActiveRegion
+            ladder.attachedMark = savedAttachedMark
+            attachMark(savedAttachedMark)
+            setNeedsDisplay()
+        }
     }
 }

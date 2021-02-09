@@ -21,17 +21,16 @@ extension DiagramViewController: UIContextMenuInteractionDelegate {
             case .mark:
                 if let location = self.menuPressLocation {
                     self.ladderView.setSelectedMark(position: location)
-//                    self.ladderView.refresh()
                 }
+                // TODO: Can you select multiple regions in Select mode?
             case .region, .label:
                 if let region = locationInLadder.region {
-                    self.ladderView.ladder.zone = Zone() // hide zone
+//                    self.ladderView.ladder.zone = Zone() // hide zone
                     self.ladderView.ladder.setMarksWithMode(.selected, inRegion: region)
                     region.mode = .selected
                 }
             case .zone:
-                // zoning selects marks automatically
-                break
+                self.ladderView.selectInZone()
             case .ladder:
                 self.ladderView.ladder.setAllMarksWithMode(.selected)
                 for region in self.ladderView.ladder.regions {
@@ -95,7 +94,10 @@ extension DiagramViewController: UIContextMenuInteractionDelegate {
 
     func zoneContextMenuConfiguration(at location: CGPoint) -> UIContextMenuConfiguration {
         print("zone selected")
-        return UIContextMenuConfiguration()
+        return UIContextMenuConfiguration(identifier: nil, previewProvider: nil) { suggestedActions in
+        return UIMenu(title: L("Zone"), children: [self.styleMenu, self.straightenMenu, self.slantMenu, self.editLabelAction, self.addRegionMenu, self.removeRegionAction, self.regionHeightMenu, self.rhythmAction, self.deleteAllInRegion])
+        }
+
     }
 
     func ladderContextMenuConfiguration(at location: CGPoint) -> UIContextMenuConfiguration {

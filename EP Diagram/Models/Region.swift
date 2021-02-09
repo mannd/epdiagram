@@ -88,6 +88,13 @@ extension Region {
     }
 }
 
+extension Region: Hashable {
+    func hash(into hasher: inout Hasher) {
+        hasher.combine(id)
+    }
+}
+
+
 // MARK: - enums
 
 // The two parts of a region.
