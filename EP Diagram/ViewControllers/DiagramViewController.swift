@@ -470,8 +470,11 @@ override func viewDidLoad() {
     func editLabel() {
         print("edit label")
         guard let selectedRegion = ladderView.selectedRegion() else { return }
-        UserAlert.showTextAlert(viewController: self, title: L("Edit Label"), message: L("Enter new label text for \"\(selectedRegion.name).\""), defaultText: selectedRegion.name, preferredStyle: .alert, handler: { newLabel in
-            self.ladderView.undoablySetLabel(newLabel, forRegion: selectedRegion)
+//        UserAlert.showTextAlert(viewController: self, title: L("Edit Label"), message: L("Enter new label text for \"\(selectedRegion.name).\""), defaultText: selectedRegion.name, preferredStyle: .alert, handler: { newLabel in
+//            self.ladderView.undoablySetLabel(newLabel, forRegion: selectedRegion)
+//        })
+        UserAlert.showNameRegionAlert(viewController: self, region: selectedRegion, handler: { newLabel, newDescription in
+            self.ladderView.undoablySetLabel(newLabel, description: newDescription, forRegion: selectedRegion)
         })
     }
   

@@ -77,4 +77,28 @@ enum UserAlert {
         vc.present(alert, animated: true)
     }
 
+    static func showNameRegionAlert(viewController vc: UIViewController, region: Region, handler: ((String, String) -> Void)?) {
+        let alert = UIAlertController(title: L("Name Region"), message: L("Give a name and optional description to this region"), preferredStyle: .alert)
+        alert.addAction(UIAlertAction(title: L("Cancel"), style: .cancel, handler: nil))
+        alert.addTextField { textField in
+            textField.placeholder = L("Diagram name")
+            textField.text = region.name
+        }
+        alert.addTextField { textField in
+            textField.placeholder = L("Diagram description")
+            textField.text = region.longDescription
+        }
+        alert.addAction(UIAlertAction(title: L("Save"), style: .default) { action in
+            if let name = alert.textFields?.first?.text, let description = alert.textFields?[1].text {
+                if let handler = handler {
+                    handler(name, description)
+                }
+                else {
+                    P("name = \(name), description = \(description)")
+                }
+            }
+        })
+        vc.present(alert, animated: true)
+    }
+
 }

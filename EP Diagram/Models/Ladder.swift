@@ -34,7 +34,7 @@ class Ladder: NSObject, Codable {
             activeRegion.mode = .active
         }
     }
-    var zone: Zone = Zone() // at most one selection zone, which may be invisible.
+    var zone: Zone = Zone() // at most one selection zone
     override var debugDescription: String { "Ladder ID " + id.debugDescription }
     private var registry: [UUID: Mark] = [:] // marks are registered for quick lookup
 

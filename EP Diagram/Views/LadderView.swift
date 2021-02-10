@@ -1453,13 +1453,15 @@ final class LadderView: ScaledView {
         mark.segment = segment
     }
 
-    func undoablySetLabel(_ label: String, forRegion region: Region) {
+    func undoablySetLabel(_ label: String, description: String, forRegion region: Region) {
         let originalName = region.name
+        let originalDescription = region.longDescription
         currentDocument?.undoManager.registerUndo(withTarget: self) { target in
-            target.undoablySetLabel(originalName, forRegion: region)
+            target.undoablySetLabel(originalName, description: originalDescription, forRegion: region)
         }
         NotificationCenter.default.post(name: .didUndoableAction, object: nil)
         region.name = label
+        region.longDescription = description
         setNeedsDisplay()
     }
 
