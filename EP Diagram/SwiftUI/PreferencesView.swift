@@ -18,16 +18,25 @@ struct PreferencesView: View {
     @AppStorage(Preferences.defaultSnapMarksKey) var snapMarks: Bool = Preferences.snapMarks
     @AppStorage(Preferences.defaultMarkStyleKey) var markStyle = Preferences.markStyle
     @AppStorage(Preferences.defaultShowLabelDescriptionKey) var showLabelDescription = Preferences.showLabelDescription
+    @AppStorage(Preferences.defaultLeftMarginKey) var leftMargin = Preferences.leftMargin
 
     @Environment(\.presentationMode) private var presentationMode: Binding<PresentationMode>
 
     var body: some View {
         NavigationView {
-            VStack{
+            VStack {
                 Form {
                     Section(header: Text("Region preferences")) {
                         Toggle(isOn: $showLabelDescription) {
                             Text("Show label description")
+                        }
+                        HStack {
+                            Text("Left margin \(Int(leftMargin))")
+                            Spacer(minLength: 50)
+                            Slider(value: $leftMargin,
+                                   in: 30...100,
+                                   step: 5
+                            )
                         }
                     }
                     Section(header: Text("Mark preferences")) {

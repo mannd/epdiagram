@@ -26,7 +26,7 @@ final class DiagramViewController: UIViewController {
 
     // TODO: Possibly change this to property of ladder, since it might depend on label width (# of chars)?
     // This margin is passed to other views.
-    let leftMargin: CGFloat = 50
+    var leftMargin: CGFloat = 50
 
     // Buttons, menus
     private let spacer = UIBarButtonItem(barButtonSystemItem: .flexibleSpace, target: nil, action: nil)
@@ -1044,6 +1044,10 @@ extension DiagramViewController {
         ladderView.snapMarks = UserDefaults.standard.bool(forKey: Preferences.defaultSnapMarksKey)
         ladderView.defaultMarkStyle = Mark.Style(rawValue: UserDefaults.standard.integer(forKey: Preferences.defaultMarkStyleKey)) ?? .solid
         ladderView.showLabelDescription = UserDefaults.standard.bool(forKey: Preferences.defaultShowLabelDescriptionKey)
+        leftMargin = CGFloat(UserDefaults.standard.double(forKey: Preferences.defaultLeftMarginKey))
+        ladderView.leftMargin = leftMargin
+        cursorView.leftMargin = leftMargin
+        imageScrollView.leftMargin = leftMargin
     }
 
     @objc func resolveFileConflicts() {

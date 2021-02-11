@@ -21,6 +21,7 @@ struct Preferences {
     static let defaultLinkMarksKey = "defaultLinkMarksKey"
     static let defaultMarkStyleKey = "defaultMarkStyleKey"
     static let defaultShowLabelDescriptionKey = "defaultShowLabelDescriptionKey"
+    static let defaultLeftMarginKey = "defaultLeftMarginKey"
 
     // Stored as Int, converted to CGFloat when used.
     static var lineWidth: Int = 2
@@ -32,6 +33,7 @@ struct Preferences {
     static var snapMarks = true
     static var markStyle = Mark.Style.solid.rawValue
     static var showLabelDescription = false
+    static var leftMargin: Double = 50
 
     // TODO: Update when new prefs added.
     static func defaults() -> [String: Any] {
@@ -45,6 +47,7 @@ struct Preferences {
             Preferences.defaultSnapMarksKey: Preferences.snapMarks,
             Preferences.defaultMarkStyleKey: Preferences.markStyle,
             Preferences.defaultShowLabelDescriptionKey: Preferences.showLabelDescription,
+            Preferences.defaultLeftMarginKey: Preferences.leftMargin,
         ]
         return defaultPreferences
     }

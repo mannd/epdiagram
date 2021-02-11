@@ -619,7 +619,6 @@ final class LadderView: ScaledView {
         cursorViewDelegate.refresh()
     }
 
-
     fileprivate func normalModeDrag(_ pan: UIPanGestureRecognizer) {
         let position = pan.location(in: self)
         let state = pan.state
@@ -1025,7 +1024,7 @@ final class LadderView: ScaledView {
         context.drawPath(using: .fillStroke)
         labelText.draw(in: labelRect)
 
-        // FIXME: add preference to show description
+        // FIXME: Raise up label a bit to allow room for description
         if showLabelDescription {
             let descriptionAttributes: [NSAttributedString.Key: Any] = [
                 .paragraphStyle: paragraphStyle,
