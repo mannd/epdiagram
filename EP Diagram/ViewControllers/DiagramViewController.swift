@@ -1043,6 +1043,7 @@ extension DiagramViewController {
         ladderView.showConductionTimes = UserDefaults.standard.bool(forKey: Preferences.defaultShowConductionTimesKey)
         ladderView.snapMarks = UserDefaults.standard.bool(forKey: Preferences.defaultSnapMarksKey)
         ladderView.defaultMarkStyle = Mark.Style(rawValue: UserDefaults.standard.integer(forKey: Preferences.defaultMarkStyleKey)) ?? .solid
+        ladderView.showLabelDescription = UserDefaults.standard.bool(forKey: Preferences.defaultShowLabelDescriptionKey)
     }
 
     @objc func resolveFileConflicts() {

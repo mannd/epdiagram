@@ -44,6 +44,7 @@ final class LadderView: ScaledView {
             }
         }
     }
+    var showLabelDescription = false
 
     // TODO: make user preferences
     // Colors
@@ -1016,12 +1017,26 @@ final class LadderView: ScaledView {
         let labelText = NSAttributedString(string: text, attributes: attributes)
         let size: CGSize = text.size(withAttributes: attributes)
         let labelRect = CGRect(x: 0, y: rect.origin.y + (rect.height - size.height) / 2, width: rect.origin.x, height: size.height)
+
         context.addRect(stringRect)
         context.setStrokeColor(red.cgColor)
         context.setFillColor(UIColor.secondarySystemBackground.cgColor)
         context.setLineWidth(1)
         context.drawPath(using: .fillStroke)
         labelText.draw(in: labelRect)
+
+        // FIXME: add preference to show description
+        if showLabelDescription {
+            let descriptionAttributes: [NSAttributedString.Key: Any] = [
+                .paragraphStyle: paragraphStyle,
+                .font: UIFont.systemFont(ofSize: 10.0),
+                .foregroundColor: region.mode == .active ? red : blue
+            ]
+            let descriptionRect = CGRect(x: 0, y: labelRect.minY + labelRect.height, width: rect.origin.x, height: stringRect.height - labelRect.height)
+            let descriptionText = NSAttributedString(string: region.longDescription, attributes: descriptionAttributes)
+
+            descriptionText.draw(in: descriptionRect)
+        }
     }
 
     fileprivate func drawRegionArea(context: CGContext, rect: CGRect, region: Region) {

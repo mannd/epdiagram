@@ -20,6 +20,7 @@ struct Preferences {
     static let defaultSnapMarksKey = "defaultSnapMarksKey"
     static let defaultLinkMarksKey = "defaultLinkMarksKey"
     static let defaultMarkStyleKey = "defaultMarkStyleKey"
+    static let defaultShowLabelDescriptionKey = "defaultShowLabelDescriptionKey"
 
     // Stored as Int, converted to CGFloat when used.
     static var lineWidth: Int = 2
@@ -30,6 +31,7 @@ struct Preferences {
     static var showConductionTimes = true
     static var snapMarks = true
     static var markStyle = Mark.Style.solid.rawValue
+    static var showLabelDescription = false
 
     // TODO: Update when new prefs added.
     static func defaults() -> [String: Any] {
@@ -42,6 +44,7 @@ struct Preferences {
             Preferences.defaultShowConductionTimesKey: Preferences.showConductionTimes,
             Preferences.defaultSnapMarksKey: Preferences.snapMarks,
             Preferences.defaultMarkStyleKey: Preferences.markStyle,
+            Preferences.defaultShowLabelDescriptionKey: Preferences.showLabelDescription,
         ]
         return defaultPreferences
     }

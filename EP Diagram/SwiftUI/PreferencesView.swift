@@ -17,6 +17,7 @@ struct PreferencesView: View {
     @AppStorage(Preferences.defaultShowConductionTimesKey) var showConductionTimes: Bool = Preferences.showConductionTimes
     @AppStorage(Preferences.defaultSnapMarksKey) var snapMarks: Bool = Preferences.snapMarks
     @AppStorage(Preferences.defaultMarkStyleKey) var markStyle = Preferences.markStyle
+    @AppStorage(Preferences.defaultShowLabelDescriptionKey) var showLabelDescription = Preferences.showLabelDescription
 
     @Environment(\.presentationMode) private var presentationMode: Binding<PresentationMode>
 
@@ -24,6 +25,11 @@ struct PreferencesView: View {
         NavigationView {
             VStack{
                 Form {
+                    Section(header: Text("Region preferences")) {
+                        Toggle(isOn: $showLabelDescription) {
+                            Text("Show label description")
+                        }
+                    }
                     Section(header: Text("Mark preferences")) {
                         Stepper("Mark width = \(lineWidth)", value: $lineWidth, in: 1...6, step: 1)
                         Stepper("Cursor width = \(cursorLineWidth)", value: $cursorLineWidth, in: 1...6, step: 1)
