@@ -24,11 +24,9 @@ final class CursorView: ScaledView {
 
     private var caliper: Caliper = Caliper()
     private var draggedComponent: Caliper.Component?
-//    var caliperMaxY: CGFloat = 0 {
-//        didSet {
-//            caliper.maxY = caliperMaxY
-//        }
-//    }
+
+    private var markerPositions: [CGPoint] = []
+
 
     var calFactor: CGFloat {
         get {
@@ -98,6 +96,9 @@ final class CursorView: ScaledView {
             drawCaliper(rect)
         case .normal:
             drawCursor(rect)
+        case .select:
+            // FIXME: testing out markers
+            drawMarkers()
         default:
             break
         }
@@ -388,7 +389,6 @@ protocol CursorViewDelegate: AnyObject {
     var cursorIsVisible: Bool { get set }
     var caliperMaxY: CGFloat { get set }
        
-
     func refresh()
     func moveCursor(cursorViewPositionX positionX: CGFloat)
     func setCursorHeight(anchorPositionY: CGFloat?)
@@ -447,5 +447,27 @@ extension CursorView: CursorViewDelegate {
 
     func intervalMeasurement(value: CGFloat) -> CGFloat {
         return value 
+    }
+
+    func setMarkerPositions(at positions: [CGPoint]) {
+        markerPositions = positions
+    }
+
+    func drawMarkers() {
+        for position in markerPositions {
+            drawMarker(at: position)
+        }
+    }
+
+    func drawMarker(at position: CGPoint) {
+        guard let context = UIGraphicsGetCurrentContext() else { return }
+        let convertedPosition = ladderViewDelegate.convertPosition(position, toView: self)
+
+        context.setStrokeColor(color.cgColor)
+        context.setLineWidth(lineWidth / 2.0)
+        context.setAlpha(alphaValue / 2.0)
+        context.move(to: CGPoint(x: convertedPosition.x, y: 0))
+        context.addLine(to: convertedPosition)
+        context.strokePath()
     }
 }

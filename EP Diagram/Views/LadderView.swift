@@ -431,7 +431,12 @@ final class LadderView: ScaledView {
         ladder.zone = Zone()
         if let mark = tapLocationInLadder.mark {
             // toggle mark selection
-            mark.mode = mark.mode == .selected ? .normal :  .selected
+            mark.mode = mark.mode == .selected ? .normal : .selected
+        } else if let region = tapLocationInLadder.region {
+            region.mode = region.mode == .selected ? .normal : .selected
+            if region.mode == .selected {
+                ladder.setMarksWithMode(.selected, inRegion: region)
+            }
         }
         setNeedsDisplay()
     }
@@ -1304,6 +1309,7 @@ final class LadderView: ScaledView {
         // Draw marks
         for mark: Mark in region.marks {
             drawMark(mark: mark, region: region, context: context)
+
         }
     }
 
@@ -1578,6 +1584,7 @@ protocol LadderViewDelegate: AnyObject {
     func getAttachedMarkScaledAnchorPosition() -> CGPoint?
     func setAttachedMarkAndLinkedMarksModes()
     func toggleAttachedMarkAnchor()
+    func convertPosition(_: CGPoint, toView: UIView) -> CGPoint
 }
 
 // MARK: LadderViewDelegate implementation
@@ -1623,6 +1630,10 @@ extension LadderView: LadderViewDelegate {
     func getTopOfLadder(view: UIView) -> CGFloat {
         let position = CGPoint(x: 0, y: ladder.regions[0].proximalBoundary)
         return convert(position, to: view).y
+    }
+
+    func convertPosition(_ position: CGPoint, toView view: UIView) -> CGPoint {
+        return convert(position, to: view)
     }
 
     func getRegionMidPoint(view: UIView) -> CGFloat {

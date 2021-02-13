@@ -270,7 +270,6 @@ override func viewDidLoad() {
         self.imageScrollView.addGestureRecognizer(longPress)
 
         setTitle()
-
     }
 
     override func viewWillAppear(_ animated: Bool) {
@@ -306,7 +305,6 @@ override func viewDidLoad() {
         let location = sender.location(in: sender.view)
         let rect = CGRect(x: location.x, y: location.y , width: 0, height: 0)
         menu.showMenu(from: sender.view!, rect: rect)
-
     }
 
     @objc func doneAction() {
@@ -348,8 +346,6 @@ override func viewDidLoad() {
     override func viewDidAppear(_ animated: Bool) {
         os_log("viewDidAppear() - ViewController", log: OSLog.viewCycle, type: .info)
         super.viewDidAppear(animated)
-
-
 
         // Need to set this here, after view draw, or Mac malpositions cursor at start of app.
         imageScrollView.contentInset = UIEdgeInsets(top: 0, left: leftMargin, bottom: 0, right: 0)
@@ -457,7 +453,7 @@ override func viewDidLoad() {
         slider.addTarget(self, action: #selector(sliderValueDidChange(_:)), for: .valueChanged)
         let doneButton = UIButton(type: .system)
         doneButton.setTitle(L("Done"), for: .normal)
-        doneButton.addTarget(self, action: #selector(closeAngleMenu(_:)), for: .touchUpInside)
+        doneButton.addTarget(self, action: #selector(closeSlantMenu(_:)), for: .touchUpInside)
         let stackView = UIStackView(frame: toolbar.frame)
         stackView.distribution = .fill
         stackView.axis = .horizontal
@@ -478,12 +474,16 @@ override func viewDidLoad() {
         })
     }
   
-    @objc func closeAngleMenu(_ sender: UIAlertAction) {
+    @objc func closeSlantMenu(_ sender: UIAlertAction) {
         currentDocument?.undoManager.endUndoGrouping()
         hideCursorAndNormalizeAllMarks()
         prolongSelectState = false
         ladderView.restoreState()
-        showMainMenu()
+        if ladderView.mode == .select {
+            showSelectMarksMenu(UIAlertAction())
+        } else {
+            showMainMenu()
+        }
     }
 
     @objc func sliderValueDidChange(_ sender: UISlider!) {

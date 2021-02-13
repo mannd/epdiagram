@@ -229,17 +229,14 @@ extension DiagramViewController: HamburgerTableDelegate, UIImagePickerController
     #if DEBUG
     func test() {
         os_log("test()", log: .debugging, type: .debug)
-        showSlantMenu()
-//        ladderView.ladder.reregisterAllMarks()
-//        print(ladderView.ladder.registry)
-//        let ladder = ladderView.ladder
-//        for region in ladder.regions {
-//            for mark in region.marks {
-//                os_log("%s", log: .test, type: .debug, mark.debugDescription)
-////                print("test \(mark.linkedMarkIDs)")
-//            }
-//        }
 
+        var positions: [CGPoint] = []
+        for mark in ladderView.ladder.regions[0].marks {
+            positions.append(ladderView.transformToScaledViewPosition(regionPosition: mark.segment.proximal, region: ladderView.ladder.regions[0]))
+            positions.append(ladderView.transformToScaledViewPosition(regionPosition: mark.segment.distal, region: ladderView.ladder.regions[0]))
+        }
+        cursorView.setMarkerPositions(at: positions)
+        cursorView.refresh()
 
     }
     #else
