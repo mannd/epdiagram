@@ -88,6 +88,7 @@
 		8ECA9FB72470A1020016D939 /* LadderTemplate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8ECA9FB62470A1020016D939 /* LadderTemplate.swift */; };
 		8ECB309925462C2D00DC79A8 /* SaveButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8ECB309825462C2D00DC79A8 /* SaveButton.swift */; };
 		8ED3B1B62360DA0D00549381 /* Anchor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8ED3B1B52360DA0D00549381 /* Anchor.swift */; };
+		8ED8CBD125D8B1FF00A6234F /* DiagramModelController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8ED8CBD025D8B1FF00A6234F /* DiagramModelController.swift */; };
 		8EF8B5B72330739F00ADB77A /* ViewControllerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8EF8B5B62330739F00ADB77A /* ViewControllerTests.swift */; };
 		8EF9166B227926BC00B51F17 /* LadderView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8EF9166A227926BC00B51F17 /* LadderView.swift */; };
 /* End PBXBuildFile section */
@@ -203,6 +204,7 @@
 		8ECA9FB62470A1020016D939 /* LadderTemplate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LadderTemplate.swift; sourceTree = "<group>"; };
 		8ECB309825462C2D00DC79A8 /* SaveButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SaveButton.swift; sourceTree = "<group>"; };
 		8ED3B1B52360DA0D00549381 /* Anchor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Anchor.swift; sourceTree = "<group>"; };
+		8ED8CBD025D8B1FF00A6234F /* DiagramModelController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DiagramModelController.swift; sourceTree = "<group>"; };
 		8EE311E524A8FE01003C7AF6 /* AudioToolbox.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AudioToolbox.framework; path = Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.15.sdk/System/Library/Frameworks/AudioToolbox.framework; sourceTree = DEVELOPER_DIR; };
 		8EF6B0F925A8CA7800DCA91C /* MobileCoreServices.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = MobileCoreServices.framework; path = Platforms/MacOSX.platform/Developer/SDKs/MacOSX11.1.sdk/System/iOSSupport/System/Library/Frameworks/MobileCoreServices.framework; sourceTree = DEVELOPER_DIR; };
 		8EF6B10125A8CAA600DCA91C /* CoreServices.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreServices.framework; path = Platforms/MacOSX.platform/Developer/SDKs/MacOSX11.1.sdk/System/Library/Frameworks/CoreServices.framework; sourceTree = DEVELOPER_DIR; };
@@ -399,6 +401,7 @@
 				8ECA9FB42470A07B0016D939 /* RegionTemplate.swift */,
 				8E856CF324EDC5E10064121F /* Segment.swift */,
 				8E982F9224EAF8B500E94F71 /* Zone.swift */,
+				8ED8CBD025D8B1FF00A6234F /* DiagramModelController.swift */,
 			);
 			path = Models;
 			sourceTree = "<group>";
@@ -619,6 +622,7 @@
 				8E253DD3244A8799008CC56B /* DiagramViewController+UIScrollViewDelegate.swift in Sources */,
 				8E6EB6C02484778E00E5F883 /* Notification+didUndoableAction.swift in Sources */,
 				8E9550BD2474B22000E1B125 /* FileIO.swift in Sources */,
+				8ED8CBD125D8B1FF00A6234F /* DiagramModelController.swift in Sources */,
 				8E856CF224EDC53D0064121F /* CGPoint+clampY.swift in Sources */,
 				8E973F9B24C4BF0800AB41C3 /* String+isBlank.swift in Sources */,
 				8EADC2A924D64E1200C5D3D8 /* SampleSelector.swift in Sources */,

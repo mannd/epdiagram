@@ -906,7 +906,8 @@ override func viewDidLoad() {
 
 
     @IBSegueAction func showPreferences(_ coder: NSCoder) -> UIViewController? {
-        let preferencesView = PreferencesView()
+        let diagramModelController = DiagramModelController(diagram: diagram)
+        let preferencesView = PreferencesView(diagramController: diagramModelController)
         let hostingController = UIHostingController(coder: coder, rootView: preferencesView)
         return hostingController
     }
@@ -1043,7 +1044,7 @@ extension DiagramViewController {
         ladderView.showConductionTimes = UserDefaults.standard.bool(forKey: Preferences.defaultShowConductionTimesKey)
         ladderView.snapMarks = UserDefaults.standard.bool(forKey: Preferences.defaultSnapMarksKey)
         ladderView.defaultMarkStyle = Mark.Style(rawValue: UserDefaults.standard.integer(forKey: Preferences.defaultMarkStyleKey)) ?? .solid
-        ladderView.showLabelDescription = UserDefaults.standard.bool(forKey: Preferences.defaultShowLabelDescriptionKey)
+//        ladderView.showLabelDescription = UserDefaults.standard.bool(forKey: Preferences.defaultShowLabelDescriptionKey)
         leftMargin = CGFloat(UserDefaults.standard.double(forKey: Preferences.defaultLeftMarginKey))
         ladderView.leftMargin = leftMargin
         cursorView.leftMargin = leftMargin

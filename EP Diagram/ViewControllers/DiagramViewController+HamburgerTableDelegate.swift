@@ -230,14 +230,14 @@ extension DiagramViewController: HamburgerTableDelegate, UIImagePickerController
     func test() {
         os_log("test()", log: .debugging, type: .debug)
 
-        var positions: [CGPoint] = []
-        for mark in ladderView.ladder.regions[0].marks {
-            positions.append(ladderView.transformToScaledViewPosition(regionPosition: mark.segment.proximal, region: ladderView.ladder.regions[0]))
-            positions.append(ladderView.transformToScaledViewPosition(regionPosition: mark.segment.distal, region: ladderView.ladder.regions[0]))
-        }
-        cursorView.setMarkerPositions(at: positions)
-        cursorView.refresh()
-
+//        var positions: [CGPoint] = []
+//        for mark in ladderView.ladder.regions[0].marks {
+//            positions.append(ladderView.transformToScaledViewPosition(regionPosition: mark.segment.proximal, region: ladderView.ladder.regions[0]))
+//            positions.append(ladderView.transformToScaledViewPosition(regionPosition: mark.segment.distal, region: ladderView.ladder.regions[0]))
+//        }
+//        cursorView.setMarkerPositions(at: positions)
+//        cursorView.refresh()
+        print("Marks are visible = \(diagram.ladder.marksAreVisible)")
     }
     #else
     func test() {}

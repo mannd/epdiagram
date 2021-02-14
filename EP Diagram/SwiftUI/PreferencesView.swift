@@ -20,6 +20,10 @@ struct PreferencesView: View {
     @AppStorage(Preferences.defaultShowLabelDescriptionKey) var showLabelDescription = Preferences.showLabelDescription
     @AppStorage(Preferences.defaultLeftMarginKey) var leftMargin = Preferences.leftMargin
 
+// Pass Diagram as binding to allow changing non-UserDefaults settings
+    // @Binding var diagram: Diagram
+    @ObservedObject var diagramController: DiagramModelController
+
     @Environment(\.presentationMode) private var presentationMode: Binding<PresentationMode>
 
     var body: some View {
@@ -27,7 +31,7 @@ struct PreferencesView: View {
             VStack {
                 Form {
                     Section(header: Text("Region preferences")) {
-                        Toggle(isOn: $showLabelDescription) {
+                        Toggle(isOn: $diagramController.diagram.ladder.marksAreVisible) {
                             Text("Show label description")
                         }
                         HStack {
@@ -63,6 +67,7 @@ struct PreferencesView: View {
                             Text("Dotted").tag(Mark.Style.dotted.rawValue)
                         })
                     }
+                    Section(header: Text("Defaults for new dagrams"), content: {})
                 }
             }
             .navigationBarTitle("Preferences", displayMode: .inline)
@@ -74,7 +79,7 @@ struct PreferencesView: View {
 #if DEBUG
 struct PreferencesView_Previews: PreviewProvider {
     static var previews: some View {
-        PreferencesView()
+        PreferencesView(diagramController: DiagramModelController(diagram: Diagram.defaultDiagram()))
     }
 }
 #endif

@@ -462,7 +462,6 @@ extension CursorView: CursorViewDelegate {
     func drawMarker(at position: CGPoint) {
         guard let context = UIGraphicsGetCurrentContext() else { return }
         let convertedPosition = ladderViewDelegate.convertPosition(position, toView: self)
-
         context.setStrokeColor(color.cgColor)
         context.setLineWidth(lineWidth / 2.0)
         context.setAlpha(alphaValue / 2.0)
