@@ -877,12 +877,8 @@ override func viewDidLoad() {
         navigationController?.setToolbarHidden(true, animated: true)
         // FIXME: Decide how to hande default ladder templates.  Below hard codes 2 defaults if there are no saved defaults.
         // Restore default ladder templates if none saved.
-        var ladderTemplates = FileIO.retrieve(FileIO.userTemplateFile, from: .documents, as: [LadderTemplate].self) ?? LadderTemplate.defaultTemplates()
-        if ladderTemplates.isEmpty {
-            ladderTemplates = LadderTemplate.defaultTemplates()
-        }
-        var templateEditor = LadderTemplatesEditor(ladderTemplates: ladderTemplates)
-        templateEditor.delegate = self
+        guard let ladderTemplatesModelController = LadderTemplatesModelController() else { return nil }
+        let templateEditor = LadderTemplatesEditor(ladderTemplatesController: ladderTemplatesModelController)
         let hostingController = UIHostingController(coder: coder, rootView: templateEditor)
         return hostingController
     }
@@ -903,7 +899,6 @@ override func viewDidLoad() {
         let hostingController = UIHostingController(coder: coder, rootView: ladderSelector)
         return hostingController
     }
-
 
     @IBSegueAction func showPreferences(_ coder: NSCoder) -> UIViewController? {
         let diagramModelController = DiagramModelController(diagram: diagram)

@@ -9,6 +9,7 @@
 import SwiftUI
 
 struct RegionTemplateEditor: View {
+    @ObservedObject var ladderTemplatesController: LadderTemplatesModelController
     @Binding var regionTemplate: RegionTemplate
 
     var body: some View {
@@ -45,7 +46,7 @@ struct RegionTemplateEditor: View {
 #if DEBUG
 struct RegionEditor_Previews: PreviewProvider {
     static var previews: some View {
-        RegionTemplateEditor(regionTemplate: .constant(RegionTemplate(name: "A", description: "Atrium", unitHeight: 1, style: .solid)))
+        RegionTemplateEditor(ladderTemplatesController: LadderTemplatesModelController(ladderTemplates: LadderTemplate.defaultTemplates()), regionTemplate: .constant(RegionTemplate(name: "A", description: "Atrium", unitHeight: 1, style: .solid)))
     }
 }
 #endif

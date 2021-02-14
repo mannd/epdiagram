@@ -7,9 +7,10 @@
 //
 
 import Foundation
+import Combine
 
 class DiagramModelController: ObservableObject {
-    @Published var diagram: Diagram
+    @Published var diagram: Diagram 
 
     init(diagram: Diagram) {
         self.diagram = diagram

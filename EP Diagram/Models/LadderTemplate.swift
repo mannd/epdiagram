@@ -9,10 +9,12 @@
 import UIKit
 
 struct LadderTemplate: Codable, Equatable {
+    private(set) var id = UUID()
+
     var name: String = ""
     var description: String = ""
     var regionTemplates = [RegionTemplate]()
-    private(set) var id = UUID()
+    var isDefaultTemplate: Bool = false
 
     // Returns a basic ladder (A, AV, V).
     static func defaultTemplate() -> LadderTemplate {

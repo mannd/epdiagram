@@ -10,21 +10,20 @@ import SwiftUI
 import os.log
 
 struct LadderTemplatesEditor: View {
-    @State var ladderTemplates: [LadderTemplate]
+    @ObservedObject var ladderTemplatesController: LadderTemplatesModelController
     @State private var editMode = EditMode.inactive
     @State private var fileSaveError = false
     @State private var errorMessage = String()
     @Environment(\.presentationMode) private var presentationMode: Binding<PresentationMode>
     @GestureState private var dragOffset = CGSize.zero
-    weak var delegate: DiagramViewControllerDelegate?
-    
+
     var body: some View {
         VStack {
             NavigationView {
                 VStack {
                     List() {
-                        ForEach(ladderTemplates) { ladderTemplate in
-                            NavigationLink(destination: LadderTemplateEditor(ladderTemplate: self.selectedLadderTemplate(id: ladderTemplate.id))) {
+                        ForEach(ladderTemplatesController.ladderTemplates) { ladderTemplate in
+                            NavigationLink(destination: LadderTemplateEditor(ladderTemplatesController: ladderTemplatesController, ladderTemplate: self.selectedLadderTemplate(id: ladderTemplate.id))) {
                                 VStack(alignment: .leading) {
                                     Text(ladderTemplate.name)
                                     Text(ladderTemplate.description)
@@ -33,17 +32,12 @@ struct LadderTemplatesEditor: View {
 
                         }
                         .onDelete { indexSet in
-                            self.ladderTemplates.remove(atOffsets: indexSet)
+                            self.ladderTemplatesController.ladderTemplates.remove(atOffsets: indexSet)
                         }
                         .onMove { indices, newOffset in
-                            self.ladderTemplates.move(fromOffsets: indices, toOffset: newOffset)
+                            self.ladderTemplatesController.ladderTemplates.move(fromOffsets: indices, toOffset: newOffset)
                         }
                     }
-                    SaveButton(action: self.onSave)
-                        .alert(isPresented: $fileSaveError) {
-                            Alert(title: Text("Error Saving Ladders"), message: Text("Changes to ladders could not be saved. \(errorMessage)"), dismissButton: .default(Text("OK")))
-                        }
-                        .disabled(self.editMode == .active)
                 }.padding()
                 .navigationBarTitle(Text("Ladders"), displayMode: .inline)
                 .navigationBarItems(leading: EditButton(), trailing: addButton)
@@ -56,10 +50,10 @@ struct LadderTemplatesEditor: View {
 
     // We create a binding for each template, otherwise delete does not work.  See https://troz.net/post/2019/swiftui-data-flow/ where this is the least ugly of several ugly work arounds.
     private func selectedLadderTemplate(id: UUID) -> Binding<LadderTemplate> {
-        guard let index = self.ladderTemplates.firstIndex(where: { $0.id == id }) else {
+        guard let index = self.ladderTemplatesController.ladderTemplates.firstIndex(where: { $0.id == id }) else {
             fatalError("Ladder template doesn't exist.")
         }
-        return self.$ladderTemplates[index]
+        return self.$ladderTemplatesController.ladderTemplates[index]
     }
 
     private var addButton: some View {
@@ -75,20 +69,7 @@ struct LadderTemplatesEditor: View {
         os_log("onAdd() - LadderEditor", log: OSLog.action, type: .info)
         let newRegionTemplate = RegionTemplate(name: "NEW", description: "New region", unitHeight: 1)
         let newLadderTemplate = LadderTemplate(name: "New Ladder", description: "New ladder", regionTemplates: [newRegionTemplate])
-        ladderTemplates.append(newLadderTemplate)
-    }
-
-    // FIXME: Catch errors and set $fileSaveError to activate alert.
-    // Errors should include deleting last template and templates with no regionTemplates.
-    private func onSave() {
-        os_log("onSave() - LadderTemplatesEditor", log: OSLog.action, type: .info)
-        for ladderTemplate in ladderTemplates {
-            if ladderTemplate.regionTemplates.count < 1 {
-                fileSaveError = true
-            }
-        }
-        delegate?.saveTemplates(ladderTemplates)
-        self.presentationMode.wrappedValue.dismiss()
+        ladderTemplatesController.ladderTemplates.append(newLadderTemplate)
     }
 }
 
@@ -97,7 +78,7 @@ fileprivate let testData = [LadderTemplate.defaultTemplate(), LadderTemplate.def
 
 struct LadderTemplatesEditor_Previews: PreviewProvider {
     static var previews: some View {
-        LadderTemplatesEditor(ladderTemplates: testData)
+        LadderTemplatesEditor(ladderTemplatesController: LadderTemplatesModelController(ladderTemplates: LadderTemplate.defaultTemplates()))
 
     }
 }
