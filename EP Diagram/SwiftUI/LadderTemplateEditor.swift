@@ -28,6 +28,13 @@ struct LadderTemplateEditor: View {
                     Section(header: Text("Description")) {
                         TextEditor(text: $ladderTemplate.description)
                     }
+                    Section(header: Text("Left margin")) {
+                        Stepper(value: $ladderTemplate.leftMargin, in: 30...100, step: 5) {
+                            HStack {
+                                Text("\(Int(ladderTemplate.leftMargin)) points")
+                            }
+                        }
+                    }
                     Section(header: Text("Regions")) {
                         RegionListView(ladderTemplatesController: ladderTemplatesController, ladderTemplate: $ladderTemplate)
                     }
@@ -99,7 +106,7 @@ struct RegionListView: View {
     struct LadderEditor_Previews: PreviewProvider {
 
         static var previews: some View {
-            LadderTemplateEditor(ladderTemplatesController: LadderTemplatesModelController(ladderTemplates: LadderTemplate.defaultTemplates()), ladderTemplate: .constant(LadderTemplate.defaultTemplate()))
+            LadderTemplateEditor(ladderTemplatesController: LadderTemplatesModelController(ladderTemplates: LadderTemplate.defaultTemplates()), ladderTemplate: .constant(LadderTemplate.defaultTemplate1()))
         }
     }
     #endif

@@ -24,7 +24,6 @@ final class DiagramViewController: UIViewController {
     var hamburgerTableViewController: HamburgerTableViewController? // We get this view via its embed segue!
     var separatorView: SeparatorView?
 
-    // TODO: Possibly change this to property of ladder, since it might depend on label width (# of chars)?
     // This margin is passed to other views.
     var leftMargin: CGFloat = 50
 
@@ -75,7 +74,7 @@ final class DiagramViewController: UIViewController {
     static let restorationFileNameKey = "restorationFileNameKey"
     static let restorationNeededKey = "restorationNeededKey"
     static let restorationTransformKey = "restorationTranslateKey"
-//    static let restorationActiveRegionIndexKey = "restorationActiveRegionIndexKey"
+    //    static let restorationActiveRegionIndexKey = "restorationActiveRegionIndexKey"
     static let restorationDoRestorationKey = "restorationDoRestorationKey"
 
     // Speed up appearance of image picker by initializing it here.
@@ -189,7 +188,7 @@ final class DiagramViewController: UIViewController {
         self.ladderView.removeRegion()
     }
 
-override func viewDidLoad() {
+    override func viewDidLoad() {
         os_log("viewDidLoad() - ViewController", log: OSLog.viewCycle, type: .info)
         super.viewDidLoad()
 
@@ -210,6 +209,7 @@ override func viewDidLoad() {
         cursorView.currentDocument = currentDocument
         ladderView.currentDocument = currentDocument
 
+        leftMargin = diagram.ladder.leftMargin
         ladderView.leftMargin = leftMargin
         cursorView.leftMargin = leftMargin
         imageScrollView.leftMargin = leftMargin
@@ -246,15 +246,15 @@ override func viewDidLoad() {
         // Navigation buttons
         // Hamburger menu is replaced by main menu on Mac.
         // TODO: Replace hamburger menu with real menu on Mac.
-//        if !isRunningOnMac() {
-//            navigationItem.setLeftBarButton(UIBarButtonItem(image: UIImage(named: "hamburger"), style: .plain, target: self, action: #selector(toggleHamburgerMenu)), animated: true)
-//        }
+        //        if !isRunningOnMac() {
+        //            navigationItem.setLeftBarButton(UIBarButtonItem(image: UIImage(named: "hamburger"), style: .plain, target: self, action: #selector(toggleHamburgerMenu)), animated: true)
+        //        }
         navigationItem.setLeftBarButton(UIBarButtonItem(image: UIImage(named: "hamburger"), style: .plain, target: self, action: #selector(toggleHamburgerMenu)), animated: true)
 
         let snapshotButton = UIBarButtonItem(image: UIImage(systemName: "photo.on.rectangle"), style: .plain, target: self, action: #selector(snapshotDiagram))
         let closeButton = UIBarButtonItem(image: UIImage(systemName: "xmark"), style: .done, target: self, action: #selector(closeAction))
         navigationItem.setRightBarButtonItems([closeButton, snapshotButton], animated: true)
-       
+
         // Set up touches
         let singleTapRecognizer = UITapGestureRecognizer(target: self, action: #selector(self.singleTap))
         singleTapRecognizer.numberOfTapsRequired = 1
@@ -264,8 +264,8 @@ override func viewDidLoad() {
         let interaction = UIContextMenuInteraction(delegate: self)
         ladderView.addInteraction(interaction)
         // Context menu not great here, prefer long press gesture
-//        let imageViewInteraction = UIContextMenuInteraction(delegate: imageScrollView)
-//        imageScrollView.addInteraction(imageViewInteraction)
+        //        let imageViewInteraction = UIContextMenuInteraction(delegate: imageScrollView)
+        //        imageScrollView.addInteraction(imageViewInteraction)
         let longPress = UILongPressGestureRecognizer(target: self, action: #selector(self.doImageScrollViewLongPress))
         self.imageScrollView.addGestureRecognizer(longPress)
 
@@ -365,7 +365,7 @@ override func viewDidLoad() {
                 restorationContentOffset.y = contentOffsetY as? CGFloat ?? 0
             }
             // FIXME: Temporary
-//            imageScrollView.setContentOffset(restorationContentOffset, animated: true)
+            //            imageScrollView.setContentOffset(restorationContentOffset, animated: true)
 
             if let isCalibrated = restorationInfo?[DiagramViewController.restorationIsCalibratedKey] as? Bool {
                 cursorView.setIsCalibrated(isCalibrated)
@@ -389,7 +389,7 @@ override func viewDidLoad() {
     var didFirstLayout = false
     override func viewDidLayoutSubviews() {
         // Called multiple times when showing context menu, so comment out for now.
-//        os_log("viewDidLayoutSubviews() - ViewController", log: .viewCycle, type: .info)
+        //        os_log("viewDidLayoutSubviews() - ViewController", log: .viewCycle, type: .info)
         if didFirstLayout { return }
         didFirstLayout = true
         // mark pointers in registry need to reestablished when diagram is reloaded
@@ -466,14 +466,14 @@ override func viewDidLoad() {
     func editLabel() {
         print("edit label")
         guard let selectedRegion = ladderView.selectedRegion() else { return }
-//        UserAlert.showTextAlert(viewController: self, title: L("Edit Label"), message: L("Enter new label text for \"\(selectedRegion.name).\""), defaultText: selectedRegion.name, preferredStyle: .alert, handler: { newLabel in
-//            self.ladderView.undoablySetLabel(newLabel, forRegion: selectedRegion)
-//        })
+        //        UserAlert.showTextAlert(viewController: self, title: L("Edit Label"), message: L("Enter new label text for \"\(selectedRegion.name).\""), defaultText: selectedRegion.name, preferredStyle: .alert, handler: { newLabel in
+        //            self.ladderView.undoablySetLabel(newLabel, forRegion: selectedRegion)
+        //        })
         UserAlert.showNameRegionAlert(viewController: self, region: selectedRegion, handler: { newLabel, newDescription in
             self.ladderView.undoablySetLabel(newLabel, description: newDescription, forRegion: selectedRegion)
         })
     }
-  
+
     @objc func closeSlantMenu(_ sender: UIAlertAction) {
         currentDocument?.undoManager.endUndoGrouping()
         hideCursorAndNormalizeAllMarks()
@@ -656,9 +656,9 @@ override func viewDidLoad() {
         setMode(.normal)
         // FIXME: This doesn't restore state
         ladderView.restoreState()
-//        ladderView.endZoning()
-//        ladderView.normalizeAllMarks()
-//        ladderView.setNeedsDisplay()
+        //        ladderView.endZoning()
+        //        ladderView.normalizeAllMarks()
+        //        ladderView.setNeedsDisplay()
     }
 
     @objc func cancelConnectMode() {
@@ -895,7 +895,7 @@ override func viewDidLoad() {
     }
 
     @IBSegueAction func showPreferences(_ coder: NSCoder) -> UIViewController? {
-        let diagramModelController = DiagramModelController(diagram: diagram)
+        let diagramModelController = DiagramModelController(diagram: diagram, diagramViewController: self)
         let preferencesView = PreferencesView(diagramController: diagramModelController)
         let hostingController = UIHostingController(coder: coder, rootView: preferencesView)
         return hostingController
@@ -904,11 +904,11 @@ override func viewDidLoad() {
     @IBSegueAction func showSampleSelector(_ coder: NSCoder) -> UIViewController? {
         let sampleDiagrams: [Diagram] = [
             Diagram(name: L("Normal ECG"), description: L("Just a normal ECG"), image: UIImage(named: "SampleECG")!, ladder: Ladder.defaultLadder()),
-        Diagram(name: L("AV Block"), description: L("High grade AV block"), image: UIImage(named: "AVBlock")!, ladder: Ladder.defaultLadder())
-//        Diagram.blankDiagram(name: L("Blank Diagram")),
-//        // Make this taller than height even with rotation.
-//        Diagram(name: L("Scrollable Blank Diagram"), image: UIImage.emptyImage(size: CGSize(width: view.frame.size.width * 3, height: max(view.frame.size.height, view.frame.size.width)), color: UIColor.systemTeal), description: L("Wide scrollable blank image"))
-        // TODO: add others here.
+            Diagram(name: L("AV Block"), description: L("High grade AV block"), image: UIImage(named: "AVBlock")!, ladder: Ladder.defaultLadder())
+            //        Diagram.blankDiagram(name: L("Blank Diagram")),
+            //        // Make this taller than height even with rotation.
+            //        Diagram(name: L("Scrollable Blank Diagram"), image: UIImage.emptyImage(size: CGSize(width: view.frame.size.width * 3, height: max(view.frame.size.height, view.frame.size.width)), color: UIColor.systemTeal), description: L("Wide scrollable blank image"))
+            // TODO: add others here.
         ]
         let sampleSelector = SampleSelector(sampleDiagrams: sampleDiagrams, delegate: self)
         let hostingController = UIHostingController(coder: coder, rootView: sampleSelector)
@@ -958,7 +958,7 @@ override func viewDidLoad() {
         showHelp()
     }
 
- 
+
     @IBAction func getDiagramInfo(_ sender: Any) {
         getDiagramInfo()
     }
@@ -969,18 +969,18 @@ override func viewDidLoad() {
 
     @IBAction func openImage(_ sender: AnyObject) {
         /* Present open panel. */
-//        guard let window = self.window else { return }
-//        let openPanel = NSOpenPanel()
-//        openPanel.allowedFileTypes = validFileExtensions()
-//        openPanel.canSelectHiddenExtension = true
-//        openPanel.beginSheetModal(for: window,
-//            completionHandler: {
-//                (result: NSApplication.ModalResponse) -> Void in
-//                if result == .OK {
-//                    self.openURL(openPanel.url, addToRecentDocuments: true)
-//               }
-//            }
-//        )
+        //        guard let window = self.window else { return }
+        //        let openPanel = NSOpenPanel()
+        //        openPanel.allowedFileTypes = validFileExtensions()
+        //        openPanel.canSelectHiddenExtension = true
+        //        openPanel.beginSheetModal(for: window,
+        //            completionHandler: {
+        //                (result: NSApplication.ModalResponse) -> Void in
+        //                if result == .OK {
+        //                    self.openURL(openPanel.url, addToRecentDocuments: true)
+        //               }
+        //            }
+        //        )
     }
 }
 
@@ -991,7 +991,7 @@ extension DiagramViewController {
         NotificationCenter.default.addObserver(self, selector: #selector(didEnterBackground), name: UIScene.didEnterBackgroundNotification, object: nil)
         NotificationCenter.default.addObserver(self, selector: #selector(didDisconnect), name: UIScene.didDisconnectNotification, object: nil)
         NotificationCenter.default.addObserver(self, selector: #selector(resolveFileConflicts), name: UIDocument.stateChangedNotification, object: nil)
-  
+
     }
 
     func removeNotifications() {
@@ -1033,11 +1033,11 @@ extension DiagramViewController {
         ladderView.showConductionTimes = UserDefaults.standard.bool(forKey: Preferences.defaultShowConductionTimesKey)
         ladderView.snapMarks = UserDefaults.standard.bool(forKey: Preferences.defaultSnapMarksKey)
         ladderView.defaultMarkStyle = Mark.Style(rawValue: UserDefaults.standard.integer(forKey: Preferences.defaultMarkStyleKey)) ?? .solid
-//        ladderView.showLabelDescription = UserDefaults.standard.bool(forKey: Preferences.defaultShowLabelDescriptionKey)
-        leftMargin = CGFloat(UserDefaults.standard.double(forKey: Preferences.defaultLeftMarginKey))
-        ladderView.leftMargin = leftMargin
-        cursorView.leftMargin = leftMargin
-        imageScrollView.leftMargin = leftMargin
+        //        ladderView.showLabelDescription = UserDefaults.standard.bool(forKey: Preferences.defaultShowLabelDescriptionKey)
+//        leftMargin = CGFloat(UserDefaults.standard.double(forKey: Preferences.defaultLeftMarginKey))
+//        ladderView.leftMargin = leftMargin
+//        cursorView.leftMargin = leftMargin
+//        imageScrollView.leftMargin = leftMargin
     }
 
     @objc func resolveFileConflicts() {

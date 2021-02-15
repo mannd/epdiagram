@@ -77,7 +77,7 @@ struct LadderTemplatesEditor: View {
 }
 
 #if DEBUG
-fileprivate let testData = [LadderTemplate.defaultTemplate(), LadderTemplate.defaultTemplate2()]
+fileprivate let testData = [LadderTemplate.defaultTemplate1(), LadderTemplate.defaultTemplate2()]
 
 struct LadderTemplatesEditor_Previews: PreviewProvider {
     static var previews: some View {

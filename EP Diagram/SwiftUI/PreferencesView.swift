@@ -35,9 +35,9 @@ struct PreferencesView: View {
                             Text("Show label description")
                         }
                         HStack {
-                            Text("Left margin \(Int(leftMargin))")
+                            Text("Left margin \(Int(diagramController.diagram.ladder.leftMargin))")
                             Spacer(minLength: 50)
-                            Slider(value: $leftMargin,
+                            Slider(value: $diagramController.diagram.ladder.leftMargin,
                                    in: 30...100,
                                    step: 5
                             )

@@ -6,13 +6,29 @@
 //  Copyright © 2021 EP Studios. All rights reserved.
 //
 
-import Foundation
+import UIKit
 import Combine
 
 class DiagramModelController: ObservableObject {
-    @Published var diagram: Diagram 
+    var diagramViewController: DiagramViewController?
+    @Published var diagram: Diagram {
+        didSet {
+            setLeftMargin(margin: diagram.ladder.leftMargin)
+            // FIXME: Make undoable instead?
+            diagramViewController?.currentDocument?.updateChangeCount(.done)
+        }
+    }
 
-    init(diagram: Diagram) {
+    init(diagram: Diagram, diagramViewController: DiagramViewController? = nil) {
         self.diagram = diagram
+        self.diagramViewController = diagramViewController
+    }
+
+    func setLeftMargin(margin: CGFloat) {
+        guard let diagramViewController = diagramViewController else { return }
+        diagramViewController.ladderView.leftMargin = margin
+        diagramViewController.cursorView.leftMargin = margin
+        diagramViewController.imageScrollView.leftMargin = margin
+
     }
 }

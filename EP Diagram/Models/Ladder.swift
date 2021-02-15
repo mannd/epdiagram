@@ -21,6 +21,7 @@ class Ladder: NSObject, Codable {
 
     var name: String
     var longDescription: String = ""
+    var leftMargin: CGFloat = 50
     var regions = [Region]()
     var regionCount: Int { regions.count }
     var attachedMark: Mark? // cursor is attached to a most 1 mark at a time
@@ -42,6 +43,7 @@ class Ladder: NSObject, Codable {
         os_log("init ladder from template", log: .action, type: .info)
         name = template.name
         longDescription = template.description
+        leftMargin = template.leftMargin
         for regionTemplate in template.regionTemplates {
             let region = Region(template: regionTemplate)
             regions.append(region)
