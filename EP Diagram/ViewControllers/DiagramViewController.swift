@@ -24,8 +24,20 @@ final class DiagramViewController: UIViewController {
     var hamburgerTableViewController: HamburgerTableViewController? // We get this view via its embed segue!
     var separatorView: SeparatorView?
 
+    static let defaultLeftMargin: CGFloat = 50
+    static let minLeftMargin: Float = 30
+    static let maxLeftMargin: Float = 100
+
     // This margin is passed to other views.
-    var leftMargin: CGFloat = 50
+    var leftMargin: CGFloat = defaultLeftMargin {
+        didSet {
+            diagram.leftMargin = leftMargin
+            ladderView.leftMargin = leftMargin
+            cursorView.leftMargin = leftMargin
+            imageScrollView.leftMargin = leftMargin
+            imageScrollView.contentInset = UIEdgeInsets(top: 0, left: leftMargin, bottom: 0, right: 0)
+        }
+    }
 
     // Buttons, menus
     private let spacer = UIBarButtonItem(barButtonSystemItem: .flexibleSpace, target: nil, action: nil)
@@ -94,6 +106,10 @@ final class DiagramViewController: UIViewController {
     }
     lazy var deleteAllInLadder = UIAction(title: L("Clear ladder"), image: UIImage(systemName: "trash"), attributes: .destructive) { action in
         self.ladderView.deleteAllInLadder()
+    }
+
+    lazy var adjustLeftMarginAction = UIAction(title: L("Adjust left margin"), image: UIImage(systemName: "arrowtriangle.left.and.line.vertical.and.arrowtriangle.right")) { action in 
+        self.showAdjustLeftMarginMenu()
     }
 
     lazy var unlinkAll = UIAction(title: L("Unlink all marks")) { action in
@@ -277,6 +293,57 @@ final class DiagramViewController: UIViewController {
         setupNotifications()
     }
 
+    func setLeftMargin(_ margin: CGFloat) {
+        let oldLeftMargin = leftMargin
+        currentDocument?.undoManager.registerUndo(withTarget: self) { target in
+            target.setLeftMargin(oldLeftMargin)
+        }
+        NotificationCenter.default.post(name: .didUndoableAction, object: nil)
+        leftMargin = margin
+    }
+
+    func showAdjustLeftMarginMenu() {
+        guard let toolbar = navigationController?.toolbar else { return }
+        currentDocument?.undoManager.beginUndoGrouping() // will end when menu closed
+        prolongSelectState = true
+        let labelText = UITextField()
+        labelText.text = L("Adjust left margin")
+        let slider = UISlider()
+        slider.minimumValue = DiagramViewController.minLeftMargin
+        slider.maximumValue = DiagramViewController.maxLeftMargin
+        slider.setValue(Float(leftMargin), animated: false)
+        slider.addTarget(self, action: #selector(leftMarginSliderValueDidChange(_:)), for: .valueChanged)
+        let doneButton = UIButton(type: .system)
+        doneButton.setTitle(L("Done"), for: .normal)
+        doneButton.addTarget(self, action: #selector(closeAdjustLeftMarginMenu(_:)), for: .touchUpInside)
+        let stackView = UIStackView(frame: toolbar.frame)
+        stackView.distribution = .fill
+        stackView.axis = .horizontal
+        stackView.spacing = 8
+        stackView.addArrangedSubview(labelText)
+        stackView.addArrangedSubview(slider)
+        stackView.addArrangedSubview(doneButton)
+        setToolbarItems([UIBarButtonItem(customView: stackView)], animated: true)
+    }
+
+    @objc func leftMarginSliderValueDidChange(_ sender: UISlider!) {
+        let value = CGFloat(sender.value)
+        setLeftMargin(value)
+        ladderView.refresh()
+}
+
+    @objc func closeAdjustLeftMarginMenu(_ sender: UISlider!) {
+        currentDocument?.undoManager.endUndoGrouping()
+        hideCursorAndNormalizeAllMarks()
+        prolongSelectState = false
+        ladderView.restoreState()
+        if ladderView.mode == .select {
+            showSelectMarksMenu(UIAlertAction())
+        } else {
+            showMainMenu()
+        }
+    }
+
     func loadSampleDiagram(_ diagram: Diagram) {
         currentDocument?.undoManager.beginUndoGrouping()
         // FIXME: make set calibration undoable...
@@ -346,6 +413,7 @@ final class DiagramViewController: UIViewController {
     override func viewDidAppear(_ animated: Bool) {
         os_log("viewDidAppear() - ViewController", log: OSLog.viewCycle, type: .info)
         super.viewDidAppear(animated)
+
 
         // Need to set this here, after view draw, or Mac malpositions cursor at start of app.
         imageScrollView.contentInset = UIEdgeInsets(top: 0, left: leftMargin, bottom: 0, right: 0)
@@ -446,6 +514,8 @@ final class DiagramViewController: UIViewController {
         guard let toolbar = navigationController?.toolbar else { return }
         currentDocument?.undoManager.beginUndoGrouping()
         prolongSelectState = true
+        let labelText = UITextField()
+        labelText.text = L("Adjust mark slant")
         let slider = UISlider()
         slider.minimumValue = -45
         slider.maximumValue = 45
@@ -458,6 +528,7 @@ final class DiagramViewController: UIViewController {
         stackView.distribution = .fill
         stackView.axis = .horizontal
         stackView.spacing = 8
+        stackView.addArrangedSubview(labelText)
         stackView.addArrangedSubview(slider)
         stackView.addArrangedSubview(doneButton)
         setToolbarItems([UIBarButtonItem(customView: stackView)], animated: true)

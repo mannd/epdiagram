@@ -20,6 +20,10 @@ struct Diagram: Codable {
     var ladder: Ladder
     var calibration: Calibration = Calibration()
     var transform: CGAffineTransform
+    var leftMargin: CGFloat {
+        get { ladder.leftMargin }
+        set(newValue) { ladder.leftMargin = newValue }
+    }
 
     init(name: String?, description: String, image: UIImage?, ladder: Ladder) {
         self.name = name

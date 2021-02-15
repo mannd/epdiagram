@@ -1516,7 +1516,6 @@ final class LadderView: ScaledView {
             target.undoablyAddRegion(region, atIndex: index)
         }
         NotificationCenter.default.post(name: .didUndoableAction, object: nil)
-        NotificationCenter.default.post(name: .didUndoableAction, object: nil)
         ladder.removeRegion(region)
         initializeRegions()
         setNeedsDisplay()

@@ -62,6 +62,7 @@ extension DiagramViewController: DiagramViewControllerDelegate {
     func setViewsNeedDisplay() {
         cursorView.setNeedsDisplay()
         ladderView.setNeedsDisplay()
+        imageScrollView.setNeedsDisplay()
     }
 
     // TODO: make undoable

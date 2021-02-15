@@ -34,14 +34,6 @@ struct PreferencesView: View {
                         Toggle(isOn: $diagramController.diagram.ladder.marksAreVisible) {
                             Text("Show label description")
                         }
-                        HStack {
-                            Text("Left margin \(Int(diagramController.diagram.ladder.leftMargin))")
-                            Spacer(minLength: 50)
-                            Slider(value: $diagramController.diagram.ladder.leftMargin,
-                                   in: 30...100,
-                                   step: 5
-                            )
-                        }
                     }
                     Section(header: Text("Mark preferences")) {
                         Stepper("Mark width = \(lineWidth)", value: $lineWidth, in: 1...6, step: 1)

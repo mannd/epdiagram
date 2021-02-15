@@ -13,8 +13,7 @@ class DiagramModelController: ObservableObject {
     var diagramViewController: DiagramViewController?
     @Published var diagram: Diagram {
         didSet {
-            setLeftMargin(margin: diagram.ladder.leftMargin)
-            // FIXME: Make undoable instead?
+            // Changes in diagram through preferences are not undoable, so just save as needed.
             diagramViewController?.currentDocument?.updateChangeCount(.done)
         }
     }
@@ -22,13 +21,5 @@ class DiagramModelController: ObservableObject {
     init(diagram: Diagram, diagramViewController: DiagramViewController? = nil) {
         self.diagram = diagram
         self.diagramViewController = diagramViewController
-    }
-
-    func setLeftMargin(margin: CGFloat) {
-        guard let diagramViewController = diagramViewController else { return }
-        diagramViewController.ladderView.leftMargin = margin
-        diagramViewController.cursorView.leftMargin = margin
-        diagramViewController.imageScrollView.leftMargin = margin
-
     }
 }
