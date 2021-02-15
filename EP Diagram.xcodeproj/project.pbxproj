@@ -87,7 +87,6 @@
 		8EC5D28D256B154E00F49865 /* UIView+PinToInside.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8EC5D28C256B154E00F49865 /* UIView+PinToInside.swift */; };
 		8ECA9FB52470A07B0016D939 /* RegionTemplate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8ECA9FB42470A07B0016D939 /* RegionTemplate.swift */; };
 		8ECA9FB72470A1020016D939 /* LadderTemplate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8ECA9FB62470A1020016D939 /* LadderTemplate.swift */; };
-		8ECB309925462C2D00DC79A8 /* SaveButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8ECB309825462C2D00DC79A8 /* SaveButton.swift */; };
 		8ED3B1B62360DA0D00549381 /* Anchor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8ED3B1B52360DA0D00549381 /* Anchor.swift */; };
 		8ED8CBD125D8B1FF00A6234F /* DiagramModelController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8ED8CBD025D8B1FF00A6234F /* DiagramModelController.swift */; };
 		8EF8B5B72330739F00ADB77A /* ViewControllerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8EF8B5B62330739F00ADB77A /* ViewControllerTests.swift */; };
@@ -204,7 +203,6 @@
 		8EC8768725B5112000F3D5C2 /* Photos.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Photos.framework; path = Platforms/MacOSX.platform/Developer/SDKs/MacOSX11.1.sdk/System/Library/Frameworks/Photos.framework; sourceTree = DEVELOPER_DIR; };
 		8ECA9FB42470A07B0016D939 /* RegionTemplate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RegionTemplate.swift; sourceTree = "<group>"; };
 		8ECA9FB62470A1020016D939 /* LadderTemplate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LadderTemplate.swift; sourceTree = "<group>"; };
-		8ECB309825462C2D00DC79A8 /* SaveButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SaveButton.swift; sourceTree = "<group>"; };
 		8ED3B1B52360DA0D00549381 /* Anchor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Anchor.swift; sourceTree = "<group>"; };
 		8ED8CBD025D8B1FF00A6234F /* DiagramModelController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DiagramModelController.swift; sourceTree = "<group>"; };
 		8EE311E524A8FE01003C7AF6 /* AudioToolbox.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AudioToolbox.framework; path = Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.15.sdk/System/Library/Frameworks/AudioToolbox.framework; sourceTree = DEVELOPER_DIR; };
@@ -461,7 +459,6 @@
 				8E77BDA3253F5AA600FD51E5 /* RegionTemplateEditor.swift */,
 				8E2BA1CF24A3BDD7002D997F /* PreferencesView.swift */,
 				8EADC2A824D64E1200C5D3D8 /* SampleSelector.swift */,
-				8ECB309825462C2D00DC79A8 /* SaveButton.swift */,
 			);
 			path = SwiftUI;
 			sourceTree = "<group>";
@@ -660,7 +657,6 @@
 				8ED3B1B62360DA0D00549381 /* Anchor.swift in Sources */,
 				8E4ACA842447905E00575538 /* HamburgerCell.swift in Sources */,
 				8E4ACA862447935600575538 /* HamburgerLayer.swift in Sources */,
-				8ECB309925462C2D00DC79A8 /* SaveButton.swift in Sources */,
 				8EF9166B227926BC00B51F17 /* LadderView.swift in Sources */,
 				8E2439F624B14F770044AEAB /* Interval.swift in Sources */,
 				8ECA9FB72470A1020016D939 /* LadderTemplate.swift in Sources */,

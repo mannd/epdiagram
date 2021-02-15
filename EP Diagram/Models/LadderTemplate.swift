@@ -14,7 +14,6 @@ struct LadderTemplate: Codable, Equatable {
     var name: String = ""
     var description: String = ""
     var regionTemplates = [RegionTemplate]()
-    var isDefaultTemplate: Bool = false
 
     // Returns a basic ladder (A, AV, V).
     static func defaultTemplate() -> LadderTemplate {
@@ -38,5 +37,13 @@ struct LadderTemplate: Codable, Equatable {
 
     static func defaultTemplates() -> [LadderTemplate] {
         return [defaultTemplate(), defaultTemplate2()]
+    }
+
+    static func templates() -> [LadderTemplate] {
+        var ladderTemplates = FileIO.retrieve(FileIO.userTemplateFile, from: .documents, as: [LadderTemplate].self) ?? LadderTemplate.defaultTemplates()
+        if ladderTemplates.isEmpty {
+            ladderTemplates = LadderTemplate.defaultTemplates()
+        }
+        return ladderTemplates
     }
 }

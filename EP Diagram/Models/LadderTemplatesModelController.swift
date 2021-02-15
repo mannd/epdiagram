@@ -6,11 +6,12 @@
 //  Copyright © 2021 EP Studios. All rights reserved.
 //
 
-import Foundation
+import UIKit
 import Combine
 import os.log
 
 class LadderTemplatesModelController: ObservableObject {
+    let viewController: UIViewController?
     @Published var ladderTemplates: [LadderTemplate] = [] {
         didSet {
             print("ladder templates changed")
@@ -18,16 +19,14 @@ class LadderTemplatesModelController: ObservableObject {
         }
     }
 
-    init(ladderTemplates: [LadderTemplate]) {
+    init(ladderTemplates: [LadderTemplate], viewController: UIViewController? = nil) {
+        self.viewController = viewController
         self.ladderTemplates = ladderTemplates
     }
 
-    init?() {
-        var ladderTemplates = FileIO.retrieve(FileIO.userTemplateFile, from: .documents, as: [LadderTemplate].self) ?? LadderTemplate.defaultTemplates()
-        if ladderTemplates.isEmpty {
-            ladderTemplates = LadderTemplate.defaultTemplates()
-        }
-        self.ladderTemplates = ladderTemplates
+    init(viewController: UIViewController? = nil) {
+        self.viewController = viewController
+        self.ladderTemplates = LadderTemplate.templates()
     }
 
     func saveTemplates() {
@@ -36,7 +35,9 @@ class LadderTemplatesModelController: ObservableObject {
             try FileIO.store(ladderTemplates, to: .documents, withFileName: FileIO.userTemplateFile)
         } catch {
             os_log("File error: %s", log: .errors, type: .error, error.localizedDescription)
-//            UserAlert.showFileError(viewController: self, error: error)
+            if let viewController = viewController {
+                UserAlert.showFileError(viewController: viewController, error: error)
+            }
         }
     }
 }

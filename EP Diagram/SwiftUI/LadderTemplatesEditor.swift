@@ -18,9 +18,10 @@ struct LadderTemplatesEditor: View {
     @GestureState private var dragOffset = CGSize.zero
 
     var body: some View {
-        VStack {
-            NavigationView {
-                VStack {
+        //        VStack {
+        NavigationView {
+            Form {
+                Section(header: Text("First in list is default ladder for new diagrams")) {
                     List() {
                         ForEach(ladderTemplatesController.ladderTemplates) { ladderTemplate in
                             NavigationLink(destination: LadderTemplateEditor(ladderTemplatesController: ladderTemplatesController, ladderTemplate: self.selectedLadderTemplate(id: ladderTemplate.id))) {
@@ -38,14 +39,16 @@ struct LadderTemplatesEditor: View {
                             self.ladderTemplatesController.ladderTemplates.move(fromOffsets: indices, toOffset: newOffset)
                         }
                     }
-                }.padding()
-                .navigationBarTitle(Text("Ladders"), displayMode: .inline)
-                .navigationBarItems(leading: EditButton(), trailing: addButton)
-                .environment(\.editMode, $editMode)
+                }
+
             }
-            // Force full screen for this view even on iPad
-            .navigationViewStyle(StackNavigationViewStyle())
+            .navigationBarTitle(Text("Ladders"), displayMode: .inline)
+            .navigationBarItems(leading: EditButton(), trailing: addButton)
+            .environment(\.editMode, $editMode)
         }
+        // Force full screen for this view even on iPad
+        .navigationViewStyle(StackNavigationViewStyle())
+
     }
 
     // We create a binding for each template, otherwise delete does not work.  See https://troz.net/post/2019/swiftui-data-flow/ where this is the least ugly of several ugly work arounds.

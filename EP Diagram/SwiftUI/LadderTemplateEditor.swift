@@ -28,11 +28,6 @@ struct LadderTemplateEditor: View {
                     Section(header: Text("Description")) {
                         TextEditor(text: $ladderTemplate.description)
                     }
-                    Section(header: Text("Default Ladder")) {
-                        Toggle(isOn: $ladderTemplate.isDefaultTemplate) {
-                            Text("Default ladder for new diagrams")
-                        }
-                    }
                     Section(header: Text("Regions")) {
                         RegionListView(ladderTemplatesController: ladderTemplatesController, ladderTemplate: $ladderTemplate)
                     }
