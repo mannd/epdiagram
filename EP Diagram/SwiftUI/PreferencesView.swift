@@ -17,7 +17,7 @@ struct PreferencesView: View {
     @AppStorage(Preferences.defaultShowConductionTimesKey) var showConductionTimes: Bool = Preferences.showConductionTimes
     @AppStorage(Preferences.defaultSnapMarksKey) var snapMarks: Bool = Preferences.snapMarks
     @AppStorage(Preferences.defaultMarkStyleKey) var markStyle = Preferences.markStyle
-    @AppStorage(Preferences.defaultShowLabelDescriptionKey) var showLabelDescription = Preferences.showLabelDescription
+    @AppStorage(Preferences.defaultLabelDescriptionVisibilityKey) var labelDescriptionVisibility = Preferences.labelDescriptionVisibility
 
 // Pass Diagram as binding to allow changing non-UserDefaults settings
     // @Binding var diagram: Diagram
@@ -29,17 +29,15 @@ struct PreferencesView: View {
         NavigationView {
             VStack {
                 Form {
-                    Section(header: Text("Region preferences")) {
-                        Picker(selection: $showLabelDescription, label: Text("Show label description"), content: {
-                            Text("Don't show").tag(TextVisibility.invisible.rawValue)
-                            Text("Show").tag(TextVisibility.visibility.rawValue)
-                            Text("Show if fits").tag(TextVisibility.visibleIfFits.rawValue)
+                    Section(header: Text("Ladder")) {
+                        Picker(selection: $labelDescriptionVisibility, label: Text("Label description visibility"), content: {
+                            Text("Invisible").tag(TextVisibility.invisible.rawValue)
+                            Text("Visible").tag(TextVisibility.visibility.rawValue)
+                            Text("Visible if fits").tag(TextVisibility.visibleIfFits.rawValue)
                         })
-//                        Toggle(isOn: $showLabelDescription) {
-//                            Text("Show label description")
-//                        }
                     }
-                    Section(header: Text("Mark preferences")) {
+                    Section(header: Text("Region")) {}
+                    Section(header: Text("Mark")) {
                         Stepper("Mark width = \(lineWidth)", value: $lineWidth, in: 1...6, step: 1)
                         Stepper("Cursor width = \(cursorLineWidth)", value: $cursorLineWidth, in: 1...6, step: 1)
                         Toggle(isOn: $showImpulseOrigin) {
@@ -63,7 +61,6 @@ struct PreferencesView: View {
                             Text("Dotted").tag(Mark.Style.dotted.rawValue)
                         })
                     }
-                    Section(header: Text("Defaults for new dagrams"), content: {})
                 }
             }
             .navigationBarTitle("Preferences", displayMode: .inline)

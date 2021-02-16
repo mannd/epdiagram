@@ -108,7 +108,7 @@ final class DiagramViewController: UIViewController {
         self.ladderView.deleteAllInLadder()
     }
 
-    lazy var adjustLeftMarginAction = UIAction(title: L("Adjust left margin"), image: UIImage(systemName: "arrowtriangle.left.and.line.vertical.and.arrowtriangle.right")) { action in 
+    lazy var adjustLeftMarginAction = UIAction(title: L("Adjust left margin"), image: UIImage(systemName: "arrowtriangle.left.and.line.vertical.and.arrowtriangle.right")) { action in
         self.showAdjustLeftMarginMenu()
     }
 
@@ -721,15 +721,16 @@ final class DiagramViewController: UIViewController {
         setViewsNeedDisplay()
     }
 
+
+    // no restore state here
     @objc func cancelSelect() {
         os_log("cancelSelect()", log: OSLog.action, type: .info)
         showMainMenu()
         setMode(.normal)
         // FIXME: This doesn't restore state
-        ladderView.restoreState()
-        //        ladderView.endZoning()
-        //        ladderView.normalizeAllMarks()
-        //        ladderView.setNeedsDisplay()
+        ladderView.endZoning()
+        ladderView.normalizeAllMarks()
+        ladderView.setNeedsDisplay()
     }
 
     @objc func cancelConnectMode() {
@@ -1104,7 +1105,7 @@ extension DiagramViewController {
         ladderView.showConductionTimes = UserDefaults.standard.bool(forKey: Preferences.defaultShowConductionTimesKey)
         ladderView.snapMarks = UserDefaults.standard.bool(forKey: Preferences.defaultSnapMarksKey)
         ladderView.defaultMarkStyle = Mark.Style(rawValue: UserDefaults.standard.integer(forKey: Preferences.defaultMarkStyleKey)) ?? .solid
-        ladderView.showLabelDescription = TextVisibility(rawValue: UserDefaults.standard.integer(forKey: Preferences.defaultShowLabelDescriptionKey)) ?? .invisible
+        ladderView.showLabelDescription = TextVisibility(rawValue: UserDefaults.standard.integer(forKey: Preferences.defaultLabelDescriptionVisibilityKey)) ?? .invisible
     }
 
     @objc func resolveFileConflicts() {
@@ -1207,4 +1208,3 @@ extension DiagramViewController {
         }
     }
 }
-

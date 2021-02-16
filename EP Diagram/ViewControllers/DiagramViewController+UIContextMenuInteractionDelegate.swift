@@ -11,7 +11,7 @@ import os.log
 
 extension DiagramViewController: UIContextMenuInteractionDelegate {
 
-    // Completion is called after menu appears.
+    // Will display menu
     func contextMenuInteraction(_ interaction: UIContextMenuInteraction, willDisplayMenuFor configuration: UIContextMenuConfiguration, animator: UIContextMenuInteractionAnimating?) {
         print("****contextMenuInteraction")
         guard let locationInLadder = self.longPressLocationInLadder else { return }
@@ -61,22 +61,23 @@ extension DiagramViewController: UIContextMenuInteractionDelegate {
             return normalModeMenu(forLocation: location)
         case .select:
             return selectModeMenu(forLocation: location)
-        case .calibration, .connect:
+        case .calibration, .connect, .menu:
             return nil
         }
     }
 
-    // This is called with each drag, and after menu appears.
+    // contextMenuInteraction(_:willEndFor:...)  This is called with each drag, and after menu appears.
     func contextMenuInteraction(_ interaction: UIContextMenuInteraction, willEndFor configuration: UIContextMenuConfiguration, animator: UIContextMenuInteractionAnimating?) {
         print("****contextMenuInteraction willEndFor")
-        animator?.addCompletion {
-            print("****contextMenuInteraction willEndFor completion")
-            // Filter out all the time this abortedly appears.
-            guard self.menuAppeared, !self.prolongSelectState else { return }
+        // Filter out all the time this abortedly appears.
+        guard self.menuAppeared else { return }
+        if !self.prolongSelectState {
             self.ladderView.restoreState()
-            self.separatorView?.isHidden = false
-            self.menuAppeared = false
-        }
+        } else {
+            self.ladderView.mode = .menu
+        } // else restore state with done button of toolbar menu
+        self.menuAppeared = false
+        self.separatorView?.isHidden = false
     }
 
     func normalModeMenu(forLocation location: CGPoint) -> UIContextMenuConfiguration? {
@@ -100,8 +101,6 @@ extension DiagramViewController: UIContextMenuInteractionDelegate {
     func selectModeMenu(forLocation location: CGPoint) -> UIContextMenuConfiguration? {
         return regionContextMenuConfiguration(at: location)
     }
-
-
 
     func markContextMenuConfiguration(at location: CGPoint) -> UIContextMenuConfiguration {
         return UIContextMenuConfiguration(identifier: nil, previewProvider: nil) {_ in

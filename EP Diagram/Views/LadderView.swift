@@ -84,6 +84,7 @@ final class LadderView: ScaledView {
 
     private var savedActiveRegion: Region?
     private var savedAttachedMark: Mark?
+    private var savedMode: Mode = .normal
 
     var mode: Mode = .normal
 
@@ -177,6 +178,8 @@ final class LadderView: ScaledView {
             performMarkConnecting(tapLocationInLadder)
         case .normal:
             performNormalTap(tapLocationInLadder)
+        case .menu:
+            break
         default:
             break
         }
@@ -1035,7 +1038,7 @@ final class LadderView: ScaledView {
         guard showLabelDescription != .invisible else { return }
         let descriptionAttributes: [NSAttributedString.Key: Any] = [
             .paragraphStyle: paragraphStyle,
-            .font: UIFont.systemFont(ofSize: 10.0),
+            .font: UIFont.systemFont(ofSize: 12.0),
             .foregroundColor: region.mode == .active ? red : blue
         ]
         let descriptionText = NSAttributedString(string: region.longDescription, attributes: descriptionAttributes)
@@ -1137,7 +1140,7 @@ final class LadderView: ScaledView {
                 let scaledFirstX = transformToScaledViewPositionX(regionPositionX: firstProximalX)
                 let scaledSecondX = transformToScaledViewPositionX(regionPositionX: secondProximalX)
                 let halfwayPosition = (scaledFirstX + scaledSecondX) / 2.0
-                let value = lround(Double(interval.proximalValue ?? 0))
+                let value = formatValue(interval.proximalValue, usingCalFactor: calibration.currentCalFactor)
                 let text = "\(value)"
                 var origin = CGPoint(x: halfwayPosition, y: region.proximalBoundary)
                 let size = text.size(withAttributes: measurementTextAttributes)
@@ -1149,7 +1152,7 @@ final class LadderView: ScaledView {
                 let scaledFirstX = transformToScaledViewPositionX(regionPositionX: firstDistalX)
                 let scaledSecondX = transformToScaledViewPositionX(regionPositionX: secondDistalX)
                 let halfwayPosition = (scaledFirstX + scaledSecondX) / 2.0
-                let value = lround(Double(interval.distalValue ?? 0))
+                let value = formatValue(interval.distalValue, usingCalFactor: calibration.currentCalFactor)
                 let text = "\(value)"
                 var origin = CGPoint(x: halfwayPosition, y: region.distalBoundary)
                 let size = text.size(withAttributes: measurementTextAttributes)
@@ -1158,6 +1161,10 @@ final class LadderView: ScaledView {
                 drawIntervalText(origin: origin, size: size, text: text, context: context, attributes: measurementTextAttributes)
             }
         }
+    }
+
+    private func formatValue(_ value: CGFloat?, usingCalFactor calFactor: CGFloat) -> Int {
+        return lround(Double(value ?? 0)  * Double(calFactor))
     }
 
     private func drawIntervalText(origin: CGPoint, size: CGSize, text: String, context: CGContext, attributes: [NSAttributedString.Key: Any]) {
@@ -1838,19 +1845,21 @@ extension LadderView: LadderViewDelegate {
     }
 
     func saveState() {
-        os_log("saveState() - LadderView", log: .default, type: .default)
+        os_log("****saveState() - LadderView", log: .default, type: .default)
         savedActiveRegion = activeRegion
         activeRegion = nil
+        savedMode = mode
         savedAttachedMark = ladder.attachedMark
         ladder.normalizeAllMarks()
         setNeedsDisplay()
     }
 
     func restoreState() {
-        os_log("restoreState() - LadderView", log: .default, type: .default)
+        os_log("****restoreState() - LadderView", log: .default, type: .default)
         // FIXME: this isn't right.  Need to do this on return to normal state.
+        ladder.normalizeAllMarks()
+        mode = savedMode
         if mode == .normal {
-            ladder.normalizeAllMarks()
             ladder.zone = Zone()
             activeRegion = savedActiveRegion
             ladder.attachedMark = savedAttachedMark

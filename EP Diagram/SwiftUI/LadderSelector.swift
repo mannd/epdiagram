@@ -28,7 +28,7 @@ struct LadderSelector: View {
                         ForEach(0 ..< ladderTemplates.count) {
                             Text(self.ladderTemplates[$0].name)
                         }
-                        }.pickerStyle(WheelPickerStyle()).padding()
+                    }.pickerStyle(WheelPickerStyle()).padding()
                 }
                 Section(header: Text("Ledder details")) {
                     HStack {

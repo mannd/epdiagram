@@ -20,8 +20,9 @@ struct Preferences {
     static let defaultSnapMarksKey = "defaultSnapMarksKey"
     static let defaultLinkMarksKey = "defaultLinkMarksKey"
     static let defaultMarkStyleKey = "defaultMarkStyleKey"
-    static let defaultShowLabelDescriptionKey = "defaultShowLabelDescriptionKey"
+    static let defaultLabelDescriptionVisibilityKey = "defaultLabelDescriptionVisibilityKey"
     static let defaultLeftMarginKey = "defaultLeftMarginKey"
+    static let defaultCaliperColorKey = "defaultCaliperColorKey"
 
     // Stored as Int, converted to CGFloat when used.
     static var lineWidth: Int = 2
@@ -32,8 +33,9 @@ struct Preferences {
     static var showConductionTimes = true
     static var snapMarks = true
     static var markStyle = Mark.Style.solid.rawValue
-    static var showLabelDescription = TextVisibility.invisible.rawValue
+    static var labelDescriptionVisibility = TextVisibility.invisible.rawValue
     static var leftMargin: Double = 50
+
 
     // TODO: Update when new prefs added.
     static func defaults() -> [String: Any] {
@@ -46,9 +48,40 @@ struct Preferences {
             Preferences.defaultShowConductionTimesKey: Preferences.showConductionTimes,
             Preferences.defaultSnapMarksKey: Preferences.snapMarks,
             Preferences.defaultMarkStyleKey: Preferences.markStyle,
-            Preferences.defaultShowLabelDescriptionKey: Preferences.showLabelDescription,
+            Preferences.defaultLabelDescriptionVisibilityKey: Preferences.labelDescriptionVisibility,
             Preferences.defaultLeftMarginKey: Preferences.leftMargin,
         ]
         return defaultPreferences
     }
+}
+
+// Possibly use to add colors to user defaults...
+// From https://gist.github.com/HassanElDesouky/373bcf4f1002f77557814a3e24fa4759
+extension UserDefaults {
+  func colorForKey(key: String) -> UIColor? {
+    var colorReturnded: UIColor?
+    if let colorData = data(forKey: key) {
+      do {
+        if let color = try NSKeyedUnarchiver.unarchiveTopLevelObjectWithData(colorData) as? UIColor {
+          colorReturnded = color
+        }
+      } catch {
+        print("Error UserDefaults")
+      }
+    }
+    return colorReturnded
+  }
+
+  func setColor(color: UIColor?, forKey key: String) {
+    var colorData: NSData?
+    if let color = color {
+      do {
+        let data = try NSKeyedArchiver.archivedData(withRootObject: color, requiringSecureCoding: false) as NSData?
+        colorData = data
+      } catch {
+        print("Error UserDefaults")
+      }
+    }
+    set(colorData, forKey: key)
+  }
 }

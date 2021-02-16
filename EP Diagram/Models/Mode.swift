@@ -8,11 +8,12 @@
 
 import Foundation
 
-// Mode is used by both LadderView and CalipersView, and set by DiagramView.
+// Mode is used by both LadderView and CalipersView.
 enum Mode {
     case normal
     case calibration
     case connect
     case select
+    case menu  // a toolbar menu is active
 }
 
