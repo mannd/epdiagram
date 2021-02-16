@@ -10,6 +10,8 @@ import UIKit
 import OSLog
 
 final class LadderView: ScaledView {
+
+
     // TODO: These all may need some tweaking...
     private let ladderPaddingMultiplier: CGFloat = 0.5
     private let accuracy: CGFloat = 20
@@ -44,7 +46,7 @@ final class LadderView: ScaledView {
             }
         }
     }
-    var showLabelDescription = false
+    var showLabelDescription: TextVisibility = .invisible
 
     // TODO: make user preferences
     // Colors
@@ -118,7 +120,7 @@ final class LadderView: ScaledView {
         initializeRegions()
         removeConnectedMarks()
         // FIXME: snap marks on startup
-       
+
         // Draw border around view.
         layer.masksToBounds = true
         layer.borderColor = UIColor.systemBlue.cgColor
@@ -773,9 +775,9 @@ final class LadderView: ScaledView {
         for region in zone.regions {
             for mark in region.marks {
                 if (mark.segment.proximal.x > zoneMin
-                    || mark.segment.distal.x > zoneMin)
+                        || mark.segment.distal.x > zoneMin)
                     && (mark.segment.proximal.x < zoneMax
-                    || mark.segment.distal.x < zoneMax) {
+                            || mark.segment.distal.x < zoneMax) {
                     mark.mode = .selected
                 } else {
                     mark.mode = .normal
@@ -1030,14 +1032,17 @@ final class LadderView: ScaledView {
         labelText.draw(in: labelRect)
 
         // FIXME: Raise up label a bit to allow room for description
-        if showLabelDescription {
-            let descriptionAttributes: [NSAttributedString.Key: Any] = [
-                .paragraphStyle: paragraphStyle,
-                .font: UIFont.systemFont(ofSize: 10.0),
-                .foregroundColor: region.mode == .active ? red : blue
-            ]
+        guard showLabelDescription != .invisible else { return }
+        let descriptionAttributes: [NSAttributedString.Key: Any] = [
+            .paragraphStyle: paragraphStyle,
+            .font: UIFont.systemFont(ofSize: 10.0),
+            .foregroundColor: region.mode == .active ? red : blue
+        ]
+        let descriptionText = NSAttributedString(string: region.longDescription, attributes: descriptionAttributes)
+
+        let descriptionSize: CGSize = region.longDescription.size(withAttributes: descriptionAttributes)
+        if showLabelDescription == .visibility || (showLabelDescription == .visibleIfFits && descriptionSize.width < stringRect.width) {
             let descriptionRect = CGRect(x: 0, y: labelRect.minY + labelRect.height, width: rect.origin.x, height: stringRect.height - labelRect.height)
-            let descriptionText = NSAttributedString(string: region.longDescription, attributes: descriptionAttributes)
 
             descriptionText.draw(in: descriptionRect)
         }
@@ -1751,8 +1756,8 @@ extension LadderView: LadderViewDelegate {
                 // FIXME: This causes unexpected straightening of mark
                 // Should not link vertical marks.  Handle in assessCloseness.50
                 else { // vertical mark
-//                    mark.segment.proximal.x = middleMark.segment.proximal.x
-//                    mark.segment.distal.x = middleMark.segment.proximal.x
+                    //                    mark.segment.proximal.x = middleMark.segment.proximal.x
+                    //                    mark.segment.distal.x = middleMark.segment.proximal.x
                 }
             }
             else {
@@ -1762,8 +1767,8 @@ extension LadderView: LadderViewDelegate {
                 }
                 // FIXME: This causes unexpected straightening of mark
                 else { // vertical mark
-//                    mark.segment.proximal.x = middleMark.segment.distal.x
-//                    mark.segment.distal.x = middleMark.segment.distal.x
+                    //                    mark.segment.proximal.x = middleMark.segment.distal.x
+                    //                    mark.segment.distal.x = middleMark.segment.distal.x
                 }
             }
         }
@@ -1854,3 +1859,12 @@ extension LadderView: LadderViewDelegate {
         }
     }
 }
+
+// MARK: - enums
+
+enum TextVisibility: Int, Codable {
+    case visibility
+    case invisible
+    case visibleIfFits
+}
+

@@ -32,7 +32,7 @@ struct Preferences {
     static var showConductionTimes = true
     static var snapMarks = true
     static var markStyle = Mark.Style.solid.rawValue
-    static var showLabelDescription = false
+    static var showLabelDescription = TextVisibility.invisible.rawValue
     static var leftMargin: Double = 50
 
     // TODO: Update when new prefs added.

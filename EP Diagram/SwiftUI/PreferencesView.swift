@@ -18,7 +18,6 @@ struct PreferencesView: View {
     @AppStorage(Preferences.defaultSnapMarksKey) var snapMarks: Bool = Preferences.snapMarks
     @AppStorage(Preferences.defaultMarkStyleKey) var markStyle = Preferences.markStyle
     @AppStorage(Preferences.defaultShowLabelDescriptionKey) var showLabelDescription = Preferences.showLabelDescription
-    @AppStorage(Preferences.defaultLeftMarginKey) var leftMargin = Preferences.leftMargin
 
 // Pass Diagram as binding to allow changing non-UserDefaults settings
     // @Binding var diagram: Diagram
@@ -31,9 +30,14 @@ struct PreferencesView: View {
             VStack {
                 Form {
                     Section(header: Text("Region preferences")) {
-                        Toggle(isOn: $diagramController.diagram.ladder.marksAreVisible) {
-                            Text("Show label description")
-                        }
+                        Picker(selection: $showLabelDescription, label: Text("Show label description"), content: {
+                            Text("Don't show").tag(TextVisibility.invisible.rawValue)
+                            Text("Show").tag(TextVisibility.visibility.rawValue)
+                            Text("Show if fits").tag(TextVisibility.visibleIfFits.rawValue)
+                        })
+//                        Toggle(isOn: $showLabelDescription) {
+//                            Text("Show label description")
+//                        }
                     }
                     Section(header: Text("Mark preferences")) {
                         Stepper("Mark width = \(lineWidth)", value: $lineWidth, in: 1...6, step: 1)
