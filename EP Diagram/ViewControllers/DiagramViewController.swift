@@ -125,8 +125,6 @@ final class DiagramViewController: UIViewController {
     static let restorationContentOffsetXKey = "restorationContentOffsetXKey"
     static let restorationContentOffsetYKey = "restorationContentOffsetYKey"
     static let restorationZoomKey = "restorationZoomKey"
-    static let restorationIsCalibratedKey = "restorationIsCalibrated"
-    static let restorationCalFactorKey = "restorationCalFactorKey"
     static let restorationFileNameKey = "restorationFileNameKey"
     static let restorationNeededKey = "restorationNeededKey"
     static let restorationTransformKey = "restorationTranslateKey"
@@ -361,13 +359,6 @@ final class DiagramViewController: UIViewController {
             }
             // FIXME: Temporary
             //            imageScrollView.setContentOffset(restorationContentOffset, animated: true)
-
-            if let isCalibrated = restorationInfo?[Self.restorationIsCalibratedKey] as? Bool {
-                cursorView.setIsCalibrated(isCalibrated)
-            }
-            if let calFactor = restorationInfo?[Self.restorationCalFactorKey] as? CGFloat {
-                cursorView.calFactor = calFactor
-            }
             if let transformString = restorationInfo?[Self.restorationTransformKey] as? String {
                 let transform = NSCoder.cgAffineTransform(for: transformString)
                 imageView.transform = transform
@@ -409,14 +400,23 @@ final class DiagramViewController: UIViewController {
             Self.restorationContentOffsetXKey: imageScrollView.contentOffset.x / imageScrollView.zoomScale,
             Self.restorationContentOffsetYKey: imageScrollView.contentOffset.y,
             Self.restorationZoomKey: imageScrollView.zoomScale,
-            Self.restorationIsCalibratedKey: cursorView.isCalibrated(),
-            Self.restorationCalFactorKey: cursorView.calFactor,
             Self.restorationFileNameKey: currentDocumentURL,
             Self.restorationDoRestorationKey: true,
             HelpViewController.inHelpKey: false,
             Self.restorationTransformKey: NSCoder.string(for: imageView.transform),
         ]
         activity.addUserInfoEntries(from: info)
+    }
+
+    private func showDebugRestorationInfo() {
+        // For debugging
+        if let restorationURL = DiagramIO.getRestorationURL() {
+            os_log("restorationURL path = %s", log: .debugging, type: .debug, restorationURL.path)
+            let paths = FileIO.enumerateDirectory(restorationURL)
+            for path in paths {
+                os_log("    %s", log: .debugging, type: .debug, path)
+            }
+        }
     }
 
     func loadSampleDiagram(_ diagram: Diagram) {
@@ -456,16 +456,7 @@ final class DiagramViewController: UIViewController {
         imageScrollView.resignFirstResponder()
     }
 
-    private func showDebugRestorationInfo() {
-        // For debugging
-        if let restorationURL = DiagramIO.getRestorationURL() {
-            os_log("restorationURL path = %s", log: .debugging, type: .debug, restorationURL.path)
-            let paths = FileIO.enumerateDirectory(restorationURL)
-            for path in paths {
-                os_log("    %s", log: .debugging, type: .debug, path)
-            }
-        }
-    }
+
 
     func setTitle() {
         if let name = currentDocument?.name(), !name.isEmpty {

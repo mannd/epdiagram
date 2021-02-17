@@ -188,7 +188,14 @@ class LadderTests: XCTestCase {
         XCTAssertEqual(mark.regionIndex, 0)
         ladder.addMark(mark, toRegion: ladder.region(atIndex: 1))
         XCTAssertEqual(mark.regionIndex, 1)
+    }
 
+    func testFreshLadder() {
+        ladder.addMark(Mark(), toRegion: ladder.region(atIndex: 0))
+        let newLadder = Ladder.freshLadder(fromLadder: ladder)
+        XCTAssertEqual(newLadder.regions.count, ladder.regions.count)
+        XCTAssertEqual(ladder.regions[0].marks.count, 1)
+        XCTAssertEqual(newLadder.regions[0].marks.count, 0)
 
     }
 }

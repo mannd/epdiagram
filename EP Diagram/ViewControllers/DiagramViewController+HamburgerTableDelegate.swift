@@ -318,7 +318,7 @@ extension DiagramViewController: HamburgerTableDelegate, UIImagePickerController
         os_log("setDiagramImage(_:)", log: .action, type: .info)
         currentDocument?.undoManager.registerUndo(withTarget: self, selector: #selector(undoablySetDiagramImage), object: imageView.image)
         NotificationCenter.default.post(name: .didUndoableAction, object: nil)
-        diagram.ladder.clear()
+//        diagram.ladder.clear()
         let scaledImage = scaleImageForImageView(image)
         diagram.image = scaledImage
         imageView.image = scaledImage
@@ -402,7 +402,15 @@ extension DiagramViewController: HamburgerTableDelegate, UIImagePickerController
         let chosenImage = info[.editedImage] as? UIImage
         // Images from photos are never upscaled.
         diagram.imageIsUpscaled = false
+        currentDocument?.undoManager.beginUndoGrouping()
+        undoablySetCalibration(Calibration())
+        undoablySetLadder(Ladder.freshLadder(fromLadder: diagram.ladder))
         undoablySetDiagramImage(chosenImage)
+        mode = .normal
+        // need to undoably clear current ladder
+//        undoablySetLadder(<#T##ladder: Ladder##Ladder#>)
+
+        currentDocument?.undoManager.endUndoGrouping()
         picker.dismiss(animated: true, completion: nil)
     }
 
@@ -425,7 +433,13 @@ extension DiagramViewController: PHPickerViewControllerDelegate {
                         if let image = image as? UIImage {
                             // Only PDFs are upscaled
                             self.diagram.imageIsUpscaled = false
+                            self.currentDocument?.undoManager.beginUndoGrouping()
+                            self.undoablySetCalibration(Calibration())
+                            // FIXME: ladder not appearing here.
+//                            self.undoablySetLadder(Ladder.freshLadder(fromLadder: self.diagram.ladder))
                             self.undoablySetDiagramImage(image)
+                            self.currentDocument?.undoManager.endUndoGrouping()
+                            self.mode = .normal
                         } else {
                             os_log("Error displaying image", log: .errors, type: .error)
                             UserAlert.showMessage(viewController: self, title: L("Error Loading Image"), message: L("Selected image could not be loaded."))

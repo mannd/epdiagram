@@ -19,6 +19,7 @@ class Ladder: NSObject, Codable {
     static let maxRegionCount = 5
     static let minRegionCount = 1
 
+    let template: LadderTemplate
     var name: String
     var longDescription: String = ""
     var leftMargin: CGFloat = 50
@@ -41,6 +42,7 @@ class Ladder: NSObject, Codable {
 
     init(template: LadderTemplate) {
         os_log("init ladder from template", log: .action, type: .info)
+        self.template = template
         name = template.name
         longDescription = template.description
         leftMargin = template.leftMargin
@@ -398,6 +400,10 @@ class Ladder: NSObject, Codable {
     // Returns a basic ladder (A, AV, V).
     static func defaultLadder() -> Ladder {
         return Ladder(template: LadderTemplate.defaultTemplate())
+    }
+
+    static func freshLadder(fromLadder ladder: Ladder) -> Ladder {
+        return Ladder(template: ladder.template )
     }
 }
 
