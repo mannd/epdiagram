@@ -18,6 +18,7 @@ struct PreferencesView: View {
     @AppStorage(Preferences.defaultSnapMarksKey) var snapMarks: Bool = Preferences.snapMarks
     @AppStorage(Preferences.defaultMarkStyleKey) var markStyle = Preferences.markStyle
     @AppStorage(Preferences.defaultLabelDescriptionVisibilityKey) var labelDescriptionVisibility = Preferences.labelDescriptionVisibility
+    @AppStorage(Preferences.defaultPlaySoundsKey) var playSounds = Preferences.playSounds
 
 // Pass Diagram as binding to allow changing non-UserDefaults settings
     // @Binding var diagram: Diagram
@@ -29,6 +30,11 @@ struct PreferencesView: View {
         NavigationView {
             VStack {
                 Form {
+                    Section(header: Text("General")) {
+                        Toggle(isOn: $playSounds) {
+                            Text("Play sounds")
+                        }
+                    }
                     Section(header: Text("Ladder")) {
                         Picker(selection: $labelDescriptionVisibility, label: Text("Label description visibility"), content: {
                             Text("Invisible").tag(TextVisibility.invisible.rawValue)

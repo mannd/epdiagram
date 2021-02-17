@@ -44,11 +44,13 @@ extension DiagramViewController: DiagramViewControllerDelegate {
 
     func saveTemplates(_ templates: [LadderTemplate]) {
         os_log("saveTemplates()", log: .action, type: .info)
-        do {
-            try FileIO.store(templates, to: .documents, withFileName: FileIO.userTemplateFile)
-        } catch {
-            os_log("File error: %s", log: .errors, type: .error, error.localizedDescription)
-            UserAlert.showFileError(viewController: self, error: error)
+        DispatchQueue.global().async {
+            do {
+                try FileIO.store(templates, to: .documents, withFileName: FileIO.userTemplateFile)
+            } catch {
+                os_log("File error: %s", log: .errors, type: .error, error.localizedDescription)
+                UserAlert.showFileError(viewController: self, error: error)
+            }
         }
     }
 

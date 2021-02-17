@@ -27,6 +27,8 @@ final class DiagramViewController: UIViewController {
     static let defaultLeftMargin: CGFloat = 50
     static let minLeftMargin: Float = 30
     static let maxLeftMargin: Float = 100
+    static let minSlantAngle: Float = -45
+    static let maxSlantAngle: Float = 45
 
     // This margin is passed to other views.
     var leftMargin: CGFloat = defaultLeftMargin {
@@ -39,15 +41,15 @@ final class DiagramViewController: UIViewController {
         }
     }
 
-    // Buttons, menus
+    // Buttons, toolbars
     private let spacer = UIBarButtonItem(barButtonSystemItem: .flexibleSpace, target: nil, action: nil)
     private var undoButton: UIBarButtonItem = UIBarButtonItem()
     private var redoButton: UIBarButtonItem = UIBarButtonItem()
     private var selectButton: UIBarButtonItem = UIBarButtonItem()
-    private var mainMenuButtons: [UIBarButtonItem]?
-    private var selectMenuButtons: [UIBarButtonItem]?
-    private var connectMenuButtons: [UIBarButtonItem]?
-    private var calibrateMenuButtons: [UIBarButtonItem]?
+    private var mainToolbarButtons: [UIBarButtonItem]?
+    private var selectToolbarButtons: [UIBarButtonItem]?
+    private var connectToolbarButtons: [UIBarButtonItem]?
+    private var calibrateToolbarButtons: [UIBarButtonItem]?
 
     weak var diagramEditorDelegate: DiagramEditorDelegate?
     var currentDocument: DiagramDocument?
@@ -74,6 +76,7 @@ final class DiagramViewController: UIViewController {
         }
     }
     var preferences: Preferences = Preferences()
+    var playSounds: Bool = true
     // Set by screen delegate
     var restorationInfo: [AnyHashable: Any]?
 
@@ -97,6 +100,7 @@ final class DiagramViewController: UIViewController {
 
     var prolongSelectState = false // used to allow menus like slant to complete actions on selected marks
     var slantEndpoint: Mark.Endpoint = .proximal
+
     // Context menu actions
     lazy var deleteAction = UIAction(title: L("Delete selected mark(s)"), image: UIImage(systemName: "trash"), attributes: .destructive) { action in
         self.ladderView.deleteSelectedMarks()
@@ -109,7 +113,7 @@ final class DiagramViewController: UIViewController {
     }
 
     lazy var adjustLeftMarginAction = UIAction(title: L("Adjust left margin"), image: UIImage(systemName: "arrowtriangle.left.and.line.vertical.and.arrowtriangle.right")) { action in
-        self.showAdjustLeftMarginMenu()
+        self.showAdjustLeftMarginToolbar()
     }
 
     lazy var unlinkAll = UIAction(title: L("Unlink all marks")) { action in
@@ -146,11 +150,11 @@ final class DiagramViewController: UIViewController {
 
     lazy var slantProximalPivotAction = UIAction(title: L("Slant proximal pivot point")) { action in
         self.slantEndpoint = .proximal
-        self.showSlantMenu()
+        self.showSlantToolbar()
     }
     lazy var slantDistalPivotAction = UIAction(title: L("Slant distal pivot point")) { action in
         self.slantEndpoint = .distal
-        self.showSlantMenu()
+        self.showSlantToolbar()
     }
     lazy var slantMenu = UIMenu(title: L("Slant mark(s)..."), image: UIImage(systemName: "line.diagonal"), children: [self.slantProximalPivotAction, self.slantDistalPivotAction])
 
@@ -204,6 +208,8 @@ final class DiagramViewController: UIViewController {
         self.ladderView.removeRegion()
     }
 
+    // MARK: - Lifecycle
+    
     override func viewDidLoad() {
         os_log("viewDidLoad() - ViewController", log: OSLog.viewCycle, type: .info)
         super.viewDidLoad()
@@ -226,9 +232,6 @@ final class DiagramViewController: UIViewController {
         ladderView.currentDocument = currentDocument
 
         leftMargin = diagram.ladder.leftMargin
-        ladderView.leftMargin = leftMargin
-        cursorView.leftMargin = leftMargin
-        imageScrollView.leftMargin = leftMargin
 
         cursorView.calibration = diagram.calibration
         ladderView.calibration = diagram.calibration
@@ -268,7 +271,7 @@ final class DiagramViewController: UIViewController {
         navigationItem.setLeftBarButton(UIBarButtonItem(image: UIImage(named: "hamburger"), style: .plain, target: self, action: #selector(toggleHamburgerMenu)), animated: true)
 
         let snapshotButton = UIBarButtonItem(image: UIImage(systemName: "photo.on.rectangle"), style: .plain, target: self, action: #selector(snapshotDiagram))
-        let closeButton = UIBarButtonItem(image: UIImage(systemName: "xmark"), style: .done, target: self, action: #selector(closeAction))
+        let closeButton = UIBarButtonItem(image: UIImage(systemName: "xmark"), style: .done, target: self, action: #selector(closeDocument))
         navigationItem.setRightBarButtonItems([closeButton, snapshotButton], animated: true)
 
         // Set up touches
@@ -293,6 +296,87 @@ final class DiagramViewController: UIViewController {
         setupNotifications()
     }
 
+    override func viewDidAppear(_ animated: Bool) {
+        os_log("viewDidAppear() - ViewController", log: OSLog.viewCycle, type: .info)
+        super.viewDidAppear(animated)
+
+        // Need to set this here, after view draw, or Mac malpositions cursor at start of app.
+        imageScrollView.contentInset = UIEdgeInsets(top: 0, left: leftMargin, bottom: 0, right: 0)
+        ladderView.normalizeAllMarks()
+        self.userActivity = self.view.window?.windowScene?.userActivity
+        // See https://github.com/mattneub/Programming-iOS-Book-Examples/blob/master/bk2ch06p357StateSaveAndRestoreWithNSUserActivity/ch19p626pageController/SceneDelegate.swift
+        if restorationInfo != nil {
+            if let zoomScale = restorationInfo?[Self.restorationZoomKey] as? CGFloat {
+                imageScrollView.zoomScale = zoomScale
+            }
+            var restorationContentOffset = CGPoint()
+            // FIXME: Do we have to correct content offset Y too?
+            if let contentOffsetX = restorationInfo?[Self.restorationContentOffsetXKey] {
+                restorationContentOffset.x = (contentOffsetX as? CGFloat ?? 0) * imageScrollView.zoomScale
+            }
+            if let contentOffsetY = restorationInfo?[Self.restorationContentOffsetYKey] {
+                restorationContentOffset.y = contentOffsetY as? CGFloat ?? 0
+            }
+            // FIXME: Temporary
+            //            imageScrollView.setContentOffset(restorationContentOffset, animated: true)
+
+            if let isCalibrated = restorationInfo?[Self.restorationIsCalibratedKey] as? Bool {
+                cursorView.setIsCalibrated(isCalibrated)
+            }
+            if let calFactor = restorationInfo?[Self.restorationCalFactorKey] as? CGFloat {
+                cursorView.calFactor = calFactor
+            }
+            if let transformString = restorationInfo?[Self.restorationTransformKey] as? String {
+                let transform = NSCoder.cgAffineTransform(for: transformString)
+                imageView.transform = transform
+            }
+        }
+        // Only use the restorationInfo once
+        restorationInfo = nil
+        showMainToolbar()
+        updateUndoRedoButtons()
+        resetViews()
+    }
+
+    // We only want to use the restorationInfo once when view controller first appears.
+    var didFirstLayout = false
+    override func viewDidLayoutSubviews() {
+        // Called multiple times when showing context menu, so comment out for now.
+        //        os_log("viewDidLayoutSubviews() - ViewController", log: .viewCycle, type: .info)
+        if didFirstLayout { return }
+        didFirstLayout = true
+        // mark pointers in registry need to reestablished when diagram is reloaded
+        ladderView.reregisterAllMarks()
+        let info = restorationInfo
+        if let inHelp = info?[HelpViewController.inHelpKey] as? Bool, inHelp {
+            performShowHelpSegue()
+        }
+    }
+
+    override func viewWillDisappear(_ animated: Bool) {
+        super.viewWillDisappear(animated)
+        removeNotifications()
+    }
+
+    override func updateUserActivityState(_ activity: NSUserActivity) {
+        os_log("updateUserActivityState called")
+        let currentDocumentURL: String = currentDocument?.fileURL.lastPathComponent ?? ""
+        super.updateUserActivityState(activity)
+        let info: [AnyHashable: Any] = [
+            // FIXME: We are correcting just x for zoom scale.  Test if correcting y is needed too.
+            Self.restorationContentOffsetXKey: imageScrollView.contentOffset.x / imageScrollView.zoomScale,
+            Self.restorationContentOffsetYKey: imageScrollView.contentOffset.y,
+            Self.restorationZoomKey: imageScrollView.zoomScale,
+            Self.restorationIsCalibratedKey: cursorView.isCalibrated(),
+            Self.restorationCalFactorKey: cursorView.calFactor,
+            Self.restorationFileNameKey: currentDocumentURL,
+            Self.restorationDoRestorationKey: true,
+            HelpViewController.inHelpKey: false,
+            Self.restorationTransformKey: NSCoder.string(for: imageView.transform),
+        ]
+        activity.addUserInfoEntries(from: info)
+    }
+
     func setLeftMargin(_ margin: CGFloat) {
         let oldLeftMargin = leftMargin
         currentDocument?.undoManager.registerUndo(withTarget: self) { target in
@@ -302,45 +386,21 @@ final class DiagramViewController: UIViewController {
         leftMargin = margin
     }
 
-    func showAdjustLeftMarginMenu() {
-        guard let toolbar = navigationController?.toolbar else { return }
-        currentDocument?.undoManager.beginUndoGrouping() // will end when menu closed
-        prolongSelectState = true
-        let labelText = UITextField()
-        labelText.text = L("Adjust left margin")
-        let slider = UISlider()
-        slider.minimumValue = DiagramViewController.minLeftMargin
-        slider.maximumValue = DiagramViewController.maxLeftMargin
-        slider.setValue(Float(leftMargin), animated: false)
-        slider.addTarget(self, action: #selector(leftMarginSliderValueDidChange(_:)), for: .valueChanged)
-        let doneButton = UIButton(type: .system)
-        doneButton.setTitle(L("Done"), for: .normal)
-        doneButton.addTarget(self, action: #selector(closeAdjustLeftMarginMenu(_:)), for: .touchUpInside)
-        let stackView = UIStackView(frame: toolbar.frame)
-        stackView.distribution = .fill
-        stackView.axis = .horizontal
-        stackView.spacing = 8
-        stackView.addArrangedSubview(labelText)
-        stackView.addArrangedSubview(slider)
-        stackView.addArrangedSubview(doneButton)
-        setToolbarItems([UIBarButtonItem(customView: stackView)], animated: true)
-    }
-
     @objc func leftMarginSliderValueDidChange(_ sender: UISlider!) {
         let value = CGFloat(sender.value)
         setLeftMargin(value)
         ladderView.refresh()
-}
+    }
 
-    @objc func closeAdjustLeftMarginMenu(_ sender: UISlider!) {
+    @objc func closeAdjustLeftMarginToolbar(_ sender: UISlider!) {
         currentDocument?.undoManager.endUndoGrouping()
         hideCursorAndNormalizeAllMarks()
         prolongSelectState = false
         ladderView.restoreState()
         if ladderView.mode == .select {
-            showSelectMarksMenu(UIAlertAction())
+            showSelectToolbar(UIAlertAction())
         } else {
-            showMainMenu()
+            showMainToolbar()
         }
     }
 
@@ -409,170 +469,30 @@ final class DiagramViewController: UIViewController {
     }
 
 
-    // FIXME: Create new diagram, add image.  Put into background, the restart.  We just go to the the files screen.  However 2nd time it happens, we get the desired result, with diagram loading with zoom, etc.
-    override func viewDidAppear(_ animated: Bool) {
-        os_log("viewDidAppear() - ViewController", log: OSLog.viewCycle, type: .info)
-        super.viewDidAppear(animated)
 
 
-        // Need to set this here, after view draw, or Mac malpositions cursor at start of app.
-        imageScrollView.contentInset = UIEdgeInsets(top: 0, left: leftMargin, bottom: 0, right: 0)
-        ladderView.normalizeAllMarks()
-        self.userActivity = self.view.window?.windowScene?.userActivity
-        // See https://github.com/mattneub/Programming-iOS-Book-Examples/blob/master/bk2ch06p357StateSaveAndRestoreWithNSUserActivity/ch19p626pageController/SceneDelegate.swift
-        if restorationInfo != nil {
-            if let zoomScale = restorationInfo?[DiagramViewController.restorationZoomKey] as? CGFloat {
-                imageScrollView.zoomScale = zoomScale
-            }
-            var restorationContentOffset = CGPoint()
-            // FIXME: Do we have to correct content offset Y too?
-            if let contentOffsetX = restorationInfo?[DiagramViewController.restorationContentOffsetXKey] {
-                restorationContentOffset.x = (contentOffsetX as? CGFloat ?? 0) * imageScrollView.zoomScale
-            }
-            if let contentOffsetY = restorationInfo?[DiagramViewController.restorationContentOffsetYKey] {
-                restorationContentOffset.y = contentOffsetY as? CGFloat ?? 0
-            }
-            // FIXME: Temporary
-            //            imageScrollView.setContentOffset(restorationContentOffset, animated: true)
+    // MARK: Toolbars
 
-            if let isCalibrated = restorationInfo?[DiagramViewController.restorationIsCalibratedKey] as? Bool {
-                cursorView.setIsCalibrated(isCalibrated)
-            }
-            if let calFactor = restorationInfo?[DiagramViewController.restorationCalFactorKey] as? CGFloat {
-                cursorView.calFactor = calFactor
-            }
-            if let transformString = restorationInfo?[DiagramViewController.restorationTransformKey] as? String {
-                let transform = NSCoder.cgAffineTransform(for: transformString)
-                imageView.transform = transform
-            }
-        }
-        // Only use the restorationInfo once
-        restorationInfo = nil
-        showMainMenu()
-        updateUndoRedoButtons()
-        resetViews()
-    }
-
-    // We only want to use the restorationInfo once when view controller first appears.
-    var didFirstLayout = false
-    override func viewDidLayoutSubviews() {
-        // Called multiple times when showing context menu, so comment out for now.
-        //        os_log("viewDidLayoutSubviews() - ViewController", log: .viewCycle, type: .info)
-        if didFirstLayout { return }
-        didFirstLayout = true
-        // mark pointers in registry need to reestablished when diagram is reloaded
-        ladderView.reregisterAllMarks()
-        let info = restorationInfo
-        if let inHelp = info?[HelpViewController.inHelpKey] as? Bool, inHelp {
-            performShowHelpSegue()
-        }
-    }
-
-    override func viewWillDisappear(_ animated: Bool) {
-        super.viewWillDisappear(animated)
-        removeNotifications()
-    }
-
-    override func updateUserActivityState(_ activity: NSUserActivity) {
-        os_log("updateUserActivityState called")
-        let currentDocumentURL: String = currentDocument?.fileURL.lastPathComponent ?? ""
-        super.updateUserActivityState(activity)
-        let info: [AnyHashable: Any] = [
-            // FIXME: We are correcting just x for zoom scale.  Test if correcting y is needed too.
-            DiagramViewController.restorationContentOffsetXKey: imageScrollView.contentOffset.x / imageScrollView.zoomScale,
-            DiagramViewController.restorationContentOffsetYKey: imageScrollView.contentOffset.y,
-            DiagramViewController.restorationZoomKey: imageScrollView.zoomScale,
-            DiagramViewController.restorationIsCalibratedKey: cursorView.isCalibrated(),
-            DiagramViewController.restorationCalFactorKey: cursorView.calFactor,
-            DiagramViewController.restorationFileNameKey: currentDocumentURL,
-            DiagramViewController.restorationDoRestorationKey: true,
-            HelpViewController.inHelpKey: false,
-            DiagramViewController.restorationTransformKey: NSCoder.string(for: imageView.transform),
-        ]
-        activity.addUserInfoEntries(from: info)
-    }
-
-    @objc func showMainMenu() {
-        if mainMenuButtons == nil {
-            let calibrateTitle = L("Calibrate", comment: "calibrate button label title")
-            let selectTitle = L("Select", comment: "select button label title")
-            let connectTitle = L("Connect", comment: "connect button label title")
-            let calibrateButton = UIBarButtonItem(title: calibrateTitle, style: UIBarButtonItem.Style.plain, target: self, action: #selector(calibrate))
-            selectButton = UIBarButtonItem(title: selectTitle, style: .plain, target: self, action: #selector(showSelectMarksMenu))
-            let connectButton = UIBarButtonItem(title: connectTitle, style: .plain, target: self, action: #selector(connectMarks))
+    @objc func showMainToolbar() {
+        if mainToolbarButtons == nil {
+            let calibrateButton = UIBarButtonItem(title: L("Calibrate"), style: UIBarButtonItem.Style.plain, target: self, action: #selector(calibrate))
+            selectButton = UIBarButtonItem(title: L("Select"), style: .plain, target: self, action: #selector(showSelectToolbar))
+            let connectButton = UIBarButtonItem(title: L("Connect"), style: .plain, target: self, action: #selector(connectMarks))
             undoButton = UIBarButtonItem(barButtonSystemItem: .undo, target: self, action: #selector(undo))
             redoButton = UIBarButtonItem(barButtonSystemItem: .redo, target: self, action: #selector(redo))
-            mainMenuButtons = [calibrateButton, spacer, selectButton, spacer, connectButton, spacer, undoButton, spacer, redoButton]
+            mainToolbarButtons = [calibrateButton, spacer, selectButton, spacer, connectButton, spacer, undoButton, spacer, redoButton]
         }
-        // Note: set toolbar items this way, not directly (i.e. toolbar.items = something).
-        setToolbarItems(mainMenuButtons, animated: false)
+        setToolbarItems(mainToolbarButtons, animated: false)
         navigationController?.setToolbarHidden(false, animated: false)
     }
 
-    // FIXME: can't single tap on mark in ladder after finished with context menu.
-    func showSlantMenu() {
-        guard let toolbar = navigationController?.toolbar else { return }
-        currentDocument?.undoManager.beginUndoGrouping()
-        prolongSelectState = true
-        let labelText = UITextField()
-        labelText.text = L("Adjust mark slant")
-        let slider = UISlider()
-        slider.minimumValue = -45
-        slider.maximumValue = 45
-        slider.setValue(0, animated: false)
-        slider.addTarget(self, action: #selector(sliderValueDidChange(_:)), for: .valueChanged)
-        let doneButton = UIButton(type: .system)
-        doneButton.setTitle(L("Done"), for: .normal)
-        doneButton.addTarget(self, action: #selector(closeSlantMenu(_:)), for: .touchUpInside)
-        let stackView = UIStackView(frame: toolbar.frame)
-        stackView.distribution = .fill
-        stackView.axis = .horizontal
-        stackView.spacing = 8
-        stackView.addArrangedSubview(labelText)
-        stackView.addArrangedSubview(slider)
-        stackView.addArrangedSubview(doneButton)
-        setToolbarItems([UIBarButtonItem(customView: stackView)], animated: true)
-    }
-
-    func editLabel() {
-        print("edit label")
-        guard let selectedRegion = ladderView.selectedRegion() else { return }
-        //        UserAlert.showTextAlert(viewController: self, title: L("Edit Label"), message: L("Enter new label text for \"\(selectedRegion.name).\""), defaultText: selectedRegion.name, preferredStyle: .alert, handler: { newLabel in
-        //            self.ladderView.undoablySetLabel(newLabel, forRegion: selectedRegion)
-        //        })
-        UserAlert.showNameRegionAlert(viewController: self, region: selectedRegion, handler: { newLabel, newDescription in
-            self.ladderView.undoablySetLabel(newLabel, description: newDescription, forRegion: selectedRegion)
-        })
-    }
-
-    @objc func closeSlantMenu(_ sender: UIAlertAction) {
-        currentDocument?.undoManager.endUndoGrouping()
-        hideCursorAndNormalizeAllMarks()
-        prolongSelectState = false
-        ladderView.restoreState()
-        if ladderView.mode == .select {
-            showSelectMarksMenu(UIAlertAction())
-        } else {
-            showMainMenu()
+    @objc func showSelectToolbar(_: UIAlertAction) {
+        if selectToolbarButtons == nil {
+            let prompt = makePrompt(text: L("Tap or drag to select"))
+            let doneButton = UIBarButtonItem(barButtonSystemItem: .done, target: self, action: #selector(cancelSelect))
+            selectToolbarButtons = [prompt, spacer, doneButton]
         }
-    }
-
-    @objc func sliderValueDidChange(_ sender: UISlider!) {
-        let value: CGFloat = CGFloat(sender.value)
-
-        ladderView.slantSelectedMarks(angle: value, endpoint: slantEndpoint)
-
-        ladderView.refresh()
-    }
-
-    @objc func showSelectMarksMenu(_: UIAlertAction) {
-        if selectMenuButtons == nil {
-            let prompt = makePrompt(text: L("Tap or drag over marks to select"))
-            let cancelTitle = L("Done")
-            let cancelButton = UIBarButtonItem(title: cancelTitle, style: .done, target: self, action: #selector(cancelSelect))
-            selectMenuButtons = [prompt, spacer, cancelButton]
-        }
-        setToolbarItems(selectMenuButtons, animated: false)
+        setToolbarItems(selectToolbarButtons, animated: false)
         navigationController?.setToolbarHidden(false, animated: false)
         hideCursorAndNormalizeAllMarks()
         ladderView.normalizeRegions()
@@ -583,6 +503,87 @@ final class DiagramViewController: UIViewController {
         setViewsNeedDisplay()
     }
 
+    private func showConnectToolbar() {
+        if connectToolbarButtons == nil {
+            let prompt = makePrompt(text: L("Tap pairs of marks to connect them"))
+            let doneButton = UIBarButtonItem(barButtonSystemItem: .done, target: self, action: #selector(cancelConnectMode))
+            connectToolbarButtons = [prompt, spacer, doneButton]
+        }
+        hideCursorAndNormalizeAllMarks()
+        ladderView.normalizeRegions()
+        setToolbarItems(connectToolbarButtons, animated: false)
+        navigationController?.setToolbarHidden(false, animated: false)
+    }
+
+    func showSlantToolbar() {
+        guard let toolbar = navigationController?.toolbar else { return }
+        currentDocument?.undoManager.beginUndoGrouping()
+        prolongSelectState = true
+        let labelText = UITextField()
+        labelText.text = L("Adjust mark slant")
+        let slider = UISlider()
+        slider.minimumValue = Self.minSlantAngle
+        slider.maximumValue = Self.maxSlantAngle
+        slider.setValue(0, animated: false)
+        slider.addTarget(self, action: #selector(slantSliderValueDidChange(_:)), for: .valueChanged)
+        let doneButton = UIButton(type: .system)
+        doneButton.setTitle(L("Done"), for: .normal)
+        doneButton.addTarget(self, action: #selector(closeSlantToolbar(_:)), for: .touchUpInside)
+        let stackView = UIStackView(frame: toolbar.frame)
+        stackView.distribution = .fill
+        stackView.axis = .horizontal
+        stackView.spacing = 8
+        stackView.addArrangedSubview(labelText)
+        stackView.addArrangedSubview(slider)
+        stackView.addArrangedSubview(doneButton)
+        setToolbarItems([UIBarButtonItem(customView: stackView)], animated: true)
+    }
+
+    func showAdjustLeftMarginToolbar() {
+        guard let toolbar = navigationController?.toolbar else { return }
+        currentDocument?.undoManager.beginUndoGrouping() // will end when menu closed
+        prolongSelectState = true
+        let labelText = UITextField()
+        labelText.text = L("Adjust left margin")
+        let slider = UISlider()
+        slider.minimumValue = Self.minLeftMargin
+        slider.maximumValue = Self.maxLeftMargin
+        slider.setValue(Float(leftMargin), animated: false)
+        slider.addTarget(self, action: #selector(leftMarginSliderValueDidChange(_:)), for: .valueChanged)
+        let doneButton = UIButton(type: .system)
+        doneButton.setTitle(L("Done"), for: .normal)
+        doneButton.addTarget(self, action: #selector(closeAdjustLeftMarginToolbar(_:)), for: .touchUpInside)
+        let stackView = UIStackView(frame: toolbar.frame)
+        stackView.distribution = .fill
+        stackView.axis = .horizontal
+        stackView.spacing = 8
+        stackView.addArrangedSubview(labelText)
+        stackView.addArrangedSubview(slider)
+        stackView.addArrangedSubview(doneButton)
+        setToolbarItems([UIBarButtonItem(customView: stackView)], animated: true)
+    }
+
+
+    @objc func closeSlantToolbar(_ sender: UIAlertAction) {
+        currentDocument?.undoManager.endUndoGrouping()
+        hideCursorAndNormalizeAllMarks()
+        prolongSelectState = false
+        ladderView.restoreState()
+        if ladderView.mode == .select {
+            showSelectToolbar(UIAlertAction())
+        } else {
+            showMainToolbar()
+        }
+    }
+
+    @objc func slantSliderValueDidChange(_ sender: UISlider!) {
+        let value: CGFloat = CGFloat(sender.value)
+
+        ladderView.slantSelectedMarks(angle: value, endpoint: slantEndpoint)
+
+        ladderView.refresh()
+    }
+
     // Ideally this should be "private" however need access to it in hamburger delegate in another file.
     func hideCursorAndNormalizeAllMarks() {
         guard cursorView.cursorIsVisible else { return } // don't bother if cursor not visible
@@ -590,31 +591,15 @@ final class DiagramViewController: UIViewController {
         ladderView.normalizeAllMarks()
     }
 
-    private func showConnectMenu() {
-        if connectMenuButtons == nil {
-            let prompt = makePrompt(text: L("Tap pairs of marks to connect them"))
-            let cancelTitle = L("Done")
-            let cancelButton = UIBarButtonItem(title: cancelTitle, style: .done, target: self, action: #selector(cancelConnectMode))
-            connectMenuButtons = [prompt, spacer, cancelButton]
-        }
-        hideCursorAndNormalizeAllMarks()
-        ladderView.normalizeRegions()
-        setToolbarItems(connectMenuButtons, animated: false)
-        navigationController?.setToolbarHidden(false, animated: false)
-    }
-
-    private func showCalibrateMenu() {
-        if calibrateMenuButtons == nil {
+    private func showCalibrateToolbar() {
+        if calibrateToolbarButtons == nil {
             let promptButton = makePrompt(text: L("Set caliper to 1000 ms"))
-            let setTitle = L("Set")
-            let setButton = UIBarButtonItem(title: setTitle, style: .plain, target: self, action: #selector(setCalibration))
-            let clearTitle = L("Clear")
-            let clearButton = UIBarButtonItem(title:clearTitle, style: .plain, target: self, action: #selector(clearCalibration))
-            let cancelTitle = L("Done")
-            let cancelButton = UIBarButtonItem(title: cancelTitle, style: .done, target: self, action: #selector(cancelCalibration))
-            calibrateMenuButtons = [promptButton, spacer, setButton, clearButton, cancelButton]
+            let setButton = UIBarButtonItem(title: L("Set"), style: .plain, target: self, action: #selector(setCalibration))
+            let clearButton = UIBarButtonItem(title: L("Clear"), style: .plain, target: self, action: #selector(clearCalibration))
+            let doneButton = UIBarButtonItem(barButtonSystemItem: .done, target: self, action: #selector(closeCalibrationToolbar))
+            calibrateToolbarButtons = [promptButton, spacer, setButton, clearButton, doneButton]
         }
-        setToolbarItems(calibrateMenuButtons, animated: false)
+        setToolbarItems(calibrateToolbarButtons, animated: false)
         navigationController?.setToolbarHidden(false, animated: false)
     }
 
@@ -624,22 +609,12 @@ final class DiagramViewController: UIViewController {
         return UIBarButtonItem(customView: prompt)
     }
 
-    @available(*, deprecated, message: "This doesn't seem to do anything.")
-    private func centerImage() {
-        // This centers image, as opposed to starting with it at the upper left
-        // hand corner of the screen.
-        if !isRunningOnMac() {
-            let newContentOffsetX = (imageScrollView.contentSize.width/2) - (imageScrollView.bounds.size.width/2);
-            imageScrollView.contentOffset = CGPoint(x: newContentOffsetX, y: 0)
-        }
-    }
+    // MARK: -  Actions
 
-    // MARK: -  Buttons
-
-    @objc func closeAction() {
-        os_log("CLOSE ACTION")
+    @objc func closeDocument() {
+        os_log("closeDocument()", log: .action, type: .info)
         let info: [AnyHashable: Any] = [
-            DiagramViewController.restorationDoRestorationKey: false]
+            Self.restorationDoRestorationKey: false]
         self.userActivity?.addUserInfoEntries(from: info)
         view.endEditing(true)
         currentDocument?.undoManager.removeAllActions()
@@ -647,6 +622,8 @@ final class DiagramViewController: UIViewController {
     }
 
     @objc func snapshotDiagram() {
+        os_log("snapshotDiagram()", log: .action, type: .info)
+
         checkPhotoLibraryStatus()
     }
 
@@ -673,6 +650,9 @@ final class DiagramViewController: UIViewController {
         if let newImage = newImage {
             let imageSaver = ImageSaver()
             imageSaver.writeToPhotoAlbum(image: newImage, viewController: self)
+            if playSounds {
+                Sounds.playShutterSound()
+            }
         }
     }
 
@@ -703,11 +683,9 @@ final class DiagramViewController: UIViewController {
         }
     }
 
-
-    // FIXME: Calibrate holds study with no image and zooming, but doesn't work with image!
     @objc func calibrate() {
         os_log("calibrate()", log: OSLog.action, type: .info)
-        showCalibrateMenu()
+        showCalibrateToolbar()
         cursorView.showCalipers()
         setMode(.calibration)
     }
@@ -716,7 +694,7 @@ final class DiagramViewController: UIViewController {
         os_log("connectMarks()", log: .action, type: .info)
         hideCursorAndNormalizeAllMarks()
         ladderView.removeConnectedMarks()
-        showConnectMenu()
+        showConnectToolbar()
         setMode(.connect)
         setViewsNeedDisplay()
     }
@@ -725,7 +703,7 @@ final class DiagramViewController: UIViewController {
     // no restore state here
     @objc func cancelSelect() {
         os_log("cancelSelect()", log: OSLog.action, type: .info)
-        showMainMenu()
+        showMainToolbar()
         setMode(.normal)
         // FIXME: This doesn't restore state
         ladderView.endZoning()
@@ -735,7 +713,7 @@ final class DiagramViewController: UIViewController {
 
     @objc func cancelConnectMode() {
         os_log("cancelLink()", log: OSLog.action, type: .info)
-        showMainMenu()
+        showMainToolbar()
         setMode(.normal)
         ladderView.removeConnectedMarks()
         ladderView.normalizeAllMarks()
@@ -745,7 +723,7 @@ final class DiagramViewController: UIViewController {
     @objc func setCalibration() {
         os_log("setCalibration()", log: .action, type: .info)
         cursorView.setCalibration(zoom: imageScrollView.zoomScale)
-        closeCalibrationMenu()
+        closeCalibrationToolbar()
     }
 
     // FIXME: clear calibration but calibration returns after saving and reopening diagram
@@ -755,16 +733,11 @@ final class DiagramViewController: UIViewController {
         hideCursorAndNormalizeAllMarks()
         ladderView.refresh()
         cursorView.refresh()
-        closeCalibrationMenu()
+        closeCalibrationToolbar()
     }
 
-    @objc func cancelCalibration() {
-        os_log("cancelCalibration()", log: .action, type: .info)
-        closeCalibrationMenu()
-    }
-
-    private func closeCalibrationMenu() {
-        showMainMenu()
+    @objc func closeCalibrationToolbar() {
+        showMainToolbar()
         setMode(.normal)
         setViewsNeedDisplay()
     }
@@ -788,6 +761,12 @@ final class DiagramViewController: UIViewController {
         }
     }
 
+    func editLabel() {
+        guard let selectedRegion = ladderView.selectedRegion() else { return }
+        UserAlert.showNameRegionAlert(viewController: self, region: selectedRegion, handler: { newLabel, newDescription in
+            self.ladderView.undoablySetLabel(newLabel, description: newDescription, forRegion: selectedRegion)
+        })
+    }
 
 
     // MARK: - Touches
@@ -1106,6 +1085,7 @@ extension DiagramViewController {
         ladderView.snapMarks = UserDefaults.standard.bool(forKey: Preferences.defaultSnapMarksKey)
         ladderView.defaultMarkStyle = Mark.Style(rawValue: UserDefaults.standard.integer(forKey: Preferences.defaultMarkStyleKey)) ?? .solid
         ladderView.showLabelDescription = TextVisibility(rawValue: UserDefaults.standard.integer(forKey: Preferences.defaultLabelDescriptionVisibilityKey)) ?? .invisible
+        playSounds = UserDefaults.standard.bool(forKey: Preferences.defaultPlaySoundsKey)
     }
 
     @objc func resolveFileConflicts() {

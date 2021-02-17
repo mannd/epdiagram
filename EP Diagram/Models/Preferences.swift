@@ -23,6 +23,7 @@ struct Preferences {
     static let defaultLabelDescriptionVisibilityKey = "defaultLabelDescriptionVisibilityKey"
     static let defaultLeftMarginKey = "defaultLeftMarginKey"
     static let defaultCaliperColorKey = "defaultCaliperColorKey"
+    static let defaultPlaySoundsKey = "defaultPlaySoundsKey"
 
     // Stored as Int, converted to CGFloat when used.
     static var lineWidth: Int = 2
@@ -35,6 +36,7 @@ struct Preferences {
     static var markStyle = Mark.Style.solid.rawValue
     static var labelDescriptionVisibility = TextVisibility.invisible.rawValue
     static var leftMargin: Double = 50
+    static var playSounds: Bool = true
 
 
     // TODO: Update when new prefs added.
@@ -50,6 +52,7 @@ struct Preferences {
             Preferences.defaultMarkStyleKey: Preferences.markStyle,
             Preferences.defaultLabelDescriptionVisibilityKey: Preferences.labelDescriptionVisibility,
             Preferences.defaultLeftMarginKey: Preferences.leftMargin,
+            Preferences.defaultPlaySoundsKey: Preferences.playSounds,
         ]
         return defaultPreferences
     }

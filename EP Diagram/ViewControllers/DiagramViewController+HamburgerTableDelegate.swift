@@ -56,7 +56,6 @@ class ImageSaver: NSObject {
             title = L("Error Saving Snapshot")
             message = L("Make sure you have allowed EP Diagram to save to the Photos Library in the Settings app.  Error message: \(error.localizedDescription)")
         } else {
-            Sounds.playShutterSound()
             // See https://www.hackingwithswift.com/books/ios-swiftui/how-to-save-images-to-the-users-photo-library
             os_log("Snapshot successfully saved.", log: .action, type: .info)
             title = L("Diagram Snapshot Saved")
@@ -180,7 +179,9 @@ extension DiagramViewController: HamburgerTableDelegate, UIImagePickerController
         imageScrollView.pinchGestureRecognizer?.isEnabled = !imageIsLocked
         cursorView.imageIsLocked = imageIsLocked
         cursorView.setNeedsDisplay()
-        Sounds.playLockSound()
+        if playSounds {
+            Sounds.playLockSound()
+        }
     }
 
     func lockLadder() {
@@ -191,7 +192,9 @@ extension DiagramViewController: HamburgerTableDelegate, UIImagePickerController
         cursorView.allowTaps = !_ladderIsLocked
         ladderView.isUserInteractionEnabled = !_ladderIsLocked
         setViewsNeedDisplay()
-        Sounds.playLockSound()
+        if playSounds {
+            Sounds.playLockSound()
+        }
     }
 
     func editLadder() {
@@ -229,7 +232,7 @@ extension DiagramViewController: HamburgerTableDelegate, UIImagePickerController
     #if DEBUG
     func test() {
         os_log("test()", log: .debugging, type: .debug)
-        showAdjustLeftMarginMenu()
+        showAdjustLeftMarginToolbar()
 //        var positions: [CGPoint] = []
 //        for mark in ladderView.ladder.regions[0].marks {
 //            positions.append(ladderView.transformToScaledViewPosition(regionPosition: mark.segment.proximal, region: ladderView.ladder.regions[0]))
