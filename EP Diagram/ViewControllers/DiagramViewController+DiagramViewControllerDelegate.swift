@@ -39,6 +39,15 @@ extension DiagramViewController: DiagramViewControllerDelegate {
         setViewsNeedDisplay()
     }
 
+    func undoablySetCalibration(_ calibration: Calibration) {
+        let oldCalibration = self.calibration
+        currentDocument?.undoManager.registerUndo(withTarget: self) { target in
+            target.undoablySetCalibration(oldCalibration)
+        }
+        NotificationCenter.default.post(name: .didUndoableAction, object: nil)
+        self.calibration = calibration
+    }
+
     func saveTemplates(_ templates: [LadderTemplate]) {
         os_log("saveTemplates()", log: .action, type: .info)
         DispatchQueue.global().async {

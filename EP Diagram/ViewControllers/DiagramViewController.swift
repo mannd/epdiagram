@@ -60,7 +60,7 @@ final class DiagramViewController: UIViewController {
                 showSelectToolbar()
             case .connect:
                 showConnectToolbar()
-            case .calibration:
+            case .calibrate:
                 cursorView.showCalipers()
                 showCalibrateToolbar()
             default:
@@ -68,6 +68,16 @@ final class DiagramViewController: UIViewController {
             }
             setViewsNeedDisplay()
         }
+    }
+
+    var calibration: Calibration {
+        get { diagram.calibration }
+        set(newValue) {
+            diagram.calibration = newValue
+            ladderView.calibration = newValue
+            cursorView.calibration = newValue
+        }
+
     }
 
     // Buttons, toolbars
@@ -264,6 +274,7 @@ final class DiagramViewController: UIViewController {
 
         leftMargin = diagram.ladder.leftMargin
 
+        // init views
         cursorView.calibration = diagram.calibration
         ladderView.calibration = diagram.calibration
         ladderView.ladder = diagram.ladder
@@ -410,13 +421,10 @@ final class DiagramViewController: UIViewController {
 
     func loadSampleDiagram(_ diagram: Diagram) {
         currentDocument?.undoManager.beginUndoGrouping()
-        // FIXME: make set calibration undoable...
-        self.diagram.calibration = diagram.calibration
+        undoablySetCalibration(Calibration())
         undoablySetLadder(diagram.ladder)
         undoablySetDiagramImage(diagram.image)
-        imageScrollView.contentInset = UIEdgeInsets(top: 0, left: leftMargin, bottom: 0, right: 0)
-        hideCursorAndNormalizeAllMarks()
-        setViewsNeedDisplay()
+        mode = .normal
         currentDocument?.undoManager.endUndoGrouping()
     }
 
@@ -678,7 +686,7 @@ final class DiagramViewController: UIViewController {
 
     @objc func launchCalibrateMode() {
         os_log("calibrate()", log: OSLog.action, type: .info)
-        mode = .calibration
+        mode = .calibrate
     }
 
     private func showCalibrateToolbar() {
@@ -686,7 +694,7 @@ final class DiagramViewController: UIViewController {
             let promptButton = makePrompt(text: L("Set caliper to 1000 ms"))
             let setButton = UIBarButtonItem(title: L("Set"), style: .plain, target: self, action: #selector(setCalibration))
             let clearButton = UIBarButtonItem(title: L("Clear"), style: .plain, target: self, action: #selector(clearCalibration))
-            let doneButton = UIBarButtonItem(barButtonSystemItem: .done, target: self, action: #selector(cancelCalibrationMode))
+            let doneButton = UIBarButtonItem(barButtonSystemItem: .done, target: self, action: #selector(cancelCalibrateMode))
             calibrateToolbarButtons = [promptButton, spacer, setButton, clearButton, doneButton]
         }
         setToolbarItems(calibrateToolbarButtons, animated: false)
@@ -696,16 +704,16 @@ final class DiagramViewController: UIViewController {
     @objc func setCalibration() {
         os_log("setCalibration()", log: .action, type: .info)
         cursorView.setCalibration(zoom: imageScrollView.zoomScale)
-        cancelCalibrationMode()
+        cancelCalibrateMode()
     }
 
     @objc func clearCalibration() {
         os_log("clearCalibration()", log: .action, type: .info)
         diagram.calibration.reset()
-        cancelCalibrationMode()
+        cancelCalibrateMode()
     }
 
-    @objc func cancelCalibrationMode() {
+    @objc func cancelCalibrateMode() {
         mode = .normal
     }
 
@@ -777,7 +785,7 @@ final class DiagramViewController: UIViewController {
     // FIXME: not sure if second behavior is good.
     @objc func singleTap(tap: UITapGestureRecognizer) {
         os_log("singleTap - ViewController", log: OSLog.touches, type: .info)
-        if cursorView.mode == .calibration {
+        if cursorView.mode == .calibrate {
             return
         }
         if ladderView.mode == .select {
@@ -829,8 +837,8 @@ final class DiagramViewController: UIViewController {
             self.pageNumber = 1
             // enablePageButtons = (numberOfPages > 1)
             openPDFPage(pdfRef, atPage: pageNumber)
-
         }
+        mode = .normal
     }
 
     private func getPDFDocumentRef(_ fileName: UnsafePointer<Int8>?) -> CGPDFDocument? {
@@ -869,6 +877,7 @@ final class DiagramViewController: UIViewController {
                 let rescaledImage = UIImage(cgImage: cgImage, scale: scaleFactor, orientation: .up)
                 undoablySetDiagramImage(rescaledImage)
                 diagram.imageIsUpscaled = true
+                mode = .normal
             }
             UIGraphicsEndImageContext()
         }
@@ -1129,6 +1138,7 @@ extension DiagramViewController: UIDropInteractionDelegate {
             if let images = imageItems as? [UIImage] {
                 self.diagram.imageIsUpscaled = false
                 self.undoablySetDiagramImage(images.first)
+                self.mode = .normal
                 return
             }
         }

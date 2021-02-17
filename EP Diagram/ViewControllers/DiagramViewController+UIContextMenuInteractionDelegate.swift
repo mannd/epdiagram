@@ -61,7 +61,7 @@ extension DiagramViewController: UIContextMenuInteractionDelegate {
             return normalModeMenu(forLocation: location)
         case .select:
             return selectModeMenu(forLocation: location)
-        case .calibration, .connect, .menu:
+        case .calibrate, .connect, .menu:
             return nil
         }
     }

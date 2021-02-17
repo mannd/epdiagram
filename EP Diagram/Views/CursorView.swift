@@ -92,7 +92,7 @@ final class CursorView: ScaledView {
             showLockImageWarning(rect: rect)
         }
         switch mode {
-        case .calibration:
+        case .calibrate:
             drawCaliper(rect)
         case .normal:
             drawCursor(rect)
@@ -239,7 +239,7 @@ final class CursorView: ScaledView {
     // This function passes touch events to the views below if the point is not
     // near the cursor.
     override func point(inside point: CGPoint, with event: UIEvent?) -> Bool {
-        if mode == .calibration {
+        if mode == .calibrate {
             return caliper.isNearCaliper(point: point, accuracy: accuracy)
         }
         guard cursor.visible else { return false }
@@ -281,8 +281,8 @@ final class CursorView: ScaledView {
 
     @objc func dragging(pan: UIPanGestureRecognizer) {
         switch mode {
-        case .calibration:
-            calibrationModeDrag(pan)
+        case .calibrate:
+            calibrateModeDrag(pan)
         case .normal:
             normalModeDrag(pan)
         default:
@@ -314,7 +314,7 @@ final class CursorView: ScaledView {
         setNeedsDisplay()
     }
 
-    private func calibrationModeDrag(_ pan: UIPanGestureRecognizer) {
+    private func calibrateModeDrag(_ pan: UIPanGestureRecognizer) {
         // No undo for calibration.
         if pan.state == .began {
             draggedComponent = caliper.isNearCaliperComponent(point: pan.location(in: self), accuracy: accuracy)
