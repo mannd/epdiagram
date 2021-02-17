@@ -24,6 +24,7 @@ final class DiagramViewController: UIViewController {
     var hamburgerTableViewController: HamburgerTableViewController? // We get this view via its embed segue!
     var separatorView: SeparatorView?
 
+    // Constants
     static let defaultLeftMargin: CGFloat = 50
     static let minLeftMargin: Float = 30
     static let maxLeftMargin: Float = 100
@@ -38,6 +39,34 @@ final class DiagramViewController: UIViewController {
             cursorView.leftMargin = leftMargin
             imageScrollView.leftMargin = leftMargin
             imageScrollView.contentInset = UIEdgeInsets(top: 0, left: leftMargin, bottom: 0, right: 0)
+        }
+    }
+
+    // Mode is passed to the other views, and setting mode cleans up after each change.
+    var mode: Mode = .normal {
+        didSet {
+            cursorView.cursorIsVisible = false
+            ladderView.normalizeLadder()
+            cursorView.mode = mode
+            ladderView.mode = mode
+            switch mode {
+            case .normal:
+                ladderView.setActiveRegion(regionNum: 0)
+                ladderView.endZoning()
+                ladderView.removeConnectedMarks()
+                showMainToolbar()
+            case .select:
+                ladderView.startZoning()
+                showSelectToolbar()
+            case .connect:
+                showConnectToolbar()
+            case .calibration:
+                cursorView.showCalipers()
+                showCalibrateToolbar()
+            default:
+                break
+            }
+            setViewsNeedDisplay()
         }
     }
 
@@ -75,8 +104,10 @@ final class DiagramViewController: UIViewController {
             diagramEditorDelegate?.diagramEditorDidUpdateContent(self, diagram: diagram)
         }
     }
-    var preferences: Preferences = Preferences()
+
+    // Diagram preferences
     var playSounds: Bool = true
+
     // Set by screen delegate
     var restorationInfo: [AnyHashable: Any]?
 
@@ -377,39 +408,12 @@ final class DiagramViewController: UIViewController {
         activity.addUserInfoEntries(from: info)
     }
 
-    func setLeftMargin(_ margin: CGFloat) {
-        let oldLeftMargin = leftMargin
-        currentDocument?.undoManager.registerUndo(withTarget: self) { target in
-            target.setLeftMargin(oldLeftMargin)
-        }
-        NotificationCenter.default.post(name: .didUndoableAction, object: nil)
-        leftMargin = margin
-    }
-
-    @objc func leftMarginSliderValueDidChange(_ sender: UISlider!) {
-        let value = CGFloat(sender.value)
-        setLeftMargin(value)
-        ladderView.refresh()
-    }
-
-    @objc func closeAdjustLeftMarginToolbar(_ sender: UISlider!) {
-        currentDocument?.undoManager.endUndoGrouping()
-        hideCursorAndNormalizeAllMarks()
-        prolongSelectState = false
-        ladderView.restoreState()
-        if ladderView.mode == .select {
-            showSelectToolbar(UIAlertAction())
-        } else {
-            showMainToolbar()
-        }
-    }
-
     func loadSampleDiagram(_ diagram: Diagram) {
         currentDocument?.undoManager.beginUndoGrouping()
         // FIXME: make set calibration undoable...
         self.diagram.calibration = diagram.calibration
-        setLadder(diagram.ladder)
-        setDiagramImage(diagram.image)
+        undoablySetLadder(diagram.ladder)
+        undoablySetDiagramImage(diagram.image)
         imageScrollView.contentInset = UIEdgeInsets(top: 0, left: leftMargin, bottom: 0, right: 0)
         hideCursorAndNormalizeAllMarks()
         setViewsNeedDisplay()
@@ -463,21 +467,13 @@ final class DiagramViewController: UIViewController {
         }
     }
 
-    func setMode(_ mode: Mode) {
-        cursorView.mode = mode
-        ladderView.mode = mode
-    }
-
-
-
-
-    // MARK: Toolbars
+    // MARK: Toolbars, Modes
 
     @objc func showMainToolbar() {
         if mainToolbarButtons == nil {
-            let calibrateButton = UIBarButtonItem(title: L("Calibrate"), style: UIBarButtonItem.Style.plain, target: self, action: #selector(calibrate))
-            selectButton = UIBarButtonItem(title: L("Select"), style: .plain, target: self, action: #selector(showSelectToolbar))
-            let connectButton = UIBarButtonItem(title: L("Connect"), style: .plain, target: self, action: #selector(connectMarks))
+            let calibrateButton = UIBarButtonItem(title: L("Calibrate"), style: UIBarButtonItem.Style.plain, target: self, action: #selector(launchCalibrateMode))
+            selectButton = UIBarButtonItem(title: L("Select"), style: .plain, target: self, action: #selector(launchSelectMode))
+            let connectButton = UIBarButtonItem(title: L("Connect"), style: .plain, target: self, action: #selector(launchConnectMode))
             undoButton = UIBarButtonItem(barButtonSystemItem: .undo, target: self, action: #selector(undo))
             redoButton = UIBarButtonItem(barButtonSystemItem: .redo, target: self, action: #selector(redo))
             mainToolbarButtons = [calibrateButton, spacer, selectButton, spacer, connectButton, spacer, undoButton, spacer, redoButton]
@@ -486,21 +482,28 @@ final class DiagramViewController: UIViewController {
         navigationController?.setToolbarHidden(false, animated: false)
     }
 
-    @objc func showSelectToolbar(_: UIAlertAction) {
+    @objc func launchSelectMode(_: UIAlertAction) {
+        mode = .select
+    }
+
+    private func showSelectToolbar() {
         if selectToolbarButtons == nil {
             let prompt = makePrompt(text: L("Tap or drag to select"))
-            let doneButton = UIBarButtonItem(barButtonSystemItem: .done, target: self, action: #selector(cancelSelect))
+            let doneButton = UIBarButtonItem(barButtonSystemItem: .done, target: self, action: #selector(cancelSelectMode))
             selectToolbarButtons = [prompt, spacer, doneButton]
         }
         setToolbarItems(selectToolbarButtons, animated: false)
-        navigationController?.setToolbarHidden(false, animated: false)
-        hideCursorAndNormalizeAllMarks()
-        ladderView.normalizeRegions()
-        setMode(.select)
-        // FIXME: This approximates what we want, but is redundant.  Refine.
-        ladderView.saveState()
-        ladderView.startZoning()
-        setViewsNeedDisplay()
+    }
+
+    @objc func cancelSelectMode() {
+        os_log("cancelSelect()", log: OSLog.action, type: .info)
+        mode = .normal
+        ladderView.setNeedsDisplay()
+    }
+
+    @objc func launchConnectMode() {
+        os_log("connectMarks()", log: .action, type: .info)
+        mode = .connect
     }
 
     private func showConnectToolbar() {
@@ -509,10 +512,13 @@ final class DiagramViewController: UIViewController {
             let doneButton = UIBarButtonItem(barButtonSystemItem: .done, target: self, action: #selector(cancelConnectMode))
             connectToolbarButtons = [prompt, spacer, doneButton]
         }
-        hideCursorAndNormalizeAllMarks()
-        ladderView.normalizeRegions()
         setToolbarItems(connectToolbarButtons, animated: false)
-        navigationController?.setToolbarHidden(false, animated: false)
+    }
+
+    @objc func cancelConnectMode() {
+        os_log("cancelLink()", log: OSLog.action, type: .info)
+        mode = .normal
+        ladderView.setNeedsDisplay()
     }
 
     func showSlantToolbar() {
@@ -570,7 +576,7 @@ final class DiagramViewController: UIViewController {
         prolongSelectState = false
         ladderView.restoreState()
         if ladderView.mode == .select {
-            showSelectToolbar(UIAlertAction())
+            launchSelectMode(UIAlertAction())
         } else {
             showMainToolbar()
         }
@@ -578,9 +584,7 @@ final class DiagramViewController: UIViewController {
 
     @objc func slantSliderValueDidChange(_ sender: UISlider!) {
         let value: CGFloat = CGFloat(sender.value)
-
         ladderView.slantSelectedMarks(angle: value, endpoint: slantEndpoint)
-
         ladderView.refresh()
     }
 
@@ -591,18 +595,7 @@ final class DiagramViewController: UIViewController {
         ladderView.normalizeAllMarks()
     }
 
-    private func showCalibrateToolbar() {
-        if calibrateToolbarButtons == nil {
-            let promptButton = makePrompt(text: L("Set caliper to 1000 ms"))
-            let setButton = UIBarButtonItem(title: L("Set"), style: .plain, target: self, action: #selector(setCalibration))
-            let clearButton = UIBarButtonItem(title: L("Clear"), style: .plain, target: self, action: #selector(clearCalibration))
-            let doneButton = UIBarButtonItem(barButtonSystemItem: .done, target: self, action: #selector(closeCalibrationToolbar))
-            calibrateToolbarButtons = [promptButton, spacer, setButton, clearButton, doneButton]
-        }
-        setToolbarItems(calibrateToolbarButtons, animated: false)
-        navigationController?.setToolbarHidden(false, animated: false)
-    }
-
+ 
     private func makePrompt(text: String) -> UIBarButtonItem {
         let prompt = UILabel()
         prompt.text = text
@@ -683,64 +676,67 @@ final class DiagramViewController: UIViewController {
         }
     }
 
-    @objc func calibrate() {
+    @objc func launchCalibrateMode() {
         os_log("calibrate()", log: OSLog.action, type: .info)
-        showCalibrateToolbar()
-        cursorView.showCalipers()
-        setMode(.calibration)
+        mode = .calibration
     }
 
-    @objc func connectMarks() {
-        os_log("connectMarks()", log: .action, type: .info)
-        hideCursorAndNormalizeAllMarks()
-        ladderView.removeConnectedMarks()
-        showConnectToolbar()
-        setMode(.connect)
-        setViewsNeedDisplay()
+    private func showCalibrateToolbar() {
+        if calibrateToolbarButtons == nil {
+            let promptButton = makePrompt(text: L("Set caliper to 1000 ms"))
+            let setButton = UIBarButtonItem(title: L("Set"), style: .plain, target: self, action: #selector(setCalibration))
+            let clearButton = UIBarButtonItem(title: L("Clear"), style: .plain, target: self, action: #selector(clearCalibration))
+            let doneButton = UIBarButtonItem(barButtonSystemItem: .done, target: self, action: #selector(cancelCalibrationMode))
+            calibrateToolbarButtons = [promptButton, spacer, setButton, clearButton, doneButton]
+        }
+        setToolbarItems(calibrateToolbarButtons, animated: false)
     }
 
-
-    // no restore state here
-    @objc func cancelSelect() {
-        os_log("cancelSelect()", log: OSLog.action, type: .info)
-        showMainToolbar()
-        setMode(.normal)
-        // FIXME: This doesn't restore state
-        ladderView.endZoning()
-        ladderView.normalizeAllMarks()
-        ladderView.setNeedsDisplay()
-    }
-
-    @objc func cancelConnectMode() {
-        os_log("cancelLink()", log: OSLog.action, type: .info)
-        showMainToolbar()
-        setMode(.normal)
-        ladderView.removeConnectedMarks()
-        ladderView.normalizeAllMarks()
-        ladderView.setNeedsDisplay()
-    }
 
     @objc func setCalibration() {
         os_log("setCalibration()", log: .action, type: .info)
         cursorView.setCalibration(zoom: imageScrollView.zoomScale)
-        closeCalibrationToolbar()
+        cancelCalibrationMode()
     }
 
-    // FIXME: clear calibration but calibration returns after saving and reopening diagram
     @objc func clearCalibration() {
         os_log("clearCalibration()", log: .action, type: .info)
         diagram.calibration.reset()
-        hideCursorAndNormalizeAllMarks()
-        ladderView.refresh()
-        cursorView.refresh()
-        closeCalibrationToolbar()
+        cancelCalibrationMode()
     }
 
-    @objc func closeCalibrationToolbar() {
-        showMainToolbar()
-        setMode(.normal)
-        setViewsNeedDisplay()
+    @objc func cancelCalibrationMode() {
+        mode = .normal
     }
+
+    @objc func leftMarginSliderValueDidChange(_ sender: UISlider!) {
+        let value = CGFloat(sender.value)
+        undoablySetLeftMargin(value)
+        ladderView.refresh()
+    }
+
+    private func undoablySetLeftMargin(_ margin: CGFloat) {
+        let oldLeftMargin = leftMargin
+        currentDocument?.undoManager.registerUndo(withTarget: self) { target in
+            target.undoablySetLeftMargin(oldLeftMargin)
+        }
+        NotificationCenter.default.post(name: .didUndoableAction, object: nil)
+        leftMargin = margin
+    }
+
+    @objc func closeAdjustLeftMarginToolbar(_ sender: UISlider!) {
+        currentDocument?.undoManager.endUndoGrouping()
+        hideCursorAndNormalizeAllMarks()
+        prolongSelectState = false
+        ladderView.restoreState()
+        if ladderView.mode == .select {
+            launchSelectMode(UIAlertAction())
+        } else {
+            showMainToolbar()
+        }
+    }
+
+
 
     @objc func undo() {
         os_log("undo action", log: OSLog.action, type: .info)
@@ -817,7 +813,7 @@ final class DiagramViewController: UIViewController {
             // TODO: implement multipage PDF
             // self.enablePageButtons = false
             diagram.imageIsUpscaled = false
-            setDiagramImage(UIImage(contentsOfFile: url.path))
+            undoablySetDiagramImage(UIImage(contentsOfFile: url.path))
         }
         else {
             // self.numberOfPages = 0
@@ -871,7 +867,7 @@ final class DiagramViewController: UIViewController {
             // correct for scale factor
             if let scaledImage = scaledImage, let cgImage = scaledImage.cgImage {
                 let rescaledImage = UIImage(cgImage: cgImage, scale: scaleFactor, orientation: .up)
-                setDiagramImage(rescaledImage)
+                undoablySetDiagramImage(rescaledImage)
                 diagram.imageIsUpscaled = true
             }
             UIGraphicsEndImageContext()
@@ -1132,7 +1128,7 @@ extension DiagramViewController: UIDropInteractionDelegate {
             print("load image")
             if let images = imageItems as? [UIImage] {
                 self.diagram.imageIsUpscaled = false
-                self.setDiagramImage(images.first)
+                self.undoablySetDiagramImage(images.first)
                 return
             }
         }

@@ -86,7 +86,11 @@ final class LadderView: ScaledView {
     private var savedAttachedMark: Mark?
     private var savedMode: Mode = .normal
 
-    var mode: Mode = .normal
+    var mode: Mode = .normal {
+        didSet {
+            print("set mode")
+        }
+    }
 
     var leftMargin: CGFloat = 0
     internal var ladderViewHeight: CGFloat = 0
@@ -1345,9 +1349,15 @@ final class LadderView: ScaledView {
     }
 
     func normalizeRegions() {
-        for region in ladder.regions {
-            region.mode = .normal
-        }
+        ladder.normalizeRegions()
+    }
+
+    func normalizeAllMarks() {
+        ladder.normalizeAllMarks()
+    }
+
+    func normalizeLadder() {
+        ladder.normalize()
     }
 
     func resetSize() {
@@ -1668,10 +1678,6 @@ extension LadderView: LadderViewDelegate {
 
     func hasActiveRegion() -> Bool {
         return activeRegion != nil
-    }
-
-    func normalizeAllMarks() {
-        ladder.normalizeAllMarks()
     }
 
     func addAttachedMark(scaledViewPositionX positionX: CGFloat) {

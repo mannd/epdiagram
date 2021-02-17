@@ -243,6 +243,17 @@ class Ladder: NSObject, Codable {
         setAllMarksWithMode(.normal)
     }
 
+    func normalizeRegions() {
+        for region in regions {
+            region.mode = .normal
+        }
+    }
+
+    func normalize() {
+        normalizeAllMarks()
+        normalizeRegions()
+    }
+
     // Will have ladder store and set mark modes
     func setAllMarksWithMode(_ mode: Mark.Mode) {
         regions.forEach {

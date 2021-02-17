@@ -314,9 +314,9 @@ extension DiagramViewController: HamburgerTableDelegate, UIImagePickerController
 //        setViewsNeedDisplay()
 //    }
 
-    @objc func setDiagramImage(_ image: UIImage?) {
+    @objc func undoablySetDiagramImage(_ image: UIImage?) {
         os_log("setDiagramImage(_:)", log: .action, type: .info)
-        currentDocument?.undoManager.registerUndo(withTarget: self, selector: #selector(setDiagramImage), object: imageView.image)
+        currentDocument?.undoManager.registerUndo(withTarget: self, selector: #selector(undoablySetDiagramImage), object: imageView.image)
         NotificationCenter.default.post(name: .didUndoableAction, object: nil)
         diagram.ladder.clear()
         let scaledImage = scaleImageForImageView(image)
@@ -402,7 +402,7 @@ extension DiagramViewController: HamburgerTableDelegate, UIImagePickerController
         let chosenImage = info[.editedImage] as? UIImage
         // Images from photos are never upscaled.
         diagram.imageIsUpscaled = false
-        setDiagramImage(chosenImage)
+        undoablySetDiagramImage(chosenImage)
         picker.dismiss(animated: true, completion: nil)
     }
 
@@ -425,7 +425,7 @@ extension DiagramViewController: PHPickerViewControllerDelegate {
                         if let image = image as? UIImage {
                             // Only PDFs are upscaled
                             self.diagram.imageIsUpscaled = false
-                            self.setDiagramImage(image)
+                            self.undoablySetDiagramImage(image)
                         } else {
                             os_log("Error displaying image", log: .errors, type: .error)
                             UserAlert.showMessage(viewController: self, title: L("Error Loading Image"), message: L("Selected image could not be loaded."))
