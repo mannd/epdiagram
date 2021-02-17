@@ -25,13 +25,4 @@ class Calibration: Codable {
         currentZoom = zoom
         originalCalFactor = calFactor
     }
-
-    func reset() {
-        originalZoom = 1
-        currentZoom = 1
-        isCalibrated = false
-        // need below?
-        originalCalFactor = 1
-    }
-
 }

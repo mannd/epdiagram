@@ -361,12 +361,11 @@ final class CursorView: ScaledView {
         setNeedsDisplay()
     }
 
-    func setCalibration(zoom: CGFloat) {
-        guard let calibration = calibration else { return }
+    func newCalibration(zoom: CGFloat) -> Calibration {
+        let calibration = Calibration()
         calibration.set(zoom: zoom, calFactor: Calibration.standardInterval / caliper.value)
         calibration.isCalibrated = true
-        ladderViewDelegate.refresh()
-        setNeedsDisplay()
+        return calibration
     }
 
     func addMarkWithAttachedCursor(position: CGPoint) {

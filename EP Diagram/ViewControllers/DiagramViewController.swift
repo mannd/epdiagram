@@ -703,13 +703,14 @@ final class DiagramViewController: UIViewController {
 
     @objc func setCalibration() {
         os_log("setCalibration()", log: .action, type: .info)
-        cursorView.setCalibration(zoom: imageScrollView.zoomScale)
+        let newCalibration = cursorView.newCalibration(zoom: imageScrollView.zoomScale)
+        undoablySetCalibration(newCalibration)
         cancelCalibrateMode()
     }
 
     @objc func clearCalibration() {
         os_log("clearCalibration()", log: .action, type: .info)
-        diagram.calibration.reset()
+        undoablySetCalibration(Calibration())
         cancelCalibrateMode()
     }
 
