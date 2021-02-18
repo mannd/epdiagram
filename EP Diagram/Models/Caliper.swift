@@ -26,6 +26,7 @@ struct Caliper {
 
     var isVisible: Bool = false
     var color: UIColor = UIColor.systemBlue
+    var lineWidth: CGFloat = 1
 
     func isNearCaliperComponent(point p: CGPoint, accuracy: CGFloat) -> Component? {
         guard let maxY = maxY else { return nil }

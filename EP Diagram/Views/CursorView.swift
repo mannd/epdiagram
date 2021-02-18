@@ -15,8 +15,12 @@ final class CursorView: ScaledView {
     private let accuracy: CGFloat = 20 // How close a tap has to be to a cursor in unscaled view to register.
 
     var calibration: Calibration?
-    // Parameters that will eventually be preferences.
+
     var lineWidth: CGFloat = 1
+    var caliperLineWidth: CGFloat {
+        get { caliper.lineWidth }
+        set(newValue) { caliper.lineWidth = newValue }
+    }
     var color: UIColor = UIColor.systemBlue
 
     private var cursor: Cursor = Cursor()
@@ -133,7 +137,7 @@ final class CursorView: ScaledView {
     func drawCaliper(_ rect: CGRect) {
         if let context = UIGraphicsGetCurrentContext() {
             context.setStrokeColor(caliper.color.cgColor)
-            context.setLineWidth(lineWidth)
+            context.setLineWidth(caliperLineWidth)
             context.setAlpha(alphaValue)
             context.move(to: CGPoint(x: caliper.bar1Position, y: 0))
             context.addLine(to: CGPoint(x: caliper.bar1Position, y: caliperMaxY))

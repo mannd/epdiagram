@@ -1086,8 +1086,9 @@ extension DiagramViewController {
 
     @objc func updatePreferences() {
         os_log("updatePreferences()", log: .action, type: .info)
-        ladderView.markLineWidth = CGFloat(UserDefaults.standard.double(forKey: Preferences.defaultLineWidthKey))
-        cursorView.lineWidth = CGFloat(UserDefaults.standard.double(forKey: Preferences.defaultCursorLineWidthKey))
+        ladderView.markLineWidth = CGFloat(UserDefaults.standard.integer(forKey: Preferences.defaultLineWidthKey))
+        cursorView.lineWidth = CGFloat(UserDefaults.standard.integer(forKey: Preferences.defaultCursorLineWidthKey))
+        cursorView.caliperLineWidth = CGFloat(UserDefaults.standard.integer(forKey: Preferences.defaultCaliperLineWidthKey))
         ladderView.showBlock = UserDefaults.standard.bool(forKey: Preferences.defaultShowBlockKey)
         ladderView.showImpulseOrigin = UserDefaults.standard.bool(forKey: Preferences.defaultShowImpulseOriginKey)
         ladderView.showIntervals = UserDefaults.standard.bool(forKey: Preferences.defaultShowIntervalsKey)

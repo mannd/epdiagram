@@ -25,6 +25,7 @@ struct Preferences {
     static let defaultCaliperColorKey = "defaultCaliperColorKey"
     static let defaultPlaySoundsKey = "defaultPlaySoundsKey"
     static let defaultHideMarksKey = "defaultHideMarksKey"
+    static let defaultCaliperLineWidthKey = "defaultCaliperLineWidthKey"
 
     // Stored as Int, converted to CGFloat when used.
     static var lineWidth: Int = 2
@@ -39,9 +40,8 @@ struct Preferences {
     static var leftMargin: Double = 50
     static var playSounds: Bool = true
     static var hideMarks: Bool = false
+    static var caliperLineWidth: Int = 1
 
-
-    // TODO: Update when new prefs added.
     static func defaults() -> [String: Any] {
         let defaultPreferences: [String: Any] = [
             Preferences.defaultLineWidthKey: Preferences.lineWidth,
@@ -56,6 +56,7 @@ struct Preferences {
             Preferences.defaultLeftMarginKey: Preferences.leftMargin,
             Preferences.defaultPlaySoundsKey: Preferences.playSounds,
             Preferences.defaultHideMarksKey: Preferences.hideMarks,
+            Preferences.defaultCaliperLineWidthKey: Preferences.caliperLineWidth,
         ]
         return defaultPreferences
     }

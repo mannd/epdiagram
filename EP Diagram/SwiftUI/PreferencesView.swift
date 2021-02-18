@@ -20,6 +20,7 @@ struct PreferencesView: View {
     @AppStorage(Preferences.defaultLabelDescriptionVisibilityKey) var labelDescriptionVisibility = Preferences.labelDescriptionVisibility
     @AppStorage(Preferences.defaultPlaySoundsKey) var playSounds = Preferences.playSounds
     @AppStorage(Preferences.defaultHideMarksKey) var hideMarks = Preferences.hideMarks
+    @AppStorage(Preferences.defaultCaliperLineWidthKey) var caliperLineWidth = Preferences.caliperLineWidth
 
 // Pass Diagram as binding to allow changing non-UserDefaults settings
     // @Binding var diagram: Diagram
@@ -48,8 +49,8 @@ struct PreferencesView: View {
                     }
                     Section(header: Text("Region")) {}
                     Section(header: Text("Mark")) {
-                        Stepper("Mark width = \(lineWidth)", value: $lineWidth, in: 1...6, step: 1)
-                        Stepper("Cursor width = \(cursorLineWidth)", value: $cursorLineWidth, in: 1...6, step: 1)
+                        Stepper("Mark line width = \(lineWidth)", value: $lineWidth, in: 1...6, step: 1)
+                        Stepper("Cursor line width = \(cursorLineWidth)", value: $cursorLineWidth, in: 1...6, step: 1)
                         Toggle(isOn: $showImpulseOrigin) {
                             Text("Show impulse origin")
                         }
@@ -70,6 +71,9 @@ struct PreferencesView: View {
                             Text("Dashed").tag(Mark.Style.dashed.rawValue)
                             Text("Dotted").tag(Mark.Style.dotted.rawValue)
                         })
+                    }
+                    Section(header: Text("Caliper")) {
+                        Stepper("Caliper line width = \(caliperLineWidth)", value: $caliperLineWidth, in: 1...6, step: 1)
                     }
                 }
             }
