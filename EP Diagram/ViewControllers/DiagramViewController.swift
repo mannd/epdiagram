@@ -138,7 +138,6 @@ final class DiagramViewController: UIViewController {
     let pdfScaleFactor: CGFloat = 5.0
 
     var prolongSelectState = false // used to allow menus like slant to complete actions on selected marks
-    { didSet { print("****prolongSelectState set")}}
     var slantEndpoint: Mark.Endpoint = .proximal
 
     // Context menu actions
@@ -425,8 +424,8 @@ final class DiagramViewController: UIViewController {
         undoablySetCalibration(Calibration())
         undoablySetLadder(diagram.ladder)
         undoablySetDiagramImage(diagram.image)
-        mode = .normal
         currentDocument?.undoManager.endUndoGrouping()
+        mode = .normal
     }
 
     @IBAction func doImageScrollViewLongPress(sender: UILongPressGestureRecognizer) {
@@ -810,7 +809,7 @@ final class DiagramViewController: UIViewController {
             // TODO: implement multipage PDF
             // self.enablePageButtons = false
             diagram.imageIsUpscaled = false
-            undoablySetDiagramImage(UIImage(contentsOfFile: url.path))
+            undoablySetDiagramImageAndResetLadder(UIImage(contentsOfFile: url.path))
         }
         else {
             // self.numberOfPages = 0
@@ -864,9 +863,8 @@ final class DiagramViewController: UIViewController {
             // correct for scale factor
             if let scaledImage = scaledImage, let cgImage = scaledImage.cgImage {
                 let rescaledImage = UIImage(cgImage: cgImage, scale: scaleFactor, orientation: .up)
-                undoablySetDiagramImage(rescaledImage)
                 diagram.imageIsUpscaled = true
-                mode = .normal
+                undoablySetDiagramImageAndResetLadder(rescaledImage)
             }
             UIGraphicsEndImageContext()
         }
@@ -1126,8 +1124,7 @@ extension DiagramViewController: UIDropInteractionDelegate {
             print("load image")
             if let images = imageItems as? [UIImage] {
                 self.diagram.imageIsUpscaled = false
-                self.undoablySetDiagramImage(images.first)
-                self.mode = .normal
+                self.undoablySetDiagramImageAndResetLadder(images.first)
                 return
             }
         }
