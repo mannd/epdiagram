@@ -80,10 +80,20 @@ final class DiagramViewController: UIViewController {
 
     }
 
+    var marksAreHidden: Bool {
+        get { ladderView.marksAreHidden }
+        set(newValue) {
+            ladderView.marksAreHidden = newValue
+            cursorView.marksAreHidden = newValue
+        }
+    }
+
     // Buttons, toolbars
     private let spacer = UIBarButtonItem(barButtonSystemItem: .flexibleSpace, target: nil, action: nil)
     private var undoButton: UIBarButtonItem = UIBarButtonItem()
     private var redoButton: UIBarButtonItem = UIBarButtonItem()
+    private var calibrateButton: UIBarButtonItem = UIBarButtonItem()
+    private var connectButton: UIBarButtonItem = UIBarButtonItem()
     private var selectButton: UIBarButtonItem = UIBarButtonItem()
     private var mainToolbarButtons: [UIBarButtonItem]?
     private var selectToolbarButtons: [UIBarButtonItem]?
@@ -367,6 +377,7 @@ final class DiagramViewController: UIViewController {
         // Only use the restorationInfo once
         restorationInfo = nil
         showMainToolbar()
+        updateToolbarButtons()
         updateUndoRedoButtons()
         resetViews()
     }
@@ -470,9 +481,9 @@ final class DiagramViewController: UIViewController {
 
     @objc func showMainToolbar() {
         if mainToolbarButtons == nil {
-            let calibrateButton = UIBarButtonItem(title: L("Calibrate"), style: UIBarButtonItem.Style.plain, target: self, action: #selector(launchCalibrateMode))
+            calibrateButton = UIBarButtonItem(title: L("Calibrate"), style: UIBarButtonItem.Style.plain, target: self, action: #selector(launchCalibrateMode))
             selectButton = UIBarButtonItem(title: L("Select"), style: .plain, target: self, action: #selector(launchSelectMode))
-            let connectButton = UIBarButtonItem(title: L("Connect"), style: .plain, target: self, action: #selector(launchConnectMode))
+            connectButton = UIBarButtonItem(title: L("Connect"), style: .plain, target: self, action: #selector(launchConnectMode))
             undoButton = UIBarButtonItem(barButtonSystemItem: .undo, target: self, action: #selector(undo))
             redoButton = UIBarButtonItem(barButtonSystemItem: .redo, target: self, action: #selector(redo))
             mainToolbarButtons = [calibrateButton, spacer, selectButton, spacer, connectButton, spacer, undoButton, spacer, redoButton]
@@ -773,6 +784,7 @@ final class DiagramViewController: UIViewController {
     // FIXME: not sure if second behavior is good.
     @objc func singleTap(tap: UITapGestureRecognizer) {
         os_log("singleTap - ViewController", log: OSLog.touches, type: .info)
+        guard !marksAreHidden else { return }
         if cursorView.mode == .calibrate {
             return
         }
@@ -1066,6 +1078,12 @@ extension DiagramViewController {
 
     }
 
+    func updateToolbarButtons() {
+        calibrateButton.isEnabled = !marksAreHidden && !ladderView.ladderIsLocked
+        selectButton.isEnabled = !marksAreHidden && !ladderView.ladderIsLocked
+        connectButton.isEnabled = !marksAreHidden && !ladderView.ladderIsLocked
+    }
+
     @objc func updatePreferences() {
         os_log("updatePreferences()", log: .action, type: .info)
         ladderView.markLineWidth = CGFloat(UserDefaults.standard.double(forKey: Preferences.defaultLineWidthKey))
@@ -1078,7 +1096,8 @@ extension DiagramViewController {
         ladderView.defaultMarkStyle = Mark.Style(rawValue: UserDefaults.standard.integer(forKey: Preferences.defaultMarkStyleKey)) ?? .solid
         ladderView.showLabelDescription = TextVisibility(rawValue: UserDefaults.standard.integer(forKey: Preferences.defaultLabelDescriptionVisibilityKey)) ?? .invisible
         playSounds = UserDefaults.standard.bool(forKey: Preferences.defaultPlaySoundsKey)
-        ladderView.ladder.marksAreHidden = UserDefaults.standard.bool(forKey: Preferences.defaultHideMarksKey)
+        marksAreHidden = UserDefaults.standard.bool(forKey: Preferences.defaultHideMarksKey)
+        updateToolbarButtons()
     }
 
     @objc func resolveFileConflicts() {

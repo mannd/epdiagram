@@ -47,6 +47,8 @@ final class LadderView: ScaledView {
         }
     }
     var showLabelDescription: TextVisibility = .invisible
+    var marksAreHidden: Bool = false
+
 
     // TODO: make user preferences
     // Colors
@@ -173,6 +175,7 @@ final class LadderView: ScaledView {
 
     @objc func singleTap(tap: UITapGestureRecognizer) {
         os_log("singleTap(tap:) - LadderView", log: OSLog.touches, type: .info)
+        guard !marksAreHidden else { return }
         let position = tap.location(in: self)
         let tapLocationInLadder = getLocationInLadder(position: position)
         switch mode {
@@ -550,6 +553,7 @@ final class LadderView: ScaledView {
 
     @objc func doubleTap(tap: UITapGestureRecognizer) {
         os_log("doubleTap(tap:) - LadderView", log: OSLog.touches, type: .info)
+        guard !marksAreHidden else { return }
         switch mode {
         case .normal:
             if deleteOrAddMark(position: tap.location(in: self), cursorViewDelegate: cursorViewDelegate) {
@@ -739,6 +743,7 @@ final class LadderView: ScaledView {
     }
 
     @objc func dragging(pan: UIPanGestureRecognizer) {
+        guard !marksAreHidden else { return }
         switch mode {
         case .select:
             selectModeDrag(pan)
@@ -989,7 +994,7 @@ final class LadderView: ScaledView {
         if ladderIsLocked {
             showLockLadderWarning(rect: rect)
         }
-        if ladder.marksAreHidden {
+        if marksAreHidden {
             showMarksAreHiddenWarning(rect: rect)
         }
     }
@@ -1342,7 +1347,7 @@ final class LadderView: ScaledView {
     func drawRegion(rect: CGRect, context: CGContext, region: Region, offset: CGFloat, scale: CGFloat, lastRegion: Bool) {
         drawLabel(rect: rect, region: region, context: context)
         drawRegionArea(context: context, rect: rect, region: region)
-        if !ladder.marksAreHidden {
+        if !marksAreHidden {
             drawMarks(region: region, context: context, rect: rect)
         }
         drawBottomLine(context: context, lastRegion: lastRegion, rect: rect)

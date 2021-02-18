@@ -191,6 +191,7 @@ extension DiagramViewController: HamburgerTableDelegate, UIImagePickerController
         ladderView.ladderIsLocked = _ladderIsLocked
         cursorView.allowTaps = !_ladderIsLocked
         ladderView.isUserInteractionEnabled = !_ladderIsLocked
+        updateToolbarButtons()
         setViewsNeedDisplay()
         if playSounds {
             Sounds.playLockSound()

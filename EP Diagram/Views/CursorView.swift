@@ -40,7 +40,8 @@ final class CursorView: ScaledView {
 
     var leftMargin: CGFloat = 0
     var mode: Mode = .normal
-
+    var marksAreHidden: Bool = false
+    
     var allowTaps = true // set false to prevent taps from making marks
     var cursorEndPointY: CGFloat = 0
 
@@ -255,6 +256,7 @@ final class CursorView: ScaledView {
 
     @objc func singleTap(tap: UITapGestureRecognizer) {
         os_log("singleTap(tap:) - CursorView", log: OSLog.touches, type: .info)
+        guard !marksAreHidden else { return }
         guard allowTaps else { return } // Taps do nothing when ladder is locked.
         switch mode {
         case .normal:
@@ -269,6 +271,7 @@ final class CursorView: ScaledView {
 
     @objc func doubleTap(tap: UITapGestureRecognizer) {
         os_log("doubleTap(tap:) - CursorView", log: OSLog.touches, type: .info)
+        guard !marksAreHidden else { return }
         guard allowTaps else { return } // Taps do nothing when ladder is locked.
         switch mode {
         case .normal:
@@ -280,6 +283,7 @@ final class CursorView: ScaledView {
     }
 
     @objc func dragging(pan: UIPanGestureRecognizer) {
+        guard !marksAreHidden else { return }
         switch mode {
         case .calibrate:
             calibrateModeDrag(pan)
