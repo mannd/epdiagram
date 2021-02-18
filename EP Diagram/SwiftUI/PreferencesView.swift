@@ -19,6 +19,7 @@ struct PreferencesView: View {
     @AppStorage(Preferences.defaultMarkStyleKey) var markStyle = Preferences.markStyle
     @AppStorage(Preferences.defaultLabelDescriptionVisibilityKey) var labelDescriptionVisibility = Preferences.labelDescriptionVisibility
     @AppStorage(Preferences.defaultPlaySoundsKey) var playSounds = Preferences.playSounds
+    @AppStorage(Preferences.defaultHideMarksKey) var hideMarks = Preferences.hideMarks
 
 // Pass Diagram as binding to allow changing non-UserDefaults settings
     // @Binding var diagram: Diagram
@@ -41,6 +42,9 @@ struct PreferencesView: View {
                             Text("Visible").tag(TextVisibility.visibility.rawValue)
                             Text("Visible if fits").tag(TextVisibility.visibleIfFits.rawValue)
                         })
+                        Toggle(isOn: $hideMarks) {
+                            Text("Hide marks")
+                        }
                     }
                     Section(header: Text("Region")) {}
                     Section(header: Text("Mark")) {

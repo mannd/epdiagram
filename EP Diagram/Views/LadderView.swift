@@ -989,7 +989,7 @@ final class LadderView: ScaledView {
         if ladderIsLocked {
             showLockLadderWarning(rect: rect)
         }
-        if !ladder.marksAreVisible {
+        if ladder.marksAreHidden {
             showMarksAreHiddenWarning(rect: rect)
         }
     }
@@ -1342,7 +1342,7 @@ final class LadderView: ScaledView {
     func drawRegion(rect: CGRect, context: CGContext, region: Region, offset: CGFloat, scale: CGFloat, lastRegion: Bool) {
         drawLabel(rect: rect, region: region, context: context)
         drawRegionArea(context: context, rect: rect, region: region)
-        if ladder.marksAreVisible {
+        if !ladder.marksAreHidden {
             drawMarks(region: region, context: context, rect: rect)
         }
         drawBottomLine(context: context, lastRegion: lastRegion, rect: rect)

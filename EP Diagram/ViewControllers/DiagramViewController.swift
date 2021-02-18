@@ -1078,6 +1078,7 @@ extension DiagramViewController {
         ladderView.defaultMarkStyle = Mark.Style(rawValue: UserDefaults.standard.integer(forKey: Preferences.defaultMarkStyleKey)) ?? .solid
         ladderView.showLabelDescription = TextVisibility(rawValue: UserDefaults.standard.integer(forKey: Preferences.defaultLabelDescriptionVisibilityKey)) ?? .invisible
         playSounds = UserDefaults.standard.bool(forKey: Preferences.defaultPlaySoundsKey)
+        ladderView.ladder.marksAreHidden = UserDefaults.standard.bool(forKey: Preferences.defaultHideMarksKey)
     }
 
     @objc func resolveFileConflicts() {

@@ -27,7 +27,7 @@ class Ladder: NSObject, Codable {
     var regionCount: Int { regions.count }
     var attachedMark: Mark? // cursor is attached to a most 1 mark at a time
     var connectedMarks = [Mark]() // marks in the process of being connected
-    var marksAreVisible: Bool = true    // shows and hides all the marks.  You can toggle this for teaching purposes.
+    var marksAreHidden: Bool = false    // hides all the marks.  You can toggle this for teaching purposes.
     var activeRegion: Region? {  // ladder model enforces at most one region can be active
         didSet {
             regions.forEach { region in region.mode = .normal }
