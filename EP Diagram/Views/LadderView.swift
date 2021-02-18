@@ -1851,27 +1851,22 @@ extension LadderView: LadderViewDelegate {
     }
 
     func saveState() {
-        os_log("****saveState() - LadderView", log: .default, type: .default)
+        os_log("saveState() - LadderView", log: .default, type: .default)
         savedActiveRegion = activeRegion
         activeRegion = nil
         savedMode = mode
         savedAttachedMark = ladder.attachedMark
-        ladder.normalizeAllMarks()
-        setNeedsDisplay()
     }
 
-    func restoreState() {
-        os_log("****restoreState() - LadderView", log: .default, type: .default)
-        // FIXME: this isn't right.  Need to do this on return to normal state.
-        ladder.normalizeAllMarks()
+    func restoreState() -> Mode {
+        os_log("restoreState() - LadderView", log: .default, type: .default)
         mode = savedMode
         if mode == .normal {
-            ladder.zone = Zone()
             activeRegion = savedActiveRegion
             ladder.attachedMark = savedAttachedMark
             attachMark(savedAttachedMark)
-            setNeedsDisplay()
         }
+        return mode
     }
 }
 

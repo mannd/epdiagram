@@ -13,7 +13,6 @@ extension DiagramViewController: UIContextMenuInteractionDelegate {
 
     // Will display menu
     func contextMenuInteraction(_ interaction: UIContextMenuInteraction, willDisplayMenuFor configuration: UIContextMenuConfiguration, animator: UIContextMenuInteractionAnimating?) {
-        print("****contextMenuInteraction")
         guard let locationInLadder = self.longPressLocationInLadder else { return }
         self.menuAppeared = true
         self.ladderView.saveState()
@@ -68,14 +67,14 @@ extension DiagramViewController: UIContextMenuInteractionDelegate {
 
     // contextMenuInteraction(_:willEndFor:...)  This is called with each drag, and after menu appears.
     func contextMenuInteraction(_ interaction: UIContextMenuInteraction, willEndFor configuration: UIContextMenuConfiguration, animator: UIContextMenuInteractionAnimating?) {
-        print("****contextMenuInteraction willEndFor")
         // Filter out all the time this abortedly appears.
         guard self.menuAppeared else { return }
-        if !self.prolongSelectState {
-            self.ladderView.restoreState()
-        } else {
+        if self.prolongSelectState {
+            // delay restoring state until menu closes
             self.ladderView.mode = .menu
-        } // else restore state with done button of toolbar menu
+        } else {
+            mode = self.ladderView.restoreState()
+        }
         self.menuAppeared = false
         self.separatorView?.isHidden = false
     }

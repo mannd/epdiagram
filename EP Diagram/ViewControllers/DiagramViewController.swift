@@ -138,6 +138,7 @@ final class DiagramViewController: UIViewController {
     let pdfScaleFactor: CGFloat = 5.0
 
     var prolongSelectState = false // used to allow menus like slant to complete actions on selected marks
+    { didSet { print("****prolongSelectState set")}}
     var slantEndpoint: Mark.Endpoint = .proximal
 
     // Context menu actions
@@ -524,6 +525,7 @@ final class DiagramViewController: UIViewController {
         guard let toolbar = navigationController?.toolbar else { return }
         currentDocument?.undoManager.beginUndoGrouping()
         prolongSelectState = true
+
         let labelText = UITextField()
         labelText.text = L("Adjust mark slant")
         let slider = UISlider()
@@ -573,12 +575,12 @@ final class DiagramViewController: UIViewController {
         currentDocument?.undoManager.endUndoGrouping()
         hideCursorAndNormalizeAllMarks()
         prolongSelectState = false
-        ladderView.restoreState()
-        if ladderView.mode == .select {
-            launchSelectMode(UIAlertAction())
-        } else {
-            showMainToolbar()
-        }
+        mode = ladderView.restoreState()
+//        if ladderView.mode == .select {
+//            launchSelectMode(UIAlertAction())
+//        } else {
+//            showMainToolbar()
+//        }
     }
 
     @objc func slantSliderValueDidChange(_ sender: UISlider!) {
@@ -728,12 +730,7 @@ final class DiagramViewController: UIViewController {
         currentDocument?.undoManager.endUndoGrouping()
         hideCursorAndNormalizeAllMarks()
         prolongSelectState = false
-        ladderView.restoreState()
-        if ladderView.mode == .select {
-            launchSelectMode(UIAlertAction())
-        } else {
-            showMainToolbar()
-        }
+        mode = ladderView.restoreState()
     }
 
 
