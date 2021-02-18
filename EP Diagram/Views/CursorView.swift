@@ -21,7 +21,8 @@ final class CursorView: ScaledView {
         get { caliper.lineWidth }
         set(newValue) { caliper.lineWidth = newValue }
     }
-    var color: UIColor = UIColor.systemBlue
+    var cursorColor: UIColor = UIColor.systemBlue
+    var caliperColor: UIColor = UIColor.systemBlue
 
     private var cursor: Cursor = Cursor()
     private var rawCursorHeight: CGFloat?
@@ -119,7 +120,7 @@ final class CursorView: ScaledView {
             let height = (position <= leftMargin) ? defaultHeight : cursor.markIntersectionPositionY
             let endPoint = CGPoint(x: position, y: height)
 
-            context.setStrokeColor(color.cgColor)
+            context.setStrokeColor(cursorColor.cgColor)
             context.setLineWidth(lineWidth)
             context.setAlpha(alphaValue)
             context.move(to: CGPoint(x: position, y: 0))
@@ -136,7 +137,7 @@ final class CursorView: ScaledView {
 
     func drawCaliper(_ rect: CGRect) {
         if let context = UIGraphicsGetCurrentContext() {
-            context.setStrokeColor(caliper.color.cgColor)
+            context.setStrokeColor(caliperColor.cgColor)
             context.setLineWidth(caliperLineWidth)
             context.setAlpha(alphaValue)
             context.move(to: CGPoint(x: caliper.bar1Position, y: 0))
@@ -154,7 +155,7 @@ final class CursorView: ScaledView {
             attributes = [
                 NSAttributedString.Key.font: textFont,
                 NSAttributedString.Key.paragraphStyle: paragraphStyle,
-                NSAttributedString.Key.foregroundColor: caliper.color
+                NSAttributedString.Key.foregroundColor: caliperColor
             ]
             let size = text.size(withAttributes: attributes)
             let measureSize = measureText.size(withAttributes: attributes)
@@ -469,7 +470,7 @@ extension CursorView: CursorViewDelegate {
     func drawMarker(at position: CGPoint) {
         guard let context = UIGraphicsGetCurrentContext() else { return }
         let convertedPosition = ladderViewDelegate.convertPosition(position, toView: self)
-        context.setStrokeColor(color.cgColor)
+        context.setStrokeColor(cursorColor.cgColor)
         context.setLineWidth(lineWidth / 2.0)
         context.setAlpha(alphaValue / 2.0)
         context.move(to: CGPoint(x: convertedPosition.x, y: 0))

@@ -22,13 +22,19 @@ struct Preferences {
     static let defaultMarkStyleKey = "defaultMarkStyleKey"
     static let defaultLabelDescriptionVisibilityKey = "defaultLabelDescriptionVisibilityKey"
     static let defaultLeftMarginKey = "defaultLeftMarginKey"
-    static let defaultCaliperColorKey = "defaultCaliperColorKey"
     static let defaultPlaySoundsKey = "defaultPlaySoundsKey"
     static let defaultHideMarksKey = "defaultHideMarksKey"
     static let defaultCaliperLineWidthKey = "defaultCaliperLineWidthKey"
+    static let defaultCaliperColorNameKey = "defaultCaliperColorNameKey"
+    static let defaultCursorColorNameKey = "defaultCursorColorNameKey"
+    static let defaultAttachedColorNameKey = "defaultAttachedColorNameKey"
+    static let defaultConnectedColorNameKey = "defaultConnectedColorNameKey"
+    static let defaultSelectedColorNameKey = "defaultSelectedColorNameKey"
+    static let defaultLinkedColorNameKey = "defaultLinkedColorNameKey"
+    static let defaultNormalColorNameKey = "defaultNormalColorNameKey"
 
     // Stored as Int, converted to CGFloat when used.
-    static var lineWidth: Int = 2
+    static var markLineWidth: Int = 2
     static var cursorLineWidth: Int = 1
     static var showImpulseOrigin = false
     static var showBlock = false
@@ -41,10 +47,17 @@ struct Preferences {
     static var playSounds: Bool = true
     static var hideMarks: Bool = false
     static var caliperLineWidth: Int = 1
+    static var caliperColorName: Int = ColorName.blue.rawValue
+    static var cursorColorName: Int = ColorName.blue.rawValue
+    static var attachedColorName: Int = ColorName.orange.rawValue
+    static var connectedColorName: Int = ColorName.green.rawValue
+    static var selectedColorName: Int = ColorName.blue.rawValue
+    static var linkedColorName: Int = ColorName.purple.rawValue
+    static var normalColorName: Int = ColorName.normal.rawValue
 
     static func defaults() -> [String: Any] {
         let defaultPreferences: [String: Any] = [
-            Preferences.defaultLineWidthKey: Preferences.lineWidth,
+            Preferences.defaultLineWidthKey: Preferences.markLineWidth,
             Preferences.defaultCursorLineWidthKey: Preferences.cursorLineWidth,
             Preferences.defaultShowImpulseOriginKey: Preferences.showImpulseOrigin,
             Preferences.defaultShowBlockKey: Preferences.showBlock,
@@ -57,38 +70,40 @@ struct Preferences {
             Preferences.defaultPlaySoundsKey: Preferences.playSounds,
             Preferences.defaultHideMarksKey: Preferences.hideMarks,
             Preferences.defaultCaliperLineWidthKey: Preferences.caliperLineWidth,
+            Preferences.defaultCaliperColorNameKey: Preferences.caliperColorName,
+            Preferences.defaultCursorColorNameKey: Preferences.cursorColorName,
+            Preferences.defaultAttachedColorNameKey: Preferences.attachedColorName,
+            Preferences.defaultConnectedColorNameKey: Preferences.connectedColorName,
+            Preferences.defaultSelectedColorNameKey: Preferences.selectedColorName,
+            Preferences.defaultLinkedColorNameKey: Preferences.linkedColorName,
+            Preferences.defaultNormalColorNameKey: Preferences.normalColorName,
         ]
         return defaultPreferences
     }
 }
 
-// Possibly use to add colors to user defaults...
-// From https://gist.github.com/HassanElDesouky/373bcf4f1002f77557814a3e24fa4759
-extension UserDefaults {
-  func colorForKey(key: String) -> UIColor? {
-    var colorReturnded: UIColor?
-    if let colorData = data(forKey: key) {
-      do {
-        if let color = try NSKeyedUnarchiver.unarchiveTopLevelObjectWithData(colorData) as? UIColor {
-          colorReturnded = color
-        }
-      } catch {
-        print("Error UserDefaults")
-      }
-    }
-    return colorReturnded
-  }
+enum ColorName: Int, Codable {
+    case blue
+    case red
+    case yellow
+    case green
+    case purple
+    case orange
+    case normal
+    case pink
 
-  func setColor(color: UIColor?, forKey key: String) {
-    var colorData: NSData?
-    if let color = color {
-      do {
-        let data = try NSKeyedArchiver.archivedData(withRootObject: color, requiringSecureCoding: false) as NSData?
-        colorData = data
-      } catch {
-        print("Error UserDefaults")
-      }
+    static var colorMap: Dictionary<ColorName, UIColor> = [
+        .blue: UIColor.systemBlue,
+        .red: UIColor.systemRed,
+        .yellow: UIColor.systemYellow,
+        .green: UIColor.systemGreen,
+        .purple: UIColor.systemPurple,
+        .orange: UIColor.systemOrange,
+        .normal: UIColor.label,
+        .pink: UIColor.systemPink
+    ]
+
+    func color() -> UIColor {
+        return ColorName.colorMap[self] ?? .blue
     }
-    set(colorData, forKey: key)
-  }
 }

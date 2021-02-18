@@ -1098,6 +1098,20 @@ extension DiagramViewController {
         ladderView.showLabelDescription = TextVisibility(rawValue: UserDefaults.standard.integer(forKey: Preferences.defaultLabelDescriptionVisibilityKey)) ?? .invisible
         playSounds = UserDefaults.standard.bool(forKey: Preferences.defaultPlaySoundsKey)
         marksAreHidden = UserDefaults.standard.bool(forKey: Preferences.defaultHideMarksKey)
+        let caliperColorName = ColorName(rawValue: UserDefaults.standard.integer(forKey: Preferences.defaultCaliperColorNameKey)) ?? ColorName.blue
+        cursorView.caliperColor = caliperColorName.color()
+        let cursorColorName = ColorName(rawValue: UserDefaults.standard.integer(forKey: Preferences.defaultCursorColorNameKey)) ?? ColorName.blue
+        cursorView.cursorColor = cursorColorName.color()
+        let attachedColorName = ColorName(rawValue: UserDefaults.standard.integer(forKey: Preferences.defaultAttachedColorNameKey)) ?? ColorName.orange
+        ladderView.attachedColor = attachedColorName.color()
+        let connectedColorName = ColorName(rawValue: UserDefaults.standard.integer(forKey: Preferences.defaultConnectedColorNameKey)) ?? ColorName.green
+        ladderView.connectedColor = connectedColorName.color()
+        let selectedColorName = ColorName(rawValue: UserDefaults.standard.integer(forKey: Preferences.defaultSelectedColorNameKey)) ?? ColorName.blue
+        ladderView.selectedColor = selectedColorName.color()
+        let linkedColorName = ColorName(rawValue: UserDefaults.standard.integer(forKey: Preferences.defaultLinkedColorNameKey)) ?? ColorName.purple
+        ladderView.linkedColor = linkedColorName.color()
+        let normalColorName = ColorName(rawValue: UserDefaults.standard.integer(forKey: Preferences.defaultNormalColorNameKey)) ?? ColorName.normal
+        ladderView.normalColor = normalColorName.color()
         updateToolbarButtons()
     }
 
