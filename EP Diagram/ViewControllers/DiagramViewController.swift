@@ -207,6 +207,10 @@ final class DiagramViewController: UIViewController {
     }
     lazy var slantMenu = UIMenu(title: L("Slant mark(s)..."), image: UIImage(systemName: "line.diagonal"), children: [self.slantProximalPivotAction, self.slantDistalPivotAction])
 
+    lazy var adjustDistalYAction = UIAction(title: L("Adjust distal mark end(s)")) { action in
+        self.adjustDistalY()
+    }
+
     lazy var oneRegionHeightAction = UIAction(title: L("1 unit")) { action in
         guard let selectedRegion = self.ladderView.selectedRegion() else { return }
         self.ladderView.setRegionHeight(1, forRegion: selectedRegion)
@@ -580,17 +584,49 @@ final class DiagramViewController: UIViewController {
         setToolbarItems([UIBarButtonItem(customView: stackView)], animated: true)
     }
 
+    func adjustDistalY() {
+        guard let toolbar = navigationController?.toolbar else { return }
+        currentDocument?.undoManager.beginUndoGrouping() // will end when menu closed
+        prolongSelectState = true
+        let labelText = UITextField()
+        labelText.text = L("Adjust distal Y value")
+        let slider = UISlider()
+        slider.minimumValue = 0.2
+        slider.maximumValue = 1.0
+        slider.setValue(1.0, animated: false)
+        slider.addTarget(self, action: #selector(adjustDistalYSliderValueDidChange(_:)), for: .valueChanged)
+        let doneButton = UIButton(type: .system)
+        doneButton.setTitle(L("Done"), for: .normal)
+        doneButton.addTarget(self, action: #selector(closeAdjustDistalYToolbar(_:)), for: .touchUpInside)
+        let stackView = UIStackView(frame: toolbar.frame)
+        stackView.distribution = .fill
+        stackView.axis = .horizontal
+        stackView.spacing = 8
+        stackView.addArrangedSubview(labelText)
+        stackView.addArrangedSubview(slider)
+        stackView.addArrangedSubview(doneButton)
+        setToolbarItems([UIBarButtonItem(customView: stackView)], animated: true)
+    }
+
+    @objc func adjustDistalYSliderValueDidChange(_ sender: UISlider) {
+        let value: CGFloat = CGFloat(sender.value)
+        ladderView.adjustDistalY(value)
+        ladderView.refresh()
+    }
+
 
     @objc func closeSlantToolbar(_ sender: UIAlertAction) {
         currentDocument?.undoManager.endUndoGrouping()
         hideCursorAndNormalizeAllMarks()
         prolongSelectState = false
         mode = ladderView.restoreState()
-//        if ladderView.mode == .select {
-//            launchSelectMode(UIAlertAction())
-//        } else {
-//            showMainToolbar()
-//        }
+    }
+
+    @objc func closeAdjustDistalYToolbar(_ sender: UIAlertAction) {
+        currentDocument?.undoManager.endUndoGrouping()
+        hideCursorAndNormalizeAllMarks()
+        prolongSelectState = false
+        mode = ladderView.restoreState()
     }
 
     @objc func slantSliderValueDidChange(_ sender: UISlider!) {

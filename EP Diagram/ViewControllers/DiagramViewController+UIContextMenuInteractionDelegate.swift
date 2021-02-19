@@ -104,7 +104,7 @@ extension DiagramViewController: UIContextMenuInteractionDelegate {
     func markContextMenuConfiguration(at location: CGPoint) -> UIContextMenuConfiguration {
         return UIContextMenuConfiguration(identifier: nil, previewProvider: nil) {_ in
             // FIXME: make sure we won't move linked marks, or disconnect them when straightening.
-            return UIMenu(title: L("Mark"), children: [self.styleMenu, self.straightenMenu, self.slantMenu, self.unlinkAction, self.deleteAction])
+            return UIMenu(title: L("Mark"), children: [self.styleMenu, self.straightenMenu, self.slantMenu, self.adjustDistalYAction,  self.unlinkAction, self.deleteAction])
         }
     }
 
@@ -117,7 +117,7 @@ extension DiagramViewController: UIContextMenuInteractionDelegate {
             } else {
                 title = L("Region")
             }
-            return UIMenu(title: title, children: [self.styleMenu, self.straightenMenu, self.slantMenu, self.editLabelAction, self.addRegionMenu, self.removeRegionAction, self.regionHeightMenu, self.rhythmAction, self.deleteAllInRegion])
+            return UIMenu(title: title, children: [self.styleMenu, self.straightenMenu, self.slantMenu, self.adjustDistalYAction, self.editLabelAction, self.addRegionMenu, self.removeRegionAction, self.regionHeightMenu, self.rhythmAction, self.deleteAllInRegion])
         }
     }
 

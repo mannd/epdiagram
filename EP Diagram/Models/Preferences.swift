@@ -89,7 +89,7 @@ enum ColorName: Int, Codable {
     case green
     case purple
     case orange
-    case normal
+    case normal // black in light mode, white in dark mode
     case pink
 
     static var colorMap: Dictionary<ColorName, UIColor> = [

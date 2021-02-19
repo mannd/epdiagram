@@ -1463,6 +1463,19 @@ final class LadderView: ScaledView {
         currentDocument?.undoManager.endUndoGrouping()
     }
 
+    func adjustDistalY(_ value: CGFloat) {
+        let selectedMarks = ladder.allMarksWithMode(.selected)
+        selectedMarks.forEach { mark in
+            let originalSegment = mark.segment
+            currentDocument?.undoManager.registerUndo(withTarget: self, handler: { target in
+                self.setSegment(segment: originalSegment, forMark: mark)
+            })
+            NotificationCenter.default.post(name: .didUndoableAction, object: nil)
+            let segment = Segment(proximal: mark.segment.proximal, distal: CGPoint(x: mark.segment.distal.x, y: value))
+            setSegment(segment: segment, forMark: mark)
+        }
+    }
+
     func slantSelectedMarks(angle: CGFloat, endpoint: Mark.Endpoint) {
         let selectedMarks = ladder.allMarksWithMode(.selected)
         selectedMarks.forEach { mark in
