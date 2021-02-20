@@ -11,8 +11,6 @@ import UIKit
 /// Namespace for global static functions, variables.
 enum Geometry {
 
-    // Most of these functions are unused at the moment.
-    
     // Measures shortest distance from a line defined by two points and a point.
     // See https://stackoverflow.com/questions/849211/shortest-distance-between-a-point-and-a-line-segment
     static func distanceSegmentToPoint(segment: Segment, point p: CGPoint) -> CGFloat {
@@ -110,6 +108,17 @@ enum Geometry {
         let a1 = (s1.proximal.y - s1.distal.y) / (s1.proximal.x - s1.distal.x)
         let a2 = (s2.proximal.y - s2.distal.y) / (s2.proximal.x - s2.distal.x)
         return a1 == a2
+    }
+
+    // Doesn't check for y outside of segment.  Exclude horizontal line before calling.
+    static func evaluateX(knowingY y: CGFloat, fromSegment s: Segment) -> CGFloat {
+        precondition(s.proximal.y != s.distal.y)
+        let x1 = s.proximal.x
+        let y1 = s.proximal.y
+        let x2 = s.distal.x
+        let y2 = s.distal.y
+        let x = ((x2-x1) * (y-y1)/(y2-y1)) + x1
+        return x
     }
 }
 

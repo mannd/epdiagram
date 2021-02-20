@@ -151,6 +151,7 @@ final class DiagramViewController: UIViewController {
 
     var prolongSelectState = false // used to allow menus like slant to complete actions on selected marks
     var activeEndpoint: Mark.Endpoint = .proximal
+    var adjustment: Adjustment = .adjust
 
     // Context menu actions
     lazy var deleteAction = UIAction(title: L("Delete selected mark(s)"), image: UIImage(systemName: "trash"), attributes: .destructive) { action in
@@ -211,13 +212,25 @@ final class DiagramViewController: UIViewController {
 
     lazy var adjustProximalYAction = UIAction(title: L("Adjust proximal mark end(s)")) { action in
         self.activeEndpoint = .proximal
+        self.adjustment = .adjust
         self.showAdjustYToolbar()
     }
     lazy var adjustDistalYAction = UIAction(title: L("Adjust distal mark end(s)")) { action in
         self.activeEndpoint = .distal
+        self.adjustment = .adjust
         self.showAdjustYToolbar()
     }
-    lazy var adjustYMenu = UIMenu(title: L("Adjust mark ends..."), children: [adjustProximalYAction, adjustDistalYAction])
+    lazy var trimProximalYAction = UIAction(title: L("Trim proximal mark end(s)")) { action in
+        self.activeEndpoint = .proximal
+        self.adjustment = .trim
+        self.showAdjustYToolbar()
+    }
+    lazy var trimDistalYAction = UIAction(title: L("Trim distal mark end(s)")) { action in
+        self.activeEndpoint = .distal
+        self.adjustment = .trim
+        self.showAdjustYToolbar()
+    }
+    lazy var adjustYMenu = UIMenu(title: L("Adjust mark ends..."), children: [adjustProximalYAction, adjustDistalYAction, trimProximalYAction, trimDistalYAction])
 
     lazy var oneRegionHeightAction = UIAction(title: L("1 unit")) { action in
         guard let selectedRegion = self.ladderView.selectedRegion() else { return }
@@ -608,20 +621,18 @@ final class DiagramViewController: UIViewController {
         currentDocument?.undoManager.beginUndoGrouping() // will end when menu closed
         prolongSelectState = true
         let labelText = UITextField()
-        labelText.text = L("Adjust distal Y value")
+        labelText.text = adjustment == .adjust ? L("Adjust distal Y value") : L("Trim distal Y value")
         let slider = UISlider()
         slider.minimumValue = 0
         slider.maximumValue = 1.0
         if let soleSelectedMark = ladderView.soleSelectedMark() {
             let y = activeEndpoint == .proximal ? soleSelectedMark.segment.proximal.y : soleSelectedMark.segment.distal.y
-            print("**** y = \(y)")
             slider.setValue(Float(y), animated: false)
         } else {
             let startValue: Float = activeEndpoint == .proximal ? 0 : 1
             slider.setValue(startValue, animated: false)
-            ladderView.adjustY(CGFloat(startValue), endpoint: activeEndpoint)
+            ladderView.adjustY(CGFloat(startValue), endpoint: activeEndpoint, adjustment: adjustment)
         }
-//        ladderView.adjustY(1.0, endpoint: activeEndpoint)
         slider.addTarget(self, action: #selector(adjustYSliderValueDidChange(_:)), for: .valueChanged)
         let doneButton = UIButton(type: .system)
         doneButton.setTitle(L("Done"), for: .normal)
@@ -638,7 +649,7 @@ final class DiagramViewController: UIViewController {
 
     @objc func adjustYSliderValueDidChange(_ sender: UISlider) {
         let value: CGFloat = CGFloat(sender.value)
-        ladderView.adjustY(value, endpoint: activeEndpoint)
+        ladderView.adjustY(value, endpoint: activeEndpoint, adjustment: adjustment)
         ladderView.refresh()
     }
 

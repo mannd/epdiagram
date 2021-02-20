@@ -83,4 +83,13 @@ class MathTests: XCTestCase {
         XCTAssertEqual(angle3, -45, accuracy: 0.0001)
     }
 
+    func testEvaluateX() {
+        let s0 = Segment(proximal: CGPoint(x: 0, y: 0), distal: CGPoint(x: 0, y: 100))
+        XCTAssertEqual(Geometry.evaluateX(knowingY: 50, fromSegment: s0), 0, accuracy: 0.001)
+        let s1 = Segment(proximal: CGPoint(x: 0, y: 0), distal: CGPoint(x: 100, y: 100))
+        XCTAssertEqual(Geometry.evaluateX(knowingY: 50, fromSegment: s1), 50, accuracy: 0.001)
+        let s2 = Segment(proximal: CGPoint(x: 0, y: 0), distal: CGPoint(x: -100, y: -100))
+        XCTAssertEqual(Geometry.evaluateX(knowingY: -50, fromSegment: s2), -50, accuracy: 0.001)
+    }
+
 }

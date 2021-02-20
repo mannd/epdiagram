@@ -1497,7 +1497,7 @@ final class LadderView: ScaledView {
         currentDocument?.undoManager.endUndoGrouping()
     }
 
-    func adjustY(_ value: CGFloat, endpoint: Mark.Endpoint) {
+    func adjustY(_ value: CGFloat, endpoint: Mark.Endpoint, adjustment: Adjustment) {
         let selectedMarks = ladder.allMarksWithMode(.selected)
         selectedMarks.forEach { mark in
             let originalSegment = mark.segment
@@ -1506,35 +1506,44 @@ final class LadderView: ScaledView {
             })
             NotificationCenter.default.post(name: .didUndoableAction, object: nil)
             let segment: Segment
-            if endpoint == .proximal {
-                segment = Segment(proximal: CGPoint(x: mark.segment.proximal.x, y: value), distal: mark.segment.distal)
-            } else {
-                segment = Segment(proximal: mark.segment.proximal, distal: CGPoint(x: mark.segment.distal.x, y: value))
+            switch adjustment {
+            case .trim:
+                if endpoint == .proximal {
+                    segment = Segment(proximal: CGPoint(x: Geometry.evaluateX(knowingY: value, fromSegment: mark.segment), y: value), distal: mark.segment.distal)
+                } else {
+                    segment = Segment(proximal: mark.segment.proximal, distal: CGPoint(x: Geometry.evaluateX(knowingY: value, fromSegment: mark.segment), y: value))
+                }
+            case .adjust:
+                if endpoint == .proximal {
+                    segment = Segment(proximal: CGPoint(x: mark.segment.proximal.x, y: value), distal: mark.segment.distal)
+                } else {
+                    segment = Segment(proximal: mark.segment.proximal, distal: CGPoint(x: mark.segment.distal.x, y: value))
+                }
             }
             setSegment(segment: segment, forMark: mark)
         }
     }
 
-    func slantSelectedMarks(angle: CGFloat, endpoint: Mark.Endpoint) {
-        let selectedMarks = ladder.allMarksWithMode(.selected)
-        selectedMarks.forEach { mark in
-            let originalSegment = mark.segment
-            currentDocument?.undoManager.registerUndo(withTarget: self, handler: { target in
-                self.setSegment(segment: originalSegment, forMark: mark)
-            })
-            NotificationCenter.default.post(name: .didUndoableAction, object: nil)
-            slantMark(angle: angle, mark: mark, endpoint: endpoint)
+        func slantSelectedMarks(angle: CGFloat, endpoint: Mark.Endpoint) {
+            let selectedMarks = ladder.allMarksWithMode(.selected)
+            selectedMarks.forEach { mark in
+                let originalSegment = mark.segment
+                currentDocument?.undoManager.registerUndo(withTarget: self, handler: { target in
+                    self.setSegment(segment: originalSegment, forMark: mark)
+                })
+                NotificationCenter.default.post(name: .didUndoableAction, object: nil)
+                slantMark(angle: angle, mark: mark, endpoint: endpoint)
+            }
         }
-    }
 
-    func slantMark(angle: CGFloat, mark: Mark, endpoint: Mark.Endpoint = .proximal) {
-        let region = ladder.region(ofMark: mark)
-        let segment = transformToScaledViewSegment(regionSegment: mark.segment, region: region)
-        let height = segment.distal.y - segment.proximal.y
-        let delta = Geometry.rightTriangleBase(withAngle: angle, height: height)
-        // We add delta to proximal x, not distal x, because we always start with a vertical mark.
-        let newSegment: Segment
-        switch endpoint {
+        func slantMark(angle: CGFloat, mark: Mark, endpoint: Mark.Endpoint = .proximal) {
+            let region = ladder.region(ofMark: mark)
+            let segment = transformToScaledViewSegment(regionSegment: mark.segment, region: region)
+            let height = segment.distal.y - segment.proximal.y
+            let delta = Geometry.rightTriangleBase(withAngle: angle, height: height)
+            // We add delta to proximal x, not distal x, because we always start with a vertical mark.
+            let newSegment: Segment
+            switch endpoint {
         case .proximal:
             newSegment = Segment(proximal: segment.proximal, distal: CGPoint(x: segment.proximal.x + delta, y: segment.distal.y))
         case .distal:
@@ -1942,5 +1951,10 @@ enum TextVisibility: Int, Codable {
     case visibility
     case invisible
     case visibleIfFits
+}
+
+enum Adjustment {
+    case adjust
+    case trim
 }
 
