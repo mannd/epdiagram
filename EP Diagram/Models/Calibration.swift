@@ -8,7 +8,8 @@
 
 import UIKit
 
-class Calibration: Codable {
+// Must be a class, reference to calibration is shared by ladder and cursor views.
+final class Calibration: Codable {
     var originalZoom: CGFloat = 1
     var currentZoom: CGFloat = 1
     var originalCalFactor: CGFloat = 1

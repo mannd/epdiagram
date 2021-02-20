@@ -8,7 +8,7 @@
 
 import UIKit
 
-class HamburgerCell: UITableViewCell {
+final class HamburgerCell: UITableViewCell {
     @IBOutlet var label: UILabel!
     @IBOutlet var icon: UIImageView!
 

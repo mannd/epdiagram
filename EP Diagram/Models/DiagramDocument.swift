@@ -9,24 +9,7 @@
 import UIKit
 import OSLog
 
-enum DocumentError: Error {
-    case unrecognizedContent
-    case corruptDocument
-    case archivingFailure
-
-    var localizedDescription: String {
-        switch self {
-        case .unrecognizedContent:
-            return L("File is an unrecognised format")
-        case .corruptDocument:
-            return L("File could not be read")
-        case .archivingFailure:
-            return L("File could not be saved")
-        }
-    }
-}
-
-class DiagramDocument: UIDocument {
+final class DiagramDocument: UIDocument {
     static let extensionName = "diagram"
 
     var diagram = Diagram.blankDiagram()
@@ -64,5 +47,22 @@ class DiagramDocument: UIDocument {
     override func handleError(_ error: Error, userInteractionPermitted: Bool) {
         super.handleError(error, userInteractionPermitted: userInteractionPermitted)
         os_log("handleError called %s", log: OSLog.errors, type: .error, error.localizedDescription)
+    }
+}
+
+enum DocumentError: Error {
+    case unrecognizedContent
+    case corruptDocument
+    case archivingFailure
+
+    var localizedDescription: String {
+        switch self {
+        case .unrecognizedContent:
+            return L("File is an unrecognised format")
+        case .corruptDocument:
+            return L("File could not be read")
+        case .archivingFailure:
+            return L("File could not be saved")
+        }
     }
 }

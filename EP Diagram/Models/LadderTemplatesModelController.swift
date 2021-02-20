@@ -10,7 +10,7 @@ import UIKit
 import Combine
 import os.log
 
-class LadderTemplatesModelController: ObservableObject {
+final class LadderTemplatesModelController: ObservableObject {
     let viewController: UIViewController?
     @Published var ladderTemplates: [LadderTemplate] = [] {
         didSet {

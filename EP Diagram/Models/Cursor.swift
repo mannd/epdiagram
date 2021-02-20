@@ -9,7 +9,7 @@
 import UIKit
 
 // Cursor is a vertical line that is used to move and set Marks.
-class Cursor  {
+final class Cursor  {
     static let intersectionRadius: CGFloat = 5
     static let omniCircleRadius: CGFloat = 20
     private let omniCircleMargin: CGFloat = 25 // how close circle gets to top and bottom of cursor

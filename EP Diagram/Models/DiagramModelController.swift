@@ -9,7 +9,7 @@
 import UIKit
 import Combine
 
-class DiagramModelController: ObservableObject {
+final class DiagramModelController: ObservableObject {
     var diagramViewController: DiagramViewController?
     @Published var diagram: Diagram {
         didSet {

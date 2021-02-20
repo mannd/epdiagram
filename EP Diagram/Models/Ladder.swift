@@ -12,7 +12,7 @@ import os.log
 // MARK: - classes
 
 /// A Ladder is simply a collection of Regions in top down order.
-class Ladder: NSObject, Codable {
+final class Ladder: NSObject, Codable {
     private(set) var id = UUID()
 
     // Hard limit on maximum and minimum number of regions in a ladder (for space reasons).

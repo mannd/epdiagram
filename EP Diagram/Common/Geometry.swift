@@ -93,6 +93,15 @@ enum Geometry {
         return tan(angle.degreesToRadians) * abs(height)
     }
 
+    static func oppositeAngle(p1: CGPoint, p2: CGPoint) -> CGFloat {
+        precondition(p1.y != p2.y) // otherwise would divide by zero
+        let sign: CGFloat = p2.x >=  p1.x ? 1 : -1
+        let oppositeSideLength = p2.x - p1.x
+        let adjacentSideLength = p2.y - p1.y
+        let ratio = oppositeSideLength / adjacentSideLength
+        return atan(ratio).radiansToDegrees * sign
+    }
+
     static func areParallel(_ s1: Segment, _ s2: Segment) -> Bool {
         // exclude situation of vertical segments
         if s1.proximal.x == s1.distal.x {

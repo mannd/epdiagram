@@ -8,7 +8,7 @@
 
 import UIKit
 
-class BlackView: UIView, UIGestureRecognizerDelegate {
+final class BlackView: UIView, UIGestureRecognizerDelegate {
     weak var delegate: HamburgerTableDelegate?
 
     required init?(coder: NSCoder) {

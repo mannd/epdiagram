@@ -49,6 +49,7 @@ final class DiagramViewController: UIViewController {
             ladderView.normalizeLadder()
             cursorView.mode = mode
             ladderView.mode = mode
+            hamburgerButton.isEnabled = (mode == .normal)
             switch mode {
             case .normal:
                 ladderView.setActiveRegion(regionNum: 0)
@@ -99,6 +100,7 @@ final class DiagramViewController: UIViewController {
     private var selectToolbarButtons: [UIBarButtonItem]?
     private var connectToolbarButtons: [UIBarButtonItem]?
     private var calibrateToolbarButtons: [UIBarButtonItem]?
+    private var hamburgerButton: UIBarButtonItem = UIBarButtonItem()
 
     weak var diagramEditorDelegate: DiagramEditorDelegate?
     var currentDocument: DiagramDocument?
@@ -322,7 +324,8 @@ final class DiagramViewController: UIViewController {
         //        if !isRunningOnMac() {
         //            navigationItem.setLeftBarButton(UIBarButtonItem(image: UIImage(named: "hamburger"), style: .plain, target: self, action: #selector(toggleHamburgerMenu)), animated: true)
         //        }
-        navigationItem.setLeftBarButton(UIBarButtonItem(image: UIImage(named: "hamburger"), style: .plain, target: self, action: #selector(toggleHamburgerMenu)), animated: true)
+        hamburgerButton = UIBarButtonItem(image: UIImage(named: "hamburger"), style: .plain, target: self, action: #selector(toggleHamburgerMenu))
+        navigationItem.setLeftBarButton(hamburgerButton, animated: true)
 
         let snapshotButton = UIBarButtonItem(image: UIImage(systemName: "photo.on.rectangle"), style: .plain, target: self, action: #selector(snapshotDiagram))
         let closeButton = UIBarButtonItem(image: UIImage(systemName: "xmark"), style: .done, target: self, action: #selector(closeDocument))
@@ -545,7 +548,17 @@ final class DiagramViewController: UIViewController {
         let slider = UISlider()
         slider.minimumValue = Self.minSlantAngle
         slider.maximumValue = Self.maxSlantAngle
-        slider.setValue(0, animated: false)
+        if let soleSelectedMark = ladderView.soleSelectedMark() {
+            var slantAngle = ladderView.slantAngle(mark: soleSelectedMark, endpoint: slantEndpoint)
+            // slant angle is flipped depending on endpoint, but it makes the slider and marks move in concert.
+            slantAngle = slantEndpoint == .proximal ? -slantAngle : slantAngle
+            slider.setValue(Float(slantAngle), animated: false)
+
+        } else {
+            slider.setValue(0, animated: false)
+            ladderView.slantSelectedMarks(angle: 0, endpoint: slantEndpoint)
+        }
+        // init marks to 0 slant
         slider.addTarget(self, action: #selector(slantSliderValueDidChange(_:)), for: .valueChanged)
         let doneButton = UIButton(type: .system)
         doneButton.setTitle(L("Done"), for: .normal)
@@ -594,6 +607,7 @@ final class DiagramViewController: UIViewController {
         slider.minimumValue = 0.2
         slider.maximumValue = 1.0
         slider.setValue(1.0, animated: false)
+        ladderView.adjustDistalY(1.0)
         slider.addTarget(self, action: #selector(adjustDistalYSliderValueDidChange(_:)), for: .valueChanged)
         let doneButton = UIButton(type: .system)
         doneButton.setTitle(L("Done"), for: .normal)
@@ -627,9 +641,10 @@ final class DiagramViewController: UIViewController {
         hideCursorAndNormalizeAllMarks()
         prolongSelectState = false
         mode = ladderView.restoreState()
+//        ladderView.swapEndsIfNeeded()
     }
 
-    @objc func slantSliderValueDidChange(_ sender: UISlider!) {
+    @objc func slantSliderValueDidChange(_ sender: UISlider) {
         let value: CGFloat = CGFloat(sender.value)
         ladderView.slantSelectedMarks(angle: value, endpoint: slantEndpoint)
         ladderView.refresh()
@@ -637,9 +652,9 @@ final class DiagramViewController: UIViewController {
 
     // Ideally this should be "private" however need access to it in hamburger delegate in another file.
     func hideCursorAndNormalizeAllMarks() {
-        guard cursorView.cursorIsVisible else { return } // don't bother if cursor not visible
         cursorView.cursorIsVisible = false
         ladderView.normalizeAllMarks()
+        setViewsNeedDisplay()
     }
 
  

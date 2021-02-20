@@ -11,7 +11,6 @@ import OSLog
 
 final class LadderView: ScaledView {
 
-
     // TODO: These all may need some tweaking...
     private let ladderPaddingMultiplier: CGFloat = 0.5
     private let accuracy: CGFloat = 20
@@ -30,7 +29,16 @@ final class LadderView: ScaledView {
         return attributes
     }()
 
-    // Controlled by Preferences at present.
+    // For debugging
+    #if DEBUG  // Change this for debugging impulse origins and block
+    var showProxEnd = true
+    var showEarliestPoint: Bool = true
+    #else  // Don't ever change this
+    var showProxEnd = false
+    var showEarliestPoint = false
+    #endif
+
+    // Controlled by Preferences
     var markLineWidth: CGFloat = 2
     var showImpulseOrigin = true
     var showBlock = true
@@ -49,9 +57,7 @@ final class LadderView: ScaledView {
     var showLabelDescription: TextVisibility = .invisible
     var marksAreHidden: Bool = false
 
-
-    // TODO: make user preferences
-    // Colors
+    // Colors - can change via Preferences
     var red = UIColor.systemRed
     var blue = UIColor.systemBlue
     var normalColor = UIColor.label
@@ -85,17 +91,12 @@ final class LadderView: ScaledView {
     private var dragOriginDivision: RegionDivision = .none
 
     private var savedActiveRegion: Region?
-    private var savedAttachedMark: Mark?
     private var savedMode: Mode = .normal
 
-    var mode: Mode = .normal {
-        didSet {
-            print("set mode")
-        }
-    }
+    var mode: Mode = .normal
 
     var leftMargin: CGFloat = 0
-    internal var ladderViewHeight: CGFloat = 0
+    var ladderViewHeight: CGFloat = 0
     private var regionUnitHeight: CGFloat = 0
 
     weak var cursorViewDelegate: CursorViewDelegate! // Note IUO.
@@ -798,13 +799,21 @@ final class LadderView: ScaledView {
         }
     }
 
-
     private func swapEndsIfNeeded(mark: Mark) {
+        print("****swapping ends")
         let proximalY = mark.segment.proximal.y
         let distalY = mark.segment.distal.y
         if proximalY > distalY {
             P("swapping ends")
             mark.swapEnds()
+        }
+    }
+
+    func swapEndsIfNeeded() {
+        ladder.regions.forEach {
+            region in region.marks.forEach {
+                mark in self.swapEndsIfNeeded(mark: mark)
+            }
         }
     }
 
@@ -1136,6 +1145,9 @@ final class LadderView: ScaledView {
         drawConductionTime(forMark: mark, segment: segment, context: context)
         drawIntervals(region: region, context: context)
 
+        drawProxEnd(forMark: mark, segment: segment, context: context)
+        drawEarliestPoint(forMark: mark, segment: segment, context: context)
+
         context.setStrokeColor(UIColor.label.cgColor)
     }
 
@@ -1217,6 +1229,20 @@ final class LadderView: ScaledView {
         let rectangle = CGRect(x: position.x, y: position.y, width: radius, height: radius)
         context.addEllipse(in: rectangle)
         context.drawPath(using: .fillStroke)
+    }
+
+    func drawProxEnd(forMark mark: Mark, segment: Segment, context: CGContext) {
+        guard showProxEnd else { return }
+        drawFilledCircle(context: context, position: segment.proximal, radius: 10)
+    }
+
+    func drawEarliestPoint(forMark mark: Mark, segment: Segment, context: CGContext) {
+        guard showEarliestPoint else { return }
+        if mark.earliestPoint == mark.segment.proximal {
+            drawFilledCircle(context: context, position: segment.proximal, radius: 20)
+        } else {
+            drawFilledCircle(context: context, position: segment.distal, radius: 20)
+        }
     }
 
     func drawPivots(forMark mark: Mark, segment: Segment, context: CGContext) {
@@ -1441,6 +1467,14 @@ final class LadderView: ScaledView {
         mark.linkedMarkIDs = LinkedMarkIDs()
     }
 
+    func soleSelectedMark() -> Mark? {
+        let selectedMarks = ladder.allMarksWithMode(.selected)
+        if selectedMarks.count == 1 {
+            return selectedMarks.first
+        }
+        return nil
+    }
+
     // FIXME: cursor malpositioned after straightening.
     func straightenToEndpoint(_ endpoint: Mark.Endpoint) {
         let selectedMarks = ladder.allMarksWithMode(.selected)
@@ -1502,6 +1536,15 @@ final class LadderView: ScaledView {
             newSegment = Segment(proximal: CGPoint(x: segment.distal.x + delta, y: segment.proximal.y), distal: segment.distal)
         }
         mark.segment = transformToRegionSegment(scaledViewSegment: newSegment, region: region)
+    }
+
+    func slantAngle(mark: Mark, endpoint: Mark.Endpoint) -> CGFloat { 
+        let region = ladder.region(ofMark: mark)
+        let segment = transformToScaledViewSegment(regionSegment: mark.segment, region: region)
+        if endpoint == .proximal {
+            return Geometry.oppositeAngle(p1: segment.proximal, p2: segment.distal)
+        }
+        return  Geometry.oppositeAngle(p1: segment.distal, p2: segment.proximal)
     }
 
     private func setSegment(segment: Segment, forMark mark: Mark) {
@@ -1624,6 +1667,7 @@ protocol LadderViewDelegate: AnyObject {
     func setAttachedMarkAndLinkedMarksModes()
     func toggleAttachedMarkAnchor()
     func convertPosition(_: CGPoint, toView: UIView) -> CGPoint
+
 }
 
 // MARK: LadderViewDelegate implementation
@@ -1708,6 +1752,8 @@ extension LadderView: LadderViewDelegate {
 
     func linkMarksNearbyAttachedMark() {
         guard let attachedMark = ladder.attachedMark else { return }
+        // FIXME: out of place
+        swapEndsIfNeeded(mark: attachedMark)
         linkNearbyMarks(mark: attachedMark)
         addlinkedMiddleMarks(ofMark: attachedMark)
     }
@@ -1873,16 +1919,13 @@ extension LadderView: LadderViewDelegate {
         savedActiveRegion = activeRegion
         activeRegion = nil
         savedMode = mode
-        savedAttachedMark = ladder.attachedMark
     }
 
-    func restoreState() -> Mode {
+    @discardableResult func restoreState() -> Mode {
         os_log("restoreState() - LadderView", log: .default, type: .default)
         mode = savedMode
         if mode == .normal {
             activeRegion = savedActiveRegion
-            ladder.attachedMark = savedAttachedMark
-            attachMark(savedAttachedMark)
         }
         return mode
     }

@@ -95,6 +95,7 @@ class MarkTests: XCTestCase {
         XCTAssert(allMarks.contains(mark1))
         XCTAssert(allMarks.contains(mark2))
         XCTAssert(allMarks.contains(mark3))
+
     }
 
     func testRegistry() {
@@ -203,6 +204,8 @@ class MarkTests: XCTestCase {
         XCTAssertEqual(mig.count, 3)
         mig.remove(id: newMark.id)
         XCTAssertEqual(mig.count, 2)
+        mig.removeAll()
+        XCTAssertEqual(mig.count, 0)
     }
 
     func testMarkDimensions() {
@@ -240,6 +243,9 @@ class MarkTests: XCTestCase {
         mark.style = .dotted
         XCTAssertEqual(mark.style.description, L("Dotted"))
         XCTAssertEqual(mark.style.id, .dotted)
+        mark.style = .inherited
+        XCTAssertEqual(mark.style.description, L("Inherited"))
+        XCTAssertEqual(mark.style.id, .inherited)
     }
 
     func testRightTriangleBase() {
@@ -274,5 +280,22 @@ class MarkTests: XCTestCase {
         XCTAssertEqual(attachedMarks.count, 3)
         let region1AttachedMarks = ladder.marksWithMode(.attached, inRegion: ladder.regions[1])
         XCTAssertEqual(region1AttachedMarks.count, 2)
+    }
+
+    func testEarliestPoint() {
+        let mark1 = Mark(positionX: 100)
+        // proximal wins if mark is vertical
+        XCTAssertEqual(mark1.earliestPoint, mark1.segment.proximal)
+        mark1.segment.distal = CGPoint(x: 110, y: 1.0)
+        XCTAssertEqual(mark1.earliestPoint, mark1.segment.proximal)
+        mark1.segment.distal = CGPoint(x: 90, y: 1.0)
+        XCTAssertEqual(mark1.earliestPoint, mark1.segment.distal)
+    }
+
+    func testApplyAngle() {
+        let mark = Mark(positionX: 0)
+        mark.applyAngle(45)
+        XCTAssertEqual(mark.segment.distal.x, 1.0, accuracy: 0.0001)
+
     }
 }

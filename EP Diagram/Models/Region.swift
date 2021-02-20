@@ -13,7 +13,7 @@ import UIKit
 /// A Region is a row of a ladder corresponding to an anatomic substrate.
 /// A Region has a labelSection such as "A" or "AV" and
 /// a markSection.  Region boundaries are set by the calling ScaledView.
-class Region: Codable {
+final class Region: Codable {
     private(set) var id = UUID()
 
     var name: String

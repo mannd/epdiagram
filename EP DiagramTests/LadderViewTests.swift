@@ -266,5 +266,17 @@ class LadderViewTests: XCTestCase {
         XCTAssertEqual(anchorPosition, mark.segment.distal)
     }
 
+    func testSlantAngle() {
+        let mark = Mark(segment: Segment(proximal: CGPoint(x:0, y: 0), distal: CGPoint(x: 100, y: 1)))
+        ladderView.ladder.addMark(mark, toRegion: ladderView.ladder.regions[0])
+        let height = ladderView.ladder.regions[0].height
+        let calculatedAngle = atan(100 / height).radiansToDegrees
+        let angle = ladderView.slantAngle(mark: mark, endpoint: .proximal)
+        XCTAssertEqual(angle, calculatedAngle, accuracy: 0.0001)
+        let angle2 = ladderView.slantAngle(mark: mark, endpoint: .distal)
+        XCTAssertEqual(angle, -angle2, accuracy: 0.0001)
+    }
+
+
 
 }

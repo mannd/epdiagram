@@ -21,7 +21,7 @@ typealias MarkIdSet = Set<UUID>
 // MARK: - classes, structs
 
 /// The mark is a fundamental component of a ladder diagram.
-class Mark: Codable {
+final class Mark: Codable {
     let id: UUID // each mark has a unique id to allow sets of marks
 
     var segment: Segment // where a mark is, using regional coordinates
@@ -53,6 +53,13 @@ class Mark: Codable {
         get {
             return sqrt(pow((segment.proximal.x - segment.distal.x), 2) + pow((segment.proximal.y - segment.distal.y), 2))
         }
+    }
+
+    var earliestPoint: CGPoint {
+        if segment.proximal.x <= segment.distal.x {
+            return segment.proximal
+        }
+        return segment.distal
     }
 
     init(segment: Segment) {
@@ -91,6 +98,8 @@ class Mark: Codable {
     func swapEnds() {
         (segment.proximal, segment.distal) = (segment.distal, segment.proximal)
     }
+
+
 
     func getAnchorPosition() -> CGPoint {
         let anchorPosition: CGPoint

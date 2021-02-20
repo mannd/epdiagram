@@ -70,10 +70,17 @@ class MathTests: XCTestCase {
         XCTAssertTrue(Geometry.areParallel(s4, s5))
         let s6 = Segment(proximal: CGPoint(x: 110, y: 50), distal: CGPoint(x: 160.1, y: 100))
         XCTAssertFalse(Geometry.areParallel(s4, s6))
+    }
 
-
-
-
+    func testOppositeAngle() {
+        let s1 = Segment(proximal: CGPoint(x: 0, y: 0), distal: CGPoint(x: 1, y: 1))
+        let angle1 = Geometry.oppositeAngle(p1: s1.proximal, p2: s1.distal)
+        XCTAssertEqual(angle1, 45, accuracy: 0.0001)
+        let angle2 = Geometry.oppositeAngle(p1: s1.distal, p2: s1.proximal)
+        XCTAssertEqual(angle2, -45, accuracy: 0.0001)
+        let s3 = Segment(proximal: CGPoint(x: 0, y: 0), distal: CGPoint(x: -1, y: -1))
+        let angle3 = Geometry.oppositeAngle(p1: s3.proximal, p2: s3.distal)
+        XCTAssertEqual(angle3, -45, accuracy: 0.0001)
     }
 
 }
