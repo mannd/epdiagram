@@ -150,7 +150,7 @@ final class DiagramViewController: UIViewController {
     let pdfScaleFactor: CGFloat = 5.0
 
     var prolongSelectState = false // used to allow menus like slant to complete actions on selected marks
-    var slantEndpoint: Mark.Endpoint = .proximal
+    var activeEndpoint: Mark.Endpoint = .proximal
 
     // Context menu actions
     lazy var deleteAction = UIAction(title: L("Delete selected mark(s)"), image: UIImage(systemName: "trash"), attributes: .destructive) { action in
@@ -200,18 +200,24 @@ final class DiagramViewController: UIViewController {
     lazy var regionStyleMenu = UIMenu(title: L("Default region style..."), children: [self.regionSolidStyleAction, self.regionDashedStyleAction, self.regionDottedStyleAction, self.regionInheritedStyleAction])
 
     lazy var slantProximalPivotAction = UIAction(title: L("Slant proximal pivot point")) { action in
-        self.slantEndpoint = .proximal
+        self.activeEndpoint = .proximal
         self.showSlantToolbar()
     }
     lazy var slantDistalPivotAction = UIAction(title: L("Slant distal pivot point")) { action in
-        self.slantEndpoint = .distal
+        self.activeEndpoint = .distal
         self.showSlantToolbar()
     }
     lazy var slantMenu = UIMenu(title: L("Slant mark(s)..."), image: UIImage(systemName: "line.diagonal"), children: [self.slantProximalPivotAction, self.slantDistalPivotAction])
 
-    lazy var adjustDistalYAction = UIAction(title: L("Adjust distal mark end(s)")) { action in
-        self.adjustDistalY()
+    lazy var adjustProximalYAction = UIAction(title: L("Adjust proximal mark end(s)")) { action in
+        self.activeEndpoint = .proximal
+        self.showAdjustYToolbar()
     }
+    lazy var adjustDistalYAction = UIAction(title: L("Adjust distal mark end(s)")) { action in
+        self.activeEndpoint = .distal
+        self.showAdjustYToolbar()
+    }
+    lazy var adjustYMenu = UIMenu(title: L("Adjust mark ends..."), children: [adjustProximalYAction, adjustDistalYAction])
 
     lazy var oneRegionHeightAction = UIAction(title: L("1 unit")) { action in
         guard let selectedRegion = self.ladderView.selectedRegion() else { return }
@@ -549,14 +555,14 @@ final class DiagramViewController: UIViewController {
         slider.minimumValue = Self.minSlantAngle
         slider.maximumValue = Self.maxSlantAngle
         if let soleSelectedMark = ladderView.soleSelectedMark() {
-            var slantAngle = ladderView.slantAngle(mark: soleSelectedMark, endpoint: slantEndpoint)
+            var slantAngle = ladderView.slantAngle(mark: soleSelectedMark, endpoint: activeEndpoint)
             // slant angle is flipped depending on endpoint, but it makes the slider and marks move in concert.
-            slantAngle = slantEndpoint == .proximal ? -slantAngle : slantAngle
+            slantAngle = activeEndpoint == .proximal ? -slantAngle : slantAngle
             slider.setValue(Float(slantAngle), animated: false)
 
         } else {
             slider.setValue(0, animated: false)
-            ladderView.slantSelectedMarks(angle: 0, endpoint: slantEndpoint)
+            ladderView.slantSelectedMarks(angle: 0, endpoint: activeEndpoint)
         }
         // init marks to 0 slant
         slider.addTarget(self, action: #selector(slantSliderValueDidChange(_:)), for: .valueChanged)
@@ -597,21 +603,29 @@ final class DiagramViewController: UIViewController {
         setToolbarItems([UIBarButtonItem(customView: stackView)], animated: true)
     }
 
-    func adjustDistalY() {
+    func showAdjustYToolbar() {
         guard let toolbar = navigationController?.toolbar else { return }
         currentDocument?.undoManager.beginUndoGrouping() // will end when menu closed
         prolongSelectState = true
         let labelText = UITextField()
         labelText.text = L("Adjust distal Y value")
         let slider = UISlider()
-        slider.minimumValue = 0.2
+        slider.minimumValue = 0
         slider.maximumValue = 1.0
-        slider.setValue(1.0, animated: false)
-        ladderView.adjustDistalY(1.0)
-        slider.addTarget(self, action: #selector(adjustDistalYSliderValueDidChange(_:)), for: .valueChanged)
+        if let soleSelectedMark = ladderView.soleSelectedMark() {
+            let y = activeEndpoint == .proximal ? soleSelectedMark.segment.proximal.y : soleSelectedMark.segment.distal.y
+            print("**** y = \(y)")
+            slider.setValue(Float(y), animated: false)
+        } else {
+            let startValue: Float = activeEndpoint == .proximal ? 0 : 1
+            slider.setValue(startValue, animated: false)
+            ladderView.adjustY(CGFloat(startValue), endpoint: activeEndpoint)
+        }
+//        ladderView.adjustY(1.0, endpoint: activeEndpoint)
+        slider.addTarget(self, action: #selector(adjustYSliderValueDidChange(_:)), for: .valueChanged)
         let doneButton = UIButton(type: .system)
         doneButton.setTitle(L("Done"), for: .normal)
-        doneButton.addTarget(self, action: #selector(closeAdjustDistalYToolbar(_:)), for: .touchUpInside)
+        doneButton.addTarget(self, action: #selector(closeAdjustYToolbar(_:)), for: .touchUpInside)
         let stackView = UIStackView(frame: toolbar.frame)
         stackView.distribution = .fill
         stackView.axis = .horizontal
@@ -622,9 +636,9 @@ final class DiagramViewController: UIViewController {
         setToolbarItems([UIBarButtonItem(customView: stackView)], animated: true)
     }
 
-    @objc func adjustDistalYSliderValueDidChange(_ sender: UISlider) {
+    @objc func adjustYSliderValueDidChange(_ sender: UISlider) {
         let value: CGFloat = CGFloat(sender.value)
-        ladderView.adjustDistalY(value)
+        ladderView.adjustY(value, endpoint: activeEndpoint)
         ladderView.refresh()
     }
 
@@ -636,17 +650,18 @@ final class DiagramViewController: UIViewController {
         mode = ladderView.restoreState()
     }
 
-    @objc func closeAdjustDistalYToolbar(_ sender: UIAlertAction) {
+    @objc func closeAdjustYToolbar(_ sender: UIAlertAction) {
         currentDocument?.undoManager.endUndoGrouping()
         hideCursorAndNormalizeAllMarks()
         prolongSelectState = false
+        ladderView.swapEndsIfNeeded()
         mode = ladderView.restoreState()
 //        ladderView.swapEndsIfNeeded()
     }
 
     @objc func slantSliderValueDidChange(_ sender: UISlider) {
         let value: CGFloat = CGFloat(sender.value)
-        ladderView.slantSelectedMarks(angle: value, endpoint: slantEndpoint)
+        ladderView.slantSelectedMarks(angle: value, endpoint: activeEndpoint)
         ladderView.refresh()
     }
 

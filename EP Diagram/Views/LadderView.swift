@@ -1497,7 +1497,7 @@ final class LadderView: ScaledView {
         currentDocument?.undoManager.endUndoGrouping()
     }
 
-    func adjustDistalY(_ value: CGFloat) {
+    func adjustY(_ value: CGFloat, endpoint: Mark.Endpoint) {
         let selectedMarks = ladder.allMarksWithMode(.selected)
         selectedMarks.forEach { mark in
             let originalSegment = mark.segment
@@ -1505,7 +1505,12 @@ final class LadderView: ScaledView {
                 self.setSegment(segment: originalSegment, forMark: mark)
             })
             NotificationCenter.default.post(name: .didUndoableAction, object: nil)
-            let segment = Segment(proximal: mark.segment.proximal, distal: CGPoint(x: mark.segment.distal.x, y: value))
+            let segment: Segment
+            if endpoint == .proximal {
+                segment = Segment(proximal: CGPoint(x: mark.segment.proximal.x, y: value), distal: mark.segment.distal)
+            } else {
+                segment = Segment(proximal: mark.segment.proximal, distal: CGPoint(x: mark.segment.distal.x, y: value))
+            }
             setSegment(segment: segment, forMark: mark)
         }
     }
