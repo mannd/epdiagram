@@ -32,7 +32,7 @@ final class LadderView: ScaledView {
     // For debugging
     #if DEBUG  // Change this for debugging impulse origins and block
     var showProxEnd = true
-    var showEarliestPoint: Bool = true
+    var showEarliestPoint: Bool = false
     #else  // Don't ever change this
     var showProxEnd = false
     var showEarliestPoint = false
@@ -817,30 +817,49 @@ final class LadderView: ScaledView {
         }
     }
 
+
+
     // TODO: expand on this logic.  Reset block and impulseOrigin to .none as necessary.
     // Also, consider adding arrows to marks indicating direction of flow (arrow will be added
     // to whichever end of the mark is later in time.  Opposite of impluse origin.
     func assessBlockAndImpulseOrigin(mark: Mark?) {
         if let mark = mark {
-            mark.block = .none
-            mark.impulseOrigin = .none
-            if mark.segment.proximal.y != 0 && mark.segment.proximal.x >= mark.segment.distal.x {
-                mark.block = .proximal
-            }
-            if mark.segment.distal.y != 1.0 && mark.segment.distal.x > mark.segment.proximal.x {
-                mark.block = .distal
-            }
-            if mark.linkedMarkIDs.proximal.count == 0 {
-                if mark.segment.proximal.x <= mark.segment.distal.x {
-                    mark.impulseOrigin = .proximal
-                }
-            }
-            if mark.linkedMarkIDs.distal.count == 0 {
-                if mark.segment.distal.x < mark.segment.proximal.x {
-                    mark.impulseOrigin = .distal
-                }
-            }
+            assessBlock(mark: mark)
+            assessImpulseOrigin(mark: mark)
         }
+    }
+
+    var blockMin: CGFloat = 0.1
+    var blockMax: CGFloat = 0.9
+    func assessBlock(mark: Mark) {
+        mark.block = .none
+        if mark.early == .none {
+            return  // for now, ignore vertical marks
+        }
+        if mark.segment.proximal.y > blockMin
+            && mark.late == .proximal {
+                mark.block = .proximal
+        } else if mark.segment.distal.y < blockMax
+            && mark.late == .distal {
+            mark.block = .distal
+        }
+    }
+
+    func assessImpulseOrigin(mark: Mark) {
+        mark.impulseOrigin = .none
+        if mark.linkedMarkIDs.proximal.count == 0 && (mark.early == .proximal || mark.early == .none) {
+            mark.impulseOrigin = .proximal
+        } else if mark.linkedMarkIDs.distal.count == 0 && mark.early == .distal {
+            mark.impulseOrigin = .distal
+        }
+    }
+
+    func clearBlock() {
+        ladder.clearBlock()
+    }
+
+    func clearImpulseOrigin() {
+        ladder.clearImpulseOrigin()
     }
 
     private func setModeOfNearbyMarks(_ mark: Mark?) {
@@ -1491,6 +1510,8 @@ final class LadderView: ScaledView {
                 segment = Segment(proximal: mark.segment.proximal, distal: CGPoint(x: mark.segment.proximal.x, y: mark.segment.distal.y))
             case .distal:
                 segment = Segment(proximal: CGPoint(x: mark.segment.distal.x, y: mark.segment.proximal.y), distal: mark.segment.distal)
+            case .none:
+                fatalError("Endpoint.none inappopriately passed to straightenToEndPoint()")
             }
             self.setSegment(segment: segment, forMark: mark)
         }
@@ -1524,30 +1545,32 @@ final class LadderView: ScaledView {
         }
     }
 
-        func slantSelectedMarks(angle: CGFloat, endpoint: Mark.Endpoint) {
-            let selectedMarks = ladder.allMarksWithMode(.selected)
-            selectedMarks.forEach { mark in
-                let originalSegment = mark.segment
-                currentDocument?.undoManager.registerUndo(withTarget: self, handler: { target in
-                    self.setSegment(segment: originalSegment, forMark: mark)
-                })
-                NotificationCenter.default.post(name: .didUndoableAction, object: nil)
-                slantMark(angle: angle, mark: mark, endpoint: endpoint)
-            }
+    func slantSelectedMarks(angle: CGFloat, endpoint: Mark.Endpoint) {
+        let selectedMarks = ladder.allMarksWithMode(.selected)
+        selectedMarks.forEach { mark in
+            let originalSegment = mark.segment
+            currentDocument?.undoManager.registerUndo(withTarget: self, handler: { target in
+                self.setSegment(segment: originalSegment, forMark: mark)
+            })
+            NotificationCenter.default.post(name: .didUndoableAction, object: nil)
+            slantMark(angle: angle, mark: mark, endpoint: endpoint)
         }
+    }
 
-        func slantMark(angle: CGFloat, mark: Mark, endpoint: Mark.Endpoint = .proximal) {
-            let region = ladder.region(ofMark: mark)
-            let segment = transformToScaledViewSegment(regionSegment: mark.segment, region: region)
-            let height = segment.distal.y - segment.proximal.y
-            let delta = Geometry.rightTriangleBase(withAngle: angle, height: height)
-            // We add delta to proximal x, not distal x, because we always start with a vertical mark.
-            let newSegment: Segment
-            switch endpoint {
+    func slantMark(angle: CGFloat, mark: Mark, endpoint: Mark.Endpoint = .proximal) {
+        let region = ladder.region(ofMark: mark)
+        let segment = transformToScaledViewSegment(regionSegment: mark.segment, region: region)
+        let height = segment.distal.y - segment.proximal.y
+        let delta = Geometry.rightTriangleBase(withAngle: angle, height: height)
+        // We add delta to proximal x, not distal x, because we always start with a vertical mark.
+        let newSegment: Segment
+        switch endpoint {
         case .proximal:
             newSegment = Segment(proximal: segment.proximal, distal: CGPoint(x: segment.proximal.x + delta, y: segment.distal.y))
         case .distal:
             newSegment = Segment(proximal: CGPoint(x: segment.distal.x + delta, y: segment.proximal.y), distal: segment.distal)
+        case .none:
+            fatalError("Endpoint.none inappopriately passed to slantMark()")
         }
         mark.segment = transformToRegionSegment(scaledViewSegment: newSegment, region: region)
     }

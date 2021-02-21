@@ -28,8 +28,8 @@ final class Mark: Codable {
     var mode: Mode = .normal
     var anchor: Anchor = .middle // Anchor point for movement and to attach a cursor
     var style: Style = .solid
-    var block: Block = .none
-    var impulseOrigin: ImpulseOrigin = .none
+    var block: Endpoint = .none
+    var impulseOrigin: Endpoint = .none
     var measurementText: String = ""
     var showMeasurementText: Bool = true
 
@@ -62,6 +62,25 @@ final class Mark: Codable {
         return segment.distal
     }
 
+    var early: Endpoint {
+        if segment.proximal.x < segment.distal.x {
+            return .proximal
+        }
+        if segment.proximal.x > segment.distal.x {
+            return .distal
+        }
+        return .none  // equal within floating point precision, i.e. vertical mark
+    }
+    var late: Endpoint {
+        if segment.proximal.x < segment.distal.x {
+            return .distal
+        }
+        if segment.proximal.x > segment.distal.x {
+            return .proximal
+        }
+        return .none
+    }
+    
     init(segment: Segment) {
         self.segment = segment
         self.id = UUID()
@@ -281,20 +300,6 @@ extension Mark {
         }
     }
 
-    // Site of block
-    enum Block: Int, Codable {
-        case proximal
-        case distal
-        case none
-    }
-
-    // Site of impulse origin
-    enum ImpulseOrigin: Int, Codable {
-        case proximal
-        case distal
-        case none
-    }
-
     // Mutually exclusive modes that determine behavior and appears of marks.
     enum Mode: Int, Codable {
         case attached
@@ -308,6 +313,7 @@ extension Mark {
     enum Endpoint: Int, Codable {
         case proximal
         case distal
+        case none
     }
 }
 

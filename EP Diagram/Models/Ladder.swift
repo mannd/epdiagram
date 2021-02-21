@@ -200,6 +200,22 @@ final class Ladder: NSObject, Codable {
         }
     }
 
+    func clearBlock() {
+        for region in regions {
+            for mark in region.marks {
+                mark.block = .none
+            }
+        }
+    }
+
+    func clearImpulseOrigin() {
+        for region in regions {
+            for mark in region.marks {
+                mark.impulseOrigin = .none
+            }
+        }
+    }
+
     func index(ofRegion region: Region?) -> Int? {
         guard let region = region else { return nil }
         return regions.firstIndex(of: region)
