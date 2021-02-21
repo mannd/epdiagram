@@ -832,16 +832,18 @@ final class LadderView: ScaledView {
     var blockMin: CGFloat = 0.1
     var blockMax: CGFloat = 0.9
     func assessBlock(mark: Mark) {
-        mark.block = .none
-        if mark.early == .none {
-            return  // for now, ignore vertical marks
-        }
-        if mark.segment.proximal.y > blockMin
-            && mark.late == .proximal {
+        if mark.autoBlock {
+            mark.block = .none
+            if mark.early == .none {
+                return  // for now, ignore vertical marks
+            }
+            if mark.segment.proximal.y > blockMin
+                && mark.late == .proximal {
                 mark.block = .proximal
-        } else if mark.segment.distal.y < blockMax
-            && mark.late == .distal {
-            mark.block = .distal
+            } else if mark.segment.distal.y < blockMax
+                        && mark.late == .distal {
+                mark.block = .distal
+            }
         }
     }
 
@@ -988,20 +990,40 @@ final class LadderView: ScaledView {
         }
     }
 
-    func setSelectedMarksStyle(style: Mark.Style) {
-        let selectedMarks: [Mark] = ladder.allMarksWithMode(.selected)
-        selectedMarks.forEach { mark in mark.style = style }
+    func setBlockAuto() {
+
     }
 
-    func setStyleToMarks(style: Mark.Style, marks: [Mark]) {
-        for mark in marks {
-            mark.style = style
+    func undoablySetMarkStyle(mark: Mark, style: Mark.Style) {
+        let originalStyle = mark.style
+        currentDocument?.undoManager.registerUndo(withTarget: self) { target in
+            target.undoablySetMarkStyle(mark: mark, style: originalStyle)
         }
+        NotificationCenter.default.post(name: .didUndoableAction, object: nil)
+        mark.style = style
+    }
+
+    func setSelectedMarksStyle(style: Mark.Style) {
+        let selectedMarks: [Mark] = ladder.allMarksWithMode(.selected)
+        currentDocument?.undoManager.beginUndoGrouping()
+        selectedMarks.forEach { mark in self.undoablySetMarkStyle(mark: mark, style: style) }
+        currentDocument?.undoManager.endUndoGrouping()
+    }
+
+    func undoablySetRegionStyle(region: Region, style: Mark.Style) {
+        let originalStyle = region.style
+        currentDocument?.undoManager.registerUndo(withTarget: self) { target in
+            target.undoablySetRegionStyle(region: region, style: originalStyle)
+        }
+        NotificationCenter.default.post(name: .didUndoableAction, object: nil)
+        region.style = style
     }
 
     func setSelectedRegionsStyle(style: Mark.Style) {
         let selectedRegions: [Region] = ladder.allRegionsWithMode(.selected)
-        selectedRegions.forEach { region in region.style = style }
+        currentDocument?.undoManager.beginUndoGrouping()
+        selectedRegions.forEach { region in self.undoablySetRegionStyle(region: region, style: style) }
+        currentDocument?.undoManager.endUndoGrouping()
     }
 
     // MARK: - draw
