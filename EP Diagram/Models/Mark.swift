@@ -28,6 +28,7 @@ final class Mark: Codable {
     var mode: Mode = .normal
     var anchor: Anchor = .middle // Anchor point for movement and to attach a cursor
     var style: Style = .solid
+    var emphasis: Emphasis = .normal
     var block: Endpoint = .none
     var impulseOrigin: Endpoint = .none
     var measurementText: String = ""
@@ -300,6 +301,21 @@ extension Mark {
             }
 
         }
+    }
+
+    enum Emphasis: Int, Codable, CustomStringConvertible {
+        case normal
+        case bold
+
+        var description: String {
+            switch self {
+            case .normal:
+                return L("Normal")
+            case .bold:
+                return L("Bold")
+            }
+        }
+
     }
 
     // Mutually exclusive modes that determine behavior and appears of marks.

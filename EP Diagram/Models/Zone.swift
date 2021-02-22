@@ -13,4 +13,6 @@ struct Zone: Codable {
     var startingRegion: Region?
     var start: CGFloat = 0
     var end: CGFloat = 0
+
+    var isVisible: Bool { start != end }
 }

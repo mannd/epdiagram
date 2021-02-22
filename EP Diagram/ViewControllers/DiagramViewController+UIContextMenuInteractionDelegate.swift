@@ -91,11 +91,11 @@ extension DiagramViewController: UIContextMenuInteractionDelegate {
         case .mark:
             return markContextMenuConfiguration(at: location)
         case .region:
-            return regionContextMenuConfiguration(at: location)
+            return markContextMenuConfiguration(at: location)
         case .label:
             return labelContextMenuConfiguration(at: location)
         case .zone:
-            return zoneContextMenuConfiguration(at: location)
+            return markContextMenuConfiguration(at: location)
         case .ladder:
             return ladderContextMenuConfiguration(at: location)
         case .error:
@@ -104,13 +104,22 @@ extension DiagramViewController: UIContextMenuInteractionDelegate {
     }
 
     func selectModeMenu(forLocation location: CGPoint) -> UIContextMenuConfiguration? {
-        return regionContextMenuConfiguration(at: location)
+        if ladderView.noSelectionExists() {
+            return noSelectionContextMenu(at: location)
+        }
+         return markContextMenuConfiguration(at: location)
+    }
+
+    func noSelectionContextMenu(at location: CGPoint) -> UIContextMenuConfiguration? {
+        return UIContextMenuConfiguration(identifier: nil, previewProvider: nil) { _ in
+            return UIMenu(title: "No Selection Found", children: [self.noSelectionAction])
+        }
     }
 
     func markContextMenuConfiguration(at location: CGPoint) -> UIContextMenuConfiguration {
         return UIContextMenuConfiguration(identifier: nil, previewProvider: nil) {_ in
             // FIXME: make sure we won't move linked marks, or disconnect them when straightening.
-            return UIMenu(title: L("Mark"), children: [self.styleMenu, self.blockMenu, self.straightenMenu, self.slantMenu, self.adjustYMenu,  self.unlinkAction, self.deleteAction])
+            return UIMenu(title: L("Mark Menu"), children: [self.styleMenu, self.emphasisMenu, self.blockMenu, self.straightenMenu, self.slantMenu, self.adjustYMenu,  self.unlinkAction, self.deleteAction])
         }
     }
 
@@ -129,8 +138,13 @@ extension DiagramViewController: UIContextMenuInteractionDelegate {
 
     func labelContextMenuConfiguration(at location: CGPoint) -> UIContextMenuConfiguration {
         return UIContextMenuConfiguration(identifier: nil, previewProvider: nil) { suggestedActions in
-            let title = "Label"
-            return UIMenu(title: title, children: [self.styleMenu, self.editLabelAction, self.addRegionMenu, self.removeRegionAction, self.regionHeightMenu])
+            let title: String
+            if let region = self.longPressLocationInLadder?.region {
+                title = L("Region Menu\n\(region.name) — \(region.longDescription)")
+            } else {
+                title = L("Region")
+            }
+            return UIMenu(title: title, children: [self.regionStyleMenu, self.editLabelAction, self.addRegionMenu, self.removeRegionAction, self.regionHeightMenu])
         }
     }
 

@@ -286,8 +286,14 @@ final class Ladder: NSObject, Codable {
         regions.forEach { region in region.marks.forEach { mark in mark.mode = mode }}
     }
 
-    func setMarkwWithMode(_ mode: Mark.Mode, inZone zone: Zone) {
+    func setMarksWithMode(_ mode: Mark.Mode, inZone zone: Zone) {
+//        ladder.zone.marks
         
+    }
+
+    func hideZone() {
+        zone.start = 0
+        zone.end = 0
     }
 
     func marksWithMode(_ mode: Mark.Mode, inRegion region: Region) -> [Mark] {

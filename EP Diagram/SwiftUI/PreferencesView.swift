@@ -48,9 +48,10 @@ struct PreferencesView: View {
                     }
                     Section(header: Text("Ladder")) {
                         Picker(selection: $labelDescriptionVisibility, label: Text("Label description visibility"), content: {
-                            Text("Invisible").tag(TextVisibility.invisible.rawValue)
+
                             Text("Visible").tag(TextVisibility.visibility.rawValue)
                             Text("Visible if fits").tag(TextVisibility.visibleIfFits.rawValue)
+                            Text("Invisible").tag(TextVisibility.invisible.rawValue)
                         })
                         Toggle(isOn: $hideMarks) {
                             Text("Hide marks")
@@ -63,11 +64,11 @@ struct PreferencesView: View {
                         }
                     }
                     Section(header: Text("Region")) {
-                        ColorPicker(binding: $activeColorName, title: "Default active region color")
+                        ColorPicker(binding: $activeColorName, title: "Active region color")
                     }
                     Section(header: Text("Mark")) {
                         Group {
-                            Stepper("Mark line width = \(markLineWidth)", value: $markLineWidth, in: 1...6, step: 1)
+                            Stepper("Mark width = \(markLineWidth)", value: $markLineWidth, in: 1...6, step: 1)
                             ColorPicker(binding: $normalColorName, title: "Default mark color")
                             ColorPicker(binding: $attachedColorName, title: "Highlighted mark color")
                             ColorPicker(binding: $connectedColorName, title: "Connected mark color")
@@ -82,7 +83,7 @@ struct PreferencesView: View {
                             Toggle(isOn: $snapMarks) {
                                 Text("Snap marks")
                             }
-                            Picker(selection: $markStyle, label: Text("Default style"), content: {
+                            Picker(selection: $markStyle, label: Text("Default mark style"), content: {
                                 Text("Solid").tag(Mark.Style.solid.rawValue)
                                 Text("Dashed").tag(Mark.Style.dashed.rawValue)
                                 Text("Dotted").tag(Mark.Style.dotted.rawValue)
@@ -90,11 +91,11 @@ struct PreferencesView: View {
                         }
                     }
                     Section(header: Text("Cursor")) {
-                        Stepper("Cursor line width = \(cursorLineWidth)", value: $cursorLineWidth, in: 1...6, step: 1)
+                        Stepper("Cursor width = \(cursorLineWidth)", value: $cursorLineWidth, in: 1...6, step: 1)
                         ColorPicker(binding: $cursorColorName, title: "Cursor color")
                     }
                     Section(header: Text("Caliper")) {
-                        Stepper("Caliper line width = \(caliperLineWidth)", value: $caliperLineWidth, in: 1...6, step: 1)
+                        Stepper("Caliper width = \(caliperLineWidth)", value: $caliperLineWidth, in: 1...6, step: 1)
                         ColorPicker(binding: $caliperColorName, title: "Caliper color")
                     }
 

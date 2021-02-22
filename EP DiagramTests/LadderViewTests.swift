@@ -277,6 +277,19 @@ class LadderViewTests: XCTestCase {
         XCTAssertEqual(angle, -angle2, accuracy: 0.0001)
     }
 
+    func testNoSelectionExists() {
+        XCTAssertTrue(ladderView.noSelectionExists())
+        let mark = Mark(segment: Segment(proximal: CGPoint(x:0, y: 0), distal: CGPoint(x: 100, y: 1)))
+        ladderView.ladder.addMark(mark, toRegion: ladderView.ladder.regions[1])
+        XCTAssertTrue(ladderView.noSelectionExists())
+        ladderView.ladder.regions[0].mode = .selected
+        XCTAssertFalse(ladderView.noSelectionExists())
+        ladderView.ladder.regions[0].mode = .normal
+        XCTAssertTrue(ladderView.noSelectionExists())
+        mark.mode = .selected
+        XCTAssertFalse(ladderView.noSelectionExists())
+    }
+
 
 
 }

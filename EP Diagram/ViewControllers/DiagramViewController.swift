@@ -201,7 +201,15 @@ final class DiagramViewController: UIViewController {
     lazy var dottedAction = UIAction(title: L("Dotted")) { action in
         self.ladderView.setSelectedMarksStyle(style: .dotted)
     }
-    lazy var styleMenu = UIMenu(title: L("Style..."), image: UIImage(systemName: "scribble"), children: [self.solidAction, self.dashedAction, self.dottedAction, self.regionStyleMenu])
+    lazy var styleMenu = UIMenu(title: L("Style..."), image: UIImage(systemName: "scribble"), children: [self.solidAction, self.dashedAction, self.dottedAction])
+
+    lazy var boldEmphasisAction = UIAction(title: L("Bold")) { action in
+        self.ladderView.setSelectedMarksEmphasis(emphasis: .bold)
+    }
+    lazy var normalEmphasisAction = UIAction(title: L("Normal")) { action in
+        self.ladderView.setSelectedMarksEmphasis(emphasis: .normal)
+    }
+    lazy var emphasisMenu = UIMenu(title: L("Emphasis"), children: [self.normalEmphasisAction, self.boldEmphasisAction])
 
     lazy var regionSolidStyleAction = UIAction(title: L("Solid")) { action in
         self.ladderView.setSelectedRegionsStyle(style: .solid)
@@ -298,6 +306,8 @@ final class DiagramViewController: UIViewController {
     lazy var removeRegionAction = UIAction(title: L("Remove region"), image: UIImage(systemName: "minus")) { action in
         self.ladderView.removeRegion()
     }
+
+    var noSelectionAction = UIAction(title: L("No regions, zones, or marks selected")) { _ in }
 
     // MARK: - Lifecycle
     

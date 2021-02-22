@@ -180,19 +180,17 @@ final class LadderView: ScaledView {
         let tapLocationInLadder = getLocationInLadder(position: position)
         switch mode {
         case .select:
-            performMarkSelecting(tapLocationInLadder)
+            selectModeSingleTap(tapLocationInLadder)
         case .connect:
-            performMarkConnecting(tapLocationInLadder)
+            connectModeSingleTap(tapLocationInLadder)
         case .normal:
-            performNormalTap(tapLocationInLadder)
-        case .menu:
-            break
-        default:
+            normalModeSingleTap(tapLocationInLadder)
+        default: // other modes don't respond to single tap
             break
         }
     }
 
-    func performNormalTap(_ tapLocationInLadder: LocationInLadder) {
+    func normalModeSingleTap(_ tapLocationInLadder: LocationInLadder) {
         if tapLocationInLadder.specificLocation == .label {
             assert(tapLocationInLadder.region != nil, "Label tapped, but region is nil!")
             if let region = tapLocationInLadder.region {
@@ -395,7 +393,7 @@ final class LadderView: ScaledView {
         ladder.connectedMarks.removeAll()
     }
 
-    private func performMarkConnecting(_ tapLocationInLadder: LocationInLadder) {
+    private func connectModeSingleTap(_ tapLocationInLadder: LocationInLadder) {
         if let mark = tapLocationInLadder.mark {
             connectTappedMark(mark)
         }
@@ -438,17 +436,17 @@ final class LadderView: ScaledView {
         setNeedsDisplay()
     }
 
-
-    private func performMarkSelecting(_ tapLocationInLadder: LocationInLadder) {
-        ladder.zone = Zone()
-        if let mark = tapLocationInLadder.mark {
+    private func selectModeSingleTap(_ tapLocationInLadder: LocationInLadder) {
+        if ladder.zone.isVisible {
+            // This deselects all selected marks, even those outside zone, which means you can't combine zone selection with region or mark selection, but this seems like the best solution for now.
+            ladder.setAllMarksWithMode(.normal)
+            ladder.hideZone()
+        } else if let mark = tapLocationInLadder.mark {
             // toggle mark selection
             mark.mode = mark.mode == .selected ? .normal : .selected
         } else if let region = tapLocationInLadder.region {
             region.mode = region.mode == .selected ? .normal : .selected
-            if region.mode == .selected {
-                ladder.setMarksWithMode(.selected, inRegion: region)
-            }
+            ladder.setMarksWithMode(region.mode == .selected ? .selected : .normal, inRegion: region)
         }
         setNeedsDisplay()
     }
@@ -780,7 +778,6 @@ final class LadderView: ScaledView {
         setNeedsDisplay()
     }
 
-    // FIXME: need to append to ladder.selectedMarks also
     func selectInZone() {
         let zoneMin = min(zone.start, zone.end)
         let zoneMax = max(zone.start, zone.end)
@@ -793,6 +790,21 @@ final class LadderView: ScaledView {
                     mark.mode = .selected
                 } else {
                     mark.mode = .normal
+                }
+            }
+        }
+    }
+
+    func setModeInZone(mode: Mark.Mode) {
+        let zoneMin = min(zone.start, zone.end)
+        let zoneMax = max(zone.start, zone.end)
+        for region in zone.regions {
+            for mark in region.marks {
+                if (mark.segment.proximal.x > zoneMin
+                        || mark.segment.distal.x > zoneMin)
+                    && (mark.segment.proximal.x < zoneMax
+                            || mark.segment.distal.x < zoneMax) {
+                    mark.mode = mode
                 }
             }
         }
@@ -1005,6 +1017,22 @@ final class LadderView: ScaledView {
         currentDocument?.undoManager.endUndoGrouping()
     }
 
+    func setSelectedMarksEmphasis(emphasis: Mark.Emphasis) {
+        let selectedMarks: [Mark] = ladder.allMarksWithMode(.selected)
+        currentDocument?.undoManager.beginUndoGrouping()
+        selectedMarks.forEach { mark in self.undoablySetMarkEmphasis(mark: mark, emphasis: emphasis) }
+        currentDocument?.undoManager.endUndoGrouping()
+    }
+
+    func undoablySetMarkEmphasis(mark: Mark, emphasis: Mark.Emphasis) {
+        let originalEmphasis = mark.emphasis
+        currentDocument?.undoManager.registerUndo(withTarget: self) { target in
+            target.undoablySetMarkEmphasis(mark: mark, emphasis: originalEmphasis)
+        }
+        NotificationCenter.default.post(name: .didUndoableAction, object: nil)
+        mark.emphasis = emphasis
+    }
+
     func undoablySetRegionStyle(region: Region, style: Mark.Style) {
         let originalStyle = region.style
         currentDocument?.undoManager.registerUndo(withTarget: self) { target in
@@ -1015,10 +1043,24 @@ final class LadderView: ScaledView {
     }
 
     func setSelectedRegionsStyle(style: Mark.Style) {
-        let selectedRegions: [Region] = ladder.allRegionsWithMode(.selected)
+        let selectedRegions: [Region] = ladder.allRegionsWithMode(.labelSelected)
         currentDocument?.undoManager.beginUndoGrouping()
         selectedRegions.forEach { region in self.undoablySetRegionStyle(region: region, style: style) }
         currentDocument?.undoManager.endUndoGrouping()
+    }
+
+    func noSelectionExists() -> Bool {
+        for region in ladder.regions {
+            if region.mode == .selected {
+                return false
+            }
+            for mark in region.marks {
+                if mark.mode == .selected {
+                    return false
+                }
+            }
+        }
+        return true
     }
 
     // MARK: - draw
@@ -1163,7 +1205,7 @@ final class LadderView: ScaledView {
         }
         context.setStrokeColor(getMarkColor(mark: mark))
         context.setFillColor(getMarkColor(mark: mark))
-        context.setLineWidth(markLineWidth)
+        context.setLineWidth(mark.emphasis == .bold ? markLineWidth + 1 :  markLineWidth)
         context.move(to: p1)
         context.addLine(to: p2)
         // Draw dashed line
