@@ -1206,6 +1206,8 @@ extension DiagramViewController {
         ladderView.linkedColor = linkedColorName.color()
         let normalColorName = ColorName(rawValue: UserDefaults.standard.integer(forKey: Preferences.defaultNormalColorNameKey)) ?? ColorName.normal
         ladderView.normalColor = normalColorName.color()
+        let activeColorName = ColorName(rawValue: UserDefaults.standard.integer(forKey: Preferences.defaultActiveColorNameKey)) ?? ColorName.red
+        ladderView.activeColor = activeColorName.color()
         updateToolbarButtons()
     }
 

@@ -58,8 +58,7 @@ final class LadderView: ScaledView {
     var marksAreHidden: Bool = false
 
     // Colors - can change via Preferences
-    var red = UIColor.systemRed
-    var blue = UIColor.systemBlue
+    var activeColor = UIColor.systemRed
     var normalColor = UIColor.label
     var attachedColor = UIColor.systemOrange
     var connectedColor = UIColor.systemGreen
@@ -1075,7 +1074,7 @@ final class LadderView: ScaledView {
         let attributes: [NSAttributedString.Key: Any] = [
             .paragraphStyle: paragraphStyle,
             .font: UIFont.systemFont(ofSize: 18.0),
-            .foregroundColor: region.mode == .active ? red : blue
+            .foregroundColor: region.mode == .active ? activeColor : selectedColor
         ]
         let text = region.name
         let labelText = NSAttributedString(string: text, attributes: attributes)
@@ -1083,7 +1082,7 @@ final class LadderView: ScaledView {
         let labelRect = CGRect(x: 0, y: rect.origin.y + (rect.height - size.height) / 2, width: rect.origin.x, height: size.height)
 
         context.addRect(stringRect)
-        context.setStrokeColor(red.cgColor)
+        context.setStrokeColor(activeColor.cgColor)
         if region.mode == .labelSelected {
             context.setFillColor(selectedColor.cgColor)
             context.setAlpha(0.2)
@@ -1100,7 +1099,7 @@ final class LadderView: ScaledView {
         let descriptionAttributes: [NSAttributedString.Key: Any] = [
             .paragraphStyle: paragraphStyle,
             .font: UIFont.systemFont(ofSize: 12.0),
-            .foregroundColor: region.mode == .active ? red : blue
+            .foregroundColor: region.mode == .active ? activeColor : selectedColor
         ]
         let descriptionText = NSAttributedString(string: region.longDescription, attributes: descriptionAttributes)
 
@@ -1127,7 +1126,7 @@ final class LadderView: ScaledView {
         if region.mode == .active {
             context.setAlpha(0.2)
             context.addRect(regionRect)
-            context.setFillColor(red.cgColor)
+            context.setFillColor(activeColor.cgColor)
             context.drawPath(using: .fillStroke)
         }
         if region.mode == .selected {
@@ -1710,8 +1709,6 @@ final class LadderView: ScaledView {
         initializeRegions()
         setNeedsDisplay()
     }
-
-
 }
 
 // MARK: - LadderViewDelegate protocol

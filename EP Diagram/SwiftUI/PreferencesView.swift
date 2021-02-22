@@ -17,6 +17,7 @@ struct PreferencesView: View {
     @AppStorage(Preferences.defaultConnectedColorNameKey) var connectedColorName = Preferences.connectedColorName
     @AppStorage(Preferences.defaultSelectedColorNameKey) var selectedColorName = Preferences.selectedColorName
     @AppStorage(Preferences.defaultLinkedColorNameKey) var linkedColorName = Preferences.linkedColorName
+    @AppStorage(Preferences.defaultActiveColorNameKey) var activeColorName = Preferences.activeColorName
     @AppStorage(Preferences.defaultShowImpulseOriginKey) var showImpulseOrigin: Bool = Preferences.showImpulseOrigin
     @AppStorage(Preferences.defaultShowBlockKey) var showBlock: Bool = Preferences.showBlock
     @AppStorage(Preferences.defaultShowIntervalsKey) var showIntervals: Bool = Preferences.showIntervals
@@ -61,7 +62,9 @@ struct PreferencesView: View {
                             Text("Show conduction times")
                         }
                     }
-                    Section(header: Text("Region")) {}
+                    Section(header: Text("Region")) {
+                        ColorPicker(binding: $activeColorName, title: "Default active region color")
+                    }
                     Section(header: Text("Mark")) {
                         Group {
                             Stepper("Mark line width = \(markLineWidth)", value: $markLineWidth, in: 1...6, step: 1)

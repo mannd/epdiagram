@@ -32,6 +32,7 @@ struct Preferences {
     static let defaultSelectedColorNameKey = "defaultSelectedColorNameKey"
     static let defaultLinkedColorNameKey = "defaultLinkedColorNameKey"
     static let defaultNormalColorNameKey = "defaultNormalColorNameKey"
+    static let defaultActiveColorNameKey = "defaultActiveColorNameKey"
 
     // Stored as Int, converted to CGFloat when used.
     static var markLineWidth: Int = 2
@@ -54,6 +55,7 @@ struct Preferences {
     static var selectedColorName: Int = ColorName.blue.rawValue
     static var linkedColorName: Int = ColorName.purple.rawValue
     static var normalColorName: Int = ColorName.normal.rawValue
+    static var activeColorName: Int = ColorName.red.rawValue
 
     static func defaults() -> [String: Any] {
         let defaultPreferences: [String: Any] = [
@@ -77,6 +79,7 @@ struct Preferences {
             Preferences.defaultSelectedColorNameKey: Preferences.selectedColorName,
             Preferences.defaultLinkedColorNameKey: Preferences.linkedColorName,
             Preferences.defaultNormalColorNameKey: Preferences.normalColorName,
+            Preferences.defaultActiveColorNameKey: Preferences.activeColorName,
         ]
         return defaultPreferences
     }
