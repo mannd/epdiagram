@@ -32,6 +32,8 @@ final class Mark: Codable {
     var impulseOrigin: Endpoint = .none
     var measurementText: String = ""
     var showMeasurementText: Bool = true
+    var autoBlock = true
+    var autoImpulseOrigin = true
 
     // Ids of other marks that this mark is linked with.
     var linkedMarkIDs: LinkedMarkIDs = LinkedMarkIDs()

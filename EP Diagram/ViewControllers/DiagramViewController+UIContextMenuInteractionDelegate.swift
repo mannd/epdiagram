@@ -29,7 +29,7 @@ extension DiagramViewController: UIContextMenuInteractionDelegate {
                 if let location = self.menuPressLocation {
                     self.ladderView.setSelectedMark(position: location)
                 }
-            case .region, .label:
+            case .region:
                 // TODO: can select multiple regions in select mode, but only one works with long press.
                 // Maybe in select mode, wherever you press shouldn't matter, only selection matters.
                 if let region = locationInLadder.region {
@@ -38,6 +38,10 @@ extension DiagramViewController: UIContextMenuInteractionDelegate {
                     //                    self.ladderView.ladder.setMarksWithMode(.selected, inRegions: selectedRegions)
                     self.ladderView.ladder.setMarksWithMode(.selected, inRegion: region)
                     region.mode = .selected
+                }
+            case .label:
+                if let region = locationInLadder.region {
+                    region.mode = .labelSelected
                 }
             case .zone:
                 self.ladderView.selectInZone()
@@ -86,8 +90,10 @@ extension DiagramViewController: UIContextMenuInteractionDelegate {
         switch locationInLadder.specificLocation {
         case .mark:
             return markContextMenuConfiguration(at: location)
-        case .region, .label:
+        case .region:
             return regionContextMenuConfiguration(at: location)
+        case .label:
+            return labelContextMenuConfiguration(at: location)
         case .zone:
             return zoneContextMenuConfiguration(at: location)
         case .ladder:
@@ -104,7 +110,7 @@ extension DiagramViewController: UIContextMenuInteractionDelegate {
     func markContextMenuConfiguration(at location: CGPoint) -> UIContextMenuConfiguration {
         return UIContextMenuConfiguration(identifier: nil, previewProvider: nil) {_ in
             // FIXME: make sure we won't move linked marks, or disconnect them when straightening.
-            return UIMenu(title: L("Mark"), children: [self.styleMenu, self.straightenMenu, self.slantMenu, self.adjustYMenu,  self.unlinkAction, self.deleteAction])
+            return UIMenu(title: L("Mark"), children: [self.styleMenu, self.blockMenu, self.straightenMenu, self.slantMenu, self.adjustYMenu,  self.unlinkAction, self.deleteAction])
         }
     }
 
@@ -117,14 +123,22 @@ extension DiagramViewController: UIContextMenuInteractionDelegate {
             } else {
                 title = L("Region")
             }
-            return UIMenu(title: title, children: [self.styleMenu, self.straightenMenu, self.slantMenu, self.adjustYMenu, self.editLabelAction, self.addRegionMenu, self.removeRegionAction, self.regionHeightMenu, self.rhythmAction, self.deleteAllInRegion])
+            return UIMenu(title: title, children: [self.styleMenu, self.straightenMenu, self.slantMenu, self.adjustYMenu, self.rhythmAction, self.deleteAllInRegion])
+        }
+    }
+
+    func labelContextMenuConfiguration(at location: CGPoint) -> UIContextMenuConfiguration {
+        return UIContextMenuConfiguration(identifier: nil, previewProvider: nil) { suggestedActions in
+            let title = "Label"
+            return UIMenu(title: title, children: [self.styleMenu, self.editLabelAction, self.addRegionMenu, self.removeRegionAction, self.regionHeightMenu])
         }
     }
 
     func zoneContextMenuConfiguration(at location: CGPoint) -> UIContextMenuConfiguration {
         print("zone selected")
         return UIContextMenuConfiguration(identifier: nil, previewProvider: nil) { suggestedActions in
-        return UIMenu(title: L("Zone"), children: [self.styleMenu, self.straightenMenu, self.slantMenu, self.editLabelAction, self.addRegionMenu, self.removeRegionAction, self.regionHeightMenu, self.rhythmAction, self.deleteAllInRegion])
+            // TODO: add deleteInZone action
+            return UIMenu(title: L("Zone"), children: [self.styleMenu, self.straightenMenu, self.slantMenu, self.rhythmAction])
         }
 
     }

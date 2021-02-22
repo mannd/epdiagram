@@ -84,6 +84,7 @@ extension Region {
     enum Mode: Int, Codable {
         case active
         case selected
+        case labelSelected
         case normal
     }
 }

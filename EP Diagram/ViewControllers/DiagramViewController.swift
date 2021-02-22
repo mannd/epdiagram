@@ -168,12 +168,29 @@ final class DiagramViewController: UIViewController {
         self.showAdjustLeftMarginToolbar()
     }
 
+    // TODO: Do we need something like this.  We do if we allow manual setting of block.
+    lazy var reanalyzeLadderAction = UIAction(title: L("Reanalyze ladder")) { action in }
+
     lazy var unlinkAll = UIAction(title: L("Unlink all marks")) { action in
         self.ladderView.unlinkAllMarks()
     }
     lazy var linkAll = UIAction(title: L("Link all marks")) { action in
         self.ladderView.linkAllMarks()
     }
+
+    lazy var blockProximalAction = UIAction(title: L("Proximal block")) { action in
+
+    }
+    lazy var blockDistalAction = UIAction(title: L("Distal block")) { action in
+
+    }
+    lazy var blockNoneAction = UIAction(title: L("No block")) { action in
+
+    }
+    lazy var blockAutoAction = UIAction(title: L("Auto block")) { action in
+//        self.ladderView.setBlockAuto()
+    }
+    lazy var blockMenu = UIMenu(title: L("Block..."), children: [self.blockProximalAction, self.blockDistalAction, self.blockNoneAction, self.blockAutoAction])
 
     lazy var solidAction = UIAction(title: L("Solid")) { action in
         self.ladderView.setSelectedMarksStyle(style: .solid)
@@ -233,19 +250,19 @@ final class DiagramViewController: UIViewController {
     lazy var adjustYMenu = UIMenu(title: L("Adjust mark ends..."), children: [adjustProximalYAction, adjustDistalYAction, trimProximalYAction, trimDistalYAction])
 
     lazy var oneRegionHeightAction = UIAction(title: L("1 unit")) { action in
-        guard let selectedRegion = self.ladderView.selectedRegion() else { return }
+        guard let selectedRegion = self.ladderView.selectedLabelRegion() else { return }
         self.ladderView.setRegionHeight(1, forRegion: selectedRegion)
     }
     lazy var twoRegionHeightAction = UIAction(title: L("2 units")) { action in
-        guard let selectedRegion = self.ladderView.selectedRegion() else { return }
+        guard let selectedRegion = self.ladderView.selectedLabelRegion() else { return }
         self.ladderView.setRegionHeight(2, forRegion: selectedRegion)
     }
     lazy var threeRegionHeightAction = UIAction(title: L("3 units")) { action in
-        guard let selectedRegion = self.ladderView.selectedRegion() else { return }
+        guard let selectedRegion = self.ladderView.selectedLabelRegion() else { return }
         self.ladderView.setRegionHeight(3, forRegion: selectedRegion)
     }
     lazy var fourRegionHeightAction = UIAction(title: L("4 units")) { action in
-        guard let selectedRegion = self.ladderView.selectedRegion() else { return }
+        guard let selectedRegion = self.ladderView.selectedLabelRegion() else { return }
         self.ladderView.setRegionHeight(4, forRegion: selectedRegion)
     }
     lazy var regionHeightMenu = UIMenu(title: L("Region height..."), image: UIImage(systemName: "arrow.up.arrow.down.square"), children: [self.oneRegionHeightAction, self.twoRegionHeightAction, self.threeRegionHeightAction, self.fourRegionHeightAction])
@@ -842,8 +859,8 @@ final class DiagramViewController: UIViewController {
     }
 
     func editLabel() {
-        guard let selectedRegion = ladderView.selectedRegion() else { return }
-        UserAlert.showNameRegionAlert(viewController: self, region: selectedRegion, handler: { newLabel, newDescription in
+        guard let selectedRegion = ladderView.selectedLabelRegion() else { return }
+        UserAlert.showEditLabelAlert(viewController: self, region: selectedRegion, handler: { newLabel, newDescription in
             self.ladderView.undoablySetLabel(newLabel, description: newDescription, forRegion: selectedRegion)
         })
     }

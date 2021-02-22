@@ -990,10 +990,6 @@ final class LadderView: ScaledView {
         }
     }
 
-    func setBlockAuto() {
-
-    }
-
     func undoablySetMarkStyle(mark: Mark, style: Mark.Style) {
         let originalStyle = mark.style
         currentDocument?.undoManager.registerUndo(withTarget: self) { target in
@@ -1088,9 +1084,15 @@ final class LadderView: ScaledView {
 
         context.addRect(stringRect)
         context.setStrokeColor(red.cgColor)
-        context.setFillColor(UIColor.secondarySystemBackground.cgColor)
+        if region.mode == .labelSelected {
+            context.setFillColor(selectedColor.cgColor)
+            context.setAlpha(0.2)
+        } else {
+            context.setFillColor(UIColor.secondarySystemBackground.cgColor)
+        }
         context.setLineWidth(1)
         context.drawPath(using: .fillStroke)
+        context.setAlpha(1.0)
         labelText.draw(in: labelRect)
 
         // FIXME: Raise up label a bit to allow room for description
@@ -1108,6 +1110,7 @@ final class LadderView: ScaledView {
 
             descriptionText.draw(in: descriptionRect)
         }
+
     }
 
     fileprivate func drawRegionArea(context: CGContext, rect: CGRect, region: Region) {
@@ -1130,7 +1133,7 @@ final class LadderView: ScaledView {
         if region.mode == .selected {
             context.setAlpha(0.2)
             context.addRect(regionRect)
-            context.setFillColor(blue.cgColor)
+            context.setFillColor(selectedColor.cgColor)
             context.drawPath(using: .fillStroke)
         }
         context.setAlpha(1)
@@ -1476,6 +1479,17 @@ final class LadderView: ScaledView {
         }
     }
 
+    func selectedLabelRegion() -> Region? {
+        let selectedRegions = ladder.allRegionsWithMode(.labelSelected)
+        // assume only one selected region
+        guard selectedRegions.count > 0 else { return nil }
+        if let region = selectedRegions.first {
+            return region
+        } else {
+            return nil
+        }
+    }
+
     @objc func deleteAllInLadder() {
         os_log("deleteAllInLadder() - LadderView", log: OSLog.debugging, type: .debug)
         currentDocument?.undoManager?.beginUndoGrouping()
@@ -1666,7 +1680,7 @@ final class LadderView: ScaledView {
     func addRegion(relation: RegionRelation) {
         guard ladder.regions.count < Ladder.maxRegionCount else { return }
         guard relation == .after || relation == .before else { return }
-        guard let selectedRegion = selectedRegion() else { return }
+        guard let selectedRegion = selectedLabelRegion() else { return }
         guard var selectedIndex = ladder.index(ofRegion: selectedRegion) else { return }
         if relation == .after {
             selectedIndex += 1
@@ -1681,7 +1695,7 @@ final class LadderView: ScaledView {
     func removeRegion() {
         // Can't remove last region
         guard ladder.regions.count > Ladder.minRegionCount else { return }
-        guard let selectedRegion = selectedRegion() else { return }
+        guard let selectedRegion = selectedLabelRegion() else { return }
         undoablyRemoveRegion(selectedRegion)
     }
 
