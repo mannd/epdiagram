@@ -290,6 +290,23 @@ class LadderViewTests: XCTestCase {
         XCTAssertFalse(ladderView.noSelectionExists())
     }
 
+    func testDominantStyleOfMarks() {
+        let mark1 = Mark()
+        let mark2 = Mark()
+        let mark3 = Mark()
+        var marks: [Mark] = [Mark]()
+        XCTAssertNil(ladderView.dominantStyleOfMarks(marks: marks))
+        marks.append(mark1)
+        marks.append(mark2)
+        marks.append(mark3)
+        XCTAssertEqual(ladderView.dominantStyleOfMarks(marks: marks), .solid)
+        mark1.style = .dashed
+        mark2.style = .dashed
+        mark3.style = .dashed
+        XCTAssertEqual(ladderView.dominantStyleOfMarks(marks: marks), .dashed)
+        mark1.style = .dotted
+        XCTAssertNil(ladderView.dominantStyleOfMarks(marks: marks))
+    }
 
 
 }

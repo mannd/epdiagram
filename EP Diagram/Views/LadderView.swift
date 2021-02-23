@@ -49,9 +49,7 @@ final class LadderView: ScaledView {
     var snapMarks = true
     var defaultMarkStyle = Mark.Style.solid {
         didSet {
-            for region in ladder.regions {
-                region.style = defaultMarkStyle
-            }
+            ladder.defaultMarkStyle = defaultMarkStyle
         }
     }
     var showLabelDescription: TextVisibility = .invisible
@@ -1047,6 +1045,21 @@ final class LadderView: ScaledView {
         currentDocument?.undoManager.beginUndoGrouping()
         selectedRegions.forEach { region in self.undoablySetRegionStyle(region: region, style: style) }
         currentDocument?.undoManager.endUndoGrouping()
+    }
+
+    func dominantStyleOfMarks(marks: [Mark]) -> Mark.Style? {
+        guard marks.count > 0 else { return nil }
+        let count = marks.count
+        if marks.filter({ $0.style == .solid }).count == count {
+            return .solid
+        }
+        if marks.filter({ $0.style == .dotted }).count == count {
+            return .dotted
+        }
+        if marks.filter({ $0.style == .dashed }).count == count {
+            return .dashed
+        }
+        return nil
     }
 
     func noSelectionExists() -> Bool {

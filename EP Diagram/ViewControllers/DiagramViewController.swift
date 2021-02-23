@@ -209,7 +209,7 @@ final class DiagramViewController: UIViewController {
     lazy var normalEmphasisAction = UIAction(title: L("Normal")) { action in
         self.ladderView.setSelectedMarksEmphasis(emphasis: .normal)
     }
-    lazy var emphasisMenu = UIMenu(title: L("Emphasis"), children: [self.normalEmphasisAction, self.boldEmphasisAction])
+    lazy var emphasisMenu = UIMenu(title: L("Emphasis..."), children: [self.normalEmphasisAction, self.boldEmphasisAction])
 
     lazy var regionSolidStyleAction = UIAction(title: L("Solid")) { action in
         self.ladderView.setSelectedRegionsStyle(style: .solid)

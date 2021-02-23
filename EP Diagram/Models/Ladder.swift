@@ -35,6 +35,7 @@ final class Ladder: NSObject, Codable {
             activeRegion.mode = .active
         }
     }
+    var defaultMarkStyle: Mark.Style = .solid
     var zone: Zone = Zone() // at most one selection zone
     override var debugDescription: String { "Ladder ID " + id.debugDescription }
     private var registry: [UUID: Mark] = [:] // marks are registered for quick lookup
@@ -156,7 +157,7 @@ final class Ladder: NSObject, Codable {
     @discardableResult func addMark(_ mark: Mark, toRegion region: Region?) -> Mark? {
         os_log("addMark(_:toRegion:) - Ladder", log: .action, type: .info)
         guard let region = region else { return nil }
-        mark.style = region.style
+        mark.style = region.style == .inherited ? defaultMarkStyle : region.style
         region.appendMark(mark)
         registerMark(mark)
         if let index = index(ofRegion: region) {
