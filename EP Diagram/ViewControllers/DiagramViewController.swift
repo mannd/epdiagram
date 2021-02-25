@@ -46,13 +46,20 @@ final class DiagramViewController: UIViewController {
     var mode: Mode = .normal {
         didSet {
             cursorView.cursorIsVisible = false
-            ladderView.normalizeLadder()
             cursorView.mode = mode
             ladderView.mode = mode
             hamburgerButton.isEnabled = (mode == .normal)
+            if mode != .normal {
+                ladderView.normalizeLadder()
+            }
             switch mode {
             case .normal:
-                ladderView.setActiveRegion(regionNum: 0)
+                let activeRegion = ladderView.activeRegion // save activeRegion
+                ladderView.normalizeLadder()
+                ladderView.activeRegion = activeRegion // restore activeRegion
+                if activeRegion == nil {
+                    ladderView.setActiveRegion(regionNum: 0)
+                }
                 ladderView.endZoning()
                 ladderView.removeConnectedMarks()
                 showMainToolbar()
@@ -154,7 +161,7 @@ final class DiagramViewController: UIViewController {
     var adjustment: Adjustment = .adjust
 
     // Context menu actions
-    lazy var deleteAction = UIAction(title: L("Delete selected mark(s)"), image: UIImage(systemName: "trash"), attributes: .destructive) { action in
+    lazy var deleteAction = UIAction(title: L("Delete mark(s)"), image: UIImage(systemName: "trash"), attributes: .destructive) { action in
         self.ladderView.deleteSelectedMarks()
     }
     lazy var deleteAllInRegion = UIAction(title: L("Clear region"), image: UIImage(systemName: "trash"), attributes: .destructive) { action in

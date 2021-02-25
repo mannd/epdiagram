@@ -1062,6 +1062,18 @@ final class LadderView: ScaledView {
         return nil
     }
 
+    func dominantEmphasisOfMarks(marks: [Mark]) -> Mark.Emphasis? {
+        guard marks.count > 0 else { return nil }
+        let count = marks.count
+        if marks.filter({ $0.emphasis == .bold }).count == count {
+            return .bold
+        }
+        if marks.filter({ $0.emphasis == .normal }).count == count {
+            return .normal
+        }
+        return nil
+    }
+
     func noSelectionExists() -> Bool {
         for region in ladder.regions {
             if region.mode == .selected {
@@ -2042,6 +2054,7 @@ extension LadderView: LadderViewDelegate {
     func saveState() {
         os_log("saveState() - LadderView", log: .default, type: .default)
         savedActiveRegion = activeRegion
+        // Fix me: this is blanking out selected region in select mode.  Maybe don't hide active region, just don't draw it in select mode.
         activeRegion = nil
         savedMode = mode
     }
@@ -2054,6 +2067,7 @@ extension LadderView: LadderViewDelegate {
         }
         return mode
     }
+    // FIXME: activeRegion is correct, but when view reappears we are back to the first region.
 }
 
 // MARK: - enums
