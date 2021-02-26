@@ -195,7 +195,7 @@ final class DiagramViewController: UIViewController {
 
     }
     lazy var blockAutoAction = UIAction(title: L("Auto block")) { action in
-//        self.ladderView.setBlockAuto()
+        self.ladderView.setSelectedMarksAutoBlock(value: true)
     }
     lazy var blockMenu = UIMenu(title: L("Block..."), children: [self.blockProximalAction, self.blockDistalAction, self.blockNoneAction, self.blockAutoAction])
 

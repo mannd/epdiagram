@@ -17,18 +17,11 @@ extension DiagramViewController: UIContextMenuInteractionDelegate {
         self.menuAppeared = true
         self.ladderView.saveState()
         self.separatorView?.isHidden = true
-        self.setSelections()
     }
 
     func setSelections() {
         os_log("setSelections() - DiagramViewController)", log: .action, type: .info)
         guard let locationInLadder = self.longPressLocationInLadder else { return }
-
-        if self.ladderView.mode == .select {
-            let selectedRegions = self.ladderView.ladder.allRegionsWithMode(.selected)
-            self.ladderView.ladder.setMarksWithMode(.selected, inRegions: selectedRegions)
-            return
-        }
         if self.ladderView.mode == .normal {
             switch locationInLadder.specificLocation {
             case .mark:
@@ -65,6 +58,7 @@ extension DiagramViewController: UIContextMenuInteractionDelegate {
         os_log("contextMenuInteraction(_:configurationForMenuAtLocation:)", log: .action, type: .info)
         switch ladderView.mode {
         case .normal:
+//            setSelections()
             return normalModeMenu(forLocation: location)
         case .select:
             return selectModeMenu(forLocation: location)
@@ -90,12 +84,13 @@ extension DiagramViewController: UIContextMenuInteractionDelegate {
 
     private func prepareActions() {
         os_log("prepareActions() - DiagramViewController", log: .action, type: .info)
-        prepareStyleActions()
-        prepareEmphasisAction()
+        let selectedMarks = self.ladderView.ladder.allMarksWithMode(.selected)
+        prepareStyleActions(selectedMarks: selectedMarks)
+        prepareEmphasisAction(selectedMarks: selectedMarks)
+        prepareBlockAction(selectedMarks: selectedMarks)
     }
 
-    private func prepareStyleActions() {
-        let selectedMarks = self.ladderView.ladder.allMarksWithMode(.selected)
+    private func prepareStyleActions(selectedMarks: [Mark]) {
         if let dominantStyle = self.ladderView.dominantStyleOfMarks(marks: selectedMarks) {
             self.solidAction.state = dominantStyle == .solid ? .on : .off
             self.dottedAction.state = dominantStyle == .dotted ? .on : .off
@@ -107,8 +102,7 @@ extension DiagramViewController: UIContextMenuInteractionDelegate {
         }
     }
 
-    private func prepareEmphasisAction() {
-        let selectedMarks = self.ladderView.ladder.allMarksWithMode(.selected)
+    private func prepareEmphasisAction(selectedMarks: [Mark]) {
         if let dominantEmphasis = self.ladderView.dominantEmphasisOfMarks(marks: selectedMarks) {
             self.boldEmphasisAction.state = dominantEmphasis == .bold ? .on : .off
             self.normalEmphasisAction.state = dominantEmphasis == .normal ? .on : .off
@@ -118,11 +112,20 @@ extension DiagramViewController: UIContextMenuInteractionDelegate {
         }
     }
 
+    private func prepareBlockAction(selectedMarks: [Mark]) {
+        if let dominantAutoBlock = self.ladderView.dominantAutoBlockOfMarks(marks: selectedMarks) {
+            self.blockAutoAction.state = dominantAutoBlock ? .on : .off
+        } else {
+            self.blockAutoAction.state = .off
+        }
+    }
+
     func normalModeMenu(forLocation location: CGPoint) -> UIContextMenuConfiguration? {
         os_log("normalModeMenu(forLocation:)", log: .action, type: .info)
         let locationInLadder = ladderView.getLocationInLadder(position: location)
         longPressLocationInLadder = locationInLadder
         menuPressLocation = location
+        setSelections()
         prepareActions()
         switch locationInLadder.specificLocation {
         case .mark:
@@ -158,6 +161,7 @@ extension DiagramViewController: UIContextMenuInteractionDelegate {
     func markContextMenuConfiguration(at location: CGPoint) -> UIContextMenuConfiguration {
         os_log("markContextMenuConfiguration(at:)", log: .action, type: .info)
         return UIContextMenuConfiguration(identifier: nil, previewProvider: nil) {_ in
+            // FIXME: make lazy
             return UIMenu(title: L("Mark Menu"), children: [self.styleMenu, self.emphasisMenu, self.blockMenu, self.straightenMenu, self.slantMenu, self.adjustYMenu,  self.unlinkAction, self.deleteAction])
         }
     }

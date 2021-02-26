@@ -1015,6 +1015,23 @@ final class LadderView: ScaledView {
         currentDocument?.undoManager.endUndoGrouping()
     }
 
+    func undoablySetAutoBlock(mark: Mark, value: Bool) {
+        let originalValue = mark.autoBlock
+        currentDocument?.undoManager.registerUndo(withTarget: self) { target in
+            target.undoablySetAutoBlock(mark: mark, value: originalValue)
+        }
+        NotificationCenter.default.post(name: .didUndoableAction, object: nil)
+        mark.autoBlock = value
+        print("****mark autoblock = \(mark.autoBlock)")
+    }
+
+    func setSelectedMarksAutoBlock(value: Bool) {
+        let selectedMarks: [Mark] = ladder.allMarksWithMode(.selected)
+        currentDocument?.undoManager.beginUndoGrouping()
+        selectedMarks.forEach { mark in self.undoablySetAutoBlock(mark: mark, value: value) }
+        currentDocument?.undoManager.endUndoGrouping()
+    }
+
     func setSelectedMarksEmphasis(emphasis: Mark.Emphasis) {
         let selectedMarks: [Mark] = ladder.allMarksWithMode(.selected)
         currentDocument?.undoManager.beginUndoGrouping()
@@ -1070,6 +1087,18 @@ final class LadderView: ScaledView {
         }
         if marks.filter({ $0.emphasis == .normal }).count == count {
             return .normal
+        }
+        return nil
+    }
+
+    func dominantAutoBlockOfMarks(marks: [Mark]) -> Bool? {
+        guard marks.count > 0 else { return nil }
+        let count = marks.count
+        if marks.filter({ $0.autoBlock == true }).count == count {
+            return true
+        }
+        if marks.filter({ $0.autoBlock == false }).count == count {
+            return false
         }
         return nil
     }
@@ -2054,8 +2083,9 @@ extension LadderView: LadderViewDelegate {
     func saveState() {
         os_log("saveState() - LadderView", log: .default, type: .default)
         savedActiveRegion = activeRegion
-        // Fix me: this is blanking out selected region in select mode.  Maybe don't hide active region, just don't draw it in select mode.
-        activeRegion = nil
+        if mode == .normal {
+            activeRegion = nil
+        }
         savedMode = mode
     }
 
@@ -2067,7 +2097,6 @@ extension LadderView: LadderViewDelegate {
         }
         return mode
     }
-    // FIXME: activeRegion is correct, but when view reappears we are back to the first region.
 }
 
 // MARK: - enums
