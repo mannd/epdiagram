@@ -199,6 +199,24 @@ final class DiagramViewController: UIViewController {
     }
     lazy var blockMenu = UIMenu(title: L("Block..."), children: [self.blockProximalAction, self.blockDistalAction, self.blockNoneAction, self.blockAutoAction])
 
+    lazy var impulseOriginProximalAction = UIAction(title: L("Proximal impulse origin")) { _ in
+        self.ladderView.setSelectedMarksImpulseOriginSetting(value: .proximal)
+    }
+
+    lazy var impulseOriginDistalAction = UIAction(title: L("Distal impulse origin")) { _ in
+        self.ladderView.setSelectedMarksImpulseOriginSetting(value: .distal)
+
+    }
+    lazy var impulseOriginNoneAction = UIAction(title: L("No impulse origin")) { _ in
+        self.ladderView.setSelectedMarksImpulseOriginSetting(value: .none)
+
+    }
+    lazy var impulseOriginAutoAction = UIAction(title: L("Auto impulse origin")) { _ in
+        self.ladderView.setSelectedMarksImpulseOriginSetting(value: .auto)
+    }
+    lazy var impulseOriginMenu = UIMenu(title: L("Impulse origin..."), children: [self.impulseOriginProximalAction, self.impulseOriginDistalAction, self.impulseOriginNoneAction, self.impulseOriginAutoAction])
+
+
     lazy var solidAction = UIAction(title: L("Solid")) { action in
         self.ladderView.setSelectedMarksStyle(style: .solid)
     }
@@ -316,7 +334,7 @@ final class DiagramViewController: UIViewController {
 
     lazy var ladderMenu = UIMenu(title: L("Ladder"), children: [self.adjustLeftMarginAction,  self.linkAll, self.unlinkAll, self.deleteAllInLadder])
 
-    lazy var markMenu = UIMenu(title: L("Mark Menu"), children: [self.styleMenu, self.emphasisMenu, self.blockMenu, self.straightenMenu, self.slantMenu, self.adjustYMenu,  self.unlinkAction, self.deleteAction])
+    lazy var markMenu = UIMenu(title: L("Mark Menu"), children: [self.styleMenu, self.emphasisMenu, self.blockMenu, self.impulseOriginMenu, self.straightenMenu, self.slantMenu, self.adjustYMenu,  self.unlinkAction, self.deleteAction])
 
     lazy var labelChildren = [self.regionStyleMenu, self.editLabelAction, self.addRegionMenu, self.removeRegionAction, self.regionHeightMenu]
 

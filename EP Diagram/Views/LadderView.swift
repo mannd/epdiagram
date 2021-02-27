@@ -859,11 +859,15 @@ final class LadderView: ScaledView {
     }
 
     func assessImpulseOrigin(mark: Mark) {
-        mark.impulseOriginSite = .none
-        if mark.linkedMarkIDs.proximal.count == 0 && (mark.early == .proximal || mark.early == .none) {
-            mark.impulseOriginSite = .proximal
-        } else if mark.linkedMarkIDs.distal.count == 0 && mark.early == .distal {
-            mark.impulseOriginSite = .distal
+        if mark.impulseOriginSetting == .auto {
+            mark.impulseOriginSite = .none
+            if mark.linkedMarkIDs.proximal.count == 0 && (mark.early == .proximal || mark.early == .none) {
+                mark.impulseOriginSite = .proximal
+            } else if mark.linkedMarkIDs.distal.count == 0 && mark.early == .distal {
+                mark.impulseOriginSite = .distal
+            }
+        } else {
+            mark.impulseOriginSite = mark.impulseOriginSetting
         }
     }
 
@@ -1034,6 +1038,23 @@ final class LadderView: ScaledView {
         assessBlock(mark: mark)
     }
 
+    func setSelectedMarksImpulseOriginSetting(value: Mark.Endpoint) {
+        let selectedMarks = ladder.allMarksWithMode(.selected)
+        currentDocument?.undoManager.beginUndoGrouping()
+        selectedMarks.forEach { mark in self.undoablySetImpulseOriginSetting(mark: mark, value: value) }
+        currentDocument?.undoManager.endUndoGrouping()
+    }
+
+    func undoablySetImpulseOriginSetting(mark: Mark, value: Mark.Endpoint) {
+        let originalImpulseOriginSetting = mark.impulseOriginSetting
+        currentDocument?.undoManager.registerUndo(withTarget: self) { target in
+            target.undoablySetImpulseOriginSetting(mark: mark, value: originalImpulseOriginSetting)
+        }
+        NotificationCenter.default.post(name: .didUndoableAction, object: nil)
+        mark.impulseOriginSetting = value
+        assessImpulseOrigin(mark: mark)
+    }
+
     func setSelectedMarksEmphasis(emphasis: Mark.Emphasis) {
         let selectedMarks: [Mark] = ladder.allMarksWithMode(.selected)
         currentDocument?.undoManager.beginUndoGrouping()
@@ -1093,6 +1114,17 @@ final class LadderView: ScaledView {
         let count = marks.count
         for value in Mark.Endpoint.allCases {
             if marks.filter({ $0.blockSetting == value }).count == count {
+                return value
+            }
+        }
+        return nil
+    }
+
+    func dominantImpulseOriginOfMarks(marks: [Mark]) -> Mark.Endpoint? {
+        guard marks.count > 0 else { return nil }
+        let count = marks.count
+        for value in Mark.Endpoint.allCases {
+            if marks.filter({ $0.impulseOriginSetting == value }).count == count {
                 return value
             }
         }

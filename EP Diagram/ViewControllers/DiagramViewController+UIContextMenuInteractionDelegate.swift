@@ -88,6 +88,7 @@ extension DiagramViewController: UIContextMenuInteractionDelegate {
         prepareStyleActions(selectedMarks: selectedMarks)
         prepareEmphasisAction(selectedMarks: selectedMarks)
         prepareBlockAction(selectedMarks: selectedMarks)
+        prepareImpulseOriginAction(selectedMarks: selectedMarks)
     }
 
     private func prepareStyleActions(selectedMarks: [Mark]) {
@@ -122,6 +123,21 @@ extension DiagramViewController: UIContextMenuInteractionDelegate {
             self.blockProximalAction.state = .off
             self.blockDistalAction.state = .off
             self.blockNoneAction.state = .off
+            self.blockAutoAction.state = .off
+        }
+    }
+
+    private func prepareImpulseOriginAction(selectedMarks: [Mark]) {
+        if let dominantImpulseOriginOfMarks = self.ladderView.dominantImpulseOriginOfMarks(marks: selectedMarks) {
+            self.impulseOriginProximalAction.state = dominantImpulseOriginOfMarks == .proximal ? .on : .off
+            self.impulseOriginDistalAction.state = dominantImpulseOriginOfMarks == .distal ? .on : .off
+            self.impulseOriginNoneAction.state = dominantImpulseOriginOfMarks == .none ? .on : .off
+            self.impulseOriginAutoAction.state = dominantImpulseOriginOfMarks == .auto ? .on : .off
+        } else {
+            self.impulseOriginProximalAction.state = .off
+            self.impulseOriginDistalAction.state = .off
+            self.impulseOriginNoneAction.state = .off
+            self.impulseOriginAutoAction.state = .off
         }
     }
 
