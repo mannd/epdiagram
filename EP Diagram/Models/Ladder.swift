@@ -204,7 +204,7 @@ final class Ladder: NSObject, Codable {
     func clearBlock() {
         for region in regions {
             for mark in region.marks {
-                mark.block = .none
+                mark.blockSite = .none
             }
         }
     }
@@ -212,7 +212,7 @@ final class Ladder: NSObject, Codable {
     func clearImpulseOrigin() {
         for region in regions {
             for mark in region.marks {
-                mark.impulseOrigin = .none
+                mark.impulseOriginSite = .none
             }
         }
     }

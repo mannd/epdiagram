@@ -29,12 +29,12 @@ final class Mark: Codable {
     var anchor: Anchor = .middle // Anchor point for movement and to attach a cursor
     var style: Style = .solid
     var emphasis: Emphasis = .normal
-    var block: Endpoint = .none
-    var impulseOrigin: Endpoint = .none
+    var blockSite: Endpoint = .none
+    var blockSetting: Endpoint = .auto
+    var impulseOriginSite: Endpoint = .none
+    var impulseOriginSetting: Endpoint = .auto
     var measurementText: String = ""
     var showMeasurementText: Bool = true
-    var autoBlock = true
-    var autoImpulseOrigin = true
 
     // Ids of other marks that this mark is linked with.
     var linkedMarkIDs: LinkedMarkIDs = LinkedMarkIDs()
@@ -303,7 +303,7 @@ extension Mark {
         }
     }
 
-    enum Emphasis: Int, Codable, CustomStringConvertible {
+    enum Emphasis: Int, Codable, CustomStringConvertible, CaseIterable {
         case normal
         case bold
 
@@ -328,10 +328,11 @@ extension Mark {
     }
 
     // Show which end of a mark is affected by an action.
-    enum Endpoint: Int, Codable {
+    enum Endpoint: Int, Codable, CaseIterable {
         case proximal
         case distal
         case none
+        case auto
     }
 }
 

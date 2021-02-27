@@ -186,16 +186,16 @@ final class DiagramViewController: UIViewController {
     }
 
     lazy var blockProximalAction = UIAction(title: L("Proximal block")) { action in
-
+        self.ladderView.setSelectedMarksManualBlock(value: .proximal)
     }
     lazy var blockDistalAction = UIAction(title: L("Distal block")) { action in
-
+        self.ladderView.setSelectedMarksManualBlock(value: .distal)
     }
     lazy var blockNoneAction = UIAction(title: L("No block")) { action in
-
+        self.ladderView.setSelectedMarksManualBlock(value: .none)
     }
     lazy var blockAutoAction = UIAction(title: L("Auto block")) { action in
-        self.ladderView.setSelectedMarksAutoBlock(value: true)
+        self.ladderView.setSelectedMarksManualBlock(value: .auto)
     }
     lazy var blockMenu = UIMenu(title: L("Block..."), children: [self.blockProximalAction, self.blockDistalAction, self.blockNoneAction, self.blockAutoAction])
 
@@ -314,7 +314,13 @@ final class DiagramViewController: UIViewController {
         self.ladderView.removeRegion()
     }
 
-    var noSelectionAction = UIAction(title: L("No regions, zones, or marks selected")) { _ in }
+    lazy var ladderMenu = UIMenu(title: L("Ladder"), children: [self.adjustLeftMarginAction,  self.linkAll, self.unlinkAll, self.deleteAllInLadder])
+
+    lazy var markMenu = UIMenu(title: L("Mark Menu"), children: [self.styleMenu, self.emphasisMenu, self.blockMenu, self.straightenMenu, self.slantMenu, self.adjustYMenu,  self.unlinkAction, self.deleteAction])
+
+    lazy var labelChildren = [self.regionStyleMenu, self.editLabelAction, self.addRegionMenu, self.removeRegionAction, self.regionHeightMenu]
+
+    lazy var noSelectionAction = UIAction(title: L("No regions, zones, or marks selected")) { _ in }
 
     // MARK: - Lifecycle
     

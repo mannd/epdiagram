@@ -841,27 +841,29 @@ final class LadderView: ScaledView {
     var blockMin: CGFloat = 0.1
     var blockMax: CGFloat = 0.9
     func assessBlock(mark: Mark) {
-        if mark.autoBlock {
-            mark.block = .none
+        if mark.blockSetting == .auto {
+            mark.blockSite = .none
             if mark.early == .none {
                 return  // for now, ignore vertical marks
             }
             if mark.segment.proximal.y > blockMin
                 && mark.late == .proximal {
-                mark.block = .proximal
+                mark.blockSite = .proximal
             } else if mark.segment.distal.y < blockMax
                         && mark.late == .distal {
-                mark.block = .distal
+                mark.blockSite = .distal
             }
+        } else {
+            mark.blockSite = mark.blockSetting
         }
     }
 
     func assessImpulseOrigin(mark: Mark) {
-        mark.impulseOrigin = .none
+        mark.impulseOriginSite = .none
         if mark.linkedMarkIDs.proximal.count == 0 && (mark.early == .proximal || mark.early == .none) {
-            mark.impulseOrigin = .proximal
+            mark.impulseOriginSite = .proximal
         } else if mark.linkedMarkIDs.distal.count == 0 && mark.early == .distal {
-            mark.impulseOrigin = .distal
+            mark.impulseOriginSite = .distal
         }
     }
 
@@ -1015,21 +1017,21 @@ final class LadderView: ScaledView {
         currentDocument?.undoManager.endUndoGrouping()
     }
 
-    func undoablySetAutoBlock(mark: Mark, value: Bool) {
-        let originalValue = mark.autoBlock
-        currentDocument?.undoManager.registerUndo(withTarget: self) { target in
-            target.undoablySetAutoBlock(mark: mark, value: originalValue)
-        }
-        NotificationCenter.default.post(name: .didUndoableAction, object: nil)
-        mark.autoBlock = value
-        print("****mark autoblock = \(mark.autoBlock)")
+    func setSelectedMarksManualBlock(value: Mark.Endpoint) {
+        let selectedMarks = ladder.allMarksWithMode(.selected)
+        currentDocument?.undoManager.beginUndoGrouping()
+        selectedMarks.forEach { mark in self.undoablySetManualBlock(mark: mark, value: value) }
+        currentDocument?.undoManager.endUndoGrouping()
     }
 
-    func setSelectedMarksAutoBlock(value: Bool) {
-        let selectedMarks: [Mark] = ladder.allMarksWithMode(.selected)
-        currentDocument?.undoManager.beginUndoGrouping()
-        selectedMarks.forEach { mark in self.undoablySetAutoBlock(mark: mark, value: value) }
-        currentDocument?.undoManager.endUndoGrouping()
+    func undoablySetManualBlock(mark: Mark, value: Mark.Endpoint) {
+        let originalBlock = mark.blockSetting
+        currentDocument?.undoManager.registerUndo(withTarget: self) { target in
+            target.undoablySetManualBlock(mark: mark, value: originalBlock)
+        }
+        NotificationCenter.default.post(name: .didUndoableAction, object: nil)
+        mark.blockSetting = value
+        assessBlock(mark: mark)
     }
 
     func setSelectedMarksEmphasis(emphasis: Mark.Emphasis) {
@@ -1067,14 +1069,10 @@ final class LadderView: ScaledView {
     func dominantStyleOfMarks(marks: [Mark]) -> Mark.Style? {
         guard marks.count > 0 else { return nil }
         let count = marks.count
-        if marks.filter({ $0.style == .solid }).count == count {
-            return .solid
-        }
-        if marks.filter({ $0.style == .dotted }).count == count {
-            return .dotted
-        }
-        if marks.filter({ $0.style == .dashed }).count == count {
-            return .dashed
+        for value in Mark.Style.allCases {
+            if marks.filter({ $0.style == value }).count == count {
+                return value
+            }
         }
         return nil
     }
@@ -1082,23 +1080,21 @@ final class LadderView: ScaledView {
     func dominantEmphasisOfMarks(marks: [Mark]) -> Mark.Emphasis? {
         guard marks.count > 0 else { return nil }
         let count = marks.count
-        if marks.filter({ $0.emphasis == .bold }).count == count {
-            return .bold
-        }
-        if marks.filter({ $0.emphasis == .normal }).count == count {
-            return .normal
+        for value in Mark.Emphasis.allCases {
+            if marks.filter({ $0.emphasis == value }).count == count {
+                return value
+            }
         }
         return nil
     }
 
-    func dominantAutoBlockOfMarks(marks: [Mark]) -> Bool? {
+    func dominantManualBlockOfMarks(marks: [Mark]) -> Mark.Endpoint? {
         guard marks.count > 0 else { return nil }
         let count = marks.count
-        if marks.filter({ $0.autoBlock == true }).count == count {
-            return true
-        }
-        if marks.filter({ $0.autoBlock == false }).count == count {
-            return false
+        for value in Mark.Endpoint.allCases {
+            if marks.filter({ $0.blockSetting == value }).count == count {
+                return value
+            }
         }
         return nil
     }
@@ -1441,7 +1437,7 @@ final class LadderView: ScaledView {
         guard showBlock else { return }
         let blockLength: CGFloat = 20
         let blockSeparation: CGFloat = 5
-        switch mark.block {
+        switch mark.blockSite {
         case .none:
             return
         case .distal:
@@ -1454,7 +1450,10 @@ final class LadderView: ScaledView {
             context.addLine(to: CGPoint(x: segment.proximal.x + blockLength / 2, y: segment.proximal.y))
             context.move(to: CGPoint(x: segment.proximal.x - blockLength / 2, y: segment.proximal.y - blockSeparation))
             context.addLine(to: CGPoint(x: segment.proximal.x + blockLength / 2, y: segment.proximal.y - blockSeparation))
+        case .auto:
+            fatalError("Block site set to auto.")
         }
+
         context.strokePath()
     }
 
@@ -1462,13 +1461,15 @@ final class LadderView: ScaledView {
         guard showImpulseOrigin else { return }
         let separation: CGFloat = 10
         let radius: CGFloat = 5
-        switch mark.impulseOrigin {
+        switch mark.impulseOriginSite {
         case .none:
             return
         case .distal:
             drawFilledCircle(context: context, position: CGPoint(x: segment.distal.x - radius / 2, y: segment.distal.y + separation - radius), radius: radius)
         case .proximal:
             drawFilledCircle(context: context, position: CGPoint(x: segment.proximal.x - radius / 2, y: segment.proximal.y - separation), radius: radius)
+        case .auto:
+            fatalError("Impulse origin site set to auto.")
         }
     }
 
@@ -1641,8 +1642,8 @@ final class LadderView: ScaledView {
                 segment = Segment(proximal: mark.segment.proximal, distal: CGPoint(x: mark.segment.proximal.x, y: mark.segment.distal.y))
             case .distal:
                 segment = Segment(proximal: CGPoint(x: mark.segment.distal.x, y: mark.segment.proximal.y), distal: mark.segment.distal)
-            case .none:
-                fatalError("Endpoint.none inappopriately passed to straightenToEndPoint()")
+            case .none, .auto:
+                fatalError("Endpoint.none or .auto inappopriately passed to straightenToEndPoint()")
             }
             self.setSegment(segment: segment, forMark: mark)
         }
@@ -1700,8 +1701,8 @@ final class LadderView: ScaledView {
             newSegment = Segment(proximal: segment.proximal, distal: CGPoint(x: segment.proximal.x + delta, y: segment.distal.y))
         case .distal:
             newSegment = Segment(proximal: CGPoint(x: segment.distal.x + delta, y: segment.proximal.y), distal: segment.distal)
-        case .none:
-            fatalError("Endpoint.none inappopriately passed to slantMark()")
+        case .none, .auto:
+            fatalError("Endpoint.none or .auto inappopriately passed to slantMark()")
         }
         mark.segment = transformToRegionSegment(scaledViewSegment: newSegment, region: region)
     }

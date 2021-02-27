@@ -113,10 +113,15 @@ extension DiagramViewController: UIContextMenuInteractionDelegate {
     }
 
     private func prepareBlockAction(selectedMarks: [Mark]) {
-        if let dominantAutoBlock = self.ladderView.dominantAutoBlockOfMarks(marks: selectedMarks) {
-            self.blockAutoAction.state = dominantAutoBlock ? .on : .off
+        if let dominantManualBlockOfMarks = self.ladderView.dominantManualBlockOfMarks(marks: selectedMarks) {
+            self.blockProximalAction.state = dominantManualBlockOfMarks == .proximal ? .on : .off
+            self.blockDistalAction.state = dominantManualBlockOfMarks == .distal ? .on : .off
+            self.blockNoneAction.state = dominantManualBlockOfMarks == .none ? .on : .off
+            self.blockAutoAction.state = dominantManualBlockOfMarks == .auto ? .on : .off
         } else {
-            self.blockAutoAction.state = .off
+            self.blockProximalAction.state = .off
+            self.blockDistalAction.state = .off
+            self.blockNoneAction.state = .off
         }
     }
 
@@ -161,8 +166,7 @@ extension DiagramViewController: UIContextMenuInteractionDelegate {
     func markContextMenuConfiguration(at location: CGPoint) -> UIContextMenuConfiguration {
         os_log("markContextMenuConfiguration(at:)", log: .action, type: .info)
         return UIContextMenuConfiguration(identifier: nil, previewProvider: nil) {_ in
-            // FIXME: make lazy
-            return UIMenu(title: L("Mark Menu"), children: [self.styleMenu, self.emphasisMenu, self.blockMenu, self.straightenMenu, self.slantMenu, self.adjustYMenu,  self.unlinkAction, self.deleteAction])
+            return self.markMenu
         }
     }
 
@@ -193,8 +197,7 @@ extension DiagramViewController: UIContextMenuInteractionDelegate {
             } else {
                 title = L("Region")
             }
-
-            return UIMenu(title: title, children: [self.regionStyleMenu, self.editLabelAction, self.addRegionMenu, self.removeRegionAction, self.regionHeightMenu])
+            return UIMenu(title: title, children: self.labelChildren)
         }
     }
 
@@ -210,7 +213,7 @@ extension DiagramViewController: UIContextMenuInteractionDelegate {
     func ladderContextMenuConfiguration(at location: CGPoint) -> UIContextMenuConfiguration {
         os_log("ladderContextMenuConfiguration(at:)", log: .action, type: .info)
         return UIContextMenuConfiguration(identifier: nil, previewProvider: nil) { suggestedActions in
-            return UIMenu(title: L("Ladder"), children: [self.adjustLeftMarginAction,  self.linkAll, self.unlinkAll, self.deleteAllInLadder])
+            return self.ladderMenu
         }
     }
 }
