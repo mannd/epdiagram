@@ -186,16 +186,16 @@ final class DiagramViewController: UIViewController {
     }
 
     lazy var blockProximalAction = UIAction(title: L("Proximal block")) { action in
-        self.ladderView.setSelectedMarksManualBlock(value: .proximal)
+        self.ladderView.setSelectedMarksBlockSetting(value: .proximal)
     }
     lazy var blockDistalAction = UIAction(title: L("Distal block")) { action in
-        self.ladderView.setSelectedMarksManualBlock(value: .distal)
+        self.ladderView.setSelectedMarksBlockSetting(value: .distal)
     }
     lazy var blockNoneAction = UIAction(title: L("No block")) { action in
-        self.ladderView.setSelectedMarksManualBlock(value: .none)
+        self.ladderView.setSelectedMarksBlockSetting(value: .none)
     }
     lazy var blockAutoAction = UIAction(title: L("Auto block")) { action in
-        self.ladderView.setSelectedMarksManualBlock(value: .auto)
+        self.ladderView.setSelectedMarksBlockSetting(value: .auto)
     }
     lazy var blockMenu = UIMenu(title: L("Block..."), children: [self.blockProximalAction, self.blockDistalAction, self.blockNoneAction, self.blockAutoAction])
 

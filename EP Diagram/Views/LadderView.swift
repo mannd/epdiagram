@@ -17,6 +17,8 @@ final class LadderView: ScaledView {
     private let lowerLimitMarkHeight: CGFloat = 0.1
     private let lowerLimitMarkWidth: CGFloat = 20
     private let nearbyMarkAccuracy: CGFloat = 15
+    var blockMin: CGFloat = 0.1
+    var blockMax: CGFloat = 0.9
 
     lazy var measurementTextAttributes: [NSAttributedString.Key: Any] = {
         let textFont = UIFont(name: "Helvetica Neue Medium", size: 14.0) ?? UIFont.systemFont(ofSize: 14, weight: UIFont.Weight.medium)
@@ -31,7 +33,7 @@ final class LadderView: ScaledView {
 
     // For debugging
     #if DEBUG  // Change this for debugging impulse origins and block
-    var showProxEnd = true
+    var showProxEnd = false
     var showEarliestPoint: Bool = false
     #else  // Don't ever change this
     var showProxEnd = false
@@ -838,8 +840,7 @@ final class LadderView: ScaledView {
         }
     }
 
-    var blockMin: CGFloat = 0.1
-    var blockMax: CGFloat = 0.9
+
     func assessBlock(mark: Mark) {
         if mark.blockSetting == .auto {
             mark.blockSite = .none
@@ -858,7 +859,7 @@ final class LadderView: ScaledView {
         }
     }
 
-    func assessImpulseOrigin(mark: Mark) {
+        func assessImpulseOrigin(mark: Mark) {
         if mark.impulseOriginSetting == .auto {
             mark.impulseOriginSite = .none
             if mark.linkedMarkIDs.proximal.count == 0 && (mark.early == .proximal || mark.early == .none) {
@@ -1021,7 +1022,7 @@ final class LadderView: ScaledView {
         currentDocument?.undoManager.endUndoGrouping()
     }
 
-    func setSelectedMarksManualBlock(value: Mark.Endpoint) {
+    func setSelectedMarksBlockSetting(value: Mark.Endpoint) {
         let selectedMarks = ladder.allMarksWithMode(.selected)
         currentDocument?.undoManager.beginUndoGrouping()
         selectedMarks.forEach { mark in self.undoablySetManualBlock(mark: mark, value: value) }
@@ -1109,7 +1110,7 @@ final class LadderView: ScaledView {
         return nil
     }
 
-    func dominantManualBlockOfMarks(marks: [Mark]) -> Mark.Endpoint? {
+    func dominantBlockSettingOfMarks(marks: [Mark]) -> Mark.Endpoint? {
         guard marks.count > 0 else { return nil }
         let count = marks.count
         for value in Mark.Endpoint.allCases {
@@ -2127,6 +2128,7 @@ extension LadderView: LadderViewDelegate {
         mode = savedMode
         if mode == .normal {
             activeRegion = savedActiveRegion
+            normalizeAllMarks()
         }
         return mode
     }

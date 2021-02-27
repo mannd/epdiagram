@@ -17,6 +17,7 @@ extension DiagramViewController: UIContextMenuInteractionDelegate {
         self.menuAppeared = true
         self.ladderView.saveState()
         self.separatorView?.isHidden = true
+        setSelections()
     }
 
     func setSelections() {
@@ -114,7 +115,7 @@ extension DiagramViewController: UIContextMenuInteractionDelegate {
     }
 
     private func prepareBlockAction(selectedMarks: [Mark]) {
-        if let dominantManualBlockOfMarks = self.ladderView.dominantManualBlockOfMarks(marks: selectedMarks) {
+        if let dominantManualBlockOfMarks = self.ladderView.dominantBlockSettingOfMarks(marks: selectedMarks) {
             self.blockProximalAction.state = dominantManualBlockOfMarks == .proximal ? .on : .off
             self.blockDistalAction.state = dominantManualBlockOfMarks == .distal ? .on : .off
             self.blockNoneAction.state = dominantManualBlockOfMarks == .none ? .on : .off
@@ -146,7 +147,9 @@ extension DiagramViewController: UIContextMenuInteractionDelegate {
         let locationInLadder = ladderView.getLocationInLadder(position: location)
         longPressLocationInLadder = locationInLadder
         menuPressLocation = location
-        setSelections()
+        // This prevents marks from being dragged, however if it is excluded the memus aren't prepared correctly.
+//        setSelections()
+        // So we must repaire this is restore state, BUT that doesn't work, because all this is happening behind the scenes and if the menu never appears, then neither does restoreState.
         prepareActions()
         switch locationInLadder.specificLocation {
         case .mark:
