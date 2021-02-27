@@ -441,13 +441,58 @@ final class LadderView: ScaledView {
             // This deselects all selected marks, even those outside zone, which means you can't combine zone selection with region or mark selection, but this seems like the best solution for now.
             ladder.setAllMarksWithMode(.normal)
             ladder.hideZone()
-        } else if let mark = tapLocationInLadder.mark {
-            // toggle mark selection
-            mark.mode = mark.mode == .selected ? .normal : .selected
-        } else if let region = tapLocationInLadder.region {
-            region.mode = region.mode == .selected ? .normal : .selected
-            ladder.setMarksWithMode(region.mode == .selected ? .selected : .normal, inRegion: region)
+            return
         }
+        switch tapLocationInLadder.specificLocation {
+        case .mark:
+            if let mark = tapLocationInLadder.mark {
+                mark.mode = mark.mode == .selected ? .normal : .selected
+            }
+        case .region:
+            if let region = tapLocationInLadder.region {
+                region.mode = region.mode == .selected ? .normal : .selected
+                ladder.setMarksWithMode(region.mode == .selected ? .selected : .normal, inRegion: region)
+            }
+        case .label:
+            if let region = tapLocationInLadder.region {
+                region.mode = region.mode == .labelSelected ? .normal : .labelSelected
+            }
+        case .zone:
+            selectInZone()
+        case .ladder:
+            ladder.mode = ladder.mode == .selected ? .normal : .selected
+            if ladder.mode == .selected {
+                ladder.setAllMarksWithMode(.selected)
+                for region in ladder.regions {
+                    region.mode = .selected
+                }
+            } else {
+                ladder.setAllMarksWithMode(.normal)
+                for region in ladder.regions {
+                    region.mode = .normal
+                }
+            }
+        default:
+            break
+        }
+
+
+
+//        else if let mark = tapLocationInLadder.mark {
+//            // toggle mark selection
+//            mark.mode = mark.mode == .selected ? .normal : .selected
+//        } else if let region = tapLocationInLadder.region {
+//            region.mode = region.mode == .selected ? .normal : .selected
+//            ladder.setMarksWithMode(region.mode == .selected ? .selected : .normal, inRegion: region)
+//        } else if let ladder = tapLocationInLadder.ladder {
+//            // set ladder mode selected
+//            ladder.mode = ladder.mode == .selected ? .normal : .selected
+//            ladder.setAllMarksWithMode(.selected)
+//            for region in ladder.regions {
+//                region.mode = .selected
+//            }
+//            print("Ladder selected")
+//        }
         setNeedsDisplay()
     }
 

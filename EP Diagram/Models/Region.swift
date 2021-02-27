@@ -28,18 +28,6 @@ final class Region: Codable {
 
     var style: Mark.Style = .inherited
 
-//    var style: Mark.Style {
-//        get {
-//            if _style == .inherited {
-//                return Mark.Style(rawValue: Preferences.markStyle) ?? .solid
-//            }
-//            return _style
-//        }
-//        set(newValue) {
-//            _style = newValue
-//        }
-//    }
-
     /// A region is copied from a template, after which the template is no longer referenced.
     /// Used to add regions on the fly.
     init(template: RegionTemplate) {

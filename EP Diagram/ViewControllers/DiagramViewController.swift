@@ -112,9 +112,8 @@ final class DiagramViewController: UIViewController {
     weak var diagramEditorDelegate: DiagramEditorDelegate?
     var currentDocument: DiagramDocument?
 
-    var menuPressLocation: CGPoint?
+    // FIXME: refactor this away
     var longPressLocationInLadder: LocationInLadder?
-    var menuAppeared = false // track when context menu appears
 
     // PDF and launch from URL stuff
     var pdfRef: CGPDFDocument?
