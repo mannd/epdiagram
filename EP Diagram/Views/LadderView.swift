@@ -58,29 +58,30 @@ final class LadderView: ScaledView {
     var marksAreHidden: Bool = false
 
     // Colors - can change via Preferences
-    var activeColor = UIColor.systemRed
-    var normalColor = UIColor.label
-    var attachedColor = UIColor.systemOrange
-    var connectedColor = UIColor.systemGreen
-    var selectedColor = UIColor.systemBlue
-    var linkedColor = UIColor.systemPurple
+    var activeColor = Preferences.defaultActiveColor
+    var attachedColor = Preferences.defaultAttachedColor
+    var connectedColor = Preferences.defaultConnectedColor
+    var selectedColor = Preferences.defaultSelectedColor
+    var linkedColor = Preferences.defaultLinkedColor
+
+    var normalColor = UIColor.label  // normalColor is not changeable via Preferences
 
     var ladderIsLocked = false
 
     var zone: Zone {
         get { return ladder.zone }
-        set(newValue) { ladder.zone = newValue }
+        set { ladder.zone = newValue }
     }
     let zoneColor = UIColor.systemBlue
     var calibration: Calibration?
     var ladder: Ladder = Ladder.defaultLadder()
     var activeRegion: Region? {
         get { ladder.activeRegion }
-        set(newValue) { ladder.activeRegion = newValue }
+        set { ladder.activeRegion = newValue }
     }
     var caliperMaxY: CGFloat {
         get { cursorViewDelegate.caliperMaxY }
-        set(newValue) { cursorViewDelegate.caliperMaxY = newValue }
+        set { cursorViewDelegate.caliperMaxY = newValue }
     }
     private var movingMark: Mark?
     private var regionOfDragOrigin: Region?
@@ -441,13 +442,59 @@ final class LadderView: ScaledView {
             // This deselects all selected marks, even those outside zone, which means you can't combine zone selection with region or mark selection, but this seems like the best solution for now.
             ladder.setAllMarksWithMode(.normal)
             ladder.hideZone()
-        } else if let mark = tapLocationInLadder.mark {
-            // toggle mark selection
-            mark.mode = mark.mode == .selected ? .normal : .selected
-        } else if let region = tapLocationInLadder.region {
-            region.mode = region.mode == .selected ? .normal : .selected
-            ladder.setMarksWithMode(region.mode == .selected ? .selected : .normal, inRegion: region)
+            setNeedsDisplay()
+            return
         }
+        switch tapLocationInLadder.specificLocation {
+        case .mark:
+            if let mark = tapLocationInLadder.mark {
+                mark.mode = mark.mode == .selected ? .normal : .selected
+            }
+        case .region:
+            if let region = tapLocationInLadder.region {
+                region.mode = region.mode == .selected ? .normal : .selected
+                ladder.setMarksWithMode(region.mode == .selected ? .selected : .normal, inRegion: region)
+            }
+        case .label:
+            if let region = tapLocationInLadder.region {
+                region.mode = region.mode == .labelSelected ? .normal : .labelSelected
+            }
+        case .zone:
+            selectInZone()
+        case .ladder:
+            ladder.mode = ladder.mode == .selected ? .normal : .selected
+            if ladder.mode == .selected {
+                ladder.setAllMarksWithMode(.selected)
+                for region in ladder.regions {
+                    region.mode = .selected
+                }
+            } else {
+                ladder.setAllMarksWithMode(.normal)
+                for region in ladder.regions {
+                    region.mode = .normal
+                }
+            }
+        default:
+            break
+        }
+
+
+
+        //        else if let mark = tapLocationInLadder.mark {
+        //            // toggle mark selection
+        //            mark.mode = mark.mode == .selected ? .normal : .selected
+        //        } else if let region = tapLocationInLadder.region {
+        //            region.mode = region.mode == .selected ? .normal : .selected
+        //            ladder.setMarksWithMode(region.mode == .selected ? .selected : .normal, inRegion: region)
+        //        } else if let ladder = tapLocationInLadder.ladder {
+        //            // set ladder mode selected
+        //            ladder.mode = ladder.mode == .selected ? .normal : .selected
+        //            ladder.setAllMarksWithMode(.selected)
+        //            for region in ladder.regions {
+        //                region.mode = .selected
+        //            }
+        //            print("Ladder selected")
+        //        }
         setNeedsDisplay()
     }
 
@@ -760,6 +807,7 @@ final class LadderView: ScaledView {
         guard let region = locationInLadder.region else { return }
         if state == .began {
             zone = Zone()
+            zone.isVisible = true
             zone.startingRegion = region
             zone.regions.insert(region)
             zone.start = regionPositionX
@@ -859,7 +907,7 @@ final class LadderView: ScaledView {
         }
     }
 
-        func assessImpulseOrigin(mark: Mark) {
+    func assessImpulseOrigin(mark: Mark) {
         if mark.impulseOriginSetting == .auto {
             mark.impulseOriginSite = .none
             if mark.linkedMarkIDs.proximal.count == 0 && (mark.early == .proximal || mark.early == .none) {
@@ -1174,10 +1222,12 @@ final class LadderView: ScaledView {
     }
 
     func endZoning() {
+        zone.isVisible = false
         zone = Zone()
     }
 
     fileprivate func drawZone(context: CGContext) {
+        guard ladder.zone.isVisible else { return }
         let start = transformToScaledViewPositionX(regionPositionX: zone.start)
         let end = transformToScaledViewPositionX(regionPositionX: zone.end)
         for region in zone.regions {
@@ -1744,9 +1794,18 @@ final class LadderView: ScaledView {
         let region = ladder.region(ofMark: mark)
         let segment = transformToScaledViewSegment(regionSegment: mark.segment, region: region)
         if endpoint == .proximal {
-            return Geometry.oppositeAngle(p1: segment.proximal, p2: segment.distal)
+            if (segment.proximal.x < segment.distal.x) {
+                return Geometry.oppositeAngle(p1: segment.proximal, p2: segment.distal)
+            } else {
+                return  Geometry.oppositeAngle(p1: segment.distal, p2: segment.proximal)
+            }
+        } else {
+            if (segment.proximal.x > segment.distal.x) {
+                return Geometry.oppositeAngle(p1: segment.proximal, p2: segment.distal)
+            } else {
+                return  Geometry.oppositeAngle(p1: segment.distal, p2: segment.proximal)
+            }
         }
-        return  Geometry.oppositeAngle(p1: segment.distal, p2: segment.proximal)
     }
 
     private func setSegment(segment: Segment, forMark mark: Mark) {
@@ -2117,20 +2176,12 @@ extension LadderView: LadderViewDelegate {
     func saveState() {
         os_log("saveState() - LadderView", log: .default, type: .default)
         savedActiveRegion = activeRegion
-        if mode == .normal {
-            activeRegion = nil
-        }
-        savedMode = mode
+        activeRegion = nil
     }
 
-    @discardableResult func restoreState() -> Mode {
+    func restoreState() {
         os_log("restoreState() - LadderView", log: .default, type: .default)
-        mode = savedMode
-        if mode == .normal {
-            activeRegion = savedActiveRegion
-            normalizeAllMarks()
-        }
-        return mode
+        activeRegion = savedActiveRegion
     }
 }
 

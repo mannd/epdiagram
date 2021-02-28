@@ -14,5 +14,5 @@ struct Zone: Codable {
     var start: CGFloat = 0
     var end: CGFloat = 0
 
-    var isVisible: Bool { start != end }
+    var isVisible: Bool = false
 }

@@ -14,15 +14,17 @@ struct Diagram: Codable {
     var longDescription: String // Not used except for samples.
 
     var imageWrapper: ImageWrapper
-    var image: UIImage? { get { imageWrapper.image }
-        set(newValue) { imageWrapper = ImageWrapper(image: newValue) } }
+    var image: UIImage? {
+        get { imageWrapper.image }
+        set { imageWrapper = ImageWrapper(image: newValue) }
+    }
     var imageIsUpscaled: Bool = false
     var ladder: Ladder
     var calibration: Calibration = Calibration()
     var transform: CGAffineTransform
     var leftMargin: CGFloat {
         get { ladder.leftMargin }
-        set(newValue) { ladder.leftMargin = newValue }
+        set { ladder.leftMargin = newValue }
     }
 
     init(name: String?, description: String, image: UIImage?, ladder: Ladder) {

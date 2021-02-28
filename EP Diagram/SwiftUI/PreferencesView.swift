@@ -9,31 +9,38 @@
 import SwiftUI
 
 struct PreferencesView: View {
-    @AppStorage(Preferences.defaultLineWidthKey) var markLineWidth = Preferences.markLineWidth
-    @AppStorage(Preferences.defaultCursorLineWidthKey) var cursorLineWidth = Preferences.cursorLineWidth
-    @AppStorage(Preferences.defaultNormalColorNameKey) var normalColorName = Preferences.normalColorName
-    @AppStorage(Preferences.defaultCursorColorNameKey) var cursorColorName = Preferences.cursorColorName
-    @AppStorage(Preferences.defaultAttachedColorNameKey) var attachedColorName = Preferences.attachedColorName
-    @AppStorage(Preferences.defaultConnectedColorNameKey) var connectedColorName = Preferences.connectedColorName
-    @AppStorage(Preferences.defaultSelectedColorNameKey) var selectedColorName = Preferences.selectedColorName
-    @AppStorage(Preferences.defaultLinkedColorNameKey) var linkedColorName = Preferences.linkedColorName
-    @AppStorage(Preferences.defaultActiveColorNameKey) var activeColorName = Preferences.activeColorName
-    @AppStorage(Preferences.defaultShowImpulseOriginKey) var showImpulseOrigin: Bool = Preferences.showImpulseOrigin
-    @AppStorage(Preferences.defaultShowBlockKey) var showBlock: Bool = Preferences.showBlock
-    @AppStorage(Preferences.defaultShowIntervalsKey) var showIntervals: Bool = Preferences.showIntervals
-    @AppStorage(Preferences.defaultShowConductionTimesKey) var showConductionTimes: Bool = Preferences.showConductionTimes
-    @AppStorage(Preferences.defaultSnapMarksKey) var snapMarks: Bool = Preferences.snapMarks
-    @AppStorage(Preferences.defaultMarkStyleKey) var markStyle = Preferences.markStyle
-    @AppStorage(Preferences.defaultLabelDescriptionVisibilityKey) var labelDescriptionVisibility = Preferences.labelDescriptionVisibility
-    @AppStorage(Preferences.defaultPlaySoundsKey) var playSounds = Preferences.playSounds
-    @AppStorage(Preferences.defaultHideMarksKey) var hideMarks = Preferences.hideMarks
-    @AppStorage(Preferences.defaultCaliperLineWidthKey) var caliperLineWidth = Preferences.caliperLineWidth
-    @AppStorage(Preferences.defaultCaliperColorNameKey) var caliperColorName = Preferences.caliperColorName
+    @AppStorage(Preferences.lineWidthKey) var markLineWidth = Preferences.markLineWidth
+    @AppStorage(Preferences.cursorLineWidthKey) var cursorLineWidth = Preferences.cursorLineWidth
+    @AppStorage(Preferences.showImpulseOriginKey) var showImpulseOrigin: Bool = Preferences.showImpulseOrigin
+    @AppStorage(Preferences.showBlockKey) var showBlock: Bool = Preferences.showBlock
+    @AppStorage(Preferences.showIntervalsKey) var showIntervals: Bool = Preferences.showIntervals
+    @AppStorage(Preferences.showConductionTimesKey) var showConductionTimes: Bool = Preferences.showConductionTimes
+    @AppStorage(Preferences.snapMarksKey) var snapMarks: Bool = Preferences.snapMarks
+    @AppStorage(Preferences.markStyleKey) var markStyle = Preferences.markStyle
+    @AppStorage(Preferences.labelDescriptionVisibilityKey) var labelDescriptionVisibility = Preferences.labelDescriptionVisibility
+    @AppStorage(Preferences.playSoundsKey) var playSounds = Preferences.playSounds
+    @AppStorage(Preferences.hideMarksKey) var hideMarks = Preferences.hideMarks
+    @AppStorage(Preferences.caliperLineWidthKey) var caliperLineWidth = Preferences.caliperLineWidth
+
+    // Color preferences
+    @AppStorage(Preferences.activeColorNameKey) var activeColorName = Preferences.activeColorName
+    @State var activeColor: Color = Color(Preferences.defaultActiveColor)
+    @AppStorage(Preferences.linkedColorNameKey) var linkedColorName = Preferences.linkedColorName
+    @State var linkedColor: Color = Color(Preferences.defaultLinkedColor)
+    @AppStorage(Preferences.selectedColorNameKey) var selectedColorName = Preferences.linkedColorName
+    @State var selectedColor: Color = Color(Preferences.defaultSelectedColor)
+    @AppStorage(Preferences.connectedColorNameKey) var connectedColorName = Preferences.connectedColorName
+    @State var connectedColor: Color = Color(Preferences.defaultConnectedColor)
+    @AppStorage(Preferences.attachedColorNameKey) var attachedColorName = Preferences.attachedColorName
+    @State var attachedColor: Color = Color(Preferences.defaultAttachedColor)
+    @AppStorage(Preferences.cursorColorNameKey) var cursorColorName = Preferences.cursorColorName
+    @State var cursorColor: Color = Color(Preferences.defaultCursorColor)
+    @AppStorage(Preferences.caliperColorNameKey) var caliperColorName = Preferences.caliperColorName
+    @State var caliperColor: Color = Color(Preferences.defaultCaliperColor)
 
     // Pass Diagram as binding to allow changing non-UserDefaults settings
     // @Binding var diagram: Diagram
     @ObservedObject var diagramController: DiagramModelController
-
     @Environment(\.presentationMode) private var presentationMode: Binding<PresentationMode>
 
     // Note: At most 10 views in a Section.  Wrap views in Group{} if more than 10 views.  See https://stackoverflow.com/questions/61178868/swiftui-random-extra-argument-in-call-error.
@@ -64,16 +71,41 @@ struct PreferencesView: View {
                         }
                     }
                     Section(header: Text("Region")) {
-                        ColorPicker(binding: $activeColorName, title: "Active region color")
+                        ColorPicker("Active region color", selection: Binding(
+                                        get: { activeColor },
+                                        set: { newValue in
+                                            activeColorName = newValue.toString
+                                            activeColor = newValue
+                                        }))
+
                     }
                     Section(header: Text("Mark")) {
                         Group {
                             Stepper("Mark width = \(markLineWidth)", value: $markLineWidth, in: 1...6, step: 1)
-                            ColorPicker(binding: $normalColorName, title: "Default mark color")
-                            ColorPicker(binding: $attachedColorName, title: "Highlighted mark color")
-                            ColorPicker(binding: $connectedColorName, title: "Connected mark color")
-                            ColorPicker(binding: $selectedColorName, title: "Selected mark color")
-                            ColorPicker(binding: $linkedColorName, title: "Linked mark color")
+                            ColorPicker("Highlighted color", selection: Binding(
+                                            get: { attachedColor },
+                                            set: { newValue in
+                                                attachedColorName = newValue.toString
+                                                attachedColor = newValue
+                                            }))
+                            ColorPicker("Connected color", selection: Binding(
+                                            get: { connectedColor },
+                                            set: { newValue in
+                                                connectedColorName = newValue.toString
+                                                connectedColor = newValue
+                                            }))
+                            ColorPicker("Selected color", selection: Binding(
+                                            get: { selectedColor },
+                                            set: { newValue in
+                                                selectedColorName = newValue.toString
+                                                selectedColor = newValue
+                                            }))
+                            ColorPicker("Linked color", selection: Binding(
+                                            get: { linkedColor },
+                                            set: { newValue in
+                                                linkedColorName = newValue.toString
+                                                linkedColor = newValue
+                                            }))
                             Toggle(isOn: $showImpulseOrigin) {
                                 Text("Show impulse origin")
                             }
@@ -92,36 +124,36 @@ struct PreferencesView: View {
                     }
                     Section(header: Text("Cursor")) {
                         Stepper("Cursor width = \(cursorLineWidth)", value: $cursorLineWidth, in: 1...6, step: 1)
-                        ColorPicker(binding: $cursorColorName, title: "Cursor color")
+                        ColorPicker("Cursor color", selection: Binding(
+                                        get: { cursorColor },
+                                        set: { newValue in
+                                            cursorColorName = newValue.toString
+                                            cursorColor = newValue
+                                        }))
                     }
                     Section(header: Text("Caliper")) {
                         Stepper("Caliper width = \(caliperLineWidth)", value: $caliperLineWidth, in: 1...6, step: 1)
-                        ColorPicker(binding: $caliperColorName, title: "Caliper color")
+                        ColorPicker("Caliper color", selection: Binding(
+                                        get: { caliperColor },
+                                        set: { newValue in
+                                            caliperColorName = newValue.toString
+                                            caliperColor = newValue
+                                        }))
                     }
 
+                }.onAppear {
+                    activeColor = Color.convertColorName(activeColorName) ?? activeColor
+                    linkedColor = Color.convertColorName(linkedColorName) ?? linkedColor
+                    selectedColor = Color.convertColorName(selectedColorName) ?? selectedColor
+                    connectedColor = Color.convertColorName(connectedColorName) ?? connectedColor
+                    attachedColor = Color.convertColorName(attachedColorName) ?? attachedColor
+                    cursorColor = Color.convertColorName(cursorColorName) ?? cursorColor
+                    caliperColor = Color.convertColorName(caliperColorName) ?? caliperColor
                 }
             }
             .navigationBarTitle("Preferences", displayMode: .inline)
         }
         .navigationViewStyle(StackNavigationViewStyle())
-    }
-}
-
-
-struct ColorPicker: View {
-    @Binding var binding: Int
-    var title: String
-    var body: some View {
-        Picker(selection: $binding, label: Text(title), content: {
-            Text("Blue").tag(ColorName.blue.rawValue).foregroundColor(.blue)
-            Text("Red").tag(ColorName.red.rawValue).foregroundColor(.red)
-            Text("Green").tag(ColorName.green.rawValue).foregroundColor(.green)
-            Text("Yellow").tag(ColorName.yellow.rawValue).foregroundColor(.yellow)
-            Text("Purple").tag(ColorName.purple.rawValue).foregroundColor(.purple)
-            Text("Orange").tag(ColorName.orange.rawValue).foregroundColor(.orange)
-            Text("Pink").tag(ColorName.pink.rawValue).foregroundColor(.pink)
-            Text("Default").tag(ColorName.normal.rawValue)
-        })
     }
 }
 
