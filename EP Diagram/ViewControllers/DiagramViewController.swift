@@ -71,7 +71,7 @@ final class DiagramViewController: UIViewController {
             case .calibrate:
                 cursorView.showCalipers()
                 showCalibrateToolbar()
-            default:
+            case .menu:
                 break
             }
             setViewsNeedDisplay()
@@ -155,7 +155,6 @@ final class DiagramViewController: UIViewController {
     private let minZoom: CGFloat = 0.2
     let pdfScaleFactor: CGFloat = 5.0
 
-    var prolongSelectState = false // used to allow menus like slant to complete actions on selected marks
     var activeEndpoint: Mark.Endpoint = .proximal
     var adjustment: Adjustment = .adjust
 
@@ -550,8 +549,6 @@ final class DiagramViewController: UIViewController {
         imageScrollView.resignFirstResponder()
     }
 
-
-
     func setTitle() {
         if let name = currentDocument?.name(), !name.isEmpty {
             title = isIPad() ? L("EP Diagram - \(name)") : name
@@ -576,6 +573,7 @@ final class DiagramViewController: UIViewController {
     }
 
     @objc func launchSelectMode(_: UIAlertAction) {
+        ladderView.saveState()
         mode = .select
     }
 
@@ -590,8 +588,8 @@ final class DiagramViewController: UIViewController {
 
     @objc func cancelSelectMode() {
         os_log("cancelSelect()", log: OSLog.action, type: .info)
+        ladderView.restoreState()
         mode = .normal
-        ladderView.setNeedsDisplay()
     }
 
     @objc func launchConnectMode() {
@@ -617,8 +615,6 @@ final class DiagramViewController: UIViewController {
     func showSlantToolbar() {
         guard let toolbar = navigationController?.toolbar else { return }
         currentDocument?.undoManager.beginUndoGrouping()
-        prolongSelectState = true
-
         let labelText = UITextField()
         labelText.text = L("Adjust mark slant")
         let slider = UISlider()
@@ -652,7 +648,6 @@ final class DiagramViewController: UIViewController {
     func showAdjustLeftMarginToolbar() {
         guard let toolbar = navigationController?.toolbar else { return }
         currentDocument?.undoManager.beginUndoGrouping() // will end when menu closed
-        prolongSelectState = true
         let labelText = UITextField()
         labelText.text = L("Adjust left margin")
         let slider = UISlider()
@@ -676,7 +671,6 @@ final class DiagramViewController: UIViewController {
     func showAdjustYToolbar() {
         guard let toolbar = navigationController?.toolbar else { return }
         currentDocument?.undoManager.beginUndoGrouping() // will end when menu closed
-        prolongSelectState = true
         let labelText = UITextField()
         labelText.text = adjustment == .adjust ? L("Adjust distal Y value") : L("Trim distal Y value")
         let slider = UISlider()
@@ -713,18 +707,13 @@ final class DiagramViewController: UIViewController {
 
     @objc func closeSlantToolbar(_ sender: UIAlertAction) {
         currentDocument?.undoManager.endUndoGrouping()
-        hideCursorAndNormalizeAllMarks()
-        prolongSelectState = false
-        mode = ladderView.restoreState()
+        showSelectToolbar()
     }
 
     @objc func closeAdjustYToolbar(_ sender: UIAlertAction) {
         currentDocument?.undoManager.endUndoGrouping()
-        hideCursorAndNormalizeAllMarks()
-        prolongSelectState = false
         ladderView.swapEndsIfNeeded()
-        mode = ladderView.restoreState()
-//        ladderView.swapEndsIfNeeded()
+        showSelectToolbar()
     }
 
     @objc func slantSliderValueDidChange(_ sender: UISlider) {
@@ -872,12 +861,8 @@ final class DiagramViewController: UIViewController {
 
     @objc func closeAdjustLeftMarginToolbar(_ sender: UISlider!) {
         currentDocument?.undoManager.endUndoGrouping()
-        hideCursorAndNormalizeAllMarks()
-        prolongSelectState = false
-        mode = ladderView.restoreState()
+        showSelectToolbar()
     }
-
-
 
     @objc func undo() {
         os_log("undo action", log: OSLog.action, type: .info)

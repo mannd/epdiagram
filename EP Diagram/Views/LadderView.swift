@@ -2162,20 +2162,12 @@ extension LadderView: LadderViewDelegate {
     func saveState() {
         os_log("saveState() - LadderView", log: .default, type: .default)
         savedActiveRegion = activeRegion
-        if mode == .normal {
-            activeRegion = nil
-        }
-        savedMode = mode
+        activeRegion = nil
     }
 
-    @discardableResult func restoreState() -> Mode {
+    func restoreState() {
         os_log("restoreState() - LadderView", log: .default, type: .default)
-        mode = savedMode
-        if mode == .normal {
-            activeRegion = savedActiveRegion
-            normalizeAllMarks()
-        }
-        return mode
+        activeRegion = savedActiveRegion
     }
 }
 

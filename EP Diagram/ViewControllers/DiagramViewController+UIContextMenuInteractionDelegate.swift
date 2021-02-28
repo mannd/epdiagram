@@ -11,10 +11,11 @@ import os.log
 
 extension DiagramViewController: UIContextMenuInteractionDelegate {
 
+    // MARK: - Delegate methods
+
     // Determines what menu appears.  Called first with long press
     func contextMenuInteraction(_ interaction: UIContextMenuInteraction, configurationForMenuAtLocation location: CGPoint) -> UIContextMenuConfiguration? {
         os_log("contextMenuInteraction(_:configurationForMenuAtLocation:)", log: .action, type: .info)
-        // Only select mode allows long press menus.
         guard ladderView.mode == .select else { return nil }
         return selectModeMenu(forLocation: location)
     }
@@ -22,24 +23,16 @@ extension DiagramViewController: UIContextMenuInteractionDelegate {
     // Will display menu.  Called when menu actually appears.
     func contextMenuInteraction(_ interaction: UIContextMenuInteraction, willDisplayMenuFor configuration: UIContextMenuConfiguration, animator: UIContextMenuInteractionAnimating?) {
         os_log("contextMenuInteraction(_:interaction:willDisplayMenuFor:animator:)", log: .action, type: .info)
-        self.ladderView.saveState()
         self.separatorView?.isHidden = true
     }
-
-
 
     // contextMenuInteraction(_:willEndFor:...)  This is called when menu is going to close.
     func contextMenuInteraction(_ interaction: UIContextMenuInteraction, willEndFor configuration: UIContextMenuConfiguration, animator: UIContextMenuInteractionAnimating?) {
         os_log("contextMenuInteraction(_:interaction:willEndFor:animator:)", log: .action, type: .info)
-        // Filter out all the time this abortedly appears.
-        if self.prolongSelectState {
-            // delay restoring state until menu closes
-            self.ladderView.mode = .menu
-        } else {
-            mode = self.ladderView.restoreState()
-        }
         self.separatorView?.isHidden = false
     }
+
+    // MARK: Prepare menus
 
     private func prepareActions() {
         os_log("prepareActions() - DiagramViewController", log: .action, type: .info)
@@ -99,6 +92,8 @@ extension DiagramViewController: UIContextMenuInteractionDelegate {
             self.impulseOriginAutoAction.state = .off
         }
     }
+
+    // MARK: - Menus
 
     func selectModeMenu(forLocation location: CGPoint) -> UIContextMenuConfiguration? {
         os_log("selectModeMenu(forLocation:)", log: .action, type: .info)
