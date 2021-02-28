@@ -165,5 +165,15 @@ extension DiagramViewController: UIContextMenuInteractionDelegate {
             return self.ladderMenu
         }
     }
+
+    func constructMenu() -> UIMenu? {
+        if ladderView.noSelectionExists() {
+            return UIMenu(title: "No Selection Found", children: [self.noSelectionAction])
+
+        } else if ladderView.ladder.mode == .selected {
+            return self.ladderMenu
+        }
+        else { return nil }
+    }
 }
 

@@ -14,6 +14,5 @@ enum Mode {
     case calibrate
     case connect
     case select
-    case menu  // a toolbar menu is active
 }
 

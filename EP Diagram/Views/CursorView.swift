@@ -19,10 +19,10 @@ final class CursorView: ScaledView {
     var lineWidth: CGFloat = 1
     var caliperLineWidth: CGFloat {
         get { caliper.lineWidth }
-        set(newValue) { caliper.lineWidth = newValue }
+        set { caliper.lineWidth = newValue }
     }
-    var cursorColor: UIColor = UIColor.systemBlue
-    var caliperColor: UIColor = UIColor.systemBlue
+    var cursorColor: UIColor = Preferences.defaultCursorColor
+    var caliperColor: UIColor = Preferences.defaultCaliperColor
 
     private var cursor: Cursor = Cursor()
     private var rawCursorHeight: CGFloat?
@@ -420,12 +420,12 @@ extension CursorView: CursorViewDelegate {
 
     var cursorIsVisible: Bool {
         get { cursor.visible }
-        set(newValue) { cursor.visible = newValue }
+        set { cursor.visible = newValue }
     }
 
     var caliperMaxY: CGFloat {
         get { caliper.maxY ?? 0 }
-        set(newValue) { caliper.maxY = newValue}
+        set { caliper.maxY = newValue}
     }
 
     func refresh() {

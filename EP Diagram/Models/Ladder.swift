@@ -297,6 +297,7 @@ final class Ladder: NSObject, Codable {
     func hideZone() {
         zone.start = 0
         zone.end = 0
+        zone.isVisible = false
     }
 
     func marksWithMode(_ mode: Mark.Mode, inRegion region: Region) -> [Mark] {

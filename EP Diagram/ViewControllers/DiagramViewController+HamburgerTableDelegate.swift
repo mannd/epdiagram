@@ -73,22 +73,22 @@ extension DiagramViewController: HamburgerTableDelegate, UIImagePickerController
     
     var imageIsLocked: Bool {
         get { _imageIsLocked }
-        set(newValue) { _imageIsLocked = newValue}
+        set { _imageIsLocked = newValue}
     }
 
     var ladderIsLocked: Bool {
         get { _ladderIsLocked }
-        set(newValue) { _ladderIsLocked = newValue }
+        set { _ladderIsLocked = newValue }
     }
 
     var constraintHamburgerLeft: NSLayoutConstraint {
         get { _constraintHamburgerLeft }
-        set(newValue){ _constraintHamburgerLeft = newValue }
+        set { _constraintHamburgerLeft = newValue }
     }
 
     var constraintHamburgerWidth: NSLayoutConstraint {
         get { _constraintHamburgerWidth }
-        set(newValue) { _constraintHamburgerWidth = newValue }
+        set { _constraintHamburgerWidth = newValue }
     }
 
     var maxBlackAlpha: CGFloat { _maxBlackAlpha }

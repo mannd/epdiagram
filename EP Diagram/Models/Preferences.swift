@@ -7,32 +7,34 @@
 //
 
 import UIKit
+import SwiftUI
 
 // TODO: remember to register each new user default in AppDelegate()!
 struct Preferences {
     // keys
-    static let defaultLineWidthKey = "defaultLineWidthKey"
-    static let defaultCursorLineWidthKey = "defaultCursorLineWidthKey"
-    static let defaultShowImpulseOriginKey = "defaultShowImpuseOriginKey"
-    static let defaultShowBlockKey = "defaultShowBlockKey"
-    static let defaultShowIntervalsKey = "defaultShowIntervalsKey"
-    static let defaultShowConductionTimesKey = "defaultShowConductionTimesKey"
-    static let defaultSnapMarksKey = "defaultSnapMarksKey"
-    static let defaultLinkMarksKey = "defaultLinkMarksKey"
-    static let defaultMarkStyleKey = "defaultMarkStyleKey"
-    static let defaultLabelDescriptionVisibilityKey = "defaultLabelDescriptionVisibilityKey"
-    static let defaultLeftMarginKey = "defaultLeftMarginKey"
-    static let defaultPlaySoundsKey = "defaultPlaySoundsKey"
-    static let defaultHideMarksKey = "defaultHideMarksKey"
-    static let defaultCaliperLineWidthKey = "defaultCaliperLineWidthKey"
-    static let defaultCaliperColorNameKey = "defaultCaliperColorNameKey"
-    static let defaultCursorColorNameKey = "defaultCursorColorNameKey"
-    static let defaultAttachedColorNameKey = "defaultAttachedColorNameKey"
-    static let defaultConnectedColorNameKey = "defaultConnectedColorNameKey"
-    static let defaultSelectedColorNameKey = "defaultSelectedColorNameKey"
-    static let defaultLinkedColorNameKey = "defaultLinkedColorNameKey"
-    static let defaultNormalColorNameKey = "defaultNormalColorNameKey"
-    static let defaultActiveColorNameKey = "defaultActiveColorNameKey"
+    static let lineWidthKey = "defaultLineWidthKey"
+    static let cursorLineWidthKey = "defaultCursorLineWidthKey"
+    static let caliperLineWidthKey = "defaultCaliperLineWidthKey"
+    static let showImpulseOriginKey = "defaultShowImpuseOriginKey"
+    static let showBlockKey = "defaultShowBlockKey"
+    static let showIntervalsKey = "defaultShowIntervalsKey"
+    static let showConductionTimesKey = "defaultShowConductionTimesKey"
+    static let snapMarksKey = "defaultSnapMarksKey"
+    static let linkMarksKey = "defaultLinkMarksKey"
+    static let markStyleKey = "defaultMarkStyleKey"
+    static let labelDescriptionVisibilityKey = "defaultLabelDescriptionVisibilityKey"
+    static let leftMarginKey = "defaultLeftMarginKey"
+    static let playSoundsKey = "defaultPlaySoundsKey"
+    static let hideMarksKey = "defaultHideMarksKey"
+
+    // color keys
+    static let caliperColorNameKey = "defaultCaliperColorNameKey"
+    static let cursorColorNameKey = "defaultCursorColorNameKey"
+    static let attachedColorNameKey = "defaultAttachedColorNameKey"
+    static let connectedColorNameKey = "defaultConnectedColorNameKey"
+    static let selectedColorNameKey = "defaultSelectedColorNameKey"
+    static let linkedColorNameKey = "defaultLinkedColorNameKey"
+    static let activeColorNameKey = "defaultActiveColorNameKey"
 
     // Stored as Int, converted to CGFloat when used.
     static var markLineWidth: Int = 2
@@ -48,65 +50,49 @@ struct Preferences {
     static var playSounds: Bool = true
     static var hideMarks: Bool = false
     static var caliperLineWidth: Int = 1
-    static var caliperColorName: Int = ColorName.blue.rawValue
-    static var cursorColorName: Int = ColorName.blue.rawValue
-    static var attachedColorName: Int = ColorName.orange.rawValue
-    static var connectedColorName: Int = ColorName.green.rawValue
-    static var selectedColorName: Int = ColorName.blue.rawValue
-    static var linkedColorName: Int = ColorName.purple.rawValue
-    static var normalColorName: Int = ColorName.normal.rawValue
-    static var activeColorName: Int = ColorName.red.rawValue
+
+    // default Colors
+    static let defaultActiveColor = UIColor.systemRed
+    static let defaultCursorColor = UIColor.systemBlue
+    static let defaultCaliperColor = UIColor.systemBlue
+    static let defaultAttachedColor = UIColor.systemOrange
+    static let defaultConnectedColor = UIColor.systemGreen
+    static let defaultSelectedColor = UIColor.systemBlue
+    static let defaultLinkedColor = UIColor.systemPurple
+
+    // Color names
+    static var caliperColorName: String = defaultCaliperColor.toString
+    static var cursorColorName: String = defaultCursorColor.toString
+    static var attachedColorName: String = defaultAttachedColor.toString
+    static var connectedColorName: String = defaultConnectedColor.toString
+    static var selectedColorName: String = defaultSelectedColor.toString
+    static var linkedColorName: String = defaultLinkedColor.toString
+    static var activeColorName: String = defaultActiveColor.toString
 
     static func defaults() -> [String: Any] {
         let defaultPreferences: [String: Any] = [
-            Preferences.defaultLineWidthKey: Preferences.markLineWidth,
-            Preferences.defaultCursorLineWidthKey: Preferences.cursorLineWidth,
-            Preferences.defaultShowImpulseOriginKey: Preferences.showImpulseOrigin,
-            Preferences.defaultShowBlockKey: Preferences.showBlock,
-            Preferences.defaultShowIntervalsKey: Preferences.showIntervals,
-            Preferences.defaultShowConductionTimesKey: Preferences.showConductionTimes,
-            Preferences.defaultSnapMarksKey: Preferences.snapMarks,
-            Preferences.defaultMarkStyleKey: Preferences.markStyle,
-            Preferences.defaultLabelDescriptionVisibilityKey: Preferences.labelDescriptionVisibility,
-            Preferences.defaultLeftMarginKey: Preferences.leftMargin,
-            Preferences.defaultPlaySoundsKey: Preferences.playSounds,
-            Preferences.defaultHideMarksKey: Preferences.hideMarks,
-            Preferences.defaultCaliperLineWidthKey: Preferences.caliperLineWidth,
-            Preferences.defaultCaliperColorNameKey: Preferences.caliperColorName,
-            Preferences.defaultCursorColorNameKey: Preferences.cursorColorName,
-            Preferences.defaultAttachedColorNameKey: Preferences.attachedColorName,
-            Preferences.defaultConnectedColorNameKey: Preferences.connectedColorName,
-            Preferences.defaultSelectedColorNameKey: Preferences.selectedColorName,
-            Preferences.defaultLinkedColorNameKey: Preferences.linkedColorName,
-            Preferences.defaultNormalColorNameKey: Preferences.normalColorName,
-            Preferences.defaultActiveColorNameKey: Preferences.activeColorName,
+            Preferences.lineWidthKey: Preferences.markLineWidth,
+            Preferences.cursorLineWidthKey: Preferences.cursorLineWidth,
+            Preferences.showImpulseOriginKey: Preferences.showImpulseOrigin,
+            Preferences.showBlockKey: Preferences.showBlock,
+            Preferences.showIntervalsKey: Preferences.showIntervals,
+            Preferences.showConductionTimesKey: Preferences.showConductionTimes,
+            Preferences.snapMarksKey: Preferences.snapMarks,
+            Preferences.markStyleKey: Preferences.markStyle,
+            Preferences.labelDescriptionVisibilityKey: Preferences.labelDescriptionVisibility,
+            Preferences.leftMarginKey: Preferences.leftMargin,
+            Preferences.playSoundsKey: Preferences.playSounds,
+            Preferences.hideMarksKey: Preferences.hideMarks,
+            Preferences.caliperLineWidthKey: Preferences.caliperLineWidth,
+            Preferences.caliperColorNameKey: Preferences.caliperColorName,
+            Preferences.cursorColorNameKey: Preferences.cursorColorName,
+            Preferences.attachedColorNameKey: Preferences.attachedColorName,
+            Preferences.connectedColorNameKey: Preferences.connectedColorName,
+            Preferences.selectedColorNameKey: Preferences.selectedColorName,
+            Preferences.linkedColorNameKey: Preferences.linkedColorName,
+            Preferences.activeColorNameKey: Preferences.activeColorName,
         ]
         return defaultPreferences
     }
 }
 
-enum ColorName: Int, Codable {
-    case blue
-    case red
-    case yellow
-    case green
-    case purple
-    case orange
-    case normal // black in light mode, white in dark mode
-    case pink
-
-    static var colorMap: Dictionary<ColorName, UIColor> = [
-        .blue: UIColor.systemBlue,
-        .red: UIColor.systemRed,
-        .yellow: UIColor.systemYellow,
-        .green: UIColor.systemGreen,
-        .purple: UIColor.systemPurple,
-        .orange: UIColor.systemOrange,
-        .normal: UIColor.label,
-        .pink: UIColor.systemPink
-    ]
-
-    func color() -> UIColor {
-        return ColorName.colorMap[self] ?? .blue
-    }
-}

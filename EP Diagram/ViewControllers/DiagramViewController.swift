@@ -71,8 +71,6 @@ final class DiagramViewController: UIViewController {
             case .calibrate:
                 cursorView.showCalipers()
                 showCalibrateToolbar()
-            case .menu:
-                break
             }
             setViewsNeedDisplay()
         }
@@ -80,17 +78,16 @@ final class DiagramViewController: UIViewController {
 
     var calibration: Calibration {
         get { diagram.calibration }
-        set(newValue) {
+        set {
             diagram.calibration = newValue
             ladderView.calibration = newValue
             cursorView.calibration = newValue
         }
-
     }
 
     var marksAreHidden: Bool {
         get { ladderView.marksAreHidden }
-        set(newValue) {
+        set {
             ladderView.marksAreHidden = newValue
             cursorView.marksAreHidden = newValue
         }
@@ -314,6 +311,16 @@ final class DiagramViewController: UIViewController {
     lazy var rhythmAction = UIAction(title: L("Rhythm"), image: UIImage(systemName: "waveform.path.ecg")) { action in
         // TODO: implement
     }
+
+    lazy var adjustCLAction = UIAction(title: L("Adjust cycle length")) { _ in
+        // TODO: implement
+    }
+
+    lazy var moveAction = UIAction(title: L("Move marks")) { _ in
+        // TODO: implement
+    }
+
+
     lazy var editLabelAction = UIAction(title: L("Edit label"), image: UIImage(systemName: "pencil.circle")) { action in
         self.editLabel()
     }
@@ -332,7 +339,7 @@ final class DiagramViewController: UIViewController {
 
     lazy var ladderMenu = UIMenu(title: L("Ladder"), children: [self.adjustLeftMarginAction,  self.linkAll, self.unlinkAll, self.deleteAllInLadder])
 
-    lazy var markMenu = UIMenu(title: L("Mark Menu"), children: [self.styleMenu, self.emphasisMenu, self.blockMenu, self.impulseOriginMenu, self.straightenMenu, self.slantMenu, self.adjustYMenu,  self.unlinkAction, self.deleteAction])
+    lazy var markMenu = UIMenu(title: L("Mark Menu"), children: [self.styleMenu, self.emphasisMenu, self.blockMenu, self.impulseOriginMenu, self.straightenMenu, self.slantMenu, self.adjustYMenu, self.moveAction, self.unlinkAction, self.deleteAction])
 
     lazy var labelChildren = [self.regionStyleMenu, self.editLabelAction, self.addRegionMenu, self.removeRegionAction, self.regionHeightMenu]
 
@@ -621,16 +628,12 @@ final class DiagramViewController: UIViewController {
         slider.minimumValue = Self.minSlantAngle
         slider.maximumValue = Self.maxSlantAngle
         if let soleSelectedMark = ladderView.soleSelectedMark() {
-            var slantAngle = ladderView.slantAngle(mark: soleSelectedMark, endpoint: activeEndpoint)
-            // slant angle is flipped depending on endpoint, but it makes the slider and marks move in concert.
-            slantAngle = activeEndpoint == .proximal ? -slantAngle : slantAngle
+            let slantAngle = ladderView.slantAngle(mark: soleSelectedMark, endpoint: activeEndpoint)
             slider.setValue(Float(slantAngle), animated: false)
-
         } else {
             slider.setValue(0, animated: false)
             ladderView.slantSelectedMarks(angle: 0, endpoint: activeEndpoint)
         }
-        // init marks to 0 slant
         slider.addTarget(self, action: #selector(slantSliderValueDidChange(_:)), for: .valueChanged)
         let doneButton = UIButton(type: .system)
         doneButton.setTitle(L("Done"), for: .normal)
@@ -1205,34 +1208,41 @@ extension DiagramViewController {
 
     @objc func updatePreferences() {
         os_log("updatePreferences()", log: .action, type: .info)
-        ladderView.markLineWidth = CGFloat(UserDefaults.standard.integer(forKey: Preferences.defaultLineWidthKey))
-        cursorView.lineWidth = CGFloat(UserDefaults.standard.integer(forKey: Preferences.defaultCursorLineWidthKey))
-        cursorView.caliperLineWidth = CGFloat(UserDefaults.standard.integer(forKey: Preferences.defaultCaliperLineWidthKey))
-        ladderView.showBlock = UserDefaults.standard.bool(forKey: Preferences.defaultShowBlockKey)
-        ladderView.showImpulseOrigin = UserDefaults.standard.bool(forKey: Preferences.defaultShowImpulseOriginKey)
-        ladderView.showIntervals = UserDefaults.standard.bool(forKey: Preferences.defaultShowIntervalsKey)
-        ladderView.showConductionTimes = UserDefaults.standard.bool(forKey: Preferences.defaultShowConductionTimesKey)
-        ladderView.snapMarks = UserDefaults.standard.bool(forKey: Preferences.defaultSnapMarksKey)
-        ladderView.defaultMarkStyle = Mark.Style(rawValue: UserDefaults.standard.integer(forKey: Preferences.defaultMarkStyleKey)) ?? .solid
-        ladderView.showLabelDescription = TextVisibility(rawValue: UserDefaults.standard.integer(forKey: Preferences.defaultLabelDescriptionVisibilityKey)) ?? .invisible
-        playSounds = UserDefaults.standard.bool(forKey: Preferences.defaultPlaySoundsKey)
-        marksAreHidden = UserDefaults.standard.bool(forKey: Preferences.defaultHideMarksKey)
-        let caliperColorName = ColorName(rawValue: UserDefaults.standard.integer(forKey: Preferences.defaultCaliperColorNameKey)) ?? ColorName.blue
-        cursorView.caliperColor = caliperColorName.color()
-        let cursorColorName = ColorName(rawValue: UserDefaults.standard.integer(forKey: Preferences.defaultCursorColorNameKey)) ?? ColorName.blue
-        cursorView.cursorColor = cursorColorName.color()
-        let attachedColorName = ColorName(rawValue: UserDefaults.standard.integer(forKey: Preferences.defaultAttachedColorNameKey)) ?? ColorName.orange
-        ladderView.attachedColor = attachedColorName.color()
-        let connectedColorName = ColorName(rawValue: UserDefaults.standard.integer(forKey: Preferences.defaultConnectedColorNameKey)) ?? ColorName.green
-        ladderView.connectedColor = connectedColorName.color()
-        let selectedColorName = ColorName(rawValue: UserDefaults.standard.integer(forKey: Preferences.defaultSelectedColorNameKey)) ?? ColorName.blue
-        ladderView.selectedColor = selectedColorName.color()
-        let linkedColorName = ColorName(rawValue: UserDefaults.standard.integer(forKey: Preferences.defaultLinkedColorNameKey)) ?? ColorName.purple
-        ladderView.linkedColor = linkedColorName.color()
-        let normalColorName = ColorName(rawValue: UserDefaults.standard.integer(forKey: Preferences.defaultNormalColorNameKey)) ?? ColorName.normal
-        ladderView.normalColor = normalColorName.color()
-        let activeColorName = ColorName(rawValue: UserDefaults.standard.integer(forKey: Preferences.defaultActiveColorNameKey)) ?? ColorName.red
-        ladderView.activeColor = activeColorName.color()
+        ladderView.markLineWidth = CGFloat(UserDefaults.standard.integer(forKey: Preferences.lineWidthKey))
+        cursorView.lineWidth = CGFloat(UserDefaults.standard.integer(forKey: Preferences.cursorLineWidthKey))
+        cursorView.caliperLineWidth = CGFloat(UserDefaults.standard.integer(forKey: Preferences.caliperLineWidthKey))
+        ladderView.showBlock = UserDefaults.standard.bool(forKey: Preferences.showBlockKey)
+        ladderView.showImpulseOrigin = UserDefaults.standard.bool(forKey: Preferences.showImpulseOriginKey)
+        ladderView.showIntervals = UserDefaults.standard.bool(forKey: Preferences.showIntervalsKey)
+        ladderView.showConductionTimes = UserDefaults.standard.bool(forKey: Preferences.showConductionTimesKey)
+        ladderView.snapMarks = UserDefaults.standard.bool(forKey: Preferences.snapMarksKey)
+        ladderView.defaultMarkStyle = Mark.Style(rawValue: UserDefaults.standard.integer(forKey: Preferences.markStyleKey)) ?? .solid
+        ladderView.showLabelDescription = TextVisibility(rawValue: UserDefaults.standard.integer(forKey: Preferences.labelDescriptionVisibilityKey)) ?? .invisible
+        playSounds = UserDefaults.standard.bool(forKey: Preferences.playSoundsKey)
+        marksAreHidden = UserDefaults.standard.bool(forKey: Preferences.hideMarksKey)
+
+        // Colors
+        if let caliperColorName = UserDefaults.standard.string(forKey: Preferences.caliperColorNameKey) {
+            cursorView.caliperColor = UIColor.convertColorName(caliperColorName) ?? Preferences.defaultCaliperColor
+        }
+        if let cursorColorName = UserDefaults.standard.string(forKey: Preferences.cursorColorNameKey) {
+            cursorView.cursorColor = UIColor.convertColorName(cursorColorName) ?? Preferences.defaultCursorColor
+        }
+        if let attachedColorName = UserDefaults.standard.string(forKey: Preferences.attachedColorNameKey) {
+            ladderView.attachedColor = UIColor.convertColorName(attachedColorName) ?? Preferences.defaultAttachedColor
+        }
+        if let connectedColorName = UserDefaults.standard.string(forKey: Preferences.connectedColorNameKey) {
+            ladderView.connectedColor = UIColor.convertColorName(connectedColorName) ?? Preferences.defaultConnectedColor
+        }
+        if let selectedColorName = UserDefaults.standard.string(forKey: Preferences.selectedColorNameKey) {
+            ladderView.selectedColor = UIColor.convertColorName(selectedColorName) ?? Preferences.defaultSelectedColor
+        }
+        if let linkedColorName = UserDefaults.standard.string(forKey: Preferences.linkedColorNameKey) {
+            ladderView.linkedColor = UIColor.convertColorName(linkedColorName) ?? Preferences.defaultLinkedColor
+        }
+        if let activeColorName = UserDefaults.standard.string(forKey: Preferences.activeColorNameKey) {
+            ladderView.activeColor = UIColor.convertColorName(activeColorName) ?? Preferences.defaultActiveColor
+        }
         updateToolbarButtons()
     }
 
