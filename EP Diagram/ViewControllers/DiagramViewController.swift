@@ -63,9 +63,11 @@ final class DiagramViewController: UIViewController {
                 }
                 ladderView.endZoning()
                 ladderView.removeConnectedMarks()
+                imageScrollView.isScrollEnabled = true
                 showMainToolbar()
             case .select:
                 ladderView.startZoning()
+                imageScrollView.isScrollEnabled = false
                 showSelectToolbar()
             case .connect:
                 showConnectToolbar()
@@ -95,7 +97,7 @@ final class DiagramViewController: UIViewController {
     }
 
     // Buttons, toolbars
-    private let spacer = UIBarButtonItem(barButtonSystemItem: .flexibleSpace, target: nil, action: nil)
+    let spacer = UIBarButtonItem(barButtonSystemItem: .flexibleSpace, target: nil, action: nil)
     private var undoButton: UIBarButtonItem = UIBarButtonItem()
     private var redoButton: UIBarButtonItem = UIBarButtonItem()
     private var calibrateButton: UIBarButtonItem = UIBarButtonItem()
@@ -106,6 +108,7 @@ final class DiagramViewController: UIViewController {
     private var connectToolbarButtons: [UIBarButtonItem]?
     private var calibrateToolbarButtons: [UIBarButtonItem]?
     private var hamburgerButton: UIBarButtonItem = UIBarButtonItem()
+    var rotateToolbarButtons: [UIBarButtonItem]?
 
     weak var diagramEditorDelegate: DiagramEditorDelegate?
     var currentDocument: DiagramDocument?
@@ -587,9 +590,10 @@ final class DiagramViewController: UIViewController {
         mode = .select
     }
 
-    private func showSelectToolbar() {
+    func showSelectToolbar() {
         if selectToolbarButtons == nil {
-            let prompt = makePrompt(text: L("Tap or drag to select"))
+            let text = isIPad() || isRunningOnMac() ? L("Select mode: Tap or drag to select. Long press ladder or image for menu.") : ("Tap or drag, then long press.")
+            let prompt = makePrompt(text: text)
             let doneButton = UIBarButtonItem(barButtonSystemItem: .done, target: self, action: #selector(cancelSelectMode))
             selectToolbarButtons = [prompt, spacer, doneButton]
         }
@@ -736,7 +740,7 @@ final class DiagramViewController: UIViewController {
     }
 
  
-    private func makePrompt(text: String) -> UIBarButtonItem {
+    func makePrompt(text: String) -> UIBarButtonItem {
         let prompt = UILabel()
         prompt.text = text
         return UIBarButtonItem(customView: prompt)

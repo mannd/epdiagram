@@ -13,6 +13,13 @@ class ImageScrollView: UIScrollView {
     override var canBecomeFirstResponder: Bool { true }
     var leftMargin: CGFloat = 0
     var mode: Mode = .normal
+
+    lazy var resetAction = UIAction(title: L("Reset")) { action in
+        self.resetImage()
+    }
+    lazy var rotateAction = UIAction(title: L("Rotate")) { action in
+        self.showRotateToolbar()
+    }
 }
 
 // FIXME: Rotation moves image to left.  Zooming removes rotation.
@@ -20,31 +27,7 @@ extension ImageScrollView: UIContextMenuInteractionDelegate {
     func contextMenuInteraction(_ interaction: UIContextMenuInteraction, configurationForMenuAtLocation location: CGPoint) -> UIContextMenuConfiguration? {
         guard mode == .select else { return nil }
         return UIContextMenuConfiguration(identifier: nil, previewProvider: nil) { suggestedActions in
-            let rotate90R = UIAction(title: L("Rotate 90 R")) { action in
-                self.rotateImage(degrees: 90)
-            }
-            let rotate90L = UIAction(title: L("Rotate 90 L")) { action in
-                self.rotateImage(degrees: -90)
-            }
-            let rotate1R = UIAction(title: L("Rotate 1 R")) { action in
-                self.rotateImage(degrees: 1)
-            }
-            let rotate1L = UIAction(title: L("Rotate 1 L")) { action in
-                self.rotateImage(degrees: -1)
-            }
-            let rotate01R = UIAction(title: L("Rotate 0.1 R")) { action in
-                self.rotateImage(degrees: 0.1)
-            }
-            let rotate01L = UIAction(title: L("Rotate 0.1 L")) { action in
-                self.rotateImage(degrees: -0.1)
-            }
-            let reset = UIAction(title: L("Reset")) { action in
-                self.resetImage()
-            }
-            // FIXME: open toolbar rotate menu instead of above.
-            let rotate = UIMenu(title: L("Rotate..."), image: UIImage(systemName: "rotate.right"), children: [rotate90R, rotate90L, rotate1R, rotate1L, rotate01R, rotate01L, reset])
-            
-            return UIMenu(title: "", children: [rotate, reset])
+            return UIMenu(title: "", children: [self.rotateAction, self.resetAction])
         }
     }
 
@@ -55,6 +38,10 @@ extension ImageScrollView: UIContextMenuInteractionDelegate {
         diagramViewControllerDelegate?.rotateImage(degrees: degrees)
         contentInset = UIEdgeInsets(top: 0, left: leftMargin, bottom: 0, right: 0)
         setNeedsDisplay()
+    }
+
+    func showRotateToolbar() {
+        diagramViewControllerDelegate?.showRotateToolbar()
     }
 
     func resetImage() {

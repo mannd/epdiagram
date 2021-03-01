@@ -17,6 +17,7 @@ protocol DiagramViewControllerDelegate: class {
     func setViewsNeedDisplay()
     func rotateImage(degrees: CGFloat)
     func resetImage()
+    func showRotateToolbar()
 }
 
 extension DiagramViewController: DiagramViewControllerDelegate {
@@ -73,47 +74,70 @@ extension DiagramViewController: DiagramViewControllerDelegate {
         imageScrollView.setNeedsDisplay()
     }
 
-    // TODO: make undoable
     func rotateImage(degrees: CGFloat) {
         newRotateImage(radians: degrees.degreesToRadians)
         imageScrollView.resignFirstResponder()
 
     }
 
+    func showRotateToolbar() {
+        currentDocument?.undoManager.beginUndoGrouping() // will end when menu closed
+        if rotateToolbarButtons == nil {
+            let prompt = makePrompt(text: L("Rotate"))
+            let rotate90RButton = UIBarButtonItem(title: L("90°R"), style: .plain, target: self, action: #selector(rotate90R))
+            let rotate90LButton = UIBarButtonItem(title: L("90°L"), style: .plain, target: self, action: #selector(rotate90L))
+            let rotate1RButton = UIBarButtonItem(title: L("1°R"), style: .plain, target: self, action: #selector(rotate1R))
+            let rotate1LBButton = UIBarButtonItem(title: L("1°L"), style: .plain, target: self, action: #selector(rotate1L))
+            let rotate01RButton = UIBarButtonItem(title: L("0.1°R"), style: .plain, target: self, action: #selector(rotate01R))
+            let rotate01LButton = UIBarButtonItem(title: L("0.1°L"), style: .plain, target: self, action: #selector(rotate01L))
+            let resetRotationButton = UIBarButtonItem(title: L("Reset"), style: .plain, target: self, action: #selector(resetImage))
+            let doneButton = UIBarButtonItem(barButtonSystemItem: .done, target: self, action: #selector(closeRotateToolbar(_:)))
+            rotateToolbarButtons = isIPad() || isRunningOnMac() ? [prompt, spacer, rotate90RButton, spacer, rotate90LButton, spacer, rotate1RButton, spacer, rotate1LBButton, spacer, rotate01RButton, spacer, rotate01LButton, spacer, resetRotationButton, spacer, doneButton] : [rotate90RButton, spacer, rotate90LButton, spacer, rotate1RButton, spacer, rotate1LBButton, spacer, rotate01RButton, spacer, rotate01LButton, spacer, doneButton] // leave out prompt and reset button so menu fits on iPhone SE2
+        }
+        setToolbarItems(rotateToolbarButtons, animated: false)
+    }
+
+    @objc func closeRotateToolbar(_ sender: UIAlertAction) {
+        currentDocument?.undoManager.endUndoGrouping()
+        showSelectToolbar()
+    }
+
+    @objc func rotate90R() {
+        imageScrollView.rotateImage(degrees: 90)
+    }
+
+    @objc func rotate90L() {
+        imageScrollView.rotateImage(degrees: -90)
+    }
+
+    @objc func rotate1R() {
+        imageScrollView.rotateImage(degrees: 1)
+    }
+
+    @objc func rotate1L() {
+        imageScrollView.rotateImage(degrees: -1)
+    }
+
+    @objc func rotate01R() {
+        imageScrollView.rotateImage(degrees: 0.1)
+    }
+
+    @objc func rotate01L() {
+        imageScrollView.rotateImage(degrees: -0.1)
+    }
+
+    @objc func doNothing() {
+
+    }
+
     @objc func resetImage() {
-//        setTransform(transform: CGAffineTransform.identity)
-//        UIView.animate(withDuration: 0.5) {
-//
-////            self.imageView.transform = CGAffineTransform.identity
-////            self.diagram.transform = CGAffineTransform.identity
-////            self.imageScrollView.zoomScale = 1.0
-////            self.imageScrollView.contentOffset = CGPoint.zero
-////            self.imageScrollView.contentInset = UIEdgeInsets(top: 0, left: self.leftMargin, bottom: 0, right: 0)
-//        }
+        setTransform(transform: CGAffineTransform.identity)
         imageScrollView.resignFirstResponder()
     }
 
-    // See https://stackoverflow.com/questions/5017540/how-to-i-rotate-uiimageview-by-90-degrees-inside-a-uiscrollview-with-correct-ima
-    func rotateUIImage(image: UIImage, angleRadians: CGFloat) -> UIImage {
-        let rotatedViewBox = UIView(frame: CGRect(x: 0, y: 0, width: image.size.width, height: image.size.height))
-        let transform = CGAffineTransform(rotationAngle: angleRadians)
-        rotatedViewBox.transform = transform
-        let rotatedSize = rotatedViewBox.frame.size
-        UIGraphicsBeginImageContext(rotatedSize)
-        let bitmap: CGContext? = UIGraphicsGetCurrentContext()
-        bitmap?.translateBy(x: rotatedSize.width/2, y: rotatedSize.height/2)
-        bitmap?.rotate(by: angleRadians)
-        bitmap?.scaleBy(x: 1.0, y: -1.0)
-        guard let cgImage = image.cgImage else { return image }
-        bitmap?.draw(cgImage, in: CGRect(x: -image.size.width / 2, y: -image.size.height / 2, width: image.size.width, height: image.size.height))
-        let newImage: UIImage? = UIGraphicsGetImageFromCurrentImageContext()
-        UIGraphicsEndImageContext()
-        return newImage ?? image
-    }
-
     func newRotateImage(radians: CGFloat) {
-        let transfrom = self.imageView.transform.rotated(by: radians)
-        setTransform(transform: transfrom)
+        let transform = self.imageScrollView.transform.rotated(by: radians)
+        setTransform(transform: transform)
     }
 
     func setTransform(transform: CGAffineTransform) {
@@ -123,10 +147,10 @@ extension DiagramViewController: DiagramViewControllerDelegate {
         }
         NotificationCenter.default.post(name: .didUndoableAction, object: nil)
         UIView.animate(withDuration: 0.4) {
-            self.imageView.transform = transform
+            self.imageScrollView.transform = transform
             self.diagram.transform = transform
-            self.imageScrollView.sizeToFit()
             self.imageScrollView.contentOffset = CGPoint.zero
+            self.imageView.sizeToFit()
             self.imageScrollView.contentInset = UIEdgeInsets(top: 0, left: self.leftMargin, bottom: 0, right: 0)
 //            self.centerContent()
         }
