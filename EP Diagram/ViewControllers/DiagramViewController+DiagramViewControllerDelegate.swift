@@ -75,7 +75,7 @@ extension DiagramViewController: DiagramViewControllerDelegate {
 
     // TODO: make undoable
     func rotateImage(degrees: CGFloat) {
-//        newRotateImage(radians: degrees.degreesToRadians)
+        newRotateImage(radians: degrees.degreesToRadians)
         imageScrollView.resignFirstResponder()
 
     }

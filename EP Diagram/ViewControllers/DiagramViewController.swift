@@ -48,6 +48,7 @@ final class DiagramViewController: UIViewController {
             cursorView.cursorIsVisible = false
             cursorView.mode = mode
             ladderView.mode = mode
+            imageScrollView.mode = mode
             hamburgerButton.isEnabled = (mode == .normal)
             if mode != .normal {
                 ladderView.normalizeLadder()
@@ -320,7 +321,6 @@ final class DiagramViewController: UIViewController {
         // TODO: implement
     }
 
-
     lazy var editLabelAction = UIAction(title: L("Edit label"), image: UIImage(systemName: "pencil.circle")) { action in
         self.editLabel()
     }
@@ -424,8 +424,11 @@ final class DiagramViewController: UIViewController {
         // Context menu not great here, prefer long press gesture
         //        let imageViewInteraction = UIContextMenuInteraction(delegate: imageScrollView)
         //        imageScrollView.addInteraction(imageViewInteraction)
-        let longPress = UILongPressGestureRecognizer(target: self, action: #selector(self.doImageScrollViewLongPress))
-        self.imageScrollView.addGestureRecognizer(longPress)
+//        let longPress = UILongPressGestureRecognizer(target: self, action: #selector(self.doImageScrollViewLongPress))
+//        self.imageScrollView.addGestureRecognizer(longPress)
+        let imageInteraction = UIContextMenuInteraction(delegate: imageScrollView)
+        imageScrollView.addInteraction(imageInteraction)
+
 
         setTitle()
     }

@@ -12,12 +12,13 @@ class ImageScrollView: UIScrollView {
     weak var diagramViewControllerDelegate: DiagramViewControllerDelegate?
     override var canBecomeFirstResponder: Bool { true }
     var leftMargin: CGFloat = 0
+    var mode: Mode = .normal
 }
-
 
 // FIXME: Rotation moves image to left.  Zooming removes rotation.
 extension ImageScrollView: UIContextMenuInteractionDelegate {
     func contextMenuInteraction(_ interaction: UIContextMenuInteraction, configurationForMenuAtLocation location: CGPoint) -> UIContextMenuConfiguration? {
+        guard mode == .select else { return nil }
         return UIContextMenuConfiguration(identifier: nil, previewProvider: nil) { suggestedActions in
             let rotate90R = UIAction(title: L("Rotate 90 R")) { action in
                 self.rotateImage(degrees: 90)
@@ -40,6 +41,7 @@ extension ImageScrollView: UIContextMenuInteractionDelegate {
             let reset = UIAction(title: L("Reset")) { action in
                 self.resetImage()
             }
+            // FIXME: open toolbar rotate menu instead of above.
             let rotate = UIMenu(title: L("Rotate..."), image: UIImage(systemName: "rotate.right"), children: [rotate90R, rotate90L, rotate1R, rotate1L, rotate01R, rotate01L, reset])
             
             return UIMenu(title: "", children: [rotate, reset])
@@ -52,6 +54,7 @@ extension ImageScrollView: UIContextMenuInteractionDelegate {
         assert(leftMargin > 0, "Left margin not set")
         diagramViewControllerDelegate?.rotateImage(degrees: degrees)
         contentInset = UIEdgeInsets(top: 0, left: leftMargin, bottom: 0, right: 0)
+        setNeedsDisplay()
     }
 
     func resetImage() {
