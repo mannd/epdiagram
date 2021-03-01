@@ -18,6 +18,7 @@ final class DiagramViewController: UIViewController {
     @IBOutlet var _constraintHamburgerLeft: NSLayoutConstraint!
     @IBOutlet var imageScrollView: ImageScrollView!
     @IBOutlet var imageView: ImageView!
+    @IBOutlet var imageContainerView: UIView!
     @IBOutlet var ladderView: LadderView!
     @IBOutlet var cursorView: CursorView!
     @IBOutlet var blackView: BlackView!
@@ -421,14 +422,9 @@ final class DiagramViewController: UIViewController {
         singleTapRecognizer.numberOfTapsRequired = 1
         imageScrollView.addGestureRecognizer(singleTapRecognizer)
 
-        // Set up context menu.
+        // Set up context menus.
         let interaction = UIContextMenuInteraction(delegate: self)
         ladderView.addInteraction(interaction)
-        // Context menu not great here, prefer long press gesture
-        //        let imageViewInteraction = UIContextMenuInteraction(delegate: imageScrollView)
-        //        imageScrollView.addInteraction(imageViewInteraction)
-//        let longPress = UILongPressGestureRecognizer(target: self, action: #selector(self.doImageScrollViewLongPress))
-//        self.imageScrollView.addGestureRecognizer(longPress)
         let imageInteraction = UIContextMenuInteraction(delegate: imageScrollView)
         imageScrollView.addInteraction(imageInteraction)
 
@@ -444,6 +440,10 @@ final class DiagramViewController: UIViewController {
     override func viewDidAppear(_ animated: Bool) {
         os_log("viewDidAppear() - ViewController", log: OSLog.viewCycle, type: .info)
         super.viewDidAppear(animated)
+        UIView.animate(withDuration: 0.4) {
+            self.imageView.transform = self.diagram.transform
+        }
+        scrollViewAdjustViews(imageScrollView) // make sure views adjust to rotated image
 
         // Need to set this here, after view draw, or Mac malpositions cursor at start of app.
         imageScrollView.contentInset = UIEdgeInsets(top: 0, left: leftMargin, bottom: 0, right: 0)
@@ -451,23 +451,23 @@ final class DiagramViewController: UIViewController {
         self.userActivity = self.view.window?.windowScene?.userActivity
         // See https://github.com/mattneub/Programming-iOS-Book-Examples/blob/master/bk2ch06p357StateSaveAndRestoreWithNSUserActivity/ch19p626pageController/SceneDelegate.swift
         if restorationInfo != nil {
-            if let zoomScale = restorationInfo?[Self.restorationZoomKey] as? CGFloat {
-                imageScrollView.zoomScale = zoomScale
-            }
-            var restorationContentOffset = CGPoint()
-            // FIXME: Do we have to correct content offset Y too?
-            if let contentOffsetX = restorationInfo?[Self.restorationContentOffsetXKey] {
-                restorationContentOffset.x = (contentOffsetX as? CGFloat ?? 0) * imageScrollView.zoomScale
-            }
-            if let contentOffsetY = restorationInfo?[Self.restorationContentOffsetYKey] {
-                restorationContentOffset.y = contentOffsetY as? CGFloat ?? 0
-            }
+//            if let zoomScale = restorationInfo?[Self.restorationZoomKey] as? CGFloat {
+//                imageScrollView.zoomScale = zoomScale
+//            }
+//            var restorationContentOffset = CGPoint()
+//            // FIXME: Do we have to correct content offset Y too?
+//            if let contentOffsetX = restorationInfo?[Self.restorationContentOffsetXKey] {
+//                restorationContentOffset.x = (contentOffsetX as? CGFloat ?? 0) * imageScrollView.zoomScale
+//            }
+//            if let contentOffsetY = restorationInfo?[Self.restorationContentOffsetYKey] {
+//                restorationContentOffset.y = contentOffsetY as? CGFloat ?? 0
+//            }
             // FIXME: Temporary
             //            imageScrollView.setContentOffset(restorationContentOffset, animated: true)
-            if let transformString = restorationInfo?[Self.restorationTransformKey] as? String {
-                let transform = NSCoder.cgAffineTransform(for: transformString)
-                imageView.transform = transform
-            }
+//            if let transformString = restorationInfo?[Self.restorationTransformKey] as? String {
+//                let transform = NSCoder.cgAffineTransform(for: transformString)
+//                imageView.transform = transform
+//            }
         }
         // Only use the restorationInfo once
         restorationInfo = nil

@@ -89,6 +89,7 @@ final class LadderView: ScaledView {
     private var regionDistalToDragOrigin: Region?
     private var dragCreatedMark: Mark?
     private var dragOriginDivision: RegionDivision = .none
+    var isDragging: Bool = false // flag set when dragging marks
 
     private var savedActiveRegion: Region?
     private var savedMode: Mode = .normal
@@ -687,6 +688,7 @@ final class LadderView: ScaledView {
         let state = pan.state
         let locationInLadder = getLocationInLadder(position: position)
         if state == .began {
+            isDragging = true
             currentDocument?.undoManager?.beginUndoGrouping()
             // Activate region and get regions proximal and distal.
             if let region = locationInLadder.region {
@@ -754,6 +756,7 @@ final class LadderView: ScaledView {
             }
         }
         if state == .ended {
+            isDragging = false
             currentDocument?.undoManager?.endUndoGrouping()
             if let movingMark = movingMark {
                 swapEndsIfNeeded(mark: movingMark)
@@ -806,6 +809,7 @@ final class LadderView: ScaledView {
         let locationInLadder = getLocationInLadder(position: position)
         guard let region = locationInLadder.region else { return }
         if state == .began {
+            isDragging = true
             zone = Zone()
             zone.isVisible = true
             zone.startingRegion = region
@@ -821,6 +825,7 @@ final class LadderView: ScaledView {
             selectInZone()
         }
         if state == .ended {
+            isDragging = false
             selectInZone()
         }
         setNeedsDisplay()

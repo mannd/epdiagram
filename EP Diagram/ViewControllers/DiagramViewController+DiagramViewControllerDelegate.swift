@@ -136,7 +136,7 @@ extension DiagramViewController: DiagramViewControllerDelegate {
     }
 
     func newRotateImage(radians: CGFloat) {
-        let transform = self.imageScrollView.transform.rotated(by: radians)
+        let transform = self.imageView.transform.rotated(by: radians)
         setTransform(transform: transform)
     }
 
@@ -147,10 +147,10 @@ extension DiagramViewController: DiagramViewControllerDelegate {
         }
         NotificationCenter.default.post(name: .didUndoableAction, object: nil)
         UIView.animate(withDuration: 0.4) {
-            self.imageScrollView.transform = transform
+            self.imageView.transform = transform
             self.diagram.transform = transform
-            self.imageScrollView.contentOffset = CGPoint.zero
-            self.imageView.sizeToFit()
+//            self.imageScrollView.contentOffset = CGPoint.zero
+//            self.imageView.sizeToFit()
             self.imageScrollView.contentInset = UIEdgeInsets(top: 0, left: self.leftMargin, bottom: 0, right: 0)
 //            self.centerContent()
         }

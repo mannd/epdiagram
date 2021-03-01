@@ -16,20 +16,10 @@ extension DiagramViewController: UIContextMenuInteractionDelegate {
     // Determines what menu appears.  Called first with long press
     func contextMenuInteraction(_ interaction: UIContextMenuInteraction, configurationForMenuAtLocation location: CGPoint) -> UIContextMenuConfiguration? {
         os_log("contextMenuInteraction(_:configurationForMenuAtLocation:)", log: .action, type: .info)
+        // FIXME: consider long press in normal mode, to allow selection of one mark, but that won't work with cursorview because long press changes cursor to omnidirectional.  
+        guard !ladderView.isDragging else { return nil }
         guard ladderView.mode == .select else { return nil }
-        return selectModeMenu(forLocation: location)
-    }
-
-    // Will display menu.  Called when menu actually appears.
-    func contextMenuInteraction(_ interaction: UIContextMenuInteraction, willDisplayMenuFor configuration: UIContextMenuConfiguration, animator: UIContextMenuInteractionAnimating?) {
-        os_log("contextMenuInteraction(_:interaction:willDisplayMenuFor:animator:)", log: .action, type: .info)
-        self.separatorView?.isHidden = true
-    }
-
-    // contextMenuInteraction(_:willEndFor:...)  This is called when menu is going to close.
-    func contextMenuInteraction(_ interaction: UIContextMenuInteraction, willEndFor configuration: UIContextMenuConfiguration, animator: UIContextMenuInteractionAnimating?) {
-        os_log("contextMenuInteraction(_:interaction:willEndFor:animator:)", log: .action, type: .info)
-        self.separatorView?.isHidden = false
+        return selectMenu(at: location)
     }
 
     // MARK: Prepare menus
@@ -95,8 +85,8 @@ extension DiagramViewController: UIContextMenuInteractionDelegate {
 
     // MARK: - Menus
 
-    func selectModeMenu(forLocation location: CGPoint) -> UIContextMenuConfiguration? {
-        os_log("selectModeMenu(forLocation:)", log: .action, type: .info)
+    func selectMenu(at location: CGPoint) -> UIContextMenuConfiguration? {
+        os_log("selectMenu(forLocation:)", log: .action, type: .info)
         prepareActions()
         if ladderView.noSelectionExists() {
             return noSelectionContextMenu(at: location)

@@ -36,7 +36,7 @@ extension ImageScrollView: UIContextMenuInteractionDelegate {
     func rotateImage(degrees: CGFloat) {
         assert(leftMargin > 0, "Left margin not set")
         diagramViewControllerDelegate?.rotateImage(degrees: degrees)
-        contentInset = UIEdgeInsets(top: 0, left: leftMargin, bottom: 0, right: 0)
+//        contentInset = UIEdgeInsets(top: 0, left: leftMargin, bottom: 0, right: 0)
         setNeedsDisplay()
     }
 
