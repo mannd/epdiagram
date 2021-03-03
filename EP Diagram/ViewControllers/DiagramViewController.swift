@@ -161,6 +161,8 @@ final class DiagramViewController: UIViewController {
     var adjustment: Adjustment = .adjust
 
     // Context menu actions
+
+    // Deletion of marks
     lazy var deleteAction = UIAction(title: L("Delete mark(s)"), image: UIImage(systemName: "trash"), attributes: .destructive) { action in
         self.ladderView.deleteSelectedMarks()
     }
@@ -171,6 +173,7 @@ final class DiagramViewController: UIViewController {
         self.ladderView.deleteAllInLadder()
     }
 
+    // Ladder actions
     lazy var adjustLeftMarginAction = UIAction(title: L("Adjust left margin"), image: UIImage(systemName: "arrowtriangle.left.and.line.vertical.and.arrowtriangle.right")) { action in
         self.showAdjustLeftMarginToolbar()
     }
@@ -178,13 +181,18 @@ final class DiagramViewController: UIViewController {
     // TODO: Do we need something like this.  We do if we allow manual setting of block.
     lazy var reanalyzeLadderAction = UIAction(title: L("Reanalyze ladder")) { action in }
 
+    // Linkage
     lazy var unlinkAll = UIAction(title: L("Unlink all marks")) { action in
         self.ladderView.unlinkAllMarks()
     }
     lazy var linkAll = UIAction(title: L("Link all marks")) { action in
         self.ladderView.linkAllMarks()
     }
+    lazy var unlinkAction = UIAction(title: L("Unlink"), image: UIImage(systemName: "link")) { action in
+        self.ladderView.unlinkSelectedMarks()
+    }
 
+    // Block and impulse origin
     lazy var blockProximalAction = UIAction(title: L("Proximal block")) { action in
         self.ladderView.setSelectedMarksBlockSetting(value: .proximal)
     }
@@ -216,7 +224,7 @@ final class DiagramViewController: UIViewController {
     }
     lazy var impulseOriginMenu = UIMenu(title: L("Impulse origin..."), children: [self.impulseOriginProximalAction, self.impulseOriginDistalAction, self.impulseOriginNoneAction, self.impulseOriginAutoAction])
 
-
+    // Mark style
     lazy var solidAction = UIAction(title: L("Solid")) { action in
         self.ladderView.setSelectedMarksStyle(style: .solid)
     }
@@ -236,6 +244,7 @@ final class DiagramViewController: UIViewController {
     }
     lazy var emphasisMenu = UIMenu(title: L("Emphasis..."), children: [self.normalEmphasisAction, self.boldEmphasisAction])
 
+    // Region style
     lazy var regionSolidStyleAction = UIAction(title: L("Solid")) { action in
         self.ladderView.setSelectedRegionsStyle(style: .solid)
     }
@@ -250,6 +259,7 @@ final class DiagramViewController: UIViewController {
     }
     lazy var regionStyleMenu = UIMenu(title: L("Default region style..."), children: [self.regionSolidStyleAction, self.regionDashedStyleAction, self.regionDottedStyleAction, self.regionInheritedStyleAction])
 
+    // Manipulate marks
     lazy var slantProximalPivotAction = UIAction(title: L("Slant proximal pivot point")) { action in
         self.activeEndpoint = .proximal
         self.showSlantToolbar()
@@ -282,28 +292,6 @@ final class DiagramViewController: UIViewController {
     }
     lazy var adjustYMenu = UIMenu(title: L("Adjust mark ends..."), children: [adjustProximalYAction, adjustDistalYAction, trimProximalYAction, trimDistalYAction])
 
-    lazy var oneRegionHeightAction = UIAction(title: L("1 unit")) { action in
-        guard let selectedRegion = self.ladderView.selectedLabelRegion() else { return }
-        self.ladderView.setRegionHeight(1, forRegion: selectedRegion)
-    }
-    lazy var twoRegionHeightAction = UIAction(title: L("2 units")) { action in
-        guard let selectedRegion = self.ladderView.selectedLabelRegion() else { return }
-        self.ladderView.setRegionHeight(2, forRegion: selectedRegion)
-    }
-    lazy var threeRegionHeightAction = UIAction(title: L("3 units")) { action in
-        guard let selectedRegion = self.ladderView.selectedLabelRegion() else { return }
-        self.ladderView.setRegionHeight(3, forRegion: selectedRegion)
-    }
-    lazy var fourRegionHeightAction = UIAction(title: L("4 units")) { action in
-        guard let selectedRegion = self.ladderView.selectedLabelRegion() else { return }
-        self.ladderView.setRegionHeight(4, forRegion: selectedRegion)
-    }
-    lazy var regionHeightMenu = UIMenu(title: L("Region height..."), image: UIImage(systemName: "arrow.up.arrow.down.square"), children: [self.oneRegionHeightAction, self.twoRegionHeightAction, self.threeRegionHeightAction, self.fourRegionHeightAction])
-
-
-    lazy var unlinkAction = UIAction(title: L("Unlink"), image: UIImage(systemName: "link")) { action in
-        self.ladderView.unlinkSelectedMarks()
-    }
 
     lazy var straightenToProximalAction = UIAction(title: L("Straighten mark to proximal endpoint")) { action in
         self.ladderView.straightenToEndpoint(.proximal)
@@ -325,10 +313,31 @@ final class DiagramViewController: UIViewController {
         // TODO: implement
     }
 
+    // Label actions
     lazy var editLabelAction = UIAction(title: L("Edit label"), image: UIImage(systemName: "pencil.circle")) { action in
         self.editLabel()
     }
 
+    // Region height
+    lazy var oneRegionHeightAction = UIAction(title: L("1 unit")) { action in
+        guard let selectedRegion = self.ladderView.selectedLabelRegion() else { return }
+        self.ladderView.setRegionHeight(1, forRegion: selectedRegion)
+    }
+    lazy var twoRegionHeightAction = UIAction(title: L("2 units")) { action in
+        guard let selectedRegion = self.ladderView.selectedLabelRegion() else { return }
+        self.ladderView.setRegionHeight(2, forRegion: selectedRegion)
+    }
+    lazy var threeRegionHeightAction = UIAction(title: L("3 units")) { action in
+        guard let selectedRegion = self.ladderView.selectedLabelRegion() else { return }
+        self.ladderView.setRegionHeight(3, forRegion: selectedRegion)
+    }
+    lazy var fourRegionHeightAction = UIAction(title: L("4 units")) { action in
+        guard let selectedRegion = self.ladderView.selectedLabelRegion() else { return }
+        self.ladderView.setRegionHeight(4, forRegion: selectedRegion)
+    }
+    lazy var regionHeightMenu = UIMenu(title: L("Region height..."), image: UIImage(systemName: "arrow.up.arrow.down.square"), children: [self.oneRegionHeightAction, self.twoRegionHeightAction, self.threeRegionHeightAction, self.fourRegionHeightAction])
+
+    // Delete or add region
     lazy var addRegionAboveAction = UIAction(title: L("Add region above")) { action in
         self.ladderView.addRegion(relation: .before)
     }
@@ -343,7 +352,7 @@ final class DiagramViewController: UIViewController {
 
     lazy var ladderMenu = UIMenu(title: L("Ladder"), children: [self.adjustLeftMarginAction,  self.linkAll, self.unlinkAll, self.deleteAllInLadder])
 
-    lazy var markMenu = UIMenu(title: L("Mark Menu"), children: [self.styleMenu, self.emphasisMenu, self.blockMenu, self.impulseOriginMenu, self.straightenMenu, self.slantMenu, self.adjustYMenu, self.moveAction, self.unlinkAction, self.deleteAction])
+    lazy var markMenu = UIMenu(title: L("Mark Menu"), children: [self.styleMenu, self.emphasisMenu,  self.impulseOriginMenu, self.blockMenu, self.straightenMenu, self.slantMenu, self.adjustYMenu, self.moveAction, self.unlinkAction, self.deleteAction])
 
     lazy var labelChildren = [self.regionStyleMenu, self.editLabelAction, self.addRegionMenu, self.removeRegionAction, self.regionHeightMenu]
 
@@ -444,6 +453,7 @@ final class DiagramViewController: UIViewController {
             self.imageView.transform = self.diagram.transform
         }
         scrollViewAdjustViews(imageScrollView) // make sure views adjust to rotated image
+        mode = .normal
 
         // Need to set this here, after view draw, or Mac malpositions cursor at start of app.
         imageScrollView.contentInset = UIEdgeInsets(top: 0, left: leftMargin, bottom: 0, right: 0)
@@ -594,10 +604,16 @@ final class DiagramViewController: UIViewController {
         if selectToolbarButtons == nil {
             let text = isIPad() || isRunningOnMac() ? L("Select mode: Tap or drag to select. Long press ladder or image for menu.") : ("Tap or drag, then long press.")
             let prompt = makePrompt(text: text)
+            let clearTitle = isIPad() || isRunningOnMac() ? L("Clear Selection") : L("Clear")
+            let clearButton = UIBarButtonItem(title: clearTitle, style: .plain, target: self, action: #selector(clearSelection))
             let doneButton = UIBarButtonItem(barButtonSystemItem: .done, target: self, action: #selector(cancelSelectMode))
-            selectToolbarButtons = [prompt, spacer, doneButton]
+            selectToolbarButtons = [prompt, spacer, clearButton, doneButton]
         }
         setToolbarItems(selectToolbarButtons, animated: false)
+    }
+
+    @objc func clearSelection() {
+        ladderView.clearSelection()
     }
 
     @objc func cancelSelectMode() {
@@ -1220,6 +1236,7 @@ extension DiagramViewController {
         cursorView.caliperLineWidth = CGFloat(UserDefaults.standard.integer(forKey: Preferences.caliperLineWidthKey))
         ladderView.showBlock = UserDefaults.standard.bool(forKey: Preferences.showBlockKey)
         ladderView.showImpulseOrigin = UserDefaults.standard.bool(forKey: Preferences.showImpulseOriginKey)
+        ladderView.showArrows = UserDefaults.standard.bool(forKey: Preferences.showArrowsKey)
         ladderView.showIntervals = UserDefaults.standard.bool(forKey: Preferences.showIntervalsKey)
         ladderView.showConductionTimes = UserDefaults.standard.bool(forKey: Preferences.showConductionTimesKey)
         ladderView.snapMarks = UserDefaults.standard.bool(forKey: Preferences.snapMarksKey)

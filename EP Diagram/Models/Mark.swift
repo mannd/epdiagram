@@ -65,6 +65,13 @@ final class Mark: Codable {
         return segment.distal
     }
 
+    var latestPoint: CGPoint {
+        if segment.distal.x >= segment.proximal.x {
+            return segment.distal
+        }
+        return segment.proximal
+    }
+
     var early: Endpoint {
         if segment.proximal.x < segment.distal.x {
             return .proximal

@@ -15,4 +15,3 @@ enum Mode {
     case connect
     case select
 }
-

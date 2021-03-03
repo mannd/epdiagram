@@ -17,6 +17,7 @@ final class LadderView: ScaledView {
     private let lowerLimitMarkHeight: CGFloat = 0.1
     private let lowerLimitMarkWidth: CGFloat = 20
     private let nearbyMarkAccuracy: CGFloat = 15
+    private let arrowHeadAngle = CGFloat(Double.pi / 6)
     var blockMin: CGFloat = 0.1
     var blockMax: CGFloat = 0.9
 
@@ -34,7 +35,7 @@ final class LadderView: ScaledView {
     // For debugging
     #if DEBUG  // Change this for debugging impulse origins and block
     var showProxEnd = false
-    var showEarliestPoint: Bool = false
+    var showEarliestPoint = false
     #else  // Don't ever change this
     var showProxEnd = false
     var showEarliestPoint = false
@@ -44,6 +45,7 @@ final class LadderView: ScaledView {
     var markLineWidth: CGFloat = 2
     var showImpulseOrigin = true
     var showBlock = true
+    var showArrows = false
     var showPivots = true
     var showIntervals = true
     var showConductionTimes = true
@@ -159,7 +161,6 @@ final class LadderView: ScaledView {
             regionBoundary += regionHeight
         }
         guard ladder.regions.count > 0 else { assertionFailure("ladder.regions has no regions!"); return }
-        activeRegion = ladder.region(atIndex: 0)
     }
 
     internal func getRegionUnitHeight(ladder: Ladder) -> CGFloat {
@@ -893,7 +894,6 @@ final class LadderView: ScaledView {
         }
     }
 
-
     func assessBlock(mark: Mark) {
         if mark.blockSetting == .auto {
             mark.blockSite = .none
@@ -1135,10 +1135,20 @@ final class LadderView: ScaledView {
     }
 
     func setSelectedRegionsStyle(style: Mark.Style) {
-        let selectedRegions: [Region] = ladder.allRegionsWithMode(.labelSelected)
+        let selectedRegions: [Region] = ladder.allRegionsWithMode(.selected)
         currentDocument?.undoManager.beginUndoGrouping()
         selectedRegions.forEach { region in self.undoablySetRegionStyle(region: region, style: style) }
         currentDocument?.undoManager.endUndoGrouping()
+    }
+
+    func dominantMarkStyleOfRegions(regions: [Region]) -> Mark.Style? {
+        let count = regions.count
+        for value in Mark.Style.allCases {
+            if regions.filter({ $0.style == value }).count == count {
+                return value
+            }
+        }
+        return nil
     }
 
     func dominantStyleOfMarks(marks: [Mark]) -> Mark.Style? {
@@ -1346,13 +1356,12 @@ final class LadderView: ScaledView {
         context.setLineWidth(mark.emphasis == .bold ? markLineWidth + 1 :  markLineWidth)
         context.move(to: p1)
         context.addLine(to: p2)
-        // Draw dashed line
         if mark.style == .dashed {
-            let dashes: [CGFloat] = [5, 5]
+            let dashes: [CGFloat] = [8, 8]
             context.setLineDash(phase: 0, lengths: dashes)
         }
         else if mark.style == .dotted {
-            let dots: [CGFloat] = [2, 2]
+            let dots: [CGFloat] = [4, 4]
             context.setLineDash(phase: 0, lengths: dots)
         }
         else { // draw solid line
@@ -1370,6 +1379,7 @@ final class LadderView: ScaledView {
 
         drawProxEnd(forMark: mark, segment: segment, context: context)
         drawEarliestPoint(forMark: mark, segment: segment, context: context)
+        drawConductionDirection(forMark: mark, segment: segment, context: context)
 
         context.setStrokeColor(UIColor.label.cgColor)
     }
@@ -1454,6 +1464,18 @@ final class LadderView: ScaledView {
         context.drawPath(using: .fillStroke)
     }
 
+    func drawArrowHead(context: CGContext, start: CGPoint, end: CGPoint, pointerLineLength: CGFloat, arrowAngle: CGFloat) {
+        context.move(to: end)
+        let startEndAngle = atan((end.y - start.y) / (end.x - start.x)) + ((end.x - start.x) < 0 ? CGFloat(Double.pi) : 0)
+        let arrowLine1 = CGPoint(x: end.x + pointerLineLength * cos(CGFloat(Double.pi) - startEndAngle + arrowAngle), y: end.y - pointerLineLength * sin(CGFloat(Double.pi) - startEndAngle + arrowAngle))
+        let arrowLine2 = CGPoint(x: end.x + pointerLineLength * cos(CGFloat(Double.pi) - startEndAngle - arrowAngle), y: end.y - pointerLineLength * sin(CGFloat(Double.pi) - startEndAngle - arrowAngle))
+
+        context.addLine(to: arrowLine1)
+        context.move(to: end)
+        context.addLine(to: arrowLine2)
+        context.strokePath()
+    }
+
     func drawProxEnd(forMark mark: Mark, segment: Segment, context: CGContext) {
         guard showProxEnd else { return }
         drawFilledCircle(context: context, position: segment.proximal, radius: 10)
@@ -1465,6 +1487,18 @@ final class LadderView: ScaledView {
             drawFilledCircle(context: context, position: segment.proximal, radius: 20)
         } else {
             drawFilledCircle(context: context, position: segment.distal, radius: 20)
+        }
+    }
+
+    func drawConductionDirection(forMark mark: Mark, segment: Segment, context: CGContext) {
+        guard showArrows else { return }
+        switch mark.late {
+        case .distal:
+            drawArrowHead(context: context, start: segment.proximal, end: segment.distal, pointerLineLength: 20, arrowAngle: arrowHeadAngle)
+        case .proximal:
+            drawArrowHead(context: context, start: segment.distal, end: segment.proximal, pointerLineLength: 20, arrowAngle: arrowHeadAngle)
+        case .none, .auto:
+            break // this is undecided unless manually set
         }
     }
 
@@ -2178,6 +2212,16 @@ extension LadderView: LadderViewDelegate {
         }
     }
 
+    func clearSelection() {
+        ladder.mode = .normal
+        ladder.setAllMarksWithMode(.normal)
+        for region in ladder.regions {
+            region.mode = .normal
+        }
+        ladder.zone.isVisible = false
+        setNeedsDisplay()
+    }
+
     func saveState() {
         os_log("saveState() - LadderView", log: .default, type: .default)
         savedActiveRegion = activeRegion
@@ -2201,5 +2245,22 @@ enum TextVisibility: Int, Codable {
 enum Adjustment {
     case adjust
     case trim
+}
+
+// MARK: - extensions
+
+extension UIBezierPath {
+    func addArrow(start: CGPoint, end: CGPoint, pointerLineLength: CGFloat, arrowAngle: CGFloat) {
+           self.move(to: start)
+           self.addLine(to: end)
+
+           let startEndAngle = atan((end.y - start.y) / (end.x - start.x)) + ((end.x - start.x) < 0 ? CGFloat(Double.pi) : 0)
+           let arrowLine1 = CGPoint(x: end.x + pointerLineLength * cos(CGFloat(Double.pi) - startEndAngle + arrowAngle), y: end.y - pointerLineLength * sin(CGFloat(Double.pi) - startEndAngle + arrowAngle))
+           let arrowLine2 = CGPoint(x: end.x + pointerLineLength * cos(CGFloat(Double.pi) - startEndAngle - arrowAngle), y: end.y - pointerLineLength * sin(CGFloat(Double.pi) - startEndAngle - arrowAngle))
+
+           self.addLine(to: arrowLine1)
+           self.move(to: end)
+           self.addLine(to: arrowLine2)
+       }
 }
 

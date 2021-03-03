@@ -14,6 +14,7 @@ struct PreferencesView: View {
     @AppStorage(Preferences.showImpulseOriginKey) var showImpulseOrigin: Bool = Preferences.showImpulseOrigin
     @AppStorage(Preferences.showBlockKey) var showBlock: Bool = Preferences.showBlock
     @AppStorage(Preferences.showIntervalsKey) var showIntervals: Bool = Preferences.showIntervals
+    @AppStorage(Preferences.showArrowsKey) var showArrows: Bool = Preferences.showArrows
     @AppStorage(Preferences.showConductionTimesKey) var showConductionTimes: Bool = Preferences.showConductionTimes
     @AppStorage(Preferences.snapMarksKey) var snapMarks: Bool = Preferences.snapMarks
     @AppStorage(Preferences.markStyleKey) var markStyle = Preferences.markStyle
@@ -111,6 +112,9 @@ struct PreferencesView: View {
                             }
                             Toggle(isOn: $showBlock) {
                                 Text("Show block")
+                            }
+                            Toggle(isOn: $showArrows) {
+                                Text("Show direction of conduction")
                             }
                             Toggle(isOn: $snapMarks) {
                                 Text("Snap marks")

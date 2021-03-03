@@ -18,6 +18,7 @@ struct Preferences {
     static let showImpulseOriginKey = "defaultShowImpuseOriginKey"
     static let showBlockKey = "defaultShowBlockKey"
     static let showIntervalsKey = "defaultShowIntervalsKey"
+    static let showArrowsKey = "defaultShowArrowsKey"
     static let showConductionTimesKey = "defaultShowConductionTimesKey"
     static let snapMarksKey = "defaultSnapMarksKey"
     static let linkMarksKey = "defaultLinkMarksKey"
@@ -41,6 +42,7 @@ struct Preferences {
     static var cursorLineWidth: Int = 1
     static var showImpulseOrigin = false
     static var showBlock = false
+    static var showArrows = false
     static var showIntervals = true
     static var showConductionTimes = true
     static var snapMarks = true
@@ -91,6 +93,7 @@ struct Preferences {
             Preferences.selectedColorNameKey: Preferences.selectedColorName,
             Preferences.linkedColorNameKey: Preferences.linkedColorName,
             Preferences.activeColorNameKey: Preferences.activeColorName,
+            Preferences.showArrowsKey: Preferences.showArrows,
         ]
         return defaultPreferences
     }

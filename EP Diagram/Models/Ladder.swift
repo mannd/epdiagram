@@ -36,6 +36,16 @@ final class Ladder: NSObject, Codable {
         }
     }
     var mode: Mode = .normal
+//        {
+//        didSet {
+//            for region in regions {
+//
+//                for mark in region.marks {
+//                    mark.mode = mode
+//                }
+//            }
+//        }
+//    }
     var defaultMarkStyle: Mark.Style = .solid
     var zone: Zone = Zone() // at most one selection zone
     override var debugDescription: String { "Ladder ID " + id.debugDescription }

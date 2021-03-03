@@ -22,9 +22,9 @@ class ImageScrollView: UIScrollView {
     }
 }
 
-// FIXME: Rotation moves image to left.  Zooming removes rotation.
 extension ImageScrollView: UIContextMenuInteractionDelegate {
     func contextMenuInteraction(_ interaction: UIContextMenuInteraction, configurationForMenuAtLocation location: CGPoint) -> UIContextMenuConfiguration? {
+        // FIXME: This might work without select mode, but scrolling image screws up.  Maybe set up an isscrolling variable to avoid this?
         guard mode == .select else { return nil }
         return UIContextMenuConfiguration(identifier: nil, previewProvider: nil) { suggestedActions in
             return UIMenu(title: "", children: [self.rotateAction, self.resetAction])

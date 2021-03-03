@@ -31,6 +31,22 @@ extension DiagramViewController: UIContextMenuInteractionDelegate {
         prepareEmphasisAction(selectedMarks: selectedMarks)
         prepareBlockAction(selectedMarks: selectedMarks)
         prepareImpulseOriginAction(selectedMarks: selectedMarks)
+        let selectedRegions = self.ladderView.ladder.allRegionsWithMode(.selected)
+        prepareRegionStyleActions(selectedRegions: selectedRegions)
+    }
+
+    private func prepareRegionStyleActions(selectedRegions: [Region]) {
+        if let dominantRegionStyle = self.ladderView.dominantMarkStyleOfRegions(regions: selectedRegions) {
+            self.regionSolidStyleAction.state = dominantRegionStyle == .solid ? .on : .off
+            self.regionDashedStyleAction.state = dominantRegionStyle == .dashed ? .on : .off
+            self.regionDottedStyleAction.state = dominantRegionStyle == .dotted ? .on : .off
+            self.regionInheritedStyleAction.state = dominantRegionStyle == .inherited ? .on : .off
+        } else {
+            self.regionSolidStyleAction.state = .off
+            self.regionDashedStyleAction.state = .off
+            self.regionDottedStyleAction.state = .off
+            self.regionInheritedStyleAction.state = .off
+        }
     }
 
     private func prepareStyleActions(selectedMarks: [Mark]) {
@@ -87,6 +103,46 @@ extension DiagramViewController: UIContextMenuInteractionDelegate {
 
     func selectMenu(at location: CGPoint) -> UIContextMenuConfiguration? {
         os_log("selectMenu(forLocation:)", log: .action, type: .info)
+        // Allow long press to select in select mode
+        let locationInLadder = ladderView.getLocationInLadder(position: location)
+        // Handle long press on single item.
+        if ladderView.noSelectionExists() {
+            switch locationInLadder.specificLocation {
+            case .mark:
+                if let mark = locationInLadder.mark {
+                    mark.mode = .selected
+                    prepareActions()
+                    return markContextMenuConfiguration(at: location)
+                }
+            case .label:
+                if let region = locationInLadder.region {
+                    region.mode = .labelSelected
+                    prepareActions()
+                    return labelContextMenuConfiguration(at: location)
+                }
+            case .region:
+                if let region = locationInLadder.region {
+                    region.mode = .selected
+                    ladderView.ladder.setMarksWithMode(.selected, inRegion: region)
+                    prepareActions()
+                    return regionContextMenuConfiguration(at: location)
+                }
+            case .ladder:
+                if let ladder = locationInLadder.ladder {
+                    ladder.mode = .selected
+                    for region in ladder.regions {
+                        region.mode = .selected
+                    }
+                    ladderView.ladder.setAllMarksWithMode(.selected)
+                    prepareActions()
+                    return ladderContextMenuConfiguration(at: location)
+                }
+            default:
+                break
+            }
+            return nil
+        }
+        // Handle long press with multiple selections made
         prepareActions()
         if ladderView.noSelectionExists() {
             return noSelectionContextMenu(at: location)
@@ -119,7 +175,7 @@ extension DiagramViewController: UIContextMenuInteractionDelegate {
             } else {
                 title = L("Region")
             }
-            return UIMenu(title: title, children: [self.styleMenu, self.straightenMenu, self.slantMenu, self.adjustYMenu, self.rhythmAction, self.deleteAllInRegion])
+            return UIMenu(title: title, children: [self.regionStyleMenu, self.styleMenu, self.straightenMenu, self.slantMenu, self.adjustYMenu, self.rhythmAction, self.deleteAllInRegion])
         }
     }
 
