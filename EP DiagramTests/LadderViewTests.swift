@@ -71,8 +71,6 @@ class LadderViewTests: XCTestCase {
     }
 
     func testActiveRegion() {
-//        // Diagram now sets active region, and can be nil on init of ladder.
-        ladderView.activeRegion = ladderView.ladder.regions[0]
         guard let activeRegion = ladderView.activeRegion else {
             XCTFail("activeRegion shouldn't be nil"); return
         }
@@ -309,6 +307,21 @@ class LadderViewTests: XCTestCase {
         XCTAssertEqual(ladderView.dominantStyleOfMarks(marks: marks), .dashed)
         mark1.style = .dotted
         XCTAssertNil(ladderView.dominantStyleOfMarks(marks: marks))
+    }
+
+    // TODO: move to calibration tests
+    func testCalibration() {
+        let calibration = Calibration()
+        calibration.set(zoom: 1.0, calFactor: 100)
+        ladderView.calibration = calibration
+        var value = ladderView.formatValue(100, usingCalFactor: 1)
+        XCTAssertEqual(value, 100)
+        value = ladderView.formatValue(100, usingCalFactor: 10)
+        XCTAssertEqual(value, 1000)
+        value = ladderView.formatValue(100, usingCalFactor: 0.01)
+        XCTAssertEqual(value, 1)
+        value = ladderView.getRawValueFromCalibratedValue(1, usingCalFactor: 0.01)
+        XCTAssertEqual(value, 100)
     }
 
 

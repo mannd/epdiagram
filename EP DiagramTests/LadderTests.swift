@@ -208,4 +208,35 @@ class LadderTests: XCTestCase {
             XCTAssertEqual(region.mode, .normal)
         }
     }
+
+    func testHaveDifferentRegions() {
+        let mark1 = ladder.addMark(Mark(), toRegion: ladder.region(atIndex: 0))
+        let mark2 = ladder.addMark(Mark(), toRegion: ladder.region(atIndex: 0))
+        var marks: [Mark] = [mark1!, mark2!]
+        XCTAssertFalse(ladder.haveDifferentRegions(marks))
+        let mark3 = ladder.addMark(Mark(), toRegion: ladder.region(atIndex: 1))
+        marks.append(mark3!)
+        XCTAssertTrue(ladder.haveDifferentRegions(marks))
+    }
+
+    func testMarksAreNotContiguous() {
+        let mark1 = ladder.addMark(Mark(), toRegion: ladder.region(atIndex: 0))
+        let mark2 = ladder.addMark(Mark(), toRegion: ladder.region(atIndex: 1))
+        let marks: [Mark] = [mark1!, mark2!]
+        XCTAssertTrue(ladder.marksAreNotContiguous(marks))
+        ladder.deleteMark(mark1)
+        ladder.deleteMark(mark2)
+        XCTAssertTrue(ladder.marksAreNotContiguous(marks))
+        let mark3 = ladder.addMark(at: 100, toRegion: ladder.region(atIndex: 0))
+        let mark4 = ladder.addMark(at: 200, toRegion: ladder.region(atIndex: 0))
+        let marks2 = [mark3!, mark4!]
+        XCTAssertFalse(ladder.marksAreNotContiguous(marks2))
+        let _ = ladder.addMark(at: 150, toRegion: ladder.region(atIndex: 0))
+        XCTAssertTrue(ladder.marksAreNotContiguous(marks2))
+        let mark5 = ladder.addMark(at: 5, toRegion: ladder.region(atIndex: 1))
+        let _ = ladder.addMark(at: 10, toRegion: ladder.region(atIndex: 1))
+        let mark7 = ladder.addMark(at: 15, toRegion: ladder.region(atIndex: 1))
+        let marks3 = [mark5!, mark7!]
+        XCTAssertTrue(ladder.marksAreNotContiguous(marks3))
+    }
 }

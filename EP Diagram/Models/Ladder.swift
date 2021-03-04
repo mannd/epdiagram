@@ -218,6 +218,60 @@ final class Ladder: NSObject, Codable {
         }
     }
 
+    func haveDifferentRegions(_ marks: [Mark]) -> Bool {
+        if marks.count <= 1 { return false }
+        let markRegionIndex = marks[0].regionIndex
+        for mark in marks {
+            if mark.regionIndex != markRegionIndex {
+                return true
+            }
+        }
+        return false
+    }
+
+    func marksAreNotContiguous(_ marks: [Mark]) -> Bool {
+        if haveDifferentRegions(marks) { return true }
+        let markRegionIndex = marks[0].regionIndex
+        var entryCounter = 0
+        var inMarks = false
+        let sortedMarks = region(atIndex: markRegionIndex).marks.sorted()
+        for mark in sortedMarks {
+            if marks.contains(mark) && !inMarks {
+                entryCounter += 1
+                inMarks = true
+            }
+            if !marks.contains(mark) {
+                inMarks = false
+            }
+        }
+        return entryCounter != 1
+    }
+
+    func meanCL(_ marks: [Mark]) -> CGFloat {
+        guard marks.count > 1 else { return 0 }
+        var intervals: [Interval] = []
+        let sortedMarks = marks.sorted()
+        let proximalSortedMarks = sortedMarks.filter { $0.segment.proximal.y <= 0 }
+//        let distalSortedMarks = sortedMarks.filter { $0.segment.distal.y >= 1 }
+        for i in 0..<proximalSortedMarks.count {
+            if i + 1 < proximalSortedMarks.count {
+                var interval = Interval()
+                interval.proximalValue = proximalSortedMarks[i+1].segment.proximal.x - proximalSortedMarks[i].segment.proximal.x
+                interval.proximalBoundary = (proximalSortedMarks[i].segment.proximal.x, proximalSortedMarks[i+1].segment.proximal.x)
+
+                if interval.proximalValue != nil {
+                    intervals.append(interval)
+                }
+            }
+        }
+        var intervalSum: CGFloat = 0
+        for interval in intervals {
+            intervalSum += interval.proximalValue ?? 0
+        }
+        print("intervalSum = \(intervalSum)")
+        return intervalSum / CGFloat(intervals.count)
+    }
+
     func index(ofRegion region: Region?) -> Int? {
         guard let region = region else { return nil }
         return regions.firstIndex(of: region)

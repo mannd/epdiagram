@@ -1392,8 +1392,12 @@ final class LadderView: ScaledView {
         }
     }
 
-    private func formatValue(_ value: CGFloat?, usingCalFactor calFactor: CGFloat) -> Int {
-        return lround(Double(value ?? 0)  * Double(calFactor))
+    func formatValue(_ value: CGFloat?, usingCalFactor calFactor: CGFloat) -> Int {
+        return lround(Double(value ?? 0) * Double(calFactor))
+    }
+
+    func getRawValueFromCalibratedValue(_ value: CGFloat, usingCalFactor calFactor: CGFloat) -> Int {
+        return lround(Double(value) / Double(calFactor))
     }
 
     private func drawIntervalText(origin: CGPoint, size: CGSize, text: String, context: CGContext, attributes: [NSAttributedString.Key: Any]) {
@@ -1727,7 +1731,6 @@ final class LadderView: ScaledView {
         return nil
     }
 
-    // FIXME: cursor malpositioned after straightening.
     func straightenToEndpoint(_ endpoint: Mark.Endpoint) {
         let selectedMarks = ladder.allMarksWithMode(.selected)
         currentDocument?.undoManager.beginUndoGrouping()
@@ -1775,6 +1778,45 @@ final class LadderView: ScaledView {
                 }
             }
             setSegment(segment: segment, forMark: mark)
+        }
+    }
+
+    func meanCL() throws -> CGFloat {
+        let selectedMarks = ladder.allMarksWithMode(.selected)
+        // FIXME: is calibration ever nil??
+        guard let calibration = calibration else {
+            fatalError("calibration is nil")
+        }
+        if !calibration.isCalibrated {
+            throw LadderError.notCalibrated
+        }
+        if selectedMarks.count <= 1 {
+            throw LadderError.tooFewMarks
+        }
+        if ladder.haveDifferentRegions(selectedMarks) {
+            throw LadderError.marksInDifferentRegions
+        }
+        if ladder.marksAreNotContiguous(selectedMarks) {
+            throw LadderError.marksNotContiguous
+        }
+        return ladder.meanCL(selectedMarks)
+    }
+
+    func adjustCL(cl: CGFloat) {
+        let selectedMarks = ladder.allMarksWithMode(.selected)
+        var proxX = selectedMarks[0].segment.proximal.x
+        var distalX = selectedMarks[0].segment.distal.x
+        for i in 1..<selectedMarks.count {
+            let originalSegment = selectedMarks[i].segment
+            currentDocument?.undoManager.registerUndo(withTarget: self, handler: { target in
+                self.setSegment(segment: originalSegment, forMark: selectedMarks[i])
+            })
+            NotificationCenter.default.post(name: .didUndoableAction, object: nil)
+            proxX += cl
+            distalX += cl
+            let newSegment = Segment(proximal: CGPoint(x: proxX, y: selectedMarks[i].segment.proximal.y), distal: CGPoint(x: distalX, y: selectedMarks[i].segment.distal.y))
+            print("newSegment = \(newSegment)")
+            self.setSegment(segment: newSegment, forMark: selectedMarks[i])
         }
     }
 
@@ -2233,20 +2275,23 @@ enum Adjustment {
     case trim
 }
 
-// MARK: - extensions
+enum LadderError: Error {
+    case notCalibrated
+    case tooFewMarks
+    case marksInDifferentRegions
+    case marksNotContiguous
 
-extension UIBezierPath {
-    func addArrow(start: CGPoint, end: CGPoint, pointerLineLength: CGFloat, arrowAngle: CGFloat) {
-           self.move(to: start)
-           self.addLine(to: end)
-
-           let startEndAngle = atan((end.y - start.y) / (end.x - start.x)) + ((end.x - start.x) < 0 ? CGFloat(Double.pi) : 0)
-           let arrowLine1 = CGPoint(x: end.x + pointerLineLength * cos(CGFloat(Double.pi) - startEndAngle + arrowAngle), y: end.y - pointerLineLength * sin(CGFloat(Double.pi) - startEndAngle + arrowAngle))
-           let arrowLine2 = CGPoint(x: end.x + pointerLineLength * cos(CGFloat(Double.pi) - startEndAngle - arrowAngle), y: end.y - pointerLineLength * sin(CGFloat(Double.pi) - startEndAngle - arrowAngle))
-
-           self.addLine(to: arrowLine1)
-           self.move(to: end)
-           self.addLine(to: arrowLine2)
-       }
+    public var errorDescription: String? {
+        switch self {
+        case .notCalibrated:
+            return L("Diagram is not calibrated.  You must calibrate first.")
+        case .tooFewMarks:
+            return L("There are too few marks.  You need to select at least 2 marks to change cycle length")
+        case .marksInDifferentRegions:
+            return L("Selected marks are in different regions.  Marks must me in the same region to change cycle length.")
+        case .marksNotContiguous:
+            return L("Marks are not contiguous.  Selected marks must be contiguous to change cycle length")
+        }
+    }
 }
 

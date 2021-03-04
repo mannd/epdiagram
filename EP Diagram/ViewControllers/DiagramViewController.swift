@@ -169,11 +169,6 @@ final class DiagramViewController: UIViewController {
         self.ladderView.deleteSelectedMarks()
     }
 
-    // Ladder actions
-    lazy var adjustLeftMarginAction = UIAction(title: L("Adjust left margin"), image: UIImage(systemName: "arrowtriangle.left.and.line.vertical.and.arrowtriangle.right")) { action in
-        self.showAdjustLeftMarginToolbar()
-    }
-
     // TODO: Do we need something like this.  We do if we allow manual setting of block.
     lazy var reanalyzeLadderAction = UIAction(title: L("Reanalyze ladder")) { action in }
 
@@ -301,8 +296,19 @@ final class DiagramViewController: UIViewController {
         // TODO: implement
     }
 
-    lazy var adjustCLAction = UIAction(title: L("Adjust cycle length")) { _ in
-        // TODO: implement
+    lazy var adjustCLAction = UIAction(title: L("Adjust cycle length"), discoverabilityTitle: "Test discoverability") { action in
+        print("action = \(action)")
+        do {
+            let meanCL = try self.ladderView.meanCL()
+            self.showAdjustCLToolbar(rawValue: meanCL)
+        } catch  {
+            if error is LadderError {
+                let ladderError = error as? LadderError
+                UserAlert.showMessage(viewController: self, title: L("Error Adjusting Cycle Length"), message: ladderError?.errorDescription ?? error.localizedDescription)
+            } else {
+                print("unknown error")
+            }
+        }
     }
 
     lazy var moveAction = UIAction(title: L("Move marks")) { _ in
@@ -313,6 +319,11 @@ final class DiagramViewController: UIViewController {
     lazy var editLabelAction = UIAction(title: L("Edit label"), image: UIImage(systemName: "pencil.circle")) { action in
         self.editLabel()
     }
+
+    lazy var adjustLeftMarginAction = UIAction(title: L("Adjust left margin"), image: UIImage(systemName: "arrowtriangle.left.and.line.vertical.and.arrowtriangle.right")) { action in
+        self.showAdjustLeftMarginToolbar()
+    }
+
 
     // Region height
     lazy var oneRegionHeightAction = UIAction(title: L("1 unit")) { action in
@@ -346,7 +357,7 @@ final class DiagramViewController: UIViewController {
         self.ladderView.removeRegion()
     }
 
-    lazy var markMenu = UIMenu(title: L("Mark Menu"), children: [self.styleMenu, self.emphasisMenu,  self.impulseOriginMenu, self.blockMenu, self.straightenMenu, self.slantMenu, self.adjustYMenu, self.moveAction, self.unlinkAction, self.deleteAction])
+    lazy var markMenu = UIMenu(title: L("Mark Menu"), children: [self.styleMenu, self.emphasisMenu,  self.impulseOriginMenu, self.blockMenu, self.straightenMenu, self.slantMenu, self.adjustYMenu, self.moveAction, self.adjustCLAction, self.unlinkAction, self.deleteAction])
 
     lazy var labelChildren = [self.regionStyleMenu, self.editLabelAction, self.addRegionMenu, self.removeRegionAction, self.regionHeightMenu, self.adjustLeftMarginAction]
 
@@ -656,6 +667,31 @@ final class DiagramViewController: UIViewController {
         ladderView.setNeedsDisplay()
     }
 
+    func showAdjustCLToolbar(rawValue: CGFloat) {
+        guard let toolbar = navigationController?.toolbar else { return }
+        currentDocument?.undoManager.beginUndoGrouping()
+        let labelText = UITextField()
+        labelText.text = L("Adjust cycle length")
+        let slider = UISlider()
+        slider.minimumValue = Float(ladderView.getRawValueFromCalibratedValue(100, usingCalFactor: ladderView.calibration?.currentCalFactor ?? 100))
+        slider.maximumValue = Float(ladderView.getRawValueFromCalibratedValue(2000, usingCalFactor: ladderView.calibration?.currentCalFactor ?? 2000))
+        slider.setValue(Float(rawValue), animated: false)
+        ladderView.adjustCL(cl: rawValue)
+        slider.addTarget(self, action: #selector(clValueDidChange(_:)), for: .valueChanged)
+        let doneButton = UIButton(type: .system)
+        doneButton.setTitle(L("Done"), for: .normal)
+        doneButton.addTarget(self, action: #selector(closeAdjustCLToolbar(_:)), for: .touchUpInside)
+        let stackView = UIStackView(frame: toolbar.frame)
+        stackView.distribution = .fill
+        stackView.axis = .horizontal
+        stackView.spacing = 8
+        stackView.addArrangedSubview(labelText)
+        stackView.addArrangedSubview(slider)
+        stackView.addArrangedSubview(doneButton)
+        setToolbarItems([UIBarButtonItem(customView: stackView)], animated: true)
+
+    }
+
     func showSlantToolbar() {
         guard let toolbar = navigationController?.toolbar else { return }
         currentDocument?.undoManager.beginUndoGrouping()
@@ -742,6 +778,18 @@ final class DiagramViewController: UIViewController {
         let value: CGFloat = CGFloat(sender.value)
         ladderView.adjustY(value, endpoint: activeEndpoint, adjustment: adjustment)
         ladderView.refresh()
+    }
+
+    @objc func clValueDidChange(_ sender: UISlider) {
+        let value: CGFloat = CGFloat(sender.value)
+        ladderView.adjustCL(cl: value)
+       //   ladderView.adjustY(value, endpoint: activeEndpoint, adjustment: adjustment)
+        ladderView.refresh()
+    }
+
+    @objc func closeAdjustCLToolbar(_ sender: UISlider) {
+        currentDocument?.undoManager.endUndoGrouping()
+        showSelectToolbar()
     }
 
 
