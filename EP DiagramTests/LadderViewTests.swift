@@ -324,5 +324,23 @@ class LadderViewTests: XCTestCase {
         XCTAssertEqual(value, 100)
     }
 
+    func testCalibration2() {
+        let calibration = Calibration()
+        calibration.set(zoom: 1.0, calFactor: 100)
+        ladderView.calibration = calibration
+        var value = calibration.calibratedInterval(100)
+        XCTAssertEqual(value, 10000)
+        calibration.set(zoom: 1.0, calFactor: 1)
+        value = calibration.calibratedInterval(100)
+        XCTAssertEqual(value, 100)
+
+        calibration.set(zoom: 1.0, calFactor: 10)
+        value = calibration.calibratedInterval(100)
+        XCTAssertEqual(value, 1000)	
+        calibration.set(zoom: 1.0, calFactor: 0.01)
+        value = calibration.calibratedInterval(100)
+        XCTAssertEqual(value, 1)
+    }
+
 
 }

@@ -86,6 +86,7 @@ final class DiagramViewController: UIViewController {
             diagram.calibration = newValue
             ladderView.calibration = newValue
             cursorView.calibration = newValue
+            print(newValue)
         }
     }
 
@@ -196,7 +197,7 @@ final class DiagramViewController: UIViewController {
     lazy var blockAutoAction = UIAction(title: L("Auto block")) { action in
         self.ladderView.setSelectedMarksBlockSetting(value: .auto)
     }
-    lazy var blockMenu = UIMenu(title: L("Block..."), children: [self.blockProximalAction, self.blockDistalAction, self.blockNoneAction, self.blockAutoAction])
+    lazy var blockMenu = UIMenu(title: L("Block..."), image: UIImage(systemName: "hand.raised"), children: [self.blockProximalAction, self.blockDistalAction, self.blockNoneAction, self.blockAutoAction])
 
     lazy var impulseOriginProximalAction = UIAction(title: L("Proximal impulse origin")) { _ in
         self.ladderView.setSelectedMarksImpulseOriginSetting(value: .proximal)
@@ -213,7 +214,7 @@ final class DiagramViewController: UIViewController {
     lazy var impulseOriginAutoAction = UIAction(title: L("Auto impulse origin")) { _ in
         self.ladderView.setSelectedMarksImpulseOriginSetting(value: .auto)
     }
-    lazy var impulseOriginMenu = UIMenu(title: L("Impulse origin..."), children: [self.impulseOriginProximalAction, self.impulseOriginDistalAction, self.impulseOriginNoneAction, self.impulseOriginAutoAction])
+    lazy var impulseOriginMenu = UIMenu(title: L("Impulse origin..."), image: UIImage(systemName: "asterisk.circle"), children: [self.impulseOriginProximalAction, self.impulseOriginDistalAction, self.impulseOriginNoneAction, self.impulseOriginAutoAction])
 
     // Mark style
     lazy var solidAction = UIAction(title: L("Solid")) { action in
@@ -233,7 +234,7 @@ final class DiagramViewController: UIViewController {
     lazy var normalEmphasisAction = UIAction(title: L("Normal")) { action in
         self.ladderView.setSelectedMarksEmphasis(emphasis: .normal)
     }
-    lazy var emphasisMenu = UIMenu(title: L("Emphasis..."), children: [self.normalEmphasisAction, self.boldEmphasisAction])
+    lazy var emphasisMenu = UIMenu(title: L("Emphasis..."), image: UIImage(systemName: "bold"), children: [self.normalEmphasisAction, self.boldEmphasisAction])
 
     // Region style
     lazy var regionSolidStyleAction = UIAction(title: L("Solid")) { action in
@@ -248,7 +249,7 @@ final class DiagramViewController: UIViewController {
     lazy var regionInheritedStyleAction = UIAction(title: L("Inherited")) { action in
         self.ladderView.setSelectedRegionsStyle(style: .inherited)
     }
-    lazy var regionStyleMenu = UIMenu(title: L("Default region style..."), children: [self.regionSolidStyleAction, self.regionDashedStyleAction, self.regionDottedStyleAction, self.regionInheritedStyleAction])
+    lazy var regionStyleMenu = UIMenu(title: L("Default region style..."), image: UIImage(systemName: "scribble"), children: [self.regionSolidStyleAction, self.regionDashedStyleAction, self.regionDottedStyleAction, self.regionInheritedStyleAction])
 
     // Manipulate marks
     lazy var slantProximalPivotAction = UIAction(title: L("Slant proximal pivot point")) { action in
@@ -281,7 +282,7 @@ final class DiagramViewController: UIViewController {
         self.adjustment = .trim
         self.showAdjustYToolbar()
     }
-    lazy var adjustYMenu = UIMenu(title: L("Adjust mark ends..."), children: [adjustProximalYAction, adjustDistalYAction, trimProximalYAction, trimDistalYAction])
+    lazy var adjustYMenu = UIMenu(title: L("Adjust mark ends..."), image: UIImage(systemName: "scissors"), children: [adjustProximalYAction, adjustDistalYAction, trimProximalYAction, trimDistalYAction])
 
 
     lazy var straightenToProximalAction = UIAction(title: L("Straighten mark to proximal endpoint")) { action in
@@ -296,7 +297,7 @@ final class DiagramViewController: UIViewController {
         // TODO: implement
     }
 
-    lazy var adjustCLAction = UIAction(title: L("Adjust cycle length"), discoverabilityTitle: "Test discoverability") { action in
+    lazy var adjustCLAction = UIAction(title: L("Adjust cycle length"), image: UIImage(systemName: "slider.horizontal.below.rectangle")) { action in
         print("action = \(action)")
         do {
             let meanCL = try self.ladderView.meanCL()
@@ -311,12 +312,12 @@ final class DiagramViewController: UIViewController {
         }
     }
 
-    lazy var moveAction = UIAction(title: L("Move marks")) { _ in
+    lazy var moveAction = UIAction(title: L("Move marks"), image: UIImage(systemName: "arrow.right.arrow.left")) { _ in
         // TODO: implement
     }
 
     // Label actions
-    lazy var editLabelAction = UIAction(title: L("Edit label"), image: UIImage(systemName: "pencil.circle")) { action in
+    lazy var editLabelAction = UIAction(title: L("Edit label"), image: UIImage(systemName: "pencil")) { action in
         self.editLabel()
     }
 
@@ -357,7 +358,7 @@ final class DiagramViewController: UIViewController {
         self.ladderView.removeRegion()
     }
 
-    lazy var markMenu = UIMenu(title: L("Mark Menu"), children: [self.styleMenu, self.emphasisMenu,  self.impulseOriginMenu, self.blockMenu, self.straightenMenu, self.slantMenu, self.adjustYMenu, self.moveAction, self.adjustCLAction, self.unlinkAction, self.deleteAction])
+    lazy var markMenu = UIMenu(title: L("Mark Menu"), children: [self.styleMenu, self.emphasisMenu,  self.impulseOriginMenu, self.blockMenu, self.straightenMenu, self.slantMenu, self.adjustYMenu, self.moveAction, self.adjustCLAction, self.rhythmAction, self.unlinkAction, self.deleteAction])
 
     lazy var labelChildren = [self.regionStyleMenu, self.editLabelAction, self.addRegionMenu, self.removeRegionAction, self.regionHeightMenu, self.adjustLeftMarginAction]
 
@@ -389,6 +390,7 @@ final class DiagramViewController: UIViewController {
         leftMargin = diagram.ladder.leftMargin
 
         // init views
+        calibration = diagram.calibration
         cursorView.calibration = diagram.calibration
         ladderView.calibration = diagram.calibration
         ladderView.ladder = diagram.ladder
@@ -471,36 +473,36 @@ final class DiagramViewController: UIViewController {
         self.userActivity = self.view.window?.windowScene?.userActivity
         // See https://github.com/mattneub/Programming-iOS-Book-Examples/blob/master/bk2ch06p357StateSaveAndRestoreWithNSUserActivity/ch19p626pageController/SceneDelegate.swift
         if restorationInfo != nil {
-            if let zoomScale = restorationInfo?[Self.restorationZoomKey] as? CGFloat {
-                imageScrollView.zoomScale = zoomScale
-            }
-            var restorationContentOffset = CGPoint()
-            // FIXME: Do we have to correct content offset Y too?
-            if let contentOffsetX = restorationInfo?[Self.restorationContentOffsetXKey] {
-                restorationContentOffset.x = (contentOffsetX as? CGFloat ?? 0) * imageScrollView.zoomScale
-            }
-            if let contentOffsetY = restorationInfo?[Self.restorationContentOffsetYKey] {
-                restorationContentOffset.y = contentOffsetY as? CGFloat ?? 0
-            }
-            if let restorationMode = restorationInfo?[Self.restorationModeKey] as? Int {
-                mode = Mode(rawValue: restorationMode) ?? .normal
-            }
-            imageScrollView.setContentOffset(restorationContentOffset, animated: true)
-            if let caliperCrossbarPosition = restorationInfo?[Self.restorationCaliperCrossbarKey] {
-                if mode == .calibrate {
-                    cursorView.caliperCrossbarPosition = caliperCrossbarPosition as? CGFloat ?? 50
-                }
-            }
-            if let caliperBar1Position = restorationInfo?[Self.restorationCaliperBar1Key] {
-                if mode == .calibrate {
-                    cursorView.caliperBar1Position = caliperBar1Position as? CGFloat ?? 50
-                }
-            }
-                if let caliperBar2Position = restorationInfo?[Self.restorationCaliperBar2Key] {
-                    if mode == .calibrate {
-                        cursorView.caliperBar2Position = caliperBar2Position as? CGFloat ?? 150
-                    }
-                }
+//            if let zoomScale = restorationInfo?[Self.restorationZoomKey] as? CGFloat {
+//                imageScrollView.zoomScale = zoomScale
+//            }
+//            var restorationContentOffset = CGPoint()
+//            // FIXME: Do we have to correct content offset Y too?
+//            if let contentOffsetX = restorationInfo?[Self.restorationContentOffsetXKey] {
+//                restorationContentOffset.x = (contentOffsetX as? CGFloat ?? 0) * imageScrollView.zoomScale
+//            }
+//            if let contentOffsetY = restorationInfo?[Self.restorationContentOffsetYKey] {
+//                restorationContentOffset.y = contentOffsetY as? CGFloat ?? 0
+//            }
+//            if let restorationMode = restorationInfo?[Self.restorationModeKey] as? Int {
+//                mode = Mode(rawValue: restorationMode) ?? .normal
+//            }
+//            imageScrollView.setContentOffset(restorationContentOffset, animated: true)
+//            if let caliperCrossbarPosition = restorationInfo?[Self.restorationCaliperCrossbarKey] {
+//                if mode == .calibrate {
+//                    cursorView.caliperCrossbarPosition = caliperCrossbarPosition as? CGFloat ?? 50
+//                }
+//            }
+//            if let caliperBar1Position = restorationInfo?[Self.restorationCaliperBar1Key] {
+//                if mode == .calibrate {
+//                    cursorView.caliperBar1Position = caliperBar1Position as? CGFloat ?? 50
+//                }
+//            }
+//                if let caliperBar2Position = restorationInfo?[Self.restorationCaliperBar2Key] {
+//                    if mode == .calibrate {
+//                        cursorView.caliperBar2Position = caliperBar2Position as? CGFloat ?? 150
+//                    }
+//                }
         }
         // Only use the restorationInfo once
         restorationInfo = nil
@@ -673,11 +675,13 @@ final class DiagramViewController: UIViewController {
         let labelText = UITextField()
         labelText.text = L("Adjust cycle length")
         let slider = UISlider()
-        slider.minimumValue = Float(ladderView.getRawValueFromCalibratedValue(100, usingCalFactor: ladderView.calibration?.currentCalFactor ?? 100))
-        slider.maximumValue = Float(ladderView.getRawValueFromCalibratedValue(2000, usingCalFactor: ladderView.calibration?.currentCalFactor ?? 2000))
+        // FIXME: min and max change with zoom.  Similar to problem with intervals.
+        slider.minimumValue = Float(ladderView.getRawValueFromCalibratedValue(100, usingCalFactor: calibration.currentCalFactor))
+        slider.maximumValue = Float(ladderView.getRawValueFromCalibratedValue(3000, usingCalFactor: calibration.currentCalFactor))
+        print("min value = \(slider.minimumValue), max value = \(slider.maximumValue)")
         slider.setValue(Float(rawValue), animated: false)
         ladderView.adjustCL(cl: rawValue)
-        slider.addTarget(self, action: #selector(clValueDidChange(_:)), for: .valueChanged)
+        slider.addTarget(self, action: #selector(clSliderValueDidChange(_:)), for: .valueChanged)
         let doneButton = UIButton(type: .system)
         doneButton.setTitle(L("Done"), for: .normal)
         doneButton.addTarget(self, action: #selector(closeAdjustCLToolbar(_:)), for: .touchUpInside)
@@ -780,10 +784,9 @@ final class DiagramViewController: UIViewController {
         ladderView.refresh()
     }
 
-    @objc func clValueDidChange(_ sender: UISlider) {
+    @objc func clSliderValueDidChange(_ sender: UISlider) {
         let value: CGFloat = CGFloat(sender.value)
         ladderView.adjustCL(cl: value)
-       //   ladderView.adjustY(value, endpoint: activeEndpoint, adjustment: adjustment)
         ladderView.refresh()
     }
 

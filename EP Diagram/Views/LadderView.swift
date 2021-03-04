@@ -1369,8 +1369,8 @@ final class LadderView: ScaledView {
                 let scaledFirstX = transformToScaledViewPositionX(regionPositionX: firstProximalX)
                 let scaledSecondX = transformToScaledViewPositionX(regionPositionX: secondProximalX)
                 let halfwayPosition = (scaledFirstX + scaledSecondX) / 2.0
-                let value = formatValue(interval.proximalValue, usingCalFactor: calibration.currentCalFactor)
-                let text = "\(value)"
+                let value = (scaledSecondX - scaledFirstX)
+                let text = "\(formatValue(value, usingCalFactor: calibration.currentCalFactor))"
                 var origin = CGPoint(x: halfwayPosition, y: region.proximalBoundary)
                 let size = text.size(withAttributes: measurementTextAttributes)
                 // Center the origin.
@@ -1381,11 +1381,11 @@ final class LadderView: ScaledView {
                 let scaledFirstX = transformToScaledViewPositionX(regionPositionX: firstDistalX)
                 let scaledSecondX = transformToScaledViewPositionX(regionPositionX: secondDistalX)
                 let halfwayPosition = (scaledFirstX + scaledSecondX) / 2.0
-                let value = formatValue(interval.distalValue, usingCalFactor: calibration.currentCalFactor)
-                let text = "\(value)"
+                let value = (scaledSecondX - scaledFirstX)
+                let text = "\(formatValue(value, usingCalFactor: calibration.currentCalFactor))"
                 var origin = CGPoint(x: halfwayPosition, y: region.distalBoundary)
                 let size = text.size(withAttributes: measurementTextAttributes)
-                // Center the origin.
+                // Center the origin
                 origin = CGPoint(x: origin.x - size.width / 2, y: origin.y - size.height)
                 drawIntervalText(origin: origin, size: size, text: text, context: context, attributes: measurementTextAttributes)
             }
@@ -1397,7 +1397,12 @@ final class LadderView: ScaledView {
     }
 
     func getRawValueFromCalibratedValue(_ value: CGFloat, usingCalFactor calFactor: CGFloat) -> Int {
-        return lround(Double(value) / Double(calFactor))
+        let x1: CGFloat = 0
+        let x2: CGFloat  = value
+        let regionX1 = transformToRegionPositionX(scaledViewPositionX: x1)
+        let regionX2 = transformToRegionPositionX(scaledViewPositionX: x2)
+        let diff = regionX2 - regionX1
+        return lround(Double(diff) / Double(calFactor))
     }
 
     private func drawIntervalText(origin: CGPoint, size: CGSize, text: String, context: CGContext, attributes: [NSAttributedString.Key: Any]) {
@@ -1815,7 +1820,6 @@ final class LadderView: ScaledView {
             proxX += cl
             distalX += cl
             let newSegment = Segment(proximal: CGPoint(x: proxX, y: selectedMarks[i].segment.proximal.y), distal: CGPoint(x: distalX, y: selectedMarks[i].segment.distal.y))
-            print("newSegment = \(newSegment)")
             self.setSegment(segment: newSegment, forMark: selectedMarks[i])
         }
     }

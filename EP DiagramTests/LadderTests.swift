@@ -239,4 +239,13 @@ class LadderTests: XCTestCase {
         let marks3 = [mark5!, mark7!]
         XCTAssertTrue(ladder.marksAreNotContiguous(marks3))
     }
+
+    func testMeanCL() {
+        let mark1 = ladder.addMark(at: 100, toRegion: ladder.region(atIndex: 0))
+        let mark2 = ladder.addMark(at: 200, toRegion: ladder.region(atIndex: 0))
+        let mark3 = ladder.addMark(at: 400, toRegion: ladder.region(atIndex: 0))
+        let marks = [mark1!, mark2!, mark3!]
+        XCTAssertEqual(ladder.meanCL(marks), 150, accuracy: 0.0001)
+
+    }
 }

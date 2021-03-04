@@ -9,7 +9,18 @@
 import UIKit
 
 // Must be a class, reference to calibration is shared by ladder and cursor views.
-final class Calibration: Codable {
+final class Calibration: Codable, CustomDebugStringConvertible {
+    var debugDescription: String {
+        """
+        Calibration:
+          originalZoom = \(originalZoom)
+          currentZoom = \(currentZoom)
+          originalCalFactor = \(originalCalFactor)
+          currentCalFactor = \(currentCalFactor)
+          isCalibrated = \(isCalibrated)
+        """
+    }
+
     var originalZoom: CGFloat = 1
     var currentZoom: CGFloat = 1
     var originalCalFactor: CGFloat = 1
@@ -25,5 +36,11 @@ final class Calibration: Codable {
         originalZoom = zoom
         currentZoom = zoom
         originalCalFactor = calFactor
+        print(self)
     }
+
+    func calibratedInterval(_ value: CGFloat) -> Int {
+        return lround(Double(value) * Double(currentCalFactor))
+    }
+
 }

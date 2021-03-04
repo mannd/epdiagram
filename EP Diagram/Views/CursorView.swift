@@ -399,7 +399,7 @@ protocol CursorViewDelegate: AnyObject {
     func isCalibrated() -> Bool
     func setIsCalibrated(_ value: Bool)
     func markMeasurement(segment: Segment) -> CGFloat
-    func intervalMeasurement(value: CGFloat) -> CGFloat
+    func intervalMeasurement(x1: CGFloat, x2: CGFloat) -> CGFloat
 }
 
 extension CursorViewDelegate {
@@ -465,8 +465,9 @@ extension CursorView: CursorViewDelegate {
         return abs(segment.proximal.x - segment.distal.x) * calibration.currentCalFactor
     }
 
-    func intervalMeasurement(value: CGFloat) -> CGFloat {
-        return value 
+    func intervalMeasurement(x1: CGFloat, x2: CGFloat) -> CGFloat {
+        guard let calibration = calibration else { return 0 }
+        return abs(x1 - x2) * calibration.currentCalFactor
     }
 
     func setMarkerPositions(at positions: [CGPoint]) {
