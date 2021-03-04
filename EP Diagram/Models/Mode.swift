@@ -9,7 +9,7 @@
 import Foundation
 
 // Mode is used by both DiagramViewController, LadderView and CalipersView.
-enum Mode {
+enum Mode: Int {
     case normal
     case calibrate
     case connect

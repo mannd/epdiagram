@@ -196,6 +196,16 @@ class LadderTests: XCTestCase {
         XCTAssertEqual(newLadder.regions.count, ladder.regions.count)
         XCTAssertEqual(ladder.regions[0].marks.count, 1)
         XCTAssertEqual(newLadder.regions[0].marks.count, 0)
+    }
 
+    func testNormalizeRegions() {
+        ladder.setAllRegionsWithMode(.selected)
+        for region in ladder.regions {
+            XCTAssertEqual(region.mode, .selected)
+        }
+        ladder.normalizeRegions()
+        for region in ladder.regions {
+            XCTAssertEqual(region.mode, .normal)
+        }
     }
 }

@@ -20,8 +20,7 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         self.scene(scene, openURLContexts: connectionOptions.urlContexts)
 
         if let documentBrowserViewController = window?.rootViewController as? DocumentBrowserViewController {
-            // FIXME: UserActivity info turned off for now.
-//            documentBrowserViewController.restorationInfo = scene.userActivity?.userInfo
+            documentBrowserViewController.restorationInfo = scene.userActivity?.userInfo
         }
     }
 

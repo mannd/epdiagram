@@ -56,19 +56,18 @@ struct PreferencesView: View {
                     }
                     Section(header: Text("Ladder")) {
                         Picker(selection: $labelDescriptionVisibility, label: Text("Label description visibility"), content: {
-
                             Text("Visible").tag(TextVisibility.visibility.rawValue)
                             Text("Visible if fits").tag(TextVisibility.visibleIfFits.rawValue)
                             Text("Invisible").tag(TextVisibility.invisible.rawValue)
                         })
                         Toggle(isOn: $hideMarks) {
-                            Text("Hide marks")
+                            Text("Hide all marks")
                         }
                         Toggle(isOn: $showIntervals) {
-                            Text("Show intervals")
+                            Text("Show intervals (after calibration)")
                         }
                         Toggle(isOn: $showConductionTimes) {
-                            Text("Show conduction times")
+                            Text("Show conduction times (after calibration)")
                         }
                     }
                     Section(header: Text("Region")) {

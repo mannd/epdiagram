@@ -209,10 +209,6 @@ final class CursorView: ScaledView {
         }
     }
 
-//    func setCaliperMaxY(_ maxY: CGFloat) {
-//        caliperMaxY = maxY
-//    }
-
     // Add tiny circle around intersection of cursor and mark.
     private func drawCircle(context: CGContext, center: CGPoint, radius: CGFloat) {
         context.addArc(center: center, radius: radius, startAngle: 0.0, endAngle: .pi * 2.0, clockwise: true)
@@ -327,7 +323,6 @@ final class CursorView: ScaledView {
         // No undo for calibration.
         if pan.state == .began {
             draggedComponent = caliper.isNearCaliperComponent(point: pan.location(in: self), accuracy: accuracy)
-            caliper.color = UIColor.systemBlue
         }
         else if pan.state == .changed {
             guard let draggedComponent = draggedComponent else { return }
@@ -337,7 +332,6 @@ final class CursorView: ScaledView {
         }
         else if pan.state == .ended {
             draggedComponent = nil
-            caliper.color = UIColor.systemRed
         }
         setNeedsDisplay()
     }
@@ -424,8 +418,12 @@ extension CursorView: CursorViewDelegate {
     }
 
     var caliperMaxY: CGFloat {
-        get { caliper.maxY ?? 0 }
-        set { caliper.maxY = newValue}
+        get { caliper.maxY }
+        set { caliper.maxY = newValue; print("caliperMaxY = \(caliper.maxY)")}
+    }
+    var caliperMinY: CGFloat {
+        get { caliper.minY }
+        set { caliper.minY = newValue }
     }
 
     func refresh() {

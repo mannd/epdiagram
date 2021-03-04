@@ -36,16 +36,7 @@ final class Ladder: NSObject, Codable {
         }
     }
     var mode: Mode = .normal
-//        {
-//        didSet {
-//            for region in regions {
-//
-//                for mark in region.marks {
-//                    mark.mode = mode
-//                }
-//            }
-//        }
-//    }
+
     var defaultMarkStyle: Mark.Style = .solid
     var zone: Zone = Zone() // at most one selection zone
     override var debugDescription: String { "Ladder ID " + id.debugDescription }
@@ -273,9 +264,7 @@ final class Ladder: NSObject, Codable {
     }
 
     func normalizeRegions() {
-        for region in regions {
-            region.mode = .normal
-        }
+        setAllRegionsWithMode(.normal)
     }
 
     func normalize() {
@@ -284,10 +273,22 @@ final class Ladder: NSObject, Codable {
         mode = .normal
     }
 
+    func setAllRegionsWithMode(_ mode: Region.Mode) {
+        regions.forEach { $0.mode = mode }
+    }
+
     // Will have ladder store and set mark modes
     func setAllMarksWithMode(_ mode: Mark.Mode) {
         regions.forEach {
             region in region.marks.forEach { mark in mark.mode = mode }
+        }
+    }
+
+    func clearSelectedLabels() {
+        for region in regions {
+            if region.mode == .labelSelected {
+                region.mode = .normal
+            }
         }
     }
 

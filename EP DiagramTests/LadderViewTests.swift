@@ -71,7 +71,11 @@ class LadderViewTests: XCTestCase {
     }
 
     func testActiveRegion() {
-        guard let activeRegion = ladderView.activeRegion else { XCTFail("activeRegion shouldn't be nil"); return }
+//        // Diagram now sets active region, and can be nil on init of ladder.
+        ladderView.activeRegion = ladderView.ladder.regions[0]
+        guard let activeRegion = ladderView.activeRegion else {
+            XCTFail("activeRegion shouldn't be nil"); return
+        }
         XCTAssertEqual(activeRegion, ladderView.ladder.regions[0])
         XCTAssertEqual(activeRegion.mode, Region.Mode.active)
         XCTAssertEqual(ladderView.ladder.regions[1].mode, .normal)

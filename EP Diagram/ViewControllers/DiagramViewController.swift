@@ -56,10 +56,9 @@ final class DiagramViewController: UIViewController {
             }
             switch mode {
             case .normal:
-                let activeRegion = ladderView.activeRegion // save activeRegion
                 ladderView.normalizeLadder()
-                ladderView.activeRegion = activeRegion // restore activeRegion
-                if activeRegion == nil {
+                ladderView.restoreState()
+                if ladderView.activeRegion == nil {
                     ladderView.setActiveRegion(regionNum: 0)
                 }
                 ladderView.endZoning()
@@ -67,6 +66,7 @@ final class DiagramViewController: UIViewController {
                 imageScrollView.isScrollEnabled = true
                 showMainToolbar()
             case .select:
+                ladderView.saveState()                
                 ladderView.startZoning()
                 imageScrollView.isScrollEnabled = false
                 showSelectToolbar()
@@ -150,6 +150,7 @@ final class DiagramViewController: UIViewController {
     static let restorationTransformKey = "restorationTranslateKey"
     //    static let restorationActiveRegionIndexKey = "restorationActiveRegionIndexKey"
     static let restorationDoRestorationKey = "restorationDoRestorationKey"
+    static let restorationModeKey = "restorationModeKey"
 
     // Speed up appearance of image picker by initializing it here.
     let imagePicker: UIImagePickerController = UIImagePickerController()
@@ -354,7 +355,7 @@ final class DiagramViewController: UIViewController {
 
     lazy var markMenu = UIMenu(title: L("Mark Menu"), children: [self.styleMenu, self.emphasisMenu,  self.impulseOriginMenu, self.blockMenu, self.straightenMenu, self.slantMenu, self.adjustYMenu, self.moveAction, self.unlinkAction, self.deleteAction])
 
-    lazy var labelChildren = [self.regionStyleMenu, self.editLabelAction, self.addRegionMenu, self.removeRegionAction, self.regionHeightMenu]
+    lazy var labelChildren = [self.regionStyleMenu, self.editLabelAction, self.addRegionMenu, self.removeRegionAction, self.regionHeightMenu, self.adjustLeftMarginAction]
 
     lazy var noSelectionAction = UIAction(title: L("No regions, zones, or marks selected")) { _ in }
 
@@ -364,7 +365,7 @@ final class DiagramViewController: UIViewController {
         os_log("viewDidLoad() - ViewController", log: OSLog.viewCycle, type: .info)
         super.viewDidLoad()
 
-        //showRestorationInfo() // for debugging
+        showDebugRestorationInfo() // for debugging
 
         // TODO: customization for mac version
         if isRunningOnMac() {
@@ -400,6 +401,8 @@ final class DiagramViewController: UIViewController {
         imageScrollView.maximumZoomScale = maxZoom
         imageScrollView.minimumZoomScale = minZoom
         imageScrollView.diagramViewControllerDelegate = self
+
+        mode = .normal
 
         let dropInteraction = UIDropInteraction(delegate: self)
         view.addInteraction(dropInteraction)
@@ -453,27 +456,30 @@ final class DiagramViewController: UIViewController {
             self.imageView.transform = self.diagram.transform
         }
         scrollViewAdjustViews(imageScrollView) // make sure views adjust to rotated image
-        mode = .normal
+//        mode = .normal
 
         // Need to set this here, after view draw, or Mac malpositions cursor at start of app.
         imageScrollView.contentInset = UIEdgeInsets(top: 0, left: leftMargin, bottom: 0, right: 0)
-        ladderView.normalizeAllMarks()
+//        ladderView.normalizeAllMarks()
         self.userActivity = self.view.window?.windowScene?.userActivity
         // See https://github.com/mattneub/Programming-iOS-Book-Examples/blob/master/bk2ch06p357StateSaveAndRestoreWithNSUserActivity/ch19p626pageController/SceneDelegate.swift
         if restorationInfo != nil {
-//            if let zoomScale = restorationInfo?[Self.restorationZoomKey] as? CGFloat {
-//                imageScrollView.zoomScale = zoomScale
-//            }
-//            var restorationContentOffset = CGPoint()
-//            // FIXME: Do we have to correct content offset Y too?
-//            if let contentOffsetX = restorationInfo?[Self.restorationContentOffsetXKey] {
-//                restorationContentOffset.x = (contentOffsetX as? CGFloat ?? 0) * imageScrollView.zoomScale
-//            }
-//            if let contentOffsetY = restorationInfo?[Self.restorationContentOffsetYKey] {
-//                restorationContentOffset.y = contentOffsetY as? CGFloat ?? 0
-//            }
-            // FIXME: Temporary
-            //            imageScrollView.setContentOffset(restorationContentOffset, animated: true)
+            if let zoomScale = restorationInfo?[Self.restorationZoomKey] as? CGFloat {
+                imageScrollView.zoomScale = zoomScale
+            }
+            var restorationContentOffset = CGPoint()
+            // FIXME: Do we have to correct content offset Y too?
+            if let contentOffsetX = restorationInfo?[Self.restorationContentOffsetXKey] {
+                restorationContentOffset.x = (contentOffsetX as? CGFloat ?? 0) * imageScrollView.zoomScale
+            }
+            if let contentOffsetY = restorationInfo?[Self.restorationContentOffsetYKey] {
+                restorationContentOffset.y = contentOffsetY as? CGFloat ?? 0
+            }
+            if let restorationMode = restorationInfo?[Self.restorationModeKey] as? Int {
+                mode = Mode(rawValue: restorationMode) ?? .normal
+            }
+//             FIXME: Temporary
+            imageScrollView.setContentOffset(restorationContentOffset, animated: true)
 //            if let transformString = restorationInfo?[Self.restorationTransformKey] as? String {
 //                let transform = NSCoder.cgAffineTransform(for: transformString)
 //                imageView.transform = transform
@@ -481,10 +487,9 @@ final class DiagramViewController: UIViewController {
         }
         // Only use the restorationInfo once
         restorationInfo = nil
-        showMainToolbar()
         updateToolbarButtons()
         updateUndoRedoButtons()
-        resetViews()
+        resetViews(setActiveRegion: false)
     }
 
     // We only want to use the restorationInfo once when view controller first appears.
@@ -518,6 +523,7 @@ final class DiagramViewController: UIViewController {
             Self.restorationZoomKey: imageScrollView.zoomScale,
             Self.restorationFileNameKey: currentDocumentURL,
             Self.restorationDoRestorationKey: true,
+            Self.restorationModeKey: mode.rawValue,
             HelpViewController.inHelpKey: false,
             Self.restorationTransformKey: NSCoder.string(for: imageView.transform),
         ]
@@ -585,7 +591,8 @@ final class DiagramViewController: UIViewController {
     @objc func showMainToolbar() {
         if mainToolbarButtons == nil {
             calibrateButton = UIBarButtonItem(title: L("Calibrate"), style: UIBarButtonItem.Style.plain, target: self, action: #selector(launchCalibrateMode))
-            selectButton = UIBarButtonItem(title: L("Select"), style: .plain, target: self, action: #selector(launchSelectMode))
+            // FIXME: Experiment with "Edit" instead of "Select" for menu title
+            selectButton = UIBarButtonItem(title: L("Edit"), style: .plain, target: self, action: #selector(launchSelectMode))
             connectButton = UIBarButtonItem(title: L("Connect"), style: .plain, target: self, action: #selector(launchConnectMode))
             undoButton = UIBarButtonItem(barButtonSystemItem: .undo, target: self, action: #selector(undo))
             redoButton = UIBarButtonItem(barButtonSystemItem: .redo, target: self, action: #selector(redo))
@@ -596,20 +603,21 @@ final class DiagramViewController: UIViewController {
     }
 
     @objc func launchSelectMode(_: UIAlertAction) {
-        ladderView.saveState()
         mode = .select
     }
 
     func showSelectToolbar() {
         if selectToolbarButtons == nil {
-            let text = isIPad() || isRunningOnMac() ? L("Select mode: Tap or drag to select. Long press ladder or image for menu.") : ("Tap or drag, then long press.")
-            let prompt = makePrompt(text: text)
-            let clearTitle = isIPad() || isRunningOnMac() ? L("Clear Selection") : L("Clear")
-            let clearButton = UIBarButtonItem(title: clearTitle, style: .plain, target: self, action: #selector(clearSelection))
+            let selectAllButton = UIBarButtonItem(title: L("Select All"), style: .plain, target: self, action: #selector(selectAllMarks))
+            let clearButton = UIBarButtonItem(title: L("Clear Selection"), style: .plain, target: self, action: #selector(clearSelection))
             let doneButton = UIBarButtonItem(barButtonSystemItem: .done, target: self, action: #selector(cancelSelectMode))
-            selectToolbarButtons = [prompt, spacer, clearButton, doneButton]
+            selectToolbarButtons = [selectAllButton, spacer, clearButton, spacer, doneButton]
         }
         setToolbarItems(selectToolbarButtons, animated: false)
+    }
+
+    @objc func selectAllMarks() {
+        ladderView.selectAllMarks()
     }
 
     @objc func clearSelection() {
@@ -887,7 +895,13 @@ final class DiagramViewController: UIViewController {
 
     @objc func closeAdjustLeftMarginToolbar(_ sender: UISlider!) {
         currentDocument?.undoManager.endUndoGrouping()
-        showSelectToolbar()
+        // Adjust left margin can be called from normal or select mode.
+        if mode == .normal {
+            showMainToolbar()
+        }
+        if mode == .select {
+            showSelectToolbar()
+        }
     }
 
     @objc func undo() {
@@ -1051,16 +1065,17 @@ final class DiagramViewController: UIViewController {
         })
     }
 
-    private func resetViews() {
+    private func resetViews(setActiveRegion: Bool = true) {
         os_log("resetViews() - ViewController", log: .action, type: .info)
         // Add back in separatorView after rotation.
         if (separatorView == nil) {
             separatorView = HorizontalSeparatorView.addSeparatorBetweenViews(separatorType: .horizontal, primaryView: imageScrollView, secondaryView: ladderView, parentView: self.view)
             separatorView?.cursorViewDelegate = cursorView
         }
-        self.ladderView.resetSize()
+        self.ladderView.resetSize(setActiveRegion: setActiveRegion)
         self.imageView.setNeedsDisplay()
         cursorView.caliperMaxY = imageScrollView.frame.height
+        cursorView.caliperMinY = 0
         setViewsNeedDisplay()
     }
 

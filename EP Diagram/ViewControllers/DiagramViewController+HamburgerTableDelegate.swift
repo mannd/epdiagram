@@ -233,9 +233,8 @@ extension DiagramViewController: HamburgerTableDelegate, UIImagePickerController
     #if DEBUG
     func test() {
         os_log("test()", log: .debugging, type: .debug)
-        ladderView.clearBlock()
-        ladderView.clearImpulseOrigin()
-        ladderView.refresh()
+        print("****ladderView.activeRegion = \(ladderView.activeRegion)")
+        print("****ladderView.activeRegion.mode = \(ladderView.activeRegion?.mode)")
     }
     #else
     func test() {}

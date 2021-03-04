@@ -16,10 +16,22 @@ extension DiagramViewController: UIContextMenuInteractionDelegate {
     // Determines what menu appears.  Called first with long press
     func contextMenuInteraction(_ interaction: UIContextMenuInteraction, configurationForMenuAtLocation location: CGPoint) -> UIContextMenuConfiguration? {
         os_log("contextMenuInteraction(_:configurationForMenuAtLocation:)", log: .action, type: .info)
-        // FIXME: consider long press in normal mode, to allow selection of one mark, but that won't work with cursorview because long press changes cursor to omnidirectional.  
         guard !ladderView.isDragging else { return nil }
+        let locationInLadder = ladderView.getLocationInLadder(position: location)
+        if locationInLadder.specificLocation == .label {
+            ladderView.normalizeLadder()
+            if let region = locationInLadder.region {
+                region.mode = .labelSelected
+                return labelContextMenuConfiguration(at: location, region: region)
+            }
+        }
         guard ladderView.mode == .select else { return nil }
         return selectMenu(at: location)
+    }
+
+    func contextMenuInteraction(_ interaction: UIContextMenuInteraction, willEndFor configuration: UIContextMenuConfiguration, animator: UIContextMenuInteractionAnimating?) {
+        os_log("contextMenuInteraction(_:willEndFor:animator:)", log: .action, type: .info)
+        ladderView.clearSelectedLabels()
     }
 
     // MARK: Prepare menus
@@ -118,25 +130,17 @@ extension DiagramViewController: UIContextMenuInteractionDelegate {
                 if let region = locationInLadder.region {
                     region.mode = .labelSelected
                     prepareActions()
-                    return labelContextMenuConfiguration(at: location)
+                    return labelContextMenuConfiguration(at: location, region: region)
                 }
             case .region:
                 if let region = locationInLadder.region {
                     region.mode = .selected
                     ladderView.ladder.setMarksWithMode(.selected, inRegion: region)
                     prepareActions()
-                    return regionContextMenuConfiguration(at: location)
+                    return markContextMenuConfiguration(at: location)
                 }
             case .ladder:
-                if let ladder = locationInLadder.ladder {
-                    ladder.mode = .selected
-                    for region in ladder.regions {
-                        region.mode = .selected
-                    }
-                    ladderView.ladder.setAllMarksWithMode(.selected)
-                    prepareActions()
-                    return ladderContextMenuConfiguration(at: location)
-                }
+                break
             default:
                 break
             }
@@ -144,18 +148,7 @@ extension DiagramViewController: UIContextMenuInteractionDelegate {
         }
         // Handle long press with multiple selections made
         prepareActions()
-        if ladderView.noSelectionExists() {
-            return noSelectionContextMenu(at: location)
-        } else if ladderView.ladder.mode == .selected {
-            return ladderContextMenuConfiguration(at: location)
-        }
         return markContextMenuConfiguration(at: location)
-    }
-
-    func noSelectionContextMenu(at location: CGPoint) -> UIContextMenuConfiguration? {
-        return UIContextMenuConfiguration(identifier: nil, previewProvider: nil) { _ in
-            return UIMenu(title: "No Selection Found", children: [self.noSelectionAction])
-        }
     }
 
     func markContextMenuConfiguration(at location: CGPoint) -> UIContextMenuConfiguration {
@@ -164,62 +157,19 @@ extension DiagramViewController: UIContextMenuInteractionDelegate {
             return self.markMenu
         }
     }
-
-    func regionContextMenuConfiguration(at location: CGPoint) -> UIContextMenuConfiguration {
-        os_log("regionContextMenuConfiguration(at:)", log: .action, type: .info)
-        return UIContextMenuConfiguration(identifier: nil, previewProvider: nil) { suggestedActions in
-            // FIXME: make sure we won't move linked marks, or disconnect them when straightening.
-            let title: String
-            if let region = self.longPressLocationInLadder?.region {
-                title = L("\(region.name) — \(region.longDescription)")
-            } else {
-                title = L("Region")
-            }
-            return UIMenu(title: title, children: [self.regionStyleMenu, self.styleMenu, self.straightenMenu, self.slantMenu, self.adjustYMenu, self.rhythmAction, self.deleteAllInRegion])
-        }
-    }
-
-    func labelContextMenuConfiguration(at location: CGPoint) -> UIContextMenuConfiguration {
+    
+    func labelContextMenuConfiguration(at location: CGPoint, region: Region) -> UIContextMenuConfiguration {
         os_log("labelContextMenuConfiguration(at:)", log: .action, type: .info)
         return UIContextMenuConfiguration(identifier: nil, previewProvider: nil) { suggestedActions in
             let title: String
-            if let region = self.longPressLocationInLadder?.region {
-                title = L("Region Menu\n\(region.name) — \(region.longDescription)")
-                self.regionSolidStyleAction.state = region.style == .solid ? .on : .off
-                self.regionDottedStyleAction.state = region.style == .dotted ? .on : .off
-                self.regionDashedStyleAction.state = region.style == .dashed ? .on : .off
-                self.regionInheritedStyleAction.state = region.style == .inherited ? .on : .off
-            } else {
-                title = L("Region")
-            }
+            title = L("Region\n\(region.name) — \(region.longDescription)")
+            self.regionSolidStyleAction.state = region.style == .solid ? .on : .off
+            self.regionDottedStyleAction.state = region.style == .dotted ? .on : .off
+            self.regionDashedStyleAction.state = region.style == .dashed ? .on : .off
+            self.regionInheritedStyleAction.state = region.style == .inherited ? .on : .off
             return UIMenu(title: title, children: self.labelChildren)
         }
     }
-
-    func zoneContextMenuConfiguration(at location: CGPoint) -> UIContextMenuConfiguration {
-        os_log("zoneContextMenuConfiguration(at:)", log: .action, type: .info)
-        return UIContextMenuConfiguration(identifier: nil, previewProvider: nil) { suggestedActions in
-            // TODO: add deleteInZone action
-            return UIMenu(title: L("Zone"), children: [self.styleMenu, self.straightenMenu, self.slantMenu, self.rhythmAction])
-        }
-
-    }
-
-    func ladderContextMenuConfiguration(at location: CGPoint) -> UIContextMenuConfiguration {
-        os_log("ladderContextMenuConfiguration(at:)", log: .action, type: .info)
-        return UIContextMenuConfiguration(identifier: nil, previewProvider: nil) { suggestedActions in
-            return self.ladderMenu
-        }
-    }
-
-    func constructMenu() -> UIMenu? {
-        if ladderView.noSelectionExists() {
-            return UIMenu(title: "No Selection Found", children: [self.noSelectionAction])
-
-        } else if ladderView.ladder.mode == .selected {
-            return self.ladderMenu
-        }
-        else { return nil }
-    }
+	
 }
 

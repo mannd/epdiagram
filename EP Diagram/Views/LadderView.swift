@@ -79,7 +79,9 @@ final class LadderView: ScaledView {
     var ladder: Ladder = Ladder.defaultLadder()
     var activeRegion: Region? {
         get { ladder.activeRegion }
-        set { ladder.activeRegion = newValue }
+        set { ladder.activeRegion = newValue
+            print("**** Active region mode = \(activeRegion?.mode)")
+        }
     }
     var caliperMaxY: CGFloat {
         get { cursorViewDelegate.caliperMaxY }
@@ -151,7 +153,7 @@ final class LadderView: ScaledView {
         self.addGestureRecognizer(draggingPanRecognizer)
     }
 
-    func initializeRegions() {
+    func initializeRegions(setActiveRegion: Bool = true) {
         regionUnitHeight = getRegionUnitHeight(ladder: ladder)
         var regionBoundary = regionUnitHeight * ladderPaddingMultiplier
         for region: Region in ladder.regions {
@@ -161,6 +163,9 @@ final class LadderView: ScaledView {
             regionBoundary += regionHeight
         }
         guard ladder.regions.count > 0 else { assertionFailure("ladder.regions has no regions!"); return }
+        if setActiveRegion {
+            activeRegion = ladder.region(atIndex: 0)
+        }
     }
 
     internal func getRegionUnitHeight(ladder: Ladder) -> CGFloat {
@@ -811,6 +816,8 @@ final class LadderView: ScaledView {
         guard let region = locationInLadder.region else { return }
         if state == .began {
             isDragging = true
+            // normalize regions that the zone goes through
+            region.mode = .normal
             zone = Zone()
             zone.isVisible = true
             zone.startingRegion = region
@@ -820,6 +827,7 @@ final class LadderView: ScaledView {
         }
         if state == .changed {
             if !zone.regions.contains(region) {
+                region.mode = .normal
                 self.zone.regions.insert(region)
             }
             zone.end = regionPositionX
@@ -1653,10 +1661,14 @@ final class LadderView: ScaledView {
         ladder.normalize()
     }
 
-    func resetSize() {
+    func clearSelectedLabels() {
+        ladder.clearSelectedLabels()
+    }
+
+    func resetSize(setActiveRegion: Bool = true) {
         os_log("resetSize() - LadderView", log: .action, type: .info)
         ladderViewHeight = self.frame.height
-        initializeRegions()
+        initializeRegions(setActiveRegion: setActiveRegion)
         cursorViewDelegate.setCursorHeight()
     }
 
@@ -2037,7 +2049,7 @@ extension LadderView: LadderViewDelegate {
     }
 
     func hasActiveRegion() -> Bool {
-        return activeRegion != nil
+        return activeRegion != nil && activeRegion?.mode == .active
     }
 
     func addAttachedMark(scaledViewPositionX positionX: CGFloat) {
@@ -2210,6 +2222,14 @@ extension LadderView: LadderViewDelegate {
         if let attachedMark = ladder.attachedMark {
             adjustCursor(mark: attachedMark)
         }
+    }
+
+    func selectAllMarks() {
+        ladder.setAllMarksWithMode(.selected)
+        for region in ladder.regions {
+            region.mode = .selected
+        }
+        setNeedsDisplay()
     }
 
     func clearSelection() {
