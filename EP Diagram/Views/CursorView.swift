@@ -390,6 +390,7 @@ final class CursorView: ScaledView {
 protocol CursorViewDelegate: AnyObject {
     var cursorIsVisible: Bool { get set }
     var caliperMaxY: CGFloat { get set }
+    var caliperCrossbarPosition: CGFloat { get set }
        
     func refresh()
     func moveCursor(cursorViewPositionX positionX: CGFloat)
@@ -424,6 +425,19 @@ extension CursorView: CursorViewDelegate {
     var caliperMinY: CGFloat {
         get { caliper.minY }
         set { caliper.minY = newValue }
+    }
+
+    var caliperCrossbarPosition: CGFloat {
+        get { caliper.crossbarPosition }
+        set { caliper.crossbarPosition = newValue }
+    }
+    var caliperBar1Position: CGFloat {
+        get { caliper.bar1Position }
+        set { caliper.bar1Position = newValue }
+    }
+    var caliperBar2Position: CGFloat {
+        get { caliper.bar2Position }
+        set { caliper.bar2Position = newValue }
     }
 
     func refresh() {

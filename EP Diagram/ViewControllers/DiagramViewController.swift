@@ -148,6 +148,10 @@ final class DiagramViewController: UIViewController {
     //    static let restorationActiveRegionIndexKey = "restorationActiveRegionIndexKey"
     static let restorationDoRestorationKey = "restorationDoRestorationKey"
     static let restorationModeKey = "restorationModeKey"
+    static let restorationCaliperCrossbarKey = "restorationCaliperCrossbarKey"
+    static let restorationCaliperBar1Key = "restorationCaliperBar1Key"
+    static let restorationCaliperBar2Key = "restorationCaliperBar2Key"
+
 
     // Speed up appearance of image picker by initializing it here.
     let imagePicker: UIImagePickerController = UIImagePickerController()
@@ -450,6 +454,9 @@ final class DiagramViewController: UIViewController {
         // Need to set this here, after view draw, or Mac malpositions cursor at start of app.
         imageScrollView.contentInset = UIEdgeInsets(top: 0, left: leftMargin, bottom: 0, right: 0)
 //        ladderView.normalizeAllMarks()
+        updateToolbarButtons()
+        updateUndoRedoButtons()
+        showMainToolbar()
         self.userActivity = self.view.window?.windowScene?.userActivity
         // See https://github.com/mattneub/Programming-iOS-Book-Examples/blob/master/bk2ch06p357StateSaveAndRestoreWithNSUserActivity/ch19p626pageController/SceneDelegate.swift
         if restorationInfo != nil {
@@ -467,17 +474,26 @@ final class DiagramViewController: UIViewController {
             if let restorationMode = restorationInfo?[Self.restorationModeKey] as? Int {
                 mode = Mode(rawValue: restorationMode) ?? .normal
             }
-//             FIXME: Temporary
             imageScrollView.setContentOffset(restorationContentOffset, animated: true)
-//            if let transformString = restorationInfo?[Self.restorationTransformKey] as? String {
-//                let transform = NSCoder.cgAffineTransform(for: transformString)
-//                imageView.transform = transform
-//            }
+            if let caliperCrossbarPosition = restorationInfo?[Self.restorationCaliperCrossbarKey] {
+                if mode == .calibrate {
+                    cursorView.caliperCrossbarPosition = caliperCrossbarPosition as? CGFloat ?? 50
+                }
+            }
+            if let caliperBar1Position = restorationInfo?[Self.restorationCaliperBar1Key] {
+                if mode == .calibrate {
+                    cursorView.caliperBar1Position = caliperBar1Position as? CGFloat ?? 50
+                }
+            }
+                if let caliperBar2Position = restorationInfo?[Self.restorationCaliperBar2Key] {
+                    if mode == .calibrate {
+                        cursorView.caliperBar2Position = caliperBar2Position as? CGFloat ?? 150
+                    }
+                }
         }
         // Only use the restorationInfo once
         restorationInfo = nil
-        updateToolbarButtons()
-        updateUndoRedoButtons()
+
         resetViews(setActiveRegion: false)
     }
 
@@ -513,6 +529,9 @@ final class DiagramViewController: UIViewController {
             Self.restorationFileNameKey: currentDocumentURL,
             Self.restorationDoRestorationKey: true,
             Self.restorationModeKey: mode.rawValue,
+            Self.restorationCaliperCrossbarKey: cursorView.caliperCrossbarPosition,
+            Self.restorationCaliperBar1Key: cursorView.caliperBar1Position,
+            Self.restorationCaliperBar2Key: cursorView.caliperBar2Position,
             HelpViewController.inHelpKey: false,
             Self.restorationTransformKey: NSCoder.string(for: imageView.transform),
         ]
