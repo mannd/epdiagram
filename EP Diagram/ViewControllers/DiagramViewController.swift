@@ -114,9 +114,6 @@ final class DiagramViewController: UIViewController {
     weak var diagramEditorDelegate: DiagramEditorDelegate?
     var currentDocument: DiagramDocument?
 
-    // FIXME: refactor this away
-    var longPressLocationInLadder: LocationInLadder?
-
     // PDF and launch from URL stuff
     var pdfRef: CGPDFDocument?
     var launchFromURL: Bool = false
@@ -166,12 +163,6 @@ final class DiagramViewController: UIViewController {
     // Deletion of marks
     lazy var deleteAction = UIAction(title: L("Delete mark(s)"), image: UIImage(systemName: "trash"), attributes: .destructive) { action in
         self.ladderView.deleteSelectedMarks()
-    }
-    lazy var deleteAllInRegion = UIAction(title: L("Clear region"), image: UIImage(systemName: "trash"), attributes: .destructive) { action in
-        self.ladderView.deleteAllInSelectedRegion()
-    }
-    lazy var deleteAllInLadder = UIAction(title: L("Clear ladder"), image: UIImage(systemName: "trash"), attributes: .destructive) { action in
-        self.ladderView.deleteAllInLadder()
     }
 
     // Ladder actions
@@ -350,8 +341,6 @@ final class DiagramViewController: UIViewController {
     lazy var removeRegionAction = UIAction(title: L("Remove region"), image: UIImage(systemName: "minus")) { action in
         self.ladderView.removeRegion()
     }
-
-    lazy var ladderMenu = UIMenu(title: L("Ladder"), children: [self.adjustLeftMarginAction,  self.linkAll, self.unlinkAll, self.deleteAllInLadder])
 
     lazy var markMenu = UIMenu(title: L("Mark Menu"), children: [self.styleMenu, self.emphasisMenu,  self.impulseOriginMenu, self.blockMenu, self.straightenMenu, self.slantMenu, self.adjustYMenu, self.moveAction, self.unlinkAction, self.deleteAction])
 
@@ -551,7 +540,6 @@ final class DiagramViewController: UIViewController {
     }
 
     @IBAction func doImageScrollViewLongPress(sender: UILongPressGestureRecognizer) {
-        print("long press")
         guard sender.state == .began else { return }
         sender.view?.becomeFirstResponder()
         let menu = UIMenuController.shared
@@ -573,7 +561,6 @@ final class DiagramViewController: UIViewController {
     }
 
     @objc func rotateAction() {
-        print("rotating")
         rotateImage(degrees: 90)
         imageScrollView.resignFirstResponder()
     }
@@ -1326,7 +1313,6 @@ extension DiagramViewController: UIDropInteractionDelegate {
     func dropInteraction(_ interaction: UIDropInteraction, performDrop session: UIDropSession) {
         // Consume drag items (in this example, of type UIImage).
         session.loadObjects(ofClass: UIImage.self) { imageItems in
-            print("load image")
             if let images = imageItems as? [UIImage] {
                 self.diagram.imageIsUpscaled = false
                 self.undoablySetDiagramImageAndResetLadder(images.first)

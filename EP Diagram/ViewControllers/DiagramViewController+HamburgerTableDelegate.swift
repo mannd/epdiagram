@@ -233,8 +233,6 @@ extension DiagramViewController: HamburgerTableDelegate, UIImagePickerController
     #if DEBUG
     func test() {
         os_log("test()", log: .debugging, type: .debug)
-        print("****ladderView.activeRegion = \(ladderView.activeRegion)")
-        print("****ladderView.activeRegion.mode = \(ladderView.activeRegion?.mode)")
     }
     #else
     func test() {}
@@ -286,7 +284,6 @@ extension DiagramViewController: HamburgerTableDelegate, UIImagePickerController
     }
 
     func documentPicker(_ controller: UIDocumentPickerViewController, didPickDocumentsAt urls: [URL]) {
-        print("urls = \(urls)")
         self.openURL(url: urls[0])
     }
 
@@ -329,26 +326,12 @@ extension DiagramViewController: HamburgerTableDelegate, UIImagePickerController
         guard let image = image else { return nil }
         // Downscale upscaled images
         if diagram.imageIsUpscaled {
-            print(">>>> downscaling image")
             if let cgImage = image.cgImage {
                 return UIImage(cgImage: cgImage, scale: pdfScaleFactor, orientation: .up)
             }
         }
         return image
     }
-
-    //    - (UIImage *)scaleImageForImageView:(UIImage *)image {
-    //        EPSLog(@"scaleImageForImageView");
-    //        // Downscale upscaled images.
-    //        if (self.imageIsUpscaled) {
-    //            EPSLog(@">>>>>>Downscaling image");
-    //            CGImageRef imageRef = image.CGImage;
-    //            return [UIImage imageWithCGImage:(CGImageRef)imageRef scale:PDF_UPSCALE_FACTOR orientation:UIImageOrientationUp];
-    //        }
-    //        return image;
-    //    }
-
-
  
     // MARK: - Hamburger menu functions
 

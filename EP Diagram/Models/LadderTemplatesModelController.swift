@@ -14,7 +14,6 @@ final class LadderTemplatesModelController: ObservableObject {
     let viewController: UIViewController?
     @Published var ladderTemplates: [LadderTemplate] = [] {
         didSet {
-            print("ladder templates changed")
             saveTemplates()
         }
     }

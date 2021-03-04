@@ -79,9 +79,7 @@ final class LadderView: ScaledView {
     var ladder: Ladder = Ladder.defaultLadder()
     var activeRegion: Region? {
         get { ladder.activeRegion }
-        set { ladder.activeRegion = newValue
-            print("**** Active region mode = \(activeRegion?.mode)")
-        }
+        set { ladder.activeRegion = newValue }
     }
     var caliperMaxY: CGFloat {
         get { cursorViewDelegate.caliperMaxY }
@@ -469,39 +467,10 @@ final class LadderView: ScaledView {
         case .zone:
             selectInZone()
         case .ladder:
-            ladder.mode = ladder.mode == .selected ? .normal : .selected
-            if ladder.mode == .selected {
-                ladder.setAllMarksWithMode(.selected)
-                for region in ladder.regions {
-                    region.mode = .selected
-                }
-            } else {
-                ladder.setAllMarksWithMode(.normal)
-                for region in ladder.regions {
-                    region.mode = .normal
-                }
-            }
+            break // ladder selection no longer does anything
         default:
             break
         }
-
-
-
-        //        else if let mark = tapLocationInLadder.mark {
-        //            // toggle mark selection
-        //            mark.mode = mark.mode == .selected ? .normal : .selected
-        //        } else if let region = tapLocationInLadder.region {
-        //            region.mode = region.mode == .selected ? .normal : .selected
-        //            ladder.setMarksWithMode(region.mode == .selected ? .selected : .normal, inRegion: region)
-        //        } else if let ladder = tapLocationInLadder.ladder {
-        //            // set ladder mode selected
-        //            ladder.mode = ladder.mode == .selected ? .normal : .selected
-        //            ladder.setAllMarksWithMode(.selected)
-        //            for region in ladder.regions {
-        //                region.mode = .selected
-        //            }
-        //            print("Ladder selected")
-        //        }
         setNeedsDisplay()
     }
 
@@ -873,11 +842,9 @@ final class LadderView: ScaledView {
     }
 
     private func swapEndsIfNeeded(mark: Mark) {
-        print("****swapping ends")
         let proximalY = mark.segment.proximal.y
         let distalY = mark.segment.distal.y
         if proximalY > distalY {
-            P("swapping ends")
             mark.swapEnds()
         }
     }
@@ -2233,7 +2200,6 @@ extension LadderView: LadderViewDelegate {
     }
 
     func clearSelection() {
-        ladder.mode = .normal
         ladder.setAllMarksWithMode(.normal)
         for region in ladder.regions {
             region.mode = .normal

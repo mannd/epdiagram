@@ -419,7 +419,7 @@ extension CursorView: CursorViewDelegate {
 
     var caliperMaxY: CGFloat {
         get { caliper.maxY }
-        set { caliper.maxY = newValue; print("caliperMaxY = \(caliper.maxY)")}
+        set { caliper.maxY = newValue }
     }
     var caliperMinY: CGFloat {
         get { caliper.minY }

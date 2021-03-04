@@ -35,7 +35,6 @@ final class Ladder: NSObject, Codable {
             activeRegion.mode = .active
         }
     }
-    var mode: Mode = .normal
 
     var defaultMarkStyle: Mark.Style = .solid
     var zone: Zone = Zone() // at most one selection zone
@@ -270,7 +269,6 @@ final class Ladder: NSObject, Codable {
     func normalize() {
         normalizeAllMarks()
         normalizeRegions()
-        mode = .normal
     }
 
     func setAllRegionsWithMode(_ mode: Region.Mode) {
@@ -440,13 +438,6 @@ final class Ladder: NSObject, Codable {
 
     static func freshLadder(fromLadder ladder: Ladder) -> Ladder {
         return Ladder(template: ladder.template )
-    }
-}
-
-extension Ladder {
-    enum Mode: Int, Codable {
-        case normal
-        case selected
     }
 }
 

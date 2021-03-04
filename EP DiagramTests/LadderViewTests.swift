@@ -220,7 +220,6 @@ class LadderViewTests: XCTestCase {
         let mark = Mark(segment: Segment(proximal: CGPoint(x:100, y: 0), distal: CGPoint(x: 150, y: 1)))
         ladderView.ladder.addMark(mark, toRegion: ladderView.ladder.regions[0])
         var scaledPosition = ladderView.transformToScaledViewPosition(regionPosition: CGPoint(x: 101, y: 0), region: ladderView.ladder.regions[0])
-        print(scaledPosition)
         var anchor = ladderView.nearestAnchor(position: scaledPosition, mark: mark)
         XCTAssertEqual(anchor, .proximal)
         scaledPosition = ladderView.transformToScaledViewPosition(regionPosition: CGPoint(x: 152, y: 1), region: ladderView.ladder.regions[0])

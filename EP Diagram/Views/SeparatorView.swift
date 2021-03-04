@@ -103,7 +103,7 @@ class SeparatorView: UIView {
         ladderView?.resetSize()
         ladderView?.caliperMaxY = caliperMaxY
         ladderView?.refresh()
-//        cursorViewDelegate?.refresh()
+        cursorViewDelegate?.refresh()
     }
 
     func drawSeparator(_ rect: CGRect, with color: UIColor) {
