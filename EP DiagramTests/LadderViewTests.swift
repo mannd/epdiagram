@@ -342,5 +342,27 @@ class LadderViewTests: XCTestCase {
         XCTAssertEqual(value, 1)
     }
 
+    func testGetRawValueFromInterval() {
+        let interval: CGFloat = 100
+        let calFactor: CGFloat = 10
+        let rawValue = ladderView.getRawValueFromCalibratedValue(interval, usingCalFactor: calFactor)
+        XCTAssertEqual(rawValue, 10)
+        let formattedValue = ladderView.formatValue(CGFloat(rawValue), usingCalFactor: calFactor)
+        XCTAssertEqual(formattedValue, Int(interval))
+        let calibration = Calibration()
+        calibration.set(zoom: 1.0, calFactor: 10)
+        ladderView.calibration = calibration
+        let rawValue2 = ladderView.getRawValueFromCalibratedValue(interval, usingCalFactor: calibration.currentCalFactor)
+        XCTAssertEqual(rawValue2, 10)
+        calibration.currentZoom = 2.0
+        ladderView.offsetX = 10
+        let rawValue3 = ladderView.getRawValueFromCalibratedValue(interval, usingCalFactor: calibration.currentCalFactor)
+        XCTAssertEqual(rawValue3, 20)
+        let formattedValue2 = ladderView.formatValue(CGFloat(rawValue3), usingCalFactor: calibration.currentCalFactor)
+        XCTAssertEqual(formattedValue2, Int(interval))
+
+    }
+
+
 
 }

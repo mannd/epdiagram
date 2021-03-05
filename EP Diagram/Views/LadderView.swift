@@ -92,6 +92,13 @@ final class LadderView: ScaledView {
     private var dragCreatedMark: Mark?
     private var dragOriginDivision: RegionDivision = .none
     var isDragging: Bool = false // flag set when dragging marks
+    var isDraggingSelectedMarks: Bool = false {
+        didSet {
+            print("isDraggingSelectedMarks = \(isDraggingSelectedMarks)")
+        }
+    }
+    var diffs: [Mark: CGFloat] = [:]
+    var movementDiffs: [Mark: (prox: CGFloat, distal: CGFloat)] = [:]
 
     private var savedActiveRegion: Region?
     private var savedMode: Mode = .normal
@@ -778,6 +785,50 @@ final class LadderView: ScaledView {
     }
 
     func selectModeDrag(_ pan: UIPanGestureRecognizer) {
+        if isDraggingSelectedMarks {
+            selectModeMarksDrag(pan)
+        } else {
+            selectModeZoneDrag(pan)
+        }
+    }
+
+    func selectModeMarksDrag(_ pan: UIPanGestureRecognizer) {
+        let selectedMarks = ladder.allMarksWithMode(.selected)
+        ladder.hideZone()
+        let location = pan.location(in: self)
+        let state = pan.state
+        if state == .began {
+            isDragging = true
+            currentDocument?.undoManager.beginUndoGrouping()
+            for mark in selectedMarks {
+                let proximalPositionX = transformToScaledViewPositionX(regionPositionX: mark.segment.proximal.x)
+                let distalPositionX = transformToScaledViewPositionX(regionPositionX: mark.segment.distal.x)
+                let proximalDiffX = proximalPositionX - location.x
+                let distalDiffX = distalPositionX - location.x
+                movementDiffs[mark] = (prox: proximalDiffX, distal: distalDiffX)
+                setSegment(segment: mark.segment, forMark: mark)
+            }
+        }
+        if state == .changed {
+            for mark in selectedMarks {
+                if let diff = movementDiffs[mark] {
+                    let region = ladder.region(ofMark: mark)
+                    let segment = transformToScaledViewSegment(regionSegment: mark.segment, region: region)
+                    let newSegment = Segment(proximal: CGPoint(x: location.x + diff.prox, y: segment.proximal.y), distal: CGPoint(x: location.x + diff.distal, y: segment.distal.y))
+                    let newRegionSegment = transformToRegionSegment(scaledViewSegment: newSegment, region: region)
+                    setSegment(segment: newRegionSegment, forMark: mark)
+                }
+            }
+        }
+        if state == .ended {
+            isDragging = false
+            movementDiffs.removeAll()
+            currentDocument?.undoManager.endUndoGrouping()
+        }
+        setNeedsDisplay()
+    }
+
+    func selectModeZoneDrag(_ pan: UIPanGestureRecognizer) {
         let position = pan.location(in: self)
         let state = pan.state
         let regionPositionX = transformToRegionPositionX(scaledViewPositionX: position.x)
@@ -1024,6 +1075,11 @@ final class LadderView: ScaledView {
             undoablyMoveMark(movement: cursorViewDelegate.cursorMovement(), mark: mark, regionPosition: regionPosition)
         }
         setModeOfNearbyMarks(mark)
+    }
+
+    func moveMarkNoCursor(mark: Mark, scaledViewPosition: CGPoint) {
+        let regionPosition = transformToRegionPosition(scaledViewPosition: scaledViewPosition, region: ladder.region(atIndex: mark.regionIndex))
+        undoablyMoveMark(movement: .horizontal, mark: mark, regionPosition: regionPosition)
     }
 
     func setSelectedMark(position: CGPoint) {
@@ -1807,6 +1863,22 @@ final class LadderView: ScaledView {
         return ladder.meanCL(selectedMarks)
     }
 
+    func checkForMovement() throws {
+        let selectedMarks = ladder.allMarksWithMode(.selected)
+        if selectedMarks.count < 1 {
+            throw LadderError.tooFewMarks
+        }
+    }
+
+    func moveMarks(_ diff: CGFloat) {
+        let selectedMarks = ladder.allMarksWithMode(.selected)
+        let regionDiff = transformToRegionPositionX(scaledViewPositionX: diff)
+        for mark in selectedMarks {
+            let newSegment = Segment(proximal: CGPoint(x: mark.segment.proximal.x + regionDiff, y: mark.segment.proximal.y), distal: CGPoint(x: mark.segment.distal.x + regionDiff, y: mark.segment.distal.y))
+            setSegment(segment: newSegment, forMark: mark)
+        }
+    }
+
     func adjustCL(cl: CGFloat) {
         let selectedMarks = ladder.allMarksWithMode(.selected)
         var proxX = selectedMarks[0].segment.proximal.x
@@ -2290,11 +2362,11 @@ enum LadderError: Error {
         case .notCalibrated:
             return L("Diagram is not calibrated.  You must calibrate first.")
         case .tooFewMarks:
-            return L("There are too few marks.  You need to select at least 2 marks to change cycle length")
+            return L("There are too few marks.  You need to select at least 2 marks.")
         case .marksInDifferentRegions:
-            return L("Selected marks are in different regions.  Marks must me in the same region to change cycle length.")
+            return L("Selected marks are in different regions.  Marks must me in the same region..")
         case .marksNotContiguous:
-            return L("Marks are not contiguous.  Selected marks must be contiguous to change cycle length")
+            return L("Marks are not contiguous.  Selected marks must be contiguous.")
         }
     }
 }

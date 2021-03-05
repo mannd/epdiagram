@@ -17,6 +17,7 @@ extension DiagramViewController: UIContextMenuInteractionDelegate {
     func contextMenuInteraction(_ interaction: UIContextMenuInteraction, configurationForMenuAtLocation location: CGPoint) -> UIContextMenuConfiguration? {
         os_log("contextMenuInteraction(_:configurationForMenuAtLocation:)", log: .action, type: .info)
         guard !ladderView.isDragging else { return nil }
+        guard !ladderView.isDraggingSelectedMarks else { return nil }
         let locationInLadder = ladderView.getLocationInLadder(position: location)
         if locationInLadder.specificLocation == .label {
             ladderView.normalizeLadder()

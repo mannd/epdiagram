@@ -297,8 +297,7 @@ final class DiagramViewController: UIViewController {
         // TODO: implement
     }
 
-    lazy var adjustCLAction = UIAction(title: L("Adjust cycle length"), image: UIImage(systemName: "slider.horizontal.below.rectangle")) { action in
-        print("action = \(action)")
+    lazy var adjustCLAction = UIAction(title: L("Adjust cycle length"), image: UIImage(systemName: "slider.horizontal.below.rectangle")) { _  in
         do {
             let meanCL = try self.ladderView.meanCL()
             self.showAdjustCLToolbar(rawValue: meanCL)
@@ -313,7 +312,17 @@ final class DiagramViewController: UIViewController {
     }
 
     lazy var moveAction = UIAction(title: L("Move marks"), image: UIImage(systemName: "arrow.right.arrow.left")) { _ in
-        // TODO: implement
+        do {
+            try self.ladderView.checkForMovement()
+            self.showMoveMarksToolbar()
+        } catch {
+            if error is LadderError {
+                let ladderError = error as? LadderError
+                UserAlert.showMessage(viewController: self, title: L("Error Moving Marks"), message: ladderError?.errorDescription ?? error.localizedDescription)
+            } else {
+                print("unknown error")
+            }
+        }
     }
 
     // Label actions
@@ -675,10 +684,8 @@ final class DiagramViewController: UIViewController {
         let labelText = UITextField()
         labelText.text = L("Adjust cycle length")
         let slider = UISlider()
-        // FIXME: min and max change with zoom.  Similar to problem with intervals.
         slider.minimumValue = Float(ladderView.getRawValueFromCalibratedValue(100, usingCalFactor: calibration.currentCalFactor))
         slider.maximumValue = Float(ladderView.getRawValueFromCalibratedValue(3000, usingCalFactor: calibration.currentCalFactor))
-        print("min value = \(slider.minimumValue), max value = \(slider.maximumValue)")
         slider.setValue(Float(rawValue), animated: false)
         ladderView.adjustCL(cl: rawValue)
         slider.addTarget(self, action: #selector(clSliderValueDidChange(_:)), for: .valueChanged)
@@ -691,6 +698,25 @@ final class DiagramViewController: UIViewController {
         stackView.spacing = 8
         stackView.addArrangedSubview(labelText)
         stackView.addArrangedSubview(slider)
+        stackView.addArrangedSubview(doneButton)
+        setToolbarItems([UIBarButtonItem(customView: stackView)], animated: true)
+
+    }
+
+    func showMoveMarksToolbar() {
+        guard let toolbar = navigationController?.toolbar else { return }
+        currentDocument?.undoManager.beginUndoGrouping()
+        let labelText = UITextField()
+        labelText.text = L("Drag selected marks")
+        ladderView.isDraggingSelectedMarks = true
+        let doneButton = UIButton(type: .system)
+        doneButton.setTitle(L("Done"), for: .normal)
+        doneButton.addTarget(self, action: #selector(closeMoveMarksToolbar(_:)), for: .touchUpInside)
+        let stackView = UIStackView(frame: toolbar.frame)
+        stackView.distribution = .fill
+        stackView.axis = .horizontal
+        stackView.spacing = 8
+        stackView.addArrangedSubview(labelText)
         stackView.addArrangedSubview(doneButton)
         setToolbarItems([UIBarButtonItem(customView: stackView)], animated: true)
 
@@ -784,17 +810,29 @@ final class DiagramViewController: UIViewController {
         ladderView.refresh()
     }
 
+    @objc func movementStepperDidChange(_ sender: UISlider) {
+        let step: CGFloat = CGFloat(sender.value)
+        print("stepper step = \(step)")
+//        ladderView.moveMarks(step)
+//        ladderView.refresh()
+    }
+
     @objc func clSliderValueDidChange(_ sender: UISlider) {
         let value: CGFloat = CGFloat(sender.value)
         ladderView.adjustCL(cl: value)
         ladderView.refresh()
     }
 
+    @objc func closeMoveMarksToolbar(_ sender: UISlider) {
+        currentDocument?.undoManager.endUndoGrouping()
+        ladderView.isDraggingSelectedMarks = false
+        showSelectToolbar()
+    }
+
     @objc func closeAdjustCLToolbar(_ sender: UISlider) {
         currentDocument?.undoManager.endUndoGrouping()
         showSelectToolbar()
     }
-
 
     @objc func closeSlantToolbar(_ sender: UIAlertAction) {
         currentDocument?.undoManager.endUndoGrouping()

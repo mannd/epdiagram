@@ -246,6 +246,6 @@ class LadderTests: XCTestCase {
         let mark3 = ladder.addMark(at: 400, toRegion: ladder.region(atIndex: 0))
         let marks = [mark1!, mark2!, mark3!]
         XCTAssertEqual(ladder.meanCL(marks), 150, accuracy: 0.0001)
-
     }
+
 }
