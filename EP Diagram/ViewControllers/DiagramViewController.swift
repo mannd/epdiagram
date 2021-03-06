@@ -293,15 +293,26 @@ final class DiagramViewController: UIViewController {
     }
     lazy var straightenMenu = UIMenu(title: L("Straighten mark(s)..."), image: UIImage(systemName: "arrow.up.arrow.down"), children: [self.straightenToProximalAction, self.straightenToDistalAction])
 
-    lazy var rhythmAction = UIAction(title: L("Rhythm"), image: UIImage(systemName: "waveform.path.ecg")) { action in
-        // TODO: implement
+    lazy var rhythmAction = UIAction(title: L("Rhythm..."), image: UIImage(systemName: "waveform.path.ecg")) { action in
+        do {
+            try self.ladderView.checkForRhythm()
+            self.performShowRhythmSegue()
+        } catch {
+            if error is LadderError {
+                let ladderError = error as? LadderError
+                UserAlert.showMessage(viewController: self, title: L("Error Applying Rhythm"), message: ladderError?.errorDescription ?? error.localizedDescription)
+            } else {
+                print("unknown error")
+            }
+        }
+
     }
 
-    lazy var adjustCLAction = UIAction(title: L("Adjust cycle length"), image: UIImage(systemName: "slider.horizontal.below.rectangle")) { _  in
+    lazy var adjustCLAction = UIAction(title: L("Adjust cycle length..."), image: UIImage(systemName: "slider.horizontal.below.rectangle")) { _  in
         do {
             let meanCL = try self.ladderView.meanCL()
             self.showAdjustCLToolbar(rawValue: meanCL)
-        } catch  {
+        } catch {
             if error is LadderError {
                 let ladderError = error as? LadderError
                 UserAlert.showMessage(viewController: self, title: L("Error Adjusting Cycle Length"), message: ladderError?.errorDescription ?? error.localizedDescription)
@@ -311,7 +322,7 @@ final class DiagramViewController: UIViewController {
         }
     }
 
-    lazy var moveAction = UIAction(title: L("Move marks"), image: UIImage(systemName: "arrow.right.arrow.left")) { _ in
+    lazy var moveAction = UIAction(title: L("Move marks..."), image: UIImage(systemName: "arrow.right.arrow.left")) { _ in
         do {
             try self.ladderView.checkForMovement()
             self.showMoveMarksToolbar()
@@ -1205,6 +1216,8 @@ final class DiagramViewController: UIViewController {
     }
 
     @IBSegueAction func showPreferences(_ coder: NSCoder) -> UIViewController? {
+        // TODO: Necessary to hide tool bar with these SwiftUI views?
+        navigationController?.setToolbarHidden(true, animated: true)
         let diagramModelController = DiagramModelController(diagram: diagram, diagramViewController: self)
         let preferencesView = PreferencesView(diagramController: diagramModelController)
         let hostingController = UIHostingController(coder: coder, rootView: preferencesView)
@@ -1229,6 +1242,18 @@ final class DiagramViewController: UIViewController {
         let helpViewController = HelpViewController(coder: coder)
         helpViewController?.restorationInfo = self.restorationInfo
         return helpViewController
+    }
+
+    @IBSegueAction func performRhythmSegueAction(_ coder: NSCoder) -> UIViewController? {
+        // Have to provide dismiss action to SwiftUI modal view.  It won't dismiss itself.
+        // TODO: Have this action actually handle the application of rhythm to the selection.
+        let rhythmView = RhythmView(dismissAction: { cl in print(cl); self.dismiss( animated: true, completion: nil) })
+        let hostingController = UIHostingController(coder: coder, rootView: rhythmView)
+        return hostingController
+    }
+
+    func performShowRhythmSegue() {
+        performSegue(withIdentifier: "showRhythmSegue", sender: self)
     }
 
     func performSelectLadderSegue() {

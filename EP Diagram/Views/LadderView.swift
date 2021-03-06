@@ -1870,6 +1870,25 @@ final class LadderView: ScaledView {
         }
     }
 
+    func checkForRhythm() throws {
+        guard let calibration = calibration else {
+            fatalError("calibration is nil")
+        }
+        if !calibration.isCalibrated {
+            throw LadderError.notCalibrated
+        }
+        let zone = ladder.zone
+        if zone.isVisible {
+            if zone.regions.count > 1 {
+                throw LadderError.tooManyRegions
+            }
+        }
+        let regions = ladder.allRegionsWithMode(.selected)
+        if regions.count > 1 {
+            throw LadderError.tooManyRegions
+        }
+    }
+
     func moveMarks(_ diff: CGFloat) {
         let selectedMarks = ladder.allMarksWithMode(.selected)
         let regionDiff = transformToRegionPositionX(scaledViewPositionX: diff)
@@ -2356,6 +2375,7 @@ enum LadderError: Error {
     case tooFewMarks
     case marksInDifferentRegions
     case marksNotContiguous
+    case tooManyRegions
 
     public var errorDescription: String? {
         switch self {
@@ -2367,7 +2387,10 @@ enum LadderError: Error {
             return L("Selected marks are in different regions.  Marks must me in the same region..")
         case .marksNotContiguous:
             return L("Marks are not contiguous.  Selected marks must be contiguous.")
+        case .tooManyRegions:
+            return L("Rhythm can only be set in one region at a time.")
         }
+
     }
 }
 
