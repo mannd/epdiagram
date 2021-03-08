@@ -32,6 +32,7 @@
 		8E35924924BE9B27001E23D5 /* DiagramIO.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8E35924824BE9B27001E23D5 /* DiagramIO.swift */; };
 		8E3AD1372459CABF0085BDD4 /* LocationInLadder.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8E3AD1362459CABF0085BDD4 /* LocationInLadder.swift */; };
 		8E4086E425F30383005F53CB /* RhythmView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8E4086E325F30383005F53CB /* RhythmView.swift */; };
+		8E4086E925F325C4005F53CB /* Rhythm.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8E4086E825F325C4005F53CB /* Rhythm.swift */; };
 		8E4A52EF24886B16007406F5 /* Diagram.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8E4A52EE24886B16007406F5 /* Diagram.swift */; };
 		8E4ACA8024478A6E00575538 /* BlackView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8E4ACA7F24478A6E00575538 /* BlackView.swift */; };
 		8E4ACA8224478D7C00575538 /* HamburgerTableViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8E4ACA8124478D7C00575538 /* HamburgerTableViewController.swift */; };
@@ -141,6 +142,7 @@
 		8E35924824BE9B27001E23D5 /* DiagramIO.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DiagramIO.swift; sourceTree = "<group>"; };
 		8E3AD1362459CABF0085BDD4 /* LocationInLadder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocationInLadder.swift; sourceTree = "<group>"; };
 		8E4086E325F30383005F53CB /* RhythmView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RhythmView.swift; sourceTree = "<group>"; };
+		8E4086E825F325C4005F53CB /* Rhythm.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Rhythm.swift; sourceTree = "<group>"; };
 		8E4A52EE24886B16007406F5 /* Diagram.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Diagram.swift; sourceTree = "<group>"; };
 		8E4ACA7F24478A6E00575538 /* BlackView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BlackView.swift; sourceTree = "<group>"; };
 		8E4ACA8124478D7C00575538 /* HamburgerTableViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HamburgerTableViewController.swift; sourceTree = "<group>"; };
@@ -408,6 +410,7 @@
 				8ECA9FB42470A07B0016D939 /* RegionTemplate.swift */,
 				8E856CF324EDC5E10064121F /* Segment.swift */,
 				8E982F9224EAF8B500E94F71 /* Zone.swift */,
+				8E4086E825F325C4005F53CB /* Rhythm.swift */,
 			);
 			path = Models;
 			sourceTree = "<group>";
@@ -628,6 +631,7 @@
 				8E253DD3244A8799008CC56B /* DiagramViewController+UIScrollViewDelegate.swift in Sources */,
 				8E6EB6C02484778E00E5F883 /* Notification+didUndoableAction.swift in Sources */,
 				8E9550BD2474B22000E1B125 /* FileIO.swift in Sources */,
+				8E4086E925F325C4005F53CB /* Rhythm.swift in Sources */,
 				8ED8CBD125D8B1FF00A6234F /* DiagramModelController.swift in Sources */,
 				8E856CF224EDC53D0064121F /* CGPoint+clampY.swift in Sources */,
 				8E973F9B24C4BF0800AB41C3 /* String+isBlank.swift in Sources */,

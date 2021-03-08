@@ -25,6 +25,7 @@ final class Ladder: NSObject, Codable {
     var leftMargin: CGFloat = 50
     var regions = [Region]()
     var regionCount: Int { regions.count }
+    // TODO: enforce only 1 attached mark at a time?
     var attachedMark: Mark? // cursor is attached to a most 1 mark at a time
     var connectedMarks = [Mark]() // marks in the process of being connected
     var activeRegion: Region? {  // ladder model enforces at most one region can be active
@@ -54,6 +55,7 @@ final class Ladder: NSObject, Codable {
     }
 
     func registerMark(_ mark: Mark) {
+        os_log("registerMark(_:) - Ladder", log: OSLog.touches, type: .info)
         registry[mark.id] = mark
     }
 
@@ -147,10 +149,12 @@ final class Ladder: NSObject, Codable {
     // TODO: Does region have to be optional?  Consider refactor away optionality.
     // addMark() functions.  All require a Region in which to add the mark.  Each new mark is registered to that region.  All return addedMark or nil if region is nil.
     func addMark(at positionX: CGFloat, toRegion region: Region?) -> Mark? {
+        os_log("addMark(at:toRegion:) - Ladder", log: OSLog.touches, type: .info)
         return addMark(Mark(positionX: positionX), toRegion: region)
     }
 
     @discardableResult func addMark(fromSegment segment: Segment, toRegion region: Region?) -> Mark? {
+        os_log("addMark(fromSegment:toRegion:) - Ladder", log: .action, type: .info)
         let mark = Mark(segment: segment)
         return addMark(mark, toRegion: region)
     }

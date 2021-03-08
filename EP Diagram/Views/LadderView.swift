@@ -91,10 +91,14 @@ final class LadderView: ScaledView {
     private var regionDistalToDragOrigin: Region?
     private var dragCreatedMark: Mark?
     private var dragOriginDivision: RegionDivision = .none
-    var isDragging: Bool = false // flag set when dragging marks
+    var isDragging: Bool = false {// flag set when dragging marks
+        didSet {
+            print("***isDragging = \(isDragging)")
+        }
+    }
     var isDraggingSelectedMarks: Bool = false {
         didSet {
-            print("isDraggingSelectedMarks = \(isDraggingSelectedMarks)")
+            print("***isDraggingSelectedMarks = \(isDraggingSelectedMarks)")
         }
     }
     var diffs: [Mark: CGFloat] = [:]
@@ -531,10 +535,12 @@ final class LadderView: ScaledView {
     }
 
     func addMarkToActiveRegion(scaledViewPositionX: CGFloat) -> Mark? {
+        os_log("addMarkToActiveRegion(scaledViewPositionX:) - LadderView", log: OSLog.touches, type: .info)
         return addMarkToActiveRegion(regionPositionX: transformToRegionPositionX(scaledViewPositionX: scaledViewPositionX))
     }
 
     func addMarkToActiveRegion(regionPositionX: CGFloat) -> Mark? {
+        os_log("addMarkToActiveRegion(regionPositionX:) - LadderView", log: OSLog.touches, type: .info)
         if let mark = ladder.addMark(at: regionPositionX, toRegion: activeRegion) {
             mark.mode = .attached
             return mark
@@ -721,7 +727,6 @@ final class LadderView: ScaledView {
         if state == .changed {
             if let mark = movingMark {
                 moveMark(mark: mark, scaledViewPosition: position)
-                setModeOfNearbyMarks(movingMark)
             }
             else if regionOfDragOrigin == locationInLadder.region, let regionOfDragOrigin = regionOfDragOrigin {
                 switch dragOriginDivision {
@@ -734,6 +739,7 @@ final class LadderView: ScaledView {
                 default:
                     break
                 }
+                // TODO: this is called repeatedly, is ok?
                 setModeOfNearbyMarks(dragCreatedMark)
             }
         }
@@ -963,7 +969,7 @@ final class LadderView: ScaledView {
         guard let mark = mark else { return }
         let nearbyDistance = nearbyMarkAccuracy / scale
         let markIds = nearbyMarkIds(mark: mark, nearbyDistance: nearbyDistance)
-        // FIXME: xxx
+        // FIXME: Do we need to clear all marks with movement?  maybe just adjacent marks?
         ladder.normalizeAllMarks()
         ladder.setModeForLinkedMarkIDs(mode: .linked, linkedMarkIDs: markIds)
         setAttachedMarkAndLinkedMarksModes()
@@ -1886,6 +1892,20 @@ final class LadderView: ScaledView {
         let regions = ladder.allRegionsWithMode(.selected)
         if regions.count > 1 {
             throw LadderError.tooManyRegions
+        }
+    }
+
+    func fillWithRhythm(_ rhythm: Rhythm) {
+        guard let calFactor = calibration?.currentCalFactor else { return }
+        if ladder.zone.isVisible {
+            let start = zone.start
+            let end = zone.end
+            let regionCL = getRawValueFromCalibratedValue(rhythm.meanCL, usingCalFactor: calFactor)
+            // need to further convert this to region coordinates
+            let region = zone.startingRegion
+            // Need add mark that doesn't use active region
+            setNeedsDisplay()
+            print(regionCL)
         }
     }
 

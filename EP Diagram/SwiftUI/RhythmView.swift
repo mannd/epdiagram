@@ -8,41 +8,16 @@
 
 import SwiftUI
 
-enum RhythmType: Int, CustomStringConvertible, Identifiable, CaseIterable {
-    case regular
-    case fibrillation
-
-    var id: RhythmType { return self }
-
-    var description: String {
-        switch self {
-        case .regular:
-            return "Regular"
-        case .fibrillation:
-            return "Fibrillation"
-        }
-    }
-}
-
 struct RhythmView: View {
-    var dismissAction: ((Double) -> Void)?
+    var dismissAction: ((Rhythm) -> Void)?
 
-    @State var cl: Double = 600
-    @State var minCL: Double = 100
-    @State var maxCL: Double = 150
-    @State var rhythmType: RhythmType = .regular
-    @State var randomizeCycleLength: Bool = true
-    @State var randomizeOrigin: Bool = false
-    @State var randomizeConductionTime: Bool = false
-    @State var deletePrexistingMarks: Bool = true
+    @State var rhythm: Rhythm = Rhythm(meanCL: 600, rhythmType: .regular, minCL: 100, maxCL: 150, randomizeCL: true, randomizeImpulseOrigin: false, randomizeConductionTime: false, replaceExistingMarks: true)
 
-    @Environment(\.presentationMode) var presentationMode: Binding<PresentationMode>
-    
     var body: some View {
         NavigationView {
             Form {
                 Section(header: Text("Rhythm type")) {
-                    Picker(selection: $rhythmType, label: Text("")) {
+                    Picker(selection: $rhythm.rhythmType, label: Text("")) {
                         ForEach(RhythmType.allCases) { rhythm in
                             Text(rhythm.description)
                         }
@@ -50,27 +25,27 @@ struct RhythmView: View {
                     .pickerStyle(SegmentedPickerStyle())
                 }
                 Section(header: Text("Mean Cycle Length")) {
-                    Text("Mean cycle length = \(lround(cl))")
-                    Slider(value: $cl, in: 50...2000)
+                    Text("Mean cycle length = \(lround(Double(rhythm.meanCL)))")
+                    Slider(value: $rhythm.meanCL, in: 50...2000)
                 }
                 Section(header: Text("Fibrillation Parameters")) {
-                    Toggle(isOn: $randomizeCycleLength) {
+                    Toggle(isOn: $rhythm.randomizeCL) {
                         Text("Randomize cycle length")
                     }
-                    Text("Minimum cycle length = \(lround(minCL))")
-                    Slider(value: $minCL, in: 10...(maxCL - 10)).disabled(randomizeCycleLength == false)
-                    Text("Maximum cycle length = \(lround(maxCL))")
-                    Slider(value: $maxCL, in: (minCL + 10)...200).disabled(randomizeCycleLength == false)
-                    Toggle(isOn: $randomizeOrigin) {
-                        Text("Randomize origin")
+                    Text("Minimum cycle length = \(lround(Double(rhythm.minCL)))")
+                    Slider(value: $rhythm.minCL, in: 10...(rhythm.maxCL - 10)).disabled(rhythm.randomizeCL == false)
+                    Text("Maximum cycle length = \(lround(Double(rhythm.maxCL)))")
+                    Slider(value: $rhythm.maxCL, in: (rhythm.minCL + 10)...200).disabled(rhythm.randomizeCL == false)
+                    Toggle(isOn: $rhythm.randomizeImpulseOrigin) {
+                        Text("Randomize impulse origin")
                     }
-                    Toggle(isOn: $randomizeConductionTime) {
+                    Toggle(isOn: $rhythm.randomizeConductionTime) {
                         Text("Randomize conduction time")
                     }
                 }
-                .disabled(rhythmType == .regular)
+                .disabled(rhythm.rhythmType == .regular)
                 Section(header: Text("Delete preexisting marks?")) {
-                    Toggle(isOn: $deletePrexistingMarks) {
+                    Toggle(isOn: $rhythm.replaceExistingMarks) {
                         Text("Delete marks in selected area first?")
                     }
                 }
@@ -86,14 +61,11 @@ struct RhythmView: View {
     }
 
     func applyRhythm() {
-        print("apply rhythm")
         if let dismissAction = dismissAction {
-            dismissAction(cl)
+            dismissAction(rhythm)
         }
     }
 }
-
-
 
 struct RhythmView_Previews: PreviewProvider {
     static var previews: some View {

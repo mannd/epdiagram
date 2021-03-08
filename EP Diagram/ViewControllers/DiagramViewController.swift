@@ -1228,10 +1228,6 @@ final class DiagramViewController: UIViewController {
         let sampleDiagrams: [Diagram] = [
             Diagram(name: L("Normal ECG"), description: L("Just a normal ECG"), image: UIImage(named: "SampleECG")!, ladder: Ladder.defaultLadder()),
             Diagram(name: L("AV Block"), description: L("High grade AV block"), image: UIImage(named: "AVBlock")!, ladder: Ladder.defaultLadder())
-            //        Diagram.blankDiagram(name: L("Blank Diagram")),
-            //        // Make this taller than height even with rotation.
-            //        Diagram(name: L("Scrollable Blank Diagram"), image: UIImage.emptyImage(size: CGSize(width: view.frame.size.width * 3, height: max(view.frame.size.height, view.frame.size.width)), color: UIColor.systemTeal), description: L("Wide scrollable blank image"))
-            // TODO: add others here.
         ]
         let sampleSelector = SampleSelector(sampleDiagrams: sampleDiagrams, delegate: self)
         let hostingController = UIHostingController(coder: coder, rootView: sampleSelector)
@@ -1247,9 +1243,15 @@ final class DiagramViewController: UIViewController {
     @IBSegueAction func performRhythmSegueAction(_ coder: NSCoder) -> UIViewController? {
         // Have to provide dismiss action to SwiftUI modal view.  It won't dismiss itself.
         // TODO: Have this action actually handle the application of rhythm to the selection.
-        let rhythmView = RhythmView(dismissAction: { cl in print(cl); self.dismiss( animated: true, completion: nil) })
+        let rhythmView = RhythmView(dismissAction: applyRhythm(rhythm:))
         let hostingController = UIHostingController(coder: coder, rootView: rhythmView)
         return hostingController
+    }
+
+    func applyRhythm(rhythm: Rhythm) {
+        print(rhythm)
+        ladderView.fillWithRhythm(rhythm)
+        self.dismiss(animated: true, completion: nil)
     }
 
     func performShowRhythmSegue() {

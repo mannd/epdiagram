@@ -140,6 +140,12 @@ extension DiagramViewController: UIContextMenuInteractionDelegate {
                     prepareActions()
                     return markContextMenuConfiguration(at: location)
                 }
+            case .zone:
+                if let zone = locationInLadder.zone {
+                    ladderView.ladder.setMarksWithMode(.selected, inZone: zone)
+                    prepareActions()
+                    return markContextMenuConfiguration(at: location)
+                }
             case .ladder:
                 break
             default:

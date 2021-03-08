@@ -376,7 +376,7 @@ final class CursorView: ScaledView {
         // imageScrollView starts at x = 0, contentInset shifts view to right, and the left margin is negative.
         // So ignore positions in left margin.
         if position.x > 0 {
-            moveCursor(cursorViewPositionX: position.x / scale)
+            moveCursor(cursorViewPositionX: position.x / scale)  // cursor is not affected by offset, only zoom scale
             cursorIsVisible = true
             ladderViewDelegate.addAttachedMark(scaledViewPositionX: position.x)
             setCursorHeight()
