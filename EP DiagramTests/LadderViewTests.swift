@@ -118,7 +118,7 @@ class LadderViewTests: XCTestCase {
         ladderView.activeRegion = ladderView.ladder.region(atIndex: 0)
         let mark2 = ladderView.addMarkToActiveRegion(regionPositionX: 10)
         let mark3 = Mark()
-        ladderView.ladder.addMark(mark3, toRegion: ladderView.activeRegion)
+        ladderView.ladder.addMark(mark3, toRegion: ladderView.activeRegion!)
         XCTAssertNotNil(mark2)
         XCTAssertNotNil(mark3)
         mark2!.mode = Mark.Mode.attached
@@ -360,6 +360,16 @@ class LadderViewTests: XCTestCase {
         XCTAssertEqual(rawValue3, 20)
         let formattedValue2 = ladderView.formatValue(CGFloat(rawValue3), usingCalFactor: calibration.currentCalFactor)
         XCTAssertEqual(formattedValue2, Int(interval))
+    }
+
+    func testAddMark() {
+        ladderView.activeRegion = nil
+        XCTAssertNil(ladderView.addMarkToActiveRegion(regionPositionX: 100))
+        XCTAssertNil(ladderView.addMarkToActiveRegion(scaledViewPositionX: 100))
+
+        ladderView.activeRegion = ladderView.ladder.regions[0]
+        XCTAssertNotNil(ladderView.addMarkToActiveRegion(regionPositionX: 100))
+        XCTAssertNotNil(ladderView.addMarkToActiveRegion(scaledViewPositionX: 100))
 
     }
 

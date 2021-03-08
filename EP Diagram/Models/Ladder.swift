@@ -145,23 +145,21 @@ final class Ladder: NSObject, Codable {
         }
         return regionRelation
     }
-    
-    // TODO: Does region have to be optional?  Consider refactor away optionality.
-    // addMark() functions.  All require a Region in which to add the mark.  Each new mark is registered to that region.  All return addedMark or nil if region is nil.
-    func addMark(at positionX: CGFloat, toRegion region: Region?) -> Mark? {
+
+    func addMark(at positionX: CGFloat, toRegion region: Region) -> Mark {
         os_log("addMark(at:toRegion:) - Ladder", log: OSLog.touches, type: .info)
         return addMark(Mark(positionX: positionX), toRegion: region)
     }
 
-    @discardableResult func addMark(fromSegment segment: Segment, toRegion region: Region?) -> Mark? {
+    @discardableResult func addMark(fromSegment segment: Segment, toRegion region: Region) -> Mark {
         os_log("addMark(fromSegment:toRegion:) - Ladder", log: .action, type: .info)
         let mark = Mark(segment: segment)
         return addMark(mark, toRegion: region)
     }
 
-    @discardableResult func addMark(_ mark: Mark, toRegion region: Region?) -> Mark? {
+    // All roads lead to this addMark function, which ensures mark is appended to a region and registered.
+    @discardableResult func addMark(_ mark: Mark, toRegion region: Region) -> Mark {
         os_log("addMark(_:toRegion:) - Ladder", log: .action, type: .info)
-        guard let region = region else { return nil }
         mark.style = region.style == .inherited ? defaultMarkStyle : region.style
         region.appendMark(mark)
         registerMark(mark)
@@ -171,11 +169,10 @@ final class Ladder: NSObject, Codable {
         return mark
     }
 
-    func deleteMark(_ mark: Mark?) {
-        guard let mark = mark else { return }
+    func deleteMark(_ mark: Mark) {
         let markRegion = region(ofMark: mark)
         normalizeAllMarks()
-        // FIXME: do we need to unregister mark.  OK if addmark registers.
+        // FIXME: do we need to unregister mark?
         unregisterMark(mark)
         if let index = markRegion.marks.firstIndex(where: {$0 === mark}) {
             markRegion.marks.remove(at: index)

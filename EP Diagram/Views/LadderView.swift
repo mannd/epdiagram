@@ -351,19 +351,17 @@ final class LadderView: ScaledView {
                 // FIXME: do we exclude region index out of range?
                 let markRegion = ladder.region(atIndex: firstRegionIndex + 1)
                 let segment = Segment(proximal: CGPoint(x: marks[0].segment.distal.x, y: 0), distal: CGPoint(x: marks[1].segment.proximal.x, y: 1.0))
-                if let mark = ladder.addMark(fromSegment: segment, toRegion: markRegion) {
-                    undoablyAddMark(mark: mark)
-                    return mark
-                }
+                let mark = ladder.addMark(fromSegment: segment, toRegion: markRegion)
+                undoablyAddMark(mark: mark)
+                return mark
             }
             if regionDifference < 0 {
                 // FIXME: do we exclude region index out of range?
                 let markRegion = ladder.region(atIndex: firstRegionIndex - 1)
                 let segment = Segment(proximal: CGPoint(x: marks[1].segment.distal.x, y: 0), distal: CGPoint(x: marks[0].segment.proximal.x, y: 1.0))
-                if let mark = ladder.addMark(fromSegment: segment, toRegion: markRegion) {
-                    undoablyAddMark(mark: mark)
-                    return mark
-                }
+                let mark = ladder.addMark(fromSegment: segment, toRegion: markRegion)
+                undoablyAddMark(mark: mark)
+                return mark
             }
         }
         return nil
@@ -541,11 +539,12 @@ final class LadderView: ScaledView {
 
     func addMarkToActiveRegion(regionPositionX: CGFloat) -> Mark? {
         os_log("addMarkToActiveRegion(regionPositionX:) - LadderView", log: OSLog.touches, type: .info)
-        if let mark = ladder.addMark(at: regionPositionX, toRegion: activeRegion) {
-            mark.mode = .attached
-            return mark
+        guard let activeRegion = activeRegion else {
+            return nil
         }
-        return nil
+        let mark = ladder.addMark(at: regionPositionX, toRegion: activeRegion)
+        mark.mode = .attached
+        return mark
     }
 
     @available(*, deprecated, message: "Used for setting anchor depending on tap location, not used.")
@@ -611,17 +610,16 @@ final class LadderView: ScaledView {
             }
         } else {
             // FIXME: refactor
-            let region = tapLocationInLadder.region
+            guard let region = tapLocationInLadder.region else { return false }
             let scaledPositionX = transformToRegionPositionX(scaledViewPositionX: tapLocationInLadder.unscaledPosition.x)
-            if let mark = ladder.addMark(at: scaledPositionX, toRegion: region) {
-                normalizeAllMarks()
-                undoablyAddMark(mark: mark)
-                attachMark(mark)
-                cursorViewDelegate.moveCursor(cursorViewPositionX: scaledPositionX)
-                cursorViewDelegate.cursorIsVisible = true
-                cursorViewDelegate.setCursorHeight()
-                cursorViewDelegate.refresh()
-            }
+            let mark = ladder.addMark(at: scaledPositionX, toRegion: region)
+            normalizeAllMarks()
+            undoablyAddMark(mark: mark)
+            attachMark(mark)
+            cursorViewDelegate.moveCursor(cursorViewPositionX: scaledPositionX)
+            cursorViewDelegate.cursorIsVisible = true
+            cursorViewDelegate.setCursorHeight()
+            cursorViewDelegate.refresh()
         }
         return true
     }
@@ -1895,18 +1893,19 @@ final class LadderView: ScaledView {
         }
     }
 
+    // TODO: implement
     func fillWithRhythm(_ rhythm: Rhythm) {
-        guard let calFactor = calibration?.currentCalFactor else { return }
-        if ladder.zone.isVisible {
-            let start = zone.start
-            let end = zone.end
-            let regionCL = getRawValueFromCalibratedValue(rhythm.meanCL, usingCalFactor: calFactor)
-            // need to further convert this to region coordinates
-            let region = zone.startingRegion
-            // Need add mark that doesn't use active region
-            setNeedsDisplay()
-            print(regionCL)
-        }
+//        guard let calFactor = calibration?.currentCalFactor else { return }
+//        if ladder.zone.isVisible {
+//            let start = zone.start
+//            let end = zone.end
+//            let regionCL = getRawValueFromCalibratedValue(rhythm.meanCL, usingCalFactor: calFactor)
+//            // need to further convert this to region coordinates
+//            let region = zone.startingRegion
+//            // Need add mark that doesn't use active region
+//            setNeedsDisplay()
+//            print(regionCL)
+//        }
     }
 
     func moveMarks(_ diff: CGFloat) {
@@ -2177,6 +2176,9 @@ extension LadderView: LadderViewDelegate {
     }
 
     func addAttachedMark(scaledViewPositionX positionX: CGFloat) {
+        guard let activeRegion = activeRegion else {
+            fatalError("activeRegion is nil in addAttachedMark(scaledViewPositionX positionX: CGFloat).")
+        }
         ladder.attachedMark = ladder.addMark(at: positionX / scale, toRegion: activeRegion)
         if let attachedMark = ladder.attachedMark {
             undoablyAddMark(mark: attachedMark)
