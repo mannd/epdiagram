@@ -244,4 +244,19 @@ class LadderTests: XCTestCase {
         XCTAssertEqual(ladder.meanCL(marks), 150, accuracy: 0.0001)
     }
 
+    func testAttachedMark() {
+        let mark1 = ladder.addMark(at: 100, toRegion: ladder.region(atIndex: 0))
+        let mark2 = ladder.addMark(at: 200, toRegion: ladder.region(atIndex: 0))
+        ladder.attachedMark = mark1
+        XCTAssertEqual(mark1.mode, .attached)
+        ladder.attachedMark = nil
+        XCTAssertEqual(mark1.mode, .normal)
+        ladder.attachedMark = mark1
+        XCTAssertEqual(mark1.mode, .attached)
+        ladder.attachedMark = mark2
+        XCTAssertEqual(mark1.mode, .normal)
+        XCTAssertEqual(mark2.mode, .attached)
+    }
+
+
 }

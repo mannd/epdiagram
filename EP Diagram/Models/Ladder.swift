@@ -25,10 +25,21 @@ final class Ladder: NSObject, Codable {
     var leftMargin: CGFloat = 50
     var regions = [Region]()
     var regionCount: Int { regions.count }
-    // TODO: enforce only 1 attached mark at a time?
-    var attachedMark: Mark? // cursor is attached to a most 1 mark at a time
+    var attachedMark: Mark?  { // attachedMark does not own its mark
+        didSet { // cursor is attached to a most 1 mark at a time
+            print("ladder.attachedMark set")
+            normalizeAllMarks()  // setting attached mark to nil does not delete it, so set its mode to normal.
+            if let attachedMark = attachedMark {
+                let linkedMarkIDs = attachedMark.linkedMarkIDs
+                // Note that the order below is important.  An attached mark can be in its own linkedMarks.  But we always want the attached mark to have an .attached highlight.
+                setModeForLinkedMarkIDs(mode: .linked, linkedMarkIDs: linkedMarkIDs)
+                attachedMark.mode = .attached
+            }
+        }
+    }
+
     var connectedMarks = [Mark]() // marks in the process of being connected
-    var activeRegion: Region? {  // ladder model enforces at most one region can be active
+    var activeRegion: Region? {  // ladder model enforces at most one region can be active and region.mode == .normal
         didSet {
             regions.forEach { region in region.mode = .normal }
             // All regions are set to normal mode if activeRegion set to nil.

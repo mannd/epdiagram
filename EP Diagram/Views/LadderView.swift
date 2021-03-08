@@ -567,11 +567,14 @@ final class LadderView: ScaledView {
         ladder.toggleAnchor(mark: mark)
     }
 
+    // This is already done when attachedMark is set in the ladder, so...
+    // TODO: refactor this away.
     func setAttachedMarkAndLinkedMarksModes() {
         print("setAttachedMarkAndLinkedMarksModes()")
         if let attachedMark = ladder.attachedMark {
             let linkedMarkIDs = attachedMark.linkedMarkIDs
             // Note that the order below is important.  An attached mark can be in its own linkedMarks.  But we always want the attached mark to have an .attached highlight.
+            ladder.normalizeAllMarks()
             ladder.setModeForLinkedMarkIDs(mode: .linked, linkedMarkIDs: linkedMarkIDs)
             attachedMark.mode = .attached
         }
@@ -580,7 +583,6 @@ final class LadderView: ScaledView {
     func attachMark(_ mark: Mark?) {
         print("attachMark()")
         ladder.attachedMark = mark
-        setAttachedMarkAndLinkedMarksModes()
     }
 
 
@@ -2331,8 +2333,8 @@ extension LadderView: LadderViewDelegate {
     }
 
     func unattachAttachedMark() {
+        // FIXME: Why is this part of unattachedAttachedMark??
         assessBlockAndImpulseOrigin(mark: ladder.attachedMark)
-        ladder.attachedMark?.mode = .normal
         ladder.attachedMark = nil
     }
 

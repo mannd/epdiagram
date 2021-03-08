@@ -373,6 +373,34 @@ class LadderViewTests: XCTestCase {
 
     }
 
+    func testAttachMark() {
+        ladderView.activeRegion = ladderView.ladder.region(atIndex: 0)
+        let mark1 = ladderView.addMarkToActiveRegion(regionPositionX: 100)
+        let mark2 = ladderView.addMarkToActiveRegion(regionPositionX: 200)
+        ladderView.attachMark(mark1)
+        XCTAssertEqual(mark1!.mode, .attached)
+        ladderView.unattachAttachedMark()
+        XCTAssertEqual(mark1!.mode, .normal)
+        ladderView.attachMark(mark1)
+        XCTAssertEqual(mark1!.mode, .attached)
+        // Can't have two marks attached at the same time.
+        ladderView.attachMark(mark2)
+        XCTAssertEqual(mark2!.mode, .attached)
+        XCTAssertEqual(mark1!.mode, .normal)
 
+
+
+//        let mark1 = ladderView.addMark(at: 100, toRegion: ladder.region(atIndex: 0))
+//        let mark2 = ladder.addMark(at: 200, toRegion: ladder.region(atIndex: 0))
+//        ladder.attachedMark = mark1
+//        XCTAssertEqual(mark1.mode, .attached)
+//        ladder.attachedMark = nil
+//        XCTAssertEqual(mark1.mode, .normal)
+//        ladder.attachedMark = mark1
+//        XCTAssertEqual(mark1.mode, .attached)
+//        ladder.attachedMark = mark2
+//        XCTAssertEqual(mark1.mode, .normal)
+//        XCTAssertEqual(mark2.mode, .attached)
+    }
 
 }
