@@ -60,8 +60,8 @@ class LadderViewTests: XCTestCase {
         let scale: CGFloat = 1.78
         let offset: CGFloat = 333.45
         let region = Region(template: RegionTemplate())
-        region.proximalBoundary = 0
-        region.distalBoundary = 300
+        region.proximalBoundaryY = 0
+        region.distalBoundaryY = 300
         let regionSegment = Transform.toRegionSegment(scaledViewSegment: markPosition, region: region, offsetX: offset, scale: scale)
         let scaledViewSegment = Transform.toScaledViewSegment(regionSegment: regionSegment, region: region, offsetX: offset, scale: scale)
         XCTAssertEqual(markPosition.proximal.x, scaledViewSegment.proximal.x, accuracy: 0.0001)
@@ -320,8 +320,8 @@ class LadderViewTests: XCTestCase {
         XCTAssertEqual(value, 1000)
         value = ladderView.formatValue(100, usingCalFactor: 0.01)
         XCTAssertEqual(value, 1)
-        value = ladderView.getRawValueFromCalibratedValue(1, usingCalFactor: 0.01)
-        XCTAssertEqual(value, 100)
+        let rawValue = ladderView.getRawValueFromCalibratedValue(1, usingCalFactor: 0.01)
+        XCTAssertEqual(rawValue, 100, accuracy: 0.0001)
     }
 
     func testCalibration2() {

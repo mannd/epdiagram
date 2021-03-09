@@ -1178,7 +1178,7 @@ final class DiagramViewController: UIViewController {
             separatorView = HorizontalSeparatorView.addSeparatorBetweenViews(separatorType: .horizontal, primaryView: imageScrollView, secondaryView: ladderView, parentView: self.view)
             separatorView?.cursorViewDelegate = cursorView
         }
-        self.ladderView.resetSize(setActiveRegion: setActiveRegion)
+        self.ladderView.resetSize(setActiveRegion: setActiveRegion, width: imageView.frame.width)
         self.imageView.setNeedsDisplay()
         cursorView.caliperMaxY = imageScrollView.frame.height
         cursorView.caliperMinY = 0

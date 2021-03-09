@@ -19,11 +19,12 @@ final class Region: Codable {
     var name: String
     var longDescription: String
     var unitHeight: Int = 1
-    var proximalBoundary: CGFloat = 0
-    var distalBoundary: CGFloat = 0
+    var proximalBoundaryY: CGFloat = 0
+    var distalBoundaryY: CGFloat = 0
     var mode: Mode = .normal
     var marks = [Mark]()
-    var height: CGFloat { distalBoundary - proximalBoundary }
+    var height: CGFloat { distalBoundaryY - proximalBoundaryY }
+    // TODO: refactor boundary and height and use at CGRect frame instead
     private var _style: Mark.Style = .inherited
 
     var style: Mark.Style = .inherited
@@ -53,8 +54,8 @@ final class Region: Codable {
     }
 
     func relativeYPosition(y: CGFloat) -> CGFloat? {
-        guard y >= proximalBoundary && y <= distalBoundary else { return nil }
-        return (y - proximalBoundary) / (distalBoundary - proximalBoundary)
+        guard y >= proximalBoundaryY && y <= distalBoundaryY else { return nil }
+        return (y - proximalBoundaryY) / (distalBoundaryY - proximalBoundaryY)
     }
 }
 
