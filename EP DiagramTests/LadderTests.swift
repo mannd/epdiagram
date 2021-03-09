@@ -47,12 +47,13 @@ class LadderTests: XCTestCase {
 
     func testAddMark() {
         let mark = ladder.addMark(at: 100, toRegion: ladder.regions[0])
-        XCTAssertEqual(mark?.segment.proximal.x, 100)
-    }
-
-    func testAddMarkNoActiveRegion() {
-        let mark = ladder.addMark(at: 100, toRegion: nil)
-        XCTAssertEqual(mark?.segment.proximal.x, nil)
+        XCTAssertNotNil(mark)
+        XCTAssertEqual(mark.segment.proximal.x, 100)
+        let mark2 = ladder.addMark(fromSegment: Segment(proximal: CGPoint(x: 100, y: 0), distal: CGPoint(x: 200, y: 1.0)), toRegion: ladder.region(atIndex: 0))
+        XCTAssertEqual(mark2.segment.proximal.x, 100)
+        XCTAssertEqual(mark2.segment.distal.x, 200)
+        XCTAssertEqual(mark2.segment.proximal.y, 0)
+        XCTAssertEqual(mark2.segment.distal.y, 1.0)
     }
 
     func testGetRegionIndex() {
@@ -92,8 +93,6 @@ class LadderTests: XCTestCase {
         // Make sure delete does nothing if mark is nil.
         let mark1 = ladder.addMark(fromSegment: segment, toRegion: ladder.regions[0])
         XCTAssertEqual(true, ladder.hasMarks())
-        ladder.deleteMark(nil)
-        XCTAssertEqual(true, ladder.hasMarks())
         ladder.deleteMark(mark1)
         XCTAssertEqual(false, ladder.hasMarks())
         ladder.addMark(fromSegment: segment, toRegion: ladder.regions[0])
@@ -117,17 +116,17 @@ class LadderTests: XCTestCase {
     func testToggleAnchor() {
         let ladder = Ladder.defaultLadder()
         let mark = ladder.addMark(Mark(), toRegion: ladder.regions[0])
-        XCTAssertEqual(Anchor.middle, mark?.anchor)
+        XCTAssertEqual(Anchor.middle, mark.anchor)
         ladder.toggleAnchor(mark: mark)
-        XCTAssertEqual(Anchor.proximal, mark?.anchor)
+        XCTAssertEqual(Anchor.proximal, mark.anchor)
         ladder.toggleAnchor(mark: mark)
-        XCTAssertEqual(Anchor.distal, mark?.anchor)
+        XCTAssertEqual(Anchor.distal, mark.anchor)
         ladder.toggleAnchor(mark: mark)
-        XCTAssertEqual(Anchor.middle, mark?.anchor)
+        XCTAssertEqual(Anchor.middle, mark.anchor)
         ladder.toggleAnchor(mark: mark)
-        XCTAssertEqual(Anchor.proximal, mark?.anchor)
+        XCTAssertEqual(Anchor.proximal, mark.anchor)
         ladder.toggleAnchor(mark: mark)
-        XCTAssertEqual(Anchor.distal, mark?.anchor)
+        XCTAssertEqual(Anchor.distal, mark.anchor)
     }
 
     func testMoveLinkedMarks() {
@@ -173,16 +172,13 @@ class LadderTests: XCTestCase {
     func testMarkIndexing() {
         let mark = Mark()
         XCTAssertEqual(mark.regionIndex, -1)
-        // make sure we can't add a mark without indexing the region properly
-        ladder.addMark(mark, toRegion: nil)
-        XCTAssertEqual(mark.regionIndex, -1)
         ladder.addMark(mark, toRegion: ladder.regions[0])
         XCTAssertEqual(mark.regionIndex, 0)
         let mark2 = ladder.addMark(at: 10, toRegion: ladder.regions[1])
-        XCTAssertEqual(mark2?.regionIndex, 1)
+        XCTAssertEqual(mark2.regionIndex, 1)
         let segment = Segment(proximal: CGPoint.zero, distal: CGPoint.zero)
         let mark3 = ladder.addMark(fromSegment: segment, toRegion: ladder.regions[0])
-        XCTAssertEqual(mark3?.regionIndex, 0)
+        XCTAssertEqual(mark3.regionIndex, 0)
         // test region(atIndex:) function
         ladder.addMark(mark, toRegion: ladder.region(atIndex: 0))
         XCTAssertEqual(mark.regionIndex, 0)
@@ -212,31 +208,31 @@ class LadderTests: XCTestCase {
     func testHaveDifferentRegions() {
         let mark1 = ladder.addMark(Mark(), toRegion: ladder.region(atIndex: 0))
         let mark2 = ladder.addMark(Mark(), toRegion: ladder.region(atIndex: 0))
-        var marks: [Mark] = [mark1!, mark2!]
+        var marks: [Mark] = [mark1, mark2]
         XCTAssertFalse(ladder.haveDifferentRegions(marks))
         let mark3 = ladder.addMark(Mark(), toRegion: ladder.region(atIndex: 1))
-        marks.append(mark3!)
+        marks.append(mark3)
         XCTAssertTrue(ladder.haveDifferentRegions(marks))
     }
 
     func testMarksAreNotContiguous() {
         let mark1 = ladder.addMark(Mark(), toRegion: ladder.region(atIndex: 0))
         let mark2 = ladder.addMark(Mark(), toRegion: ladder.region(atIndex: 1))
-        let marks: [Mark] = [mark1!, mark2!]
+        let marks: [Mark] = [mark1, mark2]
         XCTAssertTrue(ladder.marksAreNotContiguous(marks))
         ladder.deleteMark(mark1)
         ladder.deleteMark(mark2)
         XCTAssertTrue(ladder.marksAreNotContiguous(marks))
         let mark3 = ladder.addMark(at: 100, toRegion: ladder.region(atIndex: 0))
         let mark4 = ladder.addMark(at: 200, toRegion: ladder.region(atIndex: 0))
-        let marks2 = [mark3!, mark4!]
+        let marks2 = [mark3, mark4]
         XCTAssertFalse(ladder.marksAreNotContiguous(marks2))
         let _ = ladder.addMark(at: 150, toRegion: ladder.region(atIndex: 0))
         XCTAssertTrue(ladder.marksAreNotContiguous(marks2))
         let mark5 = ladder.addMark(at: 5, toRegion: ladder.region(atIndex: 1))
         let _ = ladder.addMark(at: 10, toRegion: ladder.region(atIndex: 1))
         let mark7 = ladder.addMark(at: 15, toRegion: ladder.region(atIndex: 1))
-        let marks3 = [mark5!, mark7!]
+        let marks3 = [mark5, mark7]
         XCTAssertTrue(ladder.marksAreNotContiguous(marks3))
     }
 
@@ -244,8 +240,23 @@ class LadderTests: XCTestCase {
         let mark1 = ladder.addMark(at: 100, toRegion: ladder.region(atIndex: 0))
         let mark2 = ladder.addMark(at: 200, toRegion: ladder.region(atIndex: 0))
         let mark3 = ladder.addMark(at: 400, toRegion: ladder.region(atIndex: 0))
-        let marks = [mark1!, mark2!, mark3!]
+        let marks = [mark1, mark2, mark3]
         XCTAssertEqual(ladder.meanCL(marks), 150, accuracy: 0.0001)
     }
+
+    func testAttachedMark() {
+        let mark1 = ladder.addMark(at: 100, toRegion: ladder.region(atIndex: 0))
+        let mark2 = ladder.addMark(at: 200, toRegion: ladder.region(atIndex: 0))
+        ladder.attachedMark = mark1
+        XCTAssertEqual(mark1.mode, .attached)
+        ladder.attachedMark = nil
+        XCTAssertEqual(mark1.mode, .normal)
+        ladder.attachedMark = mark1
+        XCTAssertEqual(mark1.mode, .attached)
+        ladder.attachedMark = mark2
+        XCTAssertEqual(mark1.mode, .normal)
+        XCTAssertEqual(mark2.mode, .attached)
+    }
+
 
 }

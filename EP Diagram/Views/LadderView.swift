@@ -111,6 +111,11 @@ final class LadderView: ScaledView {
 
     var leftMargin: CGFloat = 0
     var ladderViewHeight: CGFloat = 0
+    var ladderViewWidth: CGFloat = 0  {
+        didSet {
+            print("****ladderViewWidth = \(ladderViewWidth)")
+        }
+    }// full scrollable width of ladderView (dependent on imageScrollView width)
     private var regionUnitHeight: CGFloat = 0
 
     weak var cursorViewDelegate: CursorViewDelegate! // Note IUO.
@@ -167,8 +172,8 @@ final class LadderView: ScaledView {
         var regionBoundary = regionUnitHeight * ladderPaddingMultiplier
         for region: Region in ladder.regions {
             let regionHeight = CGFloat(region.unitHeight) * regionUnitHeight
-            region.proximalBoundary = regionBoundary
-            region.distalBoundary = regionBoundary + regionHeight
+            region.proximalBoundaryY = regionBoundary
+            region.distalBoundaryY = regionBoundary + regionHeight
             regionBoundary += regionHeight
         }
         guard ladder.regions.count > 0 else { assertionFailure("ladder.regions has no regions!"); return }
@@ -239,7 +244,7 @@ final class LadderView: ScaledView {
         var tappedAnchor: Anchor?
         var tappedZone: Zone?
         for region in ladder.regions {
-            if position.y > region.proximalBoundary && position.y < region.distalBoundary {
+            if position.y > region.proximalBoundaryY && position.y < region.distalBoundaryY {
                 tappedRegion = region
                 tappedDivision = tappedRegionDivision(region: region, positionY: position.y)
             }
@@ -269,13 +274,13 @@ final class LadderView: ScaledView {
     }
 
     private func tappedRegionDivision(region: Region, positionY: CGFloat) -> RegionDivision {
-        guard  positionY > region.proximalBoundary && positionY < region.distalBoundary else {
+        guard  positionY > region.proximalBoundaryY && positionY < region.distalBoundaryY else {
             return .none
         }
-        if positionY < region.proximalBoundary + 0.25 * (region.distalBoundary - region.proximalBoundary) {
+        if positionY < region.proximalBoundaryY + 0.25 * (region.distalBoundaryY - region.proximalBoundaryY) {
             return .proximal
         }
-        else if positionY < region.proximalBoundary + 0.75 * (region.distalBoundary - region.proximalBoundary) {
+        else if positionY < region.proximalBoundaryY + 0.75 * (region.distalBoundaryY - region.proximalBoundaryY) {
             return .middle
         }
         else {
@@ -351,19 +356,17 @@ final class LadderView: ScaledView {
                 // FIXME: do we exclude region index out of range?
                 let markRegion = ladder.region(atIndex: firstRegionIndex + 1)
                 let segment = Segment(proximal: CGPoint(x: marks[0].segment.distal.x, y: 0), distal: CGPoint(x: marks[1].segment.proximal.x, y: 1.0))
-                if let mark = ladder.addMark(fromSegment: segment, toRegion: markRegion) {
-                    undoablyAddMark(mark: mark)
-                    return mark
-                }
+                let mark = ladder.addMark(fromSegment: segment, toRegion: markRegion)
+                undoablyAddMark(mark: mark)
+                return mark
             }
             if regionDifference < 0 {
                 // FIXME: do we exclude region index out of range?
                 let markRegion = ladder.region(atIndex: firstRegionIndex - 1)
                 let segment = Segment(proximal: CGPoint(x: marks[1].segment.distal.x, y: 0), distal: CGPoint(x: marks[0].segment.proximal.x, y: 1.0))
-                if let mark = ladder.addMark(fromSegment: segment, toRegion: markRegion) {
-                    undoablyAddMark(mark: mark)
-                    return mark
-                }
+                let mark = ladder.addMark(fromSegment: segment, toRegion: markRegion)
+                undoablyAddMark(mark: mark)
+                return mark
             }
         }
         return nil
@@ -541,12 +544,17 @@ final class LadderView: ScaledView {
 
     func addMarkToActiveRegion(regionPositionX: CGFloat) -> Mark? {
         os_log("addMarkToActiveRegion(regionPositionX:) - LadderView", log: OSLog.touches, type: .info)
-        if let mark = ladder.addMark(at: regionPositionX, toRegion: activeRegion) {
-            mark.mode = .attached
-            return mark
+        guard let activeRegion = activeRegion else {
+            return nil
         }
-        return nil
+        let mark = ladder.addMark(at: regionPositionX, toRegion: activeRegion)
+        mark.mode = .attached
+        return mark
     }
+
+//    func addMarkToRegion(regionPositionX: CGFloat, region: Region) -> Mark {
+//
+//    }
 
     @available(*, deprecated, message: "Used for setting anchor depending on tap location, not used.")
     func getAnchor(regionDivision: RegionDivision) -> Anchor? {
@@ -568,22 +576,23 @@ final class LadderView: ScaledView {
         ladder.toggleAnchor(mark: mark)
     }
 
+    // This is already done when attachedMark is set in the ladder, so...
+    // TODO: refactor this away.
     func setAttachedMarkAndLinkedMarksModes() {
-        print("setAttachedMarkAndLinkedMarksModes()")
+        os_log("setAttachedMarkAndLinkedMarksModes( - LadderView", log: OSLog.deprecated, type: .debug)
         if let attachedMark = ladder.attachedMark {
             let linkedMarkIDs = attachedMark.linkedMarkIDs
             // Note that the order below is important.  An attached mark can be in its own linkedMarks.  But we always want the attached mark to have an .attached highlight.
+            ladder.normalizeAllMarks()
             ladder.setModeForLinkedMarkIDs(mode: .linked, linkedMarkIDs: linkedMarkIDs)
             attachedMark.mode = .attached
         }
     }
 
     func attachMark(_ mark: Mark?) {
-        print("attachMark()")
+        os_log("attachMark(_:) - LadderView", log: OSLog.action, type: .info)
         ladder.attachedMark = mark
-        setAttachedMarkAndLinkedMarksModes()
     }
-
 
     @objc func doubleTap(tap: UITapGestureRecognizer) {
         os_log("doubleTap(tap:) - LadderView", log: OSLog.touches, type: .info)
@@ -611,17 +620,16 @@ final class LadderView: ScaledView {
             }
         } else {
             // FIXME: refactor
-            let region = tapLocationInLadder.region
+            guard let region = tapLocationInLadder.region else { return false }
             let scaledPositionX = transformToRegionPositionX(scaledViewPositionX: tapLocationInLadder.unscaledPosition.x)
-            if let mark = ladder.addMark(at: scaledPositionX, toRegion: region) {
-                normalizeAllMarks()
-                undoablyAddMark(mark: mark)
-                attachMark(mark)
-                cursorViewDelegate.moveCursor(cursorViewPositionX: scaledPositionX)
-                cursorViewDelegate.cursorIsVisible = true
-                cursorViewDelegate.setCursorHeight()
-                cursorViewDelegate.refresh()
-            }
+            let mark = ladder.addMark(at: scaledPositionX, toRegion: region)
+            normalizeAllMarks()
+            undoablyAddMark(mark: mark)
+            attachMark(mark)
+            cursorViewDelegate.moveCursor(cursorViewPositionX: scaledPositionX)
+            cursorViewDelegate.cursorIsVisible = true
+            cursorViewDelegate.setCursorHeight()
+            cursorViewDelegate.refresh()
         }
         return true
     }
@@ -708,7 +716,7 @@ final class LadderView: ScaledView {
                     case .middle:
                         dragCreatedMark = addMarkToActiveRegion(scaledViewPositionX: position.x)
                         // TODO: REFACTOR
-                        dragCreatedMark?.segment.proximal.y = (position.y - regionOfDragOrigin.proximalBoundary) / (regionOfDragOrigin.distalBoundary - regionOfDragOrigin.proximalBoundary)
+                        dragCreatedMark?.segment.proximal.y = (position.y - regionOfDragOrigin.proximalBoundaryY) / (regionOfDragOrigin.distalBoundaryY - regionOfDragOrigin.proximalBoundaryY)
                         dragCreatedMark?.segment.distal.y = 0.75
                     case .distal:
                         dragCreatedMark = addMarkToActiveRegion(scaledViewPositionX: position.x)
@@ -1254,7 +1262,7 @@ final class LadderView: ScaledView {
         context.setLineWidth(1)
         let ladderWidth: CGFloat = rect.width
         for (index, region) in ladder.regions.enumerated() {
-            let regionRect = CGRect(x: leftMargin, y: region.proximalBoundary, width: ladderWidth, height: region.distalBoundary - region.proximalBoundary)
+            let regionRect = CGRect(x: leftMargin, y: region.proximalBoundaryY, width: ladderWidth, height: region.distalBoundaryY - region.proximalBoundaryY)
             let lastRegion = index == ladder.regions.count - 1
             drawRegion(rect: regionRect, context: context, region: region, offset: offsetX, scale: scale, lastRegion: lastRegion)
         }
@@ -1283,7 +1291,7 @@ final class LadderView: ScaledView {
         let start = transformToScaledViewPositionX(regionPositionX: zone.start)
         let end = transformToScaledViewPositionX(regionPositionX: zone.end)
         for region in zone.regions {
-            let zoneRect = CGRect(x: start, y: region.proximalBoundary, width: end - start, height: region.distalBoundary - region.proximalBoundary)
+            let zoneRect = CGRect(x: start, y: region.proximalBoundaryY, width: end - start, height: region.distalBoundaryY - region.proximalBoundaryY)
             context.addRect(zoneRect)
             context.setFillColor(zoneColor.cgColor)
             context.setAlpha(0.2)
@@ -1433,7 +1441,7 @@ final class LadderView: ScaledView {
                 let halfwayPosition = (scaledFirstX + scaledSecondX) / 2.0
                 let value = (scaledSecondX - scaledFirstX)
                 let text = "\(formatValue(value, usingCalFactor: calibration.currentCalFactor))"
-                var origin = CGPoint(x: halfwayPosition, y: region.proximalBoundary)
+                var origin = CGPoint(x: halfwayPosition, y: region.proximalBoundaryY)
                 let size = text.size(withAttributes: measurementTextAttributes)
                 // Center the origin.
                 origin = CGPoint(x: origin.x - size.width / 2, y: origin.y)
@@ -1445,7 +1453,7 @@ final class LadderView: ScaledView {
                 let halfwayPosition = (scaledFirstX + scaledSecondX) / 2.0
                 let value = (scaledSecondX - scaledFirstX)
                 let text = "\(formatValue(value, usingCalFactor: calibration.currentCalFactor))"
-                var origin = CGPoint(x: halfwayPosition, y: region.distalBoundary)
+                var origin = CGPoint(x: halfwayPosition, y: region.distalBoundaryY)
                 let size = text.size(withAttributes: measurementTextAttributes)
                 // Center the origin
                 origin = CGPoint(x: origin.x - size.width / 2, y: origin.y - size.height)
@@ -1458,13 +1466,13 @@ final class LadderView: ScaledView {
         return lround(Double(value ?? 0) * Double(calFactor))
     }
 
-    func getRawValueFromCalibratedValue(_ value: CGFloat, usingCalFactor calFactor: CGFloat) -> Int {
+    func getRawValueFromCalibratedValue(_ value: CGFloat, usingCalFactor calFactor: CGFloat) -> CGFloat {
         let x1: CGFloat = 0
         let x2: CGFloat  = value
         let regionX1 = transformToRegionPositionX(scaledViewPositionX: x1)
         let regionX2 = transformToRegionPositionX(scaledViewPositionX: x2)
         let diff = regionX2 - regionX1
-        return lround(Double(diff) / Double(calFactor))
+        return diff / calFactor
     }
 
     private func drawIntervalText(origin: CGPoint, size: CGSize, text: String, context: CGContext, attributes: [NSAttributedString.Key: Any]) {
@@ -1703,9 +1711,12 @@ final class LadderView: ScaledView {
         ladder.clearSelectedLabels()
     }
 
-    func resetSize(setActiveRegion: Bool = true) {
+    func resetSize(setActiveRegion: Bool = true, width: CGFloat? = nil) {
         os_log("resetSize() - LadderView", log: .action, type: .info)
         ladderViewHeight = self.frame.height
+        if let width = width { // only reset width if asked
+            ladderViewWidth = width
+        }
         initializeRegions(setActiveRegion: setActiveRegion)
         cursorViewDelegate.setCursorHeight()
     }
@@ -1895,18 +1906,33 @@ final class LadderView: ScaledView {
         }
     }
 
+    // TODO: implement
     func fillWithRhythm(_ rhythm: Rhythm) {
         guard let calFactor = calibration?.currentCalFactor else { return }
+        currentDocument?.undoManager.beginUndoGrouping()
+        func applyCL(start: CGFloat, end: CGFloat, region: Region?) {
+            guard let region = region else { return }
+            let regionCL = getRawValueFromCalibratedValue(rhythm.meanCL, usingCalFactor: calFactor)
+            var positionX = start
+            while positionX < end {
+                let mark = ladder.addMark(at: positionX, toRegion: region)
+                undoablyAddMark(mark: mark)
+                positionX += regionCL
+            }
+            setNeedsDisplay()
+        }
+
+        let selectedRegions = ladder.allRegionsWithMode(.selected)
         if ladder.zone.isVisible {
             let start = zone.start
             let end = zone.end
-            let regionCL = getRawValueFromCalibratedValue(rhythm.meanCL, usingCalFactor: calFactor)
-            // need to further convert this to region coordinates
-            let region = zone.startingRegion
-            // Need add mark that doesn't use active region
-            setNeedsDisplay()
-            print(regionCL)
+            applyCL(start: start, end: end, region: zone.startingRegion)
+        } else if selectedRegions.count == 1 {
+            let start: CGFloat = 0
+            let end = ladderViewWidth
+            applyCL(start: start, end: end, region: selectedRegions[0])
         }
+        currentDocument?.undoManager.endUndoGrouping()
     }
 
     func moveMarks(_ diff: CGFloat) {
@@ -2111,7 +2137,7 @@ extension LadderView: LadderViewDelegate {
     // MARK: - LadderView delegate methods
     // convert region upper boundary to view's coordinates and return to view
     func getRegionProximalBoundary(view: UIView) -> CGFloat {
-        let position = CGPoint(x: 0, y: activeRegion?.proximalBoundary ?? 0)
+        let position = CGPoint(x: 0, y: activeRegion?.proximalBoundaryY ?? 0)
         return convert(position, to: view).y
     }
 
@@ -2145,7 +2171,7 @@ extension LadderView: LadderViewDelegate {
     }
 
     func getTopOfLadder(view: UIView) -> CGFloat {
-        let position = CGPoint(x: 0, y: ladder.regions[0].proximalBoundary)
+        let position = CGPoint(x: 0, y: ladder.regions[0].proximalBoundaryY)
         return convert(position, to: view).y
     }
 
@@ -2155,12 +2181,12 @@ extension LadderView: LadderViewDelegate {
 
     func getRegionMidPoint(view: UIView) -> CGFloat {
         guard let activeRegion = activeRegion else { return 0 }
-        let position = CGPoint(x: 0, y: (activeRegion.distalBoundary -  activeRegion.proximalBoundary) / 2 + activeRegion.proximalBoundary)
+        let position = CGPoint(x: 0, y: (activeRegion.distalBoundaryY -  activeRegion.proximalBoundaryY) / 2 + activeRegion.proximalBoundaryY)
         return convert(position, to: view).y
     }
 
     func getRegionDistalBoundary(view: UIView) -> CGFloat {
-        let position = CGPoint(x: 0, y: activeRegion?.distalBoundary ?? 0)
+        let position = CGPoint(x: 0, y: activeRegion?.distalBoundaryY ?? 0)
         return convert(position, to: view).y
     }
 
@@ -2177,6 +2203,9 @@ extension LadderView: LadderViewDelegate {
     }
 
     func addAttachedMark(scaledViewPositionX positionX: CGFloat) {
+        guard let activeRegion = activeRegion else {
+            fatalError("activeRegion is nil in addAttachedMark(scaledViewPositionX positionX: CGFloat).")
+        }
         ladder.attachedMark = ladder.addMark(at: positionX / scale, toRegion: activeRegion)
         if let attachedMark = ladder.attachedMark {
             undoablyAddMark(mark: attachedMark)
@@ -2329,8 +2358,8 @@ extension LadderView: LadderViewDelegate {
     }
 
     func unattachAttachedMark() {
+        // FIXME: Why is this part of unattachedAttachedMark??
         assessBlockAndImpulseOrigin(mark: ladder.attachedMark)
-        ladder.attachedMark?.mode = .normal
         ladder.attachedMark = nil
     }
 

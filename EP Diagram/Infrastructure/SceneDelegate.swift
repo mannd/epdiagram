@@ -20,9 +20,9 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         self.scene(scene, openURLContexts: connectionOptions.urlContexts)
 
         // FIXME: inactivate restoration
-        if let documentBrowserViewController = window?.rootViewController as? DocumentBrowserViewController {
+//        if let documentBrowserViewController = window?.rootViewController as? DocumentBrowserViewController {
 //            documentBrowserViewController.restorationInfo = scene.userActivity?.userInfo
-        }
+//        }
     }
 
     func stateRestorationActivity(for scene: UIScene) -> NSUserActivity? {

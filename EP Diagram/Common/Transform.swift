@@ -29,13 +29,13 @@ enum Transform {
     // Position transform
     static func toRegionPosition(scaledViewPosition: CGPoint, region: Region, offsetX offset: CGFloat, scale: CGFloat) -> CGPoint {
         let x = toRegionPositionX(scaledViewPositionX: scaledViewPosition.x, offset: offset, scale: scale)
-        let y = (scaledViewPosition.y - region.proximalBoundary) / region.height
+        let y = (scaledViewPosition.y - region.proximalBoundaryY) / region.height
         return CGPoint(x: x, y: y)
     }
 
     static func toScaledViewPosition(regionPosition: CGPoint, region: Region, offsetX offset: CGFloat, scale: CGFloat) -> CGPoint {
         let x = toScaledViewPositionX(regionPositionX: regionPosition.x, offset: offset, scale: scale)
-        let y = region.proximalBoundary + regionPosition.y * region.height
+        let y = region.proximalBoundaryY + regionPosition.y * region.height
         return CGPoint(x: x, y: y)
     }
 

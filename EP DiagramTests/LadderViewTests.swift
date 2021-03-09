@@ -60,8 +60,8 @@ class LadderViewTests: XCTestCase {
         let scale: CGFloat = 1.78
         let offset: CGFloat = 333.45
         let region = Region(template: RegionTemplate())
-        region.proximalBoundary = 0
-        region.distalBoundary = 300
+        region.proximalBoundaryY = 0
+        region.distalBoundaryY = 300
         let regionSegment = Transform.toRegionSegment(scaledViewSegment: markPosition, region: region, offsetX: offset, scale: scale)
         let scaledViewSegment = Transform.toScaledViewSegment(regionSegment: regionSegment, region: region, offsetX: offset, scale: scale)
         XCTAssertEqual(markPosition.proximal.x, scaledViewSegment.proximal.x, accuracy: 0.0001)
@@ -118,7 +118,7 @@ class LadderViewTests: XCTestCase {
         ladderView.activeRegion = ladderView.ladder.region(atIndex: 0)
         let mark2 = ladderView.addMarkToActiveRegion(regionPositionX: 10)
         let mark3 = Mark()
-        ladderView.ladder.addMark(mark3, toRegion: ladderView.activeRegion)
+        ladderView.ladder.addMark(mark3, toRegion: ladderView.activeRegion!)
         XCTAssertNotNil(mark2)
         XCTAssertNotNil(mark3)
         mark2!.mode = Mark.Mode.attached
@@ -320,8 +320,8 @@ class LadderViewTests: XCTestCase {
         XCTAssertEqual(value, 1000)
         value = ladderView.formatValue(100, usingCalFactor: 0.01)
         XCTAssertEqual(value, 1)
-        value = ladderView.getRawValueFromCalibratedValue(1, usingCalFactor: 0.01)
-        XCTAssertEqual(value, 100)
+        let rawValue = ladderView.getRawValueFromCalibratedValue(1, usingCalFactor: 0.01)
+        XCTAssertEqual(rawValue, 100, accuracy: 0.0001)
     }
 
     func testCalibration2() {
@@ -360,9 +360,47 @@ class LadderViewTests: XCTestCase {
         XCTAssertEqual(rawValue3, 20)
         let formattedValue2 = ladderView.formatValue(CGFloat(rawValue3), usingCalFactor: calibration.currentCalFactor)
         XCTAssertEqual(formattedValue2, Int(interval))
+    }
+
+    func testAddMark() {
+        ladderView.activeRegion = nil
+        XCTAssertNil(ladderView.addMarkToActiveRegion(regionPositionX: 100))
+        XCTAssertNil(ladderView.addMarkToActiveRegion(scaledViewPositionX: 100))
+
+        ladderView.activeRegion = ladderView.ladder.regions[0]
+        XCTAssertNotNil(ladderView.addMarkToActiveRegion(regionPositionX: 100))
+        XCTAssertNotNil(ladderView.addMarkToActiveRegion(scaledViewPositionX: 100))
 
     }
 
+    func testAttachMark() {
+        ladderView.activeRegion = ladderView.ladder.region(atIndex: 0)
+        let mark1 = ladderView.addMarkToActiveRegion(regionPositionX: 100)
+        let mark2 = ladderView.addMarkToActiveRegion(regionPositionX: 200)
+        ladderView.attachMark(mark1)
+        XCTAssertEqual(mark1!.mode, .attached)
+        ladderView.unattachAttachedMark()
+        XCTAssertEqual(mark1!.mode, .normal)
+        ladderView.attachMark(mark1)
+        XCTAssertEqual(mark1!.mode, .attached)
+        // Can't have two marks attached at the same time.
+        ladderView.attachMark(mark2)
+        XCTAssertEqual(mark2!.mode, .attached)
+        XCTAssertEqual(mark1!.mode, .normal)
 
+
+
+//        let mark1 = ladderView.addMark(at: 100, toRegion: ladder.region(atIndex: 0))
+//        let mark2 = ladder.addMark(at: 200, toRegion: ladder.region(atIndex: 0))
+//        ladder.attachedMark = mark1
+//        XCTAssertEqual(mark1.mode, .attached)
+//        ladder.attachedMark = nil
+//        XCTAssertEqual(mark1.mode, .normal)
+//        ladder.attachedMark = mark1
+//        XCTAssertEqual(mark1.mode, .attached)
+//        ladder.attachedMark = mark2
+//        XCTAssertEqual(mark1.mode, .normal)
+//        XCTAssertEqual(mark2.mode, .attached)
+    }
 
 }

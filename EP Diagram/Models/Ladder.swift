@@ -25,10 +25,21 @@ final class Ladder: NSObject, Codable {
     var leftMargin: CGFloat = 50
     var regions = [Region]()
     var regionCount: Int { regions.count }
-    // TODO: enforce only 1 attached mark at a time?
-    var attachedMark: Mark? // cursor is attached to a most 1 mark at a time
+    var attachedMark: Mark?  { // attachedMark does not own its mark
+        didSet { // cursor is attached to a most 1 mark at a time
+            print("ladder.attachedMark set")
+            normalizeAllMarks()  // setting attached mark to nil does not delete it, so set its mode to normal.
+            if let attachedMark = attachedMark {
+                let linkedMarkIDs = attachedMark.linkedMarkIDs
+                // Note that the order below is important.  An attached mark can be in its own linkedMarks.  But we always want the attached mark to have an .attached highlight.
+                setModeForLinkedMarkIDs(mode: .linked, linkedMarkIDs: linkedMarkIDs)
+                attachedMark.mode = .attached
+            }
+        }
+    }
+
     var connectedMarks = [Mark]() // marks in the process of being connected
-    var activeRegion: Region? {  // ladder model enforces at most one region can be active
+    var activeRegion: Region? {  // ladder model enforces at most one region can be active and region.mode == .normal
         didSet {
             regions.forEach { region in region.mode = .normal }
             // All regions are set to normal mode if activeRegion set to nil.
@@ -145,23 +156,21 @@ final class Ladder: NSObject, Codable {
         }
         return regionRelation
     }
-    
-    // TODO: Does region have to be optional?  Consider refactor away optionality.
-    // addMark() functions.  All require a Region in which to add the mark.  Each new mark is registered to that region.  All return addedMark or nil if region is nil.
-    func addMark(at positionX: CGFloat, toRegion region: Region?) -> Mark? {
+
+    func addMark(at positionX: CGFloat, toRegion region: Region) -> Mark {
         os_log("addMark(at:toRegion:) - Ladder", log: OSLog.touches, type: .info)
         return addMark(Mark(positionX: positionX), toRegion: region)
     }
 
-    @discardableResult func addMark(fromSegment segment: Segment, toRegion region: Region?) -> Mark? {
+    @discardableResult func addMark(fromSegment segment: Segment, toRegion region: Region) -> Mark {
         os_log("addMark(fromSegment:toRegion:) - Ladder", log: .action, type: .info)
         let mark = Mark(segment: segment)
         return addMark(mark, toRegion: region)
     }
 
-    @discardableResult func addMark(_ mark: Mark, toRegion region: Region?) -> Mark? {
+    // All roads lead to this addMark function, which ensures mark is appended to a region and registered.
+    @discardableResult func addMark(_ mark: Mark, toRegion region: Region) -> Mark {
         os_log("addMark(_:toRegion:) - Ladder", log: .action, type: .info)
-        guard let region = region else { return nil }
         mark.style = region.style == .inherited ? defaultMarkStyle : region.style
         region.appendMark(mark)
         registerMark(mark)
@@ -171,11 +180,10 @@ final class Ladder: NSObject, Codable {
         return mark
     }
 
-    func deleteMark(_ mark: Mark?) {
-        guard let mark = mark else { return }
+    func deleteMark(_ mark: Mark) {
         let markRegion = region(ofMark: mark)
         normalizeAllMarks()
-        // FIXME: do we need to unregister mark.  OK if addmark registers.
+        // FIXME: do we need to unregister mark?
         unregisterMark(mark)
         if let index = markRegion.marks.firstIndex(where: {$0 === mark}) {
             markRegion.marks.remove(at: index)
