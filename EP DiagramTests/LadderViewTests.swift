@@ -38,7 +38,7 @@ class LadderViewTests: XCTestCase {
 
     func testLadderViewModelUnitHeight() {
         ladderView.ladder = Ladder.defaultLadder()
-        ladderView.ladderViewHeight = 100
+        ladderView.viewHeight = 100
         let height = ladderView.getRegionUnitHeight(ladder: ladderView.ladder)
         XCTAssertEqual(height, 20, accuracy: 0.0001)
     }

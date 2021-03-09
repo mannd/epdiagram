@@ -18,6 +18,7 @@ final class LadderView: ScaledView {
     private let lowerLimitMarkWidth: CGFloat = 20
     private let nearbyMarkAccuracy: CGFloat = 15
     private let arrowHeadAngle = CGFloat(Double.pi / 6)
+    private let maxRegionMeasurements = 20
     var blockMin: CGFloat = 0.1
     var blockMax: CGFloat = 0.9
 
@@ -46,7 +47,7 @@ final class LadderView: ScaledView {
     var showImpulseOrigin = true
     var showBlock = true
     var showArrows = false
-    var showPivots = true
+    var showPivots = false
     var showIntervals = true
     var showConductionTimes = true
     var showMarkText = true
@@ -104,18 +105,16 @@ final class LadderView: ScaledView {
     var diffs: [Mark: CGFloat] = [:]
     var movementDiffs: [Mark: (prox: CGFloat, distal: CGFloat)] = [:]
 
+    var regionIntervals: [Int: [Interval]] = [:]
+
     private var savedActiveRegion: Region?
     private var savedMode: Mode = .normal
 
     var mode: Mode = .normal
 
     var leftMargin: CGFloat = 0
-    var ladderViewHeight: CGFloat = 0
-    var ladderViewWidth: CGFloat = 0  {
-        didSet {
-            print("****ladderViewWidth = \(ladderViewWidth)")
-        }
-    }// full scrollable width of ladderView (dependent on imageScrollView width)
+    var viewHeight: CGFloat = 0
+    var viewMaxWidth: CGFloat = 0  // full scrollable width of ladderView (dependent on imageView width)
     private var regionUnitHeight: CGFloat = 0
 
     weak var cursorViewDelegate: CursorViewDelegate! // Note IUO.
@@ -143,7 +142,7 @@ final class LadderView: ScaledView {
 
     private func setupView() {
         os_log("setupView() - LadderView", log: .action, type: .info)
-        ladderViewHeight = self.frame.height
+        viewHeight = self.frame.height
         initializeRegions()
         removeConnectedMarks()
         // FIXME: snap marks on startup
@@ -190,7 +189,7 @@ final class LadderView: ScaledView {
         // we need padding above and below, so...
         let padding = Int(ladderPaddingMultiplier * 2)
         numRegionUnits += padding
-        return ladderViewHeight / CGFloat(numRegionUnits)
+        return viewHeight / CGFloat(numRegionUnits)
     }
 
     // MARK: - Touches
@@ -469,14 +468,10 @@ final class LadderView: ScaledView {
             if let mark = tapLocationInLadder.mark {
                 mark.mode = mark.mode == .selected ? .normal : .selected
             }
-        case .region:
+        case .region, .label: // single tap on label highlights view
             if let region = tapLocationInLadder.region {
                 region.mode = region.mode == .selected ? .normal : .selected
                 ladder.setMarksWithMode(region.mode == .selected ? .selected : .normal, inRegion: region)
-            }
-        case .label:
-            if let region = tapLocationInLadder.region {
-                region.mode = region.mode == .labelSelected ? .normal : .labelSelected
             }
         case .zone:
             selectInZone()
@@ -659,6 +654,7 @@ final class LadderView: ScaledView {
             target.undoablyDeleteMark(mark: mark)
         })
         NotificationCenter.default.post(name: .didUndoableAction, object: nil)
+        updateRegionIntervals()
         // Note no call here because calling function needs to actually add the mark.
     }
 
@@ -667,6 +663,7 @@ final class LadderView: ScaledView {
         mark.mode = .normal
         ladder.deleteMark(mark)
         hideCursorAndNormalizeAllMarks()
+        updateRegionIntervals()
         cursorViewDelegate.refresh()
     }
 
@@ -676,6 +673,7 @@ final class LadderView: ScaledView {
         ladder.addMark(mark, toRegion: region)
         mark.mode = .normal
         hideCursorAndNormalizeAllMarks()
+        updateRegionIntervals()
         cursorViewDelegate.refresh()
     }
 
@@ -749,7 +747,9 @@ final class LadderView: ScaledView {
                 }
                 // TODO: this is called repeatedly, is ok?
                 setModeOfNearbyMarks(dragCreatedMark)
+
             }
+            updateRegionIntervals()
         }
         if state == .ended {
             isDragging = false
@@ -1431,39 +1431,54 @@ final class LadderView: ScaledView {
 
     fileprivate func drawIntervals(region: Region, context: CGContext) {
         guard showIntervals else { return }
+        // FIXME: too many intervals slows updates down too much
+        //        guard region.marks.count < maxRegionMeasurements else { return }
         guard let calibration = calibration, calibration.isCalibrated else { return }
-        let marks = region.marks
-        let intervals = Interval.createIntervals(marks: marks)
-        for interval in intervals {
-            if let firstProximalX = interval.proximalBoundary?.first, let secondProximalX = interval.proximalBoundary?.second {
-                let scaledFirstX = transformToScaledViewPositionX(regionPositionX: firstProximalX)
-                let scaledSecondX = transformToScaledViewPositionX(regionPositionX: secondProximalX)
-                let halfwayPosition = (scaledFirstX + scaledSecondX) / 2.0
-                let value = (scaledSecondX - scaledFirstX)
-                let text = "\(formatValue(value, usingCalFactor: calibration.currentCalFactor))"
-                var origin = CGPoint(x: halfwayPosition, y: region.proximalBoundaryY)
-                let size = text.size(withAttributes: measurementTextAttributes)
-                // Center the origin.
-                origin = CGPoint(x: origin.x - size.width / 2, y: origin.y)
-                drawIntervalText(origin: origin, size: size, text: text, context: context, attributes: measurementTextAttributes)
-            }
-            if let firstDistalX = interval.distalBoundary?.first, let secondDistalX = interval.distalBoundary?.second {
-                let scaledFirstX = transformToScaledViewPositionX(regionPositionX: firstDistalX)
-                let scaledSecondX = transformToScaledViewPositionX(regionPositionX: secondDistalX)
-                let halfwayPosition = (scaledFirstX + scaledSecondX) / 2.0
-                let value = (scaledSecondX - scaledFirstX)
-                let text = "\(formatValue(value, usingCalFactor: calibration.currentCalFactor))"
-                var origin = CGPoint(x: halfwayPosition, y: region.distalBoundaryY)
-                let size = text.size(withAttributes: measurementTextAttributes)
-                // Center the origin
-                origin = CGPoint(x: origin.x - size.width / 2, y: origin.y - size.height)
-                drawIntervalText(origin: origin, size: size, text: text, context: context, attributes: measurementTextAttributes)
+        if let index = ladder.index(ofRegion: region), let intervals = regionIntervals[index] {
+            for interval in intervals {
+                if let firstProximalX = interval.proximalBoundary?.first, let secondProximalX = interval.proximalBoundary?.second {
+                    let scaledFirstX = transformToScaledViewPositionX(regionPositionX: firstProximalX)
+                    let scaledSecondX = transformToScaledViewPositionX(regionPositionX: secondProximalX)
+                    let value = (scaledSecondX - scaledFirstX)
+                    let text = "\(formatValue(scaledSecondX - scaledFirstX, usingCalFactor: calibration.currentCalFactor))"
+                    let size = text.size(withAttributes: measurementTextAttributes)
+                    if size.width < value { // don't crowd measurements
+                        // Center the origin.
+                        let halfwayPosition = (scaledFirstX + scaledSecondX) / 2.0
+                        var origin = CGPoint(x: halfwayPosition, y: region.proximalBoundaryY)
+                        origin = CGPoint(x: origin.x - size.width / 2, y: origin.y)
+                        drawIntervalText(origin: origin, size: size, text: text, context: context, attributes: measurementTextAttributes)
+                    }
+                }
+                if let firstDistalX = interval.distalBoundary?.first, let secondDistalX = interval.distalBoundary?.second {
+                    let scaledFirstX = transformToScaledViewPositionX(regionPositionX: firstDistalX)
+                    let scaledSecondX = transformToScaledViewPositionX(regionPositionX: secondDistalX)
+                    let value = (scaledSecondX - scaledFirstX)
+                    let text = "\(formatValue(value, usingCalFactor: calibration.currentCalFactor))"
+                    let size = text.size(withAttributes: measurementTextAttributes)
+                    if size.width < value { // don't crowd measurements
+                        // Center the origin
+                        let halfwayPosition = (scaledFirstX + scaledSecondX) / 2.0
+                        var origin = CGPoint(x: halfwayPosition, y: region.distalBoundaryY)
+                        origin = CGPoint(x: origin.x - size.width / 2, y: origin.y - size.height)
+                        drawIntervalText(origin: origin, size: size, text: text, context: context, attributes: measurementTextAttributes)
+                    }
+                }
             }
         }
     }
 
     func formatValue(_ value: CGFloat?, usingCalFactor calFactor: CGFloat) -> Int {
         return lround(Double(value ?? 0) * Double(calFactor))
+    }
+
+    func updateRegionIntervals() {
+        DispatchQueue.global().async { [unowned self] in
+            self.regionIntervals = self.ladder.regionIntervals()
+            DispatchQueue.main.async {
+                self.setNeedsDisplay()
+            }
+        }
     }
 
     func getRawValueFromCalibratedValue(_ value: CGFloat, usingCalFactor calFactor: CGFloat) -> CGFloat {
@@ -1508,7 +1523,7 @@ final class LadderView: ScaledView {
     }
 
     func getTruncatedPosition(segment: Segment) -> CGPoint? {
-        let intersection = Geometry.intersection(ofLineFrom: CGPoint(x: leftMargin, y: 0), to: CGPoint(x: leftMargin, y: ladderViewHeight), withLineFrom: segment.proximal, to: segment.distal)
+        let intersection = Geometry.intersection(ofLineFrom: CGPoint(x: leftMargin, y: 0), to: CGPoint(x: leftMargin, y: viewHeight), withLineFrom: segment.proximal, to: segment.distal)
         return intersection
     }
 
@@ -1713,9 +1728,9 @@ final class LadderView: ScaledView {
 
     func resetSize(setActiveRegion: Bool = true, width: CGFloat? = nil) {
         os_log("resetSize() - LadderView", log: .action, type: .info)
-        ladderViewHeight = self.frame.height
+        viewHeight = self.frame.height
         if let width = width { // only reset width if asked
-            ladderViewWidth = width
+            viewMaxWidth = width
         }
         initializeRegions(setActiveRegion: setActiveRegion)
         cursorViewDelegate.setCursorHeight()
@@ -1929,7 +1944,7 @@ final class LadderView: ScaledView {
             applyCL(start: start, end: end, region: zone.startingRegion)
         } else if selectedRegions.count == 1 {
             let start: CGFloat = 0
-            let end = ladderViewWidth
+            let end = viewMaxWidth
             applyCL(start: start, end: end, region: selectedRegions[0])
         }
         currentDocument?.undoManager.endUndoGrouping()
@@ -1988,7 +2003,7 @@ final class LadderView: ScaledView {
         case .none, .auto:
             fatalError("Endpoint.none or .auto inappopriately passed to slantMark()")
         }
-        mark.segment = transformToRegionSegment(scaledViewSegment: newSegment, region: region)
+        setSegment(segment: transformToRegionSegment(scaledViewSegment: newSegment, region: region), forMark: mark)
     }
 
     func slantAngle(mark: Mark, endpoint: Mark.Endpoint) -> CGFloat { 
@@ -2016,6 +2031,7 @@ final class LadderView: ScaledView {
         })
         NotificationCenter.default.post(name: .didUndoableAction, object: nil)
         mark.segment = segment
+        updateRegionIntervals()
     }
 
     func undoablySetLabel(_ label: String, description: String, forRegion region: Region) {

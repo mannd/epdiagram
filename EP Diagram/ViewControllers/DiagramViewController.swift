@@ -415,6 +415,7 @@ final class DiagramViewController: UIViewController {
         ladderView.calibration = diagram.calibration
         ladderView.ladder = diagram.ladder
         imageView.image = scaleImageForImageView(diagram.image)
+        ladderView.viewMaxWidth = imageView.frame.width
 
         imageScrollView.delegate = self
 
@@ -466,7 +467,6 @@ final class DiagramViewController: UIViewController {
         let imageInteraction = UIContextMenuInteraction(delegate: imageScrollView)
         imageScrollView.addInteraction(imageInteraction)
 
-
         setTitle()
     }
 
@@ -482,6 +482,7 @@ final class DiagramViewController: UIViewController {
             self.imageView.transform = self.diagram.transform
         }
         scrollViewAdjustViews(imageScrollView) // make sure views adjust to rotated image
+        ladderView.updateRegionIntervals()
 //        mode = .normal
 
         // Need to set this here, after view draw, or Mac malpositions cursor at start of app.
@@ -653,6 +654,11 @@ final class DiagramViewController: UIViewController {
             selectToolbarButtons = [selectAllButton, spacer, clearButton, spacer, doneButton]
         }
         setToolbarItems(selectToolbarButtons, animated: false)
+        // TODO: experiment with different bar tint colors to show mode.
+//        if let toolbar = navigationController?.toolbar {
+//            toolbar.barTintColor = UIColor.systemBlue
+//            toolbar.tintColor = UIColor.label
+//        }
     }
 
     @objc func selectAllMarks() {

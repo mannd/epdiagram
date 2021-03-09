@@ -14,10 +14,9 @@ struct Interval {
     var proximalBoundary: Boundary?
     var distalBoundary: Boundary?
 
-    // Caller should do this on background thread.
-    static func createIntervals(marks: [Mark]) -> [Interval] {
+    static func createIntervals(region: Region) -> [Interval] {
         var intervals = [Interval]()
-        let sortedMarks = marks.sorted()
+        let sortedMarks = region.marks.sorted()
         let proximalSortedMarks = sortedMarks.filter { $0.segment.proximal.y <= 0 }
         let distalSortedMarks = sortedMarks.filter { $0.segment.distal.y >= 1 }
         for i in 0..<proximalSortedMarks.count {

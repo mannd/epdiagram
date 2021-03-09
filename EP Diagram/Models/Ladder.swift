@@ -380,6 +380,14 @@ final class Ladder: NSObject, Codable {
         return  regions.filter { $0.mode == mode }
     }
 
+    func regionIntervals() -> [Int: [Interval]] {
+        var indexedIntervals: [Int: [Interval]] = [:]
+        for i in 0..<regions.count {
+            indexedIntervals[i] = Interval.createIntervals(region: regions[i])
+        }
+        return indexedIntervals
+    }
+
     func availableAnchors(forMark mark: Mark) -> [Anchor] {
         let linkedMarkIDs = mark.linkedMarkIDs
         // FIXME: if attachment is in middle, only allow other end to move

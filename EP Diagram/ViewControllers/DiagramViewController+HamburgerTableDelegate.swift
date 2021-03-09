@@ -318,6 +318,7 @@ extension DiagramViewController: HamburgerTableDelegate, UIImagePickerController
         ladderView.deleteAllInLadder()
         undoablySetDiagramImage(image)
         currentDocument?.undoManager.endUndoGrouping()
+        ladderView.viewMaxWidth = imageView.frame.width
         mode = .normal
     }
 
