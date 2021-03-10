@@ -366,8 +366,7 @@ final class CursorView: ScaledView {
 
     func newCalibration(zoom: CGFloat) -> Calibration {
         let calibration = Calibration()
-        calibration.set(zoom: zoom, calFactor: Calibration.standardInterval / caliper.value)
-        calibration.isCalibrated = true
+        calibration.set(zoom: zoom, value: caliper.value)
         return calibration
     }
 
@@ -396,10 +395,7 @@ protocol CursorViewDelegate: AnyObject {
     func moveCursor(cursorViewPositionX positionX: CGFloat)
     func setCursorHeight(anchorPositionY: CGFloat?)
     func cursorMovement() -> Movement
-    func isCalibrated() -> Bool
-    func setIsCalibrated(_ value: Bool)
     func markMeasurement(segment: Segment) -> CGFloat
-    func intervalMeasurement(x1: CGFloat, x2: CGFloat) -> CGFloat
 }
 
 extension CursorViewDelegate {
@@ -452,22 +448,9 @@ extension CursorView: CursorViewDelegate {
         return cursor.movement
     }
 
-    func isCalibrated() -> Bool {
-        return calibration?.isCalibrated ?? false
-    }
-
-    func setIsCalibrated(_ value: Bool) {
-        calibration?.isCalibrated = value
-    }
-
     func markMeasurement(segment: Segment) -> CGFloat {
         guard let calibration = calibration else { return 0 }
         return abs(segment.proximal.x - segment.distal.x) * calibration.currentCalFactor
-    }
-
-    func intervalMeasurement(x1: CGFloat, x2: CGFloat) -> CGFloat {
-        guard let calibration = calibration else { return 0 }
-        return abs(x1 - x2) * calibration.currentCalFactor
     }
 
     func setMarkerPositions(at positions: [CGPoint]) {

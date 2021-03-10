@@ -258,5 +258,13 @@ class LadderTests: XCTestCase {
         XCTAssertEqual(mark2.mode, .attached)
     }
 
+    func testAllMarks() {
+        let mark1 = ladder.addMark(at: 100, toRegion: ladder.region(atIndex: 0))
+        let mark2 = ladder.addMark(at: 200, toRegion: ladder.region(atIndex: 1))
+        let mark3 = ladder.addMark(at: 400, toRegion: ladder.region(atIndex: 2))
+        let allMarks = ladder.allMarks()
+        XCTAssertEqual(allMarks, [mark1, mark2, mark3])
+    }
+
 
 }

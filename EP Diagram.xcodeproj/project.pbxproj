@@ -33,6 +33,7 @@
 		8E3AD1372459CABF0085BDD4 /* LocationInLadder.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8E3AD1362459CABF0085BDD4 /* LocationInLadder.swift */; };
 		8E4086E425F30383005F53CB /* RhythmView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8E4086E325F30383005F53CB /* RhythmView.swift */; };
 		8E4086E925F325C4005F53CB /* Rhythm.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8E4086E825F325C4005F53CB /* Rhythm.swift */; };
+		8E487B7E25F9C55A002FFC1B /* CalibrationTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8E487B7D25F9C55A002FFC1B /* CalibrationTests.swift */; };
 		8E4A52EF24886B16007406F5 /* Diagram.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8E4A52EE24886B16007406F5 /* Diagram.swift */; };
 		8E4ACA8024478A6E00575538 /* BlackView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8E4ACA7F24478A6E00575538 /* BlackView.swift */; };
 		8E4ACA8224478D7C00575538 /* HamburgerTableViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8E4ACA8124478D7C00575538 /* HamburgerTableViewController.swift */; };
@@ -143,6 +144,7 @@
 		8E3AD1362459CABF0085BDD4 /* LocationInLadder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocationInLadder.swift; sourceTree = "<group>"; };
 		8E4086E325F30383005F53CB /* RhythmView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RhythmView.swift; sourceTree = "<group>"; };
 		8E4086E825F325C4005F53CB /* Rhythm.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Rhythm.swift; sourceTree = "<group>"; };
+		8E487B7D25F9C55A002FFC1B /* CalibrationTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CalibrationTests.swift; sourceTree = "<group>"; };
 		8E4A52EE24886B16007406F5 /* Diagram.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Diagram.swift; sourceTree = "<group>"; };
 		8E4ACA7F24478A6E00575538 /* BlackView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BlackView.swift; sourceTree = "<group>"; };
 		8E4ACA8124478D7C00575538 /* HamburgerTableViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HamburgerTableViewController.swift; sourceTree = "<group>"; };
@@ -374,6 +376,7 @@
 				8E5D0ABC2464F2CD00FE78A2 /* RegionTests.swift */,
 				8E973F9C24C4C71E00AB41C3 /* StringTests.swift */,
 				8EF8B5B62330739F00ADB77A /* ViewControllerTests.swift */,
+				8E487B7D25F9C55A002FFC1B /* CalibrationTests.swift */,
 			);
 			path = "EP DiagramTests";
 			sourceTree = "<group>";
@@ -699,6 +702,7 @@
 				8E6570FB24A99B8A001358F6 /* FileTests.swift in Sources */,
 				8E7214E022EB57FC0062C094 /* MarkTests.swift in Sources */,
 				8E25A9B122E5505200D62E18 /* LadderViewTests.swift in Sources */,
+				8E487B7E25F9C55A002FFC1B /* CalibrationTests.swift in Sources */,
 				8E5D0ABD2464F2CD00FE78A2 /* RegionTests.swift in Sources */,
 				8E973F9F24C4C93000AB41C3 /* DiagramTests.swift in Sources */,
 				8E5918BE24AEAFE100D8ABA3 /* CaliperTests.swift in Sources */,

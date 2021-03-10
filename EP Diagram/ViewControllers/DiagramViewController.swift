@@ -211,10 +211,13 @@ final class DiagramViewController: UIViewController {
         self.ladderView.setSelectedMarksImpulseOriginSetting(value: .none)
 
     }
+    lazy var impulseOriginAdjustableAction = UIAction(title: L("Adjust impulse origin")) { _ in
+        fatalError("impulseOriginAdjustAction not implemented yet")
+    }
     lazy var impulseOriginAutoAction = UIAction(title: L("Auto impulse origin")) { _ in
         self.ladderView.setSelectedMarksImpulseOriginSetting(value: .auto)
     }
-    lazy var impulseOriginMenu = UIMenu(title: L("Impulse origin..."), image: UIImage(systemName: "asterisk.circle"), children: [self.impulseOriginProximalAction, self.impulseOriginDistalAction, self.impulseOriginNoneAction, self.impulseOriginAutoAction])
+    lazy var impulseOriginMenu = UIMenu(title: L("Impulse origin..."), image: UIImage(systemName: "asterisk.circle"), children: [self.impulseOriginProximalAction, self.impulseOriginDistalAction, self.impulseOriginAdjustableAction, self.impulseOriginNoneAction, self.impulseOriginAutoAction])
 
     // Mark style
     lazy var solidAction = UIAction(title: L("Solid")) { action in
@@ -293,6 +296,7 @@ final class DiagramViewController: UIViewController {
     }
     lazy var straightenMenu = UIMenu(title: L("Straighten mark(s)..."), image: UIImage(systemName: "arrow.up.arrow.down"), children: [self.straightenToProximalAction, self.straightenToDistalAction])
 
+    // Rhythm
     lazy var rhythmAction = UIAction(title: L("Rhythm..."), image: UIImage(systemName: "waveform.path.ecg")) { action in
         do {
             try self.ladderView.checkForRhythm()
@@ -701,8 +705,8 @@ final class DiagramViewController: UIViewController {
         let labelText = UITextField()
         labelText.text = L("Adjust cycle length")
         let slider = UISlider()
-        slider.minimumValue = Float(ladderView.getRawValueFromCalibratedValue(100, usingCalFactor: calibration.currentCalFactor))
-        slider.maximumValue = Float(ladderView.getRawValueFromCalibratedValue(3000, usingCalFactor: calibration.currentCalFactor))
+        slider.minimumValue = Float(ladderView.regionValueFromCalibratedValue(100, usingCalFactor: calibration.currentCalFactor))
+        slider.maximumValue = Float(ladderView.regionValueFromCalibratedValue(3000, usingCalFactor: calibration.currentCalFactor))
         slider.setValue(Float(rawValue), animated: false)
         ladderView.adjustCL(cl: rawValue)
         slider.addTarget(self, action: #selector(clSliderValueDidChange(_:)), for: .valueChanged)

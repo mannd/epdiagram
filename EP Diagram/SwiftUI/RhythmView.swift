@@ -11,39 +11,49 @@ import SwiftUI
 struct RhythmView: View {
     var dismissAction: ((Rhythm) -> Void)?
 
-    @State var rhythm: Rhythm = Rhythm(meanCL: 600, rhythmType: .regular, minCL: 100, maxCL: 150, randomizeCL: true, randomizeImpulseOrigin: false, randomizeConductionTime: false, replaceExistingMarks: true)
+    @State var rhythm: Rhythm = Rhythm(meanCL: 600, regularity: .regular, minCL: 100, maxCL: 150, randomizeImpulseOrigin: false, randomizeConductionTime: false, impulseOrigin: .proximal, replaceExistingMarks: true)
 
     var body: some View {
         NavigationView {
             Form {
-                Section(header: Text("Rhythm type")) {
-                    Picker(selection: $rhythm.rhythmType, label: Text("")) {
-                        ForEach(RhythmType.allCases) { rhythm in
+                Section(header: Text("Regularity")) {
+                    Picker(selection: $rhythm.regularity, label: Text("")) {
+                        ForEach(Regularity.allCases) { rhythm in
                             Text(rhythm.description)
                         }
                     }
                     .pickerStyle(SegmentedPickerStyle())
                 }
-                Section(header: Text("Mean Cycle Length")) {
-                    Text("Mean cycle length = \(lround(Double(rhythm.meanCL)))")
-                    Slider(value: $rhythm.meanCL, in: 50...2000)
+                Section(header: Text("Regular Rhythm Cycle Length")) {
+                    Text("Cycle length = \(lround(Double( rhythm.meanCL)))")
+                    Slider(value: $rhythm.meanCL, in: Rhythm.minimumCL...Rhythm.maximumCL)
+                        // See https://stackoverflow.com/questions/64756306/using-a-toggle-to-disable-a-slider-in-swiftui-results-in-styling-problems for why we need to change the id to force update the slider being disabled.
+                        .disabled(rhythm.regularity == .fibrillation)
+                        .id(rhythm.regularity == .regular)
+
                 }
                 Section(header: Text("Fibrillation Parameters")) {
-                    Toggle(isOn: $rhythm.randomizeCL) {
-                        Text("Randomize cycle length")
+                    Text("Fibrillation minimum cycle length = \(lround(Double(rhythm.minCL)))")
+                    Slider(value: $rhythm.minCL, in: Rhythm.minimumFibCL...(rhythm.maxCL - 10))
+                        .disabled(rhythm.regularity == .regular)
+                        .id(rhythm.regularity == .fibrillation)
+
+                    Text("Fibrillation maximum cycle length = \(lround(Double(rhythm.maxCL)))")
+                    Slider(value: $rhythm.maxCL, in: (rhythm.minCL + 10)...Rhythm.maximumFibCL)
+                        .disabled(rhythm.regularity == .regular)
+                        .id(rhythm.regularity == .fibrillation)
+                    Picker(selection: $rhythm.impulseOrigin, label: Text("Impulse origin")) {
+                        Text("Proximal").tag(Mark.Endpoint.proximal)
+                        Text("Distal").tag(Mark.Endpoint.distal)
+                        Text("Random").tag(Mark.Endpoint.random)
                     }
-                    Text("Minimum cycle length = \(lround(Double(rhythm.minCL)))")
-                    Slider(value: $rhythm.minCL, in: 10...(rhythm.maxCL - 10)).disabled(rhythm.randomizeCL == false)
-                    Text("Maximum cycle length = \(lround(Double(rhythm.maxCL)))")
-                    Slider(value: $rhythm.maxCL, in: (rhythm.minCL + 10)...200).disabled(rhythm.randomizeCL == false)
                     Toggle(isOn: $rhythm.randomizeImpulseOrigin) {
                         Text("Randomize impulse origin")
                     }
                     Toggle(isOn: $rhythm.randomizeConductionTime) {
                         Text("Randomize conduction time")
                     }
-                }
-                .disabled(rhythm.rhythmType == .regular)
+                }.disabled(rhythm.regularity == .regular)
                 Section(header: Text("Delete preexisting marks?")) {
                     Toggle(isOn: $rhythm.replaceExistingMarks) {
                         Text("Delete marks in selected area first?")

@@ -26,21 +26,27 @@ final class Calibration: Codable, CustomDebugStringConvertible {
     var originalCalFactor: CGFloat = 1
     var isCalibrated = false
 
+    // TODO: make private after deprecated set removed
     static let standardInterval: CGFloat = 1000
 
     var currentCalFactor: CGFloat {
         (originalZoom * originalCalFactor) / currentZoom
     }
 
+    @available(*, deprecated, message: "Can be removed after after further testing.")
     func set(zoom: CGFloat, calFactor: CGFloat) {
         originalZoom = zoom
         currentZoom = zoom
         originalCalFactor = calFactor
+        isCalibrated = true
         print(self)
     }
 
-    func calibratedInterval(_ value: CGFloat) -> Int {
-        return lround(Double(value) * Double(currentCalFactor))
+    func set(zoom: CGFloat, value: CGFloat) {
+        originalZoom = zoom
+        currentZoom = zoom
+        originalCalFactor = Self.standardInterval / value
+        isCalibrated = true
     }
 
 }

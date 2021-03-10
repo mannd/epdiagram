@@ -27,4 +27,9 @@ class CursorViewTests: XCTestCase {
         let nearCursor = cursorView.isNearCursor(positionX: 100, accuracy: 0.001)
         XCTAssert(nearCursor)
     }
+
+    func testNewCalibration() {
+        let calibration = cursorView.newCalibration(zoom: 1.7)
+        XCTAssertTrue(calibration.isCalibrated)
+    }
 }

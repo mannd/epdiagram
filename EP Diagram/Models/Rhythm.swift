@@ -9,21 +9,29 @@
 import UIKit
 
 struct Rhythm {
+    static let minimumCL: CGFloat = 50
+    static let maximumCL: CGFloat = 2000
+    static let minimumFibCL: CGFloat = 50
+    static let maximumFibCL: CGFloat = 300
+
+    let minimumCT: Double = 10
+    let maximumCT: Double = Double(minimumCL) - 10
+
     var meanCL: CGFloat
-    var rhythmType: RhythmType
+    var regularity: Regularity
     var minCL: CGFloat
     var maxCL: CGFloat
-    var randomizeCL: Bool
     var randomizeImpulseOrigin: Bool
     var randomizeConductionTime: Bool
+    var impulseOrigin: Mark.Endpoint
     var replaceExistingMarks: Bool
 }
 
-enum RhythmType: Int, CustomStringConvertible, Identifiable, CaseIterable {
+enum Regularity: Int, CustomStringConvertible, Identifiable, CaseIterable {
     case regular
     case fibrillation
 
-    var id: RhythmType { return self }
+    var id: Regularity { return self }
 
     var description: String {
         switch self {

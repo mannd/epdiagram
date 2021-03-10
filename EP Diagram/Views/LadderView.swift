@@ -114,7 +114,8 @@ final class LadderView: ScaledView {
 
     var leftMargin: CGFloat = 0
     var viewHeight: CGFloat = 0
-    var viewMaxWidth: CGFloat = 0  // full scrollable width of ladderView (dependent on imageView width)
+    // viewMaxWidth is width of image, or width of ladderView if no image is present
+    var viewMaxWidth: CGFloat = 0 { didSet { viewMaxWidth = max(viewMaxWidth, frame.width) } }
     private var regionUnitHeight: CGFloat = 0
 
     weak var cursorViewDelegate: CursorViewDelegate! // Note IUO.
@@ -879,10 +880,10 @@ final class LadderView: ScaledView {
         let zoneMax = max(zone.start, zone.end)
         for region in zone.regions {
             for mark in region.marks {
-                if (mark.segment.proximal.x > zoneMin
-                        || mark.segment.distal.x > zoneMin)
-                    && (mark.segment.proximal.x < zoneMax
-                            || mark.segment.distal.x < zoneMax) {
+                if (mark.segment.proximal.x >= zoneMin
+                        || mark.segment.distal.x >= zoneMin)
+                    && (mark.segment.proximal.x <= zoneMax
+                            || mark.segment.distal.x <= zoneMax) {
                     mark.mode = .selected
                 } else {
                     mark.mode = .normal
@@ -1473,15 +1474,17 @@ final class LadderView: ScaledView {
     }
 
     func updateRegionIntervals() {
-        DispatchQueue.global().async { [unowned self] in
-            self.regionIntervals = self.ladder.regionIntervals()
-            DispatchQueue.main.async {
-                self.setNeedsDisplay()
+        DispatchQueue.global().async { [weak self] in
+            if let self = self {
+                self.regionIntervals = self.ladder.regionIntervals()
+                DispatchQueue.main.async {
+                    self.setNeedsDisplay()
+                }
             }
         }
     }
 
-    func getRawValueFromCalibratedValue(_ value: CGFloat, usingCalFactor calFactor: CGFloat) -> CGFloat {
+    func regionValueFromCalibratedValue(_ value: CGFloat, usingCalFactor calFactor: CGFloat) -> CGFloat {
         let x1: CGFloat = 0
         let x2: CGFloat  = value
         let regionX1 = transformToRegionPositionX(scaledViewPositionX: x1)
@@ -1566,7 +1569,7 @@ final class LadderView: ScaledView {
             drawArrowHead(context: context, start: segment.proximal, end: segment.distal, pointerLineLength: 20, arrowAngle: arrowHeadAngle)
         case .proximal:
             drawArrowHead(context: context, start: segment.distal, end: segment.proximal, pointerLineLength: 20, arrowAngle: arrowHeadAngle)
-        case .none, .auto:
+        case .none, .auto, .random:
             break // this is undecided unless manually set
         }
     }
@@ -1606,7 +1609,6 @@ final class LadderView: ScaledView {
             text.draw(in: textRect, withAttributes: measurementTextAttributes)
             context.strokePath()
         }
-
     }
 
     func drawPivot(context: CGContext, position: CGPoint) {
@@ -1641,8 +1643,8 @@ final class LadderView: ScaledView {
             context.addLine(to: CGPoint(x: segment.proximal.x + blockLength / 2, y: segment.proximal.y))
             context.move(to: CGPoint(x: segment.proximal.x - blockLength / 2, y: segment.proximal.y - blockSeparation))
             context.addLine(to: CGPoint(x: segment.proximal.x + blockLength / 2, y: segment.proximal.y - blockSeparation))
-        case .auto:
-            fatalError("Block site set to auto.")
+        case .auto, .random:
+            fatalError("Block site set to auto or random.")
         }
 
         context.strokePath()
@@ -1659,8 +1661,8 @@ final class LadderView: ScaledView {
             drawFilledCircle(context: context, position: CGPoint(x: segment.distal.x - radius / 2, y: segment.distal.y + separation - radius), radius: radius)
         case .proximal:
             drawFilledCircle(context: context, position: CGPoint(x: segment.proximal.x - radius / 2, y: segment.proximal.y - separation), radius: radius)
-        case .auto:
-            fatalError("Impulse origin site set to auto.")
+        case .auto, .random:
+            fatalError("Impulse origin site set to auto or random.")
         }
     }
 
@@ -1839,8 +1841,8 @@ final class LadderView: ScaledView {
                 segment = Segment(proximal: mark.segment.proximal, distal: CGPoint(x: mark.segment.proximal.x, y: mark.segment.distal.y))
             case .distal:
                 segment = Segment(proximal: CGPoint(x: mark.segment.distal.x, y: mark.segment.proximal.y), distal: mark.segment.distal)
-            case .none, .auto:
-                fatalError("Endpoint.none or .auto inappopriately passed to straightenToEndPoint()")
+            case .none, .auto, .random:
+                fatalError("Endpoint.none, .random, or .auto inappopriately passed to straightenToEndPoint()")
             }
             self.setSegment(segment: segment, forMark: mark)
         }
@@ -1925,29 +1927,98 @@ final class LadderView: ScaledView {
     func fillWithRhythm(_ rhythm: Rhythm) {
         guard let calFactor = calibration?.currentCalFactor else { return }
         currentDocument?.undoManager.beginUndoGrouping()
-        func applyCL(start: CGFloat, end: CGFloat, region: Region?) {
+        func applyCL(start: CGFloat, end: CGFloat, region: Region?, deleteExtantMarks: Bool = false) {
             guard let region = region else { return }
-            let regionCL = getRawValueFromCalibratedValue(rhythm.meanCL, usingCalFactor: calFactor)
+            if deleteExtantMarks {
+                deleteMarksInRegion(region, start: start, end: end)
+            }
+            var regionCL: CGFloat = 0
+            if rhythm.regularity == .regular {
+                regionCL = regionValueFromCalibratedValue(rhythm.meanCL, usingCalFactor: calFactor)
+            }
+            else if rhythm.regularity == .fibrillation {
+                // get average CL from min and max values
+                regionCL = regionValueFromCalibratedValue((rhythm.maxCL + rhythm.minCL) / 2, usingCalFactor: calFactor)
+            }
             var positionX = start
             while positionX < end {
                 let mark = ladder.addMark(at: positionX, toRegion: region)
+                var impulseOrigin: Mark.Endpoint = .none
+                if rhythm.regularity == .fibrillation && rhythm.randomizeConductionTime {
+                    let ct = randomizeConductionTime(range: rhythm.minimumCT...rhythm.maximumCT, calFactor: calFactor)
+                    impulseOrigin = randomizeImpulseEndpoint(endpoint: rhythm.impulseOrigin)
+                    if impulseOrigin == .proximal {
+                        mark.segment.distal.x += ct
+                    } else if impulseOrigin == .distal {
+                        mark.segment.proximal.x += ct
+                    }
+                }
+                if rhythm.regularity == .fibrillation && rhythm.randomizeImpulseOrigin {
+                    if impulseOrigin == .proximal {
+                        mark.segment.proximal.y = randomizeImpulseOrigin(range: 0...1.0)
+                    } else if impulseOrigin == .distal {
+                        mark.segment.distal.y = randomizeImpulseOrigin(range: 0...1.0)
+                    }
+                }
+                if rhythm.regularity == .fibrillation {
+                    positionX += randomizeCycleLength(range: Double(rhythm.minCL)...Double(rhythm.maxCL), calFactor: calFactor)
+
+                } else {
+                    positionX += regionCL
+                }
+                assessBlockAndImpulseOrigin(mark: mark)
                 undoablyAddMark(mark: mark)
-                positionX += regionCL
+            }
+            if zone.isVisible {
+                selectInZone()
+            } else {
+                ladder.setMarksWithMode(.selected, inRegion: region)
             }
             setNeedsDisplay()
         }
 
+        print("Rhythm \(rhythm)")
         let selectedRegions = ladder.allRegionsWithMode(.selected)
         if ladder.zone.isVisible {
             let start = zone.start
             let end = zone.end
-            applyCL(start: start, end: end, region: zone.startingRegion)
+            applyCL(start: start, end: end, region: zone.startingRegion, deleteExtantMarks: rhythm.replaceExistingMarks)
         } else if selectedRegions.count == 1 {
             let start: CGFloat = 0
             let end = viewMaxWidth
-            applyCL(start: start, end: end, region: selectedRegions[0])
+            applyCL(start: start, end: end, region: selectedRegions[0], deleteExtantMarks: rhythm.replaceExistingMarks)
         }
         currentDocument?.undoManager.endUndoGrouping()
+    }
+
+    func randomizeCycleLength(range: ClosedRange<Double>, calFactor: CGFloat) -> CGFloat {
+        let cl = Double.random(in: range)
+        return regionValueFromCalibratedValue(CGFloat(cl), usingCalFactor: calFactor)
+    }
+
+    func randomizeConductionTime(range: ClosedRange<Double>, calFactor: CGFloat) -> CGFloat {
+        let ct = Double.random(in: range)
+        return regionValueFromCalibratedValue(CGFloat(ct), usingCalFactor: calFactor)
+    }
+
+    func randomizeImpulseOrigin(range: ClosedRange<Double>) -> CGFloat {
+        let io = Double.random(in: range)
+        return CGFloat(io)
+    }
+
+    func randomizeImpulseEndpoint(endpoint: Mark.Endpoint) -> Mark.Endpoint {
+        guard endpoint == .random else { return endpoint }
+        let randomN = Int.random(in: 0...1)
+        return randomN == 0 ? .proximal : .distal
+    }
+
+    func deleteMarksInRegion(_ region: Region, start: CGFloat, end: CGFloat) {
+        for mark in region.marks {
+            if (mark.segment.proximal.x > start || mark.segment.distal.x > start)
+                && (mark.segment.proximal.x < end || mark.segment.distal.x < end) {
+                undoablyDeleteMark(mark: mark)
+            }
+        }
     }
 
     func moveMarks(_ diff: CGFloat) {
@@ -2000,8 +2071,8 @@ final class LadderView: ScaledView {
             newSegment = Segment(proximal: segment.proximal, distal: CGPoint(x: segment.proximal.x + delta, y: segment.distal.y))
         case .distal:
             newSegment = Segment(proximal: CGPoint(x: segment.distal.x + delta, y: segment.proximal.y), distal: segment.distal)
-        case .none, .auto:
-            fatalError("Endpoint.none or .auto inappopriately passed to slantMark()")
+        case .none, .random, .auto:
+            fatalError("Endpoint.none, .random, or .auto inappopriately passed to slantMark()")
         }
         setSegment(segment: transformToRegionSegment(scaledViewSegment: newSegment, region: region), forMark: mark)
     }

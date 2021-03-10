@@ -320,43 +320,25 @@ class LadderViewTests: XCTestCase {
         XCTAssertEqual(value, 1000)
         value = ladderView.formatValue(100, usingCalFactor: 0.01)
         XCTAssertEqual(value, 1)
-        let rawValue = ladderView.getRawValueFromCalibratedValue(1, usingCalFactor: 0.01)
+        let rawValue = ladderView.regionValueFromCalibratedValue(1, usingCalFactor: 0.01)
         XCTAssertEqual(rawValue, 100, accuracy: 0.0001)
-    }
-
-    func testCalibration2() {
-        let calibration = Calibration()
-        calibration.set(zoom: 1.0, calFactor: 100)
-        ladderView.calibration = calibration
-        var value = calibration.calibratedInterval(100)
-        XCTAssertEqual(value, 10000)
-        calibration.set(zoom: 1.0, calFactor: 1)
-        value = calibration.calibratedInterval(100)
-        XCTAssertEqual(value, 100)
-
-        calibration.set(zoom: 1.0, calFactor: 10)
-        value = calibration.calibratedInterval(100)
-        XCTAssertEqual(value, 1000)	
-        calibration.set(zoom: 1.0, calFactor: 0.01)
-        value = calibration.calibratedInterval(100)
-        XCTAssertEqual(value, 1)
     }
 
     func testGetRawValueFromInterval() {
         let interval: CGFloat = 100
         let calFactor: CGFloat = 10
-        let rawValue = ladderView.getRawValueFromCalibratedValue(interval, usingCalFactor: calFactor)
+        let rawValue = ladderView.regionValueFromCalibratedValue(interval, usingCalFactor: calFactor)
         XCTAssertEqual(rawValue, 10)
         let formattedValue = ladderView.formatValue(CGFloat(rawValue), usingCalFactor: calFactor)
         XCTAssertEqual(formattedValue, Int(interval))
         let calibration = Calibration()
         calibration.set(zoom: 1.0, calFactor: 10)
         ladderView.calibration = calibration
-        let rawValue2 = ladderView.getRawValueFromCalibratedValue(interval, usingCalFactor: calibration.currentCalFactor)
+        let rawValue2 = ladderView.regionValueFromCalibratedValue(interval, usingCalFactor: calibration.currentCalFactor)
         XCTAssertEqual(rawValue2, 10)
         calibration.currentZoom = 2.0
         ladderView.offsetX = 10
-        let rawValue3 = ladderView.getRawValueFromCalibratedValue(interval, usingCalFactor: calibration.currentCalFactor)
+        let rawValue3 = ladderView.regionValueFromCalibratedValue(interval, usingCalFactor: calibration.currentCalFactor)
         XCTAssertEqual(rawValue3, 20)
         let formattedValue2 = ladderView.formatValue(CGFloat(rawValue3), usingCalFactor: calibration.currentCalFactor)
         XCTAssertEqual(formattedValue2, Int(interval))

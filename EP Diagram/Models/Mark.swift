@@ -335,11 +335,14 @@ extension Mark {
     }
 
     // Show which end of a mark is affected by an action.
-    enum Endpoint: Int, Codable, CaseIterable {
+    enum Endpoint: String, Codable, CaseIterable, Identifiable {
         case proximal
         case distal
+        case random
         case none
         case auto
+
+        var id: String { return rawValue }
     }
 }
 

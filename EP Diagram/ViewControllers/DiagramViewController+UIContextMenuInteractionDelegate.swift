@@ -119,7 +119,7 @@ extension DiagramViewController: UIContextMenuInteractionDelegate {
         // Allow long press to select in select mode
         let locationInLadder = ladderView.getLocationInLadder(position: location)
         // Handle long press on single item.
-        if ladderView.noSelectionExists() {
+        if ladderView.noSelectionExists() && !ladderView.ladder.zone.isVisible {
             switch locationInLadder.specificLocation {
             case .mark:
                 if let mark = locationInLadder.mark {
@@ -140,16 +140,10 @@ extension DiagramViewController: UIContextMenuInteractionDelegate {
                     prepareActions()
                     return markContextMenuConfiguration(at: location)
                 }
-            case .zone:
-                if let zone = locationInLadder.zone {
-                    ladderView.ladder.setMarksWithMode(.selected, inZone: zone)
-                    prepareActions()
-                    return markContextMenuConfiguration(at: location)
-                }
-            case .ladder:
+            case .ladder, .zone:
                 break
-            default:
-                break
+            case .error:
+                fatalError("Location in ladder is error.")
             }
             return nil
         }
