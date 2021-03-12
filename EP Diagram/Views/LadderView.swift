@@ -436,6 +436,8 @@ final class LadderView: ScaledView {
                     newMark.mode = .connected
                     ladder.connectedMarks.append(newMark)
                     undoablyAddMark(mark: newMark)
+                    assessBlockAndImpulseOrigin(mark: newMark)
+
                 }
             }
             else if firstTappedMarkRegionIndex > regionIndex {
@@ -445,6 +447,7 @@ final class LadderView: ScaledView {
                     newMark.mode = .connected
                     ladder.connectedMarks.append(newMark)
                     undoablyAddMark(mark: newMark)
+                    assessBlockAndImpulseOrigin(mark: newMark)
                 }
             }
             // FIXME: what do do if something illegal tapped (same mark, illegal region).  Remove connected marks?

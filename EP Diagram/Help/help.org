@@ -15,10 +15,48 @@
 #+XSLT:
 #+HTML_HEAD: <style media="screen" type="text/css"> img {max-width: 100%; height: auto;} </style>
 #+HTML_HEAD: <style  type="text/css">:root { color-scheme: light dark; }</style>
-* What makes up a Diagram?
-A Diagram has two components: an (optional) image, and a ladder.  If you select a new image,
- or if you change ladders, you will need to save the diagram or your changes will be lost.  [
-Exception: if the ladder has no marks and if you have not customized the ladder, you will not be prompted to save the diagram.]  Thus your workflow can be any of the examples that follow:
-1. Select New diagram.  You will be prompted to save the current diagram, then a new diagram will be presented with a blank image, and the last ladder used.  You can then take a photo or select an image, and select a different ladder if you like.
-2. While working on a diagram, if you select a new image you will be prompted to save the diagram.  A new diagram will be created with the selected image and the ladder will be cleared (marks removed).
-3. While working on a diagram, if you select a new ladder, you will be prompted to save the diagram.  A new diagram will be created with the selected image and the ladder will be cleared (marks removed).
+* Development Version Notes
+EP Diagram is under active development, and this version is only further testing and feedback.  Many features are incomplete or not implemented, and that includes this Help module!  But to get you started, here are some tips.
+** Quick Start
+*** Normal mode
+- EP Diagram opens and saves diagram files, that will be stored in the files app on you iPad or iPhone.
+- When you open or create a new diagram file, you will see a blank area at the top of the screen and a default ladder grid at the bottom.
+- Use the "hamburger" menu icon at the top left to open the menu.  You can select an image from your photos or your files and it will appear in the top of the screen.
+- Tap on the image to create marks.  Use the cursor to align the mark with the ECG waveforms.  Tap away from the cursor to hid the cursor.  Tap on a mark to show the cursor and each tap changes the movement point of the mark from middle to proximal to distal.
+- Double click on a mark to delete it.  Double click anywhere else to create a mark.  Double clicking is a fast way to create marks.
+- Marks appear in the active region, shown by a colored background.  If you tap on a different region the marks will appear in that region and the active region will change.  Tapping on the label of the region will also activate or deactivate the region.
+- Dragging in a region will also create a mark.
+- Long press on the cursor to change it to an omnidirectional cursor (it has a large circle on it), allowing marks to move in any direction.  Long press again to change it back.
+- Marks that are placed end to end will automatically link up and move together afterwards.
+*** Calibration mode
+- Press the Calibrate button to show a caliper that can be used to calibrate the diagram to a standard interval of 1000 msec.
+- After calibration, measurements will appear on the diagram.
+*** Edit mode
+- Press Edit to allow taps to select marks or regions, or dragging to select zones.
+- Long press after selection to show a menu that allows extensive customization of the appearance of the marks, including the style, emphasis, block, impulse origin, etc. and also allows adding a rhythm to a region or zone, e.g. atrial fibrillation.
+*** Connect mode
+- Tap pairs of marks separated by a region to connect the marks.
+- Tap from a mark to an adjacent region to have a mark block in that region.
+*** Undo/Redo
+- Practically anything you do can be undone or redone and these changes are automatically saved.
+** Other features
+*** Select ladders
+*** Edit/Create your own ladders
+*** Sample diagrams
+*** Preferences
+- Change the overall appearance or behavior of the app.
+* Known issues/bugs
+- Automatic impulse origin not working correctly.  It is recommented to turn this off in Preferences and manually edit this in Edit mode instead.
+- Mark linking and unlinking behavior needs work.
+- Close marks can be difficult to individually select.
+- Diagram document format likely to change in release version and be incompatible with present format.
+- Need more sample ECGS.
+- Need to test iCloud storage.
+- Document state restoration currently turned off.
+- Cursor sometimes not aligned with mark.
+- Linked marks in same zone not behaving correctly.
+- Possible other features to implement this version:
+  - pacer spikes
+  - refractory periods
+- Mac version to be done.  Need to convert menu system to Mac.
+- Help file for release version not done.
