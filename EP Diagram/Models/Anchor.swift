@@ -13,5 +13,4 @@ enum Anchor: Int, Codable {
     case middle
     case proximal
     case distal
-    case none
 }

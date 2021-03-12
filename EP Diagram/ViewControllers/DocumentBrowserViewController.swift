@@ -9,22 +9,51 @@
 import UIKit
 import os.log
 
+enum NavigationContext {
+  case launched
+  case browsing
+  case editing
+}
+
 class DocumentBrowserViewController: UIDocumentBrowserViewController {
 
+    var presentationContest: NavigationContext = .launched
     var currentDocument: DiagramDocument?
     var editingDocument = false
     var browserDelegate = DocumentBrowserDelegate()
     var restorationInfo: [AnyHashable: Any]?
-    var persistentID: String = ""
+
+    var externalURL: URL?
 
     override func viewDidLoad() {
         super.viewDidLoad()
         allowsDocumentCreation = true
         localizedCreateDocumentActionTitle = L("Create New Diagram")
-        browserUserInterfaceStyle = .dark
+        browserUserInterfaceStyle = .light
         delegate = browserDelegate
-        view.tintColor = .green
+        view.tintColor = .systemBlue
         installDocumentBrowser()
+    }
+
+    override func viewDidAppear(_ animated: Bool) {
+        super.viewDidAppear(animated)
+        if let externalURL = externalURL {
+            if FileManager.default.fileExists(atPath: externalURL.path) {
+                openDocument(url: externalURL)
+                return
+            }
+        }
+        // Fail gently if cached file no longer exists.
+        if let lastDocumentURLPath = restorationInfo?[DiagramViewController.restorationFileNameKey] as? String,
+           !lastDocumentURLPath.isEmpty,
+           restorationInfo?[DiagramViewController.restorationDoRestorationKey] as? Bool ?? false  {
+            if let docURL = FileIO.getDocumentsURL() {
+                let fileURL = docURL.appendingPathComponent(lastDocumentURLPath)
+                if FileManager.default.fileExists(atPath: fileURL.path) {
+                    openDocument(url: fileURL)
+                }
+            }
+        }
     }
 
     func installDocumentBrowser() {
@@ -44,7 +73,7 @@ class DocumentBrowserViewController: UIDocumentBrowserViewController {
     }
 }
 
-protocol DiagramEditorDelegate {
+protocol DiagramEditorDelegate: AnyObject {
     func diagramEditorDidFinishEditing(_ controller: DiagramViewController, diagram: Diagram)
     func diagramEditorDidUpdateContent(_ controller: DiagramViewController, diagram: Diagram)
 }
@@ -64,13 +93,14 @@ extension DocumentBrowserViewController: DiagramEditorDelegate {
         editingDocument = true
         let controller = DiagramViewController.navigationControllerFactory()
         let diagramViewController = controller.viewControllers[0] as? DiagramViewController
-        diagramViewController?.delegate = self
+        diagramViewController?.diagramEditorDelegate = self
         diagramViewController?.diagram = document.diagram
         diagramViewController?.restorationInfo = restorationInfo
+        // FIXME: below needed?
         diagramViewController?.restorationIdentifier = restorationIdentifier
-        diagramViewController?.currentDocument = currentDocument
+        diagramViewController?.currentDocument = document
         controller.modalPresentationStyle = .fullScreen
-        present(controller, animated: true)
+        self.present(controller, animated: true)
     }
 
     func closeDiagramController(completion: (()->Void)? = nil) {
@@ -79,9 +109,8 @@ extension DocumentBrowserViewController: DiagramEditorDelegate {
             self.editingDocument = false
             completion?()
         }
-
         if editingDocument {
-            dismiss(animated: true) {
+            self.dismiss(animated: true) {
                 compositeClosure()
             }
         } else {
@@ -89,6 +118,7 @@ extension DocumentBrowserViewController: DiagramEditorDelegate {
         }
     }
 
+    // FIXME: on mac need to
     private func closeCurrentDocument() {
         currentDocument?.close()
         currentDocument = nil

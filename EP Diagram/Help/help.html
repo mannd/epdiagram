@@ -3,7 +3,7 @@
 "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
 <head>
-<!-- 2020-07-31 Fri 09:24 -->
+<!-- 2021-03-12 Fri 10:20 -->
 <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>&lrm;</title>
@@ -42,7 +42,7 @@
   }
   pre.src {
     position: relative;
-    overflow: visible;
+    overflow: auto;
     padding-top: 1.2em;
   }
   pre.src:before {
@@ -54,7 +54,7 @@
     padding: 3px;
     border: 1px solid black;
   }
-  pre.src:hover:before { display: inline;}
+  pre.src:hover:before { display: inline; margin-top: 14px;}
   /* Languages per Org manual */
   pre.src-asymptote:before { content: 'Asymptote'; }
   pre.src-awk:before { content: 'Awk'; }
@@ -198,50 +198,26 @@
 <style media="screen" type="text/css"> img {max-width: 100%; height: auto;} </style>
 <style  type="text/css">:root { color-scheme: light dark; }</style>
 <script type="text/javascript">
-/*
-@licstart  The following is the entire license notice for the
-JavaScript code in this tag.
-
-Copyright (C) 2012-2020 Free Software Foundation, Inc.
-
-The JavaScript code in this tag is free software: you can
-redistribute it and/or modify it under the terms of the GNU
-General Public License (GNU GPL) as published by the Free Software
-Foundation, either version 3 of the License, or (at your option)
-any later version.  The code is distributed WITHOUT ANY WARRANTY;
-without even the implied warranty of MERCHANTABILITY or FITNESS
-FOR A PARTICULAR PURPOSE.  See the GNU GPL for more details.
-
-As additional permission under GNU GPL version 3 section 7, you
-may distribute non-source (e.g., minimized or compacted) forms of
-that code without the copy of the GNU GPL normally required by
-section 4, provided you include this license notice and a URL
-through which recipients can access the Corresponding Source.
-
-
-@licend  The above is the entire license notice
-for the JavaScript code in this tag.
-*/
+// @license magnet:?xt=urn:btih:e95b018ef3580986a04669f1b5879592219e2a7a&dn=public-domain.txt Public Domain
 <!--/*--><![CDATA[/*><!--*/
- function CodeHighlightOn(elem, id)
- {
-   var target = document.getElementById(id);
-   if(null != target) {
-     elem.cacheClassElem = elem.className;
-     elem.cacheClassTarget = target.className;
-     target.className = "code-highlighted";
-     elem.className   = "code-highlighted";
-   }
- }
- function CodeHighlightOff(elem, id)
- {
-   var target = document.getElementById(id);
-   if(elem.cacheClassElem)
-     elem.className = elem.cacheClassElem;
-   if(elem.cacheClassTarget)
-     target.className = elem.cacheClassTarget;
- }
-/*]]>*///-->
+     function CodeHighlightOn(elem, id)
+     {
+       var target = document.getElementById(id);
+       if(null != target) {
+         elem.classList.add("code-highlighted");
+         target.classList.add("code-highlighted");
+       }
+     }
+     function CodeHighlightOff(elem, id)
+     {
+       var target = document.getElementById(id);
+       if(null != target) {
+         elem.classList.remove("code-highlighted");
+         target.classList.remove("code-highlighted");
+       }
+     }
+    /*]]>*///-->
+// @license-end
 </script>
 </head>
 <body>
@@ -250,23 +226,138 @@ for the JavaScript code in this tag.
 <h2>Table of Contents</h2>
 <div id="text-table-of-contents">
 <ul>
-<li><a href="#org0545386">What makes up a Diagram?</a></li>
+<li><a href="#orgd4382de">Development Version Notes</a>
+<ul>
+<li><a href="#org06831cf">Quick Start</a>
+<ul>
+<li><a href="#orgae6a96e">Normal mode</a></li>
+<li><a href="#org494d097">Calibration mode</a></li>
+<li><a href="#org365c6e5">Edit mode</a></li>
+<li><a href="#org5855650">Connect mode</a></li>
+<li><a href="#orga2fe00f">Undo/Redo</a></li>
+</ul>
+</li>
+<li><a href="#org7e037c5">Other features</a>
+<ul>
+<li><a href="#orgc0f2af7">Select ladders</a></li>
+<li><a href="#org3f25626">Edit/Create your own ladders</a></li>
+<li><a href="#orga7eaa7f">Sample diagrams</a></li>
+<li><a href="#orgc219365">Preferences</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a href="#org634f7ae">Known issues/bugs</a></li>
 </ul>
 </div>
 </div>
-<div id="outline-container-org0545386" class="outline-2">
-<h2 id="org0545386">What makes up a Diagram?</h2>
-<div class="outline-text-2" id="text-org0545386">
+<div id="outline-container-orgd4382de" class="outline-2">
+<h2 id="orgd4382de">Development Version Notes</h2>
+<div class="outline-text-2" id="text-orgd4382de">
 <p>
-A Diagram has two components: an (optional) image, and a ladder.  If you select a new image,
- or if you change ladders, you will need to save the diagram or your changes will be lost.  [
-Exception: if the ladder has no marks and if you have not customized the ladder, you will not be prompted to save the diagram.]  Thus your workflow can be any of the examples that follow:
+EP Diagram is under active development, and this version is only further testing and feedback.  Many features are incomplete or not implemented, and that includes this Help module!  But to get you started, here are some tips.
 </p>
-<ol class="org-ol">
-<li>Select New diagram.  You will be prompted to save the current diagram, then a new diagram will be presented with a blank image, and the last ladder used.  You can then take a photo or select an image, and select a different ladder if you like.</li>
-<li>While working on a diagram, if you select a new image you will be prompted to save the diagram.  A new diagram will be created with the selected image and the ladder will be cleared (marks removed).</li>
-<li>While working on a diagram, if you select a new ladder, you will be prompted to save the diagram.  A new diagram will be created with the selected image and the ladder will be cleared (marks removed).</li>
-</ol>
+</div>
+<div id="outline-container-org06831cf" class="outline-3">
+<h3 id="org06831cf">Quick Start</h3>
+<div class="outline-text-3" id="text-org06831cf">
+</div>
+<div id="outline-container-orgae6a96e" class="outline-4">
+<h4 id="orgae6a96e">Normal mode</h4>
+<div class="outline-text-4" id="text-orgae6a96e">
+<ul class="org-ul">
+<li>EP Diagram opens and saves diagram files, that will be stored in the files app on you iPad or iPhone.</li>
+<li>When you open or create a new diagram file, you will see a blank area at the top of the screen and a default ladder grid at the bottom.</li>
+<li>Use the "hamburger" menu icon at the top left to open the menu.  You can select an image from your photos or your files and it will appear in the top of the screen.</li>
+<li>Tap on the image to create marks.  Use the cursor to align the mark with the ECG waveforms.  Tap away from the cursor to hid the cursor.  Tap on a mark to show the cursor and each tap changes the movement point of the mark from middle to proximal to distal.</li>
+<li>Double click on a mark to delete it.  Double click anywhere else to create a mark.  Double clicking is a fast way to create marks.</li>
+<li>Marks appear in the active region, shown by a colored background.  If you tap on a different region the marks will appear in that region and the active region will change.  Tapping on the label of the region will also activate or deactivate the region.</li>
+<li>Dragging in a region will also create a mark.</li>
+<li>Long press on the cursor to change it to an omnidirectional cursor (it has a large circle on it), allowing marks to move in any direction.  Long press again to change it back.</li>
+<li>Marks that are placed end to end will automatically link up and move together afterwards.</li>
+</ul>
+</div>
+</div>
+<div id="outline-container-org494d097" class="outline-4">
+<h4 id="org494d097">Calibration mode</h4>
+<div class="outline-text-4" id="text-org494d097">
+<ul class="org-ul">
+<li>Press the Calibrate button to show a caliper that can be used to calibrate the diagram to a standard interval of 1000 msec.</li>
+<li>After calibration, measurements will appear on the diagram.</li>
+</ul>
+</div>
+</div>
+<div id="outline-container-org365c6e5" class="outline-4">
+<h4 id="org365c6e5">Edit mode</h4>
+<div class="outline-text-4" id="text-org365c6e5">
+<ul class="org-ul">
+<li>Press Edit to allow taps to select marks or regions, or dragging to select zones.</li>
+<li>Long press after selection to show a menu that allows extensive customization of the appearance of the marks, including the style, emphasis, block, impulse origin, etc. and also allows adding a rhythm to a region or zone, e.g. atrial fibrillation.</li>
+</ul>
+</div>
+</div>
+<div id="outline-container-org5855650" class="outline-4">
+<h4 id="org5855650">Connect mode</h4>
+<div class="outline-text-4" id="text-org5855650">
+<ul class="org-ul">
+<li>Tap pairs of marks separated by a region to connect the marks.</li>
+<li>Tap from a mark to an adjacent region to have a mark block in that region.</li>
+</ul>
+</div>
+</div>
+<div id="outline-container-orga2fe00f" class="outline-4">
+<h4 id="orga2fe00f">Undo/Redo</h4>
+<div class="outline-text-4" id="text-orga2fe00f">
+<ul class="org-ul">
+<li>Practically anything you do can be undone or redone and these changes are automatically saved.</li>
+</ul>
+</div>
+</div>
+</div>
+<div id="outline-container-org7e037c5" class="outline-3">
+<h3 id="org7e037c5">Other features</h3>
+<div class="outline-text-3" id="text-org7e037c5">
+</div>
+<div id="outline-container-orgc0f2af7" class="outline-4">
+<h4 id="orgc0f2af7">Select ladders</h4>
+</div>
+<div id="outline-container-org3f25626" class="outline-4">
+<h4 id="org3f25626">Edit/Create your own ladders</h4>
+</div>
+<div id="outline-container-orga7eaa7f" class="outline-4">
+<h4 id="orga7eaa7f">Sample diagrams</h4>
+</div>
+<div id="outline-container-orgc219365" class="outline-4">
+<h4 id="orgc219365">Preferences</h4>
+<div class="outline-text-4" id="text-orgc219365">
+<ul class="org-ul">
+<li>Change the overall appearance or behavior of the app.</li>
+</ul>
+</div>
+</div>
+</div>
+</div>
+<div id="outline-container-org634f7ae" class="outline-2">
+<h2 id="org634f7ae">Known issues/bugs</h2>
+<div class="outline-text-2" id="text-org634f7ae">
+<ul class="org-ul">
+<li>Automatic impulse origin not working correctly.  It is recommented to turn this off in Preferences and manually edit this in Edit mode instead.</li>
+<li>Mark linking and unlinking behavior needs work.</li>
+<li>Close marks can be difficult to individually select.</li>
+<li>Diagram document format likely to change in release version and be incompatible with present format.</li>
+<li>Need more sample ECGS.</li>
+<li>Need to test iCloud storage.</li>
+<li>Document state restoration currently turned off.</li>
+<li>Cursor sometimes not aligned with mark.</li>
+<li>Linked marks in same zone not behaving correctly.</li>
+<li>Possible other features to implement this version:
+<ul class="org-ul">
+<li>pacer spikes</li>
+<li>refractory periods</li>
+</ul></li>
+<li>Mac version to be done.  Need to convert menu system to Mac.</li>
+<li>Help file for release version not done.</li>
+</ul>
 </div>
 </div>
 </div>

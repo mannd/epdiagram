@@ -11,12 +11,10 @@ import XCTest
 
 class DiagramTests: XCTestCase {
 
+    // TODO: expand tests
     func testIsSaved() {
-        var diagram = Diagram(name: nil, description: "", image: UIImage(named: "SampleECG")!, ladder: Ladder.defaultLadder())
+        let diagram = Diagram(name: nil, description: "", image: UIImage(named: "SampleECG")!, ladder: Ladder.defaultLadder())
         XCTAssertEqual(nil, diagram.name)
-        XCTAssertEqual(false, diagram.isSaved)
-        diagram.name = "test"
-        XCTAssertEqual(true, diagram.isSaved)
     }
 
 }

@@ -7,6 +7,8 @@
 //
 
 import UIKit
+import UniformTypeIdentifiers
+import AVFoundation
 import os.log
 
 protocol HamburgerTableDelegate: class {
@@ -15,8 +17,7 @@ protocol HamburgerTableDelegate: class {
     var constraintHamburgerWidth: NSLayoutConstraint { get set }
     var maxBlackAlpha: CGFloat { get }
     var imageIsLocked: Bool { get set }
-    var diagramIsLocked: Bool { get set }
-//    var diagramSaved: Bool { get }
+    var ladderIsLocked: Bool { get set }
 
     func takePhoto()
     func selectImage()
@@ -24,7 +25,6 @@ protocol HamburgerTableDelegate: class {
     func renameDiagram()
     func about()
     func test()
-    func snapshotDiagram()
     func getDiagramInfo()
     func lockLadder()
     func editLadder()
@@ -56,40 +56,39 @@ class ImageSaver: NSObject {
             title = L("Error Saving Snapshot")
             message = L("Make sure you have allowed EP Diagram to save to the Photos Library in the Settings app.  Error message: \(error.localizedDescription)")
         } else {
-            Sounds.playShutterSound()
             // See https://www.hackingwithswift.com/books/ios-swiftui/how-to-save-images-to-the-users-photo-library
             os_log("Snapshot successfully saved.", log: .action, type: .info)
             title = L("Diagram Snapshot Saved")
             message = L("Diagram snapshot saved to Photo Library.")
         }
         if let viewController = viewController {
-            Common.showMessage(viewController: viewController, title: title, message: message)
+            UserAlert.showMessage(viewController: viewController, title: title, message: message)
         }
     }
 }
 
 // MARK: -
 
-extension DiagramViewController: HamburgerTableDelegate, UIImagePickerControllerDelegate & UINavigationControllerDelegate {
+extension DiagramViewController: HamburgerTableDelegate, UIImagePickerControllerDelegate & UINavigationControllerDelegate, UIDocumentPickerDelegate {
     
     var imageIsLocked: Bool {
         get { _imageIsLocked }
-        set(newValue) { _imageIsLocked = newValue}
+        set { _imageIsLocked = newValue}
     }
 
-    var diagramIsLocked: Bool {
+    var ladderIsLocked: Bool {
         get { _ladderIsLocked }
-        set(newValue) { _ladderIsLocked = newValue }
+        set { _ladderIsLocked = newValue }
     }
 
     var constraintHamburgerLeft: NSLayoutConstraint {
         get { _constraintHamburgerLeft }
-        set(newValue){ _constraintHamburgerLeft = newValue }
+        set { _constraintHamburgerLeft = newValue }
     }
 
     var constraintHamburgerWidth: NSLayoutConstraint {
         get { _constraintHamburgerWidth }
-        set(newValue) { _constraintHamburgerWidth = newValue }
+        set { _constraintHamburgerWidth = newValue }
     }
 
     var maxBlackAlpha: CGFloat { _maxBlackAlpha }
@@ -98,12 +97,37 @@ extension DiagramViewController: HamburgerTableDelegate, UIImagePickerController
 
     func takePhoto() {
         os_log("takePhoto()", log: OSLog.action, type: .info)
-        handleTakePhoto()
+        checkCameraPermissions()
+    }
+
+    func checkCameraPermissions() {
+        switch AVCaptureDevice.authorizationStatus(for: .video) {
+        case .notDetermined:
+            os_log("Camera access not determined", log: .default, type: .default)
+            AVCaptureDevice.requestAccess(for: .video, completionHandler: { granted in
+                if granted {
+                    DispatchQueue.main.async {
+                        self.handleTakePhoto()
+                    }
+
+                }
+            })
+        case .restricted:
+            os_log("Camera access restricted", log: .default, type: .default)
+        case .denied:
+            os_log("Camera access denied", log: .default, type: .default)
+            UserAlert.showMessage(viewController: self, title: L("Camera Permission Denied"), message: L("Please set camera permission in Settings app."))
+        case .authorized:
+            os_log("Camera access authorized", log: .default, type: .default)
+            self.handleTakePhoto()
+        @unknown default:
+            fatalError("Unhandled default in checkCameraPermissions()")
+        }
     }
 
     func selectImage() {
         os_log("selectImage()", log: OSLog.action, type: .info)
-        handleSelectImage()
+        chooseSource()
     }
 
     func selectLadder() {
@@ -129,9 +153,7 @@ extension DiagramViewController: HamburgerTableDelegate, UIImagePickerController
                     renameDocument(oldURL: currentFileURL, newURL: newFileURL)
                     // FIXME: currentDocument.fileURL not changing to newURL.
                     diagram.name = newName
-                    currentDocument?.updateChangeCount(.done)
-
-                    delegate?.diagramEditorDidUpdateContent(self, diagram: diagram)
+                    diagramEditorDelegate?.diagramEditorDidUpdateContent(self, diagram: diagram)
                     setTitle()
                 }
             }
@@ -143,35 +165,12 @@ extension DiagramViewController: HamburgerTableDelegate, UIImagePickerController
         os_log("getDiagramInfo()", log: .action, type: .info)
         // TODO: If there are more fields, then include this and add SwiftUI view.
         // show dialog with diagram info here.
-        P("Name = \(diagram.name ?? "unnamed")")
-        P("Description = \(diagram.longDescription)")
+        // TODO: Option to edit diagram info?
+        // also consider killing this.  File app gives file info.
+        print("Name = \(diagram.name ?? "unnamed")")
+        print("Description = \(diagram.longDescription)")
     }
 
-    func snapshotDiagram() {
-        let topRenderer = UIGraphicsImageRenderer(size: imageScrollView.bounds.size)
-        let originX = imageScrollView.bounds.minX - imageScrollView.contentOffset.x
-        let originY = imageScrollView.bounds.minY - imageScrollView.contentOffset.y
-        let bounds = CGRect(x: originX, y: originY, width: imageScrollView.bounds.width, height: imageScrollView.bounds.height)
-        let topImage = topRenderer.image { ctx in
-            imageScrollView.drawHierarchy(in: bounds, afterScreenUpdates: true)
-        }
-        let bottomRenderer = UIGraphicsImageRenderer(size: ladderView.bounds.size)
-        let bottomImage = bottomRenderer.image { ctx in
-            ladderView.drawHierarchy(in: ladderView.bounds, afterScreenUpdates: true)
-        }
-        let size = CGSize(width: ladderView.bounds.size.width, height: imageScrollView.bounds.size.height + ladderView.bounds.size.height)
-        UIGraphicsBeginImageContext(size)
-        let topRect = CGRect(x: 0, y: 0, width: ladderView.bounds.size.width, height: imageScrollView.bounds.size.height)
-        topImage.draw(in: topRect)
-        let bottomRect = CGRect(x: 0, y: imageScrollView.bounds.size.height, width: ladderView.bounds.size.width, height: ladderView.bounds.size.height)
-        bottomImage.draw(in: bottomRect)
-        let newImage = UIGraphicsGetImageFromCurrentImageContext()
-        UIGraphicsEndImageContext()
-        if let newImage = newImage {
-            let imageSaver = ImageSaver()
-            imageSaver.writeToPhotoAlbum(image: newImage, viewController: self)
-        }
-    }
 
     func lockImage() {
         imageIsLocked.toggle()
@@ -180,7 +179,9 @@ extension DiagramViewController: HamburgerTableDelegate, UIImagePickerController
         imageScrollView.pinchGestureRecognizer?.isEnabled = !imageIsLocked
         cursorView.imageIsLocked = imageIsLocked
         cursorView.setNeedsDisplay()
-        Sounds.playLockSound()
+        if playSounds {
+            Sounds.playLockSound()
+        }
     }
 
     func lockLadder() {
@@ -190,8 +191,11 @@ extension DiagramViewController: HamburgerTableDelegate, UIImagePickerController
         ladderView.ladderIsLocked = _ladderIsLocked
         cursorView.allowTaps = !_ladderIsLocked
         ladderView.isUserInteractionEnabled = !_ladderIsLocked
+        updateToolbarButtons()
         setViewsNeedDisplay()
-        Sounds.playLockSound()
+        if playSounds {
+            Sounds.playLockSound()
+        }
     }
 
     func editLadder() {
@@ -215,27 +219,25 @@ extension DiagramViewController: HamburgerTableDelegate, UIImagePickerController
     }
 
     func about() {
-        let versionBuild = Version.getAppVersion()
+        let versionBuild = Version.appVersion()
         let version = versionBuild.version ?? L("unknown")
         let build = versionBuild.build ?? L("unknown")
-        os_log("EP Diagram: version = %s build = %s", log: OSLog.debugging, type: .info, version, build)
-        Common.showMessage(
+        let prereleaseVersion = Version.prereleaseVersion
+        os_log("EP Diagram: prereleaseVersion = %s, version = %s build = %s", log: OSLog.debugging, type: .info, prereleaseVersion ?? "not prerelease", version, build)
+        var prereleaseMessage = ""
+        if let prereleaseVersion = prereleaseVersion {
+            prereleaseMessage = "\nPrerelease version \(prereleaseVersion)+\(build)"
+        }
+        UserAlert.showMessage(
             viewController: self,
             title: L("EP Diagram"),
-            message: L("Copyright 2020 EP Studios, Inc.\nVersion \(version)"))
+            message: L("Copyright 2021 EP Studios, Inc." + prereleaseMessage + "\nApp Store version \(version)"))
     }
 
     // Use to test features during development
     #if DEBUG
     func test() {
         os_log("test()", log: .debugging, type: .debug)
-        // delete all old diagrams
-        //DiagramIO.deleteEPDiagramDir()
-//        DiagramIO.deleteLadderTemplates()
-        // toggle mark visibility
-        //        ladderView.marksAreVisible.toggle()
-        //        ladderView.setNeedsDisplay()
-        DiagramIO.deleteCacheFiles()
     }
     #else
     func test() {}
@@ -249,7 +251,7 @@ extension DiagramViewController: HamburgerTableDelegate, UIImagePickerController
         imagePicker.allowsEditing = true
         imagePicker.modalPresentationStyle = .fullScreen
         if !UIImagePickerController.isSourceTypeAvailable(.camera) {
-            Common.showMessage(
+            UserAlert.showMessage(
                 viewController: self,
                 title: L("Camera error"),
                 message: L("Camera not available"))
@@ -260,28 +262,39 @@ extension DiagramViewController: HamburgerTableDelegate, UIImagePickerController
         present(imagePicker, animated: true)
     }
 
+    private func chooseSource() {
+        let alert = UIAlertController(title: NSLocalizedString("Image Source", comment: ""), message:nil, preferredStyle: .actionSheet)
+        alert.modalPresentationStyle = .popover
+        alert.popoverPresentationController?.barButtonItem = navigationItem.leftBarButtonItem
+        alert.addAction(UIAlertAction(title: NSLocalizedString("Photos", comment: ""), style: .default, handler: { _ in
+            self.handleSelectImage()
+        }))
+        alert.addAction(UIAlertAction(title: NSLocalizedString("Files", comment: ""), style: .default, handler: { _ in
+            self.handleSelectFile()
+        }))
+        alert.addAction(UIAlertAction(title: L("Cancel"), style: .cancel, handler: nil))
+        present(alert, animated: true, completion: nil)
+    }
+
+    private func handleSelectFile() {
+        let supportedTypes: [UTType] = [UTType.image, UTType.pdf]
+        let documentPicker = UIDocumentPickerViewController(forOpeningContentTypes: supportedTypes, asCopy: true)
+        documentPicker.delegate = self
+
+        // Set the initial directory.
+        documentPicker.directoryURL = FileIO.getDocumentsURL()
+
+        // Present the document picker.
+        present(documentPicker, animated: true, completion: nil)
+    }
+
+    func documentPicker(_ controller: UIDocumentPickerViewController, didPickDocumentsAt urls: [URL]) {
+        self.openURL(url: urls[0])
+    }
+
     private func handleSelectImage() {
         os_log("handleSelectImage()", log: .action, type: .info)
-        if !UIImagePickerController.isSourceTypeAvailable(.photoLibrary) {
-            Common.showMessage(
-                viewController: self,
-                title: L("Photo Library Not Available"),
-                message: L("Make sure you have enabled permission for EP Diagram to use the Photo Library in the Settings app."))
-            os_log("Photo library not available", log: .debugging, type: .debug)
-            return
-        }
-        // By default picker.mediaTypes == ["public.image"], i.e. videos aren't shown.  So no need to check UIImagePickerController.availableMediaTypes(for:) or set picker.mediaTypes.
-        imagePicker.delegate = self
-        imagePicker.sourceType = .photoLibrary
-        // TODO: Test editing on real devices (doesn't work on simulator).
-        // Must allow editing because edited image is used by UIImagePickerController delegate.
-        imagePicker.allowsEditing = true
-        // Need to use popover for iPads, according to docs, but .fullscreen seems to work too.
-        if UIDevice.current.userInterfaceIdiom == .pad {
-            imagePicker.modalPresentationStyle = .popover
-            imagePicker.popoverPresentationController?.barButtonItem = navigationItem.leftBarButtonItem
-        }
-        present(imagePicker, animated: true)
+        presentPhotosForImages()
     }
 
     func sampleDiagrams() {
@@ -289,28 +302,42 @@ extension DiagramViewController: HamburgerTableDelegate, UIImagePickerController
         performShowSampleSelectorSegue()
     }
 
-//    private func resetLadder() {
-//        // FIXME: this makes ladder default ladder and it shouldn't.
-//        ladderView.resetLadder()
-//        // FIXME: decide whether to reset undo here
-////        undoManager?.removeAllActions()
-//        updateUndoRedoButtons()
-//        setViewsNeedDisplay()
-//    }
-
-    @objc func setDiagramImage(_ image: UIImage?) {
-        currentDocument?.undoManager.registerUndo(withTarget: self, selector: #selector(setDiagramImage), object: imageView.image)
-        updateUndoRedoButtons()
-        diagram.ladder.clear()
-        diagram.image = image
-        setImageViewImage(with: image)
+    @objc func undoablySetDiagramImage(_ image: UIImage?) {
+        os_log("setDiagramImage(_:)", log: .action, type: .info)
+        currentDocument?.undoManager.registerUndo(withTarget: self, selector: #selector(undoablySetDiagramImage), object: imageView.image)
+        NotificationCenter.default.post(name: .didUndoableAction, object: nil)
+        let scaledImage = scaleImageForImageView(image)
+        diagram.image = scaledImage
+        imageView.image = scaledImage
+//        imageView.transform = diagram.transform
         imageScrollView.zoomScale = 1.0
-        imageScrollView.contentOffset = CGPoint()
-        cursorView.cursorIsVisible = false
-        clearCalibration()
+        imageScrollView.contentOffset = CGPoint.zero
+        hideCursorAndNormalizeAllMarks()
         setViewsNeedDisplay()
     }
 
+    func undoablySetDiagramImageAndResetLadder(_ image: UIImage?) {
+        os_log("undoablySetDiagramImageAndResetLadder(_:)", log: .action, type: .info)
+        currentDocument?.undoManager.beginUndoGrouping()
+        undoablySetCalibration(Calibration())
+        ladderView.deleteAllInLadder()
+        undoablySetDiagramImage(image)
+        currentDocument?.undoManager.endUndoGrouping()
+        ladderView.viewMaxWidth = imageView.frame.width
+        mode = .normal
+    }
+
+    func scaleImageForImageView(_ image: UIImage?) -> UIImage? {
+        os_log("scaleImageForImageView", log: .action, type: .info)
+        guard let image = image else { return nil }
+        // Downscale upscaled images
+        if diagram.imageIsUpscaled {
+            if let cgImage = image.cgImage {
+                return UIImage(cgImage: cgImage, scale: pdfScaleFactor, orientation: .up)
+            }
+        }
+        return image
+    }
  
     // MARK: - Hamburger menu functions
 
@@ -331,7 +358,7 @@ extension DiagramViewController: HamburgerTableDelegate, UIImagePickerController
         self.separatorView = nil
         navigationController?.setToolbarHidden(true, animated: true)
         // Always hide cursor when opening hamburger menu.
-        cursorView.cursorIsVisible = false
+        hideCursorAndNormalizeAllMarks()
         cursorView.setNeedsDisplay()
         UIView.animate(withDuration: 0.5, animations: {
             self.view.layoutIfNeeded()
@@ -356,12 +383,55 @@ extension DiagramViewController: HamburgerTableDelegate, UIImagePickerController
 
     func imagePickerController(_ picker: UIImagePickerController, didFinishPickingMediaWithInfo info: [UIImagePickerController.InfoKey : Any]) {
         let chosenImage = info[.editedImage] as? UIImage
-        setDiagramImage(chosenImage)
+        // Images from photos are never upscaled.
+        diagram.imageIsUpscaled = false
+        undoablySetDiagramImageAndResetLadder(chosenImage)
         picker.dismiss(animated: true, completion: nil)
     }
 
     func imagePickerControllerDidCancel(_ picker: UIImagePickerController) {
         picker.dismiss(animated: true, completion: nil)
     }
+
 }
 
+import PhotosUI
+
+extension DiagramViewController: PHPickerViewControllerDelegate {
+    func picker(_ picker: PHPickerViewController, didFinishPicking results: [PHPickerResult]) {
+        dismiss(animated: true)
+        if let itemProvider = results.first?.itemProvider {
+            if itemProvider.canLoadObject(ofClass: UIImage.self) {
+                itemProvider.loadObject(ofClass: UIImage.self) { [weak self] image, error in
+                    DispatchQueue.main.async {
+                        guard let self = self else { return }
+                        if let image = image as? UIImage {
+                            // Only PDFs are upscaled
+                            self.diagram.imageIsUpscaled = false
+                            self.undoablySetDiagramImageAndResetLadder(image)
+                        } else {
+                            os_log("Error displaying image", log: .errors, type: .error)
+                            UserAlert.showMessage(viewController: self, title: L("Error Loading Image"), message: L("Selected image could not be loaded."))
+                        }
+                    }
+                }
+            } else {
+                os_log("Can't load item provider", log: .errors, type: .error)
+            }
+        }
+    }
+
+    func presentPhotosForImages() {
+        presentPhotosPicker(filter: .images)
+    }
+
+    func presentPhotosPicker(filter: PHPickerFilter) {
+        var configuration = PHPickerConfiguration()
+        configuration.filter = filter
+        // .selectionLimit defaults to 1, single selection
+
+        let picker = PHPickerViewController(configuration: configuration)
+        picker.delegate = self
+        present(picker, animated: true)
+    }
+}

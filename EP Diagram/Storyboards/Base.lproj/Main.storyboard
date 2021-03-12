@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="17506" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES" initialViewController="en3-9x-pbF">
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="17701" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES" initialViewController="en3-9x-pbF">
     <device id="retina6_1" orientation="portrait" appearance="light"/>
     <dependencies>
-        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="17505"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="17703"/>
         <capability name="Safe area layout guides" minToolsVersion="9.0"/>
         <capability name="System colors in document resources" minToolsVersion="11.0"/>
         <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
@@ -16,18 +16,29 @@
                         <rect key="frame" x="0.0" y="0.0" width="414" height="896"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
-                            <scrollView clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" maximumZoomScale="5" translatesAutoresizingMaskIntoConstraints="NO" id="QhZ-gG-IcS" userLabel="Image Scroll View">
+                            <scrollView clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" maximumZoomScale="5" translatesAutoresizingMaskIntoConstraints="NO" id="QhZ-gG-IcS" userLabel="Image Scroll View" customClass="ImageScrollView" customModule="EP_Diagram" customModuleProvider="target">
                                 <rect key="frame" x="0.0" y="88" width="414" height="362.5"/>
                                 <subviews>
-                                    <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="SampleECG" translatesAutoresizingMaskIntoConstraints="NO" id="Z9T-Bh-sBD">
+                                    <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="UNx-Xp-4Hk" userLabel="Image Container View">
                                         <rect key="frame" x="0.0" y="0.0" width="1411" height="676"/>
-                                    </imageView>
+                                        <subviews>
+                                            <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="SampleECG" translatesAutoresizingMaskIntoConstraints="NO" id="Z9T-Bh-sBD" customClass="ImageView" customModule="EP_Diagram" customModuleProvider="target">
+                                                <rect key="frame" x="0.0" y="0.0" width="1411" height="676"/>
+                                            </imageView>
+                                        </subviews>
+                                        <constraints>
+                                            <constraint firstItem="Z9T-Bh-sBD" firstAttribute="top" secondItem="UNx-Xp-4Hk" secondAttribute="top" id="8vI-3f-VoE"/>
+                                            <constraint firstAttribute="trailing" secondItem="Z9T-Bh-sBD" secondAttribute="trailing" id="AYq-yK-5kP"/>
+                                            <constraint firstAttribute="bottom" secondItem="Z9T-Bh-sBD" secondAttribute="bottom" id="lGQ-ds-mxk"/>
+                                            <constraint firstItem="Z9T-Bh-sBD" firstAttribute="leading" secondItem="UNx-Xp-4Hk" secondAttribute="leading" id="qED-B5-dWq"/>
+                                        </constraints>
+                                    </view>
                                 </subviews>
                                 <constraints>
-                                    <constraint firstAttribute="bottom" secondItem="Z9T-Bh-sBD" secondAttribute="bottom" id="F6b-iL-tFJ"/>
-                                    <constraint firstItem="Z9T-Bh-sBD" firstAttribute="top" secondItem="QhZ-gG-IcS" secondAttribute="top" id="S3u-cJ-Of1"/>
-                                    <constraint firstItem="Z9T-Bh-sBD" firstAttribute="leading" secondItem="QhZ-gG-IcS" secondAttribute="leading" id="etG-Ec-HLE"/>
-                                    <constraint firstAttribute="trailing" secondItem="Z9T-Bh-sBD" secondAttribute="trailing" id="zbz-Xc-L8i"/>
+                                    <constraint firstAttribute="bottom" secondItem="UNx-Xp-4Hk" secondAttribute="bottom" id="5o7-wB-zP6"/>
+                                    <constraint firstItem="UNx-Xp-4Hk" firstAttribute="top" secondItem="QhZ-gG-IcS" secondAttribute="top" id="B4k-dT-rHg"/>
+                                    <constraint firstItem="UNx-Xp-4Hk" firstAttribute="leading" secondItem="QhZ-gG-IcS" secondAttribute="leading" id="R1O-v0-EEt"/>
+                                    <constraint firstAttribute="trailing" secondItem="UNx-Xp-4Hk" secondAttribute="trailing" id="g6N-d3-6NV"/>
                                 </constraints>
                             </scrollView>
                             <view contentMode="scaleToFill" horizontalCompressionResistancePriority="250" verticalCompressionResistancePriority="250" translatesAutoresizingMaskIntoConstraints="NO" id="rq1-PC-4iG" customClass="LadderView" customModule="EP_Diagram" customModuleProvider="target">
@@ -84,6 +95,7 @@
                         <outlet property="_constraintHamburgerWidth" destination="nDl-D1-xA0" id="BaQ-pj-B0A"/>
                         <outlet property="blackView" destination="QUl-iy-KCv" id="Nx3-1K-4cL"/>
                         <outlet property="cursorView" destination="4H8-sQ-vM2" id="bzr-S2-Omv"/>
+                        <outlet property="imageContainerView" destination="UNx-Xp-4Hk" id="sh3-Zj-Pri"/>
                         <outlet property="imageScrollView" destination="QhZ-gG-IcS" id="Jhd-Sa-e44"/>
                         <outlet property="imageView" destination="Z9T-Bh-sBD" id="6GT-g9-IHr"/>
                         <outlet property="ladderView" destination="rq1-PC-4iG" id="IAX-Gu-2b0"/>
@@ -92,6 +104,7 @@
                         <segue destination="aUo-Pc-QYX" kind="show" identifier="showPreferencesSegue" destinationCreationSelector="showPreferences:" id="JGa-0u-G6I"/>
                         <segue destination="X4y-SM-iwI" kind="show" identifier="showHelpSegue" destinationCreationSelector="performShowHelpSegueAction:" id="ezU-te-0lg"/>
                         <segue destination="ggo-hf-FSM" kind="show" identifier="showSampleSelectorSegue" destinationCreationSelector="showSampleSelector:" id="ItN-ts-1CH"/>
+                        <segue destination="BGd-dQ-vjR" kind="presentation" identifier="showRhythmSegue" destinationCreationSelector="performRhythmSegueAction:" id="vII-Nd-Rym"/>
                     </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="dkx-z0-nzr" sceneMemberID="firstResponder"/>
@@ -203,6 +216,14 @@
                 <placeholder placeholderIdentifier="IBFirstResponder" id="VRI-RL-nE8" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
             </objects>
             <point key="canvasLocation" x="1660" y="120"/>
+        </scene>
+        <!--Hosting Controller-->
+        <scene sceneID="H4X-ff-CoG">
+            <objects>
+                <hostingController id="BGd-dQ-vjR" sceneMemberID="viewController"/>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="4fZ-i0-wQL" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="3662" y="1163"/>
         </scene>
         <!--Hosting Controller-->
         <scene sceneID="dWr-ZE-lZ6">

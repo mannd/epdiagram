@@ -13,7 +13,7 @@ extension DiagramViewController: UIScrollViewDelegate {
 
     func viewForZooming(in scrollView: UIScrollView) -> UIView? {
         if scrollView == imageScrollView {
-            return imageView
+            return imageContainerView
         }
         else {
             return nil

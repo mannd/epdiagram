@@ -14,6 +14,7 @@ profiles.*
 # Generated files
 *.o
 *.pyc
+/build
 
 # Backup files
 *~.nib

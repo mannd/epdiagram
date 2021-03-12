@@ -9,6 +9,7 @@
 import SwiftUI
 
 struct RegionTemplateEditor: View {
+    @ObservedObject var ladderTemplatesController: LadderTemplatesModelController
     @Binding var regionTemplate: RegionTemplate
 
     var body: some View {
@@ -28,8 +29,8 @@ struct RegionTemplateEditor: View {
                     }
                 }
                 Section(header: Text("Line style")) {
-                    Picker(selection: $regionTemplate.lineStyle, label: Text("Line style"), content: {
-                        ForEach(Mark.LineStyle.allCases) { style in
+                    Picker(selection: $regionTemplate.style, label: Text("Line style"), content: {
+                        ForEach(Mark.Style.allCases) { style in
                             Text(style.description)
 
                         }
@@ -45,7 +46,7 @@ struct RegionTemplateEditor: View {
 #if DEBUG
 struct RegionEditor_Previews: PreviewProvider {
     static var previews: some View {
-        RegionTemplateEditor(regionTemplate: .constant(RegionTemplate(name: "A", description: "Atrium", unitHeight: 1, lineStyle: .solid)))
+        RegionTemplateEditor(ladderTemplatesController: LadderTemplatesModelController(ladderTemplates: LadderTemplate.defaultTemplates()), regionTemplate: .constant(RegionTemplate(name: "A", description: "Atrium", unitHeight: 1, style: .solid)))
     }
 }
 #endif

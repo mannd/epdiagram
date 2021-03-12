@@ -18,3 +18,11 @@ extension CGPoint {
     }
 }
 
+extension CGPoint {
+    static func distanceBetweenPoints(_ p1: CGPoint, _ p2: CGPoint) -> CGFloat {
+        let diffX = p1.x - p2.x
+        let diffY = p1.y - p2.y
+        return sqrt(diffX * diffX + diffY * diffY)
+    }
+}
+

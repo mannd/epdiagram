@@ -17,7 +17,7 @@ struct SampleSelector: View {
 
     var body: some View {
         NavigationView {
-            VStack {
+            Form {
                 List() {
                     ForEach(sampleDiagrams, id:\.self.name) {
                         diagram in VStack(alignment: .leading) { Text(diagram.name ?? "").bold().foregroundColor(.green)

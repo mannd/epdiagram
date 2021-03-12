@@ -12,6 +12,8 @@ import os.log
 extension RegionTemplate: Identifiable {}
 
 struct LadderTemplateEditor: View {
+    // For some reason, need the observed object here, even though it is never called.  Having it here apparently forces updates.
+    @ObservedObject var ladderTemplatesController: LadderTemplatesModelController
     @Binding var ladderTemplate: LadderTemplate
     @State private var editMode = EditMode.inactive
     @Environment(\.presentationMode) var presentationMode: Binding<PresentationMode>
@@ -26,8 +28,15 @@ struct LadderTemplateEditor: View {
                     Section(header: Text("Description")) {
                         TextEditor(text: $ladderTemplate.description)
                     }
+                    Section(header: Text("Left margin")) {
+                        Stepper(value: $ladderTemplate.leftMargin, in: 30...100, step: 5) {
+                            HStack {
+                                Text("\(Int(ladderTemplate.leftMargin)) points")
+                            }
+                        }
+                    }
                     Section(header: Text("Regions")) {
-                        RegionListView(ladderTemplate: $ladderTemplate)
+                        RegionListView(ladderTemplatesController: ladderTemplatesController, ladderTemplate: $ladderTemplate)
                     }
                 }
                 .navigationBarTitle(Text("Edit Ladder"), displayMode: .inline)
@@ -55,6 +64,7 @@ struct LadderTemplateEditor: View {
 }
 
 struct RegionListView: View {
+    @ObservedObject var ladderTemplatesController: LadderTemplatesModelController
     @Binding var ladderTemplate: LadderTemplate
     @State private var tooFewRegionTemplates = false
 
@@ -62,17 +72,16 @@ struct RegionListView: View {
         List {
             ForEach(ladderTemplate.regionTemplates) { regionTemplate in
                 NavigationLink(
-                    destination: RegionTemplateEditor(regionTemplate: self.selectedRegionTemplate(id: regionTemplate.id))) {
+                    destination: RegionTemplateEditor(ladderTemplatesController: ladderTemplatesController, regionTemplate: self.selectedRegionTemplate(id: regionTemplate.id))) {
                     VStack(alignment: .leading) {
                         Text(regionTemplate.name).bold().foregroundColor(.red)
                         Text(regionTemplate.description).bold()
                         Text("Height: ") + Text("\(regionTemplate.unitHeight)").bold()
-                        Text("Line style: ") + Text("\(regionTemplate.lineStyle.description)").bold()
+                        Text("Line style: ") + Text("\(regionTemplate.style.description)").bold()
                     }
                 }.alert(isPresented: $tooFewRegionTemplates) { Alert(title: Text("Too Few Regions"), message: Text("You have to have at least 1 region in your ladder."), dismissButton: .default(Text("OK")))
                 }
             }
-            
             .onDelete { indexSet in
                 // Don't allow deletion of last region, having zero regions will break things.
                 self.tooFewRegionTemplates = self.ladderTemplate.regionTemplates.count < 2
@@ -90,14 +99,14 @@ struct RegionListView: View {
         guard let index = self.ladderTemplate.regionTemplates.firstIndex(where: { $0.id == id }) else {
             fatalError("Region template doesn't exist.")
         }
-        print(index)
         return self.$ladderTemplate.regionTemplates[index]
     }
 
     #if DEBUG
     struct LadderEditor_Previews: PreviewProvider {
+
         static var previews: some View {
-            LadderTemplateEditor(ladderTemplate: .constant(LadderTemplate.defaultTemplate()))
+            LadderTemplateEditor(ladderTemplatesController: LadderTemplatesModelController(ladderTemplates: LadderTemplate.defaultTemplates()), ladderTemplate: .constant(LadderTemplate.defaultTemplate1()))
         }
     }
     #endif

@@ -7,35 +7,95 @@
 //
 
 import UIKit
+import SwiftUI
 
 // TODO: remember to register each new user default in AppDelegate()!
 struct Preferences {
     // keys
-    static let defaultLineWidthKey = "defaultLineWidthKey"
-    static let defaultCursorLineWidthKey = "defaultCursorLineWidthKey"
-    static let defaultShowImpulseOriginKey = "defaultShowImpuseOriginKey"
-    static let defaultShowBlockKey = "defaultShowBlockKey"
-    static let defaultShowIntervalsKey = "defaultShowIntervalsKey"
-    static let defaultSnapMarksKey = "defaultSnapMarksKey"
+    static let lineWidthKey = "defaultLineWidthKey"
+    static let cursorLineWidthKey = "defaultCursorLineWidthKey"
+    static let caliperLineWidthKey = "defaultCaliperLineWidthKey"
+    static let showImpulseOriginKey = "defaultShowImpuseOriginKey"
+    static let showBlockKey = "defaultShowBlockKey"
+    static let showIntervalsKey = "defaultShowIntervalsKey"
+    static let showArrowsKey = "defaultShowArrowsKey"
+    static let showConductionTimesKey = "defaultShowConductionTimesKey"
+    static let snapMarksKey = "defaultSnapMarksKey"
+    static let linkMarksKey = "defaultLinkMarksKey"
+    static let markStyleKey = "defaultMarkStyleKey"
+    static let labelDescriptionVisibilityKey = "defaultLabelDescriptionVisibilityKey"
+    static let leftMarginKey = "defaultLeftMarginKey"
+    static let playSoundsKey = "defaultPlaySoundsKey"
+    static let hideMarksKey = "defaultHideMarksKey"
 
+    // color keys
+    static let caliperColorNameKey = "defaultCaliperColorNameKey"
+    static let cursorColorNameKey = "defaultCursorColorNameKey"
+    static let attachedColorNameKey = "defaultAttachedColorNameKey"
+    static let connectedColorNameKey = "defaultConnectedColorNameKey"
+    static let selectedColorNameKey = "defaultSelectedColorNameKey"
+    static let linkedColorNameKey = "defaultLinkedColorNameKey"
+    static let activeColorNameKey = "defaultActiveColorNameKey"
 
     // Stored as Int, converted to CGFloat when used.
-    static var lineWidth: Int = 2
+    static var markLineWidth: Int = 2
     static var cursorLineWidth: Int = 1
     static var showImpulseOrigin = false
     static var showBlock = false
-    static var showIntervals = false
+    static var showArrows = false
+    static var showIntervals = true
+    static var showConductionTimes = true
     static var snapMarks = true
-    
-//    var red = UIColor.systemRed
-//    var blue = UIColor.systemBlue
-//    var unhighlightedColor = UIColor.label
-//    var attachedColor = UIColor.systemOrange
-//    var linkColor = UIColor.systemGreen
-//    var selectedColor = UIColor.systemRed
-//    var groupedColor = UIColor.systemPurple
-//    var markLineWidth: CGFloat = 2
-//    var connectedLineWidth: CGFloat = 4
-//    var showPivots = false
-    
+    static var markStyle = Mark.Style.solid.rawValue
+    static var labelDescriptionVisibility = TextVisibility.invisible.rawValue
+    static var leftMargin: Double = 50
+    static var playSounds: Bool = true
+    static var hideMarks: Bool = false
+    static var caliperLineWidth: Int = 1
+
+    // default Colors
+    static let defaultActiveColor = UIColor.systemRed
+    static let defaultCursorColor = UIColor.systemBlue
+    static let defaultCaliperColor = UIColor.systemBlue
+    static let defaultAttachedColor = UIColor.systemOrange
+    static let defaultConnectedColor = UIColor.systemGreen
+    static let defaultSelectedColor = UIColor.systemBlue
+    static let defaultLinkedColor = UIColor.systemPurple
+
+    // Color names
+    static var caliperColorName: String = defaultCaliperColor.toString
+    static var cursorColorName: String = defaultCursorColor.toString
+    static var attachedColorName: String = defaultAttachedColor.toString
+    static var connectedColorName: String = defaultConnectedColor.toString
+    static var selectedColorName: String = defaultSelectedColor.toString
+    static var linkedColorName: String = defaultLinkedColor.toString
+    static var activeColorName: String = defaultActiveColor.toString
+
+    static func defaults() -> [String: Any] {
+        let defaultPreferences: [String: Any] = [
+            Preferences.lineWidthKey: Preferences.markLineWidth,
+            Preferences.cursorLineWidthKey: Preferences.cursorLineWidth,
+            Preferences.showImpulseOriginKey: Preferences.showImpulseOrigin,
+            Preferences.showBlockKey: Preferences.showBlock,
+            Preferences.showIntervalsKey: Preferences.showIntervals,
+            Preferences.showConductionTimesKey: Preferences.showConductionTimes,
+            Preferences.snapMarksKey: Preferences.snapMarks,
+            Preferences.markStyleKey: Preferences.markStyle,
+            Preferences.labelDescriptionVisibilityKey: Preferences.labelDescriptionVisibility,
+            Preferences.leftMarginKey: Preferences.leftMargin,
+            Preferences.playSoundsKey: Preferences.playSounds,
+            Preferences.hideMarksKey: Preferences.hideMarks,
+            Preferences.caliperLineWidthKey: Preferences.caliperLineWidth,
+            Preferences.caliperColorNameKey: Preferences.caliperColorName,
+            Preferences.cursorColorNameKey: Preferences.cursorColorName,
+            Preferences.attachedColorNameKey: Preferences.attachedColorName,
+            Preferences.connectedColorNameKey: Preferences.connectedColorName,
+            Preferences.selectedColorNameKey: Preferences.selectedColorName,
+            Preferences.linkedColorNameKey: Preferences.linkedColorName,
+            Preferences.activeColorNameKey: Preferences.activeColorName,
+            Preferences.showArrowsKey: Preferences.showArrows,
+        ]
+        return defaultPreferences
+    }
 }
+

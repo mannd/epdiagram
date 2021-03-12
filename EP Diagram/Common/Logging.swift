@@ -7,7 +7,7 @@
 //
 
 import UIKit
-import os.log
+import OSLog
 
 extension OSLog {
     static let subsystem = Bundle.main.bundleIdentifier!
@@ -19,4 +19,6 @@ extension OSLog {
     static let errors = OSLog(subsystem: OSLog.subsystem, category: "errors")
     static let hamburgerCycle = OSLog(subsystem: subsystem, category: "hamburger")
     static let lifeCycle = OSLog(subsystem: subsystem, category: "lifecycle")
+    static let test = OSLog(subsystem: subsystem, category: "test")
+    static let deprecated = OSLog(subsystem: subsystem, category: "deprecated")
 }

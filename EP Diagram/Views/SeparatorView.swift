@@ -32,6 +32,8 @@ class SeparatorView: UIView {
     var primaryView: UIView  // view above
     var secondaryView: UIView // view below
 
+    weak var cursorViewDelegate: CursorViewDelegate?
+
     var oldPosition: CGFloat = 0  // position of separator before gesture started
     var firstTouch: CGPoint? // point where drag started
 
@@ -74,6 +76,11 @@ class SeparatorView: UIView {
         self.firstTouch = touches.first?.location(in: self.superview)
         self.startConstraint!.constant = self.oldPosition
         self.startConstraint!.isActive = true
+        cursorViewDelegate?.cursorIsVisible = false
+        let ladderView = secondaryView as? LadderView
+        ladderView?.normalizeAllMarks()
+        ladderView?.refresh()
+        cursorViewDelegate?.refresh()
     }
 
     override func touchesMoved(_ touches: Set<UITouch>, with event: UIEvent?) {
@@ -94,8 +101,9 @@ class SeparatorView: UIView {
         let ladderView = secondaryView as? LadderView
         let caliperMaxY = primaryView.frame.height
         ladderView?.resetSize()
-        ladderView?.setCaliperMaxY(caliperMaxY)
+        ladderView?.caliperMaxY = caliperMaxY
         ladderView?.refresh()
+        cursorViewDelegate?.refresh()
     }
 
     func drawSeparator(_ rect: CGRect, with color: UIColor) {

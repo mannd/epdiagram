@@ -7,33 +7,12 @@
 //
 
 import UIKit
+import OSLog
 
-enum DocumentError: Error {
-  case unrecognizedContent
-  case corruptDocument
-  case archivingFailure
-
-  var localizedDescription: String {
-    switch self {
-
-    case .unrecognizedContent:
-      return L("File is an unrecognised format")
-    case .corruptDocument:
-      return L("File could not be read")
-    case .archivingFailure:
-      return L("File could not be saved")
-    }
-  }
-}
-
-class DiagramDocument: UIDocument {
+final class DiagramDocument: UIDocument {
     static let extensionName = "diagram"
 
-    var diagram = Diagram.blankDiagram() {
-        didSet {
-            updateChangeCount(.done)
-        }
-    }
+    var diagram = Diagram.blankDiagram()
 
     func name() -> String {
         return fileURL.deletingPathExtension().lastPathComponent
@@ -60,12 +39,30 @@ class DiagramDocument: UIDocument {
         do {
             diagram = try decoder.decode(Diagram.self, from: data)
         } catch {
+            // TODO: with version updates, try to load earlier versions here and convert to current diagram format.
             throw DocumentError.corruptDocument
         }
     }
 
     override func handleError(_ error: Error, userInteractionPermitted: Bool) {
         super.handleError(error, userInteractionPermitted: userInteractionPermitted)
-        print("handleError called \(error.localizedDescription)")
+        os_log("handleError called %s", log: OSLog.errors, type: .error, error.localizedDescription)
+    }
+}
+
+enum DocumentError: Error {
+    case unrecognizedContent
+    case corruptDocument
+    case archivingFailure
+
+    var localizedDescription: String {
+        switch self {
+        case .unrecognizedContent:
+            return L("File is an unrecognised format")
+        case .corruptDocument:
+            return L("File could not be read")
+        case .archivingFailure:
+            return L("File could not be saved")
+        }
     }
 }

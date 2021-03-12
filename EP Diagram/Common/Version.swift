@@ -9,9 +9,10 @@
 import UIKit
 
 class Version: NSObject {
+    static let prereleaseVersion: String? = "1.0.0-alpha.1"
 
     typealias VersionBuild = (version: String?, build: String?)
-    static func getAppVersion() -> VersionBuild {
+    static func appVersion() -> VersionBuild {
         let dictionary = Bundle.main.infoDictionary
         let version = dictionary?["CFBundleShortVersionString"] as? String
         let build = dictionary?["CFBundleVersion"] as? String

@@ -8,23 +8,6 @@
 
 import UIKit
 
-enum Layer {
-    case takePhoto
-    case selectImage
-    case selectLadder
-    case renameDiagram
-    case getInfo
-    case snapshot
-    case sample
-    case templates
-    case lockImage
-    case lockLadder
-    case preferences
-    case help
-    case about
-    case test
-}
-
 struct HamburgerLayer {
     var name: String?
     var iconName: String?
@@ -50,4 +33,20 @@ struct HamburgerLayer {
         self.altName = altName
         self.altIcon = altIcon
     }
+}
+
+enum Layer {
+    case takePhoto
+    case selectImage
+    case selectLadder
+    case renameDiagram
+    case getInfo
+    case sample
+    case templates
+    case lockImage
+    case lockLadder
+    case preferences
+    case help
+    case about
+    case test
 }

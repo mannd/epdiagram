@@ -12,28 +12,41 @@ import UIKit
 
 /// Struct that pinpoints a point in a ladder.  Note that these tapped areas overlap (labels and marks are in regions).
 struct LocationInLadder {
+    enum SpecificLocation {
+        case ladder
+        case label
+        case region
+        case zone
+        case mark
+        case error
+    }
+
     var region: Region?
     var mark: Mark?
     var ladder: Ladder?
     var zone: Zone?
     var regionSection: RegionSection
     var regionDivision: RegionDivision
-    var markAnchor: Anchor
+    var markAnchor: Anchor?
     var unscaledPosition: CGPoint
-    var regionWasTapped: Bool {
-        region != nil
+    var specificLocation: SpecificLocation {
+        if mark != nil {
+            return .mark
+        }
+        if zone != nil {
+            return .zone
+        }
+        if regionSection == .labelSection {
+            return .label
+        }
+        if region != nil {
+            return .region
+        }
+        if region == nil {
+            return .ladder
+        }
+        return .error
     }
-    var labelWasTapped: Bool {
-        regionSection == .labelSection
-    }
-    var markWasTapped: Bool {
-        mark != nil
-    }
-    var ladderWasTapped: Bool {
-        // If tapped outside of all regions, assume whole ladder tapped.
-        region == nil
-    }
-    var zoneWasTapped: Bool = false
 }
 
 // MARK: - extensions
@@ -41,7 +54,8 @@ struct LocationInLadder {
 extension LocationInLadder: CustomDebugStringConvertible {
     var debugDescription: String {
         let description = """
-
+        LocationInLadder ------
+        -----------------------
         region = \(region.debugDescription)
         mark = \(mark.debugDescription)
         ladder = \(ladder.debugDescription)
@@ -50,14 +64,9 @@ extension LocationInLadder: CustomDebugStringConvertible {
         regionSection = \(regionSection)
         regionDivision = \(regionDivision)
 
-        markAnchor = \(markAnchor)
+        markAnchor = \(markAnchor.debugDescription)
         unscaledPosition = \(unscaledPosition)
-        regionWasTapped = \(regionWasTapped)
-        labelWasTapped = \(labelWasTapped)
-        markWasTapped = \(markWasTapped)
-        ladderWasTapped = \(ladderWasTapped)
-        zoneWasTapped = \(zoneWasTapped)
-        
+        specificLocation = \(specificLocation)
         """
         return description
     }

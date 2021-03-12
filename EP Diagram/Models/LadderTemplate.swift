@@ -9,13 +9,15 @@
 import UIKit
 
 struct LadderTemplate: Codable, Equatable {
-    var name: String = ""
-    var description: String = ""
-    var regionTemplates = [RegionTemplate]()
     private(set) var id = UUID()
 
+    var name: String = ""
+    var description: String = ""
+    var leftMargin: CGFloat = 50
+    var regionTemplates = [RegionTemplate]()
+
     // Returns a basic ladder (A, AV, V).
-    static func defaultTemplate() -> LadderTemplate {
+    static func defaultTemplate1() -> LadderTemplate {
         var ladderTemplate = LadderTemplate(name: "A-AV-V Ladder", description: "Basic ladder with commonly used regions")
         let aRegionTemplate = RegionTemplate(name: "A", description: "Atrium", unitHeight: 1)
         let avRegionTemplate = RegionTemplate(name: "AV", description: "Atrioventricular", unitHeight: 2)
@@ -34,7 +36,19 @@ struct LadderTemplate: Codable, Equatable {
         return ladderTemplate
     }
 
+    static func defaultTemplate() -> LadderTemplate {
+        return templates()[0]
+    }
+
     static func defaultTemplates() -> [LadderTemplate] {
-        return [defaultTemplate(), defaultTemplate2()]
+        return [defaultTemplate1(), defaultTemplate2()]
+    }
+
+    static func templates() -> [LadderTemplate] {
+        var ladderTemplates = FileIO.retrieve(FileIO.userTemplateFile, from: .documents, as: [LadderTemplate].self) ?? LadderTemplate.defaultTemplates()
+        if ladderTemplates.isEmpty {
+            ladderTemplates = LadderTemplate.defaultTemplates()
+        }
+        return ladderTemplates
     }
 }

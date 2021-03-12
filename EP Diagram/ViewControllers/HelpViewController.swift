@@ -51,7 +51,6 @@ class HelpViewController: UIViewController, WKNavigationDelegate {
         let contentOffset = helpWebView.scrollView.contentOffset
         activity.addUserInfoEntries(from: [HelpViewController.contentOffsetYKey: contentOffset.y])
         activity.addUserInfoEntries(from: [HelpViewController.inHelpKey: true])
-        print(activity.userInfo as Any)
     }
 
     func webView(_ webView: WKWebView, didStartProvisionalNavigation navigation: WKNavigation!) {

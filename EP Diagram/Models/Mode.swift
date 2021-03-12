@@ -8,11 +8,10 @@
 
 import Foundation
 
-// FIXME: This is used by both LadderView and CursorView.
-enum Mode {
+// Mode is used by both DiagramViewController, LadderView and CalipersView.
+enum Mode: Int {
     case normal
-    case calibration
-    case link
+    case calibrate
+    case connect
     case select
 }
-

@@ -19,16 +19,17 @@ struct Caliper {
     var value: CGFloat { abs(bar1Position - bar2Position) }
 
     var minY: CGFloat = 0
-    var maxY: CGFloat?
+    var maxY: CGFloat = 0
 
     let measureText: String = L("Measure")
     let text: String = L("1000 msec")
+    let boundary: CGFloat = 10
 
     var isVisible: Bool = false
     var color: UIColor = UIColor.systemBlue
+    var lineWidth: CGFloat = 1
 
     func isNearCaliperComponent(point p: CGPoint, accuracy: CGFloat) -> Component? {
-        guard let maxY = maxY else { return nil }
         guard p.y >= minY && p.y <= maxY else { return nil }
         if abs(p.x - bar1Position) < accuracy { return .bar1 }
         if abs(p.x - bar2Position) < accuracy { return .bar2}
@@ -49,7 +50,11 @@ struct Caliper {
         case .crossbar:
             bar1Position += delta.x
             bar2Position += delta.x
-            crossbarPosition += delta.y
+            if delta.y < 0 {
+                crossbarPosition += (crossbarPosition >= minY + boundary ? delta.y : 0)
+            } else {
+                crossbarPosition += (crossbarPosition <= maxY - boundary ? delta.y : 0)
+            }
         }
     }
 }

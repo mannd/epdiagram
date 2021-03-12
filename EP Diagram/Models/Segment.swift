@@ -13,9 +13,27 @@ struct Segment: Codable, Equatable {
     var proximal: CGPoint
     var distal: CGPoint
 
+    var midpoint: CGPoint {
+        CGPoint(x: (proximal.x + distal.x) / 2.0, y: (proximal.y + distal.y) / 2.0)
+    }
+
     // Y axis is clamped between 0 and 1.
     func normalized() -> Segment {
         return Segment(proximal: proximal.clampY(), distal: distal.clampY())
+    }
+
+    // Get x coordinate on segment, knowing endpoints and y coordinate.
+    // See https://math.stackexchange.com/questions/149333/calculate-third-point-with-two-given-point
+    func getX(fromY y: CGFloat) -> CGFloat? {
+        let x0 = proximal.x
+        let x1 = distal.x
+        let y0 = proximal.y
+        let y1 = distal.y
+        // Avoid getting close to dividing by zero.
+        guard abs(y1 - y0) > 0.001 else { return nil }
+        // Give up if y is not along segment.
+        guard y < max(y1, y0) && y > min(y1, y0) else { return nil }
+        return ((x1 - x0) * (y - y0)) / (y1 - y0) + x0
     }
 }
 
