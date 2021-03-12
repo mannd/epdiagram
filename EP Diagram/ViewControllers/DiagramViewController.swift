@@ -209,15 +209,12 @@ final class DiagramViewController: UIViewController {
     }
     lazy var impulseOriginNoneAction = UIAction(title: L("No impulse origin")) { _ in
         self.ladderView.setSelectedMarksImpulseOriginSetting(value: .none)
+    }
 
-    }
-    lazy var impulseOriginAdjustableAction = UIAction(title: L("Adjust impulse origin")) { _ in
-        fatalError("impulseOriginAdjustAction not implemented yet")
-    }
     lazy var impulseOriginAutoAction = UIAction(title: L("Auto impulse origin")) { _ in
         self.ladderView.setSelectedMarksImpulseOriginSetting(value: .auto)
     }
-    lazy var impulseOriginMenu = UIMenu(title: L("Impulse origin..."), image: UIImage(systemName: "asterisk.circle"), children: [self.impulseOriginProximalAction, self.impulseOriginDistalAction, self.impulseOriginAdjustableAction, self.impulseOriginNoneAction, self.impulseOriginAutoAction])
+    lazy var impulseOriginMenu = UIMenu(title: L("Impulse origin..."), image: UIImage(systemName: "asterisk.circle"), children: [self.impulseOriginProximalAction, self.impulseOriginDistalAction, self.impulseOriginNoneAction, self.impulseOriginAutoAction])
 
     // Mark style
     lazy var solidAction = UIAction(title: L("Solid")) { action in
@@ -309,7 +306,32 @@ final class DiagramViewController: UIViewController {
                 print("unknown error")
             }
         }
+    }
 
+    lazy var repeatCLMenu = UIMenu(title: L("Repeat CL..."), image: UIImage(systemName: "arrowtriangle.left.and.line.vertical.and.arrowtriangle.right"), children: [self.repeatCLBeforeAction, self.repeatCLAfterAction, self.repeatCLBothAction])
+
+    lazy var repeatCLAfterAction = UIAction(title: L("Repeat CL after")) { _ in
+        self.repeatCL(time: .after)
+    }
+    lazy var repeatCLBeforeAction = UIAction(title: L("Repeat CL before")) { _ in
+        self.repeatCL(time: .before)
+    }
+    lazy var repeatCLBothAction = UIAction(title: L("Repeat CL bidirectionally")) { _ in
+        self.repeatCL(time: .both)
+    }
+
+    private func repeatCL(time: TemporalRelation) {
+        do {
+            try self.ladderView.checkForRepeatCL()
+            self.ladderView.performRepeatCL(time: time)
+        } catch {
+            if error is LadderError {
+                let ladderError = error as? LadderError
+                UserAlert.showMessage(viewController: self, title: L("Error Repeating Cycle Length"), message: ladderError?.errorDescription ?? error.localizedDescription)
+            } else {
+                print("unknown error")
+            }
+        }
     }
 
     lazy var adjustCLAction = UIAction(title: L("Adjust cycle length..."), image: UIImage(systemName: "slider.horizontal.below.rectangle")) { _  in
@@ -382,7 +404,7 @@ final class DiagramViewController: UIViewController {
         self.ladderView.removeRegion()
     }
 
-    lazy var markMenu = UIMenu(title: L("Mark Menu"), children: [self.styleMenu, self.emphasisMenu,  self.impulseOriginMenu, self.blockMenu, self.straightenMenu, self.slantMenu, self.adjustYMenu, self.moveAction, self.adjustCLAction, self.rhythmAction, self.unlinkAction, self.deleteAction])
+    lazy var markMenu = UIMenu(title: L("Mark Menu"), children: [self.styleMenu, self.emphasisMenu,  self.impulseOriginMenu, self.blockMenu, self.straightenMenu, self.slantMenu, self.adjustYMenu, self.moveAction, self.adjustCLAction, self.rhythmAction, self.repeatCLMenu, self.unlinkAction, self.deleteAction])
 
     lazy var labelChildren = [self.regionStyleMenu, self.editLabelAction, self.addRegionMenu, self.removeRegionAction, self.regionHeightMenu, self.adjustLeftMarginAction]
 

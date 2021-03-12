@@ -259,6 +259,34 @@ final class Ladder: NSObject, Codable {
         return entryCounter != 1
     }
 
+    func marksIntersect(_ marks: [Mark]) -> Bool {
+        guard marks.count == 2 else { return false }
+        let p1 = marks[0].segment.proximal
+        let p2 = marks[0].segment.distal
+        let p3 = marks[1].segment.proximal
+        let p4 = marks[1].segment.distal
+        return Geometry.intersection(ofLineFrom: p1, to: p2, withLineFrom: p3, to: p4) != nil
+    }
+
+    func marksAreVertical(_ marks: [Mark]) -> Bool {
+        for mark in marks {
+            if !markIsVertical(mark) {
+                return false
+            }
+        }
+        return true
+    }
+
+    func difference(_ m1: Mark, _ m2: Mark) -> CGFloat {
+        let proxDiff = abs(m1.segment.proximal.x - m2.segment.proximal.x)
+        let distDiff = abs(m1.segment.distal.x - m2.segment.distal.x)
+        return min(proxDiff, distDiff)
+    }
+
+    func markIsVertical(_ mark: Mark) -> Bool {
+        return mark.segment.proximal.x == mark.segment.distal.x
+    }
+
     func meanCL(_ marks: [Mark]) -> CGFloat {
         guard marks.count > 1 else { return 0 }
         let sortedMarks = marks.sorted()
@@ -512,6 +540,12 @@ enum RegionRelation {
     case same
     case after
     case distant
+}
+
+enum TemporalRelation {
+    case before
+    case after
+    case both
 }
 
 

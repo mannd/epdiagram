@@ -42,9 +42,9 @@ struct RhythmView: View {
                     Slider(value: $rhythm.maxCL, in: (rhythm.minCL + 10)...Rhythm.maximumFibCL)
                         .disabled(rhythm.regularity == .regular)
                         .id(rhythm.regularity == .fibrillation)
-                    Picker(selection: $rhythm.impulseOrigin, label: Text("Impulse origin")) {
-                        Text("Proximal").tag(Mark.Endpoint.proximal)
-                        Text("Distal").tag(Mark.Endpoint.distal)
+                    Picker(selection: $rhythm.impulseOrigin, label: Text("Conduction direction")) {
+                        Text("Proximal -> Distal").tag(Mark.Endpoint.proximal)
+                        Text("Distal -> Proximal").tag(Mark.Endpoint.distal)
                         Text("Random").tag(Mark.Endpoint.random)
                     }
                     Toggle(isOn: $rhythm.randomizeImpulseOrigin) {

@@ -1923,7 +1923,82 @@ final class LadderView: ScaledView {
         }
     }
 
-    // TODO: implement
+    func checkForRepeatCL() throws {
+        let selectedMarks = ladder.allMarksWithMode(.selected)
+        if selectedMarks.count != 2 {
+            throw LadderError.requireTwoMarks
+        }
+        if ladder.haveDifferentRegions(selectedMarks) {
+            throw LadderError.marksInDifferentRegions
+        }
+        if ladder.marksAreNotContiguous(selectedMarks) {
+            throw LadderError.marksNotContiguous
+        }
+        if ladder.marksIntersect(selectedMarks) {
+            throw LadderError.marksIntersect
+        }
+        // TODO: Need to do this?
+        if !ladder.marksAreVertical(selectedMarks) {
+            throw LadderError.marksNotVertical
+        }
+        // FIXME: appropriate short interval
+        if ladder.difference(selectedMarks[0], selectedMarks[1]) < 20 {
+            throw LadderError.intervalTooShort
+        }
+    }
+
+    func performRepeatCL(time: TemporalRelation) {
+        let selectedMarks = ladder.allMarksWithMode(.selected)
+        guard selectedMarks.count == 2 else { return }
+        currentDocument?.undoManager.beginUndoGrouping()
+
+        func repeatCLAfter() {
+            var nextSegment = secondMark.segment
+            while nextSegment.proximal.x < regionEnd && nextSegment.distal.x < regionEnd {
+                nextSegment.proximal.x += proxCL
+                nextSegment.distal.x += proxCL
+                let newMark = ladder.addMark(fromSegment: nextSegment, toRegion: region)
+                assessBlockAndImpulseOrigin(mark: newMark)
+                newMark.mode = .selected
+                undoablyAddMark(mark: newMark)
+            }
+        }
+
+        func repeatCLBefore() {
+            var nextSegment = firstMark.segment
+            while nextSegment.proximal.x > regionStart && nextSegment.distal.x > regionStart {
+                nextSegment.proximal.x -= proxCL
+                nextSegment.distal.x -= proxCL
+                let newMark = ladder.addMark(fromSegment: nextSegment, toRegion: region)
+                assessBlockAndImpulseOrigin(mark: newMark)
+                newMark.mode = .selected
+                undoablyAddMark(mark: newMark)
+            }
+        }
+
+        let mark1 = selectedMarks[0]
+        let mark2 = selectedMarks[1]
+        let region = ladder.region(ofMark: mark1)
+        let regionStart: CGFloat = 0
+        let regionEnd: CGFloat = viewMaxWidth
+        let proxCL = abs(mark2.segment.proximal.x - mark1.segment.proximal.x)
+        let distalCL = abs(mark2.segment.distal.x - mark1.segment.distal.x)
+        let secondMark = mark2 > mark1 ? mark2 : mark1
+        let firstMark = mark2 < mark1 ? mark2 : mark1
+        print("firstMark = \(firstMark), secondMark = \(secondMark)")
+        switch time {
+        case .before:
+            repeatCLBefore()
+        case .after:
+            repeatCLAfter()
+        case .both:
+            repeatCLAfter()
+            repeatCLBefore()
+        }
+        setNeedsDisplay()
+        currentDocument?.undoManager.endUndoGrouping()
+    }
+
     func fillWithRhythm(_ rhythm: Rhythm) {
         guard let calFactor = calibration?.currentCalFactor else { return }
         currentDocument?.undoManager.beginUndoGrouping()
@@ -2469,6 +2544,7 @@ extension LadderView: LadderViewDelegate {
         for region in ladder.regions {
             region.mode = .selected
         }
+        ladder.zone.isVisible = false
         setNeedsDisplay()
     }
 
@@ -2509,9 +2585,13 @@ enum Adjustment {
 enum LadderError: Error {
     case notCalibrated
     case tooFewMarks
+    case requireTwoMarks
     case marksInDifferentRegions
     case marksNotContiguous
     case tooManyRegions
+    case marksIntersect
+    case marksNotVertical
+    case intervalTooShort
 
     public var errorDescription: String? {
         switch self {
@@ -2519,14 +2599,21 @@ enum LadderError: Error {
             return L("Diagram is not calibrated.  You must calibrate first.")
         case .tooFewMarks:
             return L("There are too few marks.  You need to select at least 2 marks.")
+        case .requireTwoMarks:
+            return L("Exactly two marks must be selected.")
         case .marksInDifferentRegions:
             return L("Selected marks are in different regions.  Marks must me in the same region..")
         case .marksNotContiguous:
             return L("Marks are not contiguous.  Selected marks must be contiguous.")
         case .tooManyRegions:
             return L("Rhythm can only be set in one region at a time.")
+        case .marksIntersect:
+            return L("Marks cannot intersect")
+        case .marksNotVertical:
+            return L("Marks must be vertical.")
+        case .intervalTooShort:
+            return L("Interval is too short.")
         }
-
     }
 }
 
