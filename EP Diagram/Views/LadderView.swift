@@ -1876,6 +1876,7 @@ final class LadderView: ScaledView {
                 }
             }
             setSegment(segment: segment, forMark: mark)
+            assessBlockAndImpulseOrigin(mark: mark)
         }
     }
 
@@ -1937,12 +1938,8 @@ final class LadderView: ScaledView {
         if ladder.marksAreNotContiguous(selectedMarks) {
             throw LadderError.marksNotContiguous
         }
-        if ladder.marksIntersect(selectedMarks) {
-            throw LadderError.marksIntersect
-        }
-        // TODO: Need to do this?
-        if !ladder.marksAreVertical(selectedMarks) {
-            throw LadderError.marksNotVertical
+        if !ladder.marksAreParallel(selectedMarks[0], selectedMarks[1]) {
+            throw LadderError.marksNotParallel
         }
         // FIXME: appropriate short interval
         if ladder.difference(selectedMarks[0], selectedMarks[1]) < 20 {
@@ -2595,6 +2592,7 @@ enum LadderError: Error {
     case marksIntersect
     case marksNotVertical
     case intervalTooShort
+    case marksNotParallel
 
     public var errorDescription: String? {
         switch self {
@@ -2616,6 +2614,8 @@ enum LadderError: Error {
             return L("Marks must be vertical.")
         case .intervalTooShort:
             return L("Interval is too short.")
+        case .marksNotParallel:
+            return L("Marks are not parallel.")
         }
     }
 }

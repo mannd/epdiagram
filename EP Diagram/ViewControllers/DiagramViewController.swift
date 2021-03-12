@@ -509,32 +509,31 @@ final class DiagramViewController: UIViewController {
         }
         scrollViewAdjustViews(imageScrollView) // make sure views adjust to rotated image
         ladderView.updateRegionIntervals()
-//        mode = .normal
-
         // Need to set this here, after view draw, or Mac malpositions cursor at start of app.
         imageScrollView.contentInset = UIEdgeInsets(top: 0, left: leftMargin, bottom: 0, right: 0)
-//        ladderView.normalizeAllMarks()
         updateToolbarButtons()
         updateUndoRedoButtons()
         showMainToolbar()
         self.userActivity = self.view.window?.windowScene?.userActivity
         // See https://github.com/mattneub/Programming-iOS-Book-Examples/blob/master/bk2ch06p357StateSaveAndRestoreWithNSUserActivity/ch19p626pageController/SceneDelegate.swift
         if restorationInfo != nil {
-//            if let zoomScale = restorationInfo?[Self.restorationZoomKey] as? CGFloat {
-//                imageScrollView.zoomScale = zoomScale
-//            }
-//            var restorationContentOffset = CGPoint()
-//            // FIXME: Do we have to correct content offset Y too?
-//            if let contentOffsetX = restorationInfo?[Self.restorationContentOffsetXKey] {
-//                restorationContentOffset.x = (contentOffsetX as? CGFloat ?? 0) * imageScrollView.zoomScale
-//            }
-//            if let contentOffsetY = restorationInfo?[Self.restorationContentOffsetYKey] {
-//                restorationContentOffset.y = contentOffsetY as? CGFloat ?? 0
-//            }
+            if let zoomScale = restorationInfo?[Self.restorationZoomKey] as? CGFloat {
+                imageScrollView.zoomScale = zoomScale
+            }
+            var restorationContentOffset = CGPoint()
+            if let contentOffsetX = restorationInfo?[Self.restorationContentOffsetXKey] {
+                restorationContentOffset.x = (contentOffsetX as? CGFloat ?? 0) * imageScrollView.zoomScale
+            }
+            if let contentOffsetY = restorationInfo?[Self.restorationContentOffsetYKey] {
+                restorationContentOffset.y = contentOffsetY as? CGFloat ?? 0
+            }
+            imageScrollView.setContentOffset(restorationContentOffset, animated: true)
+
+            // TODO: Decide: shall we just return to normal mode every time app is restored?  Is it worth returning to Calibrate mode, etc.?
+
 //            if let restorationMode = restorationInfo?[Self.restorationModeKey] as? Int {
 //                mode = Mode(rawValue: restorationMode) ?? .normal
 //            }
-//            imageScrollView.setContentOffset(restorationContentOffset, animated: true)
 //            if let caliperCrossbarPosition = restorationInfo?[Self.restorationCaliperCrossbarKey] {
 //                if mode == .calibrate {
 //                    cursorView.caliperCrossbarPosition = caliperCrossbarPosition as? CGFloat ?? 50
@@ -993,11 +992,10 @@ final class DiagramViewController: UIViewController {
             let setButton = UIBarButtonItem(title: L("Set"), style: .plain, target: self, action: #selector(setCalibration))
             let clearButton = UIBarButtonItem(title: L("Clear"), style: .plain, target: self, action: #selector(clearCalibration))
             let doneButton = UIBarButtonItem(barButtonSystemItem: .done, target: self, action: #selector(cancelCalibrateMode))
-            calibrateToolbarButtons = [promptButton, spacer, setButton, clearButton, doneButton]
+            calibrateToolbarButtons = [promptButton, spacer, setButton, spacer, clearButton, spacer, doneButton]
         }
         setToolbarItems(calibrateToolbarButtons, animated: false)
     }
-
 
     @objc func setCalibration() {
         os_log("setCalibration()", log: .action, type: .info)
