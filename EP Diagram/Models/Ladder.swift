@@ -287,6 +287,10 @@ final class Ladder: NSObject, Codable {
         return mark.segment.proximal.x == mark.segment.distal.x
     }
 
+    func marksAreParallel(_ m1: Mark, _ m2: Mark) -> Bool {
+        return Geometry.areParallel(m1.segment, m2.segment)
+    }
+
     func meanCL(_ marks: [Mark]) -> CGFloat {
         guard marks.count > 1 else { return 0 }
         let sortedMarks = marks.sorted()

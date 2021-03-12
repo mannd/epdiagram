@@ -19,10 +19,9 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         scene.userActivity = session.stateRestorationActivity ?? NSUserActivity(activityType: "org.epstudios.epdiagram.mainActivity")
         self.scene(scene, openURLContexts: connectionOptions.urlContexts)
 
-        // FIXME: inactivate restoration
-//        if let documentBrowserViewController = window?.rootViewController as? DocumentBrowserViewController {
-//            documentBrowserViewController.restorationInfo = scene.userActivity?.userInfo
-//        }
+        if let documentBrowserViewController = window?.rootViewController as? DocumentBrowserViewController {
+            documentBrowserViewController.restorationInfo = scene.userActivity?.userInfo
+        }
     }
 
     func stateRestorationActivity(for scene: UIScene) -> NSUserActivity? {

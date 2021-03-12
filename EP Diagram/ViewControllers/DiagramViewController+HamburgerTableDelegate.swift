@@ -222,11 +222,16 @@ extension DiagramViewController: HamburgerTableDelegate, UIImagePickerController
         let versionBuild = Version.appVersion()
         let version = versionBuild.version ?? L("unknown")
         let build = versionBuild.build ?? L("unknown")
-        os_log("EP Diagram: version = %s build = %s", log: OSLog.debugging, type: .info, version, build)
+        let prereleaseVersion = Version.prereleaseVersion
+        os_log("EP Diagram: prereleaseVersion = %s, version = %s build = %s", log: OSLog.debugging, type: .info, prereleaseVersion ?? "not prerelease", version, build)
+        var prereleaseMessage = ""
+        if let prereleaseVersion = prereleaseVersion {
+            prereleaseMessage = "\nPrerelease version \(prereleaseVersion)+\(build)"
+        }
         UserAlert.showMessage(
             viewController: self,
             title: L("EP Diagram"),
-            message: L("Copyright 2021 EP Studios, Inc.\nVersion \(version)+\(build)"))
+            message: L("Copyright 2021 EP Studios, Inc." + prereleaseMessage + "\nApp Store version \(version)"))
     }
 
     // Use to test features during development

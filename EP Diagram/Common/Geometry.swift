@@ -107,7 +107,8 @@ enum Geometry {
         }
         let a1 = (s1.proximal.y - s1.distal.y) / (s1.proximal.x - s1.distal.x)
         let a2 = (s2.proximal.y - s2.distal.y) / (s2.proximal.x - s2.distal.x)
-        return a1 == a2
+        return nearlyEqual(Double(a1), Double(a2))
+//        return a1 == a2
     }
 
     // Doesn't check for y outside of segment.  Exclude horizontal line before calling.
@@ -119,6 +120,10 @@ enum Geometry {
         let y2 = s.distal.y
         let x = ((x2-x1) * (y-y1)/(y2-y1)) + x1
         return x
+    }
+
+    static func nearlyEqual(_ a: Double, _ b: Double) -> Bool {
+        return abs(a - b) < Double.ulpOfOne
     }
 }
 
