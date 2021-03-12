@@ -59,6 +59,7 @@ final class LadderView: ScaledView {
     }
     var showLabelDescription: TextVisibility = .invisible
     var marksAreHidden: Bool = false
+    var doubleLineBlockMarker: Bool = true
 
     // Colors - can change via Preferences
     var activeColor = Preferences.defaultActiveColor
@@ -1639,17 +1640,20 @@ final class LadderView: ScaledView {
         case .distal:
             context.move(to: CGPoint(x: segment.distal.x - blockLength / 2, y: segment.distal.y))
             context.addLine(to: CGPoint(x: segment.distal.x + blockLength / 2, y: segment.distal.y))
-            context.move(to: CGPoint(x: segment.distal.x - blockLength / 2, y: segment.distal.y + blockSeparation))
-            context.addLine(to: CGPoint(x: segment.distal.x + blockLength / 2, y: segment.distal.y + blockSeparation))
+            if doubleLineBlockMarker {
+                context.move(to: CGPoint(x: segment.distal.x - blockLength / 2, y: segment.distal.y + blockSeparation))
+                context.addLine(to: CGPoint(x: segment.distal.x + blockLength / 2, y: segment.distal.y + blockSeparation))
+            }
         case .proximal:
             context.move(to: CGPoint(x: segment.proximal.x - blockLength / 2, y: segment.proximal.y))
             context.addLine(to: CGPoint(x: segment.proximal.x + blockLength / 2, y: segment.proximal.y))
-            context.move(to: CGPoint(x: segment.proximal.x - blockLength / 2, y: segment.proximal.y - blockSeparation))
-            context.addLine(to: CGPoint(x: segment.proximal.x + blockLength / 2, y: segment.proximal.y - blockSeparation))
+            if doubleLineBlockMarker {
+                context.move(to: CGPoint(x: segment.proximal.x - blockLength / 2, y: segment.proximal.y - blockSeparation))
+                context.addLine(to: CGPoint(x: segment.proximal.x + blockLength / 2, y: segment.proximal.y - blockSeparation))
+            }
         case .auto, .random:
             fatalError("Block site set to auto or random.")
         }
-
         context.strokePath()
     }
 
@@ -1982,7 +1986,6 @@ final class LadderView: ScaledView {
         let regionStart: CGFloat = 0
         let regionEnd: CGFloat = viewMaxWidth
         let proxCL = abs(mark2.segment.proximal.x - mark1.segment.proximal.x)
-        let distalCL = abs(mark2.segment.distal.x - mark1.segment.distal.x)
         let secondMark = mark2 > mark1 ? mark2 : mark1
         let firstMark = mark2 < mark1 ? mark2 : mark1
         print("firstMark = \(firstMark), secondMark = \(secondMark)")

@@ -22,6 +22,7 @@ struct PreferencesView: View {
     @AppStorage(Preferences.playSoundsKey) var playSounds = Preferences.playSounds
     @AppStorage(Preferences.hideMarksKey) var hideMarks = Preferences.hideMarks
     @AppStorage(Preferences.caliperLineWidthKey) var caliperLineWidth = Preferences.caliperLineWidth
+    @AppStorage(Preferences.doubleLineBlockMarkerKey) var doubleLineBlockerMarker = Preferences.doubleLineBlockMarker
 
     // Color preferences
     @AppStorage(Preferences.activeColorNameKey) var activeColorName = Preferences.activeColorName
@@ -112,17 +113,23 @@ struct PreferencesView: View {
                             Toggle(isOn: $showBlock) {
                                 Text("Show block")
                             }
+                            Toggle(isOn: $doubleLineBlockerMarker) {
+                                Text("Double line block marker")
+                            }
                             Toggle(isOn: $showArrows) {
                                 Text("Show direction of conduction")
                             }
-                            Toggle(isOn: $snapMarks) {
-                                Text("Snap marks")
+                            // Only 10 items in each group allowed.
+                            Group {
+                                Toggle(isOn: $snapMarks) {
+                                    Text("Snap marks")
+                                }
+                                Picker(selection: $markStyle, label: Text("Default mark style"), content: {
+                                    Text("Solid").tag(Mark.Style.solid.rawValue)
+                                    Text("Dashed").tag(Mark.Style.dashed.rawValue)
+                                    Text("Dotted").tag(Mark.Style.dotted.rawValue)
+                                })
                             }
-                            Picker(selection: $markStyle, label: Text("Default mark style"), content: {
-                                Text("Solid").tag(Mark.Style.solid.rawValue)
-                                Text("Dashed").tag(Mark.Style.dashed.rawValue)
-                                Text("Dotted").tag(Mark.Style.dotted.rawValue)
-                            })
                         }
                     }
                     Section(header: Text("Cursor")) {

@@ -1411,6 +1411,7 @@ extension DiagramViewController {
         ladderView.showLabelDescription = TextVisibility(rawValue: UserDefaults.standard.integer(forKey: Preferences.labelDescriptionVisibilityKey)) ?? .invisible
         playSounds = UserDefaults.standard.bool(forKey: Preferences.playSoundsKey)
         marksAreHidden = UserDefaults.standard.bool(forKey: Preferences.hideMarksKey)
+        ladderView.doubleLineBlockMarker = UserDefaults.standard.bool(forKey: Preferences.doubleLineBlockMarkerKey)
 
         // Colors
         if let caliperColorName = UserDefaults.standard.string(forKey: Preferences.caliperColorNameKey) {
