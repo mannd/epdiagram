@@ -11,15 +11,19 @@ import XCTest
 
 class CursorViewTests: XCTestCase {
     private var cursorView: CursorView!
+    private var ladderView: LadderView!
+
 
     override func setUp() {
         // Put setup code here. This method is called before the invocation of each test method in the class.
         cursorView = CursorView(frame: CGRect(x: 0, y: 0, width: 100, height: 100))
+        ladderView = LadderView()
+        cursorView.ladderViewDelegate = ladderView
     }
 
     override func tearDown() {
         cursorView = nil
-        // Put teardown code here. This method is called after the invocation of each test method in the class.
+        ladderView = nil
     }
 
     func testIsNearCursor() {
@@ -31,5 +35,11 @@ class CursorViewTests: XCTestCase {
     func testNewCalibration() {
         let calibration = cursorView.newCalibration(zoom: 1.7)
         XCTAssertTrue(calibration.isCalibrated)
+    }
+
+    func testAddMarkWithAttachedCursor() {
+        cursorView.addMarkWithAttachedCursor(positionX: 100)
+        XCTAssertEqual(cursorView.cursorIsVisible, true)
+        XCTAssertEqual(cursorView.cursorPositionX, 100, accuracy: 0.0001)
     }
 }

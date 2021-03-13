@@ -8,7 +8,6 @@
 
 import UIKit
 
-// Intervals are generated on the fly and so don't need to conform to Codable.
 struct Interval {
     typealias Boundary = (first: CGFloat?, second: CGFloat?)
     var proximalBoundary: Boundary?

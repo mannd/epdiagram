@@ -412,13 +412,18 @@ final class Ladder: NSObject, Codable {
         return regions.filter { $0.mode == mode }
     }
 
-    func regionIntervals() -> [Int: [Interval]] {
+    func ladderIntervals() -> [Int: [Interval]] {
         var indexedIntervals: [Int: [Interval]] = [:]
         for i in 0..<regions.count {
             indexedIntervals[i] = Interval.createIntervals(region: regions[i])
         }
         return indexedIntervals
     }
+
+    func regionIntervals(region: Region) -> [Interval] {
+        return Interval.createIntervals(region: region)
+    }
+
 
     func availableAnchors(forMark mark: Mark) -> [Anchor] {
         let linkedMarkIDs = mark.linkedMarkIDs

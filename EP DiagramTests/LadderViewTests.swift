@@ -369,20 +369,13 @@ class LadderViewTests: XCTestCase {
         ladderView.attachMark(mark2)
         XCTAssertEqual(mark2!.mode, .attached)
         XCTAssertEqual(mark1!.mode, .normal)
+    }
 
-
-
-//        let mark1 = ladderView.addMark(at: 100, toRegion: ladder.region(atIndex: 0))
-//        let mark2 = ladder.addMark(at: 200, toRegion: ladder.region(atIndex: 0))
-//        ladder.attachedMark = mark1
-//        XCTAssertEqual(mark1.mode, .attached)
-//        ladder.attachedMark = nil
-//        XCTAssertEqual(mark1.mode, .normal)
-//        ladder.attachedMark = mark1
-//        XCTAssertEqual(mark1.mode, .attached)
-//        ladder.attachedMark = mark2
-//        XCTAssertEqual(mark1.mode, .normal)
-//        XCTAssertEqual(mark2.mode, .attached)
+    func testAddAttachedMark() {
+        ladderView.addAttachedMark(scaledViewPositionX: 100)
+        let attachedMark = ladderView.ladder.attachedMark
+        XCTAssertNotNil(attachedMark)
+        XCTAssertEqual(attachedMark!.mode, .attached)
     }
 
 }

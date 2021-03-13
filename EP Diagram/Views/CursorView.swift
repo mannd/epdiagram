@@ -24,6 +24,9 @@ final class CursorView: ScaledView {
     var cursorColor: UIColor = Preferences.defaultCursorColor
     var caliperColor: UIColor = Preferences.defaultCaliperColor
 
+    // For testing
+    var cursorPositionX: CGFloat { cursor.positionX }
+
     private var cursor: Cursor = Cursor()
     private var rawCursorHeight: CGFloat?
 
@@ -369,14 +372,14 @@ final class CursorView: ScaledView {
         return calibration
     }
 
-    func addMarkWithAttachedCursor(position: CGPoint) {
+    func addMarkWithAttachedCursor(positionX: CGFloat) {
         os_log("addMarkWithAttachedCursor(position:) - CursorView", log: OSLog.debugging, type: .debug)
         // imageScrollView starts at x = 0, contentInset shifts view to right, and the left margin is negative.
         // So ignore positions in left margin.
-        if position.x > 0 {
-            moveCursor(cursorViewPositionX: position.x / scale)  // cursor is not affected by offset, only zoom scale
+        if positionX >= 0 {
+            moveCursor(cursorViewPositionX: positionX / scale)  // cursor is not affected by offset, only zoom scale
             cursorIsVisible = true
-            ladderViewDelegate.addAttachedMark(scaledViewPositionX: position.x)
+            ladderViewDelegate.addAttachedMark(scaledViewPositionX: positionX)
             setCursorHeight()
             setNeedsDisplay()
         }
@@ -395,6 +398,7 @@ protocol CursorViewDelegate: AnyObject {
     func setCursorHeight(anchorPositionY: CGFloat?)
     func cursorMovement() -> Movement
     func markMeasurement(segment: Segment) -> CGFloat
+    func setMarkerPositions(at positions: [CGPoint])
 }
 
 extension CursorViewDelegate {
@@ -457,6 +461,7 @@ extension CursorView: CursorViewDelegate {
     }
 
     func drawMarkers() {
+        return
         for position in markerPositions {
             drawMarker(at: position)
         }

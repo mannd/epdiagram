@@ -508,7 +508,7 @@ final class DiagramViewController: UIViewController {
             self.imageView.transform = self.diagram.transform
         }
         scrollViewAdjustViews(imageScrollView) // make sure views adjust to rotated image
-        ladderView.updateRegionIntervals()
+        ladderView.updateLadderIntervals()
         // Need to set this here, after view draw, or Mac malpositions cursor at start of app.
         imageScrollView.contentInset = UIEdgeInsets(top: 0, left: leftMargin, bottom: 0, right: 0)
         updateToolbarButtons()
@@ -725,8 +725,8 @@ final class DiagramViewController: UIViewController {
         let labelText = UITextField()
         labelText.text = L("Adjust cycle length")
         let slider = UISlider()
-        slider.minimumValue = Float(ladderView.regionValueFromCalibratedValue(100, usingCalFactor: calibration.currentCalFactor))
-        slider.maximumValue = Float(ladderView.regionValueFromCalibratedValue(3000, usingCalFactor: calibration.currentCalFactor))
+        slider.minimumValue = Float(ladderView.regionValueFromCalibratedValue(Rhythm.minimumCL, usingCalFactor: calibration.currentCalFactor))
+        slider.maximumValue = Float(ladderView.regionValueFromCalibratedValue(Rhythm.maximumCL, usingCalFactor: calibration.currentCalFactor))
         slider.setValue(Float(rawValue), animated: false)
         ladderView.adjustCL(cl: rawValue)
         slider.addTarget(self, action: #selector(clSliderValueDidChange(_:)), for: .valueChanged)
@@ -1098,9 +1098,8 @@ final class DiagramViewController: UIViewController {
             }
             else {
                 let position = tap.location(in: imageScrollView)
-                print("position = \(position)")
                 if position.x >= 0 { // negative position in left margin
-                    cursorView.addMarkWithAttachedCursor(position: position)
+                    cursorView.addMarkWithAttachedCursor(positionX: position.x)
                 }
             }
             setViewsNeedDisplay()
