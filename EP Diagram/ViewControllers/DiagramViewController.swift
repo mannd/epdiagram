@@ -715,9 +715,8 @@ final class DiagramViewController: UIViewController {
     }
 
     @objc func cancelConnectMode() {
-        os_log("cancelLink()", log: OSLog.action, type: .info)
+        os_log("cancelConnectMode()", log: OSLog.action, type: .info)
         mode = .normal
-        ladderView.setNeedsDisplay()
     }
 
     func showAdjustCLToolbar(rawValue: CGFloat) {
@@ -1099,7 +1098,10 @@ final class DiagramViewController: UIViewController {
             }
             else {
                 let position = tap.location(in: imageScrollView)
-                cursorView.addMarkWithAttachedCursor(position: position)
+                print("position = \(position)")
+                if position.x >= 0 { // negative position in left margin
+                    cursorView.addMarkWithAttachedCursor(position: position)
+                }
             }
             setViewsNeedDisplay()
         }
@@ -1209,7 +1211,6 @@ final class DiagramViewController: UIViewController {
             separatorView?.cursorViewDelegate = cursorView
         }
         self.ladderView.resetSize(setActiveRegion: setActiveRegion, width: imageView.frame.width)
-        self.imageView.setNeedsDisplay()
         cursorView.caliperMaxY = imageScrollView.frame.height
         cursorView.caliperMinY = 0
         setViewsNeedDisplay()

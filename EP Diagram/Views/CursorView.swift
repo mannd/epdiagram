@@ -267,9 +267,8 @@ final class CursorView: ScaledView {
         default:
             break
         }
-        guard mode == .normal else { return } // Single tap does nothing during calibration.
     }
-
+    
     @objc func doubleTap(tap: UITapGestureRecognizer) {
         os_log("doubleTap(tap:) - CursorView", log: OSLog.touches, type: .info)
         guard !marksAreHidden else { return }

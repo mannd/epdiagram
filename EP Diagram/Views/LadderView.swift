@@ -599,9 +599,8 @@ final class LadderView: ScaledView {
         guard !marksAreHidden else { return }
         switch mode {
         case .normal:
-            if deleteOrAddMark(position: tap.location(in: self), cursorViewDelegate: cursorViewDelegate) {
-                setNeedsDisplay()
-            }
+            deleteOrAddMark(position: tap.location(in: self), cursorViewDelegate: cursorViewDelegate)
+            setNeedsDisplay()
         default:
             break
         }
@@ -609,18 +608,17 @@ final class LadderView: ScaledView {
 
     /// Deletes mark if there is one at position.  Returns true if position corresponded to a mark.
     /// - Parameter position: position of potential mark
-    func deleteOrAddMark(position: CGPoint, cursorViewDelegate: CursorViewDelegate) -> Bool {
+    func deleteOrAddMark(position: CGPoint, cursorViewDelegate: CursorViewDelegate) {
         os_log("deleteMark(position:cursofViewDelegate:) - LadderView", log: OSLog.debugging, type: .debug)
         let tapLocationInLadder = getLocationInLadder(position: position)
         activeRegion = tapLocationInLadder.region
+        // Don't allow adding or deleting marks in label area, though ok to have label double tap set active region.
+        guard tapLocationInLadder.specificLocation != .label else { return }
         if tapLocationInLadder.specificLocation == .mark {
             if let mark = tapLocationInLadder.mark {
                 undoablyDeleteMark(mark: mark)
-                return true
             }
-        } else {
-            // FIXME: refactor
-            guard let region = tapLocationInLadder.region else { return false }
+        } else if let region = tapLocationInLadder.region {
             let scaledPositionX = transformToRegionPositionX(scaledViewPositionX: tapLocationInLadder.unscaledPosition.x)
             let mark = ladder.addMark(at: scaledPositionX, toRegion: region)
             normalizeAllMarks()
@@ -631,7 +629,6 @@ final class LadderView: ScaledView {
             cursorViewDelegate.setCursorHeight()
             cursorViewDelegate.refresh()
         }
-        return true
     }
 
     // See https://stackoverflow.com/questions/36491789/using-nsundomanager-how-to-register-undos-using-swift-closures/36492619#36492619

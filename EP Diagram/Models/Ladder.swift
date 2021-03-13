@@ -27,7 +27,6 @@ final class Ladder: NSObject, Codable {
     var regionCount: Int { regions.count }
     var attachedMark: Mark?  { // attachedMark does not own its mark
         didSet { // cursor is attached to a most 1 mark at a time
-            print("ladder.attachedMark set")
             normalizeAllMarks()  // setting attached mark to nil does not delete it, so set its mode to normal.
             if let attachedMark = attachedMark {
                 let linkedMarkIDs = attachedMark.linkedMarkIDs
