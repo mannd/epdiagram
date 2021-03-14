@@ -33,25 +33,30 @@ class DocumentBrowserViewController: UIDocumentBrowserViewController {
         delegate = browserDelegate
         view.tintColor = .systemBlue
         installDocumentBrowser()
-    }
 
-    override func viewDidAppear(_ animated: Bool) {
-        super.viewDidAppear(animated)
-        if let externalURL = externalURL {
-            if FileManager.default.fileExists(atPath: externalURL.path) {
-                openDocument(url: externalURL)
-                return
-            }
-        }
+        let info = self.restorationInfo
         // Fail gently if cached file no longer exists.
-        if let lastDocumentURLPath = restorationInfo?[DiagramViewController.restorationFileNameKey] as? String,
+        print("documentbrowser restorationinfo = \(restorationInfo)")
+        if let lastDocumentURLPath = info?[DiagramViewController.restorationFileNameKey] as? String,
            !lastDocumentURLPath.isEmpty,
-           restorationInfo?[DiagramViewController.restorationDoRestorationKey] as? Bool ?? false  {
+           info?[DiagramViewController.restorationDoRestorationKey] as? Bool ?? false {
             if let docURL = FileIO.getDocumentsURL() {
                 let fileURL = docURL.appendingPathComponent(lastDocumentURLPath)
                 if FileManager.default.fileExists(atPath: fileURL.path) {
                     openDocument(url: fileURL)
                 }
+            }
+        }
+
+    }
+
+    override func viewDidAppear(_ animated: Bool) {
+        super.viewDidAppear(animated)
+
+        if let externalURL = externalURL {
+            if FileManager.default.fileExists(atPath: externalURL.path) {
+                openDocument(url: externalURL)
+                return
             }
         }
     }
@@ -66,9 +71,9 @@ class DocumentBrowserViewController: UIDocumentBrowserViewController {
                 return
             }
 
-          if let url = url, let self = self {
-            self.openDocument(url: url)
-          }
+            if let url = url, let self = self {
+                self.openDocument(url: url)
+            }
         }
     }
 }
@@ -89,13 +94,17 @@ extension DocumentBrowserViewController: DiagramEditorDelegate {
     }
 
     func displayDiagramController() {
+        os_log("displayDiagramController()", log: .default, type: .default)
         guard !editingDocument, let document = currentDocument else { return }
         editingDocument = true
         let controller = DiagramViewController.navigationControllerFactory()
         let diagramViewController = controller.viewControllers[0] as? DiagramViewController
         diagramViewController?.diagramEditorDelegate = self
         diagramViewController?.diagram = document.diagram
+
         diagramViewController?.restorationInfo = restorationInfo
+        restorationInfo = nil // don't need it any more
+
         // FIXME: below needed?
         diagramViewController?.restorationIdentifier = restorationIdentifier
         diagramViewController?.currentDocument = document
