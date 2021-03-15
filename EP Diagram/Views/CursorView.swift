@@ -34,7 +34,13 @@ final class CursorView: ScaledView {
     private var draggedComponent: Caliper.Component?
 
     private var markerPositions: [CGPoint] = []
-
+    var showMarkers = false {
+        didSet {
+            if showMarkers {
+                ladderViewDelegate.updateMarkers()
+            }
+        }
+    }
 
     var calFactor: CGFloat {
         get {
@@ -100,17 +106,20 @@ final class CursorView: ScaledView {
         if imageIsLocked {
             showLockImageWarning(rect: rect)
         }
+        if showMarkers {
+            drawMarkers()
+        }
         switch mode {
         case .calibrate:
             drawCaliper(rect)
         case .normal:
             drawCursor(rect)
         case .select:
-            // FIXME: testing out markers
-            drawMarkers()
+            break
         default:
             break
         }
+
     }
 
     func drawCursor(_ rect: CGRect) {
@@ -461,20 +470,29 @@ extension CursorView: CursorViewDelegate {
     }
 
     func drawMarkers() {
-        return
         for position in markerPositions {
             drawMarker(at: position)
         }
     }
 
-    func drawMarker(at position: CGPoint) {
+    func drawMarker(at regionPosition: CGPoint) {
         guard let context = UIGraphicsGetCurrentContext() else { return }
-        let convertedPosition = ladderViewDelegate.convertPosition(position, toView: self)
+        let position = ladderViewDelegate.convertPosition(regionPosition, toView: self)
+
+        let positionX = scale * position.x - offsetX // inlined, for efficiency
+        let cursorDefaultHeight = ladderViewDelegate.getTopOfLadderView(view: self)
+        let defaultHeight = cursorDefaultHeight
+        let height = defaultHeight
+//        var height = region.proximalBoundaryY + (regionPosition.0.y * region.height)
+//        height = (positionX <= leftMargin) ? defaultHeight : height
+        let endPoint = CGPoint(x: positionX, y: height)
+
+
         context.setStrokeColor(cursorColor.cgColor)
-        context.setLineWidth(lineWidth / 2.0)
-        context.setAlpha(alphaValue / 2.0)
-        context.move(to: CGPoint(x: convertedPosition.x, y: 0))
-        context.addLine(to: convertedPosition)
+        context.setLineWidth(lineWidth / 1.5)
+        context.setAlpha(alphaValue / 1.5)
+        context.move(to: CGPoint(x: positionX, y: 0))
+        context.addLine(to: endPoint)
         context.strokePath()
     }
 }

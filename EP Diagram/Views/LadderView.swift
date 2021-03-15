@@ -108,13 +108,7 @@ final class LadderView: ScaledView {
     var mode: Mode = .normal
     { didSet {
         if mode == .select {
-            let marks = ladder.allMarks()
-            var markerPoints: [CGPoint] = []
-            for mark in marks {
-                markerPoints.append(transformToScaledViewPosition(regionPosition: mark.segment.proximal, region: ladder.region(ofMark: mark)))
-                markerPoints.append(transformToScaledViewPosition(regionPosition: mark.segment.distal, region: ladder.region(ofMark: mark)))
-            }
-            cursorViewDelegate.setMarkerPositions(at: markerPoints)
+        updateMarkers()
         }
     }}
 
@@ -655,6 +649,7 @@ final class LadderView: ScaledView {
             target.undoablyDeleteMark(mark: mark)
         })
         NotificationCenter.default.post(name: .didUndoableAction, object: nil)
+        updateMarkers()
         updateRegionIntervals(ladder.region(ofMark: mark))
         assessBlockAndImpulseOrigin(mark: mark)
 
@@ -667,6 +662,8 @@ final class LadderView: ScaledView {
         let region = ladder.region(ofMark: mark)
         hideCursorAndNormalizeAllMarks()
         updateRegionIntervals(region)
+        // FIXME: New
+        updateMarkers()
         cursorViewDelegate.refresh()
     }
 
@@ -676,6 +673,7 @@ final class LadderView: ScaledView {
         ladder.addMark(mark, toRegion: region)
         mark.mode = .normal
         hideCursorAndNormalizeAllMarks()
+        updateMarkers()
         updateRegionIntervals(region)
         cursorViewDelegate.refresh()
     }
@@ -751,6 +749,7 @@ final class LadderView: ScaledView {
                 setModeOfNearbyMarks(dragCreatedMark)
             }
             updateRegionIntervals(activeRegion)
+            updateMarkers()
         }
         if state == .ended {
             isDragging = false
@@ -1494,11 +1493,6 @@ final class LadderView: ScaledView {
         }
     }
 
-
-
-
-
-
     func regionValueFromCalibratedValue(_ value: CGFloat, usingCalFactor calFactor: CGFloat) -> CGFloat {
         let x1: CGFloat = 0
         let x2: CGFloat  = value
@@ -1507,7 +1501,6 @@ final class LadderView: ScaledView {
         let diff = regionX2 - regionX1
         return diff / calFactor
     }
-
 
     func showLockLadderWarning(rect: CGRect) {
         let text = L("LADDER LOCK")
@@ -2183,6 +2176,7 @@ final class LadderView: ScaledView {
         NotificationCenter.default.post(name: .didUndoableAction, object: nil)
         mark.segment = segment
         updateRegionIntervals(ladder.region(ofMark: mark))
+        updateMarkers()
         assessBlockAndImpulseOrigin(mark: mark)
     }
 
@@ -2278,6 +2272,7 @@ protocol LadderViewDelegate: AnyObject {
     func getAttachedMarkLadderViewPositionY(view: UIView) -> CGPoint?
     func getPositionYInView(positionY: CGFloat, view: UIView) -> CGFloat
     func getTopOfLadder(view: UIView) -> CGFloat
+    func getTopOfLadderView(view: UIView) -> CGFloat
 
     func refresh()
     func setActiveRegion(regionNum: Int)
@@ -2295,6 +2290,7 @@ protocol LadderViewDelegate: AnyObject {
     func setAttachedMarkAndLinkedMarksModes()
     func toggleAttachedMarkAnchor()
     func convertPosition(_: CGPoint, toView: UIView) -> CGPoint
+    func updateMarkers()
 
 }
 
@@ -2340,6 +2336,11 @@ extension LadderView: LadderViewDelegate {
 
     func getTopOfLadder(view: UIView) -> CGFloat {
         let position = CGPoint(x: 0, y: ladder.regions[0].proximalBoundaryY)
+        return convert(position, to: view).y
+    }
+
+    func getTopOfLadderView(view: UIView) -> CGFloat {
+        let position = CGPoint(x: 0, y: 0)
         return convert(position, to: view).y
     }
 
@@ -2541,6 +2542,21 @@ extension LadderView: LadderViewDelegate {
         toggleAnchor(mark: ladder.attachedMark)
         if let attachedMark = ladder.attachedMark {
             adjustCursor(mark: attachedMark)
+        }
+    }
+
+    func updateMarkers() {
+        DispatchQueue.main.async { [weak self] in
+            if let self = self {
+                let marks = self.ladder.allMarks()
+                var markerPoints: [CGPoint] = []
+                for mark in marks {
+                    markerPoints.append(mark.segment.proximal)
+                    markerPoints.append(mark.segment.distal)
+                }
+                self.cursorViewDelegate.setMarkerPositions(at: markerPoints)
+                self.cursorViewDelegate.refresh()
+            }
         }
     }
 

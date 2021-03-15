@@ -435,11 +435,11 @@
 				8E4ACA7F24478A6E00575538 /* BlackView.swift */,
 				8E01D9C622849047000F36FC /* CursorView.swift */,
 				8E4ACA832447905E00575538 /* HamburgerCell.swift */,
+				8EACC27B259E47C500F0BF42 /* ImageScrollView.swift */,
 				8E7D24F02277A00C005A1729 /* ImageView.swift */,
 				8EF9166A227926BC00B51F17 /* LadderView.swift */,
 				8E1B6CB7240CAE5300EA88A6 /* ScaledView.swift */,
 				8E8248DC23B53B55001A85F9 /* SeparatorView.swift */,
-				8EACC27B259E47C500F0BF42 /* ImageScrollView.swift */,
 			);
 			path = Views;
 			sourceTree = "<group>";

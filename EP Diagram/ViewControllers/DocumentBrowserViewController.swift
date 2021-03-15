@@ -36,7 +36,6 @@ class DocumentBrowserViewController: UIDocumentBrowserViewController {
 
         let info = self.restorationInfo
         // Fail gently if cached file no longer exists.
-        print("documentbrowser restorationinfo = \(restorationInfo)")
         if let lastDocumentURLPath = info?[DiagramViewController.restorationFileNameKey] as? String,
            !lastDocumentURLPath.isEmpty,
            info?[DiagramViewController.restorationDoRestorationKey] as? Bool ?? false {

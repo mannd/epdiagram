@@ -23,6 +23,7 @@ struct PreferencesView: View {
     @AppStorage(Preferences.hideMarksKey) var hideMarks = Preferences.hideMarks
     @AppStorage(Preferences.caliperLineWidthKey) var caliperLineWidth = Preferences.caliperLineWidth
     @AppStorage(Preferences.doubleLineBlockMarkerKey) var doubleLineBlockerMarker = Preferences.doubleLineBlockMarker
+    @AppStorage(Preferences.showMarkersKey) var showMarkers = Preferences.showMarkers
 
     // Color preferences
     @AppStorage(Preferences.activeColorNameKey) var activeColorName = Preferences.activeColorName
@@ -69,6 +70,9 @@ struct PreferencesView: View {
                         }
                         Toggle(isOn: $showConductionTimes) {
                             Text("Show conduction times (after calibration)")
+                        }
+                        Toggle(isOn: $showMarkers) {
+                            Text("Show marker grid")
                         }
                     }
                     Section(header: Text("Region")) {

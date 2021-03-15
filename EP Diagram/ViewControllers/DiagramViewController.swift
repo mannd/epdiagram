@@ -66,7 +66,7 @@ final class DiagramViewController: UIViewController {
                 imageScrollView.isScrollEnabled = true
                 showMainToolbar()
             case .select:
-                ladderView.saveState()                
+                ladderView.saveState()
                 ladderView.startZoning()
                 imageScrollView.isScrollEnabled = false
                 showSelectToolbar()
@@ -404,14 +404,14 @@ final class DiagramViewController: UIViewController {
         self.ladderView.removeRegion()
     }
 
-    lazy var markMenu = UIMenu(title: L("Mark Menu"), children: [self.styleMenu, self.emphasisMenu,  self.impulseOriginMenu, self.blockMenu, self.straightenMenu, self.slantMenu, self.adjustYMenu, self.moveAction, self.adjustCLAction, self.rhythmAction, self.repeatCLMenu, self.unlinkAction, self.deleteAction])
+    lazy var markMenu = UIMenu(title: L("Mark Menu"), children: [self.styleMenu, self.emphasisMenu, self.impulseOriginMenu, self.blockMenu, self.straightenMenu, self.slantMenu, self.adjustYMenu, self.moveAction, self.adjustCLAction, self.rhythmAction, self.repeatCLMenu, self.unlinkAction, self.deleteAction])
 
     lazy var labelChildren = [self.regionStyleMenu, self.editLabelAction, self.addRegionMenu, self.removeRegionAction, self.regionHeightMenu, self.adjustLeftMarginAction]
 
     lazy var noSelectionAction = UIAction(title: L("No regions, zones, or marks selected")) { _ in }
 
     // MARK: - Lifecycle
-    
+
     override func viewDidLoad() {
         os_log("viewDidLoad() - ViewController", log: OSLog.viewCycle, type: .info)
         super.viewDidLoad()
@@ -860,7 +860,7 @@ final class DiagramViewController: UIViewController {
         setViewsNeedDisplay()
     }
 
- 
+
     func makePrompt(text: String) -> UIBarButtonItem {
         let prompt = UILabel()
         prompt.text = text
@@ -1370,6 +1370,7 @@ extension DiagramViewController {
         playSounds = UserDefaults.standard.bool(forKey: Preferences.playSoundsKey)
         marksAreHidden = UserDefaults.standard.bool(forKey: Preferences.hideMarksKey)
         ladderView.doubleLineBlockMarker = UserDefaults.standard.bool(forKey: Preferences.doubleLineBlockMarkerKey)
+        cursorView.showMarkers = UserDefaults.standard.bool(forKey: Preferences.showMarkersKey)
 
         // Colors
         if let caliperColorName = UserDefaults.standard.string(forKey: Preferences.caliperColorNameKey) {
@@ -1452,11 +1453,8 @@ extension DiagramViewController: NSUserActivityDelegate {
         let currentDocumentURL: String = currentDocument?.fileURL.lastPathComponent ?? ""
         print("currentDocumentURL", currentDocumentURL)
         if documentIsClosing {
-            let info: [AnyHashable: Any] = [
-                Self.restorationFileNameKey: "",
-                Self.restorationDoRestorationKey: false,
-            ]
-            userActivity.addUserInfoEntries(from: info)
+            // intercept and kill userInfo if we closed the document with the close button
+            userActivity.userInfo = nil
         }
         print("saved user activity info", userActivity.userInfo as Any)
     }

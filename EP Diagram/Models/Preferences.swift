@@ -28,6 +28,7 @@ struct Preferences {
     static let playSoundsKey = "defaultPlaySoundsKey"
     static let hideMarksKey = "defaultHideMarksKey"
     static let doubleLineBlockMarkerKey = "defaultDoubleLineBlockMarker"
+    static let showMarkersKey = "defaultShowMarkersKey"
 
     // color keys
     static let caliperColorNameKey = "defaultCaliperColorNameKey"
@@ -54,6 +55,7 @@ struct Preferences {
     static var hideMarks: Bool = false
     static var caliperLineWidth: Int = 1
     static var doubleLineBlockMarker: Bool = true
+    static var showMarkers: Bool = false
 
     // default Colors
     static let defaultActiveColor = UIColor.systemRed
@@ -97,6 +99,7 @@ struct Preferences {
             Preferences.activeColorNameKey: Preferences.activeColorName,
             Preferences.showArrowsKey: Preferences.showArrows,
             Preferences.doubleLineBlockMarkerKey: Preferences.doubleLineBlockMarker,
+            Preferences.showMarkersKey: Preferences.showMarkers,
         ]
         return defaultPreferences
     }
