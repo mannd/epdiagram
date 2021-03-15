@@ -27,7 +27,6 @@ final class Ladder: NSObject, Codable {
     var regionCount: Int { regions.count }
     var attachedMark: Mark?  { // attachedMark does not own its mark
         didSet { // cursor is attached to a most 1 mark at a time
-            print("ladder.attachedMark set")
             normalizeAllMarks()  // setting attached mark to nil does not delete it, so set its mode to normal.
             if let attachedMark = attachedMark {
                 let linkedMarkIDs = attachedMark.linkedMarkIDs
@@ -413,13 +412,18 @@ final class Ladder: NSObject, Codable {
         return regions.filter { $0.mode == mode }
     }
 
-    func regionIntervals() -> [Int: [Interval]] {
+    func ladderIntervals() -> [Int: [Interval]] {
         var indexedIntervals: [Int: [Interval]] = [:]
         for i in 0..<regions.count {
             indexedIntervals[i] = Interval.createIntervals(region: regions[i])
         }
         return indexedIntervals
     }
+
+    func regionIntervals(region: Region) -> [Interval] {
+        return Interval.createIntervals(region: region)
+    }
+
 
     func availableAnchors(forMark mark: Mark) -> [Anchor] {
         let linkedMarkIDs = mark.linkedMarkIDs

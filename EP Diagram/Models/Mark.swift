@@ -109,7 +109,7 @@ final class Mark: Codable {
     }
 
     deinit {
-        os_log("Mark deinitied %s", log: OSLog.debugging, type: .debug, debugDescription)
+//        os_log("Mark deinitied %s", log: OSLog.debugging, type: .debug, debugDescription)
     }
 
     /// Return midpoint of mark as CGPoint

@@ -24,6 +24,9 @@ final class CursorView: ScaledView {
     var cursorColor: UIColor = Preferences.defaultCursorColor
     var caliperColor: UIColor = Preferences.defaultCaliperColor
 
+    // For testing
+    var cursorPositionX: CGFloat { cursor.positionX }
+
     private var cursor: Cursor = Cursor()
     private var rawCursorHeight: CGFloat?
 
@@ -31,7 +34,13 @@ final class CursorView: ScaledView {
     private var draggedComponent: Caliper.Component?
 
     private var markerPositions: [CGPoint] = []
-
+    var showMarkers = false {
+        didSet {
+            if showMarkers {
+                ladderViewDelegate.updateMarkers()
+            }
+        }
+    }
 
     var calFactor: CGFloat {
         get {
@@ -97,17 +106,20 @@ final class CursorView: ScaledView {
         if imageIsLocked {
             showLockImageWarning(rect: rect)
         }
+        if showMarkers {
+            drawMarkers()
+        }
         switch mode {
         case .calibrate:
             drawCaliper(rect)
         case .normal:
             drawCursor(rect)
         case .select:
-            // FIXME: testing out markers
-            drawMarkers()
+            break
         default:
             break
         }
+
     }
 
     func drawCursor(_ rect: CGRect) {
@@ -267,9 +279,8 @@ final class CursorView: ScaledView {
         default:
             break
         }
-        guard mode == .normal else { return } // Single tap does nothing during calibration.
     }
-
+    
     @objc func doubleTap(tap: UITapGestureRecognizer) {
         os_log("doubleTap(tap:) - CursorView", log: OSLog.touches, type: .info)
         guard !marksAreHidden else { return }
@@ -370,14 +381,14 @@ final class CursorView: ScaledView {
         return calibration
     }
 
-    func addMarkWithAttachedCursor(position: CGPoint) {
+    func addMarkWithAttachedCursor(positionX: CGFloat) {
         os_log("addMarkWithAttachedCursor(position:) - CursorView", log: OSLog.debugging, type: .debug)
         // imageScrollView starts at x = 0, contentInset shifts view to right, and the left margin is negative.
         // So ignore positions in left margin.
-        if position.x > 0 {
-            moveCursor(cursorViewPositionX: position.x / scale)  // cursor is not affected by offset, only zoom scale
+        if positionX >= 0 {
+            moveCursor(cursorViewPositionX: positionX / scale)  // cursor is not affected by offset, only zoom scale
             cursorIsVisible = true
-            ladderViewDelegate.addAttachedMark(scaledViewPositionX: position.x)
+            ladderViewDelegate.addAttachedMark(scaledViewPositionX: positionX)
             setCursorHeight()
             setNeedsDisplay()
         }
@@ -396,6 +407,7 @@ protocol CursorViewDelegate: AnyObject {
     func setCursorHeight(anchorPositionY: CGFloat?)
     func cursorMovement() -> Movement
     func markMeasurement(segment: Segment) -> CGFloat
+    func setMarkerPositions(at positions: [CGPoint])
 }
 
 extension CursorViewDelegate {
@@ -463,14 +475,24 @@ extension CursorView: CursorViewDelegate {
         }
     }
 
-    func drawMarker(at position: CGPoint) {
+    func drawMarker(at regionPosition: CGPoint) {
         guard let context = UIGraphicsGetCurrentContext() else { return }
-        let convertedPosition = ladderViewDelegate.convertPosition(position, toView: self)
+        let position = ladderViewDelegate.convertPosition(regionPosition, toView: self)
+
+        let positionX = scale * position.x - offsetX // inlined, for efficiency
+        let cursorDefaultHeight = ladderViewDelegate.getTopOfLadderView(view: self)
+        let defaultHeight = cursorDefaultHeight
+        let height = defaultHeight
+//        var height = region.proximalBoundaryY + (regionPosition.0.y * region.height)
+//        height = (positionX <= leftMargin) ? defaultHeight : height
+        let endPoint = CGPoint(x: positionX, y: height)
+
+
         context.setStrokeColor(cursorColor.cgColor)
-        context.setLineWidth(lineWidth / 2.0)
-        context.setAlpha(alphaValue / 2.0)
-        context.move(to: CGPoint(x: convertedPosition.x, y: 0))
-        context.addLine(to: convertedPosition)
+        context.setLineWidth(lineWidth / 1.5)
+        context.setAlpha(alphaValue / 1.5)
+        context.move(to: CGPoint(x: positionX, y: 0))
+        context.addLine(to: endPoint)
         context.strokePath()
     }
 }

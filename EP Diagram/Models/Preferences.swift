@@ -27,6 +27,9 @@ struct Preferences {
     static let leftMarginKey = "defaultLeftMarginKey"
     static let playSoundsKey = "defaultPlaySoundsKey"
     static let hideMarksKey = "defaultHideMarksKey"
+    static let doubleLineBlockMarkerKey = "defaultDoubleLineBlockMarker"
+    static let showMarkersKey = "defaultShowMarkersKey"
+    static let hideZeroCTKey = "defaultHideZeroCTKey"
 
     // color keys
     static let caliperColorNameKey = "defaultCaliperColorNameKey"
@@ -52,6 +55,9 @@ struct Preferences {
     static var playSounds: Bool = true
     static var hideMarks: Bool = false
     static var caliperLineWidth: Int = 1
+    static var doubleLineBlockMarker: Bool = true
+    static var showMarkers: Bool = false
+    static var hideZeroCT: Bool = false
 
     // default Colors
     static let defaultActiveColor = UIColor.systemRed
@@ -94,6 +100,9 @@ struct Preferences {
             Preferences.linkedColorNameKey: Preferences.linkedColorName,
             Preferences.activeColorNameKey: Preferences.activeColorName,
             Preferences.showArrowsKey: Preferences.showArrows,
+            Preferences.doubleLineBlockMarkerKey: Preferences.doubleLineBlockMarker,
+            Preferences.showMarkersKey: Preferences.showMarkers,
+            Preferences.hideZeroCTKey: Preferences.hideZeroCT,
         ]
         return defaultPreferences
     }

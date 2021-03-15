@@ -9,9 +9,9 @@
 import UIKit
 
 struct Rhythm {
-    static let minimumCL: CGFloat = 50
+    static let minimumCL: CGFloat = 100
     static let maximumCL: CGFloat = 2000
-    static let minimumFibCL: CGFloat = 50
+    static let minimumFibCL: CGFloat = 100
     static let maximumFibCL: CGFloat = 300
 
     let minimumCT: Double = 10

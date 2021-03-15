@@ -66,7 +66,7 @@ final class DiagramViewController: UIViewController {
                 imageScrollView.isScrollEnabled = true
                 showMainToolbar()
             case .select:
-                ladderView.saveState()                
+                ladderView.saveState()
                 ladderView.startZoning()
                 imageScrollView.isScrollEnabled = false
                 showSelectToolbar()
@@ -138,6 +138,7 @@ final class DiagramViewController: UIViewController {
 
     // Set by screen delegate
     var restorationInfo: [AnyHashable: Any]?
+    var documentIsClosing = false
 
     // Keys for state restoration
     static let restorationContentOffsetXKey = "restorationContentOffsetXKey"
@@ -152,7 +153,6 @@ final class DiagramViewController: UIViewController {
     static let restorationCaliperCrossbarKey = "restorationCaliperCrossbarKey"
     static let restorationCaliperBar1Key = "restorationCaliperBar1Key"
     static let restorationCaliperBar2Key = "restorationCaliperBar2Key"
-
 
     // Speed up appearance of image picker by initializing it here.
     let imagePicker: UIImagePickerController = UIImagePickerController()
@@ -404,19 +404,19 @@ final class DiagramViewController: UIViewController {
         self.ladderView.removeRegion()
     }
 
-    lazy var markMenu = UIMenu(title: L("Mark Menu"), children: [self.styleMenu, self.emphasisMenu,  self.impulseOriginMenu, self.blockMenu, self.straightenMenu, self.slantMenu, self.adjustYMenu, self.moveAction, self.adjustCLAction, self.rhythmAction, self.repeatCLMenu, self.unlinkAction, self.deleteAction])
+    lazy var markMenu = UIMenu(title: L("Mark Menu"), children: [self.styleMenu, self.emphasisMenu, self.impulseOriginMenu, self.blockMenu, self.straightenMenu, self.slantMenu, self.adjustYMenu, self.moveAction, self.adjustCLAction, self.rhythmAction, self.repeatCLMenu, self.unlinkAction, self.deleteAction])
 
     lazy var labelChildren = [self.regionStyleMenu, self.editLabelAction, self.addRegionMenu, self.removeRegionAction, self.regionHeightMenu, self.adjustLeftMarginAction]
 
     lazy var noSelectionAction = UIAction(title: L("No regions, zones, or marks selected")) { _ in }
 
     // MARK: - Lifecycle
-    
+
     override func viewDidLoad() {
         os_log("viewDidLoad() - ViewController", log: OSLog.viewCycle, type: .info)
         super.viewDidLoad()
 
-        showDebugRestorationInfo() // for debugging
+
 
         // TODO: customization for mac version
         if isRunningOnMac() {
@@ -501,22 +501,13 @@ final class DiagramViewController: UIViewController {
         setupNotifications()
     }
 
-    override func viewDidAppear(_ animated: Bool) {
-        os_log("viewDidAppear() - ViewController", log: OSLog.viewCycle, type: .info)
-        super.viewDidAppear(animated)
-        UIView.animate(withDuration: 0.4) {
-            self.imageView.transform = self.diagram.transform
-        }
-        scrollViewAdjustViews(imageScrollView) // make sure views adjust to rotated image
-        ladderView.updateRegionIntervals()
-        // Need to set this here, after view draw, or Mac malpositions cursor at start of app.
-        imageScrollView.contentInset = UIEdgeInsets(top: 0, left: leftMargin, bottom: 0, right: 0)
-        updateToolbarButtons()
-        updateUndoRedoButtons()
-        showMainToolbar()
-        self.userActivity = self.view.window?.windowScene?.userActivity
-        // See https://github.com/mattneub/Programming-iOS-Book-Examples/blob/master/bk2ch06p357StateSaveAndRestoreWithNSUserActivity/ch19p626pageController/SceneDelegate.swift
+    var didFirstWillLayout = false
+    override func viewWillLayoutSubviews() {
+        os_log("viewWillLayoutSubviews() - DiagramViewController", log: OSLog.viewCycle, type: .info)
+        if didFirstWillLayout { return }
+        didFirstWillLayout = true
         if restorationInfo != nil {
+            print("restorationInfo", restorationInfo as Any)
             if let zoomScale = restorationInfo?[Self.restorationZoomKey] as? CGFloat {
                 imageScrollView.zoomScale = zoomScale
             }
@@ -528,47 +519,32 @@ final class DiagramViewController: UIViewController {
                 restorationContentOffset.y = contentOffsetY as? CGFloat ?? 0
             }
             imageScrollView.setContentOffset(restorationContentOffset, animated: true)
-
-            // TODO: Decide: shall we just return to normal mode every time app is restored?  Is it worth returning to Calibrate mode, etc.?
-
-//            if let restorationMode = restorationInfo?[Self.restorationModeKey] as? Int {
-//                mode = Mode(rawValue: restorationMode) ?? .normal
-//            }
-//            if let caliperCrossbarPosition = restorationInfo?[Self.restorationCaliperCrossbarKey] {
-//                if mode == .calibrate {
-//                    cursorView.caliperCrossbarPosition = caliperCrossbarPosition as? CGFloat ?? 50
-//                }
-//            }
-//            if let caliperBar1Position = restorationInfo?[Self.restorationCaliperBar1Key] {
-//                if mode == .calibrate {
-//                    cursorView.caliperBar1Position = caliperBar1Position as? CGFloat ?? 50
-//                }
-//            }
-//                if let caliperBar2Position = restorationInfo?[Self.restorationCaliperBar2Key] {
-//                    if mode == .calibrate {
-//                        cursorView.caliperBar2Position = caliperBar2Position as? CGFloat ?? 150
-//                    }
-//                }
         }
-        // Only use the restorationInfo once
-        restorationInfo = nil
-
-        resetViews(setActiveRegion: false)
     }
 
-    // We only want to use the restorationInfo once when view controller first appears.
-    var didFirstLayout = false
-    override func viewDidLayoutSubviews() {
-        // Called multiple times when showing context menu, so comment out for now.
-        //        os_log("viewDidLayoutSubviews() - ViewController", log: .viewCycle, type: .info)
-        if didFirstLayout { return }
-        didFirstLayout = true
-        // mark pointers in registry need to reestablished when diagram is reloaded
-        ladderView.reregisterAllMarks()
-        let info = restorationInfo
-        if let inHelp = info?[HelpViewController.inHelpKey] as? Bool, inHelp {
-            performShowHelpSegue()
+    override func viewDidAppear(_ animated: Bool) {
+        os_log("viewDidAppear() - ViewController", log: OSLog.viewCycle, type: .info)
+        super.viewDidAppear(animated)
+//        print("currentDocument.userActivity", currentDocument?.userActivity as Any)
+//        self.userActivity = currentDocument?.userActivity
+//        print(userActivity?.userInfo as Any)
+        self.userActivity = self.view.window?.windowScene?.userActivity
+        self.userActivity?.delegate = self
+        self.restorationInfo = nil
+        // See https://github.com/mattneub/Programming-iOS-Book-Examples/blob/master/bk2ch06p357StateSaveAndRestoreWithNSUserActivity/ch19p626pageController/SceneDelegate.swift
+
+        UIView.animate(withDuration: 0.4) {
+            self.imageView.transform = self.diagram.transform
         }
+        scrollViewAdjustViews(imageScrollView) // make sure views adjust to rotated image
+        ladderView.updateLadderIntervals()
+        // Need to set this here, after view draw, or Mac malpositions cursor at start of app.
+        imageScrollView.contentInset = UIEdgeInsets(top: 0, left: leftMargin, bottom: 0, right: 0)
+        updateToolbarButtons()
+        updateUndoRedoButtons()
+        showMainToolbar()
+
+        resetViews(setActiveRegion: false)
     }
 
     override func viewWillDisappear(_ animated: Bool) {
@@ -577,8 +553,9 @@ final class DiagramViewController: UIViewController {
     }
 
     override func updateUserActivityState(_ activity: NSUserActivity) {
-        os_log("updateUserActivityState called")
+        os_log("debug: diagramViewController updateUserActivityState called", log: .debugging, type: .debug)
         let currentDocumentURL: String = currentDocument?.fileURL.lastPathComponent ?? ""
+        print("currentDocumentURL", currentDocumentURL)
         super.updateUserActivityState(activity)
         let info: [AnyHashable: Any] = [
             // FIXME: We are correcting just x for zoom scale.  Test if correcting y is needed too.
@@ -587,25 +564,9 @@ final class DiagramViewController: UIViewController {
             Self.restorationZoomKey: imageScrollView.zoomScale,
             Self.restorationFileNameKey: currentDocumentURL,
             Self.restorationDoRestorationKey: true,
-            Self.restorationModeKey: mode.rawValue,
-            Self.restorationCaliperCrossbarKey: cursorView.caliperCrossbarPosition,
-            Self.restorationCaliperBar1Key: cursorView.caliperBar1Position,
-            Self.restorationCaliperBar2Key: cursorView.caliperBar2Position,
-            HelpViewController.inHelpKey: false,
             Self.restorationTransformKey: NSCoder.string(for: imageView.transform),
         ]
         activity.addUserInfoEntries(from: info)
-    }
-
-    private func showDebugRestorationInfo() {
-        // For debugging
-        if let restorationURL = DiagramIO.getRestorationURL() {
-            os_log("restorationURL path = %s", log: .debugging, type: .debug, restorationURL.path)
-            let paths = FileIO.enumerateDirectory(restorationURL)
-            for path in paths {
-                os_log("    %s", log: .debugging, type: .debug, path)
-            }
-        }
     }
 
     func loadSampleDiagram(_ diagram: Diagram) {
@@ -715,9 +676,8 @@ final class DiagramViewController: UIViewController {
     }
 
     @objc func cancelConnectMode() {
-        os_log("cancelLink()", log: OSLog.action, type: .info)
+        os_log("cancelConnectMode()", log: OSLog.action, type: .info)
         mode = .normal
-        ladderView.setNeedsDisplay()
     }
 
     func showAdjustCLToolbar(rawValue: CGFloat) {
@@ -726,8 +686,8 @@ final class DiagramViewController: UIViewController {
         let labelText = UITextField()
         labelText.text = L("Adjust cycle length")
         let slider = UISlider()
-        slider.minimumValue = Float(ladderView.regionValueFromCalibratedValue(100, usingCalFactor: calibration.currentCalFactor))
-        slider.maximumValue = Float(ladderView.regionValueFromCalibratedValue(3000, usingCalFactor: calibration.currentCalFactor))
+        slider.minimumValue = Float(ladderView.regionValueFromCalibratedValue(Rhythm.minimumCL, usingCalFactor: calibration.currentCalFactor))
+        slider.maximumValue = Float(ladderView.regionValueFromCalibratedValue(Rhythm.maximumCL, usingCalFactor: calibration.currentCalFactor))
         slider.setValue(Float(rawValue), animated: false)
         ladderView.adjustCL(cl: rawValue)
         slider.addTarget(self, action: #selector(clSliderValueDidChange(_:)), for: .valueChanged)
@@ -900,7 +860,7 @@ final class DiagramViewController: UIViewController {
         setViewsNeedDisplay()
     }
 
- 
+
     func makePrompt(text: String) -> UIBarButtonItem {
         let prompt = UILabel()
         prompt.text = text
@@ -911,10 +871,9 @@ final class DiagramViewController: UIViewController {
 
     @objc func closeDocument() {
         os_log("closeDocument()", log: .action, type: .info)
-        let info: [AnyHashable: Any] = [
-            Self.restorationDoRestorationKey: false]
-        self.userActivity?.addUserInfoEntries(from: info)
         view.endEditing(true)
+        documentIsClosing = true
+        print("useractivity", userActivity?.userInfo as Any)
         currentDocument?.undoManager.removeAllActions()
         diagramEditorDelegate?.diagramEditorDidFinishEditing(self, diagram: diagram)
     }
@@ -1099,7 +1058,9 @@ final class DiagramViewController: UIViewController {
             }
             else {
                 let position = tap.location(in: imageScrollView)
-                cursorView.addMarkWithAttachedCursor(position: position)
+                if position.x >= 0 { // negative position in left margin
+                    cursorView.addMarkWithAttachedCursor(positionX: position.x)
+                }
             }
             setViewsNeedDisplay()
         }
@@ -1209,7 +1170,6 @@ final class DiagramViewController: UIViewController {
             separatorView?.cursorViewDelegate = cursorView
         }
         self.ladderView.resetSize(setActiveRegion: setActiveRegion, width: imageView.frame.width)
-        self.imageView.setNeedsDisplay()
         cursorView.caliperMaxY = imageScrollView.frame.height
         cursorView.caliperMinY = 0
         setViewsNeedDisplay()
@@ -1266,7 +1226,6 @@ final class DiagramViewController: UIViewController {
 
     @IBSegueAction func performShowHelpSegueAction(_ coder: NSCoder) -> HelpViewController? {
         let helpViewController = HelpViewController(coder: coder)
-        helpViewController?.restorationInfo = self.restorationInfo
         return helpViewController
     }
 
@@ -1302,7 +1261,6 @@ final class DiagramViewController: UIViewController {
 
     func performShowHelpSegue() {
         P("performShowHelpSegue")
-        self.userActivity?.needsSave = true
         performSegue(withIdentifier: "showHelpSegue", sender: self)
     }
 
@@ -1411,6 +1369,9 @@ extension DiagramViewController {
         ladderView.showLabelDescription = TextVisibility(rawValue: UserDefaults.standard.integer(forKey: Preferences.labelDescriptionVisibilityKey)) ?? .invisible
         playSounds = UserDefaults.standard.bool(forKey: Preferences.playSoundsKey)
         marksAreHidden = UserDefaults.standard.bool(forKey: Preferences.hideMarksKey)
+        ladderView.doubleLineBlockMarker = UserDefaults.standard.bool(forKey: Preferences.doubleLineBlockMarkerKey)
+        cursorView.showMarkers = UserDefaults.standard.bool(forKey: Preferences.showMarkersKey)
+        ladderView.hideZeroCT = UserDefaults.standard.bool(forKey: Preferences.hideZeroCTKey)
 
         // Colors
         if let caliperColorName = UserDefaults.standard.string(forKey: Preferences.caliperColorNameKey) {
@@ -1484,6 +1445,19 @@ extension DiagramViewController: UIDropInteractionDelegate {
                 return
             }
         }
+    }
+}
+
+extension DiagramViewController: NSUserActivityDelegate {
+    func userActivityWillSave(_ userActivity: NSUserActivity) {
+        print("user activity will save")
+        let currentDocumentURL: String = currentDocument?.fileURL.lastPathComponent ?? ""
+        print("currentDocumentURL", currentDocumentURL)
+        if documentIsClosing {
+            // intercept and kill userInfo if we closed the document with the close button
+            userActivity.userInfo = nil
+        }
+        print("saved user activity info", userActivity.userInfo as Any)
     }
 }
 
