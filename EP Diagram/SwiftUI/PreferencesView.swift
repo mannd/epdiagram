@@ -24,6 +24,7 @@ struct PreferencesView: View {
     @AppStorage(Preferences.caliperLineWidthKey) var caliperLineWidth = Preferences.caliperLineWidth
     @AppStorage(Preferences.doubleLineBlockMarkerKey) var doubleLineBlockerMarker = Preferences.doubleLineBlockMarker
     @AppStorage(Preferences.showMarkersKey) var showMarkers = Preferences.showMarkers
+    @AppStorage(Preferences.hideZeroCTKey) var hideZeroCT = Preferences.hideZeroCT
 
     // Color preferences
     @AppStorage(Preferences.activeColorNameKey) var activeColorName = Preferences.activeColorName
@@ -70,6 +71,9 @@ struct PreferencesView: View {
                         }
                         Toggle(isOn: $showConductionTimes) {
                             Text("Show conduction times (after calibration)")
+                        }
+                        Toggle(isOn: $hideZeroCT) {
+                            Text("Hide conduction times if zero")
                         }
                         Toggle(isOn: $showMarkers) {
                             Text("Show marker grid")

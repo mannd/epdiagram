@@ -62,6 +62,7 @@ final class LadderView: ScaledView {
     var showLabelDescription: TextVisibility = .invisible
     var marksAreHidden: Bool = false
     var doubleLineBlockMarker: Bool = true
+    var hideZeroCT: Bool = false
 
     // Colors - can change via Preferences
     var activeColor = Preferences.defaultActiveColor
@@ -1602,6 +1603,9 @@ final class LadderView: ScaledView {
         let normalizedSegment = mark.segment.normalized()
             let segment = self.transformToScaledViewSegment(regionSegment: normalizedSegment, region: self.ladder.region(ofMark: mark))
             let value = lround(Double(self.cursorViewDelegate.markMeasurement(segment: segment)))
+        if hideZeroCT && value < 1 {
+            return
+        }
         let text = "\(value)"
         var origin = segment.midpoint
         let size = text.size(withAttributes: measurementTextAttributes)
