@@ -21,8 +21,11 @@ final class CursorView: ScaledView {
         get { caliper.lineWidth }
         set { caliper.lineWidth = newValue }
     }
+    var markerLineWidth: CGFloat = CGFloat(Preferences.markLineWidth)
+
     var cursorColor: UIColor = Preferences.defaultCursorColor
     var caliperColor: UIColor = Preferences.defaultCaliperColor
+    var markerColor: UIColor = Preferences.defaultMarkerColor
 
     // For testing
     var cursorPositionX: CGFloat { cursor.positionX }
@@ -488,9 +491,9 @@ extension CursorView: CursorViewDelegate {
         let endPoint = CGPoint(x: positionX, y: height)
 
 
-        context.setStrokeColor(cursorColor.cgColor)
-        context.setLineWidth(lineWidth / 1.5)
-        context.setAlpha(alphaValue / 1.5)
+        context.setStrokeColor(markerColor.cgColor)
+        context.setLineWidth(markerLineWidth)
+        context.setAlpha(alphaValue)
         context.move(to: CGPoint(x: positionX, y: 0))
         context.addLine(to: endPoint)
         context.strokePath()

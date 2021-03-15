@@ -30,6 +30,7 @@ struct Preferences {
     static let doubleLineBlockMarkerKey = "defaultDoubleLineBlockMarker"
     static let showMarkersKey = "defaultShowMarkersKey"
     static let hideZeroCTKey = "defaultHideZeroCTKey"
+    static let markerLineWidthKey = "defaultMarkerLineWidthKey"
 
     // color keys
     static let caliperColorNameKey = "defaultCaliperColorNameKey"
@@ -39,6 +40,7 @@ struct Preferences {
     static let selectedColorNameKey = "defaultSelectedColorNameKey"
     static let linkedColorNameKey = "defaultLinkedColorNameKey"
     static let activeColorNameKey = "defaultActiveColorNameKey"
+    static let markerColorNameKey = "defaultMarkerColorNameKey"
 
     // Stored as Int, converted to CGFloat when used.
     static var markLineWidth: Int = 2
@@ -58,6 +60,7 @@ struct Preferences {
     static var doubleLineBlockMarker: Bool = true
     static var showMarkers: Bool = false
     static var hideZeroCT: Bool = false
+    static var markerLineWidth: Int = 2
 
     // default Colors
     static let defaultActiveColor = UIColor.systemRed
@@ -67,6 +70,7 @@ struct Preferences {
     static let defaultConnectedColor = UIColor.systemGreen
     static let defaultSelectedColor = UIColor.systemBlue
     static let defaultLinkedColor = UIColor.systemPurple
+    static let defaultMarkerColor = UIColor.systemBlue
 
     // Color names
     static var caliperColorName: String = defaultCaliperColor.toString
@@ -76,6 +80,7 @@ struct Preferences {
     static var selectedColorName: String = defaultSelectedColor.toString
     static var linkedColorName: String = defaultLinkedColor.toString
     static var activeColorName: String = defaultActiveColor.toString
+    static var markerColorName: String = defaultMarkerColor.toString
 
     static func defaults() -> [String: Any] {
         let defaultPreferences: [String: Any] = [
@@ -103,6 +108,8 @@ struct Preferences {
             Preferences.doubleLineBlockMarkerKey: Preferences.doubleLineBlockMarker,
             Preferences.showMarkersKey: Preferences.showMarkers,
             Preferences.hideZeroCTKey: Preferences.hideZeroCT,
+            Preferences.markerLineWidthKey: Preferences.markerLineWidth,
+            Preferences.markerColorNameKey: Preferences.markerColorName,
         ]
         return defaultPreferences
     }

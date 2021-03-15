@@ -25,6 +25,7 @@ struct PreferencesView: View {
     @AppStorage(Preferences.doubleLineBlockMarkerKey) var doubleLineBlockerMarker = Preferences.doubleLineBlockMarker
     @AppStorage(Preferences.showMarkersKey) var showMarkers = Preferences.showMarkers
     @AppStorage(Preferences.hideZeroCTKey) var hideZeroCT = Preferences.hideZeroCT
+    @AppStorage(Preferences.markerLineWidthKey) var markerLineWidth = Preferences.markerLineWidth
 
     // Color preferences
     @AppStorage(Preferences.activeColorNameKey) var activeColorName = Preferences.activeColorName
@@ -41,6 +42,8 @@ struct PreferencesView: View {
     @State var cursorColor: Color = Color(Preferences.defaultCursorColor)
     @AppStorage(Preferences.caliperColorNameKey) var caliperColorName = Preferences.caliperColorName
     @State var caliperColor: Color = Color(Preferences.defaultCaliperColor)
+    @AppStorage(Preferences.markerColorNameKey) var markerColorName = Preferences.markerColorName
+    @State var markerColor: Color = Color(Preferences.defaultMarkerColor)
 
     // Pass Diagram as binding to allow changing non-UserDefaults settings
     // @Binding var diagram: Diagram
@@ -76,8 +79,15 @@ struct PreferencesView: View {
                             Text("Hide conduction times if zero")
                         }
                         Toggle(isOn: $showMarkers) {
-                            Text("Show marker grid")
+                            Text("Show markers")
                         }
+                        Stepper("Marker width = \(markerLineWidth)", value: $markerLineWidth, in: 1...6, step: 1)
+                        ColorPicker("Marker color", selection: Binding(
+                                        get: { markerColor },
+                                        set: { newValue in
+                                            markerColorName = newValue.toString
+                                            markerColor = newValue
+                                        }))
                     }
                     Section(header: Text("Region")) {
                         ColorPicker("Active region color", selection: Binding(
@@ -167,6 +177,7 @@ struct PreferencesView: View {
                     attachedColor = Color.convertColorName(attachedColorName) ?? attachedColor
                     cursorColor = Color.convertColorName(cursorColorName) ?? cursorColor
                     caliperColor = Color.convertColorName(caliperColorName) ?? caliperColor
+                    markerColor = Color.convertColorName(markerColorName) ?? markerColor
                 }
             }
             .navigationBarTitle("Preferences", displayMode: .inline)

@@ -1372,6 +1372,7 @@ extension DiagramViewController {
         ladderView.doubleLineBlockMarker = UserDefaults.standard.bool(forKey: Preferences.doubleLineBlockMarkerKey)
         cursorView.showMarkers = UserDefaults.standard.bool(forKey: Preferences.showMarkersKey)
         ladderView.hideZeroCT = UserDefaults.standard.bool(forKey: Preferences.hideZeroCTKey)
+        cursorView.markerLineWidth = CGFloat(UserDefaults.standard.integer(forKey: Preferences.markerLineWidthKey))
 
         // Colors
         if let caliperColorName = UserDefaults.standard.string(forKey: Preferences.caliperColorNameKey) {
@@ -1394,6 +1395,9 @@ extension DiagramViewController {
         }
         if let activeColorName = UserDefaults.standard.string(forKey: Preferences.activeColorNameKey) {
             ladderView.activeColor = UIColor.convertColorName(activeColorName) ?? Preferences.defaultActiveColor
+        }
+        if let markerColorName = UserDefaults.standard.string(forKey: Preferences.markerColorNameKey) {
+            cursorView.markerColor = UIColor.convertColorName(markerColorName) ?? Preferences.defaultMarkerColor
         }
         updateToolbarButtons()
     }
