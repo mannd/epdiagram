@@ -244,7 +244,7 @@ class MarkTests: XCTestCase {
         XCTAssertEqual(mark.style.description, L("Dotted"))
         XCTAssertEqual(mark.style.id, .dotted)
         mark.style = .inherited
-        XCTAssertEqual(mark.style.description, L("Inherited"))
+        XCTAssertEqual(mark.style.description, L("Default"))
         XCTAssertEqual(mark.style.id, .inherited)
     }
 

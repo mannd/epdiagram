@@ -304,7 +304,7 @@ extension Mark {
             case .dotted:
                 return L("Dotted")
             case .inherited:
-                return L("Inherited")
+                return L("Default")
             }
 
         }

@@ -63,12 +63,12 @@ final class DiagramViewController: UIViewController {
                 }
                 ladderView.endZoning()
                 ladderView.removeConnectedMarks()
-                imageScrollView.isScrollEnabled = true
+//                imageScrollView.isScrollEnabled = true
                 showMainToolbar()
             case .select:
                 ladderView.saveState()
                 ladderView.startZoning()
-                imageScrollView.isScrollEnabled = false
+//                imageScrollView.isScrollEnabled = false
                 showSelectToolbar()
             case .connect:
                 showConnectToolbar()
@@ -246,10 +246,10 @@ final class DiagramViewController: UIViewController {
     lazy var regionDottedStyleAction = UIAction(title: L("Dotted")) { action in
         self.ladderView.setSelectedRegionsStyle(style: .dotted)
     }
-    lazy var regionInheritedStyleAction = UIAction(title: L("Inherited")) { action in
+    lazy var regionInheritedStyleAction = UIAction(title: L("Default")) { action in
         self.ladderView.setSelectedRegionsStyle(style: .inherited)
     }
-    lazy var regionStyleMenu = UIMenu(title: L("Default region style..."), image: UIImage(systemName: "scribble"), children: [self.regionSolidStyleAction, self.regionDashedStyleAction, self.regionDottedStyleAction, self.regionInheritedStyleAction])
+    lazy var regionStyleMenu = UIMenu(title: L("New mark style..."), image: UIImage(systemName: "scribble"), children: [self.regionSolidStyleAction, self.regionDashedStyleAction, self.regionDottedStyleAction, self.regionInheritedStyleAction])
 
     // Manipulate marks
     lazy var slantProximalPivotAction = UIAction(title: L("Slant proximal pivot point")) { action in
@@ -487,11 +487,15 @@ final class DiagramViewController: UIViewController {
         singleTapRecognizer.numberOfTapsRequired = 1
         imageScrollView.addGestureRecognizer(singleTapRecognizer)
 
-        // Set up context menus.
+        // Context menus
+        // We use a long press menu for the image, to avoid the view jumping around during normal scrolling, zooming.
+        // Yes, we tried using UIContextMenuInteraction, but it was unusable.
+        let longPressRecognizer = UILongPressGestureRecognizer(target: self.imageScrollView, action: #selector(imageScrollView.showImageMenu))
+        imageScrollView.addGestureRecognizer(longPressRecognizer)
+
+        // Set up context menu.
         let interaction = UIContextMenuInteraction(delegate: self)
         ladderView.addInteraction(interaction)
-        let imageInteraction = UIContextMenuInteraction(delegate: imageScrollView)
-        imageScrollView.addInteraction(imageInteraction)
 
         setTitle()
     }
@@ -578,32 +582,6 @@ final class DiagramViewController: UIViewController {
         mode = .normal
     }
 
-    @IBAction func doImageScrollViewLongPress(sender: UILongPressGestureRecognizer) {
-        guard sender.state == .began else { return }
-        sender.view?.becomeFirstResponder()
-        let menu = UIMenuController.shared
-        let rotateMenuItem = UIMenuItem(title: L("Rotate"), action: #selector(rotateAction))
-        let doneMenuItem = UIMenuItem(title: L("Done"), action: #selector(doneAction))
-        let resetMenuItem = UIMenuItem(title: L("Reset"), action: #selector(resetImage))
-        let testMenu = UIMenuController.shared
-        let test1MenuItem = UIMenuItem(title: "test1", action: #selector(rotateAction))
-        let test2MenuItem = UIMenuItem(title: "test2", action: #selector(rotateAction))
-        testMenu.menuItems = [test1MenuItem, test2MenuItem]
-        menu.menuItems = [rotateMenuItem, doneMenuItem, resetMenuItem]
-        let location = sender.location(in: sender.view)
-        let rect = CGRect(x: location.x, y: location.y , width: 0, height: 0)
-        menu.showMenu(from: sender.view!, rect: rect)
-    }
-
-    @objc func doneAction() {
-        imageScrollView.resignFirstResponder()
-    }
-
-    @objc func rotateAction() {
-        rotateImage(degrees: 90)
-        imageScrollView.resignFirstResponder()
-    }
-
     func setTitle() {
         if let name = currentDocument?.name(), !name.isEmpty {
             title = isIPad() ? L("EP Diagram - \(name)") : name
@@ -666,7 +644,7 @@ final class DiagramViewController: UIViewController {
         mode = .connect
     }
 
-    private func showConnectToolbar() {
+    func showConnectToolbar() {
         if connectToolbarButtons == nil {
             let prompt = makePrompt(text: L("Tap pairs of marks to connect them"))
             let doneButton = UIBarButtonItem(barButtonSystemItem: .done, target: self, action: #selector(cancelConnectMode))
@@ -945,7 +923,7 @@ final class DiagramViewController: UIViewController {
         mode = .calibrate
     }
 
-    private func showCalibrateToolbar() {
+    func showCalibrateToolbar() {
         if calibrateToolbarButtons == nil {
             let promptButton = makePrompt(text: L("Set caliper to 1000 ms"))
             let setButton = UIBarButtonItem(title: L("Set"), style: .plain, target: self, action: #selector(setCalibration))
@@ -1316,6 +1294,8 @@ extension DiagramViewController {
         NotificationCenter.default.addObserver(self, selector: #selector(didEnterBackground), name: UIScene.didEnterBackgroundNotification, object: nil)
         NotificationCenter.default.addObserver(self, selector: #selector(didDisconnect), name: UIScene.didDisconnectNotification, object: nil)
         NotificationCenter.default.addObserver(self, selector: #selector(resolveFileConflicts), name: UIDocument.stateChangedNotification, object: nil)
+        // TODO: Not really needed anymore
+        NotificationCenter.default.addObserver(self.imageScrollView, selector: #selector(imageScrollView.menuDidClose), name: UIMenuController.didHideMenuNotification, object: nil)
 
     }
 

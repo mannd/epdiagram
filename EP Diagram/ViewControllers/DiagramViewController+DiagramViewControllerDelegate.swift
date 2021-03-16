@@ -99,7 +99,16 @@ extension DiagramViewController: DiagramViewControllerDelegate {
 
     @objc func closeRotateToolbar(_ sender: UIAlertAction) {
         currentDocument?.undoManager.endUndoGrouping()
-        showSelectToolbar()
+        switch mode {
+        case .normal:
+            showMainToolbar()
+        case .select:
+            showSelectToolbar()
+        case .connect:
+            showConnectToolbar()
+        case .calibrate:
+            showCalibrateToolbar()
+        }
     }
 
     @objc func rotate90R() {
