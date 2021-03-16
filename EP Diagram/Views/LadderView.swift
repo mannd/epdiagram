@@ -37,7 +37,7 @@ final class LadderView: ScaledView {
 
     // For debugging
     #if DEBUG  // Change this for debugging impulse origins and block
-    var showProxEnd = false
+    var showProxEnd = true
     var showEarliestPoint = false
     #else  // Don't ever change this
     var showProxEnd = false
@@ -107,11 +107,6 @@ final class LadderView: ScaledView {
     private var savedMode: Mode = .normal
 
     var mode: Mode = .normal
-    { didSet {
-        if mode == .select {
-        updateMarkers()
-        }
-    }}
 
     var leftMargin: CGFloat = 0
     var viewHeight: CGFloat = 0
@@ -644,27 +639,12 @@ final class LadderView: ScaledView {
         undeleteMark(mark: mark)
     }
 
-    private func undoablyAddMark(mark: Mark) {
-        os_log("undoablyAddMark(mark:) - LadderView", log: OSLog.debugging, type: .debug)
-        currentDocument?.undoManager?.registerUndo(withTarget: self, handler: { target in
-            target.undoablyDeleteMark(mark: mark)
-        })
-        NotificationCenter.default.post(name: .didUndoableAction, object: nil)
-        updateMarkers()
-        updateRegionIntervals(ladder.region(ofMark: mark))
-        assessBlockAndImpulseOrigin(mark: mark)
-
-    }
-
     private func deleteMark(_ mark: Mark) {
         os_log("deleteMark(mark:) - LadderView", log: OSLog.debugging, type: .debug)
-        mark.mode = .normal
-        ladder.deleteMark(mark)
         let region = ladder.region(ofMark: mark)
+        ladder.deleteMark(mark)
         hideCursorAndNormalizeAllMarks()
-        updateRegionIntervals(region)
-        // FIXME: New
-        updateMarkers()
+        updateMarkersAndRegionIntervals(region)
         cursorViewDelegate.refresh()
     }
 
@@ -674,9 +654,18 @@ final class LadderView: ScaledView {
         ladder.addMark(mark, toRegion: region)
         mark.mode = .normal
         hideCursorAndNormalizeAllMarks()
-        updateMarkers()
-        updateRegionIntervals(region)
+        updateMarkersAndRegionIntervals(region)
         cursorViewDelegate.refresh()
+    }
+
+    private func undoablyAddMark(mark: Mark) {
+        os_log("undoablyAddMark(mark:) - LadderView", log: OSLog.debugging, type: .debug)
+        currentDocument?.undoManager?.registerUndo(withTarget: self, handler: { target in
+            target.undoablyDeleteMark(mark: mark)
+        })
+        NotificationCenter.default.post(name: .didUndoableAction, object: nil)
+        updateMarkersAndRegionIntervals(ladder.region(ofMark: mark))
+        assessBlockAndImpulseOrigin(mark: mark)
     }
 
     fileprivate func normalModeDrag(_ pan: UIPanGestureRecognizer) {
@@ -749,8 +738,7 @@ final class LadderView: ScaledView {
                 }
                 setModeOfNearbyMarks(dragCreatedMark)
             }
-            updateRegionIntervals(activeRegion)
-            updateMarkers()
+            updateMarkersAndRegionIntervals(activeRegion)
         }
         if state == .ended {
             isDragging = false
@@ -1456,6 +1444,28 @@ final class LadderView: ScaledView {
         }
     }
 
+    func updateMarkers() {
+        DispatchQueue.main.async { [weak self] in
+            if let self = self {
+                let marks = self.ladder.allMarks()
+                var markerPoints: [CGPoint] = []
+                for mark in marks {
+                    markerPoints.append(mark.segment.proximal)
+                    markerPoints.append(mark.segment.distal)
+                }
+                self.cursorViewDelegate.setMarkerPositions(at: markerPoints)
+                self.cursorViewDelegate.refresh()
+            }
+        }
+    }
+
+    func updateMarkersAndRegionIntervals(_ region: Region?) {
+        updateMarkers()
+        updateRegionIntervals(region)
+    }
+
+
+
     func assessBlockAndImpulseOrigin(mark: Mark?) {
         if let mark = mark {
             assessBlock(mark: mark)
@@ -1464,6 +1474,7 @@ final class LadderView: ScaledView {
     }
 
     func assessBlock(mark: Mark) {
+        print("****assessBlock")
         if mark.blockSetting == .auto {
             mark.blockSite = .none
             if mark.early == .none {
@@ -1482,6 +1493,7 @@ final class LadderView: ScaledView {
     }
 
     func assessImpulseOrigin(mark: Mark) {
+        print("****assessImpulseOrigin")
         if mark.impulseOriginSetting == .auto {
             mark.impulseOriginSite = .none
             if mark.linkedMarkIDs.proximal.count == 0 && (mark.early == .proximal || mark.early == .none) {
@@ -2179,8 +2191,7 @@ final class LadderView: ScaledView {
         })
         NotificationCenter.default.post(name: .didUndoableAction, object: nil)
         mark.segment = segment
-        updateRegionIntervals(ladder.region(ofMark: mark))
-        updateMarkers()
+        updateMarkersAndRegionIntervals(ladder.region(ofMark: mark))
         assessBlockAndImpulseOrigin(mark: mark)
     }
 
@@ -2295,7 +2306,7 @@ protocol LadderViewDelegate: AnyObject {
     func toggleAttachedMarkAnchor()
     func convertPosition(_: CGPoint, toView: UIView) -> CGPoint
     func updateMarkers()
-
+    func assessBlockAndImpulseOriginAttachedMark()
 }
 
 // MARK: LadderViewDelegate implementation
@@ -2391,6 +2402,10 @@ extension LadderView: LadderViewDelegate {
         swapEndsIfNeeded(mark: attachedMark)
         linkNearbyMarks(mark: attachedMark)
         addlinkedMiddleMarks(ofMark: attachedMark)
+    }
+
+    func assessBlockAndImpulseOriginAttachedMark() {
+        assessBlockAndImpulseOrigin(mark: ladder.attachedMark)
     }
 
     func undoablySnapMarkToNearbyMarks(mark: Mark, nearbyMarks: LinkedMarks) {
@@ -2549,20 +2564,7 @@ extension LadderView: LadderViewDelegate {
         }
     }
 
-    func updateMarkers() {
-        DispatchQueue.main.async { [weak self] in
-            if let self = self {
-                let marks = self.ladder.allMarks()
-                var markerPoints: [CGPoint] = []
-                for mark in marks {
-                    markerPoints.append(mark.segment.proximal)
-                    markerPoints.append(mark.segment.distal)
-                }
-                self.cursorViewDelegate.setMarkerPositions(at: markerPoints)
-                self.cursorViewDelegate.refresh()
-            }
-        }
-    }
+
 
     func selectAllMarks() {
         ladder.setAllMarksWithMode(.selected)
