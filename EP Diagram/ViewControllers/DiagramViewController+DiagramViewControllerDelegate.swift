@@ -64,7 +64,6 @@ extension DiagramViewController: DiagramViewControllerDelegate {
     func selectSampleDiagram(_ diagram: Diagram?) {
         os_log("selectSampleDiagram()", log: .action, type: .info)
         guard let diagram = diagram else { return }
-        // FIXME: This is not undoable
         loadSampleDiagram(diagram)
     }
 

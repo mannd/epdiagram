@@ -151,7 +151,6 @@ extension DiagramViewController: HamburgerTableDelegate, UIImagePickerController
                         .appendingPathComponent(newName)
                         .appendingPathExtension(DiagramDocument.extensionName)
                     renameDocument(oldURL: currentFileURL, newURL: newFileURL)
-                    // FIXME: currentDocument.fileURL not changing to newURL.
                     diagram.name = newName
                     diagramEditorDelegate?.diagramEditorDidUpdateContent(self, diagram: diagram)
                     setTitle()

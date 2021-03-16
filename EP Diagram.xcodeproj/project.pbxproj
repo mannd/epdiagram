@@ -34,6 +34,7 @@
 		8E4086E425F30383005F53CB /* RhythmView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8E4086E325F30383005F53CB /* RhythmView.swift */; };
 		8E4086E925F325C4005F53CB /* Rhythm.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8E4086E825F325C4005F53CB /* Rhythm.swift */; };
 		8E487B7E25F9C55A002FFC1B /* CalibrationTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8E487B7D25F9C55A002FFC1B /* CalibrationTests.swift */; };
+		8E48EE59260051EF007D2CE4 /* org.css in Resources */ = {isa = PBXBuildFile; fileRef = 8E48EE58260051EF007D2CE4 /* org.css */; };
 		8E4A52EF24886B16007406F5 /* Diagram.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8E4A52EE24886B16007406F5 /* Diagram.swift */; };
 		8E4ACA8024478A6E00575538 /* BlackView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8E4ACA7F24478A6E00575538 /* BlackView.swift */; };
 		8E4ACA8224478D7C00575538 /* HamburgerTableViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8E4ACA8124478D7C00575538 /* HamburgerTableViewController.swift */; };
@@ -145,6 +146,7 @@
 		8E4086E325F30383005F53CB /* RhythmView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RhythmView.swift; sourceTree = "<group>"; };
 		8E4086E825F325C4005F53CB /* Rhythm.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Rhythm.swift; sourceTree = "<group>"; };
 		8E487B7D25F9C55A002FFC1B /* CalibrationTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CalibrationTests.swift; sourceTree = "<group>"; };
+		8E48EE58260051EF007D2CE4 /* org.css */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.css; path = org.css; sourceTree = "<group>"; };
 		8E4A52EE24886B16007406F5 /* Diagram.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Diagram.swift; sourceTree = "<group>"; };
 		8E4ACA7F24478A6E00575538 /* BlackView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BlackView.swift; sourceTree = "<group>"; };
 		8E4ACA8124478D7C00575538 /* HamburgerTableViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HamburgerTableViewController.swift; sourceTree = "<group>"; };
@@ -264,6 +266,7 @@
 		8E1276D924D46BEF00AC4B8F /* Help */ = {
 			isa = PBXGroup;
 			children = (
+				8E48EE58260051EF007D2CE4 /* org.css */,
 				8E1276DC24D46F4200AC4B8F /* help.html */,
 				8E1276DA24D46C2000AC4B8F /* help.org */,
 			);
@@ -600,6 +603,7 @@
 				8E7D24CA22779DBF005A1729 /* Assets.xcassets in Resources */,
 				8E7D24C822779DBD005A1729 /* Main.storyboard in Resources */,
 				8E1276DB24D46C2000AC4B8F /* help.org in Resources */,
+				8E48EE59260051EF007D2CE4 /* org.css in Resources */,
 				8E61C3D725A6260D0064ADC1 /* Startup2.storyboard in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

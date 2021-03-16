@@ -429,7 +429,7 @@ final class DiagramViewController: UIViewController {
         cursorView.ladderViewDelegate = ladderView
         ladderView.cursorViewDelegate = cursorView
 
-        // FIXME: Do these views really need currentDocument _and_ diagram?
+        // Current document needed to access UndoManager.
         cursorView.currentDocument = currentDocument
         ladderView.currentDocument = currentDocument
 
@@ -595,7 +595,6 @@ final class DiagramViewController: UIViewController {
     @objc func showMainToolbar() {
         if mainToolbarButtons == nil {
             calibrateButton = UIBarButtonItem(title: L("Calibrate"), style: UIBarButtonItem.Style.plain, target: self, action: #selector(launchCalibrateMode))
-            // FIXME: Experiment with "Edit" instead of "Select" for menu title
             selectButton = UIBarButtonItem(title: L("Edit"), style: .plain, target: self, action: #selector(launchSelectMode))
             connectButton = UIBarButtonItem(title: L("Connect"), style: .plain, target: self, action: #selector(launchConnectMode))
             undoButton = UIBarButtonItem(barButtonSystemItem: .undo, target: self, action: #selector(undo))
@@ -1013,7 +1012,6 @@ final class DiagramViewController: UIViewController {
     //    First tap unattaches mark, second tap adds mark with cursor.
     //    - without attached mark:
     //    First tap adds attached mark, second shifts anchor.
-    // FIXME: not sure if second behavior is good.
     @objc func singleTap(tap: UITapGestureRecognizer) {
         os_log("singleTap - ViewController", log: OSLog.touches, type: .info)
         guard !marksAreHidden else { return }
@@ -1475,7 +1473,6 @@ extension DiagramViewController {
                                     return
                                 }
                                 // Try to delete old document, ignore errors.
-                                // FIXME: Should rename delete old file?
                                 if fileManager.isDeletableFile(atPath: oldURL.path) {
                                     try? fileManager.removeItem(atPath: oldURL.path)
                                 }
