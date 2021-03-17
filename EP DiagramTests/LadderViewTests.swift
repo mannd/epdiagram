@@ -378,4 +378,36 @@ class LadderViewTests: XCTestCase {
         XCTAssertEqual(attachedMark!.mode, .attached)
     }
 
+    func testHighlightNearbyMarks() {
+        let ladder = ladderView.ladder
+        let mark1 = ladderView.ladder.addMark(at: 100, toRegion: ladder.regions[0])
+        let mark2 = ladderView.ladder.addMark(at: 200, toRegion: ladder.regions[1])
+        XCTAssertEqual(mark1.mode, .normal)
+        XCTAssertEqual(mark2.mode, .normal)
+        ladder.attachedMark = mark1
+        XCTAssertEqual(mark1.mode, .attached)
+        XCTAssertEqual(mark2.mode, .normal)
+        ladder.normalizeAllMarksExceptAttachedMark()
+        XCTAssertEqual(mark1.mode, .attached)
+        XCTAssertEqual(mark2.mode, .normal)
+        let mark3 = ladder.addMark(at: 100, toRegion: ladder.regions[1])
+        var isClose = ladderView.assessCloseness(ofMark: mark1, toNeighboringMark: mark3, usingNearbyDistance: 1)
+        XCTAssertTrue(isClose)
+        isClose = ladderView.assessCloseness(ofMark: mark1, toNeighboringMark: mark2, usingNearbyDistance: 1)
+        XCTAssertFalse(isClose)
+        mark2.segment = Segment(proximal: CGPoint(x: 100, y: 0), distal: CGPoint(x: 200, y: 0.5))
+        isClose = ladderView.assessCloseness(ofMark: mark1, toNeighboringMark: mark2, usingNearbyDistance: 1)
+        XCTAssertTrue(isClose)
+        XCTAssertEqual(mark1.mode, .attached)
+        ladderView.highlightNearbyMarks(mark1)
+        XCTAssertEqual(mark1.mode, .attached)
+
+        XCTAssertEqual(mark2.mode, .linked)
+        mark2.segment = Segment(proximal: CGPoint(x: 150, y: 0), distal: CGPoint(x: 200, y: 0.5))
+        ladderView.highlightNearbyMarks(mark1)
+        XCTAssertEqual(mark2.mode, .normal)
+        XCTAssertEqual(mark1.mode, .attached)
+
+    }
+
 }

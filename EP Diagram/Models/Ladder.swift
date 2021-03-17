@@ -26,12 +26,13 @@ final class Ladder: NSObject, Codable {
     var regions = [Region]()
     var regionCount: Int { regions.count }
     var attachedMark: Mark?  { // attachedMark does not own its mark
-        didSet { // cursor is attached to a most 1 mark at a time
+        didSet { // cursor is attached to at most 1 mark at a time
+            print("+++++++++didSet attachedMark")
             normalizeAllMarks()  // setting attached mark to nil does not delete it, so set its mode to normal.
             if let attachedMark = attachedMark {
                 let linkedMarkIDs = attachedMark.linkedMarkIDs
                 // Note that the order below is important.  An attached mark can be in its own linkedMarks.  But we always want the attached mark to have an .attached highlight.
-                setModeForLinkedMarkIDs(mode: .linked, linkedMarkIDs: linkedMarkIDs)
+                setModeForMarkIDs(mode: .linked, markIDs: linkedMarkIDs)
                 attachedMark.mode = .attached
             }
         }
@@ -93,13 +94,32 @@ final class Ladder: NSObject, Codable {
         }
     }
 
+    @available(*, deprecated, message: "Remove after testing that reregisterAllMarks() is not necessary.  Mark IDs are saved anyway in ladder.registry")
     func reregisterAllMarks() {
-        os_log("restoreRegistry", log: .action, type: .info)
-        registry.removeAll()
-        for region in regions {
-            for mark in region.marks {
-                registry[mark.id] = mark
-            }
+        // TODO: why is this necessary.  Why not store the registry with the ladder, i.e. with the document?
+        os_log("restoreRegistry", log: .deprecated, type: .debug)
+        return
+
+//        registry.removeAll()
+//        for region in regions {
+//            for mark in region.marks {
+//                registry[mark.id] = mark
+//            }
+//        }
+//        print("ladder", self)
+//        print("regions", regions)
+//        print("registry", registry)
+//        for region in regions {
+//            for mark in region.marks {
+//                print("registry mark", registry[mark.id] as Any)
+//            }
+//        }
+    }
+
+    func printRegistry() {
+        guard !registry.isEmpty else { print("Empty registry!!!!"); return }
+        for item in registry {
+            print("MarkID: \(item.0), Mark: \(item.1.segment)\n")
         }
     }
 
@@ -338,13 +358,18 @@ final class Ladder: NSObject, Codable {
         else { return nil }
     }
 
-    func setModeForLinkedMarkIDs(mode: Mark.Mode, linkedMarkIDs: LinkedMarkIDs) {
-        let linkedMarks = getLinkedMarks(fromLinkedMarkIDs: linkedMarkIDs)
+    func setModeForMarkIDs(mode: Mark.Mode, markIDs: LinkedMarkIDs) {
+        let linkedMarks = getLinkedMarks(fromLinkedMarkIDs: markIDs)
         linkedMarks.setMode(mode)
     }
 
     func normalizeAllMarks() {
         setAllMarksWithMode(.normal)
+    }
+
+    func normalizeAllMarksExceptAttachedMark() {
+        setAllMarksWithMode(.normal)
+        attachedMark?.mode = .attached
     }
 
     func normalizeRegions() {

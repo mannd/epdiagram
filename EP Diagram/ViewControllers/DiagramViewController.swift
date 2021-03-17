@@ -511,7 +511,6 @@ final class DiagramViewController: UIViewController {
         if didFirstWillLayout { return }
         didFirstWillLayout = true
         if restorationInfo != nil {
-            print("restorationInfo", restorationInfo as Any)
             if let zoomScale = restorationInfo?[Self.restorationZoomKey] as? CGFloat {
                 imageScrollView.zoomScale = zoomScale
             }
@@ -529,9 +528,6 @@ final class DiagramViewController: UIViewController {
     override func viewDidAppear(_ animated: Bool) {
         os_log("viewDidAppear() - ViewController", log: OSLog.viewCycle, type: .info)
         super.viewDidAppear(animated)
-//        print("currentDocument.userActivity", currentDocument?.userActivity as Any)
-//        self.userActivity = currentDocument?.userActivity
-//        print(userActivity?.userInfo as Any)
         self.userActivity = self.view.window?.windowScene?.userActivity
         self.userActivity?.delegate = self
         self.restorationInfo = nil
@@ -850,7 +846,6 @@ final class DiagramViewController: UIViewController {
         os_log("closeDocument()", log: .action, type: .info)
         view.endEditing(true)
         documentIsClosing = true
-        print("useractivity", userActivity?.userInfo as Any)
         currentDocument?.undoManager.removeAllActions()
         diagramEditorDelegate?.diagramEditorDidFinishEditing(self, diagram: diagram)
     }
@@ -1292,9 +1287,6 @@ extension DiagramViewController {
         NotificationCenter.default.addObserver(self, selector: #selector(didEnterBackground), name: UIScene.didEnterBackgroundNotification, object: nil)
         NotificationCenter.default.addObserver(self, selector: #selector(didDisconnect), name: UIScene.didDisconnectNotification, object: nil)
         NotificationCenter.default.addObserver(self, selector: #selector(resolveFileConflicts), name: UIDocument.stateChangedNotification, object: nil)
-        // TODO: Not really needed anymore
-        NotificationCenter.default.addObserver(self.imageScrollView, selector: #selector(imageScrollView.menuDidClose), name: UIMenuController.didHideMenuNotification, object: nil)
-
     }
 
     func removeNotifications() {
@@ -1381,7 +1373,8 @@ extension DiagramViewController {
     }
 
     @objc func resolveFileConflicts() {
-        os_log("resolveFileConflicts()", log: .action, type: .info)
+        // This fires off frequently; leave commented unless debugging.
+        //os_log("resolveFileConflicts()", log: .action, type: .info)
         guard let currentDocument = currentDocument else { return }
         if currentDocument.documentState == UIDocument.State.inConflict {
             // Use newest file wins strategy.
@@ -1432,14 +1425,13 @@ extension DiagramViewController: UIDropInteractionDelegate {
 
 extension DiagramViewController: NSUserActivityDelegate {
     func userActivityWillSave(_ userActivity: NSUserActivity) {
-        print("user activity will save")
         let currentDocumentURL: String = currentDocument?.fileURL.lastPathComponent ?? ""
         print("currentDocumentURL", currentDocumentURL)
         if documentIsClosing {
             // intercept and kill userInfo if we closed the document with the close button
             userActivity.userInfo = nil
         }
-        print("saved user activity info", userActivity.userInfo as Any)
+//        print("saved user activity info", userActivity.userInfo as Any)
     }
 }
 

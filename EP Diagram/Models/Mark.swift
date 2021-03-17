@@ -26,6 +26,9 @@ final class Mark: Codable {
 
     var segment: Segment // where a mark is, using regional coordinates
     var mode: Mode = .normal
+    { didSet {
+        print("****mark \(self.id) mode set to \(mode)")
+    }}
     var anchor: Anchor = .middle // Anchor point for movement and to attach a cursor
     var style: Style = .solid
     var emphasis: Emphasis = .normal
@@ -222,7 +225,7 @@ struct LinkedMarks: Codable {
     var count: Int { allMarks.count }
 
     func setMode(_ mode: Mark.Mode) {
-        allMarks.forEach { mark in mark.mode = mode }
+        allMarks.forEach { $0.mode = mode }
     }
 }
 
@@ -263,11 +266,13 @@ struct LinkedMarkIDs: Codable {
 
 extension Mark: CustomDebugStringConvertible {
     var debugDescription: String {
-        """
+        let description = """
         \(id.debugDescription)
         \(segment)
-        mode = \(mode)
+        mark mode = \(mode)
+        linked mark IDs = \(linkedMarkIDs)
         """
+        return description
     }
 }
 

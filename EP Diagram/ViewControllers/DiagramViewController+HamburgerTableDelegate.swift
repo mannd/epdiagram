@@ -237,6 +237,8 @@ extension DiagramViewController: HamburgerTableDelegate, UIImagePickerController
     #if DEBUG
     func test() {
         os_log("test()", log: .debugging, type: .debug)
+//        ladderView.printAttachedMark()
+        ladderView.refresh()
     }
     #else
     func test() {}
