@@ -1537,7 +1537,10 @@ final class LadderView: ScaledView {
             if mark.early == .none {
                 return  // for now, ignore vertical marks
             }
-            if mark.segment.proximal.y > blockMin
+            if mark.linkedMarkIDs.middle.count > 0
+                && mark.late == ladder.markLinkage(mark: mark, linkedMarksIDs: mark.linkedMarkIDs) {
+                mark.blockSite = .none
+            } else if mark.segment.proximal.y > blockMin
                 && mark.late == .proximal {
                 mark.blockSite = .proximal
             } else if mark.segment.distal.y < blockMax
@@ -1550,29 +1553,19 @@ final class LadderView: ScaledView {
     }
 
     // FIXME: do similar analysis of middle marks for block
-    // Fatal error: Impulse origin site set to auto or random.: file EP_Diagram/LadderView.swift, line 1759
-    // implies impulse origin not being set when it should be
     func assessImpulseOrigin(mark: Mark) {
         if mark.impulseOriginSetting == .auto {
             mark.impulseOriginSite = .none
-
             if mark.linkedMarkIDs.middle.count > 0
-                && mark.early == .proximal
-                && ladder.markLinkage(mark: mark, linkedMarksIDs: mark.linkedMarkIDs) == .proximal {
+                && mark.early == ladder.markLinkage(mark: mark, linkedMarksIDs: mark.linkedMarkIDs) {
                 mark.impulseOriginSite = .none
-            } else if mark.linkedMarkIDs.middle.count > 0
-                        && mark.early == .distal
-                        && ladder.markLinkage(mark: mark, linkedMarksIDs: mark.linkedMarkIDs) == .distal {
-                mark.impulseOriginSite = .none
-            }
-            else if mark.linkedMarkIDs.proximal.count == 0 && (mark.early == .proximal || mark.early == .none) {
+            } else if mark.linkedMarkIDs.proximal.count == 0 && (mark.early == .proximal || mark.early == .none) {
                 mark.impulseOriginSite = .proximal
             } else if mark.linkedMarkIDs.distal.count == 0 && mark.early == .distal {
                 mark.impulseOriginSite = .distal
             }
         }
         else {
-            // FIXME: this can't be auto or random
             mark.impulseOriginSite = mark.impulseOriginSetting
         }
 
