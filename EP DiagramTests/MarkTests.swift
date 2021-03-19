@@ -86,7 +86,11 @@ class MarkTests: XCTestCase {
         let mark1 = Mark()
         let mark2 = Mark()
         let mark3 = Mark()
-        let linkedMarks = LinkedMarks()
+        #if USESTRUCTS
+        var linkedMarks = LinkedMarks()
+        #else
+        var linkedMarks = LinkedMarks()
+        #endif
         linkedMarks.proximal.insert(mark1)
         linkedMarks.middle.insert(mark2)
         linkedMarks.distal.insert(mark3)
@@ -178,7 +182,11 @@ class MarkTests: XCTestCase {
     }
 
     func testLinkedMarks() {
+        #if USESTRUCTS
+        var mg = LinkedMarks()
+        #else
         let mg = LinkedMarks()
+        #endif
         XCTAssertEqual(mg.count, 0)
         mg.proximal.insert(Mark())
         mg.middle.insert(Mark())
@@ -195,7 +203,11 @@ class MarkTests: XCTestCase {
     }
 
     func testLinkedMarkIDs() {
+        #if USESTRUCTS
+        var mig = LinkedMarkIDs()
+        #else
         let mig = LinkedMarkIDs()
+        #endif
         XCTAssertEqual(mig.count, 0)
         mig.proximal.insert(Mark().id)
         mig.middle.insert(Mark().id)

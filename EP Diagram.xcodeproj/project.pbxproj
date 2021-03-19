@@ -951,6 +951,7 @@
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = "org.epstudios.EP-DiagramTests";
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				"SWIFT_ACTIVE_COMPILATION_CONDITIONS[arch=*]" = USESTRUCTS;
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
 				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/EP Diagram.app/EP Diagram";
