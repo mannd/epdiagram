@@ -143,7 +143,8 @@ final class LadderView: ScaledView {
 
     private func setupView() {
         os_log("setupView() - LadderView", log: .action, type: .info)
-        ladder.reregisterAllMarks()
+        // FIXME: needs to be done later
+//        ladder.reregisterAllMarks()
         viewHeight = self.frame.height
         initializeRegions()
         removeConnectedMarks()
@@ -740,6 +741,7 @@ final class LadderView: ScaledView {
         if state == .changed {
             if let mark = movingMark {
                 moveMark(mark: mark, scaledViewPosition: position)
+                highlightNearbyMarks(mark)
             }
             else if regionOfDragOrigin == locationInLadder.region, let regionOfDragOrigin = regionOfDragOrigin {
                 switch dragOriginDivision {
@@ -928,6 +930,7 @@ final class LadderView: ScaledView {
     }
 
     func highlightNearbyMarks(_ mark: Mark?) {
+        guard snapMarks else { return }
         guard let mark = mark else { return }
         ladder.normalizeAllMarksExceptAttachedMark()
         let nearbyDistance = nearbyMarkAccuracy / scale
@@ -935,17 +938,15 @@ final class LadderView: ScaledView {
     }
 
     func setModeOfNearbyMarks(mark: Mark, nearbyDistance: CGFloat) {
-        guard let activeRegion = activeRegion else { return }
-
-        if let proximalRegion = ladder.regionBefore(region: activeRegion) {
+        let region = ladder.region(ofMark: mark)
+        if let proximalRegion = ladder.regionBefore(region: region) {
             for neighboringMark in proximalRegion.marks {
                 if assessCloseness(ofMark: mark, toNeighboringMark: neighboringMark, usingNearbyDistance: nearbyDistance) {
                     neighboringMark.mode = .linked
-
                 }
             }
         }
-        if let distalRegion = ladder.regionAfter(region: activeRegion) {
+        if let distalRegion = ladder.regionAfter(region: region) {
             for neighboringMark in distalRegion.marks {
                 if assessCloseness(ofMark: mark, toNeighboringMark: neighboringMark, usingNearbyDistance: nearbyDistance) {
                     neighboringMark.mode = .linked
@@ -954,7 +955,7 @@ final class LadderView: ScaledView {
             }
         }
         // check in the same region ("middle region", same as activeRegion)
-        for neighboringMark in activeRegion.marks {
+        for neighboringMark in region.marks {
             if assessCloseness(ofMark: mark, toNeighboringMark: neighboringMark, usingNearbyDistance: nearbyDistance) {
                 neighboringMark.mode = .linked
             }
@@ -963,7 +964,7 @@ final class LadderView: ScaledView {
 
     // FIXME: middle marks end up with a copy of themselves in the neighboring linked marks.
     // Returns linked mark ids of marks close to passed in mark.
-    func nearbyMarkIds(mark: Mark, nearbyDistance: CGFloat) -> LinkedMarkIDs {
+    func getNearbyMarkIDs(mark: Mark, nearbyDistance: CGFloat) -> LinkedMarkIDs {
         guard let activeRegion = activeRegion else { return LinkedMarkIDs() }
         var proximalMarkIds = MarkIdSet()
         var distalMarkIds = MarkIdSet()
@@ -973,7 +974,6 @@ final class LadderView: ScaledView {
                 if assessCloseness(ofMark: mark, toNeighboringMark: neighboringMark, usingNearbyDistance: nearbyDistance) {
                     print("++++found close mark proximally")
                     proximalMarkIds.insert(neighboringMark.id)
-                    neighboringMark.mode = .linked
 
                 }
             }
@@ -983,7 +983,6 @@ final class LadderView: ScaledView {
                 if assessCloseness(ofMark: mark, toNeighboringMark: neighboringMark, usingNearbyDistance: nearbyDistance) {
                     print("++++found close mark distally")
                     distalMarkIds.insert(neighboringMark.id)
-                    neighboringMark.mode = .linked
 
                 }
             }
@@ -1031,6 +1030,7 @@ final class LadderView: ScaledView {
     func moveAttachedMark(position: CGPoint) {
         if let attachedMark = ladder.attachedMark {
             moveMark(mark: attachedMark, scaledViewPosition: position)
+            highlightNearbyMarks(attachedMark)
         }
     }
 
@@ -1072,7 +1072,7 @@ final class LadderView: ScaledView {
         if cursorViewDelegate.cursorIsVisible {
             undoablyMoveMark(movement: cursorViewDelegate.cursorMovement(), mark: mark, regionPosition: regionPosition)
         }
-        highlightNearbyMarks(mark)
+        updateMarkersAndRegionIntervals(activeRegion)
     }
 
     func moveMarkNoCursor(mark: Mark, scaledViewPosition: CGPoint) {
@@ -1506,8 +1506,10 @@ final class LadderView: ScaledView {
     }
 
     func updateMarkersAndRegionIntervals(_ region: Region?) {
+        print("+++++++++++++ updateMarkersAndRegionIntervals")
         updateMarkers()
         updateRegionIntervals(region)
+        setNeedsDisplay()
     }
 
 
@@ -1873,6 +1875,8 @@ final class LadderView: ScaledView {
 
     @objc func unlinkSelectedMarks() {
         let selectedMarks = ladder.allMarksWithMode(.selected)
+        // FIXME: need this here?
+        normalizeAllMarks()
         selectedMarks.forEach { mark in unlinkMarks(mark: mark) }
     }
 
@@ -1882,10 +1886,20 @@ final class LadderView: ScaledView {
 
     func linkAllMarks() {
         // scan all marks, link them if possible
+//        ladder.unlinkAllMarks()
+//        let marks = ladder.allMarks()
+//        for mark in marks {
+//
+//            _ = nearbyMarkIds(mark: mark, nearbyDistance: nearbyMarkAccuracy / scale)
+//        }
     }
 
     func unlinkMarks(mark: Mark) {
-        normalizeAllMarks()
+        // First remove all backlinks to this mark.
+        for m in ladder.allMarks() {
+            m.linkedMarkIDs.remove(id: mark.id)
+        }
+        // Now clear all links of this mark.
         mark.linkedMarkIDs = LinkedMarkIDs()
     }
 
@@ -2453,6 +2467,10 @@ extension LadderView: LadderViewDelegate {
         addlinkedMiddleMarks(ofMark: attachedMark)
     }
 
+//    func relinkMarks() {
+//        let marks = all
+//    }
+
     func assessBlockAndImpulseOriginAttachedMark() {
         assessBlockAndImpulseOrigin(mark: ladder.attachedMark)
     }
@@ -2519,36 +2537,35 @@ extension LadderView: LadderViewDelegate {
         // FIXME: Middle marks!!!!!!!
         for middleMark in nearbyMarks.middle {
             // FIXME: this doesn't work for vertical mark.
-//
-//            mark.linkedMarkIDs.middle.insert(middleMark.id)
-//            middleMark.linkedMarkIDs.middle.insert(mark.id)
-//            var distanceToProximal = Geometry.distanceSegmentToPoint(segment: middleMark.segment, point: mark.segment.proximal)
-//            distanceToProximal = min(distanceToProximal, Geometry.distanceSegmentToPoint(segment: mark.segment, point: middleMark.segment.proximal))
-//            var distanceToDistal = Geometry.distanceSegmentToPoint(segment: middleMark.segment, point: mark.segment.distal)
-//            distanceToDistal = min(distanceToDistal, Geometry.distanceSegmentToPoint(segment: mark.segment, point: middleMark.segment.distal))
-//            if distanceToProximal < distanceToDistal {
-//                let x = middleMark.segment.getX(fromY: mark.segment.proximal.y)
-//                if let x = x {
-//                    mark.segment.proximal.x = x
-//                }
-//                // FIXME: This causes unexpected straightening of mark
-//                // Should not link vertical marks.  Handle in assessCloseness.50
-//                else { // vertical mark
-//                    //                    mark.segment.proximal.x = middleMark.segment.proximal.x
-//                    //                    mark.segment.distal.x = middleMark.segment.proximal.x
-//                }
-//            }
-//            else {
-//                let x = middleMark.segment.getX(fromY: mark.segment.distal.y)
-//                if let x = x {
-//                    mark.segment.distal.x = x
-//                }
-//                // FIXME: This causes unexpected straightening of mark
-//                else { // vertical mark
-//                    //                    mark.segment.proximal.x = middleMark.segment.distal.x
-//                    //                    mark.segment.distal.x = middleMark.segment.distal.x
-//                }
-//            }
+            mark.linkedMarkIDs.middle.insert(middleMark.id)
+            middleMark.linkedMarkIDs.middle.insert(mark.id)
+            var distanceToProximal = Geometry.distanceSegmentToPoint(segment: middleMark.segment, point: mark.segment.proximal)
+            distanceToProximal = min(distanceToProximal, Geometry.distanceSegmentToPoint(segment: mark.segment, point: middleMark.segment.proximal))
+            var distanceToDistal = Geometry.distanceSegmentToPoint(segment: middleMark.segment, point: mark.segment.distal)
+            distanceToDistal = min(distanceToDistal, Geometry.distanceSegmentToPoint(segment: mark.segment, point: middleMark.segment.distal))
+            if distanceToProximal < distanceToDistal {
+                let x = middleMark.segment.getX(fromY: mark.segment.proximal.y)
+                if let x = x {
+                    mark.segment.proximal.x = x
+                }
+                // FIXME: This causes unexpected straightening of mark
+                // Should not link vertical marks.  Handle in assessCloseness.50
+                else { // vertical mark
+                    //                    mark.segment.proximal.x = middleMark.segment.proximal.x
+                    //                    mark.segment.distal.x = middleMark.segment.proximal.x
+                }
+            }
+            else {
+                let x = middleMark.segment.getX(fromY: mark.segment.distal.y)
+                if let x = x {
+                    mark.segment.distal.x = x
+                }
+                // FIXME: This causes unexpected straightening of mark
+                else { // vertical mark
+                    //                    mark.segment.proximal.x = middleMark.segment.distal.x
+                    //                    mark.segment.distal.x = middleMark.segment.distal.x
+                }
+            }
         }
     }
 
@@ -2558,11 +2575,13 @@ extension LadderView: LadderViewDelegate {
 
     func linkNearbyMarks(mark: Mark) {
         os_log("linkNearbyMarks(mark:) - LadderView", log: .action, type: .info)
-//        guard snapMarks else { return }
-//        let minimum: CGFloat = nearbyMarkAccuracy / scale
-//        let markIds = nearbyMarkIds(mark: mark, nearbyDistance: minimum)
-//        let nearbyMarks = ladder.getLinkedMarks(fromLinkedMarkIDs: markIds)
-//        undoablySnapMarkToNearbyMarks(mark: mark, nearbyMarks: nearbyMarks)
+        guard snapMarks else { return }
+        let minimum: CGFloat = nearbyMarkAccuracy / scale
+        let nearbyMarkIDs = getNearbyMarkIDs(mark: mark, nearbyDistance: minimum)
+        print("****nearby markIDs", nearbyMarkIDs)
+        let nearbyMarks = ladder.getLinkedMarksFromLinkedMarkIDs(nearbyMarkIDs)
+        print("****nearby marks", nearbyMarks)
+        undoablySnapMarkToNearbyMarks(mark: mark, nearbyMarks: nearbyMarks)
     }
 
     // FIXME: this should add all linked middle marks together, but doesn't seem to work.

@@ -26,9 +26,6 @@ final class Mark: Codable {
 
     var segment: Segment // where a mark is, using regional coordinates
     var mode: Mode = .normal
-    { didSet {
-        print("****mark \(self.id) mode set to \(mode)")
-    }}
     var anchor: Anchor = .middle // Anchor point for movement and to attach a cursor
     var style: Style = .solid
     var emphasis: Emphasis = .normal
@@ -229,7 +226,7 @@ struct LinkedMarks: Codable {
     }
 }
 
-struct LinkedMarkIDs: Codable {
+class LinkedMarkIDs: Codable {
     var proximal: MarkIdSet
     var middle: MarkIdSet
     var distal: MarkIdSet
@@ -249,13 +246,13 @@ struct LinkedMarkIDs: Codable {
         self.distal = distal
     }
 
-    mutating func remove(id: UUID) {
+    func remove(id: UUID) {
         proximal.remove(id)
         middle.remove(id)
         distal.remove(id)
     }
 
-    mutating func removeAll() {
+    func removeAll() {
         proximal.removeAll()
         middle.removeAll()
         distal.removeAll()

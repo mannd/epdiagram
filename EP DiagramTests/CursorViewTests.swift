@@ -13,7 +13,6 @@ class CursorViewTests: XCTestCase {
     private var cursorView: CursorView!
     private var ladderView: LadderView!
 
-
     override func setUp() {
         // Put setup code here. This method is called before the invocation of each test method in the class.
         cursorView = CursorView(frame: CGRect(x: 0, y: 0, width: 100, height: 100))

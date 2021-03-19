@@ -498,6 +498,8 @@ final class DiagramViewController: UIViewController {
         ladderView.addInteraction(interaction)
 
         setTitle()
+
+        ladderView.reregisterAllMarks()
     }
 
     override func viewWillAppear(_ animated: Bool) {
@@ -1143,6 +1145,7 @@ final class DiagramViewController: UIViewController {
         self.ladderView.resetSize(setActiveRegion: setActiveRegion, width: imageView.frame.width)
         cursorView.caliperMaxY = imageScrollView.frame.height
         cursorView.caliperMinY = 0
+        ladderView.linkAllMarks()
         setViewsNeedDisplay()
     }
 

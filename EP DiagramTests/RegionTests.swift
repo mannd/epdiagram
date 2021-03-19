@@ -10,12 +10,16 @@ import XCTest
 @testable import EP_Diagram
 
 class RegionTests: XCTestCase {
+    var region: Region!
 
     override func setUpWithError() throws {
-        // Put setup code here. This method is called before the invocation of each test method in the class.
+        super.setUp()
+        region = Region(template: RegionTemplate())
     }
 
     override func tearDownWithError() throws {
+        region = nil
+        super.tearDown()
         // Put teardown code here. This method is called after the invocation of each test method in the class.
     }
 
@@ -24,15 +28,7 @@ class RegionTests: XCTestCase {
         // Use XCTAssert and related functions to verify your tests produce the correct results.
     }
 
-    func testPerformanceExample() throws {
-        // This is an example of a performance test case.
-        self.measure {
-            // Put the code you want to measure the time of here.
-        }
-    }
-
     func testRelativeYPosition() {
-        let region = Region(template: RegionTemplate())
         region.proximalBoundaryY = 200
         region.distalBoundaryY = 500
         XCTAssertNotNil(region.relativeYPosition(y: 300))
@@ -41,5 +37,4 @@ class RegionTests: XCTestCase {
         XCTAssertEqual(region.relativeYPosition(y: 300)!, 0.3333, accuracy: 0.001)
         XCTAssertNil(region.relativeYPosition(y: 199))
     }
-
 }

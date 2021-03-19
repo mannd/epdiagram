@@ -94,34 +94,17 @@ final class Ladder: NSObject, Codable {
         }
     }
 
-    @available(*, deprecated, message: "Remove after testing that reregisterAllMarks() is not necessary.  Mark IDs are saved anyway in ladder.registry")
+    // When diagram reloads, it is necessary to refresh to contents of the registry, otherwise mark linking won't work.
     func reregisterAllMarks() {
-        // TODO: why is this necessary.  Why not store the registry with the ladder, i.e. with the document?
         os_log("restoreRegistry", log: .deprecated, type: .debug)
-        return
-
-//        registry.removeAll()
-//        for region in regions {
-//            for mark in region.marks {
-//                registry[mark.id] = mark
-//            }
-//        }
-//        print("ladder", self)
-//        print("regions", regions)
-//        print("registry", registry)
-//        for region in regions {
-//            for mark in region.marks {
-//                print("registry mark", registry[mark.id] as Any)
-//            }
-//        }
-    }
-
-    func printRegistry() {
-        guard !registry.isEmpty else { print("Empty registry!!!!"); return }
-        for item in registry {
-            print("MarkID: \(item.0), Mark: \(item.1.segment)\n")
+        registry.removeAll()
+        for region in regions {
+            for mark in region.marks {
+                registry[mark.id] = mark
+            }
         }
     }
+
 
     func lookup(ids: MarkIdSet) -> MarkSet {
         var markSet = MarkSet()
@@ -134,7 +117,7 @@ final class Ladder: NSObject, Codable {
     }
 
     // Convert a LinkedMarkIDs to LinkedMarks
-    func getLinkedMarks(fromLinkedMarkIDs linkedMarkIDs: LinkedMarkIDs) -> LinkedMarks {
+    func getLinkedMarksFromLinkedMarkIDs(_ linkedMarkIDs: LinkedMarkIDs) -> LinkedMarks {
         var linkedMarks = LinkedMarks()
         linkedMarks.proximal = lookup(ids: linkedMarkIDs.proximal)
         linkedMarks.middle = lookup(ids: linkedMarkIDs.middle)
@@ -218,6 +201,7 @@ final class Ladder: NSObject, Codable {
         region.marks.removeAll()
     }
 
+    // FIXME: update this with all deletions?  Test with new diagram that registry is cleared.
     func removeMarkIdReferences(toMarkId id: UUID) {
         for region in regions {
             for mark in region.marks {
@@ -227,6 +211,7 @@ final class Ladder: NSObject, Codable {
     }
 
     // Clear ladder of all marks.
+    // FIXME: remove mark references too?  And how is this undoable?
     func clear() {
         for region in regions {
             region.marks.removeAll()
@@ -359,7 +344,7 @@ final class Ladder: NSObject, Codable {
     }
 
     func setModeForMarkIDs(mode: Mark.Mode, markIDs: LinkedMarkIDs) {
-        let linkedMarks = getLinkedMarks(fromLinkedMarkIDs: markIDs)
+        let linkedMarks = getLinkedMarksFromLinkedMarkIDs(markIDs)
         linkedMarks.setMode(mode)
     }
 
@@ -539,12 +524,14 @@ final class Ladder: NSObject, Codable {
     }
 
     func unlinkAllMarks() {
-        regions.forEach {
-            region in region.marks.forEach {
-                mark in mark.linkedMarkIDs.removeAll()
-            }
-
+        let marks = allMarks()
+        for mark in marks {
+            mark.linkedMarkIDs = LinkedMarkIDs()
         }
+//        for item in registry {
+//            item.1.linkedMarkIDs = LinkedMarkIDs()
+//        }
+        //        marks.forEach { mark in mark.linkedMarkIDs = LinkedMarkIDs() }
     }
 
     func reindexMarks() {
@@ -563,6 +550,47 @@ final class Ladder: NSObject, Codable {
     static func freshLadder(fromLadder ladder: Ladder) -> Ladder {
         return Ladder(template: ladder.template )
     }
+
+    // Debug
+    func debugGetRegistry() -> [UUID: Mark] {
+        return registry
+    }
+
+    func debugPrintRegistry() {
+        guard !registry.isEmpty else { print("Empty registry!!!!"); return }
+        let marks = allMarks()
+        for mark in marks {
+            print("----AllMarks----------------------------------------")
+            print("Linked markIDs", mark.linkedMarkIDs)
+            let linkedMarks = getLinkedMarksFromLinkedMarkIDs(mark.linkedMarkIDs)
+            for lm in linkedMarks.proximal {
+                print("proximal linked mark: \(lm.id)")
+            }
+            for lm in linkedMarks.middle {
+                print("middle linked mark: \(lm.id)")
+            }
+            for lm in linkedMarks.distal {
+                print("distal linked mark: \(lm.id)")
+            }
+            print("--------------------------------------------")
+        }
+        for item in registry {
+            print("----Registry----------------------------------------")
+            print("Linked markIDs", item.1.linkedMarkIDs)
+            let linkedMarks = getLinkedMarksFromLinkedMarkIDs(item.1.linkedMarkIDs)
+            for lm in linkedMarks.proximal {
+                print("proximal linked mark: \(lm.id)")
+            }
+            for lm in linkedMarks.middle {
+                print("middle linked mark: \(lm.id)")
+            }
+            for lm in linkedMarks.distal {
+                print("distal linked mark: \(lm.id)")
+            }
+            print("--------------------------------------------")
+        }
+    }
+
 }
 
 // MARK: - enums

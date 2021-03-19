@@ -195,7 +195,7 @@ class MarkTests: XCTestCase {
     }
 
     func testLinkedMarkIDs() {
-        var mig = LinkedMarkIDs()
+        let mig = LinkedMarkIDs()
         XCTAssertEqual(mig.count, 0)
         mig.proximal.insert(Mark().id)
         mig.middle.insert(Mark().id)
@@ -314,6 +314,10 @@ class MarkTests: XCTestCase {
         let mark = Mark(positionX: 0)
         mark.applyAngle(45)
         XCTAssertEqual(mark.segment.distal.x, 1.0, accuracy: 0.0001)
+    }
 
+    func testLinkiedMarkIDsInit() {
+        let linkedMarkIDs = LinkedMarkIDs()
+        XCTAssertEqual(linkedMarkIDs.count, 0)
     }
 }
