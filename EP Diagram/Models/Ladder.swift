@@ -116,7 +116,7 @@ final class Ladder: NSObject, Codable {
 
     // Convert a LinkedMarkIDs to LinkedMarks
     func getLinkedMarksFromLinkedMarkIDs(_ linkedMarkIDs: LinkedMarkIDs) -> LinkedMarks {
-        let linkedMarks = LinkedMarks()
+        var linkedMarks = LinkedMarks()
         linkedMarks.proximal = lookup(ids: linkedMarkIDs.proximal)
         linkedMarks.middle = lookup(ids: linkedMarkIDs.middle)
         linkedMarks.distal = lookup(ids: linkedMarkIDs.distal)

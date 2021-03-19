@@ -196,7 +196,7 @@ final class Mark: Codable {
 
 // A mark may have up to three attachments to marks in the proximal and distal regions
 // and in its own region, i.e. reentry spawning a mark.
-class LinkedMarks: Codable {
+struct LinkedMarks: Codable {
     var proximal: MarkSet
     var middle: MarkSet
     var distal: MarkSet
@@ -213,7 +213,7 @@ class LinkedMarks: Codable {
         self.distal = distal
     }
 
-    func remove(mark: Mark) {
+    mutating func remove(mark: Mark) {
         proximal.remove(mark)
         middle.remove(mark)
         distal.remove(mark)
@@ -226,7 +226,7 @@ class LinkedMarks: Codable {
     }
 }
 
-class LinkedMarkIDs: Codable {
+struct LinkedMarkIDs: Codable {
     var proximal: MarkIdSet
     var middle: MarkIdSet
     var distal: MarkIdSet
@@ -246,13 +246,13 @@ class LinkedMarkIDs: Codable {
         self.distal = distal
     }
 
-    func remove(id: UUID) {
+    mutating func remove(id: UUID) {
         proximal.remove(id)
         middle.remove(id)
         distal.remove(id)
     }
 
-    func removeAll() {
+    mutating func removeAll() {
         proximal.removeAll()
         middle.removeAll()
         distal.removeAll()
