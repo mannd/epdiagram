@@ -27,7 +27,6 @@ final class Ladder: NSObject, Codable {
     var regionCount: Int { regions.count }
     var attachedMark: Mark?  { // attachedMark does not own its mark
         didSet { // cursor is attached to at most 1 mark at a time
-            print("+++++++++didSet attachedMark")
             normalizeAllMarks()  // setting attached mark to nil does not delete it, so set its mode to normal.
             if let attachedMark = attachedMark {
                 let linkedMarkIDs = attachedMark.linkedMarkIDs
@@ -105,7 +104,6 @@ final class Ladder: NSObject, Codable {
         }
     }
 
-
     func lookup(ids: MarkIdSet) -> MarkSet {
         var markSet = MarkSet()
         for id in ids {
@@ -118,7 +116,7 @@ final class Ladder: NSObject, Codable {
 
     // Convert a LinkedMarkIDs to LinkedMarks
     func getLinkedMarksFromLinkedMarkIDs(_ linkedMarkIDs: LinkedMarkIDs) -> LinkedMarks {
-        var linkedMarks = LinkedMarks()
+        let linkedMarks = LinkedMarks()
         linkedMarks.proximal = lookup(ids: linkedMarkIDs.proximal)
         linkedMarks.middle = lookup(ids: linkedMarkIDs.middle)
         linkedMarks.distal = lookup(ids: linkedMarkIDs.distal)
@@ -528,10 +526,6 @@ final class Ladder: NSObject, Codable {
         for mark in marks {
             mark.linkedMarkIDs = LinkedMarkIDs()
         }
-//        for item in registry {
-//            item.1.linkedMarkIDs = LinkedMarkIDs()
-//        }
-        //        marks.forEach { mark in mark.linkedMarkIDs = LinkedMarkIDs() }
     }
 
     func reindexMarks() {

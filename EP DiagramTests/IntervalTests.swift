@@ -29,7 +29,6 @@ class IntervalTests: XCTestCase {
         let mark2 = ladder.addMark(at: 100, toRegion: ladder.regions[0])
         var intervals = ladder.regionIntervals(region: ladder.regions[0])
         XCTAssertEqual(intervals.count, 2)
-        print("intervals", intervals)
         XCTAssertEqual(intervals[0].proximalBoundary?.first!, 0)
         XCTAssertEqual(intervals[0].proximalBoundary?.second!, 100)
         XCTAssertEqual(intervals[1].distalBoundary?.first!, 0)
@@ -50,13 +49,6 @@ class IntervalTests: XCTestCase {
         intervals = ladder.regionIntervals(region: ladder.regions[0])
         // Intervals should be empty because the ends of the 2nd mark are too far from the region boundary
         XCTAssertEqual(intervals.count, 0)
-
-        // test boundary conditions
-
-//        XCTAssertEqual(intervals[1], 100)
-
-
-
     }
 
 }
