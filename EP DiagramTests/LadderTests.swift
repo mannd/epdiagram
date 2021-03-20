@@ -9,6 +9,8 @@
 import XCTest
 @testable import EP_Diagram
 
+
+
 class LadderTests: XCTestCase {
     private var ladder: Ladder!
 
@@ -109,7 +111,10 @@ class LadderTests: XCTestCase {
         ladder.addMark(fromSegment: segment, toRegion: ladder.regions[1])
         ladder.addMark(fromSegment: segment, toRegion: ladder.regions[1])
         XCTAssertEqual(true, ladder.hasMarks())
-        ladder.clear()
+        let all = ladder.allMarks()
+        for mark in all {
+            ladder.deleteMark(mark)
+        }
         XCTAssertEqual(false, ladder.hasMarks())
     }
 
@@ -158,11 +163,15 @@ class LadderTests: XCTestCase {
         ladder.registerMark(mark1)
         ladder.registerMark(mark2)
         ladder.registerMark(mark3)
+        #if USECLASSES
+        let mig = LinkedMarkIDs()
+        #else
         var mig = LinkedMarkIDs()
+        #endif
         mig.proximal.insert(mark1.id)
         mig.middle.insert(mark2.id)
         mig.distal.insert(mark3.id)
-        let mg = ladder.getLinkedMarks(fromLinkedMarkIDs: mig)
+        let mg = ladder.getLinkedMarksFromLinkedMarkIDs(mig)
         XCTAssert(mg.proximal.contains(mark1))
         XCTAssert(mg.middle.contains(mark2))
         XCTAssert(mg.distal.contains(mark3))
@@ -209,10 +218,10 @@ class LadderTests: XCTestCase {
         let mark1 = ladder.addMark(Mark(), toRegion: ladder.region(atIndex: 0))
         let mark2 = ladder.addMark(Mark(), toRegion: ladder.region(atIndex: 0))
         var marks: [Mark] = [mark1, mark2]
-        XCTAssertFalse(ladder.haveDifferentRegions(marks))
+        XCTAssertFalse(ladder.marksAreInDifferentRegions(marks))
         let mark3 = ladder.addMark(Mark(), toRegion: ladder.region(atIndex: 1))
         marks.append(mark3)
-        XCTAssertTrue(ladder.haveDifferentRegions(marks))
+        XCTAssertTrue(ladder.marksAreInDifferentRegions(marks))
     }
 
     func testMarksAreNotContiguous() {
@@ -266,5 +275,66 @@ class LadderTests: XCTestCase {
         XCTAssertEqual(allMarks, [mark1, mark2, mark3])
     }
 
+    func testLinkedMarkIDs() {
+        let mark1 = ladder.addMark(at: 100, toRegion: ladder.region(atIndex: 0))
+        let mark2 = ladder.addMark(at: 100, toRegion: ladder.region(atIndex: 1))
+        mark1.linkedMarkIDs.distal.insert(mark2.id)
+        XCTAssertEqual(mark1.linkedMarkIDs.distal.first, mark2.id)
+        XCTAssertEqual(mark1.linkedMarkIDs.distal.count, 1)
+        ladder.unlinkAllMarks()
+        XCTAssertEqual(mark1.linkedMarkIDs.distal.count, 0)
+        mark1.linkedMarkIDs.distal.insert(mark2.id)
+        XCTAssertEqual(mark1.linkedMarkIDs.distal.count, 1)
+        // linkedMarkIDs are structs, i.e. value semantics, so copies are independent of original.
+        #if USECLASSES
+        let linkedMarkIDs = mark1.linkedMarkIDs
+        #else
+        var linkedMarkIDs = mark1.linkedMarkIDs
+        #endif
+        linkedMarkIDs.remove(id: mark2.id)
+        XCTAssertEqual(linkedMarkIDs.count, 0)
+        // if linkedMarkIDs are a struct, the commented out statement is true
+        #if USECLASSES
+        XCTAssertEqual(mark1.linkedMarkIDs.distal.count, 0)
+        #else
+        XCTAssertEqual(mark1.linkedMarkIDs.distal.count, 1)
+        #endif
+        mark1.linkedMarkIDs = linkedMarkIDs
+        XCTAssertEqual(mark1.linkedMarkIDs.distal.count, 0)
+    }
 
+    func testRegistryConcept() {
+        // Updating struct as part of a class in a dict doesn't work == but it does per below??
+        XCTAssertEqual(ladder.debugGetRegistry().count, 0)
+        let mark1 = ladder.addMark(at: 100, toRegion: ladder.region(atIndex: 0))
+        XCTAssertEqual(ladder.debugGetRegistry().count, 1)
+        let mark2 = ladder.addMark(at: 100, toRegion: ladder.region(atIndex: 1))
+        XCTAssertEqual(mark1.linkedMarkIDs.count, 0)
+        mark1.linkedMarkIDs.distal.insert(mark2.id)
+        XCTAssertEqual(mark1.linkedMarkIDs.count, 1)
+        let testMark = ladder.debugGetRegistry()[mark1.id]
+        XCTAssertEqual(testMark?.linkedMarkIDs.count, 1)
+        XCTAssertEqual(testMark?.linkedMarkIDs.distal.contains(mark2.id), true)
+        ladder.unlinkAllMarks()
+        XCTAssertEqual(testMark?.linkedMarkIDs.count, 0)
+        XCTAssertEqual(mark1.linkedMarkIDs.count, 0)
+        XCTAssertEqual(mark2.linkedMarkIDs.count, 0)
+
+        mark1.linkedMarkIDs.distal.insert(mark2.id)
+
+        #if USECLASSES
+        let linkedMarkIDs = ladder.debugGetRegistry()[mark1.id]?.linkedMarkIDs
+        #else
+        var linkedMarkIDs = ladder.debugGetRegistry()[mark1.id]?.linkedMarkIDs
+        #endif
+        XCTAssertEqual(linkedMarkIDs?.count, 1)
+        XCTAssertEqual(ladder.debugGetRegistry()[mark1.id]?.linkedMarkIDs.count, 1)
+        linkedMarkIDs?.removeAll()
+        XCTAssertEqual(linkedMarkIDs?.count, 0)
+        #if USECLASSES
+        XCTAssertEqual(ladder.debugGetRegistry()[mark1.id]?.linkedMarkIDs.count, 1)
+        #else
+        XCTAssertEqual(ladder.debugGetRegistry()[mark1.id]?.linkedMarkIDs.count, 1)
+        #endif
+    }
 }

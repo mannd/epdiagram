@@ -222,7 +222,7 @@ struct LinkedMarks: Codable {
     var count: Int { allMarks.count }
 
     func setMode(_ mode: Mark.Mode) {
-        allMarks.forEach { mark in mark.mode = mode }
+        allMarks.forEach { $0.mode = mode }
     }
 }
 
@@ -263,11 +263,13 @@ struct LinkedMarkIDs: Codable {
 
 extension Mark: CustomDebugStringConvertible {
     var debugDescription: String {
-        """
+        let description = """
         \(id.debugDescription)
         \(segment)
-        mode = \(mode)
+        mark mode = \(mode)
+        linked mark IDs = \(linkedMarkIDs)
         """
+        return description
     }
 }
 
@@ -304,7 +306,7 @@ extension Mark {
             case .dotted:
                 return L("Dotted")
             case .inherited:
-                return L("Inherited")
+                return L("Default")
             }
 
         }

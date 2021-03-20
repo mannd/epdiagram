@@ -9,7 +9,7 @@
 import UIKit
 
 class Version: NSObject {
-    static let prereleaseVersion: String? = "1.0.0-alpha.3"
+    static let prereleaseVersion: String? = "1.0.0-alpha.4"
 
     typealias VersionBuild = (version: String?, build: String?)
     static func appVersion() -> VersionBuild {

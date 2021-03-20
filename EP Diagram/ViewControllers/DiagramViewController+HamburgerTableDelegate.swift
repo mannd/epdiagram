@@ -151,7 +151,6 @@ extension DiagramViewController: HamburgerTableDelegate, UIImagePickerController
                         .appendingPathComponent(newName)
                         .appendingPathExtension(DiagramDocument.extensionName)
                     renameDocument(oldURL: currentFileURL, newURL: newFileURL)
-                    // FIXME: currentDocument.fileURL not changing to newURL.
                     diagram.name = newName
                     diagramEditorDelegate?.diagramEditorDidUpdateContent(self, diagram: diagram)
                     setTitle()
@@ -238,6 +237,11 @@ extension DiagramViewController: HamburgerTableDelegate, UIImagePickerController
     #if DEBUG
     func test() {
         os_log("test()", log: .debugging, type: .debug)
+//        ladderView.printAttachedMark()
+        ladderView.unlinkAllMarks()
+
+        ladderView.reregisterAllMarks()
+        ladderView.ladder.debugPrintRegistry()
     }
     #else
     func test() {}

@@ -39,7 +39,6 @@ final class Calibration: Codable, CustomDebugStringConvertible {
         currentZoom = zoom
         originalCalFactor = calFactor
         isCalibrated = true
-        print(self)
     }
 
     func set(zoom: CGFloat, value: CGFloat) {

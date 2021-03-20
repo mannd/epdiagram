@@ -11,13 +11,16 @@ import XCTest
 
 
 class CalibrationTests: XCTestCase {
+    var calibration: Calibration!
 
     override func setUpWithError() throws {
-        // Put setup code here. This method is called before the invocation of each test method in the class.
+        super.setUp()
+        calibration = Calibration()
     }
 
     override func tearDownWithError() throws {
-        // Put teardown code here. This method is called after the invocation of each test method in the class.
+        calibration = nil
+        super.tearDown()
     }
 
     func testSetCalibration() {

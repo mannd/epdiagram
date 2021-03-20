@@ -64,7 +64,6 @@ extension DiagramViewController: DiagramViewControllerDelegate {
     func selectSampleDiagram(_ diagram: Diagram?) {
         os_log("selectSampleDiagram()", log: .action, type: .info)
         guard let diagram = diagram else { return }
-        // FIXME: This is not undoable
         loadSampleDiagram(diagram)
     }
 
@@ -99,7 +98,16 @@ extension DiagramViewController: DiagramViewControllerDelegate {
 
     @objc func closeRotateToolbar(_ sender: UIAlertAction) {
         currentDocument?.undoManager.endUndoGrouping()
-        showSelectToolbar()
+        switch mode {
+        case .normal:
+            showMainToolbar()
+        case .select:
+            showSelectToolbar()
+        case .connect:
+            showConnectToolbar()
+        case .calibrate:
+            showCalibrateToolbar()
+        }
     }
 
     @objc func rotate90R() {

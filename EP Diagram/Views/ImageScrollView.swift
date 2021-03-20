@@ -13,22 +13,31 @@ class ImageScrollView: UIScrollView {
     override var canBecomeFirstResponder: Bool { true }
     var leftMargin: CGFloat = 0
     var mode: Mode = .normal
-
-    lazy var resetAction = UIAction(title: L("Reset")) { action in
-        self.resetImage()
-    }
-    lazy var rotateAction = UIAction(title: L("Rotate")) { action in
-        self.showRotateToolbar()
-    }
 }
 
-extension ImageScrollView: UIContextMenuInteractionDelegate {
-    func contextMenuInteraction(_ interaction: UIContextMenuInteraction, configurationForMenuAtLocation location: CGPoint) -> UIContextMenuConfiguration? {
-        // FIXME: This might work without select mode, but scrolling image screws up.  Maybe set up an isscrolling variable to avoid this?
-        guard mode == .select else { return nil }
-        return UIContextMenuConfiguration(identifier: nil, previewProvider: nil) { suggestedActions in
-            return UIMenu(title: "", children: [self.rotateAction, self.resetAction])
+extension ImageScrollView {
+
+    @IBAction func showImageMenu(_ gestureRecognizer: UILongPressGestureRecognizer) {
+        print("long press")
+        if gestureRecognizer.state == .began {
+            if contentSize == CGSize.zero { return }
+            self.becomeFirstResponder()
+            let rotateMenuItem = UIMenuItem(title: L("Rotate"), action: #selector(showRotateToolbar))
+            let resetMenuItem = UIMenuItem(title: L("Reset"), action: #selector(resetImage))
+            let doneMenuItem = UIMenuItem(title: L("Done"), action: #selector(doneAction))
+
+            let menuController = UIMenuController.shared
+            menuController.menuItems = [rotateMenuItem, resetMenuItem, doneMenuItem]
+
+            // Set the location of the menu in the view.
+            let location = gestureRecognizer.location(in: gestureRecognizer.view)
+            let menuLocation = CGRect(x: location.x, y: location.y, width: 0, height: 0)
+            menuController.showMenu(from: self, rect: menuLocation)
         }
+    }
+
+    @objc func menuDidClose() {
+        print("menu did close")
     }
 
     func doNothing() {}
@@ -39,13 +48,16 @@ extension ImageScrollView: UIContextMenuInteractionDelegate {
         setNeedsDisplay()
     }
 
-    func showRotateToolbar() {
+    @objc func showRotateToolbar() {
         diagramViewControllerDelegate?.showRotateToolbar()
     }
 
-    func resetImage() {
+    @objc func resetImage() {
         diagramViewControllerDelegate?.resetImage()
     }
 
+    @objc func doneAction() {
+        self.resignFirstResponder()
+    }
 }
 

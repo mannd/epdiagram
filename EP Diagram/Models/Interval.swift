@@ -10,14 +10,17 @@ import UIKit
 
 struct Interval {
     typealias Boundary = (first: CGFloat?, second: CGFloat?)
+    static let boundaryTolerance: CGFloat = 0.01 // how close to region boundary is considered to be at the boundary
+    static let proximalLimit: CGFloat = 0 + boundaryTolerance
+    static let distalLimit: CGFloat = 1 - boundaryTolerance
     var proximalBoundary: Boundary?
     var distalBoundary: Boundary?
 
     static func createIntervals(region: Region) -> [Interval] {
         var intervals = [Interval]()
         let sortedMarks = region.marks.sorted()
-        let proximalSortedMarks = sortedMarks.filter { $0.segment.proximal.y <= 0 }
-        let distalSortedMarks = sortedMarks.filter { $0.segment.distal.y >= 1 }
+        let proximalSortedMarks = sortedMarks.filter { $0.segment.proximal.y <= proximalLimit }
+        let distalSortedMarks = sortedMarks.filter { $0.segment.distal.y >= distalLimit }
         for i in 0..<proximalSortedMarks.count {
             if i + 1 < proximalSortedMarks.count {
                 var interval = Interval()

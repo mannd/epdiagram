@@ -15,6 +15,7 @@
 #+XSLT:
 #+HTML_HEAD: <style media="screen" type="text/css"> img {max-width: 100%; height: auto;} </style>
 #+HTML_HEAD: <style  type="text/css">:root { color-scheme: light dark; }</style>
+#+HTML_HEAD: <link rel="stylesheet" type="text/css" href="./org.css"/>
 * Development Version Notes
 EP Diagram is under active development, and this version is only further testing and feedback.  Many features are incomplete or not implemented, and that includes this Help module!  But to get you started, here are some tips.
 ** Quick Start
@@ -45,18 +46,10 @@ EP Diagram is under active development, and this version is only further testing
 *** Sample diagrams
 *** Preferences
 - Change the overall appearance or behavior of the app.
-* Known issues/bugs
-- Automatic impulse origin not working correctly.  It is recommented to turn this off in Preferences and manually edit this in Edit mode instead.
-- Mark linking and unlinking behavior needs work.
+* Known issues/bugs 
 - Close marks can be difficult to individually select.
 - Diagram document format likely to change in release version and be incompatible with present format.
 - Need more sample ECGS.
 - Need to test iCloud storage.
-- Document state restoration currently turned off.
-- Cursor sometimes not aligned with mark.
-- Linked marks in same zone not behaving correctly.
-- Possible other features to implement this version:
-  - pacer spikes
-  - refractory periods
 - Mac version to be done.  Need to convert menu system to Mac.
 - Help file for release version not done.

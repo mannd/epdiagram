@@ -86,7 +86,11 @@ class MarkTests: XCTestCase {
         let mark1 = Mark()
         let mark2 = Mark()
         let mark3 = Mark()
+        #if USECLASSES
+        let linkedMarks = LinkedMarks()
+        #else
         var linkedMarks = LinkedMarks()
+        #endif
         linkedMarks.proximal.insert(mark1)
         linkedMarks.middle.insert(mark2)
         linkedMarks.distal.insert(mark3)
@@ -178,7 +182,11 @@ class MarkTests: XCTestCase {
     }
 
     func testLinkedMarks() {
+        #if USECLASSES
+        let mg = LinkedMarks()
+        #else
         var mg = LinkedMarks()
+        #endif
         XCTAssertEqual(mg.count, 0)
         mg.proximal.insert(Mark())
         mg.middle.insert(Mark())
@@ -195,7 +203,11 @@ class MarkTests: XCTestCase {
     }
 
     func testLinkedMarkIDs() {
+        #if USECLASSES
+        let mig = LinkedMarkIDs()
+        #else
         var mig = LinkedMarkIDs()
+        #endif
         XCTAssertEqual(mig.count, 0)
         mig.proximal.insert(Mark().id)
         mig.middle.insert(Mark().id)
@@ -244,7 +256,7 @@ class MarkTests: XCTestCase {
         XCTAssertEqual(mark.style.description, L("Dotted"))
         XCTAssertEqual(mark.style.id, .dotted)
         mark.style = .inherited
-        XCTAssertEqual(mark.style.description, L("Inherited"))
+        XCTAssertEqual(mark.style.description, L("Default"))
         XCTAssertEqual(mark.style.id, .inherited)
     }
 
@@ -314,6 +326,10 @@ class MarkTests: XCTestCase {
         let mark = Mark(positionX: 0)
         mark.applyAngle(45)
         XCTAssertEqual(mark.segment.distal.x, 1.0, accuracy: 0.0001)
+    }
 
+    func testLinkiedMarkIDsInit() {
+        let linkedMarkIDs = LinkedMarkIDs()
+        XCTAssertEqual(linkedMarkIDs.count, 0)
     }
 }

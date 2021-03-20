@@ -63,12 +63,12 @@ final class DiagramViewController: UIViewController {
                 }
                 ladderView.endZoning()
                 ladderView.removeConnectedMarks()
-                imageScrollView.isScrollEnabled = true
+//                imageScrollView.isScrollEnabled = true
                 showMainToolbar()
             case .select:
                 ladderView.saveState()
                 ladderView.startZoning()
-                imageScrollView.isScrollEnabled = false
+//                imageScrollView.isScrollEnabled = false
                 showSelectToolbar()
             case .connect:
                 showConnectToolbar()
@@ -246,10 +246,10 @@ final class DiagramViewController: UIViewController {
     lazy var regionDottedStyleAction = UIAction(title: L("Dotted")) { action in
         self.ladderView.setSelectedRegionsStyle(style: .dotted)
     }
-    lazy var regionInheritedStyleAction = UIAction(title: L("Inherited")) { action in
+    lazy var regionInheritedStyleAction = UIAction(title: L("Default")) { action in
         self.ladderView.setSelectedRegionsStyle(style: .inherited)
     }
-    lazy var regionStyleMenu = UIMenu(title: L("Default region style..."), image: UIImage(systemName: "scribble"), children: [self.regionSolidStyleAction, self.regionDashedStyleAction, self.regionDottedStyleAction, self.regionInheritedStyleAction])
+    lazy var regionStyleMenu = UIMenu(title: L("New mark style..."), image: UIImage(systemName: "scribble"), children: [self.regionSolidStyleAction, self.regionDashedStyleAction, self.regionDottedStyleAction, self.regionInheritedStyleAction])
 
     // Manipulate marks
     lazy var slantProximalPivotAction = UIAction(title: L("Slant proximal pivot point")) { action in
@@ -429,7 +429,7 @@ final class DiagramViewController: UIViewController {
         cursorView.ladderViewDelegate = ladderView
         ladderView.cursorViewDelegate = cursorView
 
-        // FIXME: Do these views really need currentDocument _and_ diagram?
+        // Current document needed to access UndoManager.
         cursorView.currentDocument = currentDocument
         ladderView.currentDocument = currentDocument
 
@@ -487,13 +487,19 @@ final class DiagramViewController: UIViewController {
         singleTapRecognizer.numberOfTapsRequired = 1
         imageScrollView.addGestureRecognizer(singleTapRecognizer)
 
-        // Set up context menus.
+        // Context menus
+        // We use a long press menu for the image, to avoid the view jumping around during normal scrolling, zooming.
+        // Yes, we tried using UIContextMenuInteraction, but it was unusable.
+        let longPressRecognizer = UILongPressGestureRecognizer(target: self.imageScrollView, action: #selector(imageScrollView.showImageMenu))
+        imageScrollView.addGestureRecognizer(longPressRecognizer)
+
+        // Set up context menu.
         let interaction = UIContextMenuInteraction(delegate: self)
         ladderView.addInteraction(interaction)
-        let imageInteraction = UIContextMenuInteraction(delegate: imageScrollView)
-        imageScrollView.addInteraction(imageInteraction)
 
         setTitle()
+
+        ladderView.reregisterAllMarks()
     }
 
     override func viewWillAppear(_ animated: Bool) {
@@ -507,7 +513,6 @@ final class DiagramViewController: UIViewController {
         if didFirstWillLayout { return }
         didFirstWillLayout = true
         if restorationInfo != nil {
-            print("restorationInfo", restorationInfo as Any)
             if let zoomScale = restorationInfo?[Self.restorationZoomKey] as? CGFloat {
                 imageScrollView.zoomScale = zoomScale
             }
@@ -525,9 +530,6 @@ final class DiagramViewController: UIViewController {
     override func viewDidAppear(_ animated: Bool) {
         os_log("viewDidAppear() - ViewController", log: OSLog.viewCycle, type: .info)
         super.viewDidAppear(animated)
-//        print("currentDocument.userActivity", currentDocument?.userActivity as Any)
-//        self.userActivity = currentDocument?.userActivity
-//        print(userActivity?.userInfo as Any)
         self.userActivity = self.view.window?.windowScene?.userActivity
         self.userActivity?.delegate = self
         self.restorationInfo = nil
@@ -578,32 +580,6 @@ final class DiagramViewController: UIViewController {
         mode = .normal
     }
 
-    @IBAction func doImageScrollViewLongPress(sender: UILongPressGestureRecognizer) {
-        guard sender.state == .began else { return }
-        sender.view?.becomeFirstResponder()
-        let menu = UIMenuController.shared
-        let rotateMenuItem = UIMenuItem(title: L("Rotate"), action: #selector(rotateAction))
-        let doneMenuItem = UIMenuItem(title: L("Done"), action: #selector(doneAction))
-        let resetMenuItem = UIMenuItem(title: L("Reset"), action: #selector(resetImage))
-        let testMenu = UIMenuController.shared
-        let test1MenuItem = UIMenuItem(title: "test1", action: #selector(rotateAction))
-        let test2MenuItem = UIMenuItem(title: "test2", action: #selector(rotateAction))
-        testMenu.menuItems = [test1MenuItem, test2MenuItem]
-        menu.menuItems = [rotateMenuItem, doneMenuItem, resetMenuItem]
-        let location = sender.location(in: sender.view)
-        let rect = CGRect(x: location.x, y: location.y , width: 0, height: 0)
-        menu.showMenu(from: sender.view!, rect: rect)
-    }
-
-    @objc func doneAction() {
-        imageScrollView.resignFirstResponder()
-    }
-
-    @objc func rotateAction() {
-        rotateImage(degrees: 90)
-        imageScrollView.resignFirstResponder()
-    }
-
     func setTitle() {
         if let name = currentDocument?.name(), !name.isEmpty {
             title = isIPad() ? L("EP Diagram - \(name)") : name
@@ -617,7 +593,6 @@ final class DiagramViewController: UIViewController {
     @objc func showMainToolbar() {
         if mainToolbarButtons == nil {
             calibrateButton = UIBarButtonItem(title: L("Calibrate"), style: UIBarButtonItem.Style.plain, target: self, action: #selector(launchCalibrateMode))
-            // FIXME: Experiment with "Edit" instead of "Select" for menu title
             selectButton = UIBarButtonItem(title: L("Edit"), style: .plain, target: self, action: #selector(launchSelectMode))
             connectButton = UIBarButtonItem(title: L("Connect"), style: .plain, target: self, action: #selector(launchConnectMode))
             undoButton = UIBarButtonItem(barButtonSystemItem: .undo, target: self, action: #selector(undo))
@@ -666,7 +641,7 @@ final class DiagramViewController: UIViewController {
         mode = .connect
     }
 
-    private func showConnectToolbar() {
+    func showConnectToolbar() {
         if connectToolbarButtons == nil {
             let prompt = makePrompt(text: L("Tap pairs of marks to connect them"))
             let doneButton = UIBarButtonItem(barButtonSystemItem: .done, target: self, action: #selector(cancelConnectMode))
@@ -873,7 +848,6 @@ final class DiagramViewController: UIViewController {
         os_log("closeDocument()", log: .action, type: .info)
         view.endEditing(true)
         documentIsClosing = true
-        print("useractivity", userActivity?.userInfo as Any)
         currentDocument?.undoManager.removeAllActions()
         diagramEditorDelegate?.diagramEditorDidFinishEditing(self, diagram: diagram)
     }
@@ -945,7 +919,7 @@ final class DiagramViewController: UIViewController {
         mode = .calibrate
     }
 
-    private func showCalibrateToolbar() {
+    func showCalibrateToolbar() {
         if calibrateToolbarButtons == nil {
             let promptButton = makePrompt(text: L("Set caliper to 1000 ms"))
             let setButton = UIBarButtonItem(title: L("Set"), style: .plain, target: self, action: #selector(setCalibration))
@@ -1035,7 +1009,6 @@ final class DiagramViewController: UIViewController {
     //    First tap unattaches mark, second tap adds mark with cursor.
     //    - without attached mark:
     //    First tap adds attached mark, second shifts anchor.
-    // FIXME: not sure if second behavior is good.
     @objc func singleTap(tap: UITapGestureRecognizer) {
         os_log("singleTap - ViewController", log: OSLog.touches, type: .info)
         guard !marksAreHidden else { return }
@@ -1172,6 +1145,7 @@ final class DiagramViewController: UIViewController {
         self.ladderView.resetSize(setActiveRegion: setActiveRegion, width: imageView.frame.width)
         cursorView.caliperMaxY = imageScrollView.frame.height
         cursorView.caliperMinY = 0
+        ladderView.linkAllMarks()
         setViewsNeedDisplay()
     }
 
@@ -1316,7 +1290,6 @@ extension DiagramViewController {
         NotificationCenter.default.addObserver(self, selector: #selector(didEnterBackground), name: UIScene.didEnterBackgroundNotification, object: nil)
         NotificationCenter.default.addObserver(self, selector: #selector(didDisconnect), name: UIScene.didDisconnectNotification, object: nil)
         NotificationCenter.default.addObserver(self, selector: #selector(resolveFileConflicts), name: UIDocument.stateChangedNotification, object: nil)
-
     }
 
     func removeNotifications() {
@@ -1372,6 +1345,7 @@ extension DiagramViewController {
         ladderView.doubleLineBlockMarker = UserDefaults.standard.bool(forKey: Preferences.doubleLineBlockMarkerKey)
         cursorView.showMarkers = UserDefaults.standard.bool(forKey: Preferences.showMarkersKey)
         ladderView.hideZeroCT = UserDefaults.standard.bool(forKey: Preferences.hideZeroCTKey)
+        cursorView.markerLineWidth = CGFloat(UserDefaults.standard.integer(forKey: Preferences.markerLineWidthKey))
 
         // Colors
         if let caliperColorName = UserDefaults.standard.string(forKey: Preferences.caliperColorNameKey) {
@@ -1395,11 +1369,15 @@ extension DiagramViewController {
         if let activeColorName = UserDefaults.standard.string(forKey: Preferences.activeColorNameKey) {
             ladderView.activeColor = UIColor.convertColorName(activeColorName) ?? Preferences.defaultActiveColor
         }
+        if let markerColorName = UserDefaults.standard.string(forKey: Preferences.markerColorNameKey) {
+            cursorView.markerColor = UIColor.convertColorName(markerColorName) ?? Preferences.defaultMarkerColor
+        }
         updateToolbarButtons()
     }
 
     @objc func resolveFileConflicts() {
-        os_log("resolveFileConflicts()", log: .action, type: .info)
+        // This fires off frequently; leave commented unless debugging.
+        //os_log("resolveFileConflicts()", log: .action, type: .info)
         guard let currentDocument = currentDocument else { return }
         if currentDocument.documentState == UIDocument.State.inConflict {
             // Use newest file wins strategy.
@@ -1450,14 +1428,13 @@ extension DiagramViewController: UIDropInteractionDelegate {
 
 extension DiagramViewController: NSUserActivityDelegate {
     func userActivityWillSave(_ userActivity: NSUserActivity) {
-        print("user activity will save")
         let currentDocumentURL: String = currentDocument?.fileURL.lastPathComponent ?? ""
         print("currentDocumentURL", currentDocumentURL)
         if documentIsClosing {
             // intercept and kill userInfo if we closed the document with the close button
             userActivity.userInfo = nil
         }
-        print("saved user activity info", userActivity.userInfo as Any)
+//        print("saved user activity info", userActivity.userInfo as Any)
     }
 }
 
@@ -1491,7 +1468,6 @@ extension DiagramViewController {
                                     return
                                 }
                                 // Try to delete old document, ignore errors.
-                                // FIXME: Should rename delete old file?
                                 if fileManager.isDeletableFile(atPath: oldURL.path) {
                                     try? fileManager.removeItem(atPath: oldURL.path)
                                 }
