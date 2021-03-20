@@ -1552,7 +1552,6 @@ final class LadderView: ScaledView {
         }
     }
 
-    // FIXME: do similar analysis of middle marks for block
     func assessImpulseOrigin(mark: Mark) {
         if mark.impulseOriginSetting == .auto {
             mark.impulseOriginSite = .none
@@ -2587,7 +2586,16 @@ extension LadderView: LadderViewDelegate {
                     //                    mark.segment.distal.x = middleMark.segment.distal.x
                 }
             }
+            if mark.anchor == .proximal {
+                cursorViewDelegate.moveCursor(cursorViewPositionX: mark.segment.proximal.x)
+            }
+            else if mark.anchor == .middle {
+                cursorViewDelegate.moveCursor(cursorViewPositionX: mark.midpoint().x)
+            } else if mark.anchor == .distal {
+                cursorViewDelegate.moveCursor(cursorViewPositionX: mark.segment.distal.x)
+            }
         }
+
     }
 
     func reregisterAllMarks() {
