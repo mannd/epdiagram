@@ -401,7 +401,6 @@ final class LadderView: ScaledView {
                     ladder.connectedMarks.append(connectedMark)
                     connectedMark.mode = .connected
                     linkNearbyMarks(mark: connectedMark)
-                    addlinkedMiddleMarks(ofMark: connectedMark)
                 }
             }
 
@@ -767,7 +766,6 @@ final class LadderView: ScaledView {
             if let movingMark = movingMark {
                 swapEndsIfNeeded(mark: movingMark)
                 linkNearbyMarks(mark: movingMark)
-                addlinkedMiddleMarks(ofMark: movingMark)
                 assessBlockAndImpulseOrigin(mark: movingMark)
                 let linkedMarks = ladder.getLinkedMarksFromLinkedMarkIDs(movingMark.linkedMarkIDs)
                 assessBlockAndImpulseOrigin(marks: linkedMarks.allMarks)
@@ -779,7 +777,6 @@ final class LadderView: ScaledView {
                 else {
                     swapEndsIfNeeded(mark: dragCreatedMark)
                     linkNearbyMarks(mark: dragCreatedMark)
-                    addlinkedMiddleMarks(ofMark: dragCreatedMark)
                     assessBlockAndImpulseOrigin(mark: dragCreatedMark)
                     let linkedMarks = ladder.getLinkedMarksFromLinkedMarkIDs(dragCreatedMark.linkedMarkIDs)
                     assessBlockAndImpulseOrigin(marks: linkedMarks.allMarks)
@@ -1991,7 +1988,7 @@ func showLockLadderWarning(rect: CGRect) {
         if selectedMarks.count <= 1 {
             throw LadderError.tooFewMarks
         }
-        if ladder.haveDifferentRegions(selectedMarks) {
+        if ladder.marksAreInDifferentRegions(selectedMarks) {
             throw LadderError.marksInDifferentRegions
         }
         if ladder.marksAreNotContiguous(selectedMarks) {
@@ -2031,7 +2028,7 @@ func showLockLadderWarning(rect: CGRect) {
         if selectedMarks.count != 2 {
             throw LadderError.requireTwoMarks
         }
-        if ladder.haveDifferentRegions(selectedMarks) {
+        if ladder.marksAreInDifferentRegions(selectedMarks) {
             throw LadderError.marksInDifferentRegions
         }
         if ladder.marksAreNotContiguous(selectedMarks) {
@@ -2480,7 +2477,6 @@ extension LadderView: LadderViewDelegate {
         // FIXME: out of place
         swapEndsIfNeeded(mark: attachedMark)
         linkNearbyMarks(mark: attachedMark)
-        addlinkedMiddleMarks(ofMark: attachedMark)
     }
 
 //    func relinkMarks() {
@@ -2609,17 +2605,6 @@ extension LadderView: LadderViewDelegate {
         let nearbyMarkIDs = getNearbyMarkIDs(mark: mark, nearbyDistance: minimum)
         let nearbyMarks = ladder.getLinkedMarksFromLinkedMarkIDs(nearbyMarkIDs)
         undoablySnapMarkToNearbyMarks(mark: mark, nearbyMarks: nearbyMarks)
-    }
-
-    // FIXME: this should add all linked middle marks together, but doesn't seem to work.
-    func addlinkedMiddleMarks(ofMark mark: Mark) {
-//        var middleMarkIds = mark.linkedMarkIDs.middle
-//        for id in middleMarkIds {
-//            if let middleSet = ladder.lookup(id: id)?.linkedMarkIDs.middle {
-//                middleMarkIds = middleMarkIds.union(middleSet)
-//            }
-//        }
-//        mark.linkedMarkIDs.middle = middleMarkIds
     }
 
     func getPositionYInView(positionY: CGFloat, view: UIView) -> CGFloat {

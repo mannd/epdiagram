@@ -215,10 +215,10 @@ class LadderTests: XCTestCase {
         let mark1 = ladder.addMark(Mark(), toRegion: ladder.region(atIndex: 0))
         let mark2 = ladder.addMark(Mark(), toRegion: ladder.region(atIndex: 0))
         var marks: [Mark] = [mark1, mark2]
-        XCTAssertFalse(ladder.haveDifferentRegions(marks))
+        XCTAssertFalse(ladder.marksAreInDifferentRegions(marks))
         let mark3 = ladder.addMark(Mark(), toRegion: ladder.region(atIndex: 1))
         marks.append(mark3)
-        XCTAssertTrue(ladder.haveDifferentRegions(marks))
+        XCTAssertTrue(ladder.marksAreInDifferentRegions(marks))
     }
 
     func testMarksAreNotContiguous() {

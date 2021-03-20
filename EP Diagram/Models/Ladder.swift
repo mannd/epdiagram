@@ -25,7 +25,7 @@ final class Ladder: NSObject, Codable {
     var leftMargin: CGFloat = 50
     var regions = [Region]()
     var regionCount: Int { regions.count }
-    var attachedMark: Mark?  { // attachedMark does not own its mark
+    var attachedMark: Mark?  {
         didSet { // cursor is attached to at most 1 mark at a time
             normalizeAllMarks()  // setting attached mark to nil does not delete it, so set its mode to normal.
             if let attachedMark = attachedMark {
@@ -36,7 +36,6 @@ final class Ladder: NSObject, Codable {
             }
         }
     }
-
     var connectedMarks = [Mark]() // marks in the process of being connected
     var activeRegion: Region? {  // ladder model enforces at most one region can be active and region.mode == .normal
         didSet {
@@ -46,7 +45,6 @@ final class Ladder: NSObject, Codable {
             activeRegion.mode = .active
         }
     }
-
     var defaultMarkStyle: Mark.Style = .solid
     var zone: Zone = Zone() // at most one selection zone
     override var debugDescription: String { "Ladder ID " + id.debugDescription }
@@ -63,6 +61,8 @@ final class Ladder: NSObject, Codable {
             regions.append(region)
         }
     }
+
+    // MARK: - Mark registration, indexing
 
     func registerMark(_ mark: Mark) {
         os_log("registerMark(_:) - Ladder", log: OSLog.touches, type: .info)
@@ -114,6 +114,16 @@ final class Ladder: NSObject, Codable {
         return markSet
     }
 
+    func reindexMarks() {
+        for region in regions {
+            for mark in region.marks {
+                mark.regionIndex = index(ofRegion: region) ?? -1
+            }
+        }
+    }
+
+    // MARK: - Linked marks, mark sets
+    
     // Convert a LinkedMarkIDs to LinkedMarks
     func getLinkedMarksFromLinkedMarkIDs(_ linkedMarkIDs: LinkedMarkIDs) -> LinkedMarks {
         var linkedMarks = LinkedMarks()
@@ -127,6 +137,14 @@ final class Ladder: NSObject, Codable {
         return lookup(ids: markIdSet)
     }
 
+
+    func unlinkAllMarks() {
+        let marks = allMarks()
+        for mark in marks {
+            mark.linkedMarkIDs = LinkedMarkIDs()
+        }
+    }
+
     func hasMarks() -> Bool {
         for region in regions {
             if region.marks.count > 0 {
@@ -136,26 +154,61 @@ final class Ladder: NSObject, Codable {
         return false
     }
 
-    func editRegion(region: Region) {
-        os_log("editRegion(region:)", log: .action, type: .info)
-        fatalError("not implemented")
+    func moveLinkedMarks(forMark mark: Mark) {
+        for proximalMark in getMarkSet(fromMarkIdSet: mark.linkedMarkIDs.proximal) {
+            proximalMark.segment.distal.x = mark.segment.proximal.x
+        }
+        for distalMark in getMarkSet(fromMarkIdSet: mark.linkedMarkIDs.distal) {
+            distalMark.segment.proximal.x = mark.segment.distal.x
+        }
+        for middleMark in getMarkSet(fromMarkIdSet:mark.linkedMarkIDs.middle) {
+            if mark == middleMark { break }
+            let distanceToProximal = Geometry.distanceSegmentToPoint(segment: mark.segment, point: middleMark.segment.proximal)
+            let distanceToDistal = Geometry.distanceSegmentToPoint(segment: mark.segment, point: middleMark.segment.distal)
+            if distanceToProximal < distanceToDistal {
+                let x = mark.segment.getX(fromY: middleMark.segment.proximal.x)
+                if let x = x {
+                    middleMark.segment.proximal.x = x
+                }
+            }
+            else {
+                let x = mark.segment.getX(fromY: middleMark.segment.distal.y)
+                    if let x = x {
+                        middleMark.segment.distal.x = x
+                }
+            }
+        }
     }
 
-    static func regionRelationBetweenMarks(mark: Mark, otherMark: Mark) -> RegionRelation {
-        var regionRelation: RegionRelation = .distant
-        let regionDiff = otherMark.regionIndex - mark.regionIndex
-        switch regionDiff {
-        case 1:
-            regionRelation = .after
-        case 0:
-            regionRelation = .same
-        case -1:
-            regionRelation = .before
-        default:
-            regionRelation = .distant
+    func markLinkage(mark: Mark, linkedMarksIDs: LinkedMarkIDs) -> Mark.Endpoint {
+        let linkedMarks = getLinkedMarksFromLinkedMarkIDs(linkedMarksIDs)
+        for m in linkedMarks.middle {
+            if getClosestEndpoint(of: mark, to: m) == .proximal {
+                return .proximal
+            }
+            if getClosestEndpoint(of: mark, to: m) == .distal {
+                return .distal
+            }
         }
-        return regionRelation
+        return .none
     }
+
+    func getClosestEndpoint(of mark: Mark, to otherMark: Mark) -> Mark.Endpoint {
+        guard mark != otherMark else { return .none }
+        let distanceToProximal = Geometry.distanceSegmentToPoint(segment: otherMark.segment, point: mark.segment.proximal)
+        let distanceToDistal = Geometry.distanceSegmentToPoint(segment: otherMark.segment, point: mark.segment.distal)
+        if distanceToProximal < distanceToDistal {
+            return .proximal
+        }
+        if distanceToProximal > distanceToDistal {
+            return .distal
+        }
+        return .none
+    }
+
+
+
+    // MARK: - Adding marks
 
     func addMark(at positionX: CGFloat, toRegion region: Region) -> Mark {
         os_log("addMark(at:toRegion:) - Ladder", log: OSLog.touches, type: .info)
@@ -179,6 +232,8 @@ final class Ladder: NSObject, Codable {
         }
         return mark
     }
+
+    // MARK: - Deleting marks
 
     func deleteMark(_ mark: Mark) {
         let markRegion = region(ofMark: mark)
@@ -208,14 +263,6 @@ final class Ladder: NSObject, Codable {
         }
     }
 
-    // Clear ladder of all marks.
-    // FIXME: remove mark references too?  And how is this undoable?
-    func clear() {
-        for region in regions {
-            region.marks.removeAll()
-        }
-    }
-
     func clearBlock() {
         for region in regions {
             for mark in region.marks {
@@ -232,7 +279,7 @@ final class Ladder: NSObject, Codable {
         }
     }
 
-    func haveDifferentRegions(_ marks: [Mark]) -> Bool {
+    func marksAreInDifferentRegions(_ marks: [Mark]) -> Bool {
         if marks.count <= 1 { return false }
         let markRegionIndex = marks[0].regionIndex
         for mark in marks {
@@ -244,7 +291,7 @@ final class Ladder: NSObject, Codable {
     }
 
     func marksAreNotContiguous(_ marks: [Mark]) -> Bool {
-        if haveDifferentRegions(marks) { return true }
+        if marksAreInDifferentRegions(marks) { return true }
         let markRegionIndex = marks[0].regionIndex
         var entryCounter = 0
         var inMarks = false
@@ -306,6 +353,24 @@ final class Ladder: NSObject, Codable {
         return intervalSum / CGFloat(proximalSortedMarks.count - 1)
     }
 
+    // MARK: - Region methods
+
+    static func regionRelationBetweenMarks(mark: Mark, otherMark: Mark) -> RegionRelation {
+        var regionRelation: RegionRelation = .distant
+        let regionDiff = otherMark.regionIndex - mark.regionIndex
+        switch regionDiff {
+        case 1:
+            regionRelation = .after
+        case 0:
+            regionRelation = .same
+        case -1:
+            regionRelation = .before
+        default:
+            regionRelation = .distant
+        }
+        return regionRelation
+    }
+
     func index(ofRegion region: Region?) -> Int? {
         guard let region = region else { return nil }
         return regions.firstIndex(of: region)
@@ -340,6 +405,20 @@ final class Ladder: NSObject, Codable {
         }
         else { return nil }
     }
+
+    func removeRegion(_ region: Region) {
+        regions.removeAll(where: { $0 == region })
+        reindexMarks()
+        // relink marks
+    }
+
+    func hideZone() {
+        zone.start = 0
+        zone.end = 0
+        zone.isVisible = false
+    }
+
+    // MARK: - Setting region and mark mode
 
     func setModeForMarkIDs(mode: Mark.Mode, markIDs: LinkedMarkIDs) {
         let linkedMarks = getLinkedMarksFromLinkedMarkIDs(markIDs)
@@ -391,11 +470,7 @@ final class Ladder: NSObject, Codable {
         regions.forEach { region in region.marks.forEach { mark in mark.mode = mode }}
     }
 
-    func hideZone() {
-        zone.start = 0
-        zone.end = 0
-        zone.isVisible = false
-    }
+
 
     func marksWithMode(_ mode: Mark.Mode, inRegion region: Region) -> [Mark] {
         let marks = region.marks.filter { mark in mark.mode == mode }
@@ -420,6 +495,8 @@ final class Ladder: NSObject, Codable {
         return regions.filter { $0.mode == mode }
     }
 
+    // MARK: - Intervals
+
     func ladderIntervals() -> [Int: [Interval]] {
         var indexedIntervals: [Int: [Interval]] = [:]
         for i in 0..<regions.count {
@@ -432,6 +509,7 @@ final class Ladder: NSObject, Codable {
         return Interval.createIntervals(region: region)
     }
 
+    // MARK: - Anchors
 
     func availableAnchors(forMark mark: Mark) -> [Anchor] {
         let linkedMarkIDs = mark.linkedMarkIDs
@@ -470,97 +548,10 @@ final class Ladder: NSObject, Codable {
         return availableAnchors(forMark: mark)[0]
     }
 
-    // Pivot points are really fixed points (rename?) that can't move during mark movement.
-    func pivotPoints(forMark mark: Mark) -> [Anchor] {
-        // No pivot points, i.e. full freedom of movement if no linked marks.
-        if mark.linkedMarkIDs.count == 0 {
-            return []
-        }
-        if mark.linkedMarkIDs.proximal.count > 0 && mark.linkedMarkIDs.distal.count > 0 {
-            return [.proximal, .distal]
-        }
-        else if mark.linkedMarkIDs.proximal.count > 0 {
-            return [.distal]
-        }
-        else if mark.linkedMarkIDs.distal.count > 0 {
-            return [.proximal]
-        }
-        // TODO: deal with middle marks
-        return []
-    }
 
-    func moveLinkedMarks(forMark mark: Mark) {
-        for proximalMark in getMarkSet(fromMarkIdSet: mark.linkedMarkIDs.proximal) {
-            proximalMark.segment.distal.x = mark.segment.proximal.x
-        }
-        for distalMark in getMarkSet(fromMarkIdSet: mark.linkedMarkIDs.distal) {
-            distalMark.segment.proximal.x = mark.segment.distal.x
-        }
-        for middleMark in getMarkSet(fromMarkIdSet:mark.linkedMarkIDs.middle) {
-            if mark == middleMark { break }
-            let distanceToProximal = Geometry.distanceSegmentToPoint(segment: mark.segment, point: middleMark.segment.proximal)
-            let distanceToDistal = Geometry.distanceSegmentToPoint(segment: mark.segment, point: middleMark.segment.distal)
-            if distanceToProximal < distanceToDistal {
-                let x = mark.segment.getX(fromY: middleMark.segment.proximal.x)
-                if let x = x {
-                    middleMark.segment.proximal.x = x
-                }
-            }
-            else {
-                let x = mark.segment.getX(fromY: middleMark.segment.distal.y)
-                    if let x = x {
-                        middleMark.segment.distal.x = x
-                }
-            }
-        }
-    }
 
-    func markLinkage(mark: Mark, linkedMarksIDs: LinkedMarkIDs) -> Mark.Endpoint {
-        let linkedMarks = getLinkedMarksFromLinkedMarkIDs(linkedMarksIDs)
-        for m in linkedMarks.middle {
-            if getClosestEndpoint(of: mark, to: m) == .proximal {
-                return .proximal
-            }
-            if getClosestEndpoint(of: mark, to: m) == .distal {
-                return .distal
-            }
-        }
-        return .none
-    }
 
-    func getClosestEndpoint(of mark: Mark, to otherMark: Mark) -> Mark.Endpoint {
-        guard mark != otherMark else { return .none }
-        let distanceToProximal = Geometry.distanceSegmentToPoint(segment: otherMark.segment, point: mark.segment.proximal)
-        let distanceToDistal = Geometry.distanceSegmentToPoint(segment: otherMark.segment, point: mark.segment.distal)
-        if distanceToProximal < distanceToDistal {
-            return .proximal
-        }
-        if distanceToProximal > distanceToDistal {
-            return .distal
-        }
-        return .none
-    }
-
-    func removeRegion(_ region: Region) {
-        regions.removeAll(where: { $0 == region })
-        reindexMarks()
-        // relink marks
-    }
-
-    func unlinkAllMarks() {
-        let marks = allMarks()
-        for mark in marks {
-            mark.linkedMarkIDs = LinkedMarkIDs()
-        }
-    }
-
-    func reindexMarks() {
-        for region in regions {
-            for mark in region.marks {
-                mark.regionIndex = index(ofRegion: region) ?? -1
-            }
-        }
-    }
+    // MARK: Ladder factories
 
     // Returns a basic ladder (A, AV, V).
     static func defaultLadder() -> Ladder {
@@ -571,7 +562,8 @@ final class Ladder: NSObject, Codable {
         return Ladder(template: ladder.template )
     }
 
-    // Debug
+    // MARK: - Debugging
+    
     func debugGetRegistry() -> [UUID: Mark] {
         return registry
     }
@@ -611,6 +603,26 @@ final class Ladder: NSObject, Codable {
         }
     }
 
+    // Pivot points are really fixed points (rename?) that can't move during mark movement.
+    // They are only for debugging.
+    func pivotPoints(forMark mark: Mark) -> [Anchor] {
+        // No pivot points, i.e. full freedom of movement if no linked marks.
+        if mark.linkedMarkIDs.count == 0 {
+            return []
+        }
+        if mark.linkedMarkIDs.proximal.count > 0 && mark.linkedMarkIDs.distal.count > 0 {
+            return [.proximal, .distal]
+        }
+        else if mark.linkedMarkIDs.proximal.count > 0 {
+            return [.distal]
+        }
+        else if mark.linkedMarkIDs.distal.count > 0 {
+            return [.proximal]
+        }
+        // TODO: deal with middle marks
+        return []
+    }
+
 }
 
 // MARK: - enums
@@ -628,5 +640,3 @@ enum TemporalRelation {
     case after
     case both
 }
-
-
