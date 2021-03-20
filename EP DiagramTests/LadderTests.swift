@@ -111,7 +111,10 @@ class LadderTests: XCTestCase {
         ladder.addMark(fromSegment: segment, toRegion: ladder.regions[1])
         ladder.addMark(fromSegment: segment, toRegion: ladder.regions[1])
         XCTAssertEqual(true, ladder.hasMarks())
-        ladder.clear()
+        let all = ladder.allMarks()
+        for mark in all {
+            ladder.deleteMark(mark)
+        }
         XCTAssertEqual(false, ladder.hasMarks())
     }
 
