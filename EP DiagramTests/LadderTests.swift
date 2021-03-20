@@ -9,6 +9,8 @@
 import XCTest
 @testable import EP_Diagram
 
+
+
 class LadderTests: XCTestCase {
     private var ladder: Ladder!
 
@@ -158,7 +160,11 @@ class LadderTests: XCTestCase {
         ladder.registerMark(mark1)
         ladder.registerMark(mark2)
         ladder.registerMark(mark3)
+        #if USECLASSES
         let mig = LinkedMarkIDs()
+        #else
+        var mig = LinkedMarkIDs()
+        #endif
         mig.proximal.insert(mark1.id)
         mig.middle.insert(mark2.id)
         mig.distal.insert(mark3.id)
@@ -277,13 +283,19 @@ class LadderTests: XCTestCase {
         mark1.linkedMarkIDs.distal.insert(mark2.id)
         XCTAssertEqual(mark1.linkedMarkIDs.distal.count, 1)
         // linkedMarkIDs are structs, i.e. value semantics, so copies are independent of original.
+        #if USECLASSES
         let linkedMarkIDs = mark1.linkedMarkIDs
+        #else
+        var linkedMarkIDs = mark1.linkedMarkIDs
+        #endif
         linkedMarkIDs.remove(id: mark2.id)
         XCTAssertEqual(linkedMarkIDs.count, 0)
         // if linkedMarkIDs are a struct, the commented out statement is true
-        //XCTAssertEqual(mark1.linkedMarkIDs.distal.count, 1)
-        // LinkedMarkIDs are a class so changing the copy also changes the original
+        #if USECLASSES
         XCTAssertEqual(mark1.linkedMarkIDs.distal.count, 0)
+        #else
+        XCTAssertEqual(mark1.linkedMarkIDs.distal.count, 1)
+        #endif
         mark1.linkedMarkIDs = linkedMarkIDs
         XCTAssertEqual(mark1.linkedMarkIDs.distal.count, 0)
     }
@@ -307,20 +319,19 @@ class LadderTests: XCTestCase {
 
         mark1.linkedMarkIDs.distal.insert(mark2.id)
 
+        #if USECLASSES
         let linkedMarkIDs = ladder.debugGetRegistry()[mark1.id]?.linkedMarkIDs
+        #else
+        var linkedMarkIDs = ladder.debugGetRegistry()[mark1.id]?.linkedMarkIDs
+        #endif
         XCTAssertEqual(linkedMarkIDs?.count, 1)
         XCTAssertEqual(ladder.debugGetRegistry()[mark1.id]?.linkedMarkIDs.count, 1)
         linkedMarkIDs?.removeAll()
         XCTAssertEqual(linkedMarkIDs?.count, 0)
-        // If linkedMarkIDs are structs, they don't affect registry
-        //XCTAssertEqual(ladder.debugGetRegistry()[mark1.id]?.linkedMarkIDs.count, 1)
-        // Budt LinkedMarkIDs are now a class, so they do
-        XCTAssertEqual(ladder.debugGetRegistry()[mark1.id]?.linkedMarkIDs.count, 0)
-
-
-
-
+        #if USECLASSES
+        XCTAssertEqual(ladder.debugGetRegistry()[mark1.id]?.linkedMarkIDs.count, 1)
+        #else
+        XCTAssertEqual(ladder.debugGetRegistry()[mark1.id]?.linkedMarkIDs.count, 1)
+        #endif
     }
-
-
 }

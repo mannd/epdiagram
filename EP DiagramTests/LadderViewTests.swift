@@ -380,8 +380,8 @@ class LadderViewTests: XCTestCase {
 
     func testHighlightNearbyMarks() {
         let ladder = ladderView.ladder
-        let mark1 = ladderView.ladder.addMark(at: 100, toRegion: ladder.regions[0])
-        let mark2 = ladderView.ladder.addMark(at: 200, toRegion: ladder.regions[1])
+        let mark1 = ladder.addMark(at: 100, toRegion: ladder.regions[0])
+        let mark2 = ladder.addMark(at: 200, toRegion: ladder.regions[1])
         XCTAssertEqual(mark1.mode, .normal)
         XCTAssertEqual(mark2.mode, .normal)
         ladder.attachedMark = mark1
@@ -408,6 +408,68 @@ class LadderViewTests: XCTestCase {
         XCTAssertEqual(mark2.mode, .normal)
         XCTAssertEqual(mark1.mode, .attached)
 
+    }
+
+    func testAssessImpulseOrigin() {
+        let ladder = ladderView.ladder
+        let mark1 = ladder.addMark(at: 100, toRegion: ladder.region(atIndex: 0))
+        let mark2 = ladder.addMark(at: 100, toRegion: ladder.region(atIndex: 1))
+        mark1.linkedMarkIDs.distal.insert(mark2.id)
+        mark2.linkedMarkIDs.proximal.insert(mark1.id)
+        ladderView.assessImpulseOrigin(mark: mark1)
+        ladderView.assessImpulseOrigin(mark: mark2)
+        XCTAssertEqual(mark1.impulseOriginSite, .proximal)
+        XCTAssertEqual(mark2.impulseOriginSite, .none)
+        let mark3 = ladder.addMark(fromSegment: Segment(proximal: CGPoint(x: 100, y: 0.5), distal: CGPoint(x: 150, y: 0.8)), toRegion: ladder.region(atIndex: 0))
+        mark1.linkedMarkIDs.middle.insert(mark3.id)
+        mark3.linkedMarkIDs.middle.insert(mark1.id)
+        ladderView.assessImpulseOrigin(mark: mark1)
+        ladderView.assessImpulseOrigin(mark: mark3)
+        XCTAssertEqual(mark1.impulseOriginSite, .proximal)
+        XCTAssertEqual(mark3.impulseOriginSite, .none)
+        mark3.linkedMarkIDs.middle.remove(mark1.id)
+        ladderView.assessImpulseOrigin(mark: mark1)
+        ladderView.assessImpulseOrigin(mark: mark3)
+        XCTAssertEqual(mark3.impulseOriginSite, .proximal)
+        mark3.linkedMarkIDs.middle.insert(mark1.id)
+        mark3.segment.distal = CGPoint(x:50, y: 0.8) // distal early now
+        ladderView.assessImpulseOrigin(mark: mark3)
+        XCTAssertEqual(mark3.impulseOriginSite, .distal)
+        // move mark1 next to distal mark3
+        mark1.move(movement: .horizontal, to: CGPoint(x: 50, y: 0))
+        ladderView.assessImpulseOrigin(mark: mark3)
+        XCTAssertEqual(mark3.impulseOriginSite, .none)
+    }
+
+    func testBlock() {
+        let ladder = ladderView.ladder
+        let mark1 = ladder.addMark(at: 100, toRegion: ladder.region(atIndex: 0))
+        let mark2 = ladder.addMark(at: 100, toRegion: ladder.region(atIndex: 1))
+        mark1.linkedMarkIDs.distal.insert(mark2.id)
+        mark2.linkedMarkIDs.proximal.insert(mark1.id)
+        ladderView.assessBlock(mark: mark1)
+        ladderView.assessBlock(mark: mark2)
+        XCTAssertEqual(mark1.blockSite, .none)
+        XCTAssertEqual(mark2.blockSite, .none)
+        let mark3 = ladder.addMark(fromSegment: Segment(proximal: CGPoint(x: 100, y: 0.5), distal: CGPoint(x: 150, y: 0.8)), toRegion: ladder.region(atIndex: 0))
+        mark1.linkedMarkIDs.middle.insert(mark3.id)
+        mark3.linkedMarkIDs.middle.insert(mark1.id)
+        ladderView.assessBlock(mark: mark1)
+        ladderView.assessBlock(mark: mark3)
+        XCTAssertEqual(mark1.blockSite, .none)
+        XCTAssertEqual(mark3.blockSite, .distal)
+        mark3.linkedMarkIDs.middle.remove(mark1.id)
+        ladderView.assessBlock(mark: mark1)
+        ladderView.assessBlock(mark: mark3)
+        XCTAssertEqual(mark3.blockSite, .distal)
+        mark3.linkedMarkIDs.middle.insert(mark1.id)
+        mark3.segment.distal = CGPoint(x:50, y: 0.8) // distal early now
+        ladderView.assessBlock(mark: mark3)
+        XCTAssertEqual(mark3.blockSite, .none)
+        // move mark1 next to distal mark3
+        mark1.move(movement: .horizontal, to: CGPoint(x: 50, y: 0))
+        ladderView.assessBlock(mark: mark3)
+        XCTAssertEqual(mark3.blockSite, .proximal)
     }
 
 }

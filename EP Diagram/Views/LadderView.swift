@@ -761,6 +761,8 @@ final class LadderView: ScaledView {
             updateMarkersAndRegionIntervals(activeRegion)
         }
         if state == .ended {
+            // This needs to be here, otherwise marks are unlinked and then undonw, so that linked marks don't go back to how they were.
+            currentDocument?.undoManager?.endUndoGrouping()
             isDragging = false
             if let movingMark = movingMark {
                 swapEndsIfNeeded(mark: movingMark)
@@ -793,7 +795,6 @@ final class LadderView: ScaledView {
             regionProximalToDragOrigin = nil
             regionDistalToDragOrigin = nil
             dragOriginDivision = .none
-            currentDocument?.undoManager?.endUndoGrouping()
         }
         cursorViewDelegate.refresh()
         setNeedsDisplay()
@@ -1063,7 +1064,6 @@ final class LadderView: ScaledView {
         cursorViewDelegate.refresh()
     }
 
-    // FIXME: After saving and reopening diagram, the linked marks appear to have their segments adjusted appropriately, but nothing shows up on the screen.  The linked marks don't move.  Why?
     private func moveLinkedMarks(forMark mark: Mark) {
         os_log("moveLinkedMarked(forMark:)", log: .action, type: .info)
         ladder.moveLinkedMarks(forMark: mark)
@@ -1537,7 +1537,10 @@ final class LadderView: ScaledView {
             if mark.early == .none {
                 return  // for now, ignore vertical marks
             }
-            if mark.segment.proximal.y > blockMin
+            if mark.linkedMarkIDs.middle.count > 0
+                && mark.late == ladder.markLinkage(mark: mark, linkedMarksIDs: mark.linkedMarkIDs) {
+                mark.blockSite = .none
+            } else if mark.segment.proximal.y > blockMin
                 && mark.late == .proximal {
                 mark.blockSite = .proximal
             } else if mark.segment.distal.y < blockMax
@@ -1552,27 +1555,32 @@ final class LadderView: ScaledView {
     func assessImpulseOrigin(mark: Mark) {
         if mark.impulseOriginSetting == .auto {
             mark.impulseOriginSite = .none
-            if mark.linkedMarkIDs.proximal.count == 0 && (mark.early == .proximal || mark.early == .none) {
+            if mark.linkedMarkIDs.middle.count > 0
+                && mark.early == ladder.markLinkage(mark: mark, linkedMarksIDs: mark.linkedMarkIDs) {
+                mark.impulseOriginSite = .none
+            } else if mark.linkedMarkIDs.proximal.count == 0 && (mark.early == .proximal || mark.early == .none) {
                 mark.impulseOriginSite = .proximal
             } else if mark.linkedMarkIDs.distal.count == 0 && mark.early == .distal {
                 mark.impulseOriginSite = .distal
             }
-        } else {
+        }
+        else {
             mark.impulseOriginSite = mark.impulseOriginSetting
         }
+
     }
 
-    func regionValueFromCalibratedValue(_ value: CGFloat, usingCalFactor calFactor: CGFloat) -> CGFloat {
-        let x1: CGFloat = 0
-        let x2: CGFloat  = value
-        let regionX1 = transformToRegionPositionX(scaledViewPositionX: x1)
-        let regionX2 = transformToRegionPositionX(scaledViewPositionX: x2)
-        let diff = regionX2 - regionX1
-        return diff / calFactor
-    }
+func regionValueFromCalibratedValue(_ value: CGFloat, usingCalFactor calFactor: CGFloat) -> CGFloat {
+    let x1: CGFloat = 0
+    let x2: CGFloat  = value
+    let regionX1 = transformToRegionPositionX(scaledViewPositionX: x1)
+    let regionX2 = transformToRegionPositionX(scaledViewPositionX: x2)
+    let diff = regionX2 - regionX1
+    return diff / calFactor
+}
 
-    func showLockLadderWarning(rect: CGRect) {
-        let text = L("LADDER LOCK")
+func showLockLadderWarning(rect: CGRect) {
+    let text = L("LADDER LOCK")
         let attributes: [NSAttributedString.Key: Any] = [
             .font: UIFont.systemFont(ofSize: 14.0),
             .foregroundColor: UIColor.white, .backgroundColor: UIColor.systemRed,
@@ -2578,7 +2586,16 @@ extension LadderView: LadderViewDelegate {
                     //                    mark.segment.distal.x = middleMark.segment.distal.x
                 }
             }
+            if mark.anchor == .proximal {
+                cursorViewDelegate.moveCursor(cursorViewPositionX: mark.segment.proximal.x)
+            }
+            else if mark.anchor == .middle {
+                cursorViewDelegate.moveCursor(cursorViewPositionX: mark.midpoint().x)
+            } else if mark.anchor == .distal {
+                cursorViewDelegate.moveCursor(cursorViewPositionX: mark.segment.distal.x)
+            }
         }
+
     }
 
     func reregisterAllMarks() {

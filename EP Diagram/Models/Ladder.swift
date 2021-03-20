@@ -116,7 +116,7 @@ final class Ladder: NSObject, Codable {
 
     // Convert a LinkedMarkIDs to LinkedMarks
     func getLinkedMarksFromLinkedMarkIDs(_ linkedMarkIDs: LinkedMarkIDs) -> LinkedMarks {
-        let linkedMarks = LinkedMarks()
+        var linkedMarks = LinkedMarks()
         linkedMarks.proximal = lookup(ids: linkedMarkIDs.proximal)
         linkedMarks.middle = lookup(ids: linkedMarkIDs.middle)
         linkedMarks.distal = lookup(ids: linkedMarkIDs.distal)
@@ -513,6 +513,32 @@ final class Ladder: NSObject, Codable {
                 }
             }
         }
+    }
+
+    func markLinkage(mark: Mark, linkedMarksIDs: LinkedMarkIDs) -> Mark.Endpoint {
+        let linkedMarks = getLinkedMarksFromLinkedMarkIDs(linkedMarksIDs)
+        for m in linkedMarks.middle {
+            if getClosestEndpoint(of: mark, to: m) == .proximal {
+                return .proximal
+            }
+            if getClosestEndpoint(of: mark, to: m) == .distal {
+                return .distal
+            }
+        }
+        return .none
+    }
+
+    func getClosestEndpoint(of mark: Mark, to otherMark: Mark) -> Mark.Endpoint {
+        guard mark != otherMark else { return .none }
+        let distanceToProximal = Geometry.distanceSegmentToPoint(segment: otherMark.segment, point: mark.segment.proximal)
+        let distanceToDistal = Geometry.distanceSegmentToPoint(segment: otherMark.segment, point: mark.segment.distal)
+        if distanceToProximal < distanceToDistal {
+            return .proximal
+        }
+        if distanceToProximal > distanceToDistal {
+            return .distal
+        }
+        return .none
     }
 
     func removeRegion(_ region: Region) {
