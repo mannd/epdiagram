@@ -15,7 +15,7 @@ final class LadderView: ScaledView {
     #if DEBUG  // Change this for debugging impulse origins and block
     var showProxEnd = false
     var showEarliestPoint = false
-    var debugMarkMode = true
+    var debugMarkMode = false
     #else  // Don't ever change this.  They must all be FALSE.
     var showProxEnd = false
     var showEarliestPoint = false
@@ -2031,9 +2031,9 @@ func showLockLadderWarning(rect: CGRect) {
         if ladder.marksAreInDifferentRegions(selectedMarks) {
             throw LadderError.marksInDifferentRegions
         }
-        if ladder.marksAreNotContiguous(selectedMarks) {
-            throw LadderError.marksNotContiguous
-        }
+//        if ladder.marksAreNotContiguous(selectedMarks) {
+//            throw LadderError.marksNotContiguous
+//        }
         if !ladder.marksAreParallel(selectedMarks[0], selectedMarks[1]) {
             throw LadderError.marksNotParallel
         }

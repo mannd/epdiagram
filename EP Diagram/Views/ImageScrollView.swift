@@ -20,6 +20,7 @@ extension ImageScrollView {
     @IBAction func showImageMenu(_ gestureRecognizer: UILongPressGestureRecognizer) {
         print("long press")
         if gestureRecognizer.state == .began {
+            if contentSize == CGSize.zero { return }
             self.becomeFirstResponder()
             let rotateMenuItem = UIMenuItem(title: L("Rotate"), action: #selector(showRotateToolbar))
             let resetMenuItem = UIMenuItem(title: L("Reset"), action: #selector(resetImage))
