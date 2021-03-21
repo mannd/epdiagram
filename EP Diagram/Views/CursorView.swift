@@ -226,6 +226,8 @@ final class CursorView: ScaledView {
 
     // Add tiny circle around intersection of cursor and mark.
     private func drawCircle(context: CGContext, center: CGPoint, radius: CGFloat) {
+        // TODO: Assess this which makes the circles more prominent.
+        context.setLineWidth(lineWidth + 1)
         context.addArc(center: center, radius: radius, startAngle: 0.0, endAngle: .pi * 2.0, clockwise: true)
         context.strokePath()
     }

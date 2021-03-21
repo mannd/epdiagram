@@ -15,7 +15,7 @@ final class LadderView: ScaledView {
     #if DEBUG  // Change this for debugging impulse origins and block
     var showProxEnd = false
     var showEarliestPoint = false
-    var debugMarkMode = false
+    var debugMarkMode = true
     #else  // Don't ever change this.  They must all be FALSE.
     var showProxEnd = false
     var showEarliestPoint = false
@@ -400,7 +400,8 @@ final class LadderView: ScaledView {
                 if let connectedMark = connect(marksToConnect: ladder.connectedMarks) {
                     ladder.connectedMarks.append(connectedMark)
                     connectedMark.mode = .connected
-                    linkNearbyMarks(mark: connectedMark)
+                    ladder.linkConnectedMarks()
+//                    linkNearbyMarks(mark: connectedMark)
                     assessBlockAndImpulseOrigin(mark: connectedMark)
                     let linkedMarks = ladder.getLinkedMarksFromLinkedMarkIDs(connectedMark.linkedMarkIDs)
                     assessBlockAndImpulseOrigin(marks: linkedMarks.allMarks)
@@ -695,6 +696,8 @@ final class LadderView: ScaledView {
         NotificationCenter.default.post(name: .didUndoableAction, object: nil)
         updateMarkersAndRegionIntervals(ladder.region(ofMark: mark))
         assessBlockAndImpulseOrigin(mark: mark)
+//        let linkedMarks = ladder.getLinkedMarksFromLinkedMarkIDs(mark.linkedMarkIDs)
+//        assessBlockAndImpulseOrigin(marks: linkedMarks.allMarks)
     }
 
     private func normalModeDrag(_ pan: UIPanGestureRecognizer) {
@@ -987,7 +990,6 @@ final class LadderView: ScaledView {
             for neighboringMark in proximalRegion.marks {
                 if assessCloseness(ofMark: mark, toNeighboringMark: neighboringMark, usingNearbyDistance: nearbyDistance) {
                     proximalMarkIds.insert(neighboringMark.id)
-
                 }
             }
         }
@@ -995,7 +997,6 @@ final class LadderView: ScaledView {
             for neighboringMark in distalRegion.marks {
                 if assessCloseness(ofMark: mark, toNeighboringMark: neighboringMark, usingNearbyDistance: nearbyDistance) {
                     distalMarkIds.insert(neighboringMark.id)
-
                 }
             }
         }
@@ -1691,7 +1692,7 @@ func showLockLadderWarning(rect: CGRect) {
         }
         var text = ""
         if debugMarkMode {
-            text = String(mark.id.uuidString.prefix(8))
+            text = String(mark.id.uuidString.prefix(8) + "\(mark.blockSite)")
         } else {
             text = "\(value)"
         }
@@ -2538,10 +2539,18 @@ extension LadderView: LadderViewDelegate {
     func snapMarkToNearbyMarks(mark: Mark, nearbyMarks: LinkedMarks) {
         os_log("SnapMarkToNearbyMarks(mark:nearbyMarks:))", log: .action, type: .info)
         guard snapMarks else { return }
+        // Remove all previous links to the mark
+        mark.linkedMarkIDs = LinkedMarkIDs()
+        // Remove all links to the mark from other marks
+        for m in ladder.allMarks() {
+            m.linkedMarkIDs.remove(id: mark.id)
+        }
+        // Now reconstruct the links
         for proxMark in nearbyMarks.proximal {
             mark.linkedMarkIDs.proximal.insert(proxMark.id)
             proxMark.linkedMarkIDs.distal.insert(mark.id)
             mark.segment.proximal.x = proxMark.segment.distal.x
+            mark.segment.proximal.y = 0
             if mark.anchor == .proximal {
                 cursorViewDelegate.moveCursor(cursorViewPositionX: mark.segment.proximal.x)
             }
@@ -2553,6 +2562,7 @@ extension LadderView: LadderViewDelegate {
             mark.linkedMarkIDs.distal.insert(distalMark.id)
             distalMark.linkedMarkIDs.proximal.insert(mark.id)
             mark.segment.distal.x = distalMark.segment.proximal.x
+            mark.segment.distal.y = 1.0
             if mark.anchor == .distal {
                 cursorViewDelegate.moveCursor(cursorViewPositionX: mark.segment.distal.x)
             }

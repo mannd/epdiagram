@@ -137,11 +137,27 @@ final class Ladder: NSObject, Codable {
         return lookup(ids: markIdSet)
     }
 
-
     func unlinkAllMarks() {
         let marks = allMarks()
         for mark in marks {
             mark.linkedMarkIDs = LinkedMarkIDs()
+        }
+    }
+
+    func linkConnectedMarks() {
+        // ignore middle marks, other linked marks when linking connected marks
+        guard connectedMarks.count == 3 else { return }
+        guard abs(connectedMarks[0].regionIndex - connectedMarks[1].regionIndex) == 2 else { return }
+        if connectedMarks[1].regionIndex > connectedMarks[0].regionIndex {
+            connectedMarks[2].linkedMarkIDs.proximal.insert(connectedMarks[0].id)
+            connectedMarks[2].linkedMarkIDs.distal.insert(connectedMarks[1].id)
+            connectedMarks[0].linkedMarkIDs.distal.insert(connectedMarks[2].id)
+            connectedMarks[1].linkedMarkIDs.proximal.insert(connectedMarks[2].id)
+        } else {
+            connectedMarks[2].linkedMarkIDs.distal.insert(connectedMarks[0].id)
+            connectedMarks[2].linkedMarkIDs.proximal.insert(connectedMarks[1].id)
+            connectedMarks[0].linkedMarkIDs.proximal.insert(connectedMarks[2].id)
+            connectedMarks[1].linkedMarkIDs.distal.insert(connectedMarks[2].id)
         }
     }
 
@@ -156,9 +172,11 @@ final class Ladder: NSObject, Codable {
 
     func moveLinkedMarks(forMark mark: Mark) {
         for proximalMark in getMarkSet(fromMarkIdSet: mark.linkedMarkIDs.proximal) {
+            if mark == proximalMark { break }
             proximalMark.segment.distal.x = mark.segment.proximal.x
         }
         for distalMark in getMarkSet(fromMarkIdSet: mark.linkedMarkIDs.distal) {
+            if mark == distalMark { break }
             distalMark.segment.proximal.x = mark.segment.distal.x
         }
         for middleMark in getMarkSet(fromMarkIdSet:mark.linkedMarkIDs.middle) {
