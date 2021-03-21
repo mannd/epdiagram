@@ -401,6 +401,9 @@ final class LadderView: ScaledView {
                     ladder.connectedMarks.append(connectedMark)
                     connectedMark.mode = .connected
                     linkNearbyMarks(mark: connectedMark)
+                    assessBlockAndImpulseOrigin(mark: connectedMark)
+                    let linkedMarks = ladder.getLinkedMarksFromLinkedMarkIDs(connectedMark.linkedMarkIDs)
+                    assessBlockAndImpulseOrigin(marks: linkedMarks.allMarks)
                 }
             }
 
@@ -426,6 +429,7 @@ final class LadderView: ScaledView {
             let firstTappedMarkRegionIndex = ladder.regionIndex(ofMark: firstTappedMark)
             guard let regionIndex = ladder.index(ofRegion: region),
                   abs(firstTappedMarkRegionIndex - regionIndex) == 1 else { return }
+            // FIXME: Do we need active region when connecting?
             activeRegion = region
             // draw mark from end of previous connecteded mark
             let tapRegionPosition = transformToRegionPosition(scaledViewPosition: tapLocationInLadder.unscaledPosition, region: region)
@@ -437,7 +441,10 @@ final class LadderView: ScaledView {
                     newMark.mode = .connected
                     ladder.connectedMarks.append(newMark)
                     undoablyAddMark(mark: newMark)
-
+                    linkNearbyMarks(mark: newMark)
+                    assessBlockAndImpulseOrigin(mark: newMark)
+                    let linkedMarks = ladder.getLinkedMarksFromLinkedMarkIDs(newMark.linkedMarkIDs)
+                    assessBlockAndImpulseOrigin(marks: linkedMarks.allMarks)
                 }
             }
             else if firstTappedMarkRegionIndex > regionIndex {
@@ -447,7 +454,10 @@ final class LadderView: ScaledView {
                     newMark.mode = .connected
                     ladder.connectedMarks.append(newMark)
                     undoablyAddMark(mark: newMark)
-                }
+                    linkNearbyMarks(mark: newMark)
+                    assessBlockAndImpulseOrigin(mark: newMark)
+                    let linkedMarks = ladder.getLinkedMarksFromLinkedMarkIDs(newMark.linkedMarkIDs)
+                    assessBlockAndImpulseOrigin(marks: linkedMarks.allMarks)                }
             }
             // FIXME: what do do if something illegal tapped (same mark, illegal region).  Remove connected marks?
             // Maybe displace red X if illegal spot.
