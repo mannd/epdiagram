@@ -255,13 +255,16 @@ final class Ladder: NSObject, Codable {
 
     func deleteMark(_ mark: Mark) {
         let markRegion = region(ofMark: mark)
+        removeMarkIdReferences(toMarkId: mark.id)
+        // Can't remove mark ids here
+//        mark.linkedMarkIDs = LinkedMarkIDs()
+
         normalizeAllMarks()
         // FIXME: do we need to unregister mark?
         unregisterMark(mark)
         if let index = markRegion.marks.firstIndex(where: {$0 === mark}) {
             markRegion.marks.remove(at: index)
         }
-        removeMarkIdReferences(toMarkId: mark.id)
     }
 
     func deleteMarksInRegion(_ region: Region) {
