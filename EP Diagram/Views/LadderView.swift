@@ -15,7 +15,7 @@ final class LadderView: ScaledView {
     #if DEBUG  // Change this for debugging impulse origins and block
     var showProxEnd = false
     var showEarliestPoint = false
-    var debugMarkMode = true
+    var debugMarkMode = false
     #else  // Don't ever change this.  They must all be FALSE.
     var showProxEnd = false
     var showEarliestPoint = false
@@ -392,7 +392,6 @@ final class LadderView: ScaledView {
             // what region is the mark in?
             let markRegionIndex = ladder.regionIndex(ofMark: mark)
             let firstMarkRegionIndex = ladder.regionIndex(ofMark: ladder.connectedMarks[0])
-            // TODO: what about create mark with each tap?
             let regionDistance = abs(markRegionIndex - firstMarkRegionIndex)
             if regionDistance > 1 {
                 ladder.connectedMarks.append(mark)
@@ -441,23 +440,19 @@ final class LadderView: ScaledView {
         let firstTappedMarkRegionIndex = ladder.regionIndex(ofMark: firstTappedMark)
         guard let regionIndex = ladder.index(ofRegion: region),
               abs(firstTappedMarkRegionIndex - regionIndex) == 1 else { return }
-        // FIXME: Do we need active region when connecting?
-        // We do, but why?
-        activeRegion = region
         // draw mark from end of previous connecteded mark
         let tapRegionPosition = transformToRegionPosition(scaledViewPosition: position, region: region)
         if firstTappedMarkRegionIndex < regionIndex {
             // marks must reach close enough to region boundary to be snapable
             guard firstTappedMark.segment.distal.y > (1.0 - lowerLimitMarkHeight) else { return }
-            if let newMark = addMarkToActiveRegion(regionPositionX: firstTappedMark.segment.distal.x) {
-                addBlockedMark(newMark: newMark, tapRegionPosition: tapRegionPosition, endPoint: .distal)
-            }
+            let newMark = ladder.addMark(at: firstTappedMark.segment.distal.x, toRegion: region)
+            addBlockedMark(newMark: newMark, tapRegionPosition: tapRegionPosition, endPoint: .distal)
         }
         else if firstTappedMarkRegionIndex > regionIndex {
             guard firstTappedMark.segment.proximal.y < lowerLimitMarkHeight else { return }
-            if let newMark = addMarkToActiveRegion(regionPositionX: firstTappedMark.segment.proximal.x) {
-                addBlockedMark(newMark: newMark, tapRegionPosition: tapRegionPosition, endPoint: .proximal)
-            }
+            let newMark = ladder.addMark(at: firstTappedMark.segment.proximal.x, toRegion: region)
+            addBlockedMark(newMark: newMark, tapRegionPosition: tapRegionPosition, endPoint: .proximal)
+
         }
         else {
             ladder.connectedMarks.removeAll()
@@ -2517,7 +2512,6 @@ extension LadderView: LadderViewDelegate {
         NotificationCenter.default.post(name: .didUndoableAction, object: nil)
         unsnapMarkFromNearbyMarks(mark: mark, nearbyMarks: nearbyMarks)
     }
-
 
     func unsnapMarkFromNearbyMarks(mark: Mark, nearbyMarks: LinkedMarks) {
         os_log("unsnapMarkFromNearbyMarks(mark:nearbyMarks:))", log: .action, type: .info)
