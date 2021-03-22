@@ -442,6 +442,7 @@ final class LadderView: ScaledView {
         guard let regionIndex = ladder.index(ofRegion: region),
               abs(firstTappedMarkRegionIndex - regionIndex) == 1 else { return }
         // FIXME: Do we need active region when connecting?
+        // We do, but why?
         activeRegion = region
         // draw mark from end of previous connecteded mark
         let tapRegionPosition = transformToRegionPosition(scaledViewPosition: position, region: region)
@@ -656,25 +657,22 @@ final class LadderView: ScaledView {
     // See https://stackoverflow.com/questions/36491789/using-nsundomanager-how-to-register-undos-using-swift-closures/36492619#36492619
     func undoablyDeleteMark(mark: Mark) {
         os_log("undoablyDeleteMark(mark:region:) - LadderView", log: OSLog.debugging, type: .debug)
-        currentDocument?.undoManager.beginUndoGrouping()
         currentDocument?.undoManager?.registerUndo(withTarget: self, handler: { target in
             target.redoablyUndeleteMark(mark: mark)
         })
         NotificationCenter.default.post(name: .didUndoableAction, object: nil)
-        ladder.deleteMark(mark)
 
+        ladder.deleteMark(mark)
+        let linkedMarks = ladder.getLinkedMarksFromLinkedMarkIDs(mark.linkedMarkIDs)
         let region = ladder.region(ofMark: mark)
         updateMarkersAndRegionIntervals(region)
         hideCursorAndNormalizeAllMarks()
-        let linkedMarks = ladder.getLinkedMarksFromLinkedMarkIDs(mark.linkedMarkIDs)
+        // ?no need to link nearby marks, but need to update links of neighboring marks
         assessBlockAndImpulseOrigin(marks: linkedMarks.allMarks)
-        currentDocument?.undoManager.endUndoGrouping()
-//        cursorViewDelegate.refresh()
     }
 
     func redoablyUndeleteMark(mark: Mark) {
         os_log("redoablyUndeleteMark(mark:region:) - LadderView", log: OSLog.debugging, type: .debug)
-        currentDocument?.undoManager.beginUndoGrouping()
 
         currentDocument?.undoManager?.registerUndo(withTarget: self, handler: { target in
             target.undoablyDeleteMark(mark: mark)
@@ -688,8 +686,6 @@ final class LadderView: ScaledView {
         linkNearbyMarks(mark: mark)
         let linkedMarks = ladder.getLinkedMarksFromLinkedMarkIDs(mark.linkedMarkIDs)
         assessBlockAndImpulseOrigin(marks: linkedMarks.allMarks)
-        currentDocument?.undoManager.endUndoGrouping()
-
     }
 
     private func undoablyAddMark(mark: Mark) {
@@ -986,19 +982,18 @@ final class LadderView: ScaledView {
     // FIXME: middle marks end up with a copy of themselves in the neighboring linked marks.
     // Returns linked mark ids of marks close to passed in mark.
     func getNearbyMarkIDs(mark: Mark, nearbyDistance: CGFloat) -> LinkedMarkIDs {
-        // FIXME:  when undeleting, active region is not the region of the undeletion!!!!!!
-        let activeRegion = ladder.region(ofMark: mark)
+        let region = ladder.region(ofMark: mark)
         var proximalMarkIds = MarkIdSet()
         var distalMarkIds = MarkIdSet()
         var middleMarkIds = MarkIdSet()
-        if let proximalRegion = ladder.regionBefore(region: activeRegion) {
+        if let proximalRegion = ladder.regionBefore(region: region) {
             for neighboringMark in proximalRegion.marks {
                 if assessCloseness(ofMark: mark, toNeighboringMark: neighboringMark, usingNearbyDistance: nearbyDistance) {
                     proximalMarkIds.insert(neighboringMark.id)
                 }
             }
         }
-        if let distalRegion = ladder.regionAfter(region: activeRegion) {
+        if let distalRegion = ladder.regionAfter(region: region) {
             for neighboringMark in distalRegion.marks {
                 if assessCloseness(ofMark: mark, toNeighboringMark: neighboringMark, usingNearbyDistance: nearbyDistance) {
                     distalMarkIds.insert(neighboringMark.id)
@@ -1006,7 +1001,7 @@ final class LadderView: ScaledView {
             }
         }
         // check in the same region ("middle region", same as activeRegion)
-        for neighboringMark in activeRegion.marks {
+        for neighboringMark in region.marks {
             if assessCloseness(ofMark: mark, toNeighboringMark: neighboringMark, usingNearbyDistance: nearbyDistance) {
                 middleMarkIds.insert(neighboringMark.id)
             }
@@ -2523,22 +2518,12 @@ extension LadderView: LadderViewDelegate {
         unsnapMarkFromNearbyMarks(mark: mark, nearbyMarks: nearbyMarks)
     }
 
-    // FIXME: does snapping need to be undoable???
+
     func unsnapMarkFromNearbyMarks(mark: Mark, nearbyMarks: LinkedMarks) {
         os_log("unsnapMarkFromNearbyMarks(mark:nearbyMarks:))", log: .action, type: .info)
         guard snapMarks else { return }
-        for proxMark in nearbyMarks.proximal {
-            mark.linkedMarkIDs.proximal.remove(proxMark.id)
-            proxMark.linkedMarkIDs.distal.remove(mark.id)
-        }
-        for distalMark in nearbyMarks.distal {
-            mark.linkedMarkIDs.distal.remove(distalMark.id)
-            distalMark.linkedMarkIDs.proximal.remove(mark.id)
-        }
-        for middleMark in nearbyMarks.middle {
-            mark.linkedMarkIDs.middle.remove(middleMark.id)
-            middleMark.linkedMarkIDs.middle.remove(mark.id)
-        }
+        // This works better than original version
+        unlinkMarks(mark: mark)
     }
 
     // Adjust ends of marks to connect after dragging.
@@ -2635,7 +2620,7 @@ extension LadderView: LadderViewDelegate {
         let minimum: CGFloat = nearbyMarkAccuracy / scale
         let nearbyMarkIDs = getNearbyMarkIDs(mark: mark, nearbyDistance: minimum)
         let nearbyMarks = ladder.getLinkedMarksFromLinkedMarkIDs(nearbyMarkIDs)
-        undoablySnapMarkToNearbyMarks(mark: mark, nearbyMarks: nearbyMarks)
+        snapMarkToNearbyMarks(mark: mark, nearbyMarks: nearbyMarks)
     }
 
     func getPositionYInView(positionY: CGFloat, view: UIView) -> CGFloat {
