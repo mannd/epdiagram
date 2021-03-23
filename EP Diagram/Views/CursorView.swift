@@ -327,8 +327,8 @@ final class CursorView: ScaledView {
             pan.setTranslation(CGPoint(x: 0,y: 0), in: self)
         }
         if pan.state == .ended {
-            currentDocument?.undoManager?.endUndoGrouping()
             ladderViewDelegate.linkMarksNearbyAttachedMark()
+            currentDocument?.undoManager?.endUndoGrouping()
             ladderViewDelegate.assessBlockAndImpulseOriginAttachedMark()
             cursorEndPointY = 0
         }
