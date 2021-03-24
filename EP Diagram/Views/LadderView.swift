@@ -425,7 +425,7 @@ final class LadderView: ScaledView {
         ladder.connectedMarks.append(newMark)
         currentDocument?.undoManager.beginUndoGrouping()
         undoablyAddMark(mark: newMark)
-        let newNearbyMarks = getNewNearbyMarks(mark: newMark)
+        let newNearbyMarks = getNearbyMarkIDs(mark: newMark)
         linkNewNearbyMarks(mark: newMark, nearbyMarks: newNearbyMarks)
         currentDocument?.undoManager.endUndoGrouping()
     }
@@ -676,8 +676,8 @@ final class LadderView: ScaledView {
         mark.mode = .normal
         updateMarkersAndRegionIntervals(region)
         hideCursorAndNormalizeAllMarks()
-        let newNearbyMarks = getNewNearbyMarks(mark: mark)
-        snapToNewNearbyMarks(mark: mark, nearbyMarks: newNearbyMarks)
+        let newNearbyMarks = getNearbyMarkIDs(mark: mark)
+        snapToNearbyMarks(mark: mark, nearbyMarks: newNearbyMarks)
         linkNewNearbyMarks(mark: mark, nearbyMarks: newNearbyMarks)
     }
 
@@ -771,8 +771,8 @@ final class LadderView: ScaledView {
             isDragging = false
             if let movingMark = movingMark {
                 swapEndsIfNeeded(mark: movingMark)
-                let newNearbyMarks = getNewNearbyMarks(mark: movingMark)
-                snapToNewNearbyMarks(mark: movingMark, nearbyMarks: newNearbyMarks)
+                let newNearbyMarks = getNearbyMarkIDs(mark: movingMark)
+                snapToNearbyMarks(mark: movingMark, nearbyMarks: newNearbyMarks)
                 linkNewNearbyMarks(mark: movingMark, nearbyMarks: newNearbyMarks)
             }
             else if let dragCreatedMark = dragCreatedMark {
@@ -781,8 +781,8 @@ final class LadderView: ScaledView {
                 }
                 else {
                     swapEndsIfNeeded(mark: dragCreatedMark)
-                    let newNearbyMarks = getNewNearbyMarks(mark: dragCreatedMark)
-                    snapToNewNearbyMarks(mark: dragCreatedMark, nearbyMarks: newNearbyMarks)
+                    let newNearbyMarks = getNearbyMarkIDs(mark: dragCreatedMark)
+                    snapToNearbyMarks(mark: dragCreatedMark, nearbyMarks: newNearbyMarks)
                     linkNewNearbyMarks(mark: dragCreatedMark, nearbyMarks: newNearbyMarks)
                 }
             }
@@ -938,99 +938,6 @@ final class LadderView: ScaledView {
         }
     }
 
-    func highlightNearbyMarks(_ mark: Mark?) {
-        guard snapMarks else { return }
-        guard let mark = mark else { return }
-        ladder.normalizeAllMarksExceptAttachedMark()
-        let nearbyDistance = nearbyMarkAccuracy / scale
-        setModeOfNearbyMarks(mark: mark, nearbyDistance: nearbyDistance)
-    }
-
-    func setModeOfNearbyMarks(mark: Mark, nearbyDistance: CGFloat) {
-        let region = ladder.region(ofMark: mark)
-        if let proximalRegion = ladder.regionBefore(region: region) {
-            for neighboringMark in proximalRegion.marks {
-                if assessCloseness(ofMark: mark, toNeighboringMark: neighboringMark, usingNearbyDistance: nearbyDistance) {
-                    neighboringMark.mode = .linked
-                }
-            }
-        }
-        if let distalRegion = ladder.regionAfter(region: region) {
-            for neighboringMark in distalRegion.marks {
-                if assessCloseness(ofMark: mark, toNeighboringMark: neighboringMark, usingNearbyDistance: nearbyDistance) {
-                    neighboringMark.mode = .linked
-
-                }
-            }
-        }
-        // check in the same region ("middle region", same as activeRegion)
-        for neighboringMark in region.marks {
-            if assessCloseness(ofMark: mark, toNeighboringMark: neighboringMark, usingNearbyDistance: nearbyDistance) {
-                neighboringMark.mode = .linked
-            }
-        }
-    }
-
-    // FIXME: middle marks end up with a copy of themselves in the neighboring linked marks.
-    // Returns linked mark ids of marks close to passed in mark.
-    func getNearbyMarkIDs(mark: Mark, nearbyDistance: CGFloat) -> LinkedMarkIDs {
-        let region = ladder.region(ofMark: mark)
-        var proximalMarkIds = MarkIdSet()
-        var distalMarkIds = MarkIdSet()
-        var middleMarkIds = MarkIdSet()
-        if let proximalRegion = ladder.regionBefore(region: region) {
-            for neighboringMark in proximalRegion.marks {
-                if assessCloseness(ofMark: mark, toNeighboringMark: neighboringMark, usingNearbyDistance: nearbyDistance) {
-                    proximalMarkIds.insert(neighboringMark.id)
-                }
-            }
-        }
-        if let distalRegion = ladder.regionAfter(region: region) {
-            for neighboringMark in distalRegion.marks {
-                if assessCloseness(ofMark: mark, toNeighboringMark: neighboringMark, usingNearbyDistance: nearbyDistance) {
-                    distalMarkIds.insert(neighboringMark.id)
-                }
-            }
-        }
-        // check in the same region ("middle region", same as activeRegion)
-        for neighboringMark in region.marks {
-            if assessCloseness(ofMark: mark, toNeighboringMark: neighboringMark, usingNearbyDistance: nearbyDistance) {
-                middleMarkIds.insert(neighboringMark.id)
-            }
-        }
-        return LinkedMarkIDs(proximal: proximalMarkIds, middle: middleMarkIds, distal: distalMarkIds)
-    }
-
-    func assessCloseness(ofMark mark: Mark, toNeighboringMark neighboringMark: Mark, usingNearbyDistance nearbyDistance: CGFloat) -> Bool {
-        guard mark != neighboringMark else { return false }
-        let region = ladder.region(ofMark: mark)
-        let neighboringRegion = ladder.region(ofMark: neighboringMark)
-        // parallel marks in the same region are by definition not close
-        if (region == neighboringRegion) && (Geometry.areParallel(mark.segment, neighboringMark.segment)) {
-            return false
-        }
-        var isClose = false
-        // To get minimum distance between two line segments, must get minimum distances between each segment and each endpoint of the other segment, and take minimum of all those.
-        let ladderViewPositionNeighboringMarkSegment = transformToScaledViewSegment(regionSegment: neighboringMark.segment, region: neighboringRegion)
-        let ladderViewPositionMarkProximal = transformToScaledViewPosition(regionPosition: mark.segment.proximal, region: region)
-        let ladderViewPositionMarkDistal = transformToScaledViewPosition(regionPosition: mark.segment.distal, region: region)
-        let distanceToNeighboringMarkSegmentProximal = Geometry.distanceSegmentToPoint(segment: ladderViewPositionNeighboringMarkSegment, point: ladderViewPositionMarkProximal)
-        let distanceToNeighboringMarkSegmentDistal = Geometry.distanceSegmentToPoint(segment: ladderViewPositionNeighboringMarkSegment, point: ladderViewPositionMarkDistal)
-
-        let ladderViewPositionMarkSegment = transformToScaledViewSegment(regionSegment: mark.segment, region: region)
-        let ladderViewPositionNeighboringMarkProximal = transformToScaledViewPosition(regionPosition: neighboringMark.segment.proximal, region: neighboringRegion)
-        let ladderViewPositionNeighboringMarkDistal = transformToScaledViewPosition(regionPosition: neighboringMark.segment.distal, region: neighboringRegion)
-        let distanceToMarkSegmentProximal = Geometry.distanceSegmentToPoint(segment: ladderViewPositionMarkSegment, point: ladderViewPositionNeighboringMarkProximal)
-        let distanceToMarkSegmentDistal = Geometry.distanceSegmentToPoint(segment: ladderViewPositionMarkSegment, point: ladderViewPositionNeighboringMarkDistal)
-
-        if distanceToNeighboringMarkSegmentProximal < nearbyDistance
-            || distanceToNeighboringMarkSegmentDistal < nearbyDistance
-            || distanceToMarkSegmentProximal < nearbyDistance
-            || distanceToMarkSegmentDistal < nearbyDistance {
-            isClose = true
-        }
-        return isClose
-    }
 
     func moveAttachedMark(position: CGPoint) {
         if let attachedMark = ladder.attachedMark {
@@ -2512,8 +2419,8 @@ extension LadderView: LadderViewDelegate {
         guard let attachedMark = ladder.attachedMark else { return }
         // FIXME: out of place
         swapEndsIfNeeded(mark: attachedMark)
-        let newNearbyMarks = getNewNearbyMarks(mark: attachedMark)
-        snapToNewNearbyMarks(mark: attachedMark, nearbyMarks: newNearbyMarks)
+        let newNearbyMarks = getNearbyMarkIDs(mark: attachedMark)
+        snapToNearbyMarks(mark: attachedMark, nearbyMarks: newNearbyMarks)
         linkNewNearbyMarks(mark: attachedMark, nearbyMarks: newNearbyMarks)
     }
 
@@ -2529,19 +2436,19 @@ extension LadderView: LadderViewDelegate {
         os_log("unsnapMarkFromNearbyMarks(mark:nearbyMarks:))", log: .action, type: .info)
         guard snapMarks else { return }
         // This works better than original version ??
-//        unlinkMarks(mark: mark)
-                    for proxMark in nearbyMarks.proximal {
-                        mark.linkedMarkIDs.proximal.remove(proxMark.id)
-                        proxMark.linkedMarkIDs.distal.remove(mark.id)
-                    }
-                    for distalMark in nearbyMarks.distal {
-                        mark.linkedMarkIDs.distal.remove(distalMark.id)
-                        distalMark.linkedMarkIDs.proximal.remove(mark.id)
-                    }
-                    for middleMark in nearbyMarks.middle {
-                        mark.linkedMarkIDs.middle.remove(middleMark.id)
-                        middleMark.linkedMarkIDs.middle.remove(mark.id)
-                    }
+        //        unlinkMarks(mark: mark)
+        for proxMark in nearbyMarks.proximal {
+            mark.linkedMarkIDs.proximal.remove(proxMark.id)
+            proxMark.linkedMarkIDs.distal.remove(mark.id)
+        }
+        for distalMark in nearbyMarks.distal {
+            mark.linkedMarkIDs.distal.remove(distalMark.id)
+            distalMark.linkedMarkIDs.proximal.remove(mark.id)
+        }
+        for middleMark in nearbyMarks.middle {
+            mark.linkedMarkIDs.middle.remove(middleMark.id)
+            middleMark.linkedMarkIDs.middle.remove(mark.id)
+        }
     }
 
     // Adjust ends of marks to connect after dragging.
@@ -2617,24 +2524,111 @@ extension LadderView: LadderViewDelegate {
 
     func linkConnectedMarks() {
         guard snapMarks else { return }
-        
-        
         ladder.linkConnectedMarks()
     }
 
-
-    func getNewNearbyMarks(mark: Mark) -> LinkedMarkIDs {
+    func getNearbyMarkIDs(mark: Mark) -> LinkedMarkIDs {
         guard snapMarks else { return LinkedMarkIDs() }
         let minimum: CGFloat = nearbyMarkAccuracy / scale
         let nearbyMarkIDs = getNearbyMarkIDs(mark: mark, nearbyDistance: minimum)
-        var filteredMarkIDs = LinkedMarkIDs()
-        filteredMarkIDs.proximal = nearbyMarkIDs.proximal.filter {  $0 != mark.id }
-        filteredMarkIDs.middle = nearbyMarkIDs.middle.filter {  $0 != mark.id }
-        filteredMarkIDs.distal = nearbyMarkIDs.distal.filter {  $0 != mark.id }
-        return filteredMarkIDs
+        return nearbyMarkIDs
     }
 
-    func snapToNewNearbyMarks(mark: Mark, nearbyMarks: LinkedMarkIDs) {
+
+    func highlightNearbyMarks(_ mark: Mark?) {
+        guard snapMarks else { return }
+        guard let mark = mark else { return }
+        ladder.normalizeAllMarksExceptAttachedMark()
+        let nearbyDistance = nearbyMarkAccuracy / scale
+        setModeOfNearbyMarks(mark: mark, nearbyDistance: nearbyDistance)
+    }
+
+    func setModeOfNearbyMarks(mark: Mark, nearbyDistance: CGFloat) {
+        let region = ladder.region(ofMark: mark)
+        if let proximalRegion = ladder.regionBefore(region: region) {
+            for neighboringMark in proximalRegion.marks {
+                if assessCloseness(ofMark: mark, toNeighboringMark: neighboringMark, usingNearbyDistance: nearbyDistance) {
+                    neighboringMark.mode = .linked
+                }
+            }
+        }
+        if let distalRegion = ladder.regionAfter(region: region) {
+            for neighboringMark in distalRegion.marks {
+                if assessCloseness(ofMark: mark, toNeighboringMark: neighboringMark, usingNearbyDistance: nearbyDistance) {
+                    neighboringMark.mode = .linked
+
+                }
+            }
+        }
+        // check in the same region ("middle region", same as activeRegion)
+        for neighboringMark in region.marks {
+            if assessCloseness(ofMark: mark, toNeighboringMark: neighboringMark, usingNearbyDistance: nearbyDistance) {
+                neighboringMark.mode = .linked
+            }
+        }
+    }
+
+    // Returns linked mark ids of marks close to passed in mark.
+    func getNearbyMarkIDs(mark: Mark, nearbyDistance: CGFloat) -> LinkedMarkIDs {
+        let region = ladder.region(ofMark: mark)
+        var proximalMarkIds = MarkIdSet()
+        var distalMarkIds = MarkIdSet()
+        var middleMarkIds = MarkIdSet()
+        if let proximalRegion = ladder.regionBefore(region: region) {
+            for neighboringMark in proximalRegion.marks {
+                if assessCloseness(ofMark: mark, toNeighboringMark: neighboringMark, usingNearbyDistance: nearbyDistance) {
+                    proximalMarkIds.insert(neighboringMark.id)
+                }
+            }
+        }
+        if let distalRegion = ladder.regionAfter(region: region) {
+            for neighboringMark in distalRegion.marks {
+                if assessCloseness(ofMark: mark, toNeighboringMark: neighboringMark, usingNearbyDistance: nearbyDistance) {
+                    distalMarkIds.insert(neighboringMark.id)
+                }
+            }
+        }
+        // check in the same region ("middle region", same as activeRegion)
+        for neighboringMark in region.marks {
+            if assessCloseness(ofMark: mark, toNeighboringMark: neighboringMark, usingNearbyDistance: nearbyDistance) {
+                middleMarkIds.insert(neighboringMark.id)
+            }
+        }
+        return LinkedMarkIDs(proximal: proximalMarkIds, middle: middleMarkIds, distal: distalMarkIds)
+    }
+
+    func assessCloseness(ofMark mark: Mark, toNeighboringMark neighboringMark: Mark, usingNearbyDistance nearbyDistance: CGFloat) -> Bool {
+        guard mark != neighboringMark else { return false }
+        let region = ladder.region(ofMark: mark)
+        let neighboringRegion = ladder.region(ofMark: neighboringMark)
+        // parallel marks in the same region are by definition not close
+        if (region == neighboringRegion) && (Geometry.areParallel(mark.segment, neighboringMark.segment)) {
+            return false
+        }
+        var isClose = false
+        // To get minimum distance between two line segments, must get minimum distances between each segment and each endpoint of the other segment, and take minimum of all those.
+        let ladderViewPositionNeighboringMarkSegment = transformToScaledViewSegment(regionSegment: neighboringMark.segment, region: neighboringRegion)
+        let ladderViewPositionMarkProximal = transformToScaledViewPosition(regionPosition: mark.segment.proximal, region: region)
+        let ladderViewPositionMarkDistal = transformToScaledViewPosition(regionPosition: mark.segment.distal, region: region)
+        let distanceToNeighboringMarkSegmentProximal = Geometry.distanceSegmentToPoint(segment: ladderViewPositionNeighboringMarkSegment, point: ladderViewPositionMarkProximal)
+        let distanceToNeighboringMarkSegmentDistal = Geometry.distanceSegmentToPoint(segment: ladderViewPositionNeighboringMarkSegment, point: ladderViewPositionMarkDistal)
+
+        let ladderViewPositionMarkSegment = transformToScaledViewSegment(regionSegment: mark.segment, region: region)
+        let ladderViewPositionNeighboringMarkProximal = transformToScaledViewPosition(regionPosition: neighboringMark.segment.proximal, region: neighboringRegion)
+        let ladderViewPositionNeighboringMarkDistal = transformToScaledViewPosition(regionPosition: neighboringMark.segment.distal, region: neighboringRegion)
+        let distanceToMarkSegmentProximal = Geometry.distanceSegmentToPoint(segment: ladderViewPositionMarkSegment, point: ladderViewPositionNeighboringMarkProximal)
+        let distanceToMarkSegmentDistal = Geometry.distanceSegmentToPoint(segment: ladderViewPositionMarkSegment, point: ladderViewPositionNeighboringMarkDistal)
+
+        if distanceToNeighboringMarkSegmentProximal < nearbyDistance
+            || distanceToNeighboringMarkSegmentDistal < nearbyDistance
+            || distanceToMarkSegmentProximal < nearbyDistance
+            || distanceToMarkSegmentDistal < nearbyDistance {
+            isClose = true
+        }
+        return isClose
+    }
+
+    func snapToNearbyMarks(mark: Mark, nearbyMarks: LinkedMarkIDs) {
         guard snapMarks else { return }
         // get the new segment to snap to, then set it undoably.
         var segment = mark.segment
@@ -2776,8 +2770,6 @@ extension LadderView: LadderViewDelegate {
             adjustCursor(mark: attachedMark)
         }
     }
-
-
 
     func selectAllMarks() {
         ladder.setAllMarksWithMode(.selected)

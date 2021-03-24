@@ -45,6 +45,9 @@ struct PreferencesView: View {
     @AppStorage(Preferences.markerColorNameKey) var markerColorName = Preferences.markerColorName
     @State var markerColor: Color = Color(Preferences.defaultMarkerColor)
 
+    // alert dialog
+    @State var showAutoLinkAlert = false
+
     // Pass Diagram as binding to allow changing non-UserDefaults settings
     // @Binding var diagram: Diagram
     @ObservedObject var diagramController: DiagramModelController
@@ -140,8 +143,11 @@ struct PreferencesView: View {
                             // Only 10 items in each group allowed.
                             Group {
                                 Toggle(isOn: $snapMarks) {
-                                    Text("Snap marks")
+                                    Text("Auto-link marks")
                                 }
+//                                .alert(isPresented: $snapMarks) {
+//                                    Alert(title: Text("test"), message: Text("test"))
+//                                }
                                 Picker(selection: $markStyle, label: Text("Default mark style"), content: {
                                     Text("Solid").tag(Mark.Style.solid.rawValue)
                                     Text("Dashed").tag(Mark.Style.dashed.rawValue)
