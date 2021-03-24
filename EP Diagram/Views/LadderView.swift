@@ -844,6 +844,7 @@ final class LadderView: ScaledView {
             isDragging = true
             currentDocument?.undoManager.beginUndoGrouping()
             for mark in selectedMarks {
+                undoablyUnlinkMark(mark: mark)
                 let proximalPositionX = transformToScaledViewPositionX(regionPositionX: mark.segment.proximal.x)
                 let distalPositionX = transformToScaledViewPositionX(regionPositionX: mark.segment.distal.x)
                 let proximalDiffX = proximalPositionX - location.x
@@ -1846,32 +1847,7 @@ final class LadderView: ScaledView {
 
     @objc func unlinkSelectedMarks() {
         let selectedMarks = ladder.allMarksWithMode(.selected)
-        // FIXME: need this here?
-        normalizeAllMarks()
-        selectedMarks.forEach { mark in unlinkMarks(mark: mark) }
-    }
-
-    func unlinkAllMarks() {
-        ladder.unlinkAllMarks()
-    }
-
-    func linkAllMarks() {
-        // scan all marks, link them if possible
-//        ladder.unlinkAllMarks()
-//        let marks = ladder.allMarks()
-//        for mark in marks {
-//
-//            _ = nearbyMarkIds(mark: mark, nearbyDistance: nearbyMarkAccuracy / scale)
-//        }
-    }
-
-    func unlinkMarks(mark: Mark) {
-        // First remove all backlinks to this mark.
-        for m in ladder.allMarks() {
-            m.linkedMarkIDs.remove(id: mark.id)
-        }
-        // Now clear all links of this mark.
-        mark.linkedMarkIDs = LinkedMarkIDs()
+        selectedMarks.forEach { mark in undoablyUnlinkMark(mark: mark) }
     }
 
     func soleSelectedMark() -> Mark? {
@@ -2657,6 +2633,99 @@ extension LadderView: LadderViewDelegate {
         assessBlockAndImpulseOrigin(mark: mark)
         let linkedMarks = ladder.getLinkedMarksFromLinkedMarkIDs(mark.linkedMarkIDs)
         assessBlockAndImpulseOrigin(marks: linkedMarks.allMarks)
+    }
+
+//    // No questions asked mark linker, checks relative regions for the marks.
+//    func linkMarks(m1: Mark, m2: Mark) {
+//        guard snapMarks else { return }
+//        currentDocument?.undoManager?.registerUndo(withTarget: self) { target in
+//            target.unlinkMarks(m1: m1, m2: m2)
+//        }
+//        NotificationCenter.default.post(name: .didUndoableAction, object: nil)
+//        let regionRelation = Ladder.regionRelationBetweenMarks(mark: m1, otherMark: m2)
+//        switch regionRelation {
+//        case .distant:
+//            return
+//        case .before:
+//            m1.linkedMarkIDs.proximal.insert(m2.id)
+//            m2.linkedMarkIDs.distal.insert(m1.id)
+//        case .after:
+//            m1.linkedMarkIDs.distal.insert(m2.id)
+//            m2.linkedMarkIDs.proximal.insert(m1.id)
+//        case .same:
+//            m1.linkedMarkIDs.middle.insert(m2.id)
+//            m2.linkedMarkIDs.middle.insert(m1.id)
+//        }
+//    }
+
+
+//    // not used yet
+//    func unlinkMarks(m1: Mark, m2: Mark) {
+//        guard snapMarks else { return }
+//        currentDocument?.undoManager?.registerUndo(withTarget: self) { target in
+//            target.linkMarks(m1: m1, m2: m2)
+//        }
+//        NotificationCenter.default.post(name: .didUndoableAction, object: nil)
+//        m1.linkedMarkIDs.proximal.remove(m2.id)
+//        m1.linkedMarkIDs.middle.remove(m2.id)
+//        m1.linkedMarkIDs.distal.remove(m2.id)
+//        m2.linkedMarkIDs.proximal.remove(m1.id)
+//        m2.linkedMarkIDs.middle.remove(m1.id)
+//        m2.linkedMarkIDs.distal.remove(m1.id)
+//    }
+
+    func undoablyUnlinkMark(mark: Mark) {
+        guard snapMarks else { return }
+        let linkedMarkIDs = mark.linkedMarkIDs
+        let originalMark = mark
+        currentDocument?.undoManager?.registerUndo(withTarget: self) { target in
+            target.undoablyLinkMark(mark: originalMark, linkedMarkIDs: linkedMarkIDs)
+        }
+        NotificationCenter.default.post(name: .didUndoableAction, object: nil)
+        unlinkMark(mark: mark)
+        updateMarkersAndRegionIntervals(ladder.region(ofMark: mark))
+        assessBlockAndImpulseOrigin(mark: mark)
+    }
+
+    func unlinkMark(mark: Mark) {
+        // First remove all backlinks to this mark.
+        for m in ladder.allMarks() {
+            m.linkedMarkIDs.remove(id: mark.id)
+        }
+        // Now clear all links of this mark.
+        mark.linkedMarkIDs = LinkedMarkIDs()
+    }
+
+    func undoablyLinkMark(mark: Mark, linkedMarkIDs: LinkedMarkIDs) {
+        guard snapMarks else { return }
+        let originalMark = mark
+        currentDocument?.undoManager?.registerUndo(withTarget: self) { target in
+            target.undoablyUnlinkMark(mark: originalMark)
+        }
+        NotificationCenter.default.post(name: .didUndoableAction, object: nil)
+        let linkedMarks = ladder.getLinkedMarksFromLinkedMarkIDs(linkedMarkIDs)
+        for linkedMark in linkedMarks.allMarks {
+            linkMarks(m1: mark, m2: linkedMark)
+        }
+        updateMarkersAndRegionIntervals(ladder.region(ofMark: mark))
+        assessBlockAndImpulseOrigin(mark: mark)
+    }
+
+    private func linkMarks(m1: Mark, m2: Mark) {
+        let regionRelation = Ladder.regionRelationBetweenMarks(mark: m1, otherMark: m2)
+        switch regionRelation {
+        case .distant:
+            return
+        case .before:
+            m1.linkedMarkIDs.proximal.insert(m2.id)
+            m2.linkedMarkIDs.distal.insert(m1.id)
+        case .after:
+            m1.linkedMarkIDs.distal.insert(m2.id)
+            m2.linkedMarkIDs.proximal.insert(m1.id)
+        case .same:
+            m1.linkedMarkIDs.middle.insert(m2.id)
+            m2.linkedMarkIDs.middle.insert(m1.id)
+        }
     }
 
     func getPositionYInView(positionY: CGFloat, view: UIView) -> CGFloat {

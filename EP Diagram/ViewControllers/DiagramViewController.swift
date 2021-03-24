@@ -1145,7 +1145,7 @@ final class DiagramViewController: UIViewController {
         self.ladderView.resetSize(setActiveRegion: setActiveRegion, width: imageView.frame.width)
         cursorView.caliperMaxY = imageScrollView.frame.height
         cursorView.caliperMinY = 0
-        ladderView.linkAllMarks()
+//        ladderView.linkAllMarks()
         setViewsNeedDisplay()
     }
 
