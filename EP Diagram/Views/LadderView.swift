@@ -1482,6 +1482,8 @@ final class LadderView: ScaledView {
     func assessBlock(mark: Mark) {
         if mark.blockSetting == .auto {
             mark.blockSite = .none
+            // If snapMarks is off, leave this at none
+            if !snapMarks { return }
             if mark.early == .none {
                 return  // for now, ignore vertical marks
             }
@@ -1503,6 +1505,8 @@ final class LadderView: ScaledView {
     func assessImpulseOrigin(mark: Mark) {
         if mark.impulseOriginSetting == .auto {
             mark.impulseOriginSite = .none
+            // If snapMarks is off, leave this at none
+            if !snapMarks { return }
             if mark.linkedMarkIDs.middle.count > 0
                 && mark.early == ladder.markLinkage(mark: mark, linkedMarksIDs: mark.linkedMarkIDs) {
                 mark.impulseOriginSite = .none
