@@ -95,6 +95,24 @@
 		8ED3B1B62360DA0D00549381 /* Anchor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8ED3B1B52360DA0D00549381 /* Anchor.swift */; };
 		8ED8CBD125D8B1FF00A6234F /* DiagramModelController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8ED8CBD025D8B1FF00A6234F /* DiagramModelController.swift */; };
 		8EDCE17F25EC0C7400B9C7B8 /* Color.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8EDCE17E25EC0C7400B9C7B8 /* Color.swift */; };
+		8EE7DB35260D1014005DC65D /* epdiagram_files.png in Resources */ = {isa = PBXBuildFile; fileRef = 8EE7DB34260D1014005DC65D /* epdiagram_files.png */; };
+		8EE7DB3A260D130B005DC65D /* new_diagram.png in Resources */ = {isa = PBXBuildFile; fileRef = 8EE7DB39260D130B005DC65D /* new_diagram.png */; };
+		8EE7DB3F260D174C005DC65D /* diagram_with_image.png in Resources */ = {isa = PBXBuildFile; fileRef = 8EE7DB3E260D174C005DC65D /* diagram_with_image.png */; };
+		8EE7DB45260D2799005DC65D /* rotate_menu.png in Resources */ = {isa = PBXBuildFile; fileRef = 8EE7DB43260D2799005DC65D /* rotate_menu.png */; };
+		8EE7DB46260D2799005DC65D /* image_menu.png in Resources */ = {isa = PBXBuildFile; fileRef = 8EE7DB44260D2799005DC65D /* image_menu.png */; };
+		8EE7DB4B260D2F75005DC65D /* active_region.png in Resources */ = {isa = PBXBuildFile; fileRef = 8EE7DB4A260D2F75005DC65D /* active_region.png */; };
+		8EE7DB50260D3244005DC65D /* adding_marks.png in Resources */ = {isa = PBXBuildFile; fileRef = 8EE7DB4F260D3244005DC65D /* adding_marks.png */; };
+		8EE7DB55260D33DB005DC65D /* adding_V_marks.png in Resources */ = {isa = PBXBuildFile; fileRef = 8EE7DB54260D33DB005DC65D /* adding_V_marks.png */; };
+		8EE7DB5B260D3986005DC65D /* finish_drag_in_AV.png in Resources */ = {isa = PBXBuildFile; fileRef = 8EE7DB59260D3986005DC65D /* finish_drag_in_AV.png */; };
+		8EE7DB5C260D3986005DC65D /* drag_in_AV.png in Resources */ = {isa = PBXBuildFile; fileRef = 8EE7DB5A260D3986005DC65D /* drag_in_AV.png */; };
+		8EE7DB61260D3AB4005DC65D /* misaligned_mark.png in Resources */ = {isa = PBXBuildFile; fileRef = 8EE7DB60260D3AB4005DC65D /* misaligned_mark.png */; };
+		8EE7DB66260D3BBC005DC65D /* single_tap_on_mark.png in Resources */ = {isa = PBXBuildFile; fileRef = 8EE7DB65260D3BBC005DC65D /* single_tap_on_mark.png */; };
+		8EE7DB6B260D3DDA005DC65D /* prosimal_anchor.png in Resources */ = {isa = PBXBuildFile; fileRef = 8EE7DB6A260D3DDA005DC65D /* prosimal_anchor.png */; };
+		8EE7DB70260D3DE7005DC65D /* distal_anchor.png in Resources */ = {isa = PBXBuildFile; fileRef = 8EE7DB6F260D3DE7005DC65D /* distal_anchor.png */; };
+		8EE7DB75260D3FE5005DC65D /* moving_AV_mark.png in Resources */ = {isa = PBXBuildFile; fileRef = 8EE7DB74260D3FE5005DC65D /* moving_AV_mark.png */; };
+		8EE7DB7C260D41F8005DC65D /* distal_end_malpositioned.png in Resources */ = {isa = PBXBuildFile; fileRef = 8EE7DB79260D41F8005DC65D /* distal_end_malpositioned.png */; };
+		8EE7DB7D260D41F8005DC65D /* still_moving_distal_end.png in Resources */ = {isa = PBXBuildFile; fileRef = 8EE7DB7A260D41F8005DC65D /* still_moving_distal_end.png */; };
+		8EE7DB7E260D41F8005DC65D /* move_distal_end.png in Resources */ = {isa = PBXBuildFile; fileRef = 8EE7DB7B260D41F8005DC65D /* move_distal_end.png */; };
 		8EF8B5B72330739F00ADB77A /* ViewControllerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8EF8B5B62330739F00ADB77A /* ViewControllerTests.swift */; };
 		8EF9166B227926BC00B51F17 /* LadderView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8EF9166A227926BC00B51F17 /* LadderView.swift */; };
 /* End PBXBuildFile section */
@@ -218,6 +236,24 @@
 		8ED8CBD025D8B1FF00A6234F /* DiagramModelController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DiagramModelController.swift; sourceTree = "<group>"; };
 		8EDCE17E25EC0C7400B9C7B8 /* Color.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Color.swift; sourceTree = "<group>"; };
 		8EE311E524A8FE01003C7AF6 /* AudioToolbox.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AudioToolbox.framework; path = Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.15.sdk/System/Library/Frameworks/AudioToolbox.framework; sourceTree = DEVELOPER_DIR; };
+		8EE7DB34260D1014005DC65D /* epdiagram_files.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = epdiagram_files.png; sourceTree = "<group>"; };
+		8EE7DB39260D130B005DC65D /* new_diagram.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = new_diagram.png; sourceTree = "<group>"; };
+		8EE7DB3E260D174C005DC65D /* diagram_with_image.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = diagram_with_image.png; sourceTree = "<group>"; };
+		8EE7DB43260D2799005DC65D /* rotate_menu.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = rotate_menu.png; sourceTree = "<group>"; };
+		8EE7DB44260D2799005DC65D /* image_menu.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = image_menu.png; sourceTree = "<group>"; };
+		8EE7DB4A260D2F75005DC65D /* active_region.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = active_region.png; sourceTree = "<group>"; };
+		8EE7DB4F260D3244005DC65D /* adding_marks.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = adding_marks.png; sourceTree = "<group>"; };
+		8EE7DB54260D33DB005DC65D /* adding_V_marks.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = adding_V_marks.png; sourceTree = "<group>"; };
+		8EE7DB59260D3986005DC65D /* finish_drag_in_AV.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = finish_drag_in_AV.png; sourceTree = "<group>"; };
+		8EE7DB5A260D3986005DC65D /* drag_in_AV.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = drag_in_AV.png; sourceTree = "<group>"; };
+		8EE7DB60260D3AB4005DC65D /* misaligned_mark.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = misaligned_mark.png; sourceTree = "<group>"; };
+		8EE7DB65260D3BBC005DC65D /* single_tap_on_mark.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = single_tap_on_mark.png; sourceTree = "<group>"; };
+		8EE7DB6A260D3DDA005DC65D /* prosimal_anchor.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = prosimal_anchor.png; sourceTree = "<group>"; };
+		8EE7DB6F260D3DE7005DC65D /* distal_anchor.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = distal_anchor.png; sourceTree = "<group>"; };
+		8EE7DB74260D3FE5005DC65D /* moving_AV_mark.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = moving_AV_mark.png; sourceTree = "<group>"; };
+		8EE7DB79260D41F8005DC65D /* distal_end_malpositioned.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = distal_end_malpositioned.png; sourceTree = "<group>"; };
+		8EE7DB7A260D41F8005DC65D /* still_moving_distal_end.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = still_moving_distal_end.png; sourceTree = "<group>"; };
+		8EE7DB7B260D41F8005DC65D /* move_distal_end.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = move_distal_end.png; sourceTree = "<group>"; };
 		8EF6B0F925A8CA7800DCA91C /* MobileCoreServices.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = MobileCoreServices.framework; path = Platforms/MacOSX.platform/Developer/SDKs/MacOSX11.1.sdk/System/iOSSupport/System/Library/Frameworks/MobileCoreServices.framework; sourceTree = DEVELOPER_DIR; };
 		8EF6B10125A8CAA600DCA91C /* CoreServices.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreServices.framework; path = Platforms/MacOSX.platform/Developer/SDKs/MacOSX11.1.sdk/System/Library/Frameworks/CoreServices.framework; sourceTree = DEVELOPER_DIR; };
 		8EF8B5B62330739F00ADB77A /* ViewControllerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ViewControllerTests.swift; sourceTree = "<group>"; };
@@ -268,6 +304,7 @@
 		8E1276D924D46BEF00AC4B8F /* Help */ = {
 			isa = PBXGroup;
 			children = (
+				8EE7DB33260D0F9B005DC65D /* img */,
 				8E48EE58260051EF007D2CE4 /* org.css */,
 				8E1276DC24D46F4200AC4B8F /* help.html */,
 				8E1276DA24D46C2000AC4B8F /* help.org */,
@@ -496,6 +533,31 @@
 			name = Frameworks;
 			sourceTree = "<group>";
 		};
+		8EE7DB33260D0F9B005DC65D /* img */ = {
+			isa = PBXGroup;
+			children = (
+				8EE7DB79260D41F8005DC65D /* distal_end_malpositioned.png */,
+				8EE7DB7B260D41F8005DC65D /* move_distal_end.png */,
+				8EE7DB7A260D41F8005DC65D /* still_moving_distal_end.png */,
+				8EE7DB74260D3FE5005DC65D /* moving_AV_mark.png */,
+				8EE7DB6F260D3DE7005DC65D /* distal_anchor.png */,
+				8EE7DB6A260D3DDA005DC65D /* prosimal_anchor.png */,
+				8EE7DB65260D3BBC005DC65D /* single_tap_on_mark.png */,
+				8EE7DB60260D3AB4005DC65D /* misaligned_mark.png */,
+				8EE7DB5A260D3986005DC65D /* drag_in_AV.png */,
+				8EE7DB59260D3986005DC65D /* finish_drag_in_AV.png */,
+				8EE7DB54260D33DB005DC65D /* adding_V_marks.png */,
+				8EE7DB4F260D3244005DC65D /* adding_marks.png */,
+				8EE7DB4A260D2F75005DC65D /* active_region.png */,
+				8EE7DB44260D2799005DC65D /* image_menu.png */,
+				8EE7DB43260D2799005DC65D /* rotate_menu.png */,
+				8EE7DB3E260D174C005DC65D /* diagram_with_image.png */,
+				8EE7DB39260D130B005DC65D /* new_diagram.png */,
+				8EE7DB34260D1014005DC65D /* epdiagram_files.png */,
+			);
+			path = img;
+			sourceTree = "<group>";
+		};
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
@@ -600,14 +662,32 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				8EE7DB35260D1014005DC65D /* epdiagram_files.png in Resources */,
 				8E04C5CB2569947100946348 /* Startup.storyboard in Resources */,
+				8EE7DB3F260D174C005DC65D /* diagram_with_image.png in Resources */,
 				8E7D24CD22779DBF005A1729 /* LaunchScreen.storyboard in Resources */,
 				8E1276DD24D46F4200AC4B8F /* help.html in Resources */,
+				8EE7DB5C260D3986005DC65D /* drag_in_AV.png in Resources */,
+				8EE7DB50260D3244005DC65D /* adding_marks.png in Resources */,
 				8E7D24CA22779DBF005A1729 /* Assets.xcassets in Resources */,
 				8E7D24C822779DBD005A1729 /* Main.storyboard in Resources */,
+				8EE7DB4B260D2F75005DC65D /* active_region.png in Resources */,
 				8E1276DB24D46C2000AC4B8F /* help.org in Resources */,
+				8EE7DB6B260D3DDA005DC65D /* prosimal_anchor.png in Resources */,
+				8EE7DB46260D2799005DC65D /* image_menu.png in Resources */,
+				8EE7DB75260D3FE5005DC65D /* moving_AV_mark.png in Resources */,
 				8E48EE59260051EF007D2CE4 /* org.css in Resources */,
+				8EE7DB66260D3BBC005DC65D /* single_tap_on_mark.png in Resources */,
+				8EE7DB70260D3DE7005DC65D /* distal_anchor.png in Resources */,
+				8EE7DB7E260D41F8005DC65D /* move_distal_end.png in Resources */,
+				8EE7DB45260D2799005DC65D /* rotate_menu.png in Resources */,
+				8EE7DB7D260D41F8005DC65D /* still_moving_distal_end.png in Resources */,
+				8EE7DB3A260D130B005DC65D /* new_diagram.png in Resources */,
+				8EE7DB61260D3AB4005DC65D /* misaligned_mark.png in Resources */,
+				8EE7DB55260D33DB005DC65D /* adding_V_marks.png in Resources */,
+				8EE7DB7C260D41F8005DC65D /* distal_end_malpositioned.png in Resources */,
 				8E61C3D725A6260D0064ADC1 /* Startup2.storyboard in Resources */,
+				8EE7DB5B260D3986005DC65D /* finish_drag_in_AV.png in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -891,7 +971,7 @@
 				CODE_SIGN_ENTITLEMENTS = "EP Diagram/EP Diagram.entitlements";
 				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 3;
+				CURRENT_PROJECT_VERSION = 4;
 				DERIVE_MACCATALYST_PRODUCT_BUNDLE_IDENTIFIER = NO;
 				DEVELOPMENT_TEAM = W74NPJXYEG;
 				"ENABLE_HARDENED_RUNTIME[sdk=macosx*]" = YES;
@@ -917,7 +997,7 @@
 				CODE_SIGN_ENTITLEMENTS = "EP Diagram/EP Diagram.entitlements";
 				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 3;
+				CURRENT_PROJECT_VERSION = 4;
 				DERIVE_MACCATALYST_PRODUCT_BUNDLE_IDENTIFIER = NO;
 				DEVELOPMENT_TEAM = W74NPJXYEG;
 				"ENABLE_HARDENED_RUNTIME[sdk=macosx*]" = YES;
