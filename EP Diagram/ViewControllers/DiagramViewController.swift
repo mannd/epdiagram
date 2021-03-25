@@ -174,12 +174,6 @@ final class DiagramViewController: UIViewController {
     lazy var reanalyzeLadderAction = UIAction(title: L("Reanalyze ladder")) { action in }
 
     // Linkage
-    lazy var unlinkAll = UIAction(title: L("Unlink all marks")) { action in
-        self.ladderView.unlinkAllMarks()
-    }
-    lazy var linkAll = UIAction(title: L("Link all marks")) { action in
-        self.ladderView.linkAllMarks()
-    }
     lazy var unlinkAction = UIAction(title: L("Unlink"), image: UIImage(systemName: "link")) { action in
         self.ladderView.unlinkSelectedMarks()
     }
@@ -577,6 +571,7 @@ final class DiagramViewController: UIViewController {
         undoablySetLadder(diagram.ladder)
         undoablySetDiagramImage(diagram.image)
         currentDocument?.undoManager.endUndoGrouping()
+        ladderView.activeRegion = nil
         mode = .normal
     }
 

@@ -1800,6 +1800,7 @@ final class LadderView: ScaledView {
         if let selectedRegion = selectedRegions.first {
             currentDocument?.undoManager?.beginUndoGrouping()
             for mark in selectedRegion.marks {
+                undoablyUnlinkMark(mark: mark)
                 undoablyDeleteMark(mark: mark)
             }
             currentDocument?.undoManager?.endUndoGrouping()
@@ -1836,6 +1837,7 @@ final class LadderView: ScaledView {
         currentDocument?.undoManager?.beginUndoGrouping()
         for region in ladder.regions {
             for mark in region.marks {
+                undoablyUnlinkMark(mark: mark)
                 undoablyDeleteMark(mark: mark)
             }
         }
@@ -1847,7 +1849,9 @@ final class LadderView: ScaledView {
 
     @objc func unlinkSelectedMarks() {
         let selectedMarks = ladder.allMarksWithMode(.selected)
+        currentDocument?.undoManager.beginUndoGrouping()
         selectedMarks.forEach { mark in undoablyUnlinkMark(mark: mark) }
+        currentDocument?.undoManager.endUndoGrouping()
     }
 
     func soleSelectedMark() -> Mark? {
@@ -1862,6 +1866,7 @@ final class LadderView: ScaledView {
         let selectedMarks = ladder.allMarksWithMode(.selected)
         currentDocument?.undoManager.beginUndoGrouping()
         selectedMarks.forEach { mark in
+            undoablyUnlinkMark(mark: mark)
             let originalSegment = mark.segment
             currentDocument?.undoManager.registerUndo(withTarget: self, handler: { target in
                 self.setSegment(segment: originalSegment, forMark: mark)
@@ -1884,6 +1889,7 @@ final class LadderView: ScaledView {
     func adjustY(_ value: CGFloat, endpoint: Mark.Endpoint, adjustment: Adjustment) {
         let selectedMarks = ladder.allMarksWithMode(.selected)
         selectedMarks.forEach { mark in
+            undoablyUnlinkMark(mark: mark)
             let originalSegment = mark.segment
             currentDocument?.undoManager.registerUndo(withTarget: self, handler: { target in
                 self.setSegment(segment: originalSegment, forMark: mark)
@@ -2132,6 +2138,7 @@ final class LadderView: ScaledView {
         var proxX = selectedMarks[0].segment.proximal.x
         var distalX = selectedMarks[0].segment.distal.x
         for i in 1..<selectedMarks.count {
+            undoablyUnlinkMark(mark: selectedMarks[i])
             let originalSegment = selectedMarks[i].segment
             currentDocument?.undoManager.registerUndo(withTarget: self, handler: { target in
                 self.setSegment(segment: originalSegment, forMark: selectedMarks[i])
@@ -2147,6 +2154,7 @@ final class LadderView: ScaledView {
     func slantSelectedMarks(angle: CGFloat, endpoint: Mark.Endpoint) {
         let selectedMarks = ladder.allMarksWithMode(.selected)
         selectedMarks.forEach { mark in
+            undoablyUnlinkMark(mark: mark)
             let originalSegment = mark.segment
             currentDocument?.undoManager.registerUndo(withTarget: self, handler: { target in
                 self.setSegment(segment: originalSegment, forMark: mark)
