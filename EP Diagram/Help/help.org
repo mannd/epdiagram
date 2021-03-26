@@ -16,40 +16,225 @@
 #+HTML_HEAD: <style media="screen" type="text/css"> img {max-width: 100%; height: auto;} </style>
 #+HTML_HEAD: <style  type="text/css">:root { color-scheme: light dark; }</style>
 #+HTML_HEAD: <link rel="stylesheet" type="text/css" href="./org.css"/>
-* Development Version Notes
-EP Diagram is under active development, and this version is only further testing and feedback.  Many features are incomplete or not implemented, and that includes this Help module!  But to get you started, here are some tips.
-** Quick Start
-*** Normal mode
-- EP Diagram opens and saves diagram files, that will be stored in the files app on you iPad or iPhone.
+* Beta Version Notes
+*EP Diagram* is under active development, but this beta version is now feature complete, and the remaining development will be bug fixes and usability improvements.
+** New in this version
+- App help (this file) is now complete.
+** What is still missing
+- Possibly adding onboarding and/or tooltips.
+** Instructions for beta testers
+- Email me (mannd@epstudiossoftware.com) with bugs or requested features.  I especially would like to know about any app crashes.
+- Let me know if there are usability problems (hard to move marks, unexpected behavior, other awkwardness).
+- If you have sample ECGs that could be included in the app, for example, different types of heart block, premature beats, other arrhythmias, please send them to me.  Make sure they are anonymized and are not copyrighted.
+- The final diagram file format will likely change with the release of the app, meaning diagram files you create with this beta version will likely not open in the app.  Once the final version is released, the file format will be forwardly compatible with subsequent app versions.
+- Email me at mannd@epstudiossoftware.com or send feedback directly through the TestFlight app.
+- A copy of this help file is at [link].  It may be useful to read through the help file on a different device while using the app as you are learning it.
+* Quick Start
+** Normal mode
+- *EP Diagram* opens and saves diagram files, that will be stored in the files app on you iPad or iPhone.
 - When you open or create a new diagram file, you will see a blank area at the top of the screen and a default ladder grid at the bottom.
 - Use the "hamburger" menu icon at the top left to open the menu.  You can select an image from your photos or your files and it will appear in the top of the screen.
-- Tap on the image to create marks.  Use the cursor to align the mark with the ECG waveforms.  Tap away from the cursor to hid the cursor.  Tap on a mark to show the cursor and each tap changes the movement point of the mark from middle to proximal to distal.
+- Tap on the image to create marks, which are the lines that you will be drawing on the ladder.  Use the cursor to align the mark with the ECG waveforms.  Tap away from the cursor to hide the cursor.  Tap on a mark to show the cursor and each tap changes the movement point of the mark from middle to proximal to distal.
 - Double click on a mark to delete it.  Double click anywhere else to create a mark.  Double clicking is a fast way to create marks.
 - Marks appear in the active region, shown by a colored background.  If you tap on a different region the marks will appear in that region and the active region will change.  Tapping on the label of the region will also activate or deactivate the region.
 - Dragging in a region will also create a mark.
 - Long press on the cursor to change it to an omnidirectional cursor (it has a large circle on it), allowing marks to move in any direction.  Long press again to change it back.
 - Marks that are placed end to end will automatically link up and move together afterwards.
-*** Calibration mode
+** Calibration mode
 - Press the Calibrate button to show a caliper that can be used to calibrate the diagram to a standard interval of 1000 msec.
 - After calibration, measurements will appear on the diagram.
-*** Edit mode
+** Edit mode
 - Press Edit to allow taps to select marks or regions, or dragging to select zones.
 - Long press after selection to show a menu that allows extensive customization of the appearance of the marks, including the style, emphasis, block, impulse origin, etc. and also allows adding a rhythm to a region or zone, e.g. atrial fibrillation.
-*** Connect mode
+** Connect mode
 - Tap pairs of marks separated by a region to connect the marks.
 - Tap from a mark to an adjacent region to have a mark block in that region.
-*** Undo/Redo
+** Undo/Redo
 - Practically anything you do can be undone or redone and these changes are automatically saved.
 ** Other features
-*** Select ladders
-*** Edit/Create your own ladders
-*** Sample diagrams
-*** Preferences
-- Change the overall appearance or behavior of the app.
+- Select ladders
+- Edit/create your own ladders
+- Sample diagrams
+** Preferences
+- Change the overall appearance or behavior of the app.  Many aspects are customizable.
+* What are ladder diagrams?
+Ladder diagrams date back at least a century and have been used to analyze arrhythmias and as teaching tools almost as long as there has been electrocardiography.  For a history and examples of ladder diagrams, see the [[*References][references]].  Also, I plan to write a blog post on ladder diagrams and the *EP Diagram* app, which I'll link here when it is available.
+* EP Diagram manual
+** Introduction
+*EP Diagram* is a full feature ladder drawing program.  It allows you not only to draw ladders, but customize their appearance to a fine degree.  As such it is a complex program and it can take a while to learn all its features.  However, it has an extensive Undo/Redo facility, so feel free to experiment. 
+** Terminology
+|----------------------+----------------------------------------------------------------------|
+| Term                 | Definition                                                           |
+|----------------------+----------------------------------------------------------------------|
+| Diagram              | a file containing an image and a ladder                              |
+| Ladder               | a representation of electrical conduction                            |
+| Region               | an anatomic area of the heart, e.g. atrium or venticle               |
+| Zone                 | a subset of a region                                                 |
+| Label                | the area of a region containing its name, e.g. A or V                |
+| Mark                 | the lines in each region representing conduction                     |
+| Cursor               | a line connected to a mark used to move and align the mark           |
+| Anchor               | the point on the mark where movement occurs, indicated by the cursor |
+| Link                 | a connection between marks causing them to move together             |
+| Impulse origin       | where conduction starts, indicated by a symbol                       |
+| Block                | where conduction blocks, indicated by a symbol                       |
+| Interval             | time in msec between adjacent marks, aka cycle length                |
+| Conduction time      | time in msec between earliest and latest points of a mark            |
+| Caliper              | used to calibrate the diagram to allow measurements                  |
+| Conduction direction | optional arrow symbol indicating direction of electrical flow        |
+| Markers              | optional lines on image aligned with marks                           |
+** Diagrams
+*** Creating and opening diagrams
+EP Diagram is a document-based app, meaning the diagrams you create are stored on your device and on iCloud, and can be handled by the Files app on your device, meaning you can copy them, rename them, or delete them outside of the *EP Diagram* app.  The diagram files you create have a file extension of ~diagram~ and a specific icon and file format.  When you open the app, a screen showing your diagram files and a create file icon.
+
+#+CAPTION: EP Diagram files
+[[./img/epdiagram_files.png]]
+
+Tap *Create New Diagram* to create a diagram file, or tap on one of your previously created diagrams to open it.
+*** Renaming a diagram
+New diagrams have a generic file name.  You can rename the diagram in the Files app, or rename using the /side menu/ [link] and then choosing *Rename diagram*.
+*** Initial diagram screen
+
+#+CAPTION: New diagram
+[[./img/new_diagram.png]]
+
+A blank diagram has no ECG image and has a default ladder without marks.  You will see how to add an ECG image and annotate the ladder in the next sections.
+** Images
+*** Adding an image
+**** Image types
+*EP Diagram* supports most image formats, such as jpg, png, and also can load PDF files.  In addition you can take an photo with your device's camera and directly import it into the app.
+**** Selecting images
+Open the /side menu/ and tap *Take photo* to use your camera to create an image, or tap *Select image* and choose *Photos* or *Files* as the image source.  If a dialog appears asking for permission to access the camera or your Photos app, go ahead and grant permission.  If you don't, you will need to grant this permission in the Settings app of your device in order to import images.  After selecting an image, it will appear in the top half of your diagram.
+
+#+Caption: Diagram with image added
+[[./img/diagram_with_image.png]]
+
+*** Manipulating the image
+**** Scrolling and zooming
+You can pinch to zoom and use your finger to scroll the image.  If you have created a ladder, you will see the ladder will zoom and scroll appropriately at the same time.  In fact, in *EP Diagram* all zooming and scrolling is down via the image, not via the ladder.
+**** Rotating the image
+If the image is out of kilter (this may especially happen with photos you take), long press on the image and then select in the menu that appears *Rotate*.
+
+#+Caption: Image menu
+[[./img/image_menu.png]]
+
+Use the buttons at the bottom of the screen to rotate the image.  Tap *Reset* to bring the image back to its original orientation.
+
+#+Caption: Rotate menu
+[[./img/rotate_menu.png]]
+
+**** Device rotation
+You can rotate the device itself and the screen will automatically adjust.
+**** Adjust the size of the image versus the ladder
+There is a small red horizontal bar between the image and the ladder.  Move this up or down to adjust the relative proportions of the image and the ladder on the screen.
+** Ladders
+*** Default ladder
+When you create a new diagram, a default ladder is presented initially.  You can change the default ladder (see [link]), but the original default (default default?) ladder has three regions: A (atrial), AV (atrioventricular), and V (ventricular).  Notice that the AV region is larger than the other two.  This is something you can change [link]; in fact you can create your own ladders from scratch [link].  You can also edit the text of the labels on the left hand side, add or remove regions, and adjust the width of the labels.  All this will be discussed later.  For now we'll just use this ladder as is and start to create some marks.
+*** Modes
+Most of the time you will be working with the ladder in /normal/ mode.  This mode allows you to add and delete marks, move marks, link marks together, and in general draw your ladder.  The toolbar menu at the bottom of the screen in normal mode shows the three other modes: /calibrate/, /edit/, and /connect/.  Those modes are used to calibrate the diagram to allow measurements to be made, to edit the ladder, and to connect quickly pairs of marks.  These modes will be discussed in detail later.
+*** Active region
+In normal mode frequently one of the ladder regions is highlighted, as seen below.  This is the /active region/.
+
+#+CAPTION: The active region is highlighted
+[[./img/active_region.png]]
+
+You can change the active region by tapping on the label of another region, or toggle it on and off by tapping of the label of the active region.  The active region determines into which region a mark is drawn, when tapping on the image as described next.
+*** Creating marks
+If you tap once on the image, a vertical mark with an attached cursor will be drawn in the active region.  If there is no active region, the first region in the ladder will become the active region.  If instead of tapping on the image you tap on the ladder, whatever region you tap on will become the active region, and the mark will appear in that region.
+
+Once the mark appears with the cursor, if you single tap elsewhere, the cursor will disappear.  Tap again elsewhere on the image to create another mark.  In the figure below we are adding marks in the A region, corresponding to P waves, by tapping on P waves in the image.  
+
+#+CAPTION: Adding marks to the A region
+[[./img/adding_marks.png]]
+
+Note that in these images tiny dots are present above each mark.  These are /impulse origin/ symbols, and they may not appear if you are working through this example yourself, as they depend on app preference settings.  They will be explained later, but ignore them for now.
+
+*** Shortcut for creating marks
+It's a bit tiresome to click to create a mark, and then click again just to make the cursor disappear, and the click a third time to create the next mark.  So, to make things easier, you can just double click at each new location to create a new mark.  Here, we first clicked on the label of the V region to make it the active region, and we are double clicking on QRS complexes to make marks in the V region.
+
+#+CAPTION: Adding marks in the V region
+[[./img/adding_V_marks.png]]
+
+*** Dragging to create marks
+As described later when explaining connect mode, it is easier to connect the marks we have drawn, but we'll stay in normal mode for now and accomplish the same feat.  Using your finger, drag from the first mark in the A region to the first mark in the V region.  A new mark will be created, and when it is close to the other two marks, they will be highlighted in a purple color, meaning they are close enough to the new mark to be linked.
+
+#+CAPTION: Dragging to create a mark in the AV region
+[[./img/drag_in_AV.png]]
+
+
+When you finish the drag through the AV region and lift your finger, the new mark (if it is close enough) will snap into the correct position, linking the two regions with conduction through the AV region.
+
+#+CAPTION: Finish mark in AV region
+[[./img/finish_drag_in_AV.png]]
+
+*** Repositioning marks
+Nobody's perfect, and it's likely the marks you create will not be perfectly aligned with the image or with each other.  It's often necessary to reposition marks you have already created.  Let's look at how to fix a misaligned mark.
+
+#+CAPTION: Misaligned mark in AV region
+[[./img/misaligned_mark.png]]
+
+In the above figure, we attempted to create another mark in the AV region by dragging, but we weren't close enough to the other marks to have them link up ("missed it by that much...").  What to do to fix this?
+
+Well, we could hit the *Undo* button or just delete the mark as described below and start over.  But let's reposition this mark instead.
+
+We saw that you can tap on the image or the ladder to create a mark.  What happens if you tap on a mark that you have already created? Tap on the misaligned mark, and you will see it becomes highlighted and has a cursor. 
+
+#+CAPTION: Single tap on mark to activate cursor
+[[./img/single_tap_on_mark.png]]
+
+An important point: if a mark has a cursor, we can move it.  By the same token, you can't move a mark unless it has a cursor, at least while in normal mode.  But before we move the mark, note where the cursor intersects the mark, namely, at its midpoint.  This is called the /anchor/ of the mark.  Let's address this further.
+
+*** Mark anchors
+Once a mark has a cursor, we can change the anchor point by single-tapping on the mark or the cursor.  Marks have at most three anchor points, proximal, middle, and distal, though some marks have only two if they are linked to other marks (i.e. their freedom of movement is more limited).  When we drag the cursor of the mark, the anchor is what moves.  To demonstrate this, single tap on the highlighted mark or its cursor.  The anchor will move from the middle to the proximal end of the mark.  Tap again and it will move the to distal end.  Finally it will cycle back to the middle if you tap again.
+
+#+CAPTION: Proximal anchor
+[[./img/proximal_anchor.png]]
+
+#+CAPTION: Distal anchor
+[[./img/distal_anchor.png]]
+
+With the anchor back in the middle, drag the cursor or the mark horizontally.  When it gets close enough it should link with the A and V marks.
+
+#+CAPTION: Moving AV mark into position
+[[./img/moving_AV_mark.png]]
+
+Even though that worked (at least for me), let's consider another mark that wasn't so perfectly slanted to connect both its ends.  In the figure below, we have used the middle anchor to move the mark so that the A end connects, but the V end is way off.
+
+#+CAPTION: Distal end of AV mark needs positioning.
+[[./img/distal_end_malpositioned.png]]
+
+We don't want to move the mark as a whole; just the distal end.  So tap on it to show the cursor and then tap twice more (not too fast, because a double tap will delete the mark) to bring the anchor point to the distal position as shown below.
+
+#+CAPTION: Starting to move distal end
+[[./img/move_distal_end.png]]
+
+#+CAPTION: Moving distal end
+[[./img/still_moving_distal_end.png]]
+
+When the end is close enough lift your finger and the marks will link up.
+
+*** Marks that don't span a region
+
+**** The omnidirectional cursor
+
+*** Deleting marks
+
+*** Linked marks
+
+** Menus
+
 * Known issues/bugs 
-- Close marks can be difficult to individually select.
 - Diagram document format likely to change in release version and be incompatible with present format.
-- Need more sample ECGS.
-- Need to test iCloud storage.
-- Mac version to be done.  Need to convert menu system to Mac.
-- Help file for release version not done.
+- Need more sample ECGS!
+- Multipage PDF files not supported yet.
+- Mac version still under development.
+* Next version plans
+We plan to include in the next version:
+- Refractory periods
+- Pacing spikes
+- Add notes to ladder
+- Mac version
+* References
+1. Johnson NP, Denes P. The Ladder Diagram (A 100+ Year History). American Journal of Cardiology. 2008;101(12):1801-1804. doi:10.1016/j.amjcard.2008.02.085
+2. Antiperovitch P, Luna AB de, Alencar JN de, et al. Old teaching tools should not be forgotten: The value of the Lewis ladder diagram in understanding bigeminal rhythms. Annals of Noninvasive Electrocardiology. 2019;24(5):e12685. doi:https://doi.org/10.1111/anec.12685
+
+   

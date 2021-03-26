@@ -226,6 +226,8 @@ final class CursorView: ScaledView {
 
     // Add tiny circle around intersection of cursor and mark.
     private func drawCircle(context: CGContext, center: CGPoint, radius: CGFloat) {
+        // TODO: Assess this which makes the circles more prominent.
+        context.setLineWidth(lineWidth + 1)
         context.addArc(center: center, radius: radius, startAngle: 0.0, endAngle: .pi * 2.0, clockwise: true)
         context.strokePath()
     }
@@ -325,8 +327,8 @@ final class CursorView: ScaledView {
             pan.setTranslation(CGPoint(x: 0,y: 0), in: self)
         }
         if pan.state == .ended {
-            currentDocument?.undoManager?.endUndoGrouping()
             ladderViewDelegate.linkMarksNearbyAttachedMark()
+            currentDocument?.undoManager?.endUndoGrouping()
             ladderViewDelegate.assessBlockAndImpulseOriginAttachedMark()
             cursorEndPointY = 0
         }

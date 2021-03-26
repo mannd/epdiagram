@@ -45,6 +45,8 @@ struct PreferencesView: View {
     @AppStorage(Preferences.markerColorNameKey) var markerColorName = Preferences.markerColorName
     @State var markerColor: Color = Color(Preferences.defaultMarkerColor)
 
+    @State var showAutoLinkWarning = false
+
     // Pass Diagram as binding to allow changing non-UserDefaults settings
     // @Binding var diagram: Diagram
     @ObservedObject var diagramController: DiagramModelController
@@ -140,7 +142,13 @@ struct PreferencesView: View {
                             // Only 10 items in each group allowed.
                             Group {
                                 Toggle(isOn: $snapMarks) {
-                                    Text("Snap marks")
+                                    Text("Auto-link marks")
+                                }
+                                .onChange(of: snapMarks, perform: { value in
+                                    showAutoLinkWarning = !value
+                                })
+                                .alert(isPresented: $showAutoLinkWarning) {
+                                    Alert(title: Text("Warning: No Auto-Linking"), message: Text("Auto-linking is used to link marks together and to automatically determine block and impulse origin.  If you turn it off, you will need to manually align marks and annotate block and impulse origin."))
                                 }
                                 Picker(selection: $markStyle, label: Text("Default mark style"), content: {
                                     Text("Solid").tag(Mark.Style.solid.rawValue)

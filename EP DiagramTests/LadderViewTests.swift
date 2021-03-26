@@ -312,7 +312,7 @@ class LadderViewTests: XCTestCase {
     // TODO: move to calibration tests
     func testCalibration() {
         let calibration = Calibration()
-        calibration.set(zoom: 1.0, calFactor: 100)
+        calibration.set(zoom: 1.0, value: 100)
         ladderView.calibration = calibration
         var value = ladderView.formatValue(100, usingCalFactor: 1)
         XCTAssertEqual(value, 100)
@@ -332,14 +332,14 @@ class LadderViewTests: XCTestCase {
         let formattedValue = ladderView.formatValue(CGFloat(rawValue), usingCalFactor: calFactor)
         XCTAssertEqual(formattedValue, Int(interval))
         let calibration = Calibration()
-        calibration.set(zoom: 1.0, calFactor: 10)
+        calibration.set(zoom: 1.0, value: 10)
         ladderView.calibration = calibration
         let rawValue2 = ladderView.regionValueFromCalibratedValue(interval, usingCalFactor: calibration.currentCalFactor)
-        XCTAssertEqual(rawValue2, 10)
+        XCTAssertEqual(rawValue2, 1.0)
         calibration.currentZoom = 2.0
         ladderView.offsetX = 10
         let rawValue3 = ladderView.regionValueFromCalibratedValue(interval, usingCalFactor: calibration.currentCalFactor)
-        XCTAssertEqual(rawValue3, 20)
+        XCTAssertEqual(rawValue3, 2.0)
         let formattedValue2 = ladderView.formatValue(CGFloat(rawValue3), usingCalFactor: calibration.currentCalFactor)
         XCTAssertEqual(formattedValue2, Int(interval))
     }
@@ -407,8 +407,94 @@ class LadderViewTests: XCTestCase {
         ladderView.highlightNearbyMarks(mark1)
         XCTAssertEqual(mark2.mode, .normal)
         XCTAssertEqual(mark1.mode, .attached)
-
     }
+
+    func testGetNearbyMarkIDs1() {
+        ladderView.activeRegion = ladderView.ladder.regions[0]
+        let mark1 = ladderView.addMarkToActiveRegion(regionPositionX: 100)
+        XCTAssertEqual(ladderView.ladder.region(ofMark: mark1!), ladderView.ladder.regions[0])
+        ladderView.activeRegion = ladderView.ladder.regions[1]
+        let mark2 = ladderView.addMarkToActiveRegion(regionPositionX: 101)
+        XCTAssertEqual(ladderView.ladder.region(ofMark: mark2!), ladderView.ladder.regions[1])
+        ladderView.activeRegion = ladderView.ladder.regions[2]
+        let mark3 = ladderView.addMarkToActiveRegion(regionPositionX: 102)
+        XCTAssertEqual(ladderView.ladder.region(ofMark: mark3!), ladderView.ladder.regions[2])
+        let nearbyMarksToMark1 = ladderView.getNearbyMarkIDs(mark: mark1!, nearbyDistance: 2)
+        XCTAssertTrue(nearbyMarksToMark1.distal.contains(mark2!.id))
+        XCTAssertFalse(nearbyMarksToMark1.distal.contains(mark3!.id))
+        XCTAssertEqual(nearbyMarksToMark1.proximal.count, 0)
+        XCTAssertEqual(nearbyMarksToMark1.middle.count, 0)
+        let nearbyMarksToMark2 = ladderView.getNearbyMarkIDs(mark: mark2!, nearbyDistance: 2)
+        XCTAssertTrue(nearbyMarksToMark2.proximal.contains(mark1!.id))
+        XCTAssertTrue(nearbyMarksToMark2.distal.contains(mark3!.id))
+        XCTAssertEqual(nearbyMarksToMark2.middle.count, 0)
+        let mark4 = ladderView.addMarkToActiveRegion(regionPositionX: 200)
+        var nearbyMarksToMark3 = ladderView.getNearbyMarkIDs(mark: mark3!, nearbyDistance: 2)
+        XCTAssertEqual(nearbyMarksToMark3.middle.count, 0)
+        mark4?.segment = Segment(proximal:  CGPoint(x:103, y: 0.2), distal: CGPoint(x: 203, y: 1.0))
+        nearbyMarksToMark3 = ladderView.getNearbyMarkIDs(mark: mark3!, nearbyDistance: 2)
+        XCTAssertTrue(nearbyMarksToMark3.middle.contains(mark4!.id))
+        mark4?.segment = Segment(proximal:  CGPoint(x:106, y: 0.2), distal: CGPoint(x: 206, y: 1.0))
+        nearbyMarksToMark3 = ladderView.getNearbyMarkIDs(mark: mark3!, nearbyDistance: 2)
+        XCTAssertFalse(nearbyMarksToMark3.middle.contains(mark4!.id))
+    }
+
+    func testGetNearbyMarkIDs2() {
+        ladderView.activeRegion = ladderView.ladder.regions[0]
+        let mark1 = ladderView.addMarkToActiveRegion(regionPositionX: 100)
+        XCTAssertEqual(ladderView.ladder.region(ofMark: mark1!), ladderView.ladder.regions[0])
+        ladderView.activeRegion = ladderView.ladder.regions[1]
+        let mark2 = ladderView.addMarkToActiveRegion(regionPositionX: 101)
+        XCTAssertEqual(ladderView.ladder.region(ofMark: mark2!), ladderView.ladder.regions[1])
+        ladderView.activeRegion = ladderView.ladder.regions[2]
+        let mark3 = ladderView.addMarkToActiveRegion(regionPositionX: 102)
+        XCTAssertEqual(ladderView.ladder.region(ofMark: mark3!), ladderView.ladder.regions[2])
+        let nearbyMarksToMark1 = ladderView.getNearbyMarkIDs(mark: mark1!)
+        XCTAssertTrue(nearbyMarksToMark1.distal.contains(mark2!.id))
+        XCTAssertFalse(nearbyMarksToMark1.distal.contains(mark3!.id))
+        XCTAssertEqual(nearbyMarksToMark1.proximal.count, 0)
+        XCTAssertEqual(nearbyMarksToMark1.middle.count, 0)
+        let nearbyMarksToMark2 = ladderView.getNearbyMarkIDs(mark: mark2!)
+        XCTAssertTrue(nearbyMarksToMark2.proximal.contains(mark1!.id))
+        XCTAssertTrue(nearbyMarksToMark2.distal.contains(mark3!.id))
+        XCTAssertEqual(nearbyMarksToMark2.middle.count, 0)
+        let mark4 = ladderView.addMarkToActiveRegion(regionPositionX: 200)
+        var nearbyMarksToMark3 = ladderView.getNearbyMarkIDs(mark: mark3!)
+        XCTAssertEqual(nearbyMarksToMark3.middle.count, 0)
+        mark4?.segment = Segment(proximal:  CGPoint(x:103, y: 0.2), distal: CGPoint(x: 203, y: 1.0))
+        nearbyMarksToMark3 = ladderView.getNearbyMarkIDs(mark: mark3!)
+        XCTAssertTrue(nearbyMarksToMark3.middle.contains(mark4!.id))
+        mark4?.segment = Segment(proximal:  CGPoint(x:103 + 15, y: 0.2), distal: CGPoint(x: 206, y: 1.0))
+        nearbyMarksToMark3 = ladderView.getNearbyMarkIDs(mark: mark3!)
+        print("nearbyMarksToMark3", nearbyMarksToMark3)
+        XCTAssertFalse(nearbyMarksToMark3.middle.contains(mark4!.id))
+    }
+
+    func testSnapToNearbyMarks() {
+        ladderView.activeRegion = ladderView.ladder.regions[0]
+        let mark1 = ladderView.addMarkToActiveRegion(regionPositionX: 100)
+        ladderView.activeRegion = ladderView.ladder.regions[1]
+        _ = ladderView.addMarkToActiveRegion(regionPositionX: 101)
+        ladderView.activeRegion = ladderView.ladder.regions[2]
+        _ = ladderView.addMarkToActiveRegion(regionPositionX: 102)
+        XCTAssertEqual(mark1!.segment, Segment(proximal: CGPoint(x: 100, y: 0), distal: CGPoint(x: 100, y: 1.0)))
+        let nearbyMarksToMark1 = ladderView.getNearbyMarkIDs(mark: mark1!)
+        ladderView.snapToNearbyMarks(mark: mark1!, nearbyMarks: nearbyMarksToMark1)
+        XCTAssertEqual(mark1!.segment, Segment(proximal: CGPoint(x: 100, y: 0), distal: CGPoint(x: 101, y: 1.0)))
+        ladderView.activeRegion = ladderView.ladder.regions[2]
+        let mark4 = ladderView.addMarkToActiveRegion(regionPositionX: 500)
+        let mark5 = Mark(segment: Segment(proximal: CGPoint(x:501, y: 0.5), distal: CGPoint(x: 700, y: 0.5)))
+        ladderView.ladder.addMark(mark5, toRegion: ladderView.ladder.regions[2])
+        let nearbyMarksToMark5 = ladderView.getNearbyMarkIDs(mark: mark5)
+        XCTAssertEqual(nearbyMarksToMark5.middle.first, mark4!.id)
+        let nearbyMarksToMark4 = ladderView.getNearbyMarkIDs(mark: mark4!)
+        XCTAssertEqual(nearbyMarksToMark4.middle.first, mark5.id)
+        ladderView.snapToNearbyMarks(mark: mark5, nearbyMarks: nearbyMarksToMark5)
+        XCTAssertEqual(mark5.segment.proximal.x, mark4?.segment.proximal.x)
+    }
+
+
+
 
     func testAssessImpulseOrigin() {
         let ladder = ladderView.ladder
@@ -436,7 +522,8 @@ class LadderViewTests: XCTestCase {
         ladderView.assessImpulseOrigin(mark: mark3)
         XCTAssertEqual(mark3.impulseOriginSite, .distal)
         // move mark1 next to distal mark3
-        mark1.move(movement: .horizontal, to: CGPoint(x: 50, y: 0))
+        mark1.segment = Mark.changePosition(mark: mark1, movement: .horizontal, to: CGPoint(x: 50, y: 0))
+//        mark1.move(movement: .horizontal, to: CGPoint(x: 50, y: 0))
         ladderView.assessImpulseOrigin(mark: mark3)
         XCTAssertEqual(mark3.impulseOriginSite, .none)
     }

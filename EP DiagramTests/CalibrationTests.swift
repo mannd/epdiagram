@@ -26,7 +26,7 @@ class CalibrationTests: XCTestCase {
     func testSetCalibration() {
         let value: CGFloat = 100
         let calibration = Calibration()
-        calibration.set(zoom: 1.5, calFactor: Calibration.standardInterval / value)
+        calibration.set(zoom: 1.5, value: value)
         let calibration2 = Calibration()
         calibration2.set(zoom: 1.5, value: value)
         XCTAssertEqual(calibration.currentCalFactor, calibration2.currentCalFactor)
