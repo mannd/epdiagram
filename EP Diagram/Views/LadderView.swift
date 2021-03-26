@@ -13,7 +13,7 @@ final class LadderView: ScaledView {
 
     // For debugging
     #if DEBUG  // Change this for debugging impulse origins and block
-    var showProxEnd = true
+    var showProxEnd = false
     var showEarliestPoint = false
     var debugMarkMode = false
     #else  // Don't ever change this.  They must all be FALSE.
@@ -1599,11 +1599,15 @@ final class LadderView: ScaledView {
 
     func drawConductionDirection(forMark mark: Mark, segment: Segment, context: CGContext) {
         guard showArrows else { return }
+        let arrowLineLength: CGFloat = 20
+        let halfArrowLineLength: CGFloat = 10 // make arrowLineLength / 2
         switch mark.late {
         case .distal:
-            drawArrowHead(context: context, start: segment.proximal, end: segment.distal, pointerLineLength: 20, arrowAngle: arrowHeadAngle)
+            if segment.distal.x < leftMargin + halfArrowLineLength { return }
+            drawArrowHead(context: context, start: segment.proximal, end: segment.distal, pointerLineLength: arrowLineLength, arrowAngle: arrowHeadAngle)
         case .proximal:
-            drawArrowHead(context: context, start: segment.distal, end: segment.proximal, pointerLineLength: 20, arrowAngle: arrowHeadAngle)
+            if segment.proximal.x < leftMargin + halfArrowLineLength { return }
+            drawArrowHead(context: context, start: segment.distal, end: segment.proximal, pointerLineLength: arrowLineLength, arrowAngle: arrowHeadAngle)
         case .none, .auto, .random:
             break // this is undecided unless manually set
         }
@@ -1674,11 +1678,14 @@ final class LadderView: ScaledView {
     func drawBlock(context: CGContext, mark: Mark, segment: Segment) {
         guard showBlock else { return }
         let blockLength: CGFloat = 20
+        let halfBlockLength: CGFloat = 10  // make blockLength / 2
         let blockSeparation: CGFloat = 5
         switch mark.blockSite {
         case .none:
             return
         case .distal:
+
+            if segment.distal.x < leftMargin + halfBlockLength { return }
             context.move(to: CGPoint(x: segment.distal.x - blockLength / 2, y: segment.distal.y))
             context.addLine(to: CGPoint(x: segment.distal.x + blockLength / 2, y: segment.distal.y))
             if doubleLineBlockMarker {
@@ -1686,6 +1693,7 @@ final class LadderView: ScaledView {
                 context.addLine(to: CGPoint(x: segment.distal.x + blockLength / 2, y: segment.distal.y + blockSeparation))
             }
         case .proximal:
+            if segment.proximal.x < leftMargin + halfBlockLength { return }
             context.move(to: CGPoint(x: segment.proximal.x - blockLength / 2, y: segment.proximal.y))
             context.addLine(to: CGPoint(x: segment.proximal.x + blockLength / 2, y: segment.proximal.y))
             if doubleLineBlockMarker {
@@ -1706,8 +1714,10 @@ final class LadderView: ScaledView {
         case .none:
             return
         case .distal:
+            if segment.distal.x < leftMargin { return }
             drawFilledCircle(context: context, position: CGPoint(x: segment.distal.x - radius / 2, y: segment.distal.y + separation - radius), radius: radius)
         case .proximal:
+            if segment.proximal.x < leftMargin { return }
             drawFilledCircle(context: context, position: CGPoint(x: segment.proximal.x - radius / 2, y: segment.proximal.y - separation), radius: radius)
         case .auto, .random:
             fatalError("Impulse origin site set to auto or random.")

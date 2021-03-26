@@ -62,6 +62,8 @@ Ladder diagrams date back at least a century and have been used to analyze arrhy
 * EP Diagram manual
 ** Introduction
 *EP Diagram* is a full feature ladder drawing program.  It allows you not only to draw ladders, but customize their appearance to a fine degree.  As such it is a complex program and it can take a while to learn all its features.  However, it has an extensive Undo/Redo facility, so feel free to experiment. 
+** Don't panic! (Undo, Redo, and Autosave)
+Practically any change you make while using this app can be reversed by tapping the *Undo* button at the bottom of the screen.  If you change your mind you can revert the undo action by tapping the *Redo* button.  Every change you make is automatically saved.
 ** Terminology
 |----------------------+----------------------------------------------------------------------|
 | Term                 | Definition                                                           |
@@ -82,6 +84,7 @@ Ladder diagrams date back at least a century and have been used to analyze arrhy
 | Caliper              | used to calibrate the diagram to allow measurements                  |
 | Conduction direction | optional arrow symbol indicating direction of electrical flow        |
 | Markers              | optional lines on image aligned with marks                           |
+** Menus
 ** Diagrams
 *** Creating and opening diagrams
 EP Diagram is a document-based app, meaning the diagrams you create are stored on your device and on iCloud, and can be handled by the Files app on your device, meaning you can copy them, rename them, or delete them outside of the *EP Diagram* app.  The diagram files you create have a file extension of ~diagram~ and a specific icon and file format.  When you open the app, a screen showing your diagram files and a create file icon.
@@ -98,6 +101,8 @@ New diagrams have a generic file name.  You can rename the diagram in the Files 
 [[./img/new_diagram.png]]
 
 A blank diagram has no ECG image and has a default ladder without marks.  You will see how to add an ECG image and annotate the ladder in the next sections.
+*** Closing a diagram
+There is no need to specifically save changes you make to a diagram.  Every change you make is automatically saved.  You close a diagram by simply tapping the *X* at the upper right hand corner of the screen.  When you reopen the diagram it will appear like it did when it was last closed.  Not however that undo and redo information is /not/ restored when you close and reopen a diagram.  Undo information can also be reset by the operating system if memory resources are low.  Thus if you have a diagram that you want to "play around with" but don't want to lose its original form, it might be best to duplicate that diagram using the Files app, and work on a copy.  
 ** Images
 *** Adding an image
 **** Image types
@@ -138,6 +143,7 @@ In normal mode frequently one of the ladder regions is highlighted, as seen belo
 [[./img/active_region.png]]
 
 You can change the active region by tapping on the label of another region, or toggle it on and off by tapping of the label of the active region.  The active region determines into which region a mark is drawn, when tapping on the image as described next.
+** Marks
 *** Creating marks
 If you tap once on the image, a vertical mark with an attached cursor will be drawn in the active region.  If there is no active region, the first region in the ladder will become the active region.  If instead of tapping on the image you tap on the ladder, whatever region you tap on will become the active region, and the mark will appear in that region.
 
@@ -184,7 +190,7 @@ We saw that you can tap on the image or the ladder to create a mark.  What happe
 An important point: if a mark has a cursor, we can move it.  By the same token, you can't move a mark unless it has a cursor, at least while in normal mode.  But before we move the mark, note where the cursor intersects the mark, namely, at its midpoint.  This is called the /anchor/ of the mark.  Let's address this further.
 
 *** Mark anchors
-Once a mark has a cursor, we can change the anchor point by single-tapping on the mark or the cursor.  Marks have at most three anchor points, proximal, middle, and distal, though some marks have only two if they are linked to other marks (i.e. their freedom of movement is more limited).  When we drag the cursor of the mark, the anchor is what moves.  To demonstrate this, single tap on the highlighted mark or its cursor.  The anchor will move from the middle to the proximal end of the mark.  Tap again and it will move the to distal end.  Finally it will cycle back to the middle if you tap again.
+Once a mark has a cursor, we can change the anchor point by single-tapping on the mark or the cursor.  Marks have at most three anchor points, proximal, middle, and distal, though some marks have only two if they are linked to other marks (i.e. their freedom of movement is restricted).  When we drag the cursor of the mark, the anchor is what moves.  To demonstrate this, single tap on the highlighted mark or its cursor.  The anchor will move from the middle to the proximal end of the mark.  Tap again and it will move the to distal end.  Finally it will cycle back to the middle if you tap again.
 
 #+CAPTION: Proximal anchor
 [[./img/proximal_anchor.png]]
@@ -197,7 +203,7 @@ With the anchor back in the middle, drag the cursor or the mark horizontally.  W
 #+CAPTION: Moving AV mark into position
 [[./img/moving_AV_mark.png]]
 
-Even though that worked (at least for me), let's consider another mark that wasn't so perfectly slanted to connect both its ends.  In the figure below, we have used the middle anchor to move the mark so that the A end connects, but the V end is way off.
+Even though that worked, let's consider another mark that wasn't so perfectly slanted to connect both its ends.  In the figure below, we have used the middle anchor to move the mark so that the A end connects, but the V end is way off.
 
 #+CAPTION: Distal end of AV mark needs positioning.
 [[./img/distal_end_malpositioned.png]]
@@ -212,15 +218,64 @@ We don't want to move the mark as a whole; just the distal end.  So tap on it to
 
 When the end is close enough lift your finger and the marks will link up.
 
-*** Marks that don't span a region
+*** Moving marks in all directions
+So far we have used the cursor to move marks purely in a horizontal direction.  But we can also move marks in unlimited directions.  To do this we have to change our cursor to an /omnidirectional/ cursor.
 
-**** The omnidirectional cursor
+Tap a mark to cause the cursor to appear.  Then do a long press on the cursor.  A circle will appear, indicating the cursor is now omnidirectional.
+
+#+CAPTION: Omnidirectional cursor
+[[./img/omnidirectional_cursor.png]]
+
+Tap the cursor to move the anchor to the distal point of the mark.  Now when you move the cursor you can move this point in any direction.
+
+#+CAPTION: Omnidirectional movement
+[[./img/omnidirectional_movement.png]]
+
+Another long press on the cursor will change it back into a normal horizontal movement cursor.
 
 *** Deleting marks
 
+To delete a mark, simply double click it.  You can delete multiple marks, or all the marks in a region or in the ladder using edit mode [link].
 *** Linked marks
+Once marks are linked, moving one linked mark will also move the marks it is linked to.  In order to unlink marks, you can use the *Undo* button, or delete and the re-add a linked mark, or use edit mode [link].
+*** Block and impulse origin
+In the course of add, deleting, and moving marks, if the app preferences are set to show impulse origin or block, the app will try to determine automatically where the impulse origin is and where block is, depending on the direction of the marks and their linking, and will show this with symbols as seen below.  You can also manually set impulse origin and block using edit mode [link].
 
-** Menus
+#+CAPTION: Impulse origin and block
+[[./img/impulse_origin_block.png]]
+
+** Connecting marks
+Connect mode is useful to connect marks in different regions rapidly.  Tap the *Connect* button to enter this mode.  Then tap on pairs of marks, separated by a region of conduction to connect them.  
+
+#+CAPTION: Tap on mark in A region
+[[./img/connect_step_1.png]]
+
+#+CAPTION: Tap on mark in V region
+[[./img/connect_step_2.png]]
+
+You can also quickly create a blocked mark in connect mode.  Tap on a mark in the A region, then tap in the AV region.  A new mark will be created with block in the AV region.
+
+#+CAPTION: Tap on mark in A region
+[[./img/connect_block_step_1.png]]
+
+#+CAPTION: Tap in the AV region
+[[./img/connect_block_step_2.png]]
+
+Tap the *Done* button to resume normal mode.
+
+** Editing marks
+
+** Calibration and measurements
+
+** Creating your own ladders
+
+** Sample diagrams
+
+** Diagram snapshots
+To create a snapshot and save it to the Photos app, simply tap the *Snapshot* button (next to the *X* close button) at the top right of the screen.  If a dialog appears asking for permission to access your photo library, select access to all photos if you wish to take diagram snapshots.
+
+#+CAPTION: Snapshot button
+[[./img/snapshot_button.png]]
 
 * Known issues/bugs 
 - Diagram document format likely to change in release version and be incompatible with present format.
