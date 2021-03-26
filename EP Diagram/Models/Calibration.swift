@@ -33,13 +33,13 @@ final class Calibration: Codable, CustomDebugStringConvertible {
         (originalZoom * originalCalFactor) / currentZoom
     }
 
-    @available(*, deprecated, message: "Can be removed after after further testing.")
-    func set(zoom: CGFloat, calFactor: CGFloat) {
-        originalZoom = zoom
-        currentZoom = zoom
-        originalCalFactor = calFactor
-        isCalibrated = true
-    }
+//    @available(*, deprecated, message: "Can be removed after after further testing.")
+//    func set(zoom: CGFloat, calFactor: CGFloat) {
+//        originalZoom = zoom
+//        currentZoom = zoom
+//        originalCalFactor = calFactor
+//        isCalibrated = true
+//    }
 
     func set(zoom: CGFloat, value: CGFloat) {
         originalZoom = zoom

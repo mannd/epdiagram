@@ -194,8 +194,9 @@ final class Mark: Codable {
         }
     }
 
-    static func changePosition(originalSegment: Segment, anchor: Anchor, movement: Movement, to position: CGPoint) -> Segment {
-        var segment = originalSegment
+    static func changePosition(mark: Mark, movement: Movement, to position: CGPoint) -> Segment {
+        var segment = mark.segment
+        let anchor = mark.anchor
         if movement == .horizontal {
             switch anchor {
             case .proximal:

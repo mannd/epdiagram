@@ -989,7 +989,7 @@ final class LadderView: ScaledView {
     }
 
     private func moveMark(movement: Movement, mark: Mark, regionPosition: CGPoint) {
-        let segment = Mark.changePosition(originalSegment: mark.segment, anchor: mark.anchor, movement: movement, to: regionPosition)
+        let segment = Mark.changePosition(mark: mark, movement: movement, to: regionPosition)
         setSegment(segment: segment, forMark: mark)
         moveLinkedMarks(forMark: mark)
         adjustCursor(mark: mark)
@@ -1012,7 +1012,6 @@ final class LadderView: ScaledView {
         }
         for middleMark in ladder.getMarkSet(fromMarkIdSet:mark.linkedMarkIDs.middle) {
             if mark == middleMark { break }
-            print("****middleMark", middleMark.id)
             var segment = middleMark.segment
             let distanceToProximal = Geometry.distanceSegmentToPoint(segment: mark.segment, point: middleMark.segment.proximal)
             let distanceToDistal = Geometry.distanceSegmentToPoint(segment: mark.segment, point: middleMark.segment.distal)
@@ -1029,7 +1028,6 @@ final class LadderView: ScaledView {
                 }
             }
             setSegment(segment: segment, forMark: middleMark)
-            print("middle mark segment", segment)
         }
         setNeedsDisplay()
     }

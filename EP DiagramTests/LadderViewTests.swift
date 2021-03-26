@@ -312,7 +312,7 @@ class LadderViewTests: XCTestCase {
     // TODO: move to calibration tests
     func testCalibration() {
         let calibration = Calibration()
-        calibration.set(zoom: 1.0, calFactor: 100)
+        calibration.set(zoom: 1.0, value: 100)
         ladderView.calibration = calibration
         var value = ladderView.formatValue(100, usingCalFactor: 1)
         XCTAssertEqual(value, 100)
@@ -332,14 +332,14 @@ class LadderViewTests: XCTestCase {
         let formattedValue = ladderView.formatValue(CGFloat(rawValue), usingCalFactor: calFactor)
         XCTAssertEqual(formattedValue, Int(interval))
         let calibration = Calibration()
-        calibration.set(zoom: 1.0, calFactor: 10)
+        calibration.set(zoom: 1.0, value: 10)
         ladderView.calibration = calibration
         let rawValue2 = ladderView.regionValueFromCalibratedValue(interval, usingCalFactor: calibration.currentCalFactor)
-        XCTAssertEqual(rawValue2, 10)
+        XCTAssertEqual(rawValue2, 1.0)
         calibration.currentZoom = 2.0
         ladderView.offsetX = 10
         let rawValue3 = ladderView.regionValueFromCalibratedValue(interval, usingCalFactor: calibration.currentCalFactor)
-        XCTAssertEqual(rawValue3, 20)
+        XCTAssertEqual(rawValue3, 2.0)
         let formattedValue2 = ladderView.formatValue(CGFloat(rawValue3), usingCalFactor: calibration.currentCalFactor)
         XCTAssertEqual(formattedValue2, Int(interval))
     }
@@ -474,9 +474,9 @@ class LadderViewTests: XCTestCase {
         ladderView.activeRegion = ladderView.ladder.regions[0]
         let mark1 = ladderView.addMarkToActiveRegion(regionPositionX: 100)
         ladderView.activeRegion = ladderView.ladder.regions[1]
-        let mark2 = ladderView.addMarkToActiveRegion(regionPositionX: 101)
+        _ = ladderView.addMarkToActiveRegion(regionPositionX: 101)
         ladderView.activeRegion = ladderView.ladder.regions[2]
-        let mark3 = ladderView.addMarkToActiveRegion(regionPositionX: 102)
+        _ = ladderView.addMarkToActiveRegion(regionPositionX: 102)
         XCTAssertEqual(mark1!.segment, Segment(proximal: CGPoint(x: 100, y: 0), distal: CGPoint(x: 100, y: 1.0)))
         let nearbyMarksToMark1 = ladderView.getNearbyMarkIDs(mark: mark1!)
         ladderView.snapToNearbyMarks(mark: mark1!, nearbyMarks: nearbyMarksToMark1)
@@ -522,7 +522,7 @@ class LadderViewTests: XCTestCase {
         ladderView.assessImpulseOrigin(mark: mark3)
         XCTAssertEqual(mark3.impulseOriginSite, .distal)
         // move mark1 next to distal mark3
-        mark1.segment = Mark.changePosition(originalSegment: mark1.segment, anchor: mark1.anchor, movement: .horizontal, to: CGPoint(x: 50, y: 0))
+        mark1.segment = Mark.changePosition(mark: mark1, movement: .horizontal, to: CGPoint(x: 50, y: 0))
 //        mark1.move(movement: .horizontal, to: CGPoint(x: 50, y: 0))
         ladderView.assessImpulseOrigin(mark: mark3)
         XCTAssertEqual(mark3.impulseOriginSite, .none)
