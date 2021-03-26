@@ -2231,6 +2231,7 @@ final class LadderView: ScaledView {
     // If N is last region index, add to N + 1, as long as N + 1 < max number of regions.
     // So need to calculate index before calling, and make sure it is legit.
     func undoablyAddRegion(_ region: Region, atIndex index: Int) {
+        unlinkAllMarks()
         let originalRegion = region
         currentDocument?.undoManager.registerUndo(withTarget: self) { target in
             target.undoablyRemoveRegion(originalRegion)
@@ -2239,12 +2240,14 @@ final class LadderView: ScaledView {
         ladder.regions.insert(region, at: index)
         initializeRegions()
         ladder.reindexMarks()
+        relinkAllMarks()
         // also need to regroup marks
         setNeedsDisplay()
     }
 
     func undoablyRemoveRegion(_ region: Region) {
         assert(ladder.regions.count > Ladder.minRegionCount)
+        unlinkAllMarks()
         let originalRegion = region
         let index = ladder.index(ofRegion: originalRegion)!
         currentDocument?.undoManager.registerUndo(withTarget: self) { target in
@@ -2254,6 +2257,7 @@ final class LadderView: ScaledView {
         ladder.removeRegion(region)
         initializeRegions()
         ladder.reindexMarks()
+        relinkAllMarks()
         setNeedsDisplay()
     }
 
@@ -2269,14 +2273,18 @@ final class LadderView: ScaledView {
         selectedRegionTemplate.name = ""
         selectedRegionTemplate.description = ""
         let newRegion = Region(template: selectedRegionTemplate)
+        currentDocument?.undoManager.beginUndoGrouping()
         undoablyAddRegion(newRegion, atIndex: selectedIndex)
+        currentDocument?.undoManager.endUndoGrouping()
     }
 
     func removeRegion() {
         // Can't remove last region
         guard ladder.regions.count > Ladder.minRegionCount else { return }
         guard let selectedRegion = selectedLabelRegion() else { return }
+        currentDocument?.undoManager.beginUndoGrouping()
         undoablyRemoveRegion(selectedRegion)
+        currentDocument?.undoManager.endUndoGrouping()
     }
 
     func setRegionHeight(_ height: Int, forRegion region: Region) {
@@ -2585,6 +2593,14 @@ extension LadderView: LadderViewDelegate {
         }
     }
 
+    func relinkAllMarks() {
+        let marks = ladder.allMarks()
+        for mark in marks {
+            let nearbyMarks = getNearbyMarkIDs(mark: mark)
+            linkNearbyMarks(mark: mark, nearbyMarks: nearbyMarks)
+        }
+    }
+
     func linkNearbyMarks(mark: Mark, nearbyMarks: LinkedMarkIDs) {
         guard snapMarks else { return }
         currentDocument?.undoManager?.registerUndo(withTarget: self) { target in
@@ -2678,6 +2694,13 @@ extension LadderView: LadderViewDelegate {
 //        m2.linkedMarkIDs.middle.remove(m1.id)
 //        m2.linkedMarkIDs.distal.remove(m1.id)
 //    }
+
+    func unlinkAllMarks() {
+        let marks = ladder.allMarks()
+        for mark in marks {
+            undoablyUnlinkMark(mark: mark)
+        }
+    }
 
     func undoablyUnlinkMark(mark: Mark) {
         guard snapMarks else { return }

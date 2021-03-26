@@ -21,6 +21,8 @@ extension DiagramViewController: UIContextMenuInteractionDelegate {
         let locationInLadder = ladderView.getLocationInLadder(position: location)
         if locationInLadder.specificLocation == .label {
             ladderView.normalizeLadder()
+            cursorView.cursorIsVisible = false
+            cursorView.setNeedsDisplay()
             if let region = locationInLadder.region {
                 region.mode = .labelSelected
                 return labelContextMenuConfiguration(at: location, region: region)
