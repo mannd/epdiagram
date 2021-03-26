@@ -13,7 +13,7 @@ final class LadderView: ScaledView {
 
     // For debugging
     #if DEBUG  // Change this for debugging impulse origins and block
-    var showProxEnd = false
+    var showProxEnd = true
     var showEarliestPoint = false
     var debugMarkMode = false
     #else  // Don't ever change this.  They must all be FALSE.
@@ -755,7 +755,7 @@ final class LadderView: ScaledView {
                     if let dragCreatedMark = dragCreatedMark {
                         undoablyAddMark(mark: dragCreatedMark)
                     }
-                    dragCreatedMark?.mode = .attached
+                    attachMark(dragCreatedMark)
                 }
             }
         }
@@ -780,7 +780,6 @@ final class LadderView: ScaledView {
             updateMarkersAndRegionIntervals(activeRegion)
         }
         if state == .ended {
-//            currentDocument?.undoManager.endUndoGrouping()
             isDragging = false
             if let movingMark = movingMark {
                 swapEndsIfNeeded(mark: movingMark)
@@ -941,8 +940,17 @@ final class LadderView: ScaledView {
         let proximalY = mark.segment.proximal.y
         let distalY = mark.segment.distal.y
         if proximalY > distalY {
-            mark.swapEnds()
+            undoablySwapEnds(mark: mark)
         }
+    }
+
+    private func undoablySwapEnds(mark: Mark) {
+        currentDocument?.undoManager.registerUndo(withTarget: self) { target in
+            target.undoablySwapEnds(mark: mark)
+        }
+        NotificationCenter.default.post(name: .didUndoableAction, object: nil)
+        mark.swapEnds()
+        mark.swapAnchors()
     }
 
     func swapEndsIfNeeded() {
@@ -975,21 +983,14 @@ final class LadderView: ScaledView {
         guard let activeRegion = activeRegion else { return }
         let regionPosition = transformToRegionPosition(scaledViewPosition: scaledViewPosition, region: activeRegion)
         if cursorViewDelegate.cursorIsVisible {
-            undoablyMoveMark(movement: cursorViewDelegate.cursorMovement(), mark: mark, regionPosition: regionPosition)
+            moveMark(movement: cursorViewDelegate.cursorMovement(), mark: mark, regionPosition: regionPosition)
         }
         updateMarkersAndRegionIntervals(activeRegion)
     }
 
-    private func undoablyMoveMark(movement: Movement, mark: Mark, regionPosition: CGPoint) {
-        currentDocument?.undoManager?.registerUndo(withTarget: self, handler: {target in
-            target.undoablyMoveMark(movement: movement, mark: mark, regionPosition: regionPosition)
-        })
-        NotificationCenter.default.post(name: .didUndoableAction, object: nil)
-        moveMark(movement: movement, mark: mark, regionPosition: regionPosition)
-    }
-
     private func moveMark(movement: Movement, mark: Mark, regionPosition: CGPoint) {
-        mark.move(movement: movement, to: regionPosition)
+        let segment = Mark.changePosition(mark: mark, movement: movement, to: regionPosition)
+        setSegment(segment: segment, forMark: mark)
         moveLinkedMarks(forMark: mark)
         adjustCursor(mark: mark)
         cursorViewDelegate.refresh()
@@ -1011,7 +1012,6 @@ final class LadderView: ScaledView {
         }
         for middleMark in ladder.getMarkSet(fromMarkIdSet:mark.linkedMarkIDs.middle) {
             if mark == middleMark { break }
-            print("****middleMark", middleMark.id)
             var segment = middleMark.segment
             let distanceToProximal = Geometry.distanceSegmentToPoint(segment: mark.segment, point: middleMark.segment.proximal)
             let distanceToDistal = Geometry.distanceSegmentToPoint(segment: mark.segment, point: middleMark.segment.distal)
@@ -1028,7 +1028,6 @@ final class LadderView: ScaledView {
                 }
             }
             setSegment(segment: segment, forMark: middleMark)
-            print("middle mark segment", segment)
         }
         setNeedsDisplay()
     }
