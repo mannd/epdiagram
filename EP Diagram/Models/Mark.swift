@@ -161,6 +161,7 @@ final class Mark: Codable {
         return numerator / denominator
     }
 
+    // This is not used, though it is in the tests.
     func move(movement: Movement, to position: CGPoint) {
         if movement == .horizontal {
             switch anchor {
@@ -191,6 +192,40 @@ final class Mark: Codable {
                 segment.distal = position
             }
         }
+    }
+
+    static func changePosition(originalSegment: Segment, anchor: Anchor, movement: Movement, to position: CGPoint) -> Segment {
+        var segment = originalSegment
+        if movement == .horizontal {
+            switch anchor {
+            case .proximal:
+                segment.proximal.x = position.x
+            case .middle:
+                // Determine halfway point between proximal and distal.
+                let differenceX = (segment.proximal.x - segment.distal.x) / 2
+                segment.proximal.x = position.x + differenceX
+                segment.distal.x = position.x - differenceX
+            case .distal:
+                segment.distal.x = position.x
+            }
+        }
+        else if movement == .omnidirectional {
+            switch anchor {
+            case .proximal:
+                segment.proximal = position
+            case .middle:
+                // Determine halfway point between proximal and distal.
+                let differenceX = (segment.proximal.x - segment.distal.x) / 2
+                let differenceY = (segment.proximal.y - segment.distal.y) / 2
+                segment.proximal.x = position.x + differenceX
+                segment.distal.x = position.x - differenceX
+                segment.proximal.y = position.y + differenceY
+                segment.distal.y = position.y - differenceY
+            case .distal:
+                segment.distal = position
+            }
+        }
+        return segment
     }
 
     // Must normalize x and y??

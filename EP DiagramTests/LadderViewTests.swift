@@ -522,7 +522,8 @@ class LadderViewTests: XCTestCase {
         ladderView.assessImpulseOrigin(mark: mark3)
         XCTAssertEqual(mark3.impulseOriginSite, .distal)
         // move mark1 next to distal mark3
-        mark1.move(movement: .horizontal, to: CGPoint(x: 50, y: 0))
+        mark1.segment = Mark.changePosition(originalSegment: mark1.segment, anchor: mark1.anchor, movement: .horizontal, to: CGPoint(x: 50, y: 0))
+//        mark1.move(movement: .horizontal, to: CGPoint(x: 50, y: 0))
         ladderView.assessImpulseOrigin(mark: mark3)
         XCTAssertEqual(mark3.impulseOriginSite, .none)
     }
