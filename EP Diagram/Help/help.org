@@ -244,6 +244,21 @@ In the course of add, deleting, and moving marks, if the app preferences are set
 #+CAPTION: Impulse origin and block
 [[./img/impulse_origin_block.png]]
 
+** Calibration and measurements
+*** Calibrating the diagram
+While ladder diagrams are nice, even nicer is the ability to use the ladder to make measurements.  In order to to do this, you must calibrate the diagram.  Tap the *Calibration* button to enter calibration mode.  A single caliper will appear on the image.  If you use the app *EP Calipers* this will look familiar.  This caliper though is only for setting calibration.  It is not for making measurements.  Your ladder will do that, once it is calibrated.
+
+#+CAPTION: Calibration mode
+[[./img/calibration_mode.png]]
+
+Note that this caliper is set to a measurement of 1000 msec.  In order to calibrate, you must measure a 1000 msec interval with the caliper.  Then tap *Set* to set the calibration, or tap *Clear* to remove calibration.  Once calibrated, you can recalibrate at any time.  Tap *Done* to return to normal mode.
+*** Intervals and conduction times
+After calibration, if preferences are set to show intervals and show conduction times, you will now see measurements on the ladder.  These will change "on the fly" as you modify the ladder.  They will remain accurate even when zooming and scrolling the image.
+
+#+CAPTION: Measurements
+[[./img/measurements.png]]
+
+
 ** Connecting marks
 Connect mode is useful to connect marks in different regions rapidly.  Tap the *Connect* button to enter this mode.  Then tap on pairs of marks, separated by a region of conduction to connect them.  
 
@@ -264,8 +279,8 @@ You can also quickly create a blocked mark in connect mode.  Tap on a mark in th
 Tap the *Done* button to resume normal mode.
 
 ** Editing marks
-
-** Calibration and measurements
+*** Fine-tuning your diagrams
+If you are aiming for publication quality diagrams, it's important that marks all slope the same, that block is always at the same level in a region, and that you change the appearance of marks, such as making the mark a dashed instead of a solid line.  Edit mode if for making these changes.  It allows you to select one or many marks or select regions and then apply changes to the selection.  
 
 ** Creating your own ladders
 

@@ -225,6 +225,10 @@ class MarkTests: XCTestCase {
         XCTAssertEqual(mark.width, 100)
         XCTAssertEqual(mark.height, 1)
         XCTAssertEqual(mark.length, sqrt(10_001), accuracy: accuracy)
+        // Do same for segments
+        let segment = Segment(proximal: CGPoint(x: 0, y: 0), distal: CGPoint(x: 100, y: 1))
+        XCTAssertEqual(segment.length, sqrt(10_001), accuracy: accuracy)
+
     }
 
     func testAnchorPosition() {
