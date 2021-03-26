@@ -13,7 +13,7 @@ final class LadderView: ScaledView {
 
     // For debugging
     #if DEBUG  // Change this for debugging impulse origins and block
-    var showProxEnd = false
+    var showProxEnd = true
     var showEarliestPoint = false
     var debugMarkMode = false
     #else  // Don't ever change this.  They must all be FALSE.
@@ -941,8 +941,17 @@ final class LadderView: ScaledView {
         let proximalY = mark.segment.proximal.y
         let distalY = mark.segment.distal.y
         if proximalY > distalY {
-            mark.swapEnds()
+            undoablySwapEnds(mark: mark)
         }
+    }
+
+    private func undoablySwapEnds(mark: Mark) {
+        currentDocument?.undoManager.registerUndo(withTarget: self) { target in
+            target.undoablySwapEnds(mark: mark)
+        }
+        NotificationCenter.default.post(name: .didUndoableAction, object: nil)
+        mark.swapEnds()
+        mark.swapAnchors()
     }
 
     func swapEndsIfNeeded() {

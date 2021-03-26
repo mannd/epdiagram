@@ -128,7 +128,16 @@ final class Mark: Codable {
         (segment.proximal, segment.distal) = (segment.distal, segment.proximal)
     }
 
-
+    func swapAnchors() {
+        switch anchor {
+        case .proximal:
+            anchor = .distal
+        case .distal:
+            anchor = .proximal
+        default:
+            break
+        }
+    }
 
     func getAnchorPosition() -> CGPoint {
         let anchorPosition: CGPoint

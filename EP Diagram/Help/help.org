@@ -28,6 +28,7 @@
 - If you have sample ECGs that could be included in the app, for example, different types of heart block, premature beats, other arrhythmias, please send them to me.  Make sure they are anonymized and are not copyrighted.
 - The final diagram file format will likely change with the release of the app, meaning diagram files you create with this beta version will likely not open in the app.  Once the final version is released, the file format will be forwardly compatible with subsequent app versions.
 - Email me at mannd@epstudiossoftware.com or send feedback directly through the TestFlight app.
+- A copy of this help file is at [link].  It may be useful to read through the help file on a different device while using the app as you are learning it.
 * Quick Start
 ** Normal mode
 - *EP Diagram* opens and saves diagram files, that will be stored in the files app on you iPad or iPhone.
