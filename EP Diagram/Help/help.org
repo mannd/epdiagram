@@ -16,11 +16,11 @@
 #+HTML_HEAD: <style media="screen" type="text/css"> img {max-width: 100%; height: auto;} </style>
 #+HTML_HEAD: <style  type="text/css">:root { color-scheme: light dark; }</style>
 #+HTML_HEAD: <link rel="stylesheet" type="text/css" href="./org.css"/>
-* Beta Version Notes
+* Beta version notes
 *EP Diagram* is under active development, but this beta version is now feature complete, and the remaining development will be bug fixes and usability improvements.
 ** New in this version
 - App help (this file) is now complete.
-- Improve undoability of mark movement.
+- Improvement in undo functionality.
 - Restore linking after edit mode.
 - Keep symbols from appearing in left margin.
 ** What is still missing
@@ -29,10 +29,11 @@
 - Email me (mannd@epstudiossoftware.com) with bugs or requested features.  I especially would like to know about any app crashes.
 - Let me know if there are usability problems (hard to move marks, unexpected behavior, other awkwardness).
 - If you have sample ECGs that could be included in the app, for example, different types of heart block, premature beats, other arrhythmias, please send them to me.  Make sure they are anonymized and are not copyrighted.
+- If you have ideas for default ladders to be included in the app, let me know.
 - The final diagram file format will likely change with the release of the app, meaning diagram files you create with this beta version will likely not open in the app.  Once the final version is released, the file format will be forwardly compatible with subsequent app versions.
 - Email me at mannd@epstudiossoftware.com or send feedback directly through the TestFlight app.
 - A copy of this help file is at [link].  It may be useful to read through the help file on a different device while using the app as you are learning it.
-* Quick Start
+* Quick start
 ** Normal mode
 - *EP Diagram* opens and saves diagram files, that will be stored in the files app on you iPad or iPhone.
 - When you open or create a new diagram file, you will see a blank area at the top of the screen and a default ladder grid at the bottom.
@@ -73,7 +74,7 @@ Practically any change you make while using this app can be reversed by tapping 
 |----------------------+----------------------------------------------------------------------|
 | Diagram              | a file containing an image and a ladder                              |
 | Ladder               | a graphical representation of electrical conduction                  |
-| Region               | an anatomic area of the heart, e.g. atrium or venticle               |
+| Region               | an anatomic area of the heart, e.g. atrium or ventricle              |
 | Zone                 | a subset of a region                                                 |
 | Label                | the area of a region containing its name, e.g. A or V                |
 | Mark                 | the lines in each region representing conduction                     |
@@ -135,7 +136,7 @@ You can rotate the device itself and the screen will automatically adjust.
 There is a small red horizontal bar between the image and the ladder.  Move this up or down to adjust the relative proportions of the image and the ladder on the screen.
 ** Ladders
 *** Default ladder
-When you create a new diagram, a default ladder is presented initially.  You can change the default ladder (see [link]), but the original default (default default?) ladder has three regions: A (atrial), AV (atrioventricular), and V (ventricular).  Notice that the AV region is larger than the other two.  This is something you can change [link]; in fact you can create your own ladders from scratch [link].  You can also edit the text of the labels on the left hand side, add or remove regions, and adjust the width of the labels.  All this will be discussed later.  For now we'll just use this ladder as is and start to create some marks.
+When you create a new diagram, a default ladder is presented initially.  You can change the default ladder (see [link]), but the original default ladder has three regions: A (atrial), AV (atrioventricular), and V (ventricular).  Notice that the AV region is larger than the other two.  This is something you can change [link]; in fact you can create your own ladders from scratch [link].  You can also edit the text of the labels on the left hand side, add or remove regions, and adjust the width of the labels.  All this will be discussed later.  For now we'll just use this ladder as is and start to create some marks.
 *** Modes
 Most of the time you will be working with the ladder in /normal/ mode.  This mode allows you to add and delete marks, move marks, link marks together, and in general draw your ladder.  The toolbar menu at the bottom of the screen in normal mode shows the three other modes: /calibrate/, /edit/, and /connect/.  Those modes are used to calibrate the diagram to allow measurements to be made, to edit the ladder, and to connect quickly pairs of marks.  These modes will be discussed in detail later.
 *** Active region
@@ -248,7 +249,7 @@ In the course of add, deleting, and moving marks, if the app preferences are set
 
 ** Calibration and measurements
 *** Calibrating the diagram
-While ladder diagrams are nice, even nicer is the ability to use the ladder to make measurements.  In order to to do this, you must calibrate the diagram.  Tap the *Calibration* button to enter calibration mode.  A single caliper will appear on the image.  If you use the app *EP Calipers* this will look familiar.  This caliper though is only for setting calibration.  It is not for making measurements.  Your ladder will do that, once it is calibrated.
+While ladder diagrams are nice, even nicer is the ability to use the ladder to make measurements.  In order to do this, you must calibrate the diagram.  Tap the *Calibration* button to enter calibration mode.  A single caliper will appear on the image.  If you use the app *EP Calipers* this will look familiar.  This caliper though is only for setting calibration.  It is not for making measurements.  Your ladder will do that, once it is calibrated.
 
 #+CAPTION: Calibration mode
 [[./img/calibration_mode.png]]
@@ -334,19 +335,108 @@ Use the "hamburger" icon at the upper left of the screen to open the side menu.
 #+CAPTION: Side menu
 [[./img/side_menu.png]]
 
-The *Take photo* and *Select image* menu items were already discussed in the section on images [link].  Here we will discuss the other menu items.
+*** Take photo
+Use your camera to photograph an ECG image that will be directly imported into the diagram.  Adding a new image will blank the ladder, though you can always undo back to the previous app state.  You will need to grant permission to the app to use the camera when doing this the first time.
+*** Select image
+Select an image from the Photos app of from your files.  As previously noted, the ladder will be cleared when adding a new image.  You will need to grant access to your photos when selecting an image for the first time.
 *** Select ladder
+As you will see, you can edit and create your own ladders using the ladder editor [link].  Use *Select ladder* to choose a ladder.  Note that when you select a ladder, it will be blank (without marks), though of course you can always use the *Undo* button to go back to the previous ladder.
+
+#+CAPTION: Select ladder
+[[./img/select_ladder.png]]
+
 *** Rename diagram
+Use this selection to change the name of your diagram file.
 *** Diagram info
+Displays a dialog box with information about the current diagram.
 *** Sample diagrams
+Select a sample diagram.
+
+#+CAPTION: Sample diagrams
+[[./img/sample_diagrams.png]]
+
 *** Lock image
+Prevent the image from scrolling or zooming.  The same button, titled *Unlock image* is used to unlock the image.
 *** Lock ladder
+Prevent changes to the ladder (although the *Undo* and *Redo* buttons still affect the ladder).  Unlock the ladder with the same button. 
 *** Ladder editor
+Editing and creating ladders is discussed in a section below [link].
 *** Preferences
 Preferences are discussed in detail in the next section [link].
 *** Help
+View this help file.
 *** About
+View a dialog including copyright and version information about the app.
+** Editing and creating ladders
+You are not limited to the default ladders that come with the app.  You can create your own ladders, change ladders, or delete those that you don't use. There are two ways to edit ladders. 
+*** Long press on a ladder label
+If in normal or edit mode you long press on a label of the current ladder, a menu appears that allows you to make changes to the current ladder.
+
+#+CAPTION: Region menu
+[[./img/region_menu.png]]
+
+The menu items are:
+**** New mark style
+Normally added marks just assume the default style set in preferences, but you can change this in a region to a different default.  This does not change the style of marks already present.  Use the *Style* menu item in edit mode to do that.
+**** Edit label
+You can change the label name and description.
+**** Add region
+Add a region above or below the selected region.
+**** Remove region
+Remove a region.
+**** Region height
+Change the height of a region (see below [link]).
+**** Adjust left margin
+Change the left margin.
+*** The ladder editor
+The ladder editor will not affect diagrams that you have already created.  Instead it affects the templates that new ladders are based on.  On the side menu tap *Ladder editor* to open the editor.
+
+#+CAPTION: The ladder editor
+[[./img/ladder_editor.png]]
+
+Tap *Edit* to delete ladders, or change the order of ladders in the list.  Note: The first ladder on the list is the default ladder used when you create a new diagram.
+
+Use the *+* button to add a new ladder.  Tap on a ladder to go to the next screen, which is used to edit the ladder itself.
+
+#+CAPTION: Edit ladder screen
+[[./img/edit_ladder.png]]
+
+On this screen you can change the name and description of the ladder, the left margin width, and can add or edit the ladder regions.  Tap *Edit* to delete or change the order of the regions, Tap *+* to add a new region, or tap a region to edit the region, which brings us to the next screen.
+
+#+CAPTION: Region editor
+[[./img/region_editor.png]]
+
+Here you can change the name, description, height, and default mark line style of the region.  The height is a relative height, i.e. a region with a height of 2 will be twice a height twice as much as a region of height 1.  This is why the AV region in the diagrams shown in this help file is twice has high as the A and V regions.
+
+After making changes, hit the back button at the top left to return to your diagram.
+
 ** Preferences
+There are multiple app preferences that you can set, as seen below.  
+
+#+CAPTION: App preferences
+[[./img/preferences.png]]
+
+Most are self-explanatory, and rather than list each one, we'll just provide an overview of them.
+*** Colors
+You can change the colors of marks, calipers, cursors.
+*** Line width
+You can also change the thickness of the lines used for various elements, making them more visible.
+*** Measurements
+Show conduction times or intervals.  Even with these options selected, these measurements won't appear unless you have calibrated the diagram.
+*** Markers
+Markers are lines that appear on the image that correspond to the two endpoints of each mark.  They are similar to the cursor, except they are aligned with every mark.  They can sometimes be useful in fine-tuning the alignment of the marks to the ECG.
+*** Conduction direction
+Select to show arrows pointing in the direction of conduction.
+*** Default mark line style
+The style of new marks added to the ladder.  This can be overridden by the region and mark context menus.
+*** Label description visibility
+Set this to show the label description under the name of the label.
+*** Hide all marks
+For teaching purposes, it may be useful to hide the ladder marks and just show the ECG image.
+*** Play sounds
+Play the lock sounds when the image or ladder is locked.
+*** Auto-link marks
+It is recommended to leave this on, so that marks are automatically linked together and "snap" into position.  If it is turned off, all mark alignment will need to be manually.  In addition, impulse origin and block may need to be set manually as they cannot be ascertained automatically.
 
 ** Diagram snapshots
 To create a snapshot and save it to the Photos app, simply tap the *Snapshot* button (next to the *X* close button) at the top right of the screen.  If a dialog appears asking for permission to access your photo library, select access to all photos if you wish to take diagram snapshots.
@@ -354,18 +444,27 @@ To create a snapshot and save it to the Photos app, simply tap the *Snapshot* bu
 #+CAPTION: Snapshot button
 [[./img/snapshot_button.png]]
 
-* Known issues/bugs 
+* Known issues/bugs/limitations
 - Diagram document format likely to change in release version and be incompatible with present format.
-- Need more sample ECGS!
-- Multipage PDF files not supported yet.
+- Need more sample ECGS, more default ladders.
+- Multi-page PDF files not supported yet.
 - Mac version still under development.
 * Next version plans
 We plan to include in the next version:
 - Refractory periods
 - Pacing spikes
 - Add notes to ladder
-- Mac version
+- Mac support
 * References
 1. Johnson NP, Denes P. The Ladder Diagram (A 100+ Year History). American Journal of Cardiology. 2008;101(12):1801-1804. doi:10.1016/j.amjcard.2008.02.085
 2. Antiperovitch P, Luna AB de, Alencar JN de, et al. Old teaching tools should not be forgotten: The value of the Lewis ladder diagram in understanding bigeminal rhythms. Annals of Noninvasive Electrocardiology. 2019;24(5):e12685. doi:https://doi.org/10.1111/anec.12685
 * Acknowledgments
+- This app was inspired by someone who complained that the *EP Calipers* app didn't have the ability to draw ladder diagrams, so it was hardly worth the $1.99 it cost.  As it turns out, implementing a ladder diagram app is a non-trivial procedure.  Nevertheless, thanks to this anonymous reviewer for giving me the idea.
+
+- The source code for *EP Diagram* is available on [[https://github.com/mannd/epdiagram][GitHub]].
+
+- *EP Diagram* is open source software and is licensed under the Apache License Version 2.0. No guarantees are made as to the accuracy of the app, so use at your own risk.
+
+- For questions, error reporting or suggestions contact mannd@epstudiossoftware.com
+
+- Website: https://www.epstudiossoftware.com
