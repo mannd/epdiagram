@@ -959,13 +959,7 @@ final class DiagramViewController: UIViewController {
 
     @objc func closeAdjustLeftMarginToolbar(_ sender: UISlider!) {
         currentDocument?.undoManager.endUndoGrouping()
-        // Adjust left margin can be called from normal or select mode.
-        if mode == .normal {
-            showMainToolbar()
-        }
-        if mode == .select {
-            showSelectToolbar()
-        }
+        showSelectToolbar()
     }
 
     @objc func undo() {

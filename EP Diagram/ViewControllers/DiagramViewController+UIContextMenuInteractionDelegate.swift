@@ -16,6 +16,7 @@ extension DiagramViewController: UIContextMenuInteractionDelegate {
     // Determines what menu appears.  Called first with long press
     func contextMenuInteraction(_ interaction: UIContextMenuInteraction, configurationForMenuAtLocation location: CGPoint) -> UIContextMenuConfiguration? {
         os_log("contextMenuInteraction(_:configurationForMenuAtLocation:)", log: .action, type: .info)
+        guard ladderView.mode == .select else { return nil }
         guard !ladderView.isDragging else { return nil }
         guard !ladderView.isDraggingSelectedMarks else { return nil }
         let locationInLadder = ladderView.getLocationInLadder(position: location)
@@ -28,7 +29,6 @@ extension DiagramViewController: UIContextMenuInteractionDelegate {
                 return labelContextMenuConfiguration(at: location, region: region)
             }
         }
-        guard ladderView.mode == .select else { return nil }
         return selectMenu(at: location)
     }
 
