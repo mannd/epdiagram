@@ -2656,45 +2656,6 @@ extension LadderView: LadderViewDelegate {
         assessBlockAndImpulseOrigin(marks: linkedMarks.allMarks)
     }
 
-//    // No questions asked mark linker, checks relative regions for the marks.
-//    func linkMarks(m1: Mark, m2: Mark) {
-//        guard snapMarks else { return }
-//        currentDocument?.undoManager?.registerUndo(withTarget: self) { target in
-//            target.unlinkMarks(m1: m1, m2: m2)
-//        }
-//        NotificationCenter.default.post(name: .didUndoableAction, object: nil)
-//        let regionRelation = Ladder.regionRelationBetweenMarks(mark: m1, otherMark: m2)
-//        switch regionRelation {
-//        case .distant:
-//            return
-//        case .before:
-//            m1.linkedMarkIDs.proximal.insert(m2.id)
-//            m2.linkedMarkIDs.distal.insert(m1.id)
-//        case .after:
-//            m1.linkedMarkIDs.distal.insert(m2.id)
-//            m2.linkedMarkIDs.proximal.insert(m1.id)
-//        case .same:
-//            m1.linkedMarkIDs.middle.insert(m2.id)
-//            m2.linkedMarkIDs.middle.insert(m1.id)
-//        }
-//    }
-
-
-//    // not used yet
-//    func unlinkMarks(m1: Mark, m2: Mark) {
-//        guard snapMarks else { return }
-//        currentDocument?.undoManager?.registerUndo(withTarget: self) { target in
-//            target.linkMarks(m1: m1, m2: m2)
-//        }
-//        NotificationCenter.default.post(name: .didUndoableAction, object: nil)
-//        m1.linkedMarkIDs.proximal.remove(m2.id)
-//        m1.linkedMarkIDs.middle.remove(m2.id)
-//        m1.linkedMarkIDs.distal.remove(m2.id)
-//        m2.linkedMarkIDs.proximal.remove(m1.id)
-//        m2.linkedMarkIDs.middle.remove(m1.id)
-//        m2.linkedMarkIDs.distal.remove(m1.id)
-//    }
-
     func unlinkAllMarks() {
         let marks = ladder.allMarks()
         for mark in marks {
@@ -2703,7 +2664,6 @@ extension LadderView: LadderViewDelegate {
     }
 
     func undoablyUnlinkMark(mark: Mark) {
-        guard snapMarks else { return }
         let linkedMarkIDs = mark.linkedMarkIDs
         let originalMark = mark
         currentDocument?.undoManager?.registerUndo(withTarget: self) { target in
@@ -2725,7 +2685,6 @@ extension LadderView: LadderViewDelegate {
     }
 
     func undoablyLinkMark(mark: Mark, linkedMarkIDs: LinkedMarkIDs) {
-        guard snapMarks else { return }
         let originalMark = mark
         currentDocument?.undoManager?.registerUndo(withTarget: self) { target in
             target.undoablyUnlinkMark(mark: originalMark)

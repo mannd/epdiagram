@@ -328,7 +328,7 @@ final class DiagramViewController: UIViewController {
         }
     }
 
-    lazy var adjustCLAction = UIAction(title: L("Adjust cycle length..."), image: UIImage(systemName: "slider.horizontal.below.rectangle")) { _  in
+    lazy var adjustCLAction = UIAction(title: L("Adjust CL..."), image: UIImage(systemName: "slider.horizontal.below.rectangle")) { _  in
         do {
             let meanCL = try self.ladderView.meanCL()
             self.showAdjustCLToolbar(rawValue: meanCL)

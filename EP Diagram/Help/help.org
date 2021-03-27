@@ -20,6 +20,9 @@
 *EP Diagram* is under active development, but this beta version is now feature complete, and the remaining development will be bug fixes and usability improvements.
 ** New in this version
 - App help (this file) is now complete.
+- Improve undoability of mark movement.
+- Restore linking after edit mode.
+- Keep symbols from appearing in left margin.
 ** What is still missing
 - Possibly adding onboarding and/or tooltips.
 ** Instructions for beta testers
@@ -69,7 +72,7 @@ Practically any change you make while using this app can be reversed by tapping 
 | Term                 | Definition                                                           |
 |----------------------+----------------------------------------------------------------------|
 | Diagram              | a file containing an image and a ladder                              |
-| Ladder               | a representation of electrical conduction                            |
+| Ladder               | a graphical representation of electrical conduction                  |
 | Region               | an anatomic area of the heart, e.g. atrium or venticle               |
 | Zone                 | a subset of a region                                                 |
 | Label                | the area of a region containing its name, e.g. A or V                |
@@ -84,7 +87,6 @@ Practically any change you make while using this app can be reversed by tapping 
 | Caliper              | used to calibrate the diagram to allow measurements                  |
 | Conduction direction | optional arrow symbol indicating direction of electrical flow        |
 | Markers              | optional lines on image aligned with marks                           |
-** Menus
 ** Diagrams
 *** Creating and opening diagrams
 EP Diagram is a document-based app, meaning the diagrams you create are stored on your device and on iCloud, and can be handled by the Files app on your device, meaning you can copy them, rename them, or delete them outside of the *EP Diagram* app.  The diagram files you create have a file extension of ~diagram~ and a specific icon and file format.  When you open the app, a screen showing your diagram files and a create file icon.
@@ -280,11 +282,71 @@ Tap the *Done* button to resume normal mode.
 
 ** Editing marks
 *** Fine-tuning your diagrams
-If you are aiming for publication quality diagrams, it's important that marks all slope the same, that block is always at the same level in a region, and that you change the appearance of marks, such as making the mark a dashed instead of a solid line.  Edit mode if for making these changes.  It allows you to select one or many marks or select regions and then apply changes to the selection.  
+If you are aiming for publication quality diagrams, it's important that marks all slope the same, that block is always at the same level in a region, and that you change the appearance of marks, such as making the mark a dashed instead of a solid line.  Edit mode if for making these changes.  It allows you to select one or many marks or select regions and then apply changes to the selection.  Editing multiple marks at once allows them all to assume the same appearance, e.g. have the same slant, block at the same level, etc.
+*** Making selections in edit mode
+Tap the *Edit* button to enter edit mode.  In this mode a single tap on one or more marks will select these marks.  A single tap on a region (including the region label) will select the region and all the marks in the region.  Dragging on an area of the ladder will select a zone and the marks within the zone.  A tap on a selected mark, region, or zone will unselect the selection.
+You can also use the *Select All* and *Clear Selection* buttons on the toolbar to quickly select the whole ladder or clear your selection.  Once selected, a long press will bring up a context menu.  After editing, select *Done* to return to normal mode.
 
-** Creating your own ladders
+#+CAPTION: Context menu in edit mode
+[[./img/context_menu.png]]
 
-** Sample diagrams
+*** Menu items
+**** Style
+Choose between a solid, dashed, or dotted mark line style.
+**** Emphasis
+Marks can have a normal or bold emphasis.  Bold emphasis thickens the line of the mark.
+**** Impulse origin
+Impulse origin is normally automatic, but you can override this and place the impulse origin proximally or distally, or have no impulse origin annotated.
+**** Block
+Block is also normally automatically determined, but you can also override this manually.
+**** Straighten marks
+Makes selected marks vertical.
+**** Slant marks
+Applies a slant to selected marks.
+**** Adjust mark ends
+You can fine tune where either end of a mark ends in a region.
+**** Move marks
+You can move the selected marks as a group by dragging them horizontally after selecting this menu option.
+**** Adjust CL
+Lengthen or shorten the cycle length of a group of marks.  This option forces all the selected marks to have the same cycle length.
+**** Rhythm
+This is discussed below [link].
+**** Repeat CL
+Repeat the cycle length of a pair of marks forward, backward, or bidirectionally.  This is useful in copying a repeating pattern.
+**** Unlink
+Unlink the selected marks.
+**** Delete mark(s)
+Delete the selected marks.
+*** Creating rhythms
+If you select a zone or region, and then bring up the context menu with a long press, you can select the *Rhythm* item to bring up a screen that allows you to fill the region or zone with a rhythm.
+
+#+CAPTION: Rhythm selection
+[[./img/rhythm.png]]
+
+You can choose a regular rhythm or fibrillation.  With fibrillation you will have a random cycle length defined by an upper and lower limit.  You can also randomize parameters such as the impulse origin, conduction time, and conduction direction.
+** Side menu items
+*** Opening the side menu
+Use the "hamburger" icon at the upper left of the screen to open the side menu.
+
+#+CAPTION: Hamburger icon
+[[./img/hamburger.png]]
+
+#+CAPTION: Side menu
+[[./img/side_menu.png]]
+
+The *Take photo* and *Select image* menu items were already discussed in the section on images [link].  Here we will discuss the other menu items.
+*** Select ladder
+*** Rename diagram
+*** Diagram info
+*** Sample diagrams
+*** Lock image
+*** Lock ladder
+*** Ladder editor
+*** Preferences
+Preferences are discussed in detail in the next section [link].
+*** Help
+*** About
+** Preferences
 
 ** Diagram snapshots
 To create a snapshot and save it to the Photos app, simply tap the *Snapshot* button (next to the *X* close button) at the top right of the screen.  If a dialog appears asking for permission to access your photo library, select access to all photos if you wish to take diagram snapshots.
@@ -306,5 +368,4 @@ We plan to include in the next version:
 * References
 1. Johnson NP, Denes P. The Ladder Diagram (A 100+ Year History). American Journal of Cardiology. 2008;101(12):1801-1804. doi:10.1016/j.amjcard.2008.02.085
 2. Antiperovitch P, Luna AB de, Alencar JN de, et al. Old teaching tools should not be forgotten: The value of the Lewis ladder diagram in understanding bigeminal rhythms. Annals of Noninvasive Electrocardiology. 2019;24(5):e12685. doi:https://doi.org/10.1111/anec.12685
-
-   
+* Acknowledgments
