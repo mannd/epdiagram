@@ -53,9 +53,7 @@ final class Mark: Codable {
         }
     }
     var length: CGFloat {
-        get {
-            return sqrt(pow((segment.proximal.x - segment.distal.x), 2) + pow((segment.proximal.y - segment.distal.y), 2))
-        }
+        get { segment.length }
     }
 
     var earliestPoint: CGPoint {

@@ -162,12 +162,30 @@ extension DiagramViewController: HamburgerTableDelegate, UIImagePickerController
 
     func getDiagramInfo() {
         os_log("getDiagramInfo()", log: .action, type: .info)
-        // TODO: If there are more fields, then include this and add SwiftUI view.
-        // show dialog with diagram info here.
-        // TODO: Option to edit diagram info?
-        // also consider killing this.  File app gives file info.
-        print("Name = \(diagram.name ?? "unnamed")")
-        print("Description = \(diagram.longDescription)")
+        // FIXME: Consider killing this.  Files app gives file info.
+        var message: String = ""
+        if let currentDocument = currentDocument {
+            let dateFormatter = DateFormatter()
+            dateFormatter.dateStyle = .medium
+            dateFormatter.timeStyle = .medium
+
+            message += L("File name = \(currentDocument.localizedName)")
+            if let fileModificationDate = currentDocument.fileModificationDate {
+                let formattedDate = dateFormatter.string(from: fileModificationDate)
+                message += L("\nLast modified = \(formattedDate)")
+            }
+            message +=
+                L("""
+                \nDescription = \(diagram.longDescription)
+                Ladder name = \(diagram.ladder.name)
+                Ladder description = \(diagram.ladder.longDescription)
+                """)
+        }
+        else {
+            message = L("Could not get diagram file information")
+        }
+        UserAlert.showMessage(viewController: self, title: L("Diagram Info"), message: message)
+        print(message)
     }
 
 

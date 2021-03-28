@@ -10,11 +10,17 @@ import UIKit
 
 // A line segment represented by 2 points.
 struct Segment: Codable, Equatable {
+    static let minLength: CGFloat = 0.2
+
     var proximal: CGPoint
     var distal: CGPoint
 
     var midpoint: CGPoint {
         CGPoint(x: (proximal.x + distal.x) / 2.0, y: (proximal.y + distal.y) / 2.0)
+    }
+
+    var length: CGFloat {
+        sqrt(pow((proximal.x - distal.x), 2) + pow((proximal.y - distal.y), 2))
     }
 
     // Y axis is clamped between 0 and 1.

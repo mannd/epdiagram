@@ -328,7 +328,7 @@ final class DiagramViewController: UIViewController {
         }
     }
 
-    lazy var adjustCLAction = UIAction(title: L("Adjust cycle length..."), image: UIImage(systemName: "slider.horizontal.below.rectangle")) { _  in
+    lazy var adjustCLAction = UIAction(title: L("Adjust CL..."), image: UIImage(systemName: "slider.horizontal.below.rectangle")) { _  in
         do {
             let meanCL = try self.ladderView.meanCL()
             self.showAdjustCLToolbar(rawValue: meanCL)
@@ -929,6 +929,7 @@ final class DiagramViewController: UIViewController {
         os_log("setCalibration()", log: .action, type: .info)
         let newCalibration = cursorView.newCalibration(zoom: imageScrollView.zoomScale)
         undoablySetCalibration(newCalibration)
+        ladderView.updateLadderIntervals()
         cancelCalibrateMode()
     }
 
@@ -959,13 +960,7 @@ final class DiagramViewController: UIViewController {
 
     @objc func closeAdjustLeftMarginToolbar(_ sender: UISlider!) {
         currentDocument?.undoManager.endUndoGrouping()
-        // Adjust left margin can be called from normal or select mode.
-        if mode == .normal {
-            showMainToolbar()
-        }
-        if mode == .select {
-            showSelectToolbar()
-        }
+        showSelectToolbar()
     }
 
     @objc func undo() {
@@ -1367,6 +1362,7 @@ extension DiagramViewController {
         if let markerColorName = UserDefaults.standard.string(forKey: Preferences.markerColorNameKey) {
             cursorView.markerColor = UIColor.convertColorName(markerColorName) ?? Preferences.defaultMarkerColor
         }
+        ladderView.updateLadderIntervals()
         updateToolbarButtons()
     }
 
