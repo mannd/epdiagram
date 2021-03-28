@@ -929,6 +929,7 @@ final class DiagramViewController: UIViewController {
         os_log("setCalibration()", log: .action, type: .info)
         let newCalibration = cursorView.newCalibration(zoom: imageScrollView.zoomScale)
         undoablySetCalibration(newCalibration)
+        ladderView.updateLadderIntervals()
         cancelCalibrateMode()
     }
 
@@ -1361,6 +1362,7 @@ extension DiagramViewController {
         if let markerColorName = UserDefaults.standard.string(forKey: Preferences.markerColorNameKey) {
             cursorView.markerColor = UIColor.convertColorName(markerColorName) ?? Preferences.defaultMarkerColor
         }
+        ladderView.updateLadderIntervals()
         updateToolbarButtons()
     }
 
