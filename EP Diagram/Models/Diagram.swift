@@ -7,6 +7,7 @@
 //
 
 import UIKit
+import BetterCodable
 import os.log
 
 struct Diagram: Codable {
@@ -25,6 +26,14 @@ struct Diagram: Codable {
     var leftMargin: CGFloat {
         get { ladder.leftMargin }
         set { ladder.leftMargin = newValue }
+    }
+
+    // Implement updates to Diagram using this sort of strategy and BetterCodable wrappers.
+    @DefaultCodable<FileVersion> var fileVersion: Int = 1
+
+    struct FileVersion: DefaultCodableStrategy {
+        typealias DefaultValue = Int
+        static var defaultValue: DefaultValue { return 1 }
     }
 
     init(name: String?, description: String, image: UIImage?, ladder: Ladder) {

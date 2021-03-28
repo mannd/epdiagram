@@ -3,7 +3,7 @@
 	archiveVersion = 1;
 	classes = {
 	};
-	objectVersion = 50;
+	objectVersion = 52;
 	objects = {
 
 /* Begin PBXBuildFile section */
@@ -87,6 +87,7 @@
 		8EA444C02476E471005B5452 /* LadderSelector.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8EA444BF2476E471005B5452 /* LadderSelector.swift */; };
 		8EACC27C259E47C500F0BF42 /* ImageScrollView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8EACC27B259E47C500F0BF42 /* ImageScrollView.swift */; };
 		8EADC2A924D64E1200C5D3D8 /* SampleSelector.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8EADC2A824D64E1200C5D3D8 /* SampleSelector.swift */; };
+		8EBBDE2726111E26004DDD2B /* BetterCodable in Frameworks */ = {isa = PBXBuildFile; productRef = 8EBBDE2626111E26004DDD2B /* BetterCodable */; };
 		8EBC824124E5E04800B5CA29 /* UIImage+emptyImage.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8EBC824024E5E04800B5CA29 /* UIImage+emptyImage.swift */; };
 		8EBC824324E6EBA700B5CA29 /* Sounds.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8EBC824224E6EBA700B5CA29 /* Sounds.swift */; };
 		8EC5D288256B149C00F49865 /* DocumentBrowserDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8EC5D287256B149C00F49865 /* DocumentBrowserDelegate.swift */; };
@@ -231,6 +232,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				8EBBDE2726111E26004DDD2B /* BetterCodable in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -515,6 +517,9 @@
 			dependencies = (
 			);
 			name = "EP Diagram";
+			packageProductDependencies = (
+				8EBBDE2626111E26004DDD2B /* BetterCodable */,
+			);
 			productName = "EP Diagram";
 			productReference = 8E7D24BF22779DBD005A1729 /* EP Diagram.app */;
 			productType = "com.apple.product-type.application";
@@ -587,6 +592,9 @@
 				Base,
 			);
 			mainGroup = 8E7D24B622779DBD005A1729;
+			packageReferences = (
+				8EBBDE2526111E26004DDD2B /* XCRemoteSwiftPackageReference "BetterCodable" */,
+			);
 			productRefGroup = 8E7D24C022779DBD005A1729 /* Products */;
 			projectDirPath = "";
 			projectRoot = "";
@@ -1062,6 +1070,25 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		8EBBDE2526111E26004DDD2B /* XCRemoteSwiftPackageReference "BetterCodable" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/marksands/BetterCodable";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 0.3.0;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		8EBBDE2626111E26004DDD2B /* BetterCodable */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 8EBBDE2526111E26004DDD2B /* XCRemoteSwiftPackageReference "BetterCodable" */;
+			productName = BetterCodable;
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = 8E7D24B722779DBD005A1729 /* Project object */;
 }

@@ -177,6 +177,7 @@ extension DiagramViewController: HamburgerTableDelegate, UIImagePickerController
             message +=
                 L("""
                 \nDescription = \(diagram.longDescription)
+                Diagram file version = \(diagram.fileVersion)
                 Ladder name = \(diagram.ladder.name)
                 Ladder description = \(diagram.ladder.longDescription)
                 """)
@@ -255,7 +256,7 @@ extension DiagramViewController: HamburgerTableDelegate, UIImagePickerController
     #if DEBUG
     func test() {
         os_log("test()", log: .debugging, type: .debug)
-        ladderView.setNeedsDisplay()
+        print(diagram.fileVersion)
     }
     #else
     func test() {}
