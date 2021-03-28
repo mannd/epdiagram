@@ -33,7 +33,6 @@ The beta version of *EP Diagram* is nearly feature complete and ready for testin
 - If you have sample ECGs that could be included in the app, for example, different types of heart block, premature beats, or tachyarrhythmias, please send them to me.  Make sure they are anonymized and are not copyrighted.
 - If you have ideas for default ladders to be included in the app, let me know.
 - Note that the final diagram file format will likely change with the release of the app, meaning diagram files you create with this beta version may not open in the release version of the app.  Once the final 1.0.0 version is released, the file format will be forwardly compatible with subsequent app versions.
-- A copy of this help file is at [link].  It may be useful to read through the help file on a different device while using the app as you are learning it.
 * Quick start
 ** Normal mode
 - *EP Diagram* opens and saves ~diagram~ files, that will be stored in the Files app on you iPad or iPhone.
