@@ -256,7 +256,6 @@ extension DiagramViewController: HamburgerTableDelegate, UIImagePickerController
     #if DEBUG
     func test() {
         os_log("test()", log: .debugging, type: .debug)
-        print(diagram.fileVersion)
     }
     #else
     func test() {}
@@ -373,8 +372,8 @@ extension DiagramViewController: HamburgerTableDelegate, UIImagePickerController
         hamburgerTableViewController?.reloadData()
         constraintHamburgerLeft.constant = 0
         hamburgerMenuIsOpen = true
-        self.separatorView?.removeFromSuperview()
-        self.separatorView = nil
+        self.separatorView?.showIndicator = false
+        self.separatorView?.setNeedsDisplay()
         navigationController?.setToolbarHidden(true, animated: true)
         // Always hide cursor when opening hamburger menu.
         hideCursorAndNormalizeAllMarks()
@@ -394,7 +393,8 @@ extension DiagramViewController: HamburgerTableDelegate, UIImagePickerController
             self.view.layoutIfNeeded()
             self.blackView.alpha = 0
         }, completion: { (finished:Bool) in
-            self.separatorView = HorizontalSeparatorView.addSeparatorBetweenViews(separatorType: .horizontal, primaryView: self.imageScrollView, secondaryView: self.ladderView, parentView: self.view)
+            self.separatorView?.showIndicator = true
+            self.separatorView?.setNeedsDisplay()
         })
     }
 

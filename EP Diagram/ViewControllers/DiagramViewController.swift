@@ -541,6 +541,7 @@ final class DiagramViewController: UIViewController {
         showMainToolbar()
 
         resetViews(setActiveRegion: false)
+
     }
 
     override func viewWillDisappear(_ animated: Bool) {
@@ -1114,6 +1115,7 @@ final class DiagramViewController: UIViewController {
         hideCursorAndNormalizeAllMarks()
         // Remove separatorView when rotating to let original constraints resume.
         // Otherwise, views are not laid out correctly.
+        print("imageViewFrameHeight", imageScrollView.frame.size.height)
         if let separatorView = separatorView {
             // Note separatorView is released when removed from superview.
             separatorView.removeFromSuperview()
@@ -1135,7 +1137,6 @@ final class DiagramViewController: UIViewController {
         self.ladderView.resetSize(setActiveRegion: setActiveRegion, width: imageView.frame.width)
         cursorView.caliperMaxY = imageScrollView.frame.height
         cursorView.caliperMinY = 0
-//        ladderView.linkAllMarks()
         setViewsNeedDisplay()
     }
 

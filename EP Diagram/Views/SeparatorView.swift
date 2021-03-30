@@ -39,6 +39,8 @@ class SeparatorView: UIView {
 
     var updateListener: OnConstraintUpdateProtocol?
 
+    var showIndicator: Bool = true
+
     @discardableResult
     internal static func addSeparatorBetweenViews(separatorType: SeparatorType, primaryView: UIView, secondaryView: UIView, parentView: UIView) -> SeparatorView{
         var separator: SeparatorView
@@ -114,10 +116,12 @@ class SeparatorView: UIView {
     }
 
     func drawIndicator(_ rect: CGRect, with color: UIColor) {
-        color.set()
-        let path = UIBezierPath(roundedRect: rect, cornerRadius: 2.5)
-        path.stroke()
-        path.fill()
+        if showIndicator {
+            color.set()
+            let path = UIBezierPath(roundedRect: rect, cornerRadius: 2.5)
+            path.stroke()
+            path.fill()
+        }
     }
 }
 
@@ -143,9 +147,6 @@ final class HorizontalSeparatorView: SeparatorView, OnConstraintUpdateProtocol {
 //        parentView.bottomAnchor.constraint(equalTo: secondaryView.bottomAnchor).isActive = true
     }
 
-    // FIXME: Separator is drawn across width of screen in landscape view.
-    // Would like to constrain to Safe Margin Area, but since we have made
-    // the separator clear it doesn't matter much.
     override func setupSeparatorConstraints() {
         self.heightAnchor.constraint(equalToConstant: totalSize).isActive = true
         self.superview?.leadingAnchor.constraint(equalTo: self.leadingAnchor).isActive = true
