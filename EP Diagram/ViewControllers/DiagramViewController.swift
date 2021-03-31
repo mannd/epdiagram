@@ -1115,7 +1115,6 @@ final class DiagramViewController: UIViewController {
         hideCursorAndNormalizeAllMarks()
         // Remove separatorView when rotating to let original constraints resume.
         // Otherwise, views are not laid out correctly.
-        print("imageViewFrameHeight", imageScrollView.frame.size.height)
         if let separatorView = separatorView {
             // Note separatorView is released when removed from superview.
             separatorView.removeFromSuperview()

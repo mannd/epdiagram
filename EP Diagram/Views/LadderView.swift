@@ -15,7 +15,7 @@ final class LadderView: ScaledView {
     #if DEBUG  // Change this for debugging impulse origins and block
     var showProxEnd = false
     var showEarliestPoint = false
-    var debugMarkMode = false
+    var debugMarkMode = true
     #else  // Don't ever change this.  They must all be FALSE.
     var showProxEnd = false
     var showEarliestPoint = false
@@ -703,6 +703,8 @@ final class LadderView: ScaledView {
                     movingMark = mark
                     // NB: Need to move it nowhere, to let undo get back to starting position!
                     if let anchorPosition = getMarkScaledAnchorPosition(mark) {
+                        let nearbyMarks = getNearbyMarkIDs(mark: mark)
+//                        unlinkNearbyMarks(mark: mark, nearbyMarks: nearbyMarks)
                         moveMark(mark: mark, scaledViewPosition: anchorPosition)
                     }
                 }
@@ -759,7 +761,8 @@ final class LadderView: ScaledView {
             isDragging = false
             if let movingMark = movingMark {
                 swapEndsIfNeeded(mark: movingMark)
-                let newNearbyMarks = getNearbyMarkIDs(mark: movingMark)
+                let newNearbyMarks =
+                    getNearbyMarkIDs(mark: movingMark)
                 snapToNearbyMarks(mark: movingMark, nearbyMarks: newNearbyMarks)
                 linkNearbyMarks(mark: movingMark, nearbyMarks: newNearbyMarks)
             }
@@ -774,7 +777,8 @@ final class LadderView: ScaledView {
                     linkNearbyMarks(mark: dragCreatedMark, nearbyMarks: newNearbyMarks)
                 }
             }
-            currentDocument?.undoManager?.endUndoGrouping()
+            currentDocument?.undoManager.endUndoGrouping()
+
             if !cursorViewDelegate.cursorIsVisible {
                 normalizeAllMarks()
             }
@@ -917,6 +921,8 @@ final class LadderView: ScaledView {
     }
 
     private func swapEndsIfNeeded(mark: Mark) {
+        os_log("swapEndsIfNeeded(mark:) - LadderView", log: .default, type: .default)
+
         let proximalY = mark.segment.proximal.y
         let distalY = mark.segment.distal.y
         if proximalY > distalY {
@@ -925,6 +931,8 @@ final class LadderView: ScaledView {
     }
 
     private func undoablySwapEnds(mark: Mark) {
+        os_log("undoablyUnswapEnds(mark:) - LadderView", log: .default, type: .default)
+
         currentDocument?.undoManager.registerUndo(withTarget: self) { target in
             target.undoablySwapEnds(mark: mark)
         }
@@ -934,6 +942,8 @@ final class LadderView: ScaledView {
     }
 
     func swapEndsIfNeeded() {
+        os_log("swapEndsIfNeeded() - LadderView", log: .default, type: .default)
+
         ladder.regions.forEach {
             region in region.marks.forEach {
                 mark in self.swapEndsIfNeeded(mark: mark)
@@ -968,7 +978,7 @@ final class LadderView: ScaledView {
         updateMarkersAndRegionIntervals(activeRegion)
     }
 
-    private func moveMark(movement: Movement, mark: Mark, regionPosition: CGPoint) {
+    func moveMark(movement: Movement, mark: Mark, regionPosition: CGPoint) {
         let segment = Mark.changePosition(mark: mark, movement: movement, to: regionPosition)
         setSegment(segment: segment, forMark: mark)
         moveLinkedMarks(forMark: mark)
@@ -1957,6 +1967,7 @@ final class LadderView: ScaledView {
         }
     }
 
+    // FIXME: Need better repeatCL, need repeat pattern
     func checkForRepeatCL() throws {
         let selectedMarks = ladder.allMarksWithMode(.selected)
         if selectedMarks.count != 2 {
@@ -1968,9 +1979,9 @@ final class LadderView: ScaledView {
 //        if ladder.marksAreNotContiguous(selectedMarks) {
 //            throw LadderError.marksNotContiguous
 //        }
-        if !ladder.marksAreParallel(selectedMarks[0], selectedMarks[1]) {
-            throw LadderError.marksNotParallel
-        }
+//        if !ladder.marksAreParallel(selectedMarks[0], selectedMarks[1]) {
+//            throw LadderError.marksNotParallel
+//        }
         // FIXME: appropriate short interval
         if ladder.difference(selectedMarks[0], selectedMarks[1]) < 20 {
             throw LadderError.intervalTooShort
@@ -2205,6 +2216,7 @@ final class LadderView: ScaledView {
         if segment.length < Segment.minLength { return }
         let originalSegment = mark.segment
         currentDocument?.undoManager?.registerUndo(withTarget: self, handler: { target in
+            print("setSegment()")
             target.setSegment(segment: originalSegment, forMark: mark)
         })
         NotificationCenter.default.post(name: .didUndoableAction, object: nil)
@@ -2444,6 +2456,8 @@ extension LadderView: LadderViewDelegate {
     }
 
     func getNearbyMarkIDs(mark: Mark) -> LinkedMarkIDs {
+        os_log("getNearbyMarkIDs(mark:) - LadderView", log: .default, type: .default)
+
         guard snapMarks else { return LinkedMarkIDs() }
         let minimum: CGFloat = nearbyMarkAccuracy / scale
         let nearbyMarkIDs = getNearbyMarkIDs(mark: mark, nearbyDistance: minimum)
@@ -2452,6 +2466,8 @@ extension LadderView: LadderViewDelegate {
 
 
     func highlightNearbyMarks(_ mark: Mark?) {
+        os_log("highlightNearbyMarks(mark:) - LadderView", log: .default, type: .default)
+
         guard snapMarks else { return }
         guard let mark = mark else { return }
         ladder.normalizeAllMarksExceptAttachedMark()
@@ -2546,7 +2562,9 @@ extension LadderView: LadderViewDelegate {
 
     func snapToNearbyMarks(mark: Mark, nearbyMarks: LinkedMarkIDs) {
         guard snapMarks else { return }
+
         // get the new segment to snap to, then set it undoably.
+
         var segment = mark.segment
         if nearbyMarks.proximal.count > 0 {
             // Only need to snap to one proximal and distal mark.
@@ -2602,23 +2620,31 @@ extension LadderView: LadderViewDelegate {
     }
 
     func linkNearbyMarks(mark: Mark, nearbyMarks: LinkedMarkIDs) {
+        os_log("linkNearbyMarks(mark:nearbyMarks:) - LadderView", log: .default, type: .default)
+
         guard snapMarks else { return }
+
+        let filteredProximal = nearbyMarks.proximal.subtracting(mark.linkedMarkIDs.proximal)
+        let filteredMiddle = nearbyMarks.middle.subtracting(mark.linkedMarkIDs.middle)
+        let filteredDistal = nearbyMarks.distal.subtracting(mark.linkedMarkIDs.distal)
+        let filteredNearbyMarks = LinkedMarkIDs(proximal: filteredProximal, middle: filteredMiddle, distal: filteredDistal)
         currentDocument?.undoManager?.registerUndo(withTarget: self) { target in
-            target.unlinkNearbyMarks(mark: mark, nearbyMarks: nearbyMarks)
+            print("unlinkingNearbyMarks()")
+            target.unlinkNearbyMarks(mark: mark, nearbyMarks: filteredNearbyMarks)
         }
         NotificationCenter.default.post(name: .didUndoableAction, object: nil)
-        // Need to link all of them
-        for proximalMark in nearbyMarks.proximal {
+        // Need to link the new marks
+        for proximalMark in filteredNearbyMarks.proximal {
             mark.linkedMarkIDs.proximal.insert(proximalMark)
             let proxMark = ladder.lookup(id: proximalMark)
             proxMark?.linkedMarkIDs.distal.insert(mark.id)
         }
-        for middleMark in nearbyMarks.middle {
+        for middleMark in filteredNearbyMarks.middle {
             mark.linkedMarkIDs.middle.insert(middleMark)
             let middleMark = ladder.lookup(id: middleMark)
             middleMark?.linkedMarkIDs.middle.insert(mark.id)
         }
-        for distalMark in nearbyMarks.distal {
+        for distalMark in filteredNearbyMarks.distal {
             mark.linkedMarkIDs.distal.insert(distalMark)
             let distalMark = ladder.lookup(id: distalMark)
             distalMark?.linkedMarkIDs.proximal.insert(mark.id)
@@ -2632,6 +2658,7 @@ extension LadderView: LadderViewDelegate {
     func unlinkNearbyMarks(mark: Mark, nearbyMarks: LinkedMarkIDs) {
         guard snapMarks else { return }
         currentDocument?.undoManager?.registerUndo(withTarget: self) { target in
+            print("linking nearby marks")
             target.linkNearbyMarks(mark: mark, nearbyMarks: nearbyMarks)
         }
         NotificationCenter.default.post(name: .didUndoableAction, object: nil)

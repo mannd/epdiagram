@@ -559,4 +559,24 @@ class LadderViewTests: XCTestCase {
         XCTAssertEqual(mark3.blockSite, .proximal)
     }
 
+    func testMaintainLinking() {
+        let markA = ladderView.addMarkToActiveRegion(regionPositionX: 100)
+        ladderView.setActiveRegion(regionNum: 1)
+        let markAV = ladderView.addMarkToActiveRegion(regionPositionX: 200)
+        markAV!.anchor = .proximal
+        ladderView.moveMark(movement: .horizontal, mark: markAV!, regionPosition: CGPoint(x: 100, y: 0))
+        XCTAssertEqual(markAV!.segment.proximal.x, 100)
+        XCTAssertEqual(markAV!.segment.distal.x, 200)
+        let nearbyMarks = ladderView.getNearbyMarkIDs(mark: markAV!)
+        ladderView.linkNearbyMarks(mark: markAV!, nearbyMarks: nearbyMarks)
+        XCTAssert(markA!.linkedMarkIDs.distal.contains(markAV!.id))
+        XCTAssert(markAV!.linkedMarkIDs.proximal.contains(markA!.id))
+        ladderView.unlinkMark(mark: markAV!)
+        ladderView.moveMark(movement: .horizontal, mark: markAV!, regionPosition: CGPoint(x: 200, y: 0))
+        XCTAssertEqual(markAV!.segment.proximal.x, 200)
+        XCTAssertEqual(markAV!.segment.distal.x, 200)
+        XCTAssertEqual(markA!.linkedMarkIDs.distal.count, 0)
+        XCTAssertEqual(markAV!.linkedMarkIDs.proximal.count, 0)
+    }
+
 }
