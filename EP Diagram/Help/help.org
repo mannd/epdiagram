@@ -19,14 +19,12 @@
 * Beta version notes
 The beta version of *EP Diagram* is nearly feature complete and ready for testing.
 ** New in this version
-- App help (this file) is now complete.
-- Improvement in undo functionality.
-- Restore linking after edit mode.
-- Prevent symbols from appearing in left margin.
-- Bug fixes.
+- Reimplement automatic impulse origin and block determination.
+- Implement file versioning so there should be no problems with future file versions being incompatible with the pre-release versions.
 ** What is still missing
 - Onboarding and/or tooltips.
 - Multipage PDF support.
+- We will try implement copy and paste for groups of marks prior to release of the app.
 ** Instructions for beta testers
 - Play around with the app.
 - Email me (mannd@epstudiossoftware.com) or use the TestFlight app to report any bugs, crashes, awkwardness, or to request features.
