@@ -15,7 +15,7 @@ final class LadderView: ScaledView {
     #if DEBUG  // Change this for debugging impulse origins and block
     var showProxEnd = false
     var showEarliestPoint = false
-    var debugMarkMode = true
+    var debugMarkMode = false
     #else  // Don't ever change this.  They must all be FALSE.
     var showProxEnd = false
     var showEarliestPoint = false
@@ -1388,13 +1388,14 @@ final class LadderView: ScaledView {
 
         drawBlock(context: context, mark: mark, segment: segment)
         drawImpulseOrigin(context: context, mark: mark, segment: segment)
+        drawConductionDirection(forMark: mark, segment: segment, context: context)
+
         drawPivots(forMark: mark, segment: Segment(proximal: p1, distal: p2), context: context)
         drawConductionTime(forMark: mark, segment: segment, context: context)
         drawIntervals(region: region, context: context)
 
         drawProxEnd(forMark: mark, segment: segment, context: context)
         drawEarliestPoint(forMark: mark, segment: segment, context: context)
-        drawConductionDirection(forMark: mark, segment: segment, context: context)
 
         context.setStrokeColor(UIColor.label.cgColor)
     }
@@ -1622,6 +1623,7 @@ final class LadderView: ScaledView {
         context.addLine(to: arrowLine1)
         context.move(to: end)
         context.addLine(to: arrowLine2)
+//        context.setStrokeColor(getMar)
         context.strokePath()
     }
 
