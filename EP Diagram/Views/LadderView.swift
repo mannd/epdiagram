@@ -1512,27 +1512,28 @@ final class LadderView: ScaledView {
         }
     }
 
+    func assessGlobalImpulseOrigin() {
+        let marks = ladder.allMarks()
+        for mark in marks {
+            assessImpulseOrigin(mark: mark)
+        }
+    }
+
     func assessBlock(mark: Mark) {
+        guard snapMarks else { return }
         if mark.blockSetting == .auto {
-            mark.blockSite = .none
-            // If snapMarks is off, leave this at none
-            if !snapMarks { return }
-            if mark.early == .none {
-                return  // for now, ignore vertical marks
-            }
-            if mark.linkedMarkIDs.middle.count > 0 {
-                let latestMark = getLatestMiddleMark(mark: mark)
-                if latestMark == mark {
-                    mark.blockSite = mark.late
+            mark.blockSite = mark.late
+            if mark.latestPoint.y < 0.1 || mark.latestPoint.y > 0.9 {
+                mark.blockSite = .none
+            } else {
+                for middleMarkID in mark.linkedMarkIDs.middle {
+                    if let middleMark = ladder.lookup(id: middleMarkID) {
+                        if Geometry.distanceSegmentToPoint(segment: middleMark.segment, point: mark.latestPoint) < 0.01 {
+                            mark.blockSite = .none
+                            break
+                        }
+                    }
                 }
-            }
-            else if mark.segment.proximal.y > blockMin
-                && mark.late == .proximal {
-                mark.blockSite = .proximal
-            }
-            else if mark.segment.distal.y < blockMax
-                        && mark.late == .distal {
-                mark.blockSite = .distal
             }
         } else {
             mark.blockSite = mark.blockSetting
@@ -1540,63 +1541,31 @@ final class LadderView: ScaledView {
     }
 
     func assessImpulseOrigin(mark: Mark) {
+        guard snapMarks else { return }
         if mark.impulseOriginSetting == .auto {
-            mark.impulseOriginSite = .none
-            // If snapMarks is off, leave this at none
-            if !snapMarks { return }
-            if mark.linkedMarkIDs.proximal.count == 0
-                && mark.segment.proximal.y < 0.01
-                && (mark.early == .proximal || mark.early == .none) {
-                mark.impulseOriginSite = .proximal
-            }
-            if mark.linkedMarkIDs.distal.count == 0
-                        && mark.segment.distal.y > 0.99
-                        && mark.early == .distal {
-                mark.impulseOriginSite = .distal
-            }
-            else if mark.segment.proximal.y > 0.01
-                        && mark.segment.distal.y < 0.99 {
-                //                  if mark.early == ladder.markLinkage(mark: mark, linkedMarksIDs: mark.linkedMarkIDs) {
-                let earliestMiddleMark = getEarliestMiddleMark(mark: mark)
-                if earliestMiddleMark == mark {
-                    mark.impulseOriginSite = mark.early
+            mark.impulseOriginSite = mark.early
+            if mark.early == .proximal && mark.linkedMarkIDs.proximal.count > 0 {
+                mark.impulseOriginSite = .none
+            } else if  mark.early == .distal && mark.linkedMarkIDs.distal.count > 0 {
+                mark.impulseOriginSite = .none
+            } else {
+                for middleMarkID in mark.linkedMarkIDs.middle {
+                    if let middleMark = ladder.lookup(id: middleMarkID) {
+                        if Geometry.distanceSegmentToPoint(segment: middleMark.segment, point: mark.earliestPoint) < 0.01 {
+                            mark.impulseOriginSite = .none
+                            break
+                        }
+                    }
                 }
+            }
+            // Handle special case of vertical mark, which defaults to having proximal impulse origin.
+            if mark.impulseOriginSite == .none
+                && mark.early == .none
+                && mark.linkedMarkIDs.proximal.count == 0 {
+                mark.impulseOriginSite = .proximal
             }
         } else {
             mark.impulseOriginSite = mark.impulseOriginSetting
-        }
-    }
-
-    func getEarliestMiddleMark(mark: Mark) -> Mark {
-        var earliestMark = mark
-        for m in mark.linkedMarkIDs.middle {
-            if let middleMark = ladder.lookup(id: m) {
-                let point = middleMark.earliestPoint
-                if point.x < mark.earliestPoint.x {
-                    earliestMark = middleMark
-                }
-            }
-        }
-        return earliestMark
-    }
-
-    func getLatestMiddleMark(mark: Mark) -> Mark {
-        var latestMark = mark
-        for m in mark.linkedMarkIDs.middle {
-            if let middleMark = ladder.lookup(id: m) {
-                let point = middleMark.latestPoint
-                if point.x > mark.latestPoint.x {
-                    latestMark = middleMark
-                }
-            }
-        }
-        return latestMark
-    }
-
-    func assessGlobalImpulseOrigin() {
-        let marks = ladder.allMarks()
-        for mark in marks {
-            assessImpulseOrigin(mark: mark)
         }
     }
 

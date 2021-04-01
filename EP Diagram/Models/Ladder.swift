@@ -181,39 +181,6 @@ final class Ladder: NSObject, Codable {
         }
     }
 
-    func markLinkage(mark: Mark, linkedMarksIDs: LinkedMarkIDs) -> Mark.Endpoint {
-        let linkedMarks = getLinkedMarksFromLinkedMarkIDs(linkedMarksIDs)
-        for m in linkedMarks.middle {
-//            let intersection = Geometry.intersection(ofLineFrom: mark.segment.proximal, to: mark.segment.distal, withLineFrom: m.segment.proximal, to: m.segment.distal)
-//            print("intersection", intersection as Any)
-//            print("mark.earliest", mark.earliestPoint)
-//            print("m.earliest", m.earliestPoint)
-            if getClosestEndpoint(of: mark, to: m) == .proximal {
-                return .proximal
-            }
-            if getClosestEndpoint(of: mark, to: m) == .distal {
-                return .distal
-            }
-        }
-        return .none
-    }
-
-
-    func getClosestEndpoint(of mark: Mark, to otherMark: Mark) -> Mark.Endpoint {
-        guard mark != otherMark else { return .none }
-        let distanceToProximal = Geometry.distanceSegmentToPoint(segment: otherMark.segment, point: mark.segment.proximal)
-        let distanceToDistal = Geometry.distanceSegmentToPoint(segment: otherMark.segment, point: mark.segment.distal)
-        if distanceToProximal < distanceToDistal {
-            return .proximal
-        }
-        if distanceToProximal > distanceToDistal {
-            return .distal
-        }
-        return .none
-    }
-
-
-
     // MARK: - Adding marks
 
     func addMark(at positionX: CGFloat, toRegion region: Region) -> Mark {
