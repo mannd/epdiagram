@@ -144,23 +144,6 @@ final class Ladder: NSObject, Codable {
         }
     }
 
-    func linkConnectedMarks() {
-        // ignore middle marks, other linked marks when linking connected marks
-        guard connectedMarks.count == 3 else { return }
-        guard abs(connectedMarks[0].regionIndex - connectedMarks[1].regionIndex) == 2 else { return }
-        if connectedMarks[1].regionIndex > connectedMarks[0].regionIndex {
-            connectedMarks[2].linkedMarkIDs.proximal.insert(connectedMarks[0].id)
-            connectedMarks[2].linkedMarkIDs.distal.insert(connectedMarks[1].id)
-            connectedMarks[0].linkedMarkIDs.distal.insert(connectedMarks[2].id)
-            connectedMarks[1].linkedMarkIDs.proximal.insert(connectedMarks[2].id)
-        } else {
-            connectedMarks[2].linkedMarkIDs.distal.insert(connectedMarks[0].id)
-            connectedMarks[2].linkedMarkIDs.proximal.insert(connectedMarks[1].id)
-            connectedMarks[0].linkedMarkIDs.proximal.insert(connectedMarks[2].id)
-            connectedMarks[1].linkedMarkIDs.distal.insert(connectedMarks[2].id)
-        }
-    }
-
     func hasMarks() -> Bool {
         for region in regions {
             if region.marks.count > 0 {
@@ -197,34 +180,6 @@ final class Ladder: NSObject, Codable {
             }
         }
     }
-
-    func markLinkage(mark: Mark, linkedMarksIDs: LinkedMarkIDs) -> Mark.Endpoint {
-        let linkedMarks = getLinkedMarksFromLinkedMarkIDs(linkedMarksIDs)
-        for m in linkedMarks.middle {
-            if getClosestEndpoint(of: mark, to: m) == .proximal {
-                return .proximal
-            }
-            if getClosestEndpoint(of: mark, to: m) == .distal {
-                return .distal
-            }
-        }
-        return .none
-    }
-
-    func getClosestEndpoint(of mark: Mark, to otherMark: Mark) -> Mark.Endpoint {
-        guard mark != otherMark else { return .none }
-        let distanceToProximal = Geometry.distanceSegmentToPoint(segment: otherMark.segment, point: mark.segment.proximal)
-        let distanceToDistal = Geometry.distanceSegmentToPoint(segment: otherMark.segment, point: mark.segment.distal)
-        if distanceToProximal < distanceToDistal {
-            return .proximal
-        }
-        if distanceToProximal > distanceToDistal {
-            return .distal
-        }
-        return .none
-    }
-
-
 
     // MARK: - Adding marks
 

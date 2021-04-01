@@ -15,7 +15,7 @@ final class LadderView: ScaledView {
     #if DEBUG  // Change this for debugging impulse origins and block
     var showProxEnd = false
     var showEarliestPoint = false
-    var debugMarkMode = false
+    var debugMarkMode = true
     #else  // Don't ever change this.  They must all be FALSE.
     var showProxEnd = false
     var showEarliestPoint = false
@@ -107,6 +107,9 @@ final class LadderView: ScaledView {
 
     private var savedActiveRegion: Region?
     private var savedMode: Mode = .normal
+
+    // array of two unscaled tap positions, corresponding with connected mark array
+    private var connectedMarkTapPositions: [CGPoint] = []
 
     var mode: Mode = .normal
 
@@ -348,6 +351,8 @@ final class LadderView: ScaledView {
     }
 
     private func connect(marksToConnect marks: [Mark]) -> Mark? {
+        os_log("connect(marksToConnect:) - LadderView", log: OSLog.touches, type: .info)
+
         // Should not be called unless two marks to connect are in marks.
         guard marks.count == 2 else { return nil }
         // None of the region indices can be out of range, given the guard above.
@@ -371,30 +376,62 @@ final class LadderView: ScaledView {
                 undoablyAddMark(mark: mark)
                 return mark
             }
+        } else if abs(regionDifference) == 1 {
+            print("same region mark")
+            if regionDifference > 0 {
+                // If first and secondRegionIndex aren't out of range, markRegion can't be either.
+                let markRegion = ladder.region(atIndex: secondRegionIndex)
+                let segment = Segment(proximal: CGPoint(x: marks[0].segment.distal.x, y: 0), distal: transformToRegionPosition(scaledViewPosition: connectedMarkTapPositions[1], region: markRegion))
+                print("segment", segment)
+
+                let mark = ladder.addMark(fromSegment: segment, toRegion: markRegion)
+                undoablyAddMark(mark: mark)
+                let nearbyMarks = getNearbyMarkIDs(mark: mark)
+                snapToNearbyMarks(mark: mark, nearbyMarks: nearbyMarks)
+                return mark
+            }
+            if regionDifference < 0 {
+                print("regionDiff", regionDifference)
+                let markRegion = ladder.region(atIndex: firstRegionIndex)
+                let segment = Segment(proximal: CGPoint(x: marks[1].segment.distal.x, y: 0), distal: transformToRegionPosition(scaledViewPosition: connectedMarkTapPositions[0], region: markRegion))
+                print("segment", segment)
+                let mark = ladder.addMark(fromSegment: segment, toRegion: markRegion)
+                undoablyAddMark(mark: mark)
+                let nearbyMarks = getNearbyMarkIDs(mark: mark)
+                snapToNearbyMarks(mark: mark, nearbyMarks: nearbyMarks)
+                return mark
+            }
         }
         return nil
     }
 
-    private func connectTappedMark(_ mark: Mark) {
+    private func connectTappedMark(_ mark: Mark, position: CGPoint) {
+        os_log("connectTappedMark(mark:) - LadderView", log: OSLog.touches, type: .info)
+
         switch ladder.connectedMarks.count {
         case 2...:
             ladder.connectedMarks.removeAll()
+            connectedMarkTapPositions.removeAll()
             normalizeAllMarks()
             ladder.connectedMarks.append(mark)
+            connectedMarkTapPositions.append(position)
             mark.mode = .connected
             return
         case 0:
             ladder.connectedMarks.append(mark)
+            connectedMarkTapPositions.removeAll()
+            connectedMarkTapPositions.append(position)
             mark.mode = .connected
             return
         case 1:
             guard mark != ladder.connectedMarks[0] else { return }
             // different mark tapped
             // what region is the mark in?
+            connectedMarkTapPositions.append(position)
             let markRegionIndex = ladder.regionIndex(ofMark: mark)
             let firstMarkRegionIndex = ladder.regionIndex(ofMark: ladder.connectedMarks[0])
             let regionDistance = abs(markRegionIndex - firstMarkRegionIndex)
-            if regionDistance > 1 {
+            if regionDistance > 0 && regionDistance < 3 {
                 ladder.connectedMarks.append(mark)
                 mark.mode = .connected
                 if let connectedMark = connect(marksToConnect: ladder.connectedMarks) {
@@ -405,6 +442,9 @@ final class LadderView: ScaledView {
                     let linkedMarks = ladder.getLinkedMarksFromLinkedMarkIDs(connectedMark.linkedMarkIDs)
                     assessBlockAndImpulseOrigin(marks: linkedMarks.allMarks)
                 }
+            } else {
+                ladder.connectedMarks.removeAll()
+                connectedMarkTapPositions.removeAll()
             }
         default:
             assertionFailure("Impossible connected mark count.")
@@ -412,10 +452,14 @@ final class LadderView: ScaledView {
     }
 
     func removeConnectedMarks() {
+        os_log("removeConnectedMarks() - LadderView", log: OSLog.touches, type: .info)
+
         ladder.connectedMarks.removeAll()
     }
 
     fileprivate func addBlockedMark(newMark: Mark, tapRegionPosition: CGPoint, endPoint: Mark.Endpoint) {
+        os_log("addBlockedMark(newMark) - LadderView", log: OSLog.touches, type: .info)
+
         switch endPoint {
         case .distal:
             newMark.segment.distal = tapRegionPosition
@@ -434,6 +478,8 @@ final class LadderView: ScaledView {
     }
 
     func connectTappedMarkToBlockedMark(position: CGPoint, region: Region) {
+        os_log("connectTappedMarkToBlockedMark(position:region:) - LadderView", log: OSLog.touches, type: .info)
+
         // Regions are only used if a first mark is already chosen.
         guard ladder.connectedMarks.count == 1 else { return }
         let firstTappedMark = ladder.connectedMarks[0]
@@ -453,7 +499,6 @@ final class LadderView: ScaledView {
             guard firstTappedMark.segment.proximal.y < lowerLimitMarkHeight else { return }
             let newMark = ladder.addMark(at: firstTappedMark.segment.proximal.x, toRegion: region)
             addBlockedMark(newMark: newMark, tapRegionPosition: tapRegionPosition, endPoint: .proximal)
-
         }
         else {
             ladder.connectedMarks.removeAll()
@@ -461,8 +506,10 @@ final class LadderView: ScaledView {
     }
 
     private func connectModeSingleTap(_ tapLocationInLadder: LocationInLadder) {
+        os_log("connectModeSingleTap(_:) - LadderView", log: OSLog.touches, type: .info)
+
         if let mark = tapLocationInLadder.mark {
-            connectTappedMark(mark)
+            connectTappedMark(mark, position: tapLocationInLadder.unscaledPosition)
         }
         else if let region = tapLocationInLadder.region {
             connectTappedMarkToBlockedMark(position: tapLocationInLadder.unscaledPosition, region: region)
@@ -759,7 +806,8 @@ final class LadderView: ScaledView {
             isDragging = false
             if let movingMark = movingMark {
                 swapEndsIfNeeded(mark: movingMark)
-                let newNearbyMarks = getNearbyMarkIDs(mark: movingMark)
+                let newNearbyMarks =
+                    getNearbyMarkIDs(mark: movingMark)
                 snapToNearbyMarks(mark: movingMark, nearbyMarks: newNearbyMarks)
                 linkNearbyMarks(mark: movingMark, nearbyMarks: newNearbyMarks)
             }
@@ -774,7 +822,7 @@ final class LadderView: ScaledView {
                     linkNearbyMarks(mark: dragCreatedMark, nearbyMarks: newNearbyMarks)
                 }
             }
-            currentDocument?.undoManager?.endUndoGrouping()
+            currentDocument?.undoManager.endUndoGrouping()
             if !cursorViewDelegate.cursorIsVisible {
                 normalizeAllMarks()
             }
@@ -917,6 +965,8 @@ final class LadderView: ScaledView {
     }
 
     private func swapEndsIfNeeded(mark: Mark) {
+        os_log("swapEndsIfNeeded(mark:) - LadderView", log: .default, type: .default)
+
         let proximalY = mark.segment.proximal.y
         let distalY = mark.segment.distal.y
         if proximalY > distalY {
@@ -925,6 +975,8 @@ final class LadderView: ScaledView {
     }
 
     private func undoablySwapEnds(mark: Mark) {
+        os_log("undoablyUnswapEnds(mark:) - LadderView", log: .default, type: .default)
+
         currentDocument?.undoManager.registerUndo(withTarget: self) { target in
             target.undoablySwapEnds(mark: mark)
         }
@@ -934,6 +986,8 @@ final class LadderView: ScaledView {
     }
 
     func swapEndsIfNeeded() {
+        os_log("swapEndsIfNeeded() - LadderView", log: .default, type: .default)
+
         ladder.regions.forEach {
             region in region.marks.forEach {
                 mark in self.swapEndsIfNeeded(mark: mark)
@@ -968,7 +1022,7 @@ final class LadderView: ScaledView {
         updateMarkersAndRegionIntervals(activeRegion)
     }
 
-    private func moveMark(movement: Movement, mark: Mark, regionPosition: CGPoint) {
+    func moveMark(movement: Movement, mark: Mark, regionPosition: CGPoint) {
         let segment = Mark.changePosition(mark: mark, movement: movement, to: regionPosition)
         setSegment(segment: segment, forMark: mark)
         moveLinkedMarks(forMark: mark)
@@ -1458,23 +1512,28 @@ final class LadderView: ScaledView {
         }
     }
 
+    func assessGlobalImpulseOrigin() {
+        let marks = ladder.allMarks()
+        for mark in marks {
+            assessImpulseOrigin(mark: mark)
+        }
+    }
+
     func assessBlock(mark: Mark) {
+        guard snapMarks else { return }
         if mark.blockSetting == .auto {
-            mark.blockSite = .none
-            // If snapMarks is off, leave this at none
-            if !snapMarks { return }
-            if mark.early == .none {
-                return  // for now, ignore vertical marks
-            }
-            if mark.linkedMarkIDs.middle.count > 0
-                && mark.late == ladder.markLinkage(mark: mark, linkedMarksIDs: mark.linkedMarkIDs) {
+            mark.blockSite = mark.late
+            if mark.latestPoint.y < 0.1 || mark.latestPoint.y > 0.9 {
                 mark.blockSite = .none
-            } else if mark.segment.proximal.y > blockMin
-                && mark.late == .proximal {
-                mark.blockSite = .proximal
-            } else if mark.segment.distal.y < blockMax
-                        && mark.late == .distal {
-                mark.blockSite = .distal
+            } else {
+                for middleMarkID in mark.linkedMarkIDs.middle {
+                    if let middleMark = ladder.lookup(id: middleMarkID) {
+                        if Geometry.distanceSegmentToPoint(segment: middleMark.segment, point: mark.latestPoint) < 0.01 {
+                            mark.blockSite = .none
+                            break
+                        }
+                    }
+                }
             }
         } else {
             mark.blockSite = mark.blockSetting
@@ -1482,28 +1541,31 @@ final class LadderView: ScaledView {
     }
 
     func assessImpulseOrigin(mark: Mark) {
+        guard snapMarks else { return }
         if mark.impulseOriginSetting == .auto {
-            mark.impulseOriginSite = .none
-            // If snapMarks is off, leave this at none
-            if !snapMarks { return }
-            if mark.linkedMarkIDs.middle.count > 0
-                && mark.early == ladder.markLinkage(mark: mark, linkedMarksIDs: mark.linkedMarkIDs) {
+            mark.impulseOriginSite = mark.early
+            if mark.early == .proximal && mark.linkedMarkIDs.proximal.count > 0 {
                 mark.impulseOriginSite = .none
-            } else if mark.linkedMarkIDs.proximal.count == 0 && (mark.early == .proximal || mark.early == .none) {
-                mark.impulseOriginSite = .proximal
-            } else if mark.linkedMarkIDs.distal.count == 0 && mark.early == .distal {
-                mark.impulseOriginSite = .distal
+            } else if  mark.early == .distal && mark.linkedMarkIDs.distal.count > 0 {
+                mark.impulseOriginSite = .none
+            } else {
+                for middleMarkID in mark.linkedMarkIDs.middle {
+                    if let middleMark = ladder.lookup(id: middleMarkID) {
+                        if Geometry.distanceSegmentToPoint(segment: middleMark.segment, point: mark.earliestPoint) < 0.01 {
+                            mark.impulseOriginSite = .none
+                            break
+                        }
+                    }
+                }
             }
-        }
-        else {
+            // Handle special case of vertical mark, which defaults to having proximal impulse origin.
+            if mark.impulseOriginSite == .none
+                && mark.early == .none
+                && mark.linkedMarkIDs.proximal.count == 0 {
+                mark.impulseOriginSite = .proximal
+            }
+        } else {
             mark.impulseOriginSite = mark.impulseOriginSetting
-        }
-    }
-
-    func assessGlobalImpulseOrigin() {
-        let marks = ladder.allMarks()
-        for mark in marks {
-            assessImpulseOrigin(mark: mark)
         }
     }
 
@@ -1957,6 +2019,7 @@ final class LadderView: ScaledView {
         }
     }
 
+    // FIXME: Need better repeatCL, need repeat pattern
     func checkForRepeatCL() throws {
         let selectedMarks = ladder.allMarksWithMode(.selected)
         if selectedMarks.count != 2 {
@@ -1968,9 +2031,9 @@ final class LadderView: ScaledView {
 //        if ladder.marksAreNotContiguous(selectedMarks) {
 //            throw LadderError.marksNotContiguous
 //        }
-        if !ladder.marksAreParallel(selectedMarks[0], selectedMarks[1]) {
-            throw LadderError.marksNotParallel
-        }
+//        if !ladder.marksAreParallel(selectedMarks[0], selectedMarks[1]) {
+//            throw LadderError.marksNotParallel
+//        }
         // FIXME: appropriate short interval
         if ladder.difference(selectedMarks[0], selectedMarks[1]) < 20 {
             throw LadderError.intervalTooShort
@@ -1989,6 +2052,7 @@ final class LadderView: ScaledView {
                 nextSegment.distal.x += proxCL
                 let newMark = ladder.addMark(fromSegment: nextSegment, toRegion: region)
                 newMark.mode = .selected
+                newMark.style = secondMark.style
                 undoablyAddMark(mark: newMark)
             }
         }
@@ -2000,6 +2064,7 @@ final class LadderView: ScaledView {
                 nextSegment.distal.x -= proxCL
                 let newMark = ladder.addMark(fromSegment: nextSegment, toRegion: region)
                 newMark.mode = .selected
+                newMark.style = firstMark.style
                 undoablyAddMark(mark: newMark)
             }
         }
@@ -2205,6 +2270,7 @@ final class LadderView: ScaledView {
         if segment.length < Segment.minLength { return }
         let originalSegment = mark.segment
         currentDocument?.undoManager?.registerUndo(withTarget: self, handler: { target in
+            print("setSegment()")
             target.setSegment(segment: originalSegment, forMark: mark)
         })
         NotificationCenter.default.post(name: .didUndoableAction, object: nil)
@@ -2438,12 +2504,21 @@ extension LadderView: LadderViewDelegate {
         ladder.reregisterAllMarks()
     }
 
+    // FIXME: why does ladder need to deal with connect marks?  change ladder.connectedMarks to connectedMarks?  If it doesn't mess up json file.
     func linkConnectedMarks() {
         guard snapMarks else { return }
-        ladder.linkConnectedMarks()
+        guard ladder.connectedMarks.count == 3 else { return }
+        let nearbyMarks0 = getNearbyMarkIDs(mark: ladder.connectedMarks[0])
+        let nearbyMarks2 = getNearbyMarkIDs(mark: ladder.connectedMarks[2])
+        linkNearbyMarks(mark: ladder.connectedMarks[0], nearbyMarks: nearbyMarks0)
+        linkNearbyMarks(mark: ladder.connectedMarks[2], nearbyMarks: nearbyMarks2)
+
+//        ladder.linkConnectedMarks()
     }
 
     func getNearbyMarkIDs(mark: Mark) -> LinkedMarkIDs {
+        os_log("getNearbyMarkIDs(mark:) - LadderView", log: .default, type: .default)
+
         guard snapMarks else { return LinkedMarkIDs() }
         let minimum: CGFloat = nearbyMarkAccuracy / scale
         let nearbyMarkIDs = getNearbyMarkIDs(mark: mark, nearbyDistance: minimum)
@@ -2452,6 +2527,8 @@ extension LadderView: LadderViewDelegate {
 
 
     func highlightNearbyMarks(_ mark: Mark?) {
+        os_log("highlightNearbyMarks(mark:) - LadderView", log: .default, type: .default)
+
         guard snapMarks else { return }
         guard let mark = mark else { return }
         ladder.normalizeAllMarksExceptAttachedMark()
@@ -2546,7 +2623,9 @@ extension LadderView: LadderViewDelegate {
 
     func snapToNearbyMarks(mark: Mark, nearbyMarks: LinkedMarkIDs) {
         guard snapMarks else { return }
+
         // get the new segment to snap to, then set it undoably.
+
         var segment = mark.segment
         if nearbyMarks.proximal.count > 0 {
             // Only need to snap to one proximal and distal mark.
@@ -2602,23 +2681,31 @@ extension LadderView: LadderViewDelegate {
     }
 
     func linkNearbyMarks(mark: Mark, nearbyMarks: LinkedMarkIDs) {
+        os_log("linkNearbyMarks(mark:nearbyMarks:) - LadderView", log: .default, type: .default)
+
         guard snapMarks else { return }
+
+        let filteredProximal = nearbyMarks.proximal.subtracting(mark.linkedMarkIDs.proximal)
+        let filteredMiddle = nearbyMarks.middle.subtracting(mark.linkedMarkIDs.middle)
+        let filteredDistal = nearbyMarks.distal.subtracting(mark.linkedMarkIDs.distal)
+        let filteredNearbyMarks = LinkedMarkIDs(proximal: filteredProximal, middle: filteredMiddle, distal: filteredDistal)
         currentDocument?.undoManager?.registerUndo(withTarget: self) { target in
-            target.unlinkNearbyMarks(mark: mark, nearbyMarks: nearbyMarks)
+            print("unlinkingNearbyMarks()")
+            target.unlinkNearbyMarks(mark: mark, nearbyMarks: filteredNearbyMarks)
         }
         NotificationCenter.default.post(name: .didUndoableAction, object: nil)
-        // Need to link all of them
-        for proximalMark in nearbyMarks.proximal {
+        // Need to link the new marks
+        for proximalMark in filteredNearbyMarks.proximal {
             mark.linkedMarkIDs.proximal.insert(proximalMark)
             let proxMark = ladder.lookup(id: proximalMark)
             proxMark?.linkedMarkIDs.distal.insert(mark.id)
         }
-        for middleMark in nearbyMarks.middle {
+        for middleMark in filteredNearbyMarks.middle {
             mark.linkedMarkIDs.middle.insert(middleMark)
             let middleMark = ladder.lookup(id: middleMark)
             middleMark?.linkedMarkIDs.middle.insert(mark.id)
         }
-        for distalMark in nearbyMarks.distal {
+        for distalMark in filteredNearbyMarks.distal {
             mark.linkedMarkIDs.distal.insert(distalMark)
             let distalMark = ladder.lookup(id: distalMark)
             distalMark?.linkedMarkIDs.proximal.insert(mark.id)
@@ -2632,6 +2719,7 @@ extension LadderView: LadderViewDelegate {
     func unlinkNearbyMarks(mark: Mark, nearbyMarks: LinkedMarkIDs) {
         guard snapMarks else { return }
         currentDocument?.undoManager?.registerUndo(withTarget: self) { target in
+            print("linking nearby marks")
             target.linkNearbyMarks(mark: mark, nearbyMarks: nearbyMarks)
         }
         NotificationCenter.default.post(name: .didUndoableAction, object: nil)

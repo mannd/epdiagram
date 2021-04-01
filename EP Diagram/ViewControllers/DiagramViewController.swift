@@ -541,6 +541,7 @@ final class DiagramViewController: UIViewController {
         showMainToolbar()
 
         resetViews(setActiveRegion: false)
+
     }
 
     override func viewWillDisappear(_ animated: Bool) {
@@ -607,7 +608,7 @@ final class DiagramViewController: UIViewController {
             let selectAllButton = UIBarButtonItem(title: L("Select All"), style: .plain, target: self, action: #selector(selectAllMarks))
             let clearButton = UIBarButtonItem(title: L("Clear Selection"), style: .plain, target: self, action: #selector(clearSelection))
             let doneButton = UIBarButtonItem(barButtonSystemItem: .done, target: self, action: #selector(cancelSelectMode))
-            selectToolbarButtons = [selectAllButton, spacer, clearButton, spacer, doneButton]
+            selectToolbarButtons = [selectAllButton, spacer, clearButton, spacer, undoButton, spacer, redoButton, spacer, doneButton]
         }
         setToolbarItems(selectToolbarButtons, animated: false)
         // TODO: experiment with different bar tint colors to show mode.
@@ -640,7 +641,7 @@ final class DiagramViewController: UIViewController {
         if connectToolbarButtons == nil {
             let prompt = makePrompt(text: L("Tap pairs of marks to connect them"))
             let doneButton = UIBarButtonItem(barButtonSystemItem: .done, target: self, action: #selector(cancelConnectMode))
-            connectToolbarButtons = [prompt, spacer, doneButton]
+            connectToolbarButtons = [prompt, spacer, undoButton, spacer, redoButton, spacer, doneButton]
         }
         setToolbarItems(connectToolbarButtons, animated: false)
     }
@@ -1135,7 +1136,6 @@ final class DiagramViewController: UIViewController {
         self.ladderView.resetSize(setActiveRegion: setActiveRegion, width: imageView.frame.width)
         cursorView.caliperMaxY = imageScrollView.frame.height
         cursorView.caliperMinY = 0
-//        ladderView.linkAllMarks()
         setViewsNeedDisplay()
     }
 
