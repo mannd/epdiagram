@@ -184,6 +184,10 @@ final class Ladder: NSObject, Codable {
     func markLinkage(mark: Mark, linkedMarksIDs: LinkedMarkIDs) -> Mark.Endpoint {
         let linkedMarks = getLinkedMarksFromLinkedMarkIDs(linkedMarksIDs)
         for m in linkedMarks.middle {
+//            let intersection = Geometry.intersection(ofLineFrom: mark.segment.proximal, to: mark.segment.distal, withLineFrom: m.segment.proximal, to: m.segment.distal)
+//            print("intersection", intersection as Any)
+//            print("mark.earliest", mark.earliestPoint)
+//            print("m.earliest", m.earliestPoint)
             if getClosestEndpoint(of: mark, to: m) == .proximal {
                 return .proximal
             }
@@ -193,6 +197,7 @@ final class Ladder: NSObject, Codable {
         }
         return .none
     }
+
 
     func getClosestEndpoint(of mark: Mark, to otherMark: Mark) -> Mark.Endpoint {
         guard mark != otherMark else { return .none }

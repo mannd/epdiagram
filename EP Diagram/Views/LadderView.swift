@@ -15,7 +15,7 @@ final class LadderView: ScaledView {
     #if DEBUG  // Change this for debugging impulse origins and block
     var showProxEnd = false
     var showEarliestPoint = false
-    var debugMarkMode = false
+    var debugMarkMode = true
     #else  // Don't ever change this.  They must all be FALSE.
     var showProxEnd = false
     var showEarliestPoint = false
@@ -823,7 +823,6 @@ final class LadderView: ScaledView {
                 }
             }
             currentDocument?.undoManager.endUndoGrouping()
-
             if !cursorViewDelegate.cursorIsVisible {
                 normalizeAllMarks()
             }
@@ -1521,13 +1520,17 @@ final class LadderView: ScaledView {
             if mark.early == .none {
                 return  // for now, ignore vertical marks
             }
-            if mark.linkedMarkIDs.middle.count > 0
-                && mark.late == ladder.markLinkage(mark: mark, linkedMarksIDs: mark.linkedMarkIDs) {
-                mark.blockSite = .none
-            } else if mark.segment.proximal.y > blockMin
+            if mark.linkedMarkIDs.middle.count > 0 {
+                let latestMark = getLatestMiddleMark(mark: mark)
+                if latestMark == mark {
+                    mark.blockSite = mark.late
+                }
+            }
+            else if mark.segment.proximal.y > blockMin
                 && mark.late == .proximal {
                 mark.blockSite = .proximal
-            } else if mark.segment.distal.y < blockMax
+            }
+            else if mark.segment.distal.y < blockMax
                         && mark.late == .distal {
                 mark.blockSite = .distal
             }
@@ -1541,18 +1544,53 @@ final class LadderView: ScaledView {
             mark.impulseOriginSite = .none
             // If snapMarks is off, leave this at none
             if !snapMarks { return }
-            if mark.linkedMarkIDs.middle.count > 0
-                && mark.early == ladder.markLinkage(mark: mark, linkedMarksIDs: mark.linkedMarkIDs) {
-                mark.impulseOriginSite = .none
-            } else if mark.linkedMarkIDs.proximal.count == 0 && (mark.early == .proximal || mark.early == .none) {
+            if mark.linkedMarkIDs.proximal.count == 0
+                && mark.segment.proximal.y < 0.01
+                && (mark.early == .proximal || mark.early == .none) {
                 mark.impulseOriginSite = .proximal
-            } else if mark.linkedMarkIDs.distal.count == 0 && mark.early == .distal {
+            }
+            if mark.linkedMarkIDs.distal.count == 0
+                        && mark.segment.distal.y > 0.99
+                        && mark.early == .distal {
                 mark.impulseOriginSite = .distal
             }
-        }
-        else {
+            else if mark.segment.proximal.y > 0.01
+                        && mark.segment.distal.y < 0.99 {
+                //                  if mark.early == ladder.markLinkage(mark: mark, linkedMarksIDs: mark.linkedMarkIDs) {
+                let earliestMiddleMark = getEarliestMiddleMark(mark: mark)
+                if earliestMiddleMark == mark {
+                    mark.impulseOriginSite = mark.early
+                }
+            }
+        } else {
             mark.impulseOriginSite = mark.impulseOriginSetting
         }
+    }
+
+    func getEarliestMiddleMark(mark: Mark) -> Mark {
+        var earliestMark = mark
+        for m in mark.linkedMarkIDs.middle {
+            if let middleMark = ladder.lookup(id: m) {
+                let point = middleMark.earliestPoint
+                if point.x < mark.earliestPoint.x {
+                    earliestMark = middleMark
+                }
+            }
+        }
+        return earliestMark
+    }
+
+    func getLatestMiddleMark(mark: Mark) -> Mark {
+        var latestMark = mark
+        for m in mark.linkedMarkIDs.middle {
+            if let middleMark = ladder.lookup(id: m) {
+                let point = middleMark.latestPoint
+                if point.x > mark.latestPoint.x {
+                    latestMark = middleMark
+                }
+            }
+        }
+        return latestMark
     }
 
     func assessGlobalImpulseOrigin() {
@@ -2497,6 +2535,7 @@ extension LadderView: LadderViewDelegate {
         ladder.reregisterAllMarks()
     }
 
+    // FIXME: why does ladder need to deal with connect marks?  change ladder.connectedMarks to connectedMarks?  If it doesn't mess up json file.
     func linkConnectedMarks() {
         guard snapMarks else { return }
         guard ladder.connectedMarks.count == 3 else { return }
