@@ -330,40 +330,45 @@ extension DiagramViewController: HamburgerTableDelegate, UIImagePickerController
         performShowSampleSelectorSegue()
     }
 
-    @objc func undoablySetDiagramImage(_ image: UIImage?, imageIsUpscaled: Bool) {
+    @objc func undoablySetDiagramImage(_ image: UIImage?,
+                                       imageIsUpscaled: Bool,
+                                       transform: CGAffineTransform,
+                                       scale: CGFloat,
+                                       contentOffset: CGPoint) {
         os_log("setDiagramImage(_:)", log: .action, type: .info)
-        //FIXME: scaling issues with undoing PDFs
 
         let oldImage = self.imageView.image
         let oldImageIsUpscaled = diagram.imageIsUpscaled
-
+        let oldTransform = self.imageView.transform
+        let oldScale = self.imageScrollView.zoomScale
+        let oldContentOffset = self.imageScrollView.contentOffset
         currentDocument?.undoManager.registerUndo(withTarget: self) { target in
-            target.undoablySetDiagramImage(oldImage, imageIsUpscaled: oldImageIsUpscaled)
+            target.undoablySetDiagramImage(oldImage, imageIsUpscaled: oldImageIsUpscaled, transform: oldTransform, scale: oldScale, contentOffset: oldContentOffset)
         }
-
-//        currentDocument?.undoManager.registerUndo(withTarget: self, selector: #selector(undoablySetDiagramImage), object: imageView.image)
-
         NotificationCenter.default.post(name: .didUndoableAction, object: nil)
 
         diagram.imageIsUpscaled = imageIsUpscaled
-
         let scaledImage = scaleImageForImageView(image)
         diagram.image = scaledImage
         imageView.image = scaledImage
-//        imageView.transform = diagram.transform
-        imageScrollView.zoomScale = 1.0
-
-        imageScrollView.contentOffset = CGPoint.zero
+        imageScrollView.zoomScale = scale
+        imageView.transform = transform
+        diagram.transform = transform
+        imageScrollView.contentOffset = contentOffset
         hideCursorAndNormalizeAllMarks()
         setViewsNeedDisplay()
     }
 
-    func undoablySetDiagramImageAndResetLadder(_ image: UIImage?, imageIsUpscaled: Bool) {
+    func undoablySetDiagramImageAndResetLadder(_ image: UIImage?,
+                                               imageIsUpscaled: Bool,
+                                               transform: CGAffineTransform,
+                                               scale: CGFloat,
+                                               contentOffset: CGPoint) {
         os_log("undoablySetDiagramImageAndResetLadder(_:)", log: .action, type: .info)
         currentDocument?.undoManager.beginUndoGrouping()
         undoablySetCalibration(Calibration())
         ladderView.deleteAllInLadder()
-        undoablySetDiagramImage(image, imageIsUpscaled: imageIsUpscaled)
+        undoablySetDiagramImage(image, imageIsUpscaled: imageIsUpscaled, transform: transform, scale: scale, contentOffset: contentOffset)
         currentDocument?.undoManager.endUndoGrouping()
         ladderView.viewMaxWidth = imageView.frame.width
         if !showingPDFToolbar {
@@ -429,7 +434,7 @@ extension DiagramViewController: HamburgerTableDelegate, UIImagePickerController
     func imagePickerController(_ picker: UIImagePickerController, didFinishPickingMediaWithInfo info: [UIImagePickerController.InfoKey : Any]) {
         let chosenImage = info[.editedImage] as? UIImage
         // Images from photos are never upscaled.
-        undoablySetDiagramImageAndResetLadder(chosenImage, imageIsUpscaled: false)
+        undoablySetDiagramImageAndResetLadder(chosenImage, imageIsUpscaled: false, transform: CGAffineTransform.identity, scale: 1.0, contentOffset: .zero)
         picker.dismiss(animated: true, completion: nil)
     }
 
@@ -451,7 +456,7 @@ extension DiagramViewController: PHPickerViewControllerDelegate {
                         guard let self = self else { return }
                         if let image = image as? UIImage {
                             // Only PDFs are upscaled
-                            self.undoablySetDiagramImageAndResetLadder(image, imageIsUpscaled: false)
+                            self.undoablySetDiagramImageAndResetLadder(image, imageIsUpscaled: false, transform: CGAffineTransform.identity, scale: 1.0, contentOffset: .zero)
                         } else {
                             os_log("Error displaying image", log: .errors, type: .error)
                             UserAlert.showMessage(viewController: self, title: L("Error Loading Image"), message: L("Selected image could not be loaded."))

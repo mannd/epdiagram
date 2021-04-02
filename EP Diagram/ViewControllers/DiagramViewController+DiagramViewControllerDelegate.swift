@@ -96,6 +96,7 @@ extension DiagramViewController: DiagramViewControllerDelegate {
             rotateToolbarButtons = isIPad() || isRunningOnMac() ? [prompt, spacer, rotate90RButton, spacer, rotate90LButton, spacer, rotate1RButton, spacer, rotate1LBButton, spacer, rotate01RButton, spacer, rotate01LButton, spacer, resetRotationButton, spacer, doneButton] : [rotate90RButton, spacer, rotate90LButton, spacer, rotate1RButton, spacer, rotate1LBButton, spacer, rotate01RButton, spacer, rotate01LButton, spacer, doneButton] // leave out prompt and reset button so menu fits on iPhone SE2
         }
         setToolbarItems(rotateToolbarButtons, animated: false)
+        showingRotateToolbar = true
     }
 
     @objc func closeRotateToolbar(_ sender: UIAlertAction) {
@@ -110,6 +111,7 @@ extension DiagramViewController: DiagramViewControllerDelegate {
         case .calibrate:
             showCalibrateToolbar()
         }
+        showingRotateToolbar = false
     }
 
     @objc func rotate90R() {
@@ -172,7 +174,6 @@ extension DiagramViewController: DiagramViewControllerDelegate {
 
     func showPDFToolbar() {
         currentDocument?.undoManager.beginUndoGrouping() // will end when menu closed
-        showingPDFToolbar = true
         if pdfToolbarButtons == nil {
             let prompt = makePrompt(text: L("PDF"))
             let previousPageButton = UIBarButtonItem(title: L("Previous page"), style: .plain, target: self, action: #selector(previousPage(_:)))
@@ -182,6 +183,7 @@ extension DiagramViewController: DiagramViewControllerDelegate {
             pdfToolbarButtons =  [prompt, spacer, previousPageButton, spacer, nextPageButton, spacer, gotoPageButton, spacer, doneButton]
         }
         setToolbarItems(pdfToolbarButtons, animated: false)
+        showingPDFToolbar = true
     }
 
     @objc func gotoPage(_ sender: AnyObject) {

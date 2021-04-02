@@ -123,7 +123,10 @@ final class DiagramViewController: UIViewController {
     var pageNumber: Int = 1
     var enablePageButtons = false
     var numberOfPages: Int = 0
+
+    // flags to inhibit certain actions when showing these toolbars
     var showingPDFToolbar = false
+    var showingRotateToolbar = false
 
     // For hambuger menu
     var hamburgerMenuIsOpen = false
@@ -559,7 +562,6 @@ final class DiagramViewController: UIViewController {
         print("currentDocumentURL", currentDocumentURL)
         super.updateUserActivityState(activity)
         let info: [AnyHashable: Any] = [
-            // FIXME: We are correcting just x for zoom scale.  Test if correcting y is needed too.
             Self.restorationContentOffsetXKey: imageScrollView.contentOffset.x / imageScrollView.zoomScale,
             Self.restorationContentOffsetYKey: imageScrollView.contentOffset.y,
             Self.restorationZoomKey: imageScrollView.zoomScale,
@@ -574,7 +576,7 @@ final class DiagramViewController: UIViewController {
         currentDocument?.undoManager.beginUndoGrouping()
         undoablySetCalibration(Calibration())
         undoablySetLadder(diagram.ladder)
-        undoablySetDiagramImage(diagram.image, imageIsUpscaled: false)
+        undoablySetDiagramImage(diagram.image, imageIsUpscaled: false, transform: .identity, scale: 1.0, contentOffset: .zero)
         currentDocument?.undoManager.endUndoGrouping()
         ladderView.activeRegion = nil
         mode = .normal
@@ -1048,7 +1050,7 @@ final class DiagramViewController: UIViewController {
         let ext = url.pathExtension.uppercased()
         if ext != "PDF" {
             self.enablePageButtons = false
-            undoablySetDiagramImageAndResetLadder(UIImage(contentsOfFile: url.path), imageIsUpscaled: false)
+            undoablySetDiagramImageAndResetLadder(UIImage(contentsOfFile: url.path), imageIsUpscaled: false, transform: .identity, scale: 1.0, contentOffset: .zero)
         }
         else {
             self.numberOfPages = 0
@@ -1104,7 +1106,7 @@ final class DiagramViewController: UIViewController {
             // correct for scale factor
             if let scaledImage = scaledImage, let cgImage = scaledImage.cgImage {
                 let rescaledImage = UIImage(cgImage: cgImage, scale: scaleFactor, orientation: .up)
-                undoablySetDiagramImageAndResetLadder(rescaledImage, imageIsUpscaled: true)
+                undoablySetDiagramImageAndResetLadder(rescaledImage, imageIsUpscaled: true, transform: .identity, scale: 1.0, contentOffset: .zero)
             }
             UIGraphicsEndImageContext()
         }
@@ -1453,7 +1455,7 @@ extension DiagramViewController: UIDropInteractionDelegate {
         // Consume drag items (in this example, of type UIImage).
         session.loadObjects(ofClass: UIImage.self) { imageItems in
             if let images = imageItems as? [UIImage] {
-                self.undoablySetDiagramImageAndResetLadder(images.first, imageIsUpscaled: false)
+                self.undoablySetDiagramImageAndResetLadder(images.first, imageIsUpscaled: false, transform: .identity, scale: 1.0, contentOffset: .zero)
                 return
             }
         }

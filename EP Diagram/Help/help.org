@@ -132,6 +132,12 @@ Use the buttons at the bottom of the screen to rotate the image.  Tap *Reset* to
 You can rotate the device itself and the screen will automatically adjust.
 **** Adjust the size of the image versus the ladder
 There is a small red horizontal bar between the image and the ladder.  Move this up or down to adjust the relative proportions of the image and the ladder on the screen.
+
+*** PDF files
+Load PDF files like any other image file.  However, some PDF files contain multiple pages.  You can change the page by performing a long press on the image and selected the *PDF* menu item.  A toolbar will appear at the bottom which allows you to change pages.
+
+Note that once a multipage PDF diagram is closed, only the page shown when the diagram is closed will be saved with the diagram.  This is because *EP Diagram* only saves one image at a time.  In order to changes pages after reopening a diagram based on a multipage PDF file, it will be necessary to reload the PDF file.
+
 ** Ladders
 *** Default ladder
 When you create a new diagram, a default ladder is presented initially.  You can [[*Editing and creating ladders][change the default ladder, select a different ladder, or create a new ladder from scratch]].  The default ladder has three regions: A (atrial), AV (atrioventricular), and V (ventricular).  For the purposes of this manual/tutorial we'll use the default ladder as is and start to create some marks.
@@ -443,7 +449,6 @@ To create a snapshot and save it to the Photos app, simply tap the *Snapshot* bu
 
 * Known issues/bugs/limitations
 - Image rotation inappropriately carries over to next image loaded.
-- Add multipage PDF documentation to Help.
 - Repeating CL tool will be expanded to copy/paste, duplicate selected marks.
 - Need more sample ECGS, more default ladders.
 - Mac version still under development.
