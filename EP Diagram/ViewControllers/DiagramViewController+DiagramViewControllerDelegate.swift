@@ -18,6 +18,8 @@ protocol DiagramViewControllerDelegate: class {
     func rotateImage(degrees: CGFloat)
     func resetImage()
     func showRotateToolbar()
+    func showPDFMenuItems() -> Bool
+    func showPDFToolbar()
 }
 
 extension DiagramViewController: DiagramViewControllerDelegate {
@@ -161,6 +163,59 @@ extension DiagramViewController: DiagramViewControllerDelegate {
 //            self.imageView.sizeToFit()
             self.imageScrollView.contentInset = UIEdgeInsets(top: 0, left: self.leftMargin, bottom: 0, right: 0)
 //            self.centerContent()
+        }
+    }
+
+    func showPDFMenuItems() -> Bool {
+        return pdfRef != nil && numberOfPages > 1
+    }
+
+    func showPDFToolbar() {
+        currentDocument?.undoManager.beginUndoGrouping() // will end when menu closed
+        showingPDFToolbar = true
+        if pdfToolbarButtons == nil {
+            let prompt = makePrompt(text: L("PDF"))
+            let previousPageButton = UIBarButtonItem(title: L("Previous page"), style: .plain, target: self, action: #selector(previousPage(_:)))
+            let nextPageButton = UIBarButtonItem(title: L("Next page"), style: .plain, target: self, action: #selector(nextPage(_:)))
+            let gotoPageButton = UIBarButtonItem(title: L("Goto page"), style: .plain, target: self, action: #selector(gotoPage(_:)))
+            let doneButton = UIBarButtonItem(barButtonSystemItem: .done, target: self, action: #selector(closePDFToolbar(_:)))
+            pdfToolbarButtons =  [prompt, spacer, previousPageButton, spacer, nextPageButton, spacer, gotoPageButton, spacer, doneButton]
+        }
+        setToolbarItems(pdfToolbarButtons, animated: false)
+    }
+
+    @objc func gotoPage(_ sender: AnyObject) {
+        getPageNumber()
+    }
+
+    @objc func previousPage(_ sender: AnyObject) {
+        pageNumber -= 1
+        pageNumber = pageNumber < 0 ? 0 : pageNumber
+        if let pdf = pdfRef {
+            openPDFPage(pdf, atPage: pageNumber)
+        }
+    }
+
+    @objc func nextPage(_ sender: AnyObject) {
+        pageNumber += 1
+        pageNumber = pageNumber >= numberOfPages ? numberOfPages - 1 : pageNumber
+        if let pdf = pdfRef {
+            openPDFPage(pdf, atPage: pageNumber)
+        }
+    }
+
+    @objc func closePDFToolbar(_ sender: UIAlertAction) {
+        currentDocument?.undoManager.endUndoGrouping()
+        showingPDFToolbar = false
+        switch mode {
+        case .normal:
+            showMainToolbar()
+        case .select:
+            showSelectToolbar()
+        case .connect:
+            showConnectToolbar()
+        case .calibrate:
+            showCalibrateToolbar()
         }
     }
 

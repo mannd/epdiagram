@@ -111,6 +111,7 @@ final class DiagramViewController: UIViewController {
     private var calibrateToolbarButtons: [UIBarButtonItem]?
     private var hamburgerButton: UIBarButtonItem = UIBarButtonItem()
     var rotateToolbarButtons: [UIBarButtonItem]?
+    var pdfToolbarButtons: [UIBarButtonItem]?
 
     weak var diagramEditorDelegate: DiagramEditorDelegate?
     var currentDocument: DiagramDocument?
@@ -120,6 +121,9 @@ final class DiagramViewController: UIViewController {
     var launchFromURL: Bool = false
     var launchURL: URL?
     var pageNumber: Int = 1
+    var enablePageButtons = false
+    var numberOfPages: Int = 0
+    var showingPDFToolbar = false
 
     // For hambuger menu
     var hamburgerMenuIsOpen = false
@@ -570,7 +574,7 @@ final class DiagramViewController: UIViewController {
         currentDocument?.undoManager.beginUndoGrouping()
         undoablySetCalibration(Calibration())
         undoablySetLadder(diagram.ladder)
-        undoablySetDiagramImage(diagram.image)
+        undoablySetDiagramImage(diagram.image, imageIsUpscaled: false)
         currentDocument?.undoManager.endUndoGrouping()
         ladderView.activeRegion = nil
         mode = .normal
@@ -1035,27 +1039,32 @@ final class DiagramViewController: UIViewController {
     func openURL(url: URL) {
         os_log("openURL action", log: OSLog.action, type: .info)
         // FIXME: self.resetImage sets transform to CGAffineTransformIdentity
+        // this is in EP Calipers (the containe view is not transformed.
+        // Also this is not undoable, so do we need it?
         // self.resetImage
+//        self.imageContainerView.transform = CGAffineTransform.identity
+
+
         let ext = url.pathExtension.uppercased()
         if ext != "PDF" {
-            // TODO: implement multipage PDF
-            // self.enablePageButtons = false
-            diagram.imageIsUpscaled = false
-            undoablySetDiagramImageAndResetLadder(UIImage(contentsOfFile: url.path))
+            self.enablePageButtons = false
+            undoablySetDiagramImageAndResetLadder(UIImage(contentsOfFile: url.path), imageIsUpscaled: false)
         }
         else {
-            // self.numberOfPages = 0
+            self.numberOfPages = 0
             let urlPath = url.path as NSString
             let tmpPDFRef: CGPDFDocument? = getPDFDocumentRef(urlPath.utf8String)
             if tmpPDFRef == nil {
                 return
             }
-            // self.clearPDF
+            self.clearPDF()
             pdfRef = tmpPDFRef
-            // self.numberOfPages = (int)CGPDFDocumentGetNumberOfPages(pdfRef)
+            if let pdfRef = pdfRef {
+                self.numberOfPages = pdfRef.numberOfPages
+            }
             // always start with page number 1
             self.pageNumber = 1
-            // enablePageButtons = (numberOfPages > 1)
+            enablePageButtons = (numberOfPages > 1)
             openPDFPage(pdfRef, atPage: pageNumber)
         }
         mode = .normal
@@ -1075,7 +1084,7 @@ final class DiagramViewController: UIViewController {
         return document
     }
 
-    private func openPDFPage(_ documentRef: CGPDFDocument?, atPage pageNum: Int) {
+    func openPDFPage(_ documentRef: CGPDFDocument?, atPage pageNum: Int) {
         guard let documentRef = documentRef else { return }
         let page: CGPDFPage? = getPDFPage(documentRef, pageNumber: pageNum)
         if let page = page {
@@ -1095,8 +1104,7 @@ final class DiagramViewController: UIViewController {
             // correct for scale factor
             if let scaledImage = scaledImage, let cgImage = scaledImage.cgImage {
                 let rescaledImage = UIImage(cgImage: cgImage, scale: scaleFactor, orientation: .up)
-                diagram.imageIsUpscaled = true
-                undoablySetDiagramImageAndResetLadder(rescaledImage)
+                undoablySetDiagramImageAndResetLadder(rescaledImage, imageIsUpscaled: true)
             }
             UIGraphicsEndImageContext()
         }
@@ -1104,6 +1112,42 @@ final class DiagramViewController: UIViewController {
 
     private func getPDFPage(_ document: CGPDFDocument, pageNumber: Int) -> CGPDFPage? {
         return document.page(at: pageNumber)
+    }
+
+    func getPageNumber() {
+        let gotoPageAlertController = UIAlertController(title: L("Goto page"), message: nil, preferredStyle: .alert)
+        gotoPageAlertController.addTextField(configurationHandler: { textField in
+            let currentPage: String = String.localizedStringWithFormat("%i", self.pageNumber)
+            textField.text = currentPage
+            textField.selectAll(nil)
+            textField.clearButtonMode = .always
+            textField.keyboardType = .numberPad
+        })
+        let cancelAction = UIAlertAction(title: L("Cancel"), style: .cancel, handler: { _ in self.showPDFToolbar() })
+        let gotoAction = UIAlertAction(title: L("OK"), style: .default) { _ in
+            let textFields = gotoPageAlertController.textFields
+            if let rawTextField = textFields?[0] {
+                if var page = Int(rawTextField.text ?? "1") {
+                    if page > self.numberOfPages {
+                        page = self.numberOfPages
+                    }
+                    if page < 1 {
+                        page = 1
+                    }
+                    self.pageNumber = page;
+                    //            [self enablePageButtons:YES];
+                    self.openPDFPage(self.pdfRef, atPage: self.pageNumber)
+                }
+            }
+        }
+        gotoPageAlertController.addAction(cancelAction)
+        gotoPageAlertController.addAction(gotoAction)
+        present(gotoPageAlertController, animated: true)
+    }
+
+    func clearPDF() {
+        pageNumber = 0
+        numberOfPages = 0
     }
 
     // MARK: - Rotate screen
@@ -1409,8 +1453,7 @@ extension DiagramViewController: UIDropInteractionDelegate {
         // Consume drag items (in this example, of type UIImage).
         session.loadObjects(ofClass: UIImage.self) { imageItems in
             if let images = imageItems as? [UIImage] {
-                self.diagram.imageIsUpscaled = false
-                self.undoablySetDiagramImageAndResetLadder(images.first)
+                self.undoablySetDiagramImageAndResetLadder(images.first, imageIsUpscaled: false)
                 return
             }
         }
