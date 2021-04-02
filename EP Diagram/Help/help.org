@@ -19,12 +19,11 @@
 * Beta version notes
 The beta version of *EP Diagram* is nearly feature complete and ready for testing.
 ** New in this version
-- Reimplement automatic impulse origin and block determination.
-- Implement file versioning so there should be no problems with future file versions being incompatible with the pre-release versions.
+- Fix nasty bug that broke image scaling after loading a PDF and then undoing.
+- Implement multipage PDF.
 ** What is still missing
 - Onboarding and/or tooltips.
-- Multipage PDF support.
-- We will try implement copy and paste for groups of marks prior to release of the app.
+- See [[*Known issues/bugs/limitations][Known issues/bugs/limitations]].
 ** Instructions for beta testers
 - Play around with the app.
 - Email me (mannd@epstudiossoftware.com) or use the TestFlight app to report any bugs, crashes, awkwardness, or to request features.
@@ -443,9 +442,10 @@ To create a snapshot and save it to the Photos app, simply tap the *Snapshot* bu
 [[./img/snapshot_button.png]]
 
 * Known issues/bugs/limitations
-- Diagram document format likely to change in release version and be incompatible with present format.
+- Image rotation inappropriately carries over to next image loaded.
+- Add multipage PDF documentation to Help.
+- Repeating CL tool will be expanded to copy/paste, duplicate selected marks.
 - Need more sample ECGS, more default ladders.
-- Multi-page PDF files not supported yet.
 - Mac version still under development.
 * Next version plans
 We plan to include in the next version:

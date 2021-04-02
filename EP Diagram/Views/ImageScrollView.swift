@@ -26,8 +26,13 @@ extension ImageScrollView {
             let resetMenuItem = UIMenuItem(title: L("Reset"), action: #selector(resetImage))
             let doneMenuItem = UIMenuItem(title: L("Done"), action: #selector(doneAction))
 
+            let pdfMenuItem = UIMenuItem(title: L("PDF"), action: #selector(showPDFToolbar))
             let menuController = UIMenuController.shared
-            menuController.menuItems = [rotateMenuItem, resetMenuItem, doneMenuItem]
+            if let delegate = diagramViewControllerDelegate, delegate.showPDFMenuItems() {
+                menuController.menuItems = [rotateMenuItem, resetMenuItem, pdfMenuItem, doneMenuItem]
+            } else {
+                menuController.menuItems = [rotateMenuItem, resetMenuItem, doneMenuItem]
+            }
 
             // Set the location of the menu in the view.
             let location = gestureRecognizer.location(in: gestureRecognizer.view)
@@ -58,6 +63,11 @@ extension ImageScrollView {
 
     @objc func doneAction() {
         self.resignFirstResponder()
+    }
+
+    @objc func showPDFToolbar() {
+        print("showPDFToolbar()")
+        diagramViewControllerDelegate?.showPDFToolbar()
     }
 }
 
