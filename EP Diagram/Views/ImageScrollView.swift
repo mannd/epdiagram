@@ -19,6 +19,7 @@ extension ImageScrollView {
 
     @IBAction func showImageMenu(_ gestureRecognizer: UILongPressGestureRecognizer) {
         print("long press")
+        guard let delegate = diagramViewControllerDelegate, delegate.okToShowLongPressMenu() else { return }
         if gestureRecognizer.state == .began {
             if contentSize == CGSize.zero { return }
             self.becomeFirstResponder()

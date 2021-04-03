@@ -86,7 +86,6 @@ final class DiagramViewController: UIViewController {
             diagram.calibration = newValue
             ladderView.calibration = newValue
             cursorView.calibration = newValue
-            print(newValue)
         }
     }
 
@@ -1522,3 +1521,4 @@ extension DiagramViewController {
         }
     }
 }
+

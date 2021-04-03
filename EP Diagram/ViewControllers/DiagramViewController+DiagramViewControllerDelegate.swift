@@ -20,6 +20,7 @@ protocol DiagramViewControllerDelegate: class {
     func showRotateToolbar()
     func showPDFMenuItems() -> Bool
     func showPDFToolbar()
+    func okToShowLongPressMenu() -> Bool
 }
 
 extension DiagramViewController: DiagramViewControllerDelegate {
@@ -173,7 +174,6 @@ extension DiagramViewController: DiagramViewControllerDelegate {
     }
 
     func showPDFToolbar() {
-        currentDocument?.undoManager.beginUndoGrouping() // will end when menu closed
         if pdfToolbarButtons == nil {
             let prompt = makePrompt(text: L("PDF"))
             let previousPageButton = UIBarButtonItem(title: L("Previous page"), style: .plain, target: self, action: #selector(previousPage(_:)))
@@ -207,7 +207,6 @@ extension DiagramViewController: DiagramViewControllerDelegate {
     }
 
     @objc func closePDFToolbar(_ sender: UIAlertAction) {
-        currentDocument?.undoManager.endUndoGrouping()
         showingPDFToolbar = false
         switch mode {
         case .normal:
@@ -219,6 +218,10 @@ extension DiagramViewController: DiagramViewControllerDelegate {
         case .calibrate:
             showCalibrateToolbar()
         }
+    }
+
+    func okToShowLongPressMenu() -> Bool {
+        return !showingRotateToolbar && !showingPDFToolbar
     }
 
 }

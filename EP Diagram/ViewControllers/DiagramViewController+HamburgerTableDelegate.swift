@@ -256,16 +256,20 @@ extension DiagramViewController: HamburgerTableDelegate, UIImagePickerController
     #if DEBUG
     func test() {
         os_log("test()", log: .debugging, type: .debug)
-        print("********************")
-        print("diagram.imageIsUpScaled", diagram.imageIsUpscaled)
-        print("imageView.transform", imageView.transform)
-        print("imageContainerView.transform", imageContainerView.transform)
-        print("imageScrollView.zoomScale", imageScrollView.zoomScale)
-        print("imageScrollView.contentOffset", imageScrollView.contentOffset)
-        print("imageScrollView.contentInset", imageScrollView.contentInset)
-        print(calibration)
-        print("********************")
-        setViewsNeedDisplay()
+        print("imageView.frame", imageView.frame)
+        print("container view frame", imageContainerView.frame)
+        print("imageView.bounds", imageView.bounds)
+        print("container view bounds", imageContainerView.bounds)
+//        print("********************")
+//        print("diagram.imageIsUpScaled", diagram.imageIsUpscaled)
+//        print("imageView.transform", imageView.transform)
+//        print("imageContainerView.transform", imageContainerView.transform)
+//        print("imageScrollView.zoomScale", imageScrollView.zoomScale)
+//        print("imageScrollView.contentOffset", imageScrollView.contentOffset)
+//        print("imageScrollView.contentInset", imageScrollView.contentInset)
+//        print(calibration)
+//        print("********************")
+//        setViewsNeedDisplay()
     }
     #else
     func test() {}

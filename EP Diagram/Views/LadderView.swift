@@ -1819,6 +1819,8 @@ final class LadderView: ScaledView {
 
     func normalizeAllMarks() {
         ladder.normalizeAllMarks()
+        ladder.normalizeRegions()
+        ladder.hideZone()
     }
 
     func normalizeLadder() {
