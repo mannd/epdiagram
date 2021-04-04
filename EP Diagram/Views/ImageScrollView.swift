@@ -13,13 +13,21 @@ class ImageScrollView: UIScrollView {
     override var canBecomeFirstResponder: Bool { true }
     var leftMargin: CGFloat = 0
     var mode: Mode = .normal
+    var isActivated: Bool = true {
+        didSet {
+            isUserInteractionEnabled = isActivated
+            alpha = isActivated ? 1.0 : 0.4
+        }
+    }
 }
 
 extension ImageScrollView {
 
     @IBAction func showImageMenu(_ gestureRecognizer: UILongPressGestureRecognizer) {
         print("long press")
+        guard let delegate = diagramViewControllerDelegate, delegate.okToShowLongPressMenu() else { return }
         if gestureRecognizer.state == .began {
+            delegate.hideCursor()
             if contentSize == CGSize.zero { return }
             self.becomeFirstResponder()
             let rotateMenuItem = UIMenuItem(title: L("Rotate"), action: #selector(showRotateToolbar))

@@ -18,9 +18,9 @@
 #+HTML_HEAD: <link rel="stylesheet" type="text/css" href="./org.css"/>
 * Beta version notes
 The beta version of *EP Diagram* is nearly feature complete and ready for testing.
-** New in this version
-- Fix nasty bug that broke image scaling after loading a PDF and then undoing.
-- Implement multipage PDF.
+** New in this version (1.0.0-beta.3)
+- Fix some issues with image scaling and rotation
+- Fix crash due to nested undo groupings.
 ** What is still missing
 - Onboarding and/or tooltips.
 - See [[*Known issues/bugs/limitations][Known issues/bugs/limitations]].
@@ -29,10 +29,9 @@ The beta version of *EP Diagram* is nearly feature complete and ready for testin
 - Email me (mannd@epstudiossoftware.com) or use the TestFlight app to report any bugs, crashes, awkwardness, or to request features.
 - If you have sample ECGs that could be included in the app, for example, different types of heart block, premature beats, or tachyarrhythmias, please send them to me.  Make sure they are anonymized and are not copyrighted.
 - If you have ideas for default ladders to be included in the app, let me know.
-- Note that the final diagram file format will likely change with the release of the app, meaning diagram files you create with this beta version may not open in the release version of the app.  Once the final 1.0.0 version is released, the file format will be forwardly compatible with subsequent app versions.
 * Quick start
 ** Normal mode
-- *EP Diagram* opens and saves ~diagram~ files, that will be stored in the Files app on you iPad or iPhone.
+- *EP Diagram* opens and saves /diagram/ files, that will be stored in the Files app on you iPad or iPhone.
 - When you create a new diagram file, you will see a blank area at the top of the screen and a default ladder grid at the bottom.
 - There is a toolbar at the bottom of the screen with buttons that allow you to change the functional mode of the app, as well as undo and redo actions in the app.  The default mode of the app is termed /normal mode/ and this is the mode that you will use to fill in the ladder with marks representing conduction.
 - Use the "hamburger" menu icon at the top left to open the side menu.  You can select an ECG image from your photos or your files and it will appear in the top of the screen.
@@ -132,6 +131,12 @@ Use the buttons at the bottom of the screen to rotate the image.  Tap *Reset* to
 You can rotate the device itself and the screen will automatically adjust.
 **** Adjust the size of the image versus the ladder
 There is a small red horizontal bar between the image and the ladder.  Move this up or down to adjust the relative proportions of the image and the ladder on the screen.
+
+*** PDF files
+Load PDF files like any other image file.  However, some PDF files contain multiple pages.  You can change the page by performing a long press on the image and selected the *PDF* menu item.  A toolbar will appear at the bottom which allows you to change pages.
+
+Note that once a multipage PDF diagram is closed, only the page shown when the diagram is closed will be saved with the diagram.  This is because *EP Diagram* only saves one image at a time.  In order to changes pages after reopening a diagram based on a multipage PDF file, it will be necessary to reload the PDF file.
+
 ** Ladders
 *** Default ladder
 When you create a new diagram, a default ladder is presented initially.  You can [[*Editing and creating ladders][change the default ladder, select a different ladder, or create a new ladder from scratch]].  The default ladder has three regions: A (atrial), AV (atrioventricular), and V (ventricular).  For the purposes of this manual/tutorial we'll use the default ladder as is and start to create some marks.
@@ -442,8 +447,6 @@ To create a snapshot and save it to the Photos app, simply tap the *Snapshot* bu
 [[./img/snapshot_button.png]]
 
 * Known issues/bugs/limitations
-- Image rotation inappropriately carries over to next image loaded.
-- Add multipage PDF documentation to Help.
 - Repeating CL tool will be expanded to copy/paste, duplicate selected marks.
 - Need more sample ECGS, more default ladders.
 - Mac version still under development.

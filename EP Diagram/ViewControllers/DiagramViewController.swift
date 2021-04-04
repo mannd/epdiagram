@@ -32,14 +32,19 @@ final class DiagramViewController: UIViewController {
     static let minSlantAngle: Float = -45
     static let maxSlantAngle: Float = 45
 
+    let gotoTextFieldTag = 1
+
     // This margin is passed to other views.
     var leftMargin: CGFloat = defaultLeftMargin {
         didSet {
             diagram.leftMargin = leftMargin
             ladderView.leftMargin = leftMargin
             cursorView.leftMargin = leftMargin
+            // Rotation can extend the edge of the view left of the left margin, so
+            // we compensate for this here, and whenever left margin is set.
+            let offset = self.imageView.frame
+            imageScrollView.contentInset.left = self.leftMargin - offset.minX
             imageScrollView.leftMargin = leftMargin
-            imageScrollView.contentInset = UIEdgeInsets(top: 0, left: leftMargin, bottom: 0, right: 0)
         }
     }
 
@@ -86,7 +91,6 @@ final class DiagramViewController: UIViewController {
             diagram.calibration = newValue
             ladderView.calibration = newValue
             cursorView.calibration = newValue
-            print(newValue)
         }
     }
 
@@ -123,7 +127,10 @@ final class DiagramViewController: UIViewController {
     var pageNumber: Int = 1
     var enablePageButtons = false
     var numberOfPages: Int = 0
+
+    // flags to inhibit certain actions when showing these toolbars
     var showingPDFToolbar = false
+    var showingRotateToolbar = false
 
     // For hambuger menu
     var hamburgerMenuIsOpen = false
@@ -438,7 +445,8 @@ final class DiagramViewController: UIViewController {
         cursorView.calibration = diagram.calibration
         ladderView.calibration = diagram.calibration
         ladderView.ladder = diagram.ladder
-        imageView.image = scaleImageForImageView(diagram.image)
+        // Diagram image already scaled, so don't scale again here.
+        imageView.image = diagram.image
         ladderView.viewMaxWidth = imageView.frame.width
 
         imageScrollView.delegate = self
@@ -539,7 +547,8 @@ final class DiagramViewController: UIViewController {
         scrollViewAdjustViews(imageScrollView) // make sure views adjust to rotated image
         ladderView.updateLadderIntervals()
         // Need to set this here, after view draw, or Mac malpositions cursor at start of app.
-        imageScrollView.contentInset = UIEdgeInsets(top: 0, left: leftMargin, bottom: 0, right: 0)
+        let offset = self.imageView.frame
+        imageScrollView.contentInset = UIEdgeInsets(top: 0, left: leftMargin - offset.minX, bottom: 0, right: 0)
         updateToolbarButtons()
         updateUndoRedoButtons()
         showMainToolbar()
@@ -559,7 +568,6 @@ final class DiagramViewController: UIViewController {
         print("currentDocumentURL", currentDocumentURL)
         super.updateUserActivityState(activity)
         let info: [AnyHashable: Any] = [
-            // FIXME: We are correcting just x for zoom scale.  Test if correcting y is needed too.
             Self.restorationContentOffsetXKey: imageScrollView.contentOffset.x / imageScrollView.zoomScale,
             Self.restorationContentOffsetYKey: imageScrollView.contentOffset.y,
             Self.restorationZoomKey: imageScrollView.zoomScale,
@@ -574,7 +582,7 @@ final class DiagramViewController: UIViewController {
         currentDocument?.undoManager.beginUndoGrouping()
         undoablySetCalibration(Calibration())
         undoablySetLadder(diagram.ladder)
-        undoablySetDiagramImage(diagram.image, imageIsUpscaled: false)
+        undoablySetDiagramImage(diagram.image, imageIsUpscaled: false, transform: .identity, scale: 1.0, contentOffset: .zero)
         currentDocument?.undoManager.endUndoGrouping()
         ladderView.activeRegion = nil
         mode = .normal
@@ -677,6 +685,7 @@ final class DiagramViewController: UIViewController {
         stackView.addArrangedSubview(slider)
         stackView.addArrangedSubview(doneButton)
         setToolbarItems([UIBarButtonItem(customView: stackView)], animated: true)
+        imageScrollView.isActivated = false
 
     }
 
@@ -696,7 +705,7 @@ final class DiagramViewController: UIViewController {
         stackView.addArrangedSubview(labelText)
         stackView.addArrangedSubview(doneButton)
         setToolbarItems([UIBarButtonItem(customView: stackView)], animated: true)
-
+        imageScrollView.isActivated = false
     }
 
     func showSlantToolbar() {
@@ -726,6 +735,7 @@ final class DiagramViewController: UIViewController {
         stackView.addArrangedSubview(slider)
         stackView.addArrangedSubview(doneButton)
         setToolbarItems([UIBarButtonItem(customView: stackView)], animated: true)
+        imageScrollView.isActivated = false
     }
 
     func showAdjustLeftMarginToolbar() {
@@ -749,6 +759,7 @@ final class DiagramViewController: UIViewController {
         stackView.addArrangedSubview(slider)
         stackView.addArrangedSubview(doneButton)
         setToolbarItems([UIBarButtonItem(customView: stackView)], animated: true)
+        imageScrollView.isActivated = false
     }
 
     func showAdjustYToolbar() {
@@ -779,6 +790,7 @@ final class DiagramViewController: UIViewController {
         stackView.addArrangedSubview(slider)
         stackView.addArrangedSubview(doneButton)
         setToolbarItems([UIBarButtonItem(customView: stackView)], animated: true)
+        imageScrollView.isActivated = false
     }
 
     @objc func adjustYSliderValueDidChange(_ sender: UISlider) {
@@ -804,22 +816,26 @@ final class DiagramViewController: UIViewController {
         currentDocument?.undoManager.endUndoGrouping()
         ladderView.isDraggingSelectedMarks = false
         showSelectToolbar()
+        imageScrollView.isActivated = true
     }
 
     @objc func closeAdjustCLToolbar(_ sender: UISlider) {
         currentDocument?.undoManager.endUndoGrouping()
         showSelectToolbar()
+        imageScrollView.isActivated = true
     }
 
     @objc func closeSlantToolbar(_ sender: UIAlertAction) {
         currentDocument?.undoManager.endUndoGrouping()
         showSelectToolbar()
+        imageScrollView.isActivated = true
     }
 
     @objc func closeAdjustYToolbar(_ sender: UIAlertAction) {
         currentDocument?.undoManager.endUndoGrouping()
         ladderView.swapEndsIfNeeded()
         showSelectToolbar()
+        imageScrollView.isActivated = true
     }
 
     @objc func slantSliderValueDidChange(_ sender: UISlider) {
@@ -966,6 +982,7 @@ final class DiagramViewController: UIViewController {
     @objc func closeAdjustLeftMarginToolbar(_ sender: UISlider!) {
         currentDocument?.undoManager.endUndoGrouping()
         showSelectToolbar()
+        imageScrollView.isActivated = true
     }
 
     @objc func undo() {
@@ -1048,7 +1065,7 @@ final class DiagramViewController: UIViewController {
         let ext = url.pathExtension.uppercased()
         if ext != "PDF" {
             self.enablePageButtons = false
-            undoablySetDiagramImageAndResetLadder(UIImage(contentsOfFile: url.path), imageIsUpscaled: false)
+            undoablySetDiagramImageAndResetLadder(UIImage(contentsOfFile: url.path), imageIsUpscaled: false, transform: .identity, scale: 1.0, contentOffset: .zero)
         }
         else {
             self.numberOfPages = 0
@@ -1104,7 +1121,7 @@ final class DiagramViewController: UIViewController {
             // correct for scale factor
             if let scaledImage = scaledImage, let cgImage = scaledImage.cgImage {
                 let rescaledImage = UIImage(cgImage: cgImage, scale: scaleFactor, orientation: .up)
-                undoablySetDiagramImageAndResetLadder(rescaledImage, imageIsUpscaled: true)
+                undoablySetDiagramImageAndResetLadder(rescaledImage, imageIsUpscaled: true, transform: .identity, scale: 1.0, contentOffset: .zero)
             }
             UIGraphicsEndImageContext()
         }
@@ -1119,7 +1136,8 @@ final class DiagramViewController: UIViewController {
         gotoPageAlertController.addTextField(configurationHandler: { textField in
             let currentPage: String = String.localizedStringWithFormat("%i", self.pageNumber)
             textField.text = currentPage
-            textField.selectAll(nil)
+            textField.tag = self.gotoTextFieldTag
+            textField.delegate = self
             textField.clearButtonMode = .always
             textField.keyboardType = .numberPad
         })
@@ -1453,7 +1471,7 @@ extension DiagramViewController: UIDropInteractionDelegate {
         // Consume drag items (in this example, of type UIImage).
         session.loadObjects(ofClass: UIImage.self) { imageItems in
             if let images = imageItems as? [UIImage] {
-                self.undoablySetDiagramImageAndResetLadder(images.first, imageIsUpscaled: false)
+                self.undoablySetDiagramImageAndResetLadder(images.first, imageIsUpscaled: false, transform: .identity, scale: 1.0, contentOffset: .zero)
                 return
             }
         }
@@ -1520,3 +1538,12 @@ extension DiagramViewController {
         }
     }
 }
+
+extension DiagramViewController: UITextFieldDelegate {
+    func textFieldDidBeginEditing(_ textField: UITextField) {
+        if textField.tag == gotoTextFieldTag {
+            textField.selectAll(nil)
+        }
+    }
+}
+

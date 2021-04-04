@@ -20,6 +20,8 @@ protocol DiagramViewControllerDelegate: class {
     func showRotateToolbar()
     func showPDFMenuItems() -> Bool
     func showPDFToolbar()
+    func okToShowLongPressMenu() -> Bool
+    func hideCursor()
 }
 
 extension DiagramViewController: DiagramViewControllerDelegate {
@@ -77,6 +79,7 @@ extension DiagramViewController: DiagramViewControllerDelegate {
 
     func rotateImage(degrees: CGFloat) {
         newRotateImage(radians: degrees.degreesToRadians)
+
         imageScrollView.resignFirstResponder()
 
     }
@@ -96,6 +99,8 @@ extension DiagramViewController: DiagramViewControllerDelegate {
             rotateToolbarButtons = isIPad() || isRunningOnMac() ? [prompt, spacer, rotate90RButton, spacer, rotate90LButton, spacer, rotate1RButton, spacer, rotate1LBButton, spacer, rotate01RButton, spacer, rotate01LButton, spacer, resetRotationButton, spacer, doneButton] : [rotate90RButton, spacer, rotate90LButton, spacer, rotate1RButton, spacer, rotate1LBButton, spacer, rotate01RButton, spacer, rotate01LButton, spacer, doneButton] // leave out prompt and reset button so menu fits on iPhone SE2
         }
         setToolbarItems(rotateToolbarButtons, animated: false)
+        showingRotateToolbar = true
+        ladderView.isActivated = false
     }
 
     @objc func closeRotateToolbar(_ sender: UIAlertAction) {
@@ -110,6 +115,8 @@ extension DiagramViewController: DiagramViewControllerDelegate {
         case .calibrate:
             showCalibrateToolbar()
         }
+        showingRotateToolbar = false
+        ladderView.isActivated = true
     }
 
     @objc func rotate90R() {
@@ -159,10 +166,10 @@ extension DiagramViewController: DiagramViewControllerDelegate {
         UIView.animate(withDuration: 0.4) {
             self.imageView.transform = transform
             self.diagram.transform = transform
-//            self.imageScrollView.contentOffset = CGPoint.zero
-//            self.imageView.sizeToFit()
-            self.imageScrollView.contentInset = UIEdgeInsets(top: 0, left: self.leftMargin, bottom: 0, right: 0)
-//            self.centerContent()
+            // Rotation can extend the edge of the view left of the left margin, so
+            // we compensate for this here, and whenever left margin is set.
+            let offset = self.imageView.frame
+            self.imageScrollView.contentInset.left = self.leftMargin - offset.minX
         }
     }
 
@@ -171,8 +178,6 @@ extension DiagramViewController: DiagramViewControllerDelegate {
     }
 
     func showPDFToolbar() {
-        currentDocument?.undoManager.beginUndoGrouping() // will end when menu closed
-        showingPDFToolbar = true
         if pdfToolbarButtons == nil {
             let prompt = makePrompt(text: L("PDF"))
             let previousPageButton = UIBarButtonItem(title: L("Previous page"), style: .plain, target: self, action: #selector(previousPage(_:)))
@@ -182,6 +187,8 @@ extension DiagramViewController: DiagramViewControllerDelegate {
             pdfToolbarButtons =  [prompt, spacer, previousPageButton, spacer, nextPageButton, spacer, gotoPageButton, spacer, doneButton]
         }
         setToolbarItems(pdfToolbarButtons, animated: false)
+        showingPDFToolbar = true
+        ladderView.isActivated = false
     }
 
     @objc func gotoPage(_ sender: AnyObject) {
@@ -205,8 +212,6 @@ extension DiagramViewController: DiagramViewControllerDelegate {
     }
 
     @objc func closePDFToolbar(_ sender: UIAlertAction) {
-        currentDocument?.undoManager.endUndoGrouping()
-        showingPDFToolbar = false
         switch mode {
         case .normal:
             showMainToolbar()
@@ -217,6 +222,16 @@ extension DiagramViewController: DiagramViewControllerDelegate {
         case .calibrate:
             showCalibrateToolbar()
         }
+        showingPDFToolbar = false
+        ladderView.isActivated = true
+    }
+
+    func okToShowLongPressMenu() -> Bool {
+        return !showingRotateToolbar && !showingPDFToolbar
+    }
+
+    func hideCursor() {
+        hideCursorAndNormalizeAllMarks()
     }
 
 }

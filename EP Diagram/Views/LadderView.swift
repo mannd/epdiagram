@@ -113,6 +113,13 @@ final class LadderView: ScaledView {
 
     var mode: Mode = .normal
 
+    var isActivated: Bool = true {
+        didSet {
+            isUserInteractionEnabled = isActivated
+            alpha = isActivated ? 1.0 : 0.4
+        }
+    }
+
     var leftMargin: CGFloat = 0
     var viewHeight: CGFloat = 0
     // viewMaxWidth is width of image, or width of ladderView if no image is present
@@ -697,6 +704,10 @@ final class LadderView: ScaledView {
         let region = ladder.region(ofMark: mark)
         updateMarkersAndRegionIntervals(region)
         hideCursorAndNormalizeAllMarks()
+        if mode == .select {
+            ladder.normalizeRegions()
+            ladder.hideZone()
+        }
         // ?no need to link nearby marks, but need to update links of neighboring marks
         assessBlockAndImpulseOrigin(marks: linkedMarks.allMarks)
     }
@@ -713,6 +724,10 @@ final class LadderView: ScaledView {
         mark.mode = .normal
         updateMarkersAndRegionIntervals(region)
         hideCursorAndNormalizeAllMarks()
+        if mode == .select {
+            ladder.normalizeRegions()
+            ladder.hideZone()
+        }
         let newNearbyMarks = getNearbyMarkIDs(mark: mark)
         snapToNearbyMarks(mark: mark, nearbyMarks: newNearbyMarks)
         linkNearbyMarks(mark: mark, nearbyMarks: newNearbyMarks)
@@ -1819,6 +1834,8 @@ final class LadderView: ScaledView {
 
     func normalizeAllMarks() {
         ladder.normalizeAllMarks()
+//        ladder.normalizeRegions()
+//        ladder.hideZone()
     }
 
     func normalizeLadder() {
@@ -2272,7 +2289,6 @@ final class LadderView: ScaledView {
         if segment.length < Segment.minLength { return }
         let originalSegment = mark.segment
         currentDocument?.undoManager?.registerUndo(withTarget: self, handler: { target in
-            print("setSegment()")
             target.setSegment(segment: originalSegment, forMark: mark)
         })
         NotificationCenter.default.post(name: .didUndoableAction, object: nil)
