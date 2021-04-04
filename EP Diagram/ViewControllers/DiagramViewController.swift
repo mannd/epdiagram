@@ -32,6 +32,8 @@ final class DiagramViewController: UIViewController {
     static let minSlantAngle: Float = -45
     static let maxSlantAngle: Float = 45
 
+    let gotoTextFieldTag = 1
+
     // This margin is passed to other views.
     var leftMargin: CGFloat = defaultLeftMargin {
         didSet {
@@ -1128,7 +1130,9 @@ final class DiagramViewController: UIViewController {
         gotoPageAlertController.addTextField(configurationHandler: { textField in
             let currentPage: String = String.localizedStringWithFormat("%i", self.pageNumber)
             textField.text = currentPage
-            textField.selectAll(nil)
+            textField.tag = gotoTextFieldTag
+            textField.delegate = self
+//            textField.selectAll(self)
             textField.clearButtonMode = .always
             textField.keyboardType = .numberPad
         })
@@ -1526,6 +1530,14 @@ extension DiagramViewController {
                     })
                 }
             }
+        }
+    }
+}
+
+extension DiagramViewController: UITextFieldDelegate {
+    func textFieldDidBeginEditing(_ textField: UITextField) {
+        if textField.tag == gotoTextFieldTag {
+            textField.selectAll(nil)
         }
     }
 }
