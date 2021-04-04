@@ -358,10 +358,18 @@ extension DiagramViewController: HamburgerTableDelegate, UIImagePickerController
         imageScrollView.zoomScale = scale
         imageView.transform = transform
         diagram.transform = transform
-        imageScrollView.contentOffset = contentOffset
+        // handle imageScrollView sometimes ignoring contentInset and plastering
+        // the contents against the side of the screen.
+        if contentOffset.x == 0 {
+            imageScrollView.contentOffset = CGPoint(x: -leftMargin, y: 0)
+        } else {
+            imageScrollView.contentOffset = contentOffset
+        }
         hideCursorAndNormalizeAllMarks()
         UIView.animate(withDuration: 0.5, animations: {
+
             self.view.layoutIfNeeded()
+            print("****animation complete")
         })
     }
 
