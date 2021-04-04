@@ -1130,9 +1130,8 @@ final class DiagramViewController: UIViewController {
         gotoPageAlertController.addTextField(configurationHandler: { textField in
             let currentPage: String = String.localizedStringWithFormat("%i", self.pageNumber)
             textField.text = currentPage
-            textField.tag = gotoTextFieldTag
+            textField.tag = self.gotoTextFieldTag
             textField.delegate = self
-//            textField.selectAll(self)
             textField.clearButtonMode = .always
             textField.keyboardType = .numberPad
         })

@@ -21,6 +21,7 @@ protocol DiagramViewControllerDelegate: class {
     func showPDFMenuItems() -> Bool
     func showPDFToolbar()
     func okToShowLongPressMenu() -> Bool
+    func hideCursor()
 }
 
 extension DiagramViewController: DiagramViewControllerDelegate {
@@ -78,6 +79,17 @@ extension DiagramViewController: DiagramViewControllerDelegate {
 
     func rotateImage(degrees: CGFloat) {
         newRotateImage(radians: degrees.degreesToRadians)
+
+
+        // FIXME: Temp
+        let offset = imageView.frame
+        print("offset", offset)
+        print(imageScrollView.contentInset)
+        print("imageContainerView offset", imageContainerView.frame)
+        imageScrollView.contentInset.left = leftMargin - offset.minX
+        // This may fix rotation problem, but this offset has to be applied at startup too, or the margin will still overlap.  Should be done when transform is first applied.  It may not be the exact formula needed to fix this problem.  Also need to test if this is appropriate if 
+
+
         imageScrollView.resignFirstResponder()
 
     }
@@ -98,6 +110,7 @@ extension DiagramViewController: DiagramViewControllerDelegate {
         }
         setToolbarItems(rotateToolbarButtons, animated: false)
         showingRotateToolbar = true
+        ladderView.isActivated = false
     }
 
     @objc func closeRotateToolbar(_ sender: UIAlertAction) {
@@ -113,6 +126,7 @@ extension DiagramViewController: DiagramViewControllerDelegate {
             showCalibrateToolbar()
         }
         showingRotateToolbar = false
+        ladderView.isActivated = true
     }
 
     @objc func rotate90R() {
@@ -184,6 +198,7 @@ extension DiagramViewController: DiagramViewControllerDelegate {
         }
         setToolbarItems(pdfToolbarButtons, animated: false)
         showingPDFToolbar = true
+        ladderView.isActivated = false
     }
 
     @objc func gotoPage(_ sender: AnyObject) {
@@ -207,7 +222,6 @@ extension DiagramViewController: DiagramViewControllerDelegate {
     }
 
     @objc func closePDFToolbar(_ sender: UIAlertAction) {
-        showingPDFToolbar = false
         switch mode {
         case .normal:
             showMainToolbar()
@@ -218,10 +232,16 @@ extension DiagramViewController: DiagramViewControllerDelegate {
         case .calibrate:
             showCalibrateToolbar()
         }
+        showingPDFToolbar = false
+        ladderView.isActivated = true
     }
 
     func okToShowLongPressMenu() -> Bool {
         return !showingRotateToolbar && !showingPDFToolbar
+    }
+
+    func hideCursor() {
+        hideCursorAndNormalizeAllMarks()
     }
 
 }

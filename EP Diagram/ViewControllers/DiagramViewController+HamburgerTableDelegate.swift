@@ -360,7 +360,9 @@ extension DiagramViewController: HamburgerTableDelegate, UIImagePickerController
         diagram.transform = transform
         imageScrollView.contentOffset = contentOffset
         hideCursorAndNormalizeAllMarks()
-        setViewsNeedDisplay()
+        UIView.animate(withDuration: 0.5, animations: {
+            self.view.layoutIfNeeded()
+        })
     }
 
     func undoablySetDiagramImageAndResetLadder(_ image: UIImage?,

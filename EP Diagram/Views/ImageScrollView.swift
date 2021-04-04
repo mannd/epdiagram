@@ -27,6 +27,7 @@ extension ImageScrollView {
         print("long press")
         guard let delegate = diagramViewControllerDelegate, delegate.okToShowLongPressMenu() else { return }
         if gestureRecognizer.state == .began {
+            delegate.hideCursor()
             if contentSize == CGSize.zero { return }
             self.becomeFirstResponder()
             let rotateMenuItem = UIMenuItem(title: L("Rotate"), action: #selector(showRotateToolbar))
