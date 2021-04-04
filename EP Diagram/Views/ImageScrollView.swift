@@ -13,6 +13,12 @@ class ImageScrollView: UIScrollView {
     override var canBecomeFirstResponder: Bool { true }
     var leftMargin: CGFloat = 0
     var mode: Mode = .normal
+    var isActivated: Bool = true {
+        didSet {
+            isUserInteractionEnabled = isActivated
+            alpha = isActivated ? 1.0 : 0.4
+        }
+    }
 }
 
 extension ImageScrollView {

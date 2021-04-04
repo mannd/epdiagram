@@ -113,6 +113,13 @@ final class LadderView: ScaledView {
 
     var mode: Mode = .normal
 
+    var isActivated: Bool = true {
+        didSet {
+            isUserInteractionEnabled = isActivated
+            alpha = isActivated ? 1.0 : 0.4
+        }
+    }
+
     var leftMargin: CGFloat = 0
     var viewHeight: CGFloat = 0
     // viewMaxWidth is width of image, or width of ladderView if no image is present
@@ -1819,8 +1826,8 @@ final class LadderView: ScaledView {
 
     func normalizeAllMarks() {
         ladder.normalizeAllMarks()
-        ladder.normalizeRegions()
-        ladder.hideZone()
+//        ladder.normalizeRegions()
+//        ladder.hideZone()
     }
 
     func normalizeLadder() {
