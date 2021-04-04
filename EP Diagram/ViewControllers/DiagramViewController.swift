@@ -678,6 +678,7 @@ final class DiagramViewController: UIViewController {
         stackView.addArrangedSubview(slider)
         stackView.addArrangedSubview(doneButton)
         setToolbarItems([UIBarButtonItem(customView: stackView)], animated: true)
+        imageScrollView.isActivated = false
 
     }
 
@@ -697,7 +698,7 @@ final class DiagramViewController: UIViewController {
         stackView.addArrangedSubview(labelText)
         stackView.addArrangedSubview(doneButton)
         setToolbarItems([UIBarButtonItem(customView: stackView)], animated: true)
-
+        imageScrollView.isActivated = false
     }
 
     func showSlantToolbar() {
@@ -727,6 +728,7 @@ final class DiagramViewController: UIViewController {
         stackView.addArrangedSubview(slider)
         stackView.addArrangedSubview(doneButton)
         setToolbarItems([UIBarButtonItem(customView: stackView)], animated: true)
+        imageScrollView.isActivated = false
     }
 
     func showAdjustLeftMarginToolbar() {
@@ -750,6 +752,7 @@ final class DiagramViewController: UIViewController {
         stackView.addArrangedSubview(slider)
         stackView.addArrangedSubview(doneButton)
         setToolbarItems([UIBarButtonItem(customView: stackView)], animated: true)
+        imageScrollView.isActivated = false
     }
 
     func showAdjustYToolbar() {
@@ -780,6 +783,7 @@ final class DiagramViewController: UIViewController {
         stackView.addArrangedSubview(slider)
         stackView.addArrangedSubview(doneButton)
         setToolbarItems([UIBarButtonItem(customView: stackView)], animated: true)
+        imageScrollView.isActivated = false
     }
 
     @objc func adjustYSliderValueDidChange(_ sender: UISlider) {
@@ -805,22 +809,26 @@ final class DiagramViewController: UIViewController {
         currentDocument?.undoManager.endUndoGrouping()
         ladderView.isDraggingSelectedMarks = false
         showSelectToolbar()
+        imageScrollView.isActivated = true
     }
 
     @objc func closeAdjustCLToolbar(_ sender: UISlider) {
         currentDocument?.undoManager.endUndoGrouping()
         showSelectToolbar()
+        imageScrollView.isActivated = true
     }
 
     @objc func closeSlantToolbar(_ sender: UIAlertAction) {
         currentDocument?.undoManager.endUndoGrouping()
         showSelectToolbar()
+        imageScrollView.isActivated = true
     }
 
     @objc func closeAdjustYToolbar(_ sender: UIAlertAction) {
         currentDocument?.undoManager.endUndoGrouping()
         ladderView.swapEndsIfNeeded()
         showSelectToolbar()
+        imageScrollView.isActivated = true
     }
 
     @objc func slantSliderValueDidChange(_ sender: UISlider) {
