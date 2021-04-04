@@ -18,7 +18,7 @@ import os.log
 typealias MarkSet = Set<Mark>
 typealias MarkIdSet = Set<UUID>
 
-// MARK: - classes, structs
+// MARK: - classes
 
 /// The mark is a fundamental component of a ladder diagram.
 final class Mark: Codable {
@@ -26,7 +26,7 @@ final class Mark: Codable {
 
     var segment: Segment // where a mark is, using regional coordinates
     var mode: Mode = .normal
-    var anchor: Anchor = .middle // Anchor point for movement and to attach a cursor
+    var anchor: Anchor = .middle // Anchor point for movement and cursor attachment
     var style: Style = .solid
     var emphasis: Emphasis = .normal
     var blockSite: Endpoint = .none
@@ -34,7 +34,6 @@ final class Mark: Codable {
     var impulseOriginSite: Endpoint = .none
     var impulseOriginSetting: Endpoint = .auto
     var measurementText: String = ""
-    var showMeasurementText: Bool = true
 
     // Ids of other marks that this mark is linked with.
     var linkedMarkIDs: LinkedMarkIDs = LinkedMarkIDs()
@@ -56,6 +55,7 @@ final class Mark: Codable {
         get { segment.length }
     }
 
+    /// Position of earliest point on mark.
     var earliestPoint: CGPoint {
         if segment.proximal.x <= segment.distal.x {
             return segment.proximal
@@ -63,6 +63,7 @@ final class Mark: Codable {
         return segment.distal
     }
 
+    /// Position of latest point on mark.
     var latestPoint: CGPoint {
         if segment.distal.x >= segment.proximal.x {
             return segment.distal
@@ -70,7 +71,8 @@ final class Mark: Codable {
         return segment.proximal
     }
 
-    var early: Endpoint {
+    /// The earlier of the two endpoints, Endpoint.none if mark is vertical.
+    var earlyEndpoint: Endpoint {
         if segment.proximal.x < segment.distal.x {
             return .proximal
         }
@@ -79,7 +81,10 @@ final class Mark: Codable {
         }
         return .none  // equal within floating point precision, i.e. vertical mark
     }
-    var late: Endpoint {
+
+
+    /// The later of the two endpoints, Enpoint.none if mark is vertical.
+    var lateEndpoint: Endpoint {
         if segment.proximal.x < segment.distal.x {
             return .distal
         }
@@ -88,7 +93,8 @@ final class Mark: Codable {
         }
         return .none
     }
-    
+
+    /// Create a mark from a segment.
     init(segment: Segment) {
         self.segment = segment
         self.id = UUID()
@@ -96,21 +102,24 @@ final class Mark: Codable {
         anchor = .middle
     }
 
+    /// Create a mark with a zero length segment.  Mostly used for testing.
     convenience init() {
         self.init(segment: Segment(proximal: CGPoint.zero, distal: CGPoint.zero))
     }
 
-    // init a mark that is vertical and spans a region.
+    /// Create a mark that is vertical and spans a region.
     convenience init(positionX: CGFloat) {
         let segment = Segment(proximal: CGPoint(x: positionX, y: 0), distal: CGPoint(x: positionX, y:1.0))
         self.init(segment: segment)
     }
 
+    /// Available for debugging.
     deinit {
-//        os_log("Mark deinitied %s", log: OSLog.debugging, type: .debug, debugDescription)
+        //os_log("Mark deinitied %s", log: OSLog.debugging, type: .debug, debugDescription)
     }
 
-    /// Return midpoint of mark as CGPoint
+    /// Returns midpoint of mark segment  as `CGPoint`.
+    /// - Returns:  midpoint of the mark segment
     func midpoint() -> CGPoint {
         let segment = self.segment.normalized()
         let x = (segment.distal.x - segment.proximal.x) / 2.0 + segment.proximal.x
@@ -118,14 +127,20 @@ final class Mark: Codable {
         return CGPoint(x: x, y: y)
     }
 
+    /// Returns midpoint x coordinate.
+    /// - Returns:  midpoint x coordinate as `CGFloat`
     func midpointX() -> CGFloat {
         return (segment.distal.x - segment.proximal.x) / 2.0 + segment.proximal.x
     }
 
+
+    /// Swaps the proximal and distal ends of the mark segment.
     func swapEnds() {
         (segment.proximal, segment.distal) = (segment.distal, segment.proximal)
     }
 
+
+    /// Swaps proximal and distal anchor positions.
     func swapAnchors() {
         switch anchor {
         case .proximal:
@@ -137,6 +152,8 @@ final class Mark: Codable {
         }
     }
 
+    /// Returns position of anchor in region coordinates.
+    /// - Returns:  Returns anchor position as `CGPoint`
     func getAnchorPosition() -> CGPoint {
         let anchorPosition: CGPoint
         switch anchor {
@@ -150,7 +167,10 @@ final class Mark: Codable {
         return anchorPosition
     }
 
-    // Note point must be in absolute coordinates, with y between 0 and 1 relative to region height.
+    /// Returns shortest distance of a point in region coordinates to the mark.
+    ///
+    /// - Parameter point: a `CGPoint` in region coordinates
+    /// - Returns: closest distance between the point and the mark as `CGFloat  `
     func distance(point: CGPoint) -> CGFloat {
         var numerator = (segment.distal.y - segment.proximal.y) * point.x - (segment.distal.x - segment.proximal.x) * point.y + segment.distal.x * segment.proximal.y - segment.distal.y * segment.proximal.x
         numerator = abs(numerator)
@@ -159,7 +179,13 @@ final class Mark: Codable {
         return numerator / denominator
     }
 
-    // This is not used, though it is in the tests.
+    /// Move mark to region position, depending on movement type and anchor position
+    ///
+    /// Used in testing but not currently used in app.
+    ///
+    /// - Parameters:
+    ///   - movement: type of movement (horizontal or omnidirectional)
+    ///   - position: point to move to, in region coordinates
     func move(movement: Movement, to position: CGPoint) {
         if movement == .horizontal {
             switch anchor {
@@ -192,7 +218,30 @@ final class Mark: Codable {
         }
     }
 
-    static func changePosition(mark: Mark, movement: Movement, to position: CGPoint) -> Segment {
+
+    /// Apply an angle to a mark.
+    ///
+    /// Only used for testing at present,  not in production code.
+    /// - Parameter angle: angle in degrees as `CGFloat`
+    func applyAngle(_ angle: CGFloat) {
+        let y0 = segment.proximal.y
+        let y1 = segment.distal.y
+        let height = y1 - y0
+        let delta = Geometry.rightTriangleBase(withAngle: angle, height: height)
+        segment.distal.x += delta
+    }
+
+    // MARK: - static functions
+
+    /// Returns a segment that represents movement of a mark.
+    ///
+    /// - Parameters:
+    ///   - mark: the `Mark` to be moved
+    ///   - movement: a `Movement` type (horizontal or omindirectional
+    ///   - position: `CGPoint` in region coordinates to move to
+    /// - Returns: a `Segment` reporesenting the position of the mark after movement.
+    ///            Setting the mark segment to this segment will move the mark.
+    static func segmentAfterMovement(mark: Mark, movement: Movement, to position: CGPoint) -> Segment {
         var segment = mark.segment
         let anchor = mark.anchor
         if movement == .horizontal {
@@ -227,18 +276,12 @@ final class Mark: Codable {
         return segment
     }
 
-    // Must normalize x and y??
-    func applyAngle(_ angle: CGFloat) {
-        let y0 = segment.proximal.y
-        let y1 = segment.distal.y
-        let height = y1 - y0
-        let delta = Geometry.rightTriangleBase(withAngle: angle, height: height)
-        segment.distal.x += delta
-    }
 }
 
-// A mark may have up to three attachments to marks in the proximal and distal regions
-// and in its own region, i.e. reentry spawning a mark.
+// MARK: structs
+
+/// A mark may have up to three attachments to marks in the proximal and distal regions
+/// and in its own region, i.e. reentry spawning a mark.
 struct LinkedMarks: Codable {
     var proximal: MarkSet
     var middle: MarkSet
@@ -269,6 +312,7 @@ struct LinkedMarks: Codable {
     }
 }
 
+/// Linked marks are actually tracked by marks as mark ids, to prevent recursion.
 struct LinkedMarkIDs: Codable {
     var proximal: MarkIdSet
     var middle: MarkIdSet
@@ -307,10 +351,14 @@ struct LinkedMarkIDs: Codable {
 extension Mark: CustomDebugStringConvertible {
     var debugDescription: String {
         let description = """
+
+        ***Mark***
         \(id.debugDescription)
         \(segment)
         mark mode = \(mode)
         linked mark IDs = \(linkedMarkIDs)
+        *********
+
         """
         return description
     }
@@ -329,6 +377,8 @@ extension Mark: Comparable, Hashable {
         hasher.combine(id)
     }
 }
+
+// MARK: - Mark enums
 
 // enums for Mark
 extension Mark {
@@ -355,6 +405,7 @@ extension Mark {
         }
     }
 
+    /// Analagous to bold text, make a mark thicker for emphasis.
     enum Emphasis: Int, Codable, CustomStringConvertible, CaseIterable {
         case normal
         case bold
@@ -370,7 +421,7 @@ extension Mark {
 
     }
 
-    // Mutually exclusive modes that determine behavior and appears of marks.
+    /// Mutually exclusive modes that determine behavior and appears of marks.
     enum Mode: Int, Codable {
         case attached
         case linked
@@ -379,7 +430,7 @@ extension Mark {
         case normal
     }
 
-    // Show which end of a mark is affected by an action.
+    /// Show which end of a mark is affected by an action.
     enum Endpoint: String, Codable, CaseIterable, Identifiable {
         case proximal
         case distal
@@ -393,6 +444,7 @@ extension Mark {
 
 // MARK: - enums
 
+/// Freedom of movement for a mark.  It can move either horizontally or in any direction.
 enum Movement {
     case horizontal
     case omnidirectional

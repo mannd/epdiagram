@@ -8,38 +8,22 @@
 
 import UIKit
 
-// Must be a class, reference to calibration is shared by ladder and cursor views.
-final class Calibration: Codable, CustomDebugStringConvertible {
-    var debugDescription: String {
-        """
-        Calibration:
-          originalZoom = \(originalZoom)
-          currentZoom = \(currentZoom)
-          originalCalFactor = \(originalCalFactor)
-          currentCalFactor = \(currentCalFactor)
-          isCalibrated = \(isCalibrated)
-        """
-    }
-
+/// Calibration is used to convert distances between marks into measurements in msec.
+/// A calFactor  is determined that is a ratio of msec to screen points.  Calibration adjusts automatically
+/// to zoom scale.
+final class Calibration: Codable {
+    // NOTE: Calibration must be a class, as a reference to
+    // calibration is shared by ladder and cursor views.
     var originalZoom: CGFloat = 1
     var currentZoom: CGFloat = 1
     var originalCalFactor: CGFloat = 1
     var isCalibrated = false
 
-    // TODO: make private after deprecated set removed
-    static let standardInterval: CGFloat = 1000
+    static private let standardInterval: CGFloat = 1000
 
     var currentCalFactor: CGFloat {
         (originalZoom * originalCalFactor) / currentZoom
     }
-
-//    @available(*, deprecated, message: "Can be removed after after further testing.")
-//    func set(zoom: CGFloat, calFactor: CGFloat) {
-//        originalZoom = zoom
-//        currentZoom = zoom
-//        originalCalFactor = calFactor
-//        isCalibrated = true
-//    }
 
     func set(zoom: CGFloat, value: CGFloat) {
         originalZoom = zoom
@@ -48,4 +32,19 @@ final class Calibration: Codable, CustomDebugStringConvertible {
         isCalibrated = true
     }
 
+}
+
+extension Calibration: CustomDebugStringConvertible {
+    var debugDescription: String {
+        """
+
+        Calibration:
+          originalZoom = \(originalZoom)
+          currentZoom = \(currentZoom)
+          originalCalFactor = \(originalCalFactor)
+          currentCalFactor = \(currentCalFactor)
+          isCalibrated = \(isCalibrated)
+
+        """
+    }
 }

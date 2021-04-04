@@ -310,20 +310,20 @@ class MarkTests: XCTestCase {
 
     func testEarly() {
         let mark1 = Mark(positionX: 100)
-        XCTAssertEqual(mark1.early, .none)
+        XCTAssertEqual(mark1.earlyEndpoint, .none)
         mark1.segment.distal = CGPoint(x: 110, y: 1.0)
-        XCTAssertEqual(mark1.early, .proximal)
+        XCTAssertEqual(mark1.earlyEndpoint, .proximal)
         mark1.segment.distal = CGPoint(x: 90, y: 1.0)
-        XCTAssertEqual(mark1.early, .distal)
+        XCTAssertEqual(mark1.earlyEndpoint, .distal)
     }
 
     func testLate() {
         let mark1 = Mark(positionX: 100)
-        XCTAssertEqual(mark1.late, .none)
+        XCTAssertEqual(mark1.lateEndpoint, .none)
         mark1.segment.distal = CGPoint(x: 110, y: 1.0)
-        XCTAssertEqual(mark1.late, .distal)
+        XCTAssertEqual(mark1.lateEndpoint, .distal)
         mark1.segment.distal = CGPoint(x: 90, y: 1.0)
-        XCTAssertEqual(mark1.late, .proximal)
+        XCTAssertEqual(mark1.lateEndpoint, .proximal)
     }
 
     func testApplyAngle() {

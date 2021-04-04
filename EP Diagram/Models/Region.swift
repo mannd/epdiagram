@@ -10,9 +10,9 @@ import UIKit
 
 // MARK: - classes
 
-/// A Region is a row of a ladder corresponding to an anatomic substrate.
-/// A Region has a labelSection such as "A" or "AV" and
-/// a markSection.  Region boundaries are set by the calling ScaledView.
+/// A Region is a row of a ladder corresponding to an anatomic substrate  and it contains marks.
+/// A Region has a label section such as "A" or "AV" and
+/// a mark section.  Region boundaries are set by the calling `LadderView`..
 final class Region: Codable {
     private(set) var id = UUID()
 
@@ -24,11 +24,12 @@ final class Region: Codable {
     var mode: Mode = .normal
     var marks = [Mark]()
     var height: CGFloat { distalBoundaryY - proximalBoundaryY }
-    // TODO: refactor boundary and height and use at CGRect frame instead
     private var _style: Mark.Style = .inherited
 
     var style: Mark.Style = .inherited
 
+    /// Create a region from a `RegionTemplate`.
+    ///
     /// A region is copied from a template, after which the template is no longer referenced.
     /// Used to add regions on the fly.
     init(template: RegionTemplate) {
@@ -39,6 +40,8 @@ final class Region: Codable {
     }
 
     /// Creates a template from a region.
+    ///
+    /// A region can be converted to a region template.  Used when adding regions on the fly.
     func regionTemplate() -> RegionTemplate {
         let template = RegionTemplate(
             name: self.name,
@@ -49,10 +52,21 @@ final class Region: Codable {
         return template
     }
 
+    /// Add a mark to the region's array of marks.
+    /// - Parameter mark: `Mark` to be added to this region.
     func appendMark(_ mark: Mark) {
         marks.append(mark)
     }
 
+
+    /// Determines *region *y coordinate from a *scaled* y value.
+    ///
+    /// Region uses a hybrid coordinate system.  Marks always use region coordinates,
+    /// but regions also know their boundaries as scaled coordinates.  However scaled y coordinates
+    /// never change in the ladder with zoom or changes in content offset.  This function is at present
+    /// only used for testing and is not in production code.
+    /// - Parameter y: scaled y coordinate as `CGFloat`
+    /// - Returns: region y coordinate as `CGFloat`.  Returns nil if y not within region boundaries.
     func relativeYPosition(y: CGFloat) -> CGFloat? {
         guard y >= proximalBoundaryY && y <= distalBoundaryY else { return nil }
         return (y - proximalBoundaryY) / (distalBoundaryY - proximalBoundaryY)
@@ -72,6 +86,7 @@ extension Region: Equatable {
 }
 
 extension Region {
+    /// Region mode determines appearance and behavior of the region.
     enum Mode: Int, Codable {
         case active
         case selected
@@ -89,13 +104,15 @@ extension Region: Hashable {
 
 // MARK: - enums
 
-// The two parts of a region.
+/// The two parts of a region.
 enum RegionSection {
     case labelSection
     case markSection
 }
 
 /// All regions are divided vertically into three parts...
+///
+/// Used to determine what part of a region is tapped.
 enum RegionDivision {
     case proximal
     case middle

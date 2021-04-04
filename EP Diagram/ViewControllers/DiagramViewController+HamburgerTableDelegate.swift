@@ -256,10 +256,11 @@ extension DiagramViewController: HamburgerTableDelegate, UIImagePickerController
     #if DEBUG
     func test() {
         os_log("test()", log: .debugging, type: .debug)
-        print("imageView.frame", imageView.frame)
-        print("container view frame", imageContainerView.frame)
-        print("imageView.bounds", imageView.bounds)
-        print("container view bounds", imageContainerView.bounds)
+        print("ladderView.viewMaxWidth", ladderView.viewMaxWidth)
+        //        print("imageView.frame", imageView.frame)
+//        print("container view frame", imageContainerView.frame)
+//        print("imageView.bounds", imageView.bounds)
+//        print("container view bounds", imageContainerView.bounds)
 //        print("********************")
 //        print("diagram.imageIsUpScaled", diagram.imageIsUpscaled)
 //        print("imageView.transform", imageView.transform)
@@ -367,9 +368,7 @@ extension DiagramViewController: HamburgerTableDelegate, UIImagePickerController
         }
         hideCursorAndNormalizeAllMarks()
         UIView.animate(withDuration: 0.5, animations: {
-
             self.view.layoutIfNeeded()
-            print("****animation complete")
         })
     }
 
