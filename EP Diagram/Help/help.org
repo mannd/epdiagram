@@ -18,9 +18,9 @@
 #+HTML_HEAD: <link rel="stylesheet" type="text/css" href="./org.css"/>
 * Beta version notes
 The beta version of *EP Diagram* is nearly feature complete and ready for testing.
-** New in this version
-- Fix nasty bug that broke image scaling after loading a PDF and then undoing.
-- Implement multipage PDF.
+** New in this version (1.0.0-beta.3)
+- Fix some issues with image scaling and rotation
+- Fix crash due to nested undo groupings.
 ** What is still missing
 - Onboarding and/or tooltips.
 - See [[*Known issues/bugs/limitations][Known issues/bugs/limitations]].
@@ -450,7 +450,6 @@ To create a snapshot and save it to the Photos app, simply tap the *Snapshot* bu
 - Repeating CL tool will be expanded to copy/paste, duplicate selected marks.
 - Need more sample ECGS, more default ladders.
 - Mac version still under development.
-- Rotated images may overlap the left margin and slightly and thus the edges of the image may not be accessible.  This only practically affects larger rotations (more than just a few degrees).  This is a limitation of the mehtod of rotation.  If your image must be rotated a large amount, it is recommended you rotate it in an external program (for example, using the editor functions of the Photos app), and load the rotated image into your diagram.
 * Next version plans
 We plan to include in the next version:
 - Refractory periods
