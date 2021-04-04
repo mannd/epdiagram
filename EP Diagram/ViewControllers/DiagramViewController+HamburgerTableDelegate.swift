@@ -339,7 +339,7 @@ extension DiagramViewController: HamburgerTableDelegate, UIImagePickerController
                                        transform: CGAffineTransform,
                                        scale: CGFloat,
                                        contentOffset: CGPoint) {
-        os_log("setDiagramImage(_:)", log: .action, type: .info)
+        os_log("setDiagramImage(_:)", log: .debugging, type: .info)
 
         let oldImage = self.imageView.image
         let oldImageIsUpscaled = diagram.imageIsUpscaled

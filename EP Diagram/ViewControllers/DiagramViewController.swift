@@ -445,7 +445,8 @@ final class DiagramViewController: UIViewController {
         cursorView.calibration = diagram.calibration
         ladderView.calibration = diagram.calibration
         ladderView.ladder = diagram.ladder
-        imageView.image = scaleImageForImageView(diagram.image)
+        // Diagram image already scaled, so don't scale again here.
+        imageView.image = diagram.image
         ladderView.viewMaxWidth = imageView.frame.width
 
         imageScrollView.delegate = self
@@ -546,7 +547,8 @@ final class DiagramViewController: UIViewController {
         scrollViewAdjustViews(imageScrollView) // make sure views adjust to rotated image
         ladderView.updateLadderIntervals()
         // Need to set this here, after view draw, or Mac malpositions cursor at start of app.
-        imageScrollView.contentInset = UIEdgeInsets(top: 0, left: leftMargin, bottom: 0, right: 0)
+        let offset = self.imageView.frame
+        imageScrollView.contentInset = UIEdgeInsets(top: 0, left: leftMargin - offset.minX, bottom: 0, right: 0)
         updateToolbarButtons()
         updateUndoRedoButtons()
         showMainToolbar()
