@@ -166,16 +166,10 @@ extension DiagramViewController: DiagramViewControllerDelegate {
         UIView.animate(withDuration: 0.4) {
             self.imageView.transform = transform
             self.diagram.transform = transform
-
-//            self.imageScrollView.contentInset = UIEdgeInsets(top: 0, left: self.leftMargin, bottom: 0, right: 0)
-            // FIXME: Temp
+            // Rotation can extend the edge of the view left of the left margin, so
+            // we compensate for this here, and whenever left margin is set.
             let offset = self.imageView.frame
-            print("offset", offset)
-            print(self.imageScrollView.contentInset)
-            print("imageContainerView offset", self.imageContainerView.frame)
             self.imageScrollView.contentInset.left = self.leftMargin - offset.minX
-            // This may fix rotation problem, but this offset has to be applied at startup too, or the margin will still overlap.  Should be done when transform is first applied.  It may not be the exact formula needed to fix this problem.  Also need to test if this is appropriate if
-
         }
     }
 

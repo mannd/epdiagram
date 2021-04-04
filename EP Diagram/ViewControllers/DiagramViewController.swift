@@ -40,8 +40,11 @@ final class DiagramViewController: UIViewController {
             diagram.leftMargin = leftMargin
             ladderView.leftMargin = leftMargin
             cursorView.leftMargin = leftMargin
+            // Rotation can extend the edge of the view left of the left margin, so
+            // we compensate for this here, and whenever left margin is set.
+            let offset = self.imageView.frame
+            imageScrollView.contentInset.left = self.leftMargin - offset.minX
             imageScrollView.leftMargin = leftMargin
-            imageScrollView.contentInset = UIEdgeInsets(top: 0, left: leftMargin, bottom: 0, right: 0)
         }
     }
 
@@ -977,6 +980,7 @@ final class DiagramViewController: UIViewController {
     @objc func closeAdjustLeftMarginToolbar(_ sender: UISlider!) {
         currentDocument?.undoManager.endUndoGrouping()
         showSelectToolbar()
+        imageScrollView.isActivated = true
     }
 
     @objc func undo() {
