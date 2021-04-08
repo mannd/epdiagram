@@ -15,7 +15,7 @@ final class LadderView: ScaledView {
     #if DEBUG  // Change this for debugging impulse origins and block
     var showProxEnd = false
     var showEarliestPoint = false
-    var debugMarkMode = true
+    var debugMarkMode = false
     #else  // Don't ever change this.  They must all be FALSE.
     var showProxEnd = false
     var showEarliestPoint = false
@@ -736,6 +736,7 @@ final class LadderView: ScaledView {
             ladder.hideZone()
         }
         // ?no need to link nearby marks, but need to update links of neighboring marks
+        relinkAllMarks()
         assessBlockAndImpulseOrigin(marks: linkedMarks.allMarks)
     }
 
@@ -755,6 +756,7 @@ final class LadderView: ScaledView {
             ladder.normalizeRegions()
             ladder.hideZone()
         }
+        relinkAllMarks()
         let newNearbyMarks = getNearbyMarkIDs(mark: mark)
         snapToNearbyMarks(mark: mark, nearbyMarks: newNearbyMarks)
         linkNearbyMarks(mark: mark, nearbyMarks: newNearbyMarks)
@@ -766,6 +768,7 @@ final class LadderView: ScaledView {
             target.undoablyDeleteMark(mark: mark)
         })
         NotificationCenter.default.post(name: .didUndoableAction, object: nil)
+        relinkAllMarks()
         updateMarkersAndRegionIntervals(ladder.region(ofMark: mark))
         assessBlockAndImpulseOrigin(mark: mark)
         let linkedMarks = ladder.getLinkedMarksFromLinkedMarkIDs(mark.linkedMarkIDs)
@@ -939,8 +942,6 @@ final class LadderView: ScaledView {
                 let distalDiffX = distalPositionX - location.x
                 movementDiffs[mark] = (prox: proximalDiffX, distal: distalDiffX)
                 setSegment(segment: mark.segment, forMark: mark)
-                let nearbyMarks = getNearbyMarkIDs(mark: mark)
-                linkNearbyMarks(mark: mark, nearbyMarks: nearbyMarks)
             }
         }
         if state == .changed {
@@ -951,12 +952,11 @@ final class LadderView: ScaledView {
                     let newSegment = Segment(proximal: CGPoint(x: location.x + diff.prox, y: segment.proximal.y), distal: CGPoint(x: location.x + diff.distal, y: segment.distal.y))
                     let newRegionSegment = transformToRegionSegment(scaledViewSegment: newSegment, region: region)
                     setSegment(segment: newRegionSegment, forMark: mark)
-                    let nearbyMarks = getNearbyMarkIDs(mark: mark)
-                    linkNearbyMarks(mark: mark, nearbyMarks: nearbyMarks)
                 }
             }
         }
         if state == .ended {
+            relinkAllMarks()
             isDragging = false
             movementDiffs.removeAll()
             currentDocument?.undoManager.endUndoGrouping()
@@ -2005,8 +2005,7 @@ final class LadderView: ScaledView {
                 fatalError("Endpoint.none, .random, or .auto inappopriately passed to straightenToEndPoint()")
             }
             self.setSegment(segment: segment, forMark: mark)
-            let nearbyMarks = getNearbyMarkIDs(mark: mark)
-            linkNearbyMarks(mark: mark, nearbyMarks: nearbyMarks)
+            relinkAllMarks()
         }
         currentDocument?.undoManager.endUndoGrouping()
     }
@@ -2036,8 +2035,7 @@ final class LadderView: ScaledView {
                 }
             }
             setSegment(segment: segment, forMark: mark)
-            let nearbyMarks = getNearbyMarkIDs(mark: mark)
-            linkNearbyMarks(mark: mark, nearbyMarks: nearbyMarks)
+            relinkAllMarks()
         }
     }
 
@@ -2151,6 +2149,7 @@ final class LadderView: ScaledView {
             repeatCLAfter()
             repeatCLBefore()
         }
+        relinkAllMarks()
         setNeedsDisplay()
         currentDocument?.undoManager.endUndoGrouping()
     }
@@ -2204,6 +2203,7 @@ final class LadderView: ScaledView {
             } else {
                 ladder.setMarksWithMode(.selected, inRegion: region)
             }
+            relinkAllMarks()
             setNeedsDisplay()
         }
         let selectedRegions = ladder.allRegionsWithMode(.selected)
@@ -2356,7 +2356,7 @@ final class LadderView: ScaledView {
     func segmentPlusDiffWillBeInBounds(segment: Segment, diff: (proximal: CGFloat, distal: CGFloat)) -> Bool {
         var inBounds = false
         let newSegment = Segment(proximal: CGPoint(x: segment.proximal.x + diff.proximal, y: segment.proximal.y), distal: CGPoint(x: segment.distal.x + diff.distal, y: segment.distal.y))
-        inBounds = (newSegment.proximal.x > 0 || newSegment.distal.x > 0) && (newSegment.proximal.x < viewMaxWidth || newSegment.distal.x < viewMaxWidth)
+        inBounds = newSegment.latestPoint.x > 0  && newSegment.earliestPoint.x < viewMaxWidth
         return inBounds
     }
 
@@ -2398,9 +2398,7 @@ final class LadderView: ScaledView {
             distalX += cl
             let newSegment = Segment(proximal: CGPoint(x: proxX, y: selectedMarks[i].segment.proximal.y), distal: CGPoint(x: distalX, y: selectedMarks[i].segment.distal.y))
             self.setSegment(segment: newSegment, forMark: selectedMarks[i])
-            let nearbyMarks = getNearbyMarkIDs(mark: selectedMarks[i])
-            linkNearbyMarks(mark: selectedMarks[i], nearbyMarks: nearbyMarks)
-
+            relinkAllMarks()
         }
     }
 
@@ -2433,8 +2431,7 @@ final class LadderView: ScaledView {
             fatalError("Endpoint.none, .random, or .auto inappopriately passed to slantMark()")
         }
         setSegment(segment: transformToRegionSegment(scaledViewSegment: newSegment, region: region), forMark: mark)
-        let nearbyMarks = getNearbyMarkIDs(mark: mark)
-        linkNearbyMarks(mark: mark, nearbyMarks: nearbyMarks)
+        relinkAllMarks()
     }
 
     func slantAngle(mark: Mark, endpoint: Mark.Endpoint) -> CGFloat { 

@@ -16,15 +16,14 @@
 #+HTML_HEAD: <style media="screen" type="text/css"> img {max-width: 100%; height: auto;} </style>
 #+HTML_HEAD: <style  type="text/css">:root { color-scheme: light dark; }</style>
 #+HTML_HEAD: <link rel="stylesheet" type="text/css" href="./org.css"/>
-* Beta version notes
-The beta version of *EP Diagram* is nearly feature complete and ready for testing.
-** New in this version (1.0.0-beta.3)
-- Fix some issues with image scaling and rotation
-- Fix crash due to nested undo groupings.
+* Prerelease notes
+The version of *EP Diagram* is feature complete and a candidate for release.
+** New in this version (1.0.0-rc.1)
+- Add repeat pattern and copy/paste features.
+- Add onboarding.
 ** What is still missing
-- Onboarding and/or tooltips.
 - See [[*Known issues/bugs/limitations][Known issues/bugs/limitations]].
-** Instructions for beta testers
+** Instructions for TestFlight testers
 - Play around with the app.
 - Email me (mannd@epstudiossoftware.com) or use the TestFlight app to report any bugs, crashes, awkwardness, or to request features.
 - If you have sample ECGs that could be included in the app, for example, different types of heart block, premature beats, or tachyarrhythmias, please send them to me.  Make sure they are anonymized and are not copyrighted.
@@ -80,11 +79,13 @@ Ladder diagram terminology is not really standardized.  Here is a glossary of th
 | Link                 | a connection between marks causing them to move together             |
 | Impulse origin       | where conduction starts, indicated by a symbol                       |
 | Block                | where conduction blocks, indicated by a symbol                       |
-| Interval             | time in msec between adjacent marks, i.e. cycle length           |
+| Interval             | time in msec between adjacent marks, i.e. cycle length               |
 | Conduction time      | time in msec between earliest and latest points of a mark            |
 | Caliper              | used to calibrate the diagram to allow measurements                  |
 | Conduction direction | optional arrow symbol indicating direction of electrical flow        |
 | Markers              | optional lines on image aligned with marks                           |
+| Mark pattern         | a grouping of marks that form a repeating pattern                    |
+| Joining mark         | mark used to joing together mark patterns                            |
 ** Diagrams
 *** Creating and opening diagrams
 EP Diagram is a file based app, meaning the diagrams you create are stored on your device or on iCloud, and can be processed by the Files app on your device, meaning you can copy them, rename them, or delete them outside of the *EP Diagram* app.  The diagram files you create have a file extension of ~diagram~ and a specific icon and file format.  When you open the app, a screen shows your diagram files and a create file icon.

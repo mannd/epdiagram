@@ -173,6 +173,10 @@ extension DiagramViewController: UIContextMenuInteractionDelegate {
             self.regionDottedStyleAction.state = region.style == .dotted ? .on : .off
             self.regionDashedStyleAction.state = region.style == .dashed ? .on : .off
             self.regionInheritedStyleAction.state = region.style == .inherited ? .on : .off
+            self.oneRegionHeightAction.state = region.unitHeight == 1 ? .on : .off
+            self.twoRegionHeightAction.state = region.unitHeight == 2 ? .on : .off
+            self.threeRegionHeightAction.state = region.unitHeight == 3 ? .on : .off
+            self.fourRegionHeightAction.state = region.unitHeight == 4 ? .on : .off
             return UIMenu(title: title, children: self.labelMenu)
         }
     }

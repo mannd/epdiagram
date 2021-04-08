@@ -37,8 +37,6 @@ class CaliperTests: XCTestCase {
         // test for points out of caliper range
         XCTAssertNil(caliper.isNearCaliperComponent(point: CGPoint(x: 50, y: caliper.maxY + 10), accuracy: accuracy))
         XCTAssertNil(caliper.isNearCaliperComponent(point: CGPoint(x: 50, y: -10), accuracy: accuracy))
-
-
     }
 
     func testCaliperMovement() {
@@ -54,14 +52,13 @@ class CaliperTests: XCTestCase {
         XCTAssertEqual(60, caliper.crossbarPosition)
         XCTAssertEqual(20, caliper.bar1Position)
         XCTAssertEqual(60, caliper.bar2Position)
+        caliper.crossbarPosition = 0 // too close to boundary
         let negDelta = CGPoint(x: 5, y: -5)
         caliper.move(delta: negDelta, component: .crossbar)
-        XCTAssertEqual(55, caliper.crossbarPosition)
+        XCTAssertEqual(0, caliper.crossbarPosition)
         let bigNegDelta = CGPoint(x: 0, y: -90)
         caliper.move(delta: bigNegDelta, component: .crossbar)
         XCTAssertEqual(0, caliper.crossbarPosition)
-
-
     }
 
     func testCaliperValue() {

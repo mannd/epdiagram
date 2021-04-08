@@ -13,6 +13,13 @@ import Photos
 import os.log
 
 final class DiagramViewController: UIViewController {
+    // For debugging only
+    #if DEBUG
+    var debugShowOnboarding = true
+    #else // Don't change below!
+    var debugShowOnboarding = false
+    #endif
+
     // View, outlets, constraints
     @IBOutlet var _constraintHamburgerWidth: NSLayoutConstraint!
     @IBOutlet var _constraintHamburgerLeft: NSLayoutConstraint!
@@ -506,6 +513,10 @@ final class DiagramViewController: UIViewController {
         setTitle()
 
         ladderView.reregisterAllMarks()
+
+        if debugShowOnboarding { // || first run
+            performShowOnboardingSegue()
+        }
     }
 
     override func viewWillAppear(_ animated: Bool) {
@@ -619,7 +630,8 @@ final class DiagramViewController: UIViewController {
     func showSelectToolbar() {
         if selectToolbarButtons == nil {
             let selectAllButton = UIBarButtonItem(title: L("Select All"), style: .plain, target: self, action: #selector(selectAllMarks))
-            let clearButton = UIBarButtonItem(title: L("Clear Selection"), style: .plain, target: self, action: #selector(clearSelection))
+            let clearButtonTitle = isIPad() ? L("Clear Selection") : L("Clear")
+            let clearButton = UIBarButtonItem(title: clearButtonTitle, style: .plain, target: self, action: #selector(clearSelection))
             let doneButton = UIBarButtonItem(barButtonSystemItem: .done, target: self, action: #selector(cancelSelectMode))
             selectToolbarButtons = [selectAllButton, spacer, clearButton, spacer, undoButton, spacer, redoButton, spacer, doneButton]
         }
@@ -709,7 +721,7 @@ final class DiagramViewController: UIViewController {
         guard let toolbar = navigationController?.toolbar else { return }
         currentDocument?.undoManager.beginUndoGrouping()
         let labelText = UITextField()
-        labelText.text = L("Tap joining mark once for single copy, double tab for multiple copies")
+        labelText.text = isIPad() ? L("Tap joining mark once for single copy, double tab for multiple copies") : L("Single or double tap joining mark")
         let doneButton = UIButton(type: .close)
         doneButton.addTarget(self, action: #selector(closeRepeatPatternToolbar(_:)), for: .touchUpInside)
         let stackView = UIStackView(frame: toolbar.frame)
@@ -1032,7 +1044,9 @@ final class DiagramViewController: UIViewController {
         os_log("undo action", log: OSLog.action, type: .info)
         if self.currentDocument?.undoManager?.canUndo ?? false {
             // Cursor doesn't track undo and redo well, so hide it!
-            hideCursorAndNormalizeAllMarks()
+            if mode == .normal {
+                hideCursorAndNormalizeAllMarks()
+            }
             self.currentDocument?.undoManager?.undo()
             setViewsNeedDisplay()
         }
@@ -1041,7 +1055,9 @@ final class DiagramViewController: UIViewController {
     @objc func redo() {
         os_log("redo action", log: OSLog.action, type: .info)
         if self.currentDocument?.undoManager?.canRedo ?? false {
-            hideCursorAndNormalizeAllMarks()
+            if mode == .normal {
+                hideCursorAndNormalizeAllMarks()
+            }
             self.currentDocument?.undoManager?.redo()
             setViewsNeedDisplay()
         }
@@ -1083,6 +1099,7 @@ final class DiagramViewController: UIViewController {
         }
         if ladderView.mode == .select {
             ladderView.endZoning()
+            ladderView.normalizeRegions()
             ladderView.normalizeAllMarks()
             ladderView.setNeedsDisplay()
         }
@@ -1227,12 +1244,13 @@ final class DiagramViewController: UIViewController {
     override func viewWillTransition(to size: CGSize, with coordinator: UIViewControllerTransitionCoordinator) {
         os_log("viewWillTransition", log: OSLog.viewCycle, type: .info)
         super.viewWillTransition(to: size, with: coordinator)
-        // Hide cursor with rotation, to avoid redrawing it.
-        hideCursorAndNormalizeAllMarks()
+        // Hide cursor with rotation, to avoid redrawing it, but only if in normal mode.
+        if mode == .normal {
+            hideCursorAndNormalizeAllMarks()
+        }
         // Remove separatorView when rotating to let original constraints resume.
         // Otherwise, views are not laid out correctly.
         if let separatorView = separatorView {
-            // Note separatorView is released when removed from superview.
             separatorView.removeFromSuperview()
             self.separatorView = nil
         }
@@ -1297,7 +1315,8 @@ final class DiagramViewController: UIViewController {
     @IBSegueAction func showSampleSelector(_ coder: NSCoder) -> UIViewController? {
         let sampleDiagrams: [Diagram] = [
             Diagram(name: L("Normal ECG"), description: L("Just a normal ECG"), image: UIImage(named: "SampleECG")!, ladder: Ladder.defaultLadder()),
-            Diagram(name: L("AV Block"), description: L("High grade AV block"), image: UIImage(named: "AVBlock")!, ladder: Ladder.defaultLadder())
+            Diagram(name: L("AV Block"), description: L("High grade AV block"), image: UIImage(named: "AVBlock")!, ladder: Ladder.defaultLadder()),
+            Diagram(name: L("Wenckebach"), description: L("Mobitz I 2nd degree AV block"), image: UIImage(named: "Wenckebach")!, ladder: Ladder.defaultLadder())
         ]
         let sampleSelector = SampleSelector(sampleDiagrams: sampleDiagrams, delegate: self)
         let hostingController = UIHostingController(coder: coder, rootView: sampleSelector)
@@ -1315,6 +1334,11 @@ final class DiagramViewController: UIViewController {
         let rhythmView = RhythmView(dismissAction: applyRhythm(rhythm:))
         let hostingController = UIHostingController(coder: coder, rootView: rhythmView)
         return hostingController
+    }
+
+    @IBSegueAction func performOnboardingSegueAction(_ coder: NSCoder) -> UIViewController? {
+        let onboardingView = Onboarding()
+        return UIHostingController(coder: coder, rootView: onboardingView)
     }
 
     func applyRhythm(rhythm: Rhythm) {
@@ -1342,6 +1366,10 @@ final class DiagramViewController: UIViewController {
     func performShowHelpSegue() {
         P("performShowHelpSegue")
         performSegue(withIdentifier: "showHelpSegue", sender: self)
+    }
+
+    func performShowOnboardingSegue() {
+        performSegue(withIdentifier: "showOnboardingSegue", sender: self)
     }
 
     func performShowPreferencesSegue() {

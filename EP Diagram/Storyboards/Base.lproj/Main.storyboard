@@ -105,6 +105,7 @@
                         <segue destination="X4y-SM-iwI" kind="show" identifier="showHelpSegue" destinationCreationSelector="performShowHelpSegueAction:" id="ezU-te-0lg"/>
                         <segue destination="ggo-hf-FSM" kind="show" identifier="showSampleSelectorSegue" destinationCreationSelector="showSampleSelector:" id="ItN-ts-1CH"/>
                         <segue destination="BGd-dQ-vjR" kind="presentation" identifier="showRhythmSegue" destinationCreationSelector="performRhythmSegueAction:" id="vII-Nd-Rym"/>
+                        <segue destination="M0c-tI-NTs" kind="show" identifier="showOnboardingSegue" destinationCreationSelector="performOnboardingSegueAction:" id="dER-Jc-QCi"/>
                     </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="dkx-z0-nzr" sceneMemberID="firstResponder"/>
@@ -215,7 +216,17 @@
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="VRI-RL-nE8" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="1660" y="120"/>
+            <point key="canvasLocation" x="1703" y="479"/>
+        </scene>
+        <!--Hosting Controller-->
+        <scene sceneID="0AI-gK-xkd">
+            <objects>
+                <hostingController id="M0c-tI-NTs" sceneMemberID="viewController">
+                    <navigationItem key="navigationItem" id="sap-BX-ubQ"/>
+                </hostingController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="1QW-Kz-HuN" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="2484" y="121"/>
         </scene>
         <!--Hosting Controller-->
         <scene sceneID="H4X-ff-CoG">

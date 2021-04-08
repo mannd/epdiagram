@@ -56,20 +56,10 @@ final class Mark: Codable {
     }
 
     /// Position of earliest point on mark.
-    var earliestPoint: CGPoint {
-        if segment.proximal.x <= segment.distal.x {
-            return segment.proximal
-        }
-        return segment.distal
-    }
+    var earliestPoint: CGPoint { return segment.earliestPoint }
 
     /// Position of latest point on mark.
-    var latestPoint: CGPoint {
-        if segment.distal.x >= segment.proximal.x {
-            return segment.distal
-        }
-        return segment.proximal
-    }
+    var latestPoint: CGPoint { segment.latestPoint }
 
     /// The earlier of the two endpoints, Endpoint.none if mark is vertical.
     var earlyEndpoint: Endpoint {
@@ -81,7 +71,6 @@ final class Mark: Codable {
         }
         return .none  // equal within floating point precision, i.e. vertical mark
     }
-
 
     /// The later of the two endpoints, Enpoint.none if mark is vertical.
     var lateEndpoint: Endpoint {

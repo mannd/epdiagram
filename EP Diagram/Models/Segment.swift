@@ -44,6 +44,23 @@ struct Segment: Codable, Equatable {
         guard y < max(y1, y0) && y > min(y1, y0) else { return nil }
         return ((x1 - x0) * (y - y0)) / (y1 - y0) + x0
     }
+
+    /// Position of earliest point on segment.
+    var earliestPoint: CGPoint {
+        if proximal.x <= distal.x {
+            return proximal
+        }
+        return distal
+    }
+
+    /// Position of latest point on segment.
+    var latestPoint: CGPoint {
+        if distal.x >= proximal.x {
+            return distal
+        }
+        return proximal
+    }
+
 }
 
 

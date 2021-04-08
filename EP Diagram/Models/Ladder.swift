@@ -507,7 +507,7 @@ final class Ladder: NSObject, Codable {
     func availableAnchors(forMark mark: Mark) -> [Anchor] {
         let linkedMarkIDs = mark.linkedMarkIDs
         // FIXME: if attachment is in middle, only allow other end to move
-        if linkedMarkIDs.count < 2 {
+        if linkedMarkIDs.proximal.count == 0 || linkedMarkIDs.distal.count == 0 {
             return defaultAnchors()
         }
         else {
@@ -540,9 +540,6 @@ final class Ladder: NSObject, Codable {
     func defaultAnchor(forMark mark: Mark) -> Anchor {
         return availableAnchors(forMark: mark)[0]
     }
-
-
-
 
     // MARK: Ladder factories
 
