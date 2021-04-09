@@ -127,13 +127,12 @@ final class LadderView: ScaledView {
     var leftMargin: CGFloat = 0
     var viewHeight: CGFloat = 0
     // viewMaxWidth is width of image, or width of ladderView if no image is present
+    // FIXME: Should always be imageViewWidth, unless no image.
     var viewMaxWidth: CGFloat = 0 {
         didSet {
             if viewMaxWidth == 0 { // no image loaded, so use frame.width
                 viewMaxWidth = frame.width
-            } else {
-                viewMaxWidth = min(viewMaxWidth, frame.width)
-            }
+            } 
         }
     }
     private var regionUnitHeight: CGFloat = 0
@@ -756,10 +755,9 @@ final class LadderView: ScaledView {
             ladder.normalizeRegions()
             ladder.hideZone()
         }
-        relinkAllMarks()
         let newNearbyMarks = getNearbyMarkIDs(mark: mark)
         snapToNearbyMarks(mark: mark, nearbyMarks: newNearbyMarks)
-        linkNearbyMarks(mark: mark, nearbyMarks: newNearbyMarks)
+        relinkAllMarks()
     }
 
     private func undoablyAddMark(mark: Mark) {
@@ -1575,6 +1573,12 @@ final class LadderView: ScaledView {
         for mark in marks {
             assessBlock(mark: mark)
             assessImpulseOrigin(mark: mark)
+        }
+    }
+
+    func assessBlockAndImpulseOriginForAllMarks() {
+        for mark in ladder.allMarks() {
+            assessBlockAndImpulseOrigin(mark: mark)
         }
     }
 

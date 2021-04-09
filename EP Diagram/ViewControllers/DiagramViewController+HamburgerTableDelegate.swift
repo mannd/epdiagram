@@ -439,6 +439,7 @@ extension DiagramViewController: HamburgerTableDelegate, UIImagePickerController
         }, completion: { (finished:Bool) in
             self.separatorView?.showIndicator = true
             self.separatorView?.setNeedsDisplay()
+            self.setViewsNeedDisplay()
         })
     }
 

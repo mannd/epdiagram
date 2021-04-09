@@ -15,7 +15,7 @@ import os.log
 final class DiagramViewController: UIViewController {
     // For debugging only
     #if DEBUG
-    var debugShowOnboarding = true
+    var debugShowOnboarding = false
     #else // Don't change below!
     var debugShowOnboarding = false
     #endif
@@ -514,8 +514,17 @@ final class DiagramViewController: UIViewController {
 
         ladderView.reregisterAllMarks()
 
-        if debugShowOnboarding { // || first run
+        let firstRun: Bool = !UserDefaults.standard.bool(forKey: Preferences.notFirstRunKey)
+
+
+        if debugShowOnboarding || firstRun { // || first run
             performShowOnboardingSegue()
+            UserDefaults.standard.set(true, forKey: Preferences.notFirstRunKey)
+            // take this oportunity to save the version, which we can use in the future to determine if we nee to reshow the onboarding (e.g. if onboarding changes).
+            if let version = Version.version {
+                UserDefaults.standard.set(version, forKey: Preferences.versionKey)
+                print("version", version)
+            }
         }
     }
 
@@ -1313,12 +1322,7 @@ final class DiagramViewController: UIViewController {
     }
 
     @IBSegueAction func showSampleSelector(_ coder: NSCoder) -> UIViewController? {
-        let sampleDiagrams: [Diagram] = [
-            Diagram(name: L("Normal ECG"), description: L("Just a normal ECG"), image: UIImage(named: "SampleECG")!, ladder: Ladder.defaultLadder()),
-            Diagram(name: L("AV Block"), description: L("High grade AV block"), image: UIImage(named: "AVBlock")!, ladder: Ladder.defaultLadder()),
-            Diagram(name: L("Wenckebach"), description: L("Mobitz I 2nd degree AV block"), image: UIImage(named: "Wenckebach")!, ladder: Ladder.defaultLadder())
-        ]
-        let sampleSelector = SampleSelector(sampleDiagrams: sampleDiagrams, delegate: self)
+        let sampleSelector = SampleSelector(sampleDiagrams: Diagram.sampleDiagrams(), delegate: self)
         let hostingController = UIHostingController(coder: coder, rootView: sampleSelector)
         return hostingController
     }
@@ -1337,8 +1341,14 @@ final class DiagramViewController: UIViewController {
     }
 
     @IBSegueAction func performOnboardingSegueAction(_ coder: NSCoder) -> UIViewController? {
-        let onboardingView = Onboarding()
-        return UIHostingController(coder: coder, rootView: onboardingView)
+        guard let url = Bundle.main.url(forResource: "onboard", withExtension: "html") else { return nil }
+        do {
+            let contents = try String(contentsOf: url)
+            let onboardingView = Onboarding(onboardText: .constant(contents), url: url)
+            return UIHostingController(coder: coder, rootView: onboardingView)
+        } catch {
+            return nil
+        }
     }
 
     func applyRhythm(rhythm: Rhythm) {

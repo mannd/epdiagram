@@ -100,6 +100,8 @@
 		8ED8CBD125D8B1FF00A6234F /* DiagramModelController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8ED8CBD025D8B1FF00A6234F /* DiagramModelController.swift */; };
 		8EDCE17F25EC0C7400B9C7B8 /* Color.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8EDCE17E25EC0C7400B9C7B8 /* Color.swift */; };
 		8EE1411E261F9A5B00392100 /* Onboarding.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8EE1411D261F9A5B00392100 /* Onboarding.swift */; };
+		8EE141232620EED500392100 /* onboard.html in Resources */ = {isa = PBXBuildFile; fileRef = 8EE141222620EED500392100 /* onboard.html */; };
+		8EE141282620EEE200392100 /* onboard.org in Resources */ = {isa = PBXBuildFile; fileRef = 8EE141272620EEE200392100 /* onboard.org */; };
 		8EF8B5B72330739F00ADB77A /* ViewControllerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8EF8B5B62330739F00ADB77A /* ViewControllerTests.swift */; };
 		8EF9166B227926BC00B51F17 /* LadderView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8EF9166A227926BC00B51F17 /* LadderView.swift */; };
 /* End PBXBuildFile section */
@@ -226,6 +228,8 @@
 		8ED8CBD025D8B1FF00A6234F /* DiagramModelController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DiagramModelController.swift; sourceTree = "<group>"; };
 		8EDCE17E25EC0C7400B9C7B8 /* Color.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Color.swift; sourceTree = "<group>"; };
 		8EE1411D261F9A5B00392100 /* Onboarding.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Onboarding.swift; sourceTree = "<group>"; };
+		8EE141222620EED500392100 /* onboard.html */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.html; path = onboard.html; sourceTree = "<group>"; };
+		8EE141272620EEE200392100 /* onboard.org */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = onboard.org; sourceTree = "<group>"; };
 		8EE311E524A8FE01003C7AF6 /* AudioToolbox.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AudioToolbox.framework; path = Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.15.sdk/System/Library/Frameworks/AudioToolbox.framework; sourceTree = DEVELOPER_DIR; };
 		8EF6B0F925A8CA7800DCA91C /* MobileCoreServices.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = MobileCoreServices.framework; path = Platforms/MacOSX.platform/Developer/SDKs/MacOSX11.1.sdk/System/iOSSupport/System/Library/Frameworks/MobileCoreServices.framework; sourceTree = DEVELOPER_DIR; };
 		8EF6B10125A8CAA600DCA91C /* CoreServices.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreServices.framework; path = Platforms/MacOSX.platform/Developer/SDKs/MacOSX11.1.sdk/System/Library/Frameworks/CoreServices.framework; sourceTree = DEVELOPER_DIR; };
@@ -400,6 +404,8 @@
 		8E976B95260E438C00CA8BF9 /* Help */ = {
 			isa = PBXGroup;
 			children = (
+				8EE141272620EEE200392100 /* onboard.org */,
+				8EE141222620EED500392100 /* onboard.html */,
 				8E976B8A260E435000CA8BF9 /* help.html */,
 				8E976B8B260E435000CA8BF9 /* help.org */,
 				8E976B8C260E435000CA8BF9 /* img */,
@@ -624,11 +630,13 @@
 				8E976B90260E435100CA8BF9 /* img in Resources */,
 				8E04C5CB2569947100946348 /* Startup.storyboard in Resources */,
 				8E976B8E260E435100CA8BF9 /* help.html in Resources */,
+				8EE141232620EED500392100 /* onboard.html in Resources */,
 				8E976B8F260E435100CA8BF9 /* help.org in Resources */,
 				8E7D24CD22779DBF005A1729 /* LaunchScreen.storyboard in Resources */,
 				8E7D24CA22779DBF005A1729 /* Assets.xcassets in Resources */,
 				8E7D24C822779DBD005A1729 /* Main.storyboard in Resources */,
 				8E61C3D725A6260D0064ADC1 /* Startup2.storyboard in Resources */,
+				8EE141282620EEE200392100 /* onboard.org in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
