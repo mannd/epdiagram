@@ -16,8 +16,9 @@ class CursorViewTests: XCTestCase {
     override func setUp() {
         // Put setup code here. This method is called before the invocation of each test method in the class.
         cursorView = CursorView(frame: CGRect(x: 0, y: 0, width: 100, height: 100))
-        ladderView = LadderView()
+        ladderView = LadderView(frame: CGRect(origin: CGPoint(x: 0, y: 0), size: CGSize(width: 100, height: 100)))
         cursorView.ladderViewDelegate = ladderView
+        ladderView.cursorViewDelegate = cursorView
     }
 
     override func tearDown() {
