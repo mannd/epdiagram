@@ -516,7 +516,6 @@ final class DiagramViewController: UIViewController {
 
         let firstRun: Bool = !UserDefaults.standard.bool(forKey: Preferences.notFirstRunKey)
 
-
         if debugShowOnboarding || firstRun { // || first run
             performShowOnboardingSegue()
             UserDefaults.standard.set(true, forKey: Preferences.notFirstRunKey)

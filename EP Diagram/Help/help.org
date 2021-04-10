@@ -19,9 +19,10 @@
 * Prerelease notes
 The version of *EP Diagram* is feature complete and a candidate for release.
 ** New in this version (1.0.0-rc.1)
-- Add repeat pattern and copy/paste features.
+- Add [[*Copy][copy]] and [[*Repeat pattern][repeat pattern]] features.
 - Add onboarding.
 ** What is still missing
+- No new features will be added.  May tighten up the Help file before final release and will be intensively testing this version for the next few days.
 - See [[*Known issues/bugs/limitations][Known issues/bugs/limitations]].
 ** Instructions for TestFlight testers
 - Play around with the app.
@@ -60,7 +61,9 @@ The version of *EP Diagram* is feature complete and a candidate for release.
 - Change the overall appearance or behavior of the app.  Many aspects are customizable.
 * EP Diagram manual
 ** Introduction
-Ladder diagrams date back at least a century and have been used to analyze arrhythmias and as teaching tools for almost as long as there has been electrocardiography.  For a history and examples of ladder diagrams, see the [[*References][references]].  *EP Diagram* is a full featured ladder drawing program.  It allows you not only to draw ladders, but also to customize their appearance to a fine degree.  As such it is a complex program and it can take a while to learn all its features.  However, it has an extensive undo/redo facility, so feel free to experiment. 
+Ladder diagrams date back at least a century and have been used to analyze arrhythmias and as teaching tools for almost as long as there has been electrocardiography.  For a history and examples of ladder diagrams, see the [[*References][references]].  *EP Diagram* is a full featured ladder drawing program.  It allows you not only to draw ladders, but also to customize their appearance to a fine degree.  As such it is a complex program and it can take a while to learn all its features.  However, it has an extensive undo/redo facility, so feel free to experiment.
+
+*EP Diagram* is optimized for use on an iPad.  It can be used on a phone, but due to the small size of a phone, it may be more difficult to draw ladder diagrams.
 ** Don't panic! (Undo, Redo, and Autosave)
 Practically any change you make while using this app can be reversed by tapping the *Undo* button at the bottom of the screen.  If you change your mind you can revert the undo action by tapping the *Redo* button.  Every change you make is automatically saved.  There is no need to explicity save your diagram files; the app does this in the background.
 ** Terminology
@@ -319,6 +322,14 @@ Lengthen or shorten the cycle length of a group of marks.  This option forces al
 This is discussed [[*Creating rhythms][below]].
 **** Repeat CL
 Repeat the cycle length of a pair of marks forward, backward, or bidirectionally.  This is useful in copying a repeating pattern.
+**** Copy
+Select marks and then with this menu item tap on the ladder to copy them to the point of the tap.  Use [[*Move marks][Move marks]] to fine tune the position of the pasted marks if necessary.
+**** Repeat pattern
+This option will take a selected group of marks and repeat them, with one mark acting as a /joining mark/.  This allows the repetition of complex patterns.  You single tap on the joining mark to duplicate the pattern once.  A double tap on the joining mark will duplicate the pattern until the end or begining of the ECG.  A picture is worth a lot of description.
+
+#+CAPTION: Using pattern repeat.  The top panel shows before, and the bottom after the repeat.  The joining mark is indicated by the the green arrow.  A single tap on the joining mark resulted in a duplication of the pattern.
+[[./img/pattern_repeat.png]]
+
 **** Unlink
 Unlink the selected marks.
 **** Delete mark(s)
@@ -448,8 +459,6 @@ To create a snapshot and save it to the Photos app, simply tap the *Snapshot* bu
 [[./img/snapshot_button.png]]
 
 * Known issues/bugs/limitations
-- Repeating CL tool will be expanded to copy/paste, duplicate selected marks.
-- Need more sample ECGS, more default ladders.
 - Mac version still under development.
 * Next version plans
 We plan to include in the next version:
