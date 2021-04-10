@@ -22,6 +22,10 @@ extension DiagramViewController: UIContextMenuInteractionDelegate {
         guard !showingRotateToolbar else { return nil }
         guard !ladderView.isDragging else { return nil }
         guard !ladderView.isDraggingSelectedMarks else { return nil }
+        // imageScrollView is deactivated when ladderView is showing a toolbar menu.
+        // We don't want to allow another longpress and bring up the menu again, as that
+        // will call crashes due to nested undoManager groupings.  
+        guard imageScrollView.isActivated else { return nil }
         let locationInLadder = ladderView.getLocationInLadder(position: location)
         if locationInLadder.specificLocation == .label {
             ladderView.normalizeLadder()
