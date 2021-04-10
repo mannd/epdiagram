@@ -1752,7 +1752,7 @@ final class LadderView: ScaledView {
         guard let calibration = calibration, calibration.isCalibrated, showConductionTimes else { return }
         let normalizedSegment = mark.segment.normalized()
             let segment = self.transformToScaledViewSegment(regionSegment: normalizedSegment, region: self.ladder.region(ofMark: mark))
-            let value = lround(Double(self.cursorViewDelegate.markMeasurement(segment: segment)))
+        let value = lround(conductionTime(fromSegment: segment))
         if hideZeroCT && value < 1 {
             return
         }
@@ -1771,6 +1771,11 @@ final class LadderView: ScaledView {
             text.draw(in: textRect, withAttributes: measurementTextAttributes)
             context.strokePath()
         }
+    }
+
+    func conductionTime(fromSegment segment: Segment) -> Double {
+        guard let calibration = calibration else { return 0 }
+        return Double(abs(segment.proximal.x - segment.distal.x) * calibration.currentCalFactor)
     }
 
     func drawPivot(context: CGContext, position: CGPoint) {

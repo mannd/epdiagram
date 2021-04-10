@@ -411,7 +411,6 @@ protocol CursorViewDelegate: AnyObject {
     func moveCursor(cursorViewPositionX positionX: CGFloat)
     func setCursorHeight(anchorPositionY: CGFloat?)
     func cursorMovement() -> Movement
-    func markMeasurement(segment: Segment) -> CGFloat
     func setMarkerPositions(at positions: [CGPoint])
 }
 
@@ -463,11 +462,6 @@ extension CursorView: CursorViewDelegate {
 
     func cursorMovement() -> Movement {
         return cursor.movement
-    }
-
-    func markMeasurement(segment: Segment) -> CGFloat {
-        guard let calibration = calibration else { return 0 }
-        return abs(segment.proximal.x - segment.distal.x) * calibration.currentCalFactor
     }
 
     func setMarkerPositions(at positions: [CGPoint]) {

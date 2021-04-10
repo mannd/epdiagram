@@ -472,6 +472,10 @@ We plan to include in the next version:
 * Acknowledgments
 - This app was inspired by someone who complained that the *EP Calipers* app didn't have the ability to draw ladder diagrams, so it was hardly worth $1.99.  As it turns out, implementing a ladder diagram app is a non-trivial operation.  Nevertheless, thanks to this anonymous reviewer for giving me the idea.
 
+- Some public domain clipart used in the figures was obtained from [https://www.clipartmax.com]].
+
+- Sample ECGs are licensed by [[https://creativecommons.org/licenses/by/3.0/][CC BY 3]] and [[https://creativecommons.org/licenses/by-nc-sa/4.0/][CC BY-NC-SA 4.0]].  Creators include [[https://commons.wikimedia.org/wiki/User:Ceccomaster][Ceccomaster]], and [[https://litfl.com/karel-frederik-wenckebach/][litfl.com]].
+
 - The source code for *EP Diagram* is available on [[https://github.com/mannd/epdiagram][GitHub]].
 
 - *EP Diagram* is open source software and is licensed under the Apache License Version 2.0. No guarantees are made as to the accuracy of the app, so use at your own risk.
