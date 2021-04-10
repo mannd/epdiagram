@@ -9,7 +9,7 @@
 import UIKit
 
 class Version: NSObject {
-    static let prereleaseVersion: String? = "1.0.0-rc.1"
+    static let prereleaseVersion: String? = "1.0.0-rc.2"
 
     static var version: String? {
         get {
