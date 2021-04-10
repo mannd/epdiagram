@@ -940,6 +940,17 @@ final class LadderView: ScaledView {
                     let newNearbyMarks = getNearbyMarkIDs(mark: dragCreatedMark)
                     snapToNearbyMarks(mark: dragCreatedMark, nearbyMarks: newNearbyMarks)
                     linkNearbyMarks(mark: dragCreatedMark, nearbyMarks: newNearbyMarks)
+                    // Check if close to boundary
+                    if dragCreatedMark.segment.proximal.y > 0 && dragCreatedMark.segment.proximal.y < 0.05 {
+                        var segment = dragCreatedMark.segment
+                        segment.proximal.y = 0
+                        setSegment(segment: segment, forMark: dragCreatedMark)
+                    }
+                    if dragCreatedMark.segment.distal.y < 1.0 && dragCreatedMark.segment.distal.y > 0.95 {
+                        var segment = dragCreatedMark.segment
+                        segment.distal.y = 1.0
+                        setSegment(segment: segment, forMark: dragCreatedMark)
+                    }
                 }
             }
             currentDocument?.undoManager.endUndoGrouping()

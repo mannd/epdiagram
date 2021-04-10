@@ -17,21 +17,21 @@ struct Onboarding: View {
     var body: some View {
         TabView {
             VStack {
-                Text("Single tap ladder to create a mark with attached cursor or to attach a cursor to a mark.")
+                Text("Single tap ladder to create a vertical mark or to attach a cursor to a mark.")
                     .padding()
                 Image("single-tap-1").resizable()
                     .aspectRatio(contentMode: .fit)
 
             }
             VStack {
-                Text("Repeat single taps on mark or cursor to toggle the anchor point for the cursor which affects how the mark can move.")
+                Text("Repeat single taps on mark or cursor to toggle the anchor point which affects how the mark can move.")
                     .padding()
                 Image("single-tap-2").resizable()
                     .aspectRatio(contentMode: .fit)
 
             }
             VStack {
-                Text("Drag the cursor or a mark with a cursor to move the mark.  You can also drag in the ladder to create a new mark.")
+                Text("Drag the cursor to move the mark.  You can also drag in a region to create a new mark.")
                     .padding()
                 Image("move-mark").resizable()
                     .aspectRatio(contentMode: .fit)

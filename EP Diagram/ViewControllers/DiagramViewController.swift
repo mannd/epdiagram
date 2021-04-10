@@ -672,7 +672,8 @@ final class DiagramViewController: UIViewController {
 
     func showConnectToolbar() {
         if connectToolbarButtons == nil {
-            let prompt = makePrompt(text: L("Tap pairs of marks to connect them"))
+            let labelText = isIPad() ? L("Tap pairs of marks to connect them") : L("Tap pairs of marks")
+            let prompt = makePrompt(text: labelText)
             let doneButton = UIBarButtonItem(barButtonSystemItem: .done, target: self, action: #selector(cancelConnectMode))
             connectToolbarButtons = [prompt, spacer, undoButton, spacer, redoButton, spacer, doneButton]
         }
