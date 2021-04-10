@@ -19,9 +19,10 @@
 * Prerelease notes
 The version of *EP Diagram* is feature complete and a candidate for release.
 ** New in this version (1.0.0-rc.2)
-- Optimized some code.
+- Optimized code to make undo/redo faster when dealing with many marks (e.g. in AFB)
+- Disallow long press during certain edit functions to avoid crash from too many nested undos.
 ** What is still missing
-- No new features will be added.  May tighten up the Help file before final release and will be intensively testing this version for the next few days.
+- No new features will be added. 
 - See [[*Known issues/bugs/limitations][Known issues/bugs/limitations]].
 ** Instructions for TestFlight testers
 - Play around with the app.
