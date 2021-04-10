@@ -56,4 +56,14 @@ struct Diagram: Codable {
     static func scrollableBlankDiagram() -> Diagram {
         return Diagram(name: L("Scrollable Blank Diagram"), description: L("Wide scrollable blank image"), image: UIImage.emptyImage(size: CGSize(width: 1, height: 1), color: UIColor.systemTeal), ladder: Ladder.defaultLadder())
     }
+
+    static func sampleDiagrams() -> [Diagram] {
+        let sampleDiagrams: [Diagram] = [
+            Diagram(name: L("Normal ECG"), description: L("Just a normal ECG"), image: UIImage(named: "SampleECG")!, ladder: Ladder.defaultLadder()),
+            Diagram(name: L("AV Block"), description: L("High grade AV block"), image: UIImage(named: "AVBlock")!, ladder: Ladder.defaultLadder()),
+            Diagram(name: L("Wenckebach"), description: L("Mobitz I 2nd degree AV block"), image: UIImage(named: "Wenckebach")!, ladder: Ladder.defaultLadder()),
+            Diagram(name: L("AVNRT"), description: L("AV nodal reentrant tachycardia"), image: UIImage(named: "AVNRT")!, ladder: Ladder.defaultLadder())
+        ]
+        return sampleDiagrams
+    }
 }

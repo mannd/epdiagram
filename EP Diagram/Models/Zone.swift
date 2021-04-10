@@ -8,6 +8,8 @@
 
 import UIKit
 
+/// A zone is used to select marks in one or more regions.  It is a highlighted rectangle,
+/// and marks within it are usually set in selected mode.
 struct Zone: Codable {
     var regions: Set<Region> = []
     var startingRegion: Region?

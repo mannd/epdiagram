@@ -107,8 +107,10 @@ enum Geometry {
         }
         let a1 = (s1.proximal.y - s1.distal.y) / (s1.proximal.x - s1.distal.x)
         let a2 = (s2.proximal.y - s2.distal.y) / (s2.proximal.x - s2.distal.x)
-        return nearlyEqual(Double(a1), Double(a2))
-//        return a1 == a2
+        // Below are too precise for the floating point arithmetic
+        //return nearlyEqual(Double(a1), Double(a2))
+        //return a1 == a2
+        return abs(a1 - a2) < 0.00001
     }
 
     // Doesn't check for y outside of segment.  Exclude horizontal line before calling.

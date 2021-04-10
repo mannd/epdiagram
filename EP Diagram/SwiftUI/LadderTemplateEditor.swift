@@ -106,7 +106,7 @@ struct RegionListView: View {
     struct LadderEditor_Previews: PreviewProvider {
 
         static var previews: some View {
-            LadderTemplateEditor(ladderTemplatesController: LadderTemplatesModelController(ladderTemplates: LadderTemplate.defaultTemplates()), ladderTemplate: .constant(LadderTemplate.defaultTemplate1()))
+            LadderTemplateEditor(ladderTemplatesController: LadderTemplatesModelController(ladderTemplates: LadderTemplate.defaultTemplates()), ladderTemplate: .constant(LadderTemplate.defaultTemplate_A_AV_V()))
         }
     }
     #endif

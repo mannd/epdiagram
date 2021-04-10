@@ -94,9 +94,14 @@
 		8EC5D28D256B154E00F49865 /* UIView+PinToInside.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8EC5D28C256B154E00F49865 /* UIView+PinToInside.swift */; };
 		8ECA9FB52470A07B0016D939 /* RegionTemplate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8ECA9FB42470A07B0016D939 /* RegionTemplate.swift */; };
 		8ECA9FB72470A1020016D939 /* LadderTemplate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8ECA9FB62470A1020016D939 /* LadderTemplate.swift */; };
+		8ED3651A261B664D00F2A2B6 /* LadderError.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8ED36519261B664D00F2A2B6 /* LadderError.swift */; };
+		8ED3651F261B66A900F2A2B6 /* UIView+findViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8ED3651E261B66A900F2A2B6 /* UIView+findViewController.swift */; };
 		8ED3B1B62360DA0D00549381 /* Anchor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8ED3B1B52360DA0D00549381 /* Anchor.swift */; };
 		8ED8CBD125D8B1FF00A6234F /* DiagramModelController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8ED8CBD025D8B1FF00A6234F /* DiagramModelController.swift */; };
 		8EDCE17F25EC0C7400B9C7B8 /* Color.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8EDCE17E25EC0C7400B9C7B8 /* Color.swift */; };
+		8EE1411E261F9A5B00392100 /* Onboarding.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8EE1411D261F9A5B00392100 /* Onboarding.swift */; };
+		8EE141232620EED500392100 /* onboard.html in Resources */ = {isa = PBXBuildFile; fileRef = 8EE141222620EED500392100 /* onboard.html */; };
+		8EE141282620EEE200392100 /* onboard.org in Resources */ = {isa = PBXBuildFile; fileRef = 8EE141272620EEE200392100 /* onboard.org */; };
 		8EF8B5B72330739F00ADB77A /* ViewControllerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8EF8B5B62330739F00ADB77A /* ViewControllerTests.swift */; };
 		8EF9166B227926BC00B51F17 /* LadderView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8EF9166A227926BC00B51F17 /* LadderView.swift */; };
 /* End PBXBuildFile section */
@@ -217,9 +222,14 @@
 		8EC8768725B5112000F3D5C2 /* Photos.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Photos.framework; path = Platforms/MacOSX.platform/Developer/SDKs/MacOSX11.1.sdk/System/Library/Frameworks/Photos.framework; sourceTree = DEVELOPER_DIR; };
 		8ECA9FB42470A07B0016D939 /* RegionTemplate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RegionTemplate.swift; sourceTree = "<group>"; };
 		8ECA9FB62470A1020016D939 /* LadderTemplate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LadderTemplate.swift; sourceTree = "<group>"; };
+		8ED36519261B664D00F2A2B6 /* LadderError.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LadderError.swift; sourceTree = "<group>"; };
+		8ED3651E261B66A900F2A2B6 /* UIView+findViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "UIView+findViewController.swift"; sourceTree = "<group>"; };
 		8ED3B1B52360DA0D00549381 /* Anchor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Anchor.swift; sourceTree = "<group>"; };
 		8ED8CBD025D8B1FF00A6234F /* DiagramModelController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DiagramModelController.swift; sourceTree = "<group>"; };
 		8EDCE17E25EC0C7400B9C7B8 /* Color.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Color.swift; sourceTree = "<group>"; };
+		8EE1411D261F9A5B00392100 /* Onboarding.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Onboarding.swift; sourceTree = "<group>"; };
+		8EE141222620EED500392100 /* onboard.html */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.html; path = onboard.html; sourceTree = "<group>"; };
+		8EE141272620EEE200392100 /* onboard.org */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = onboard.org; sourceTree = "<group>"; };
 		8EE311E524A8FE01003C7AF6 /* AudioToolbox.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AudioToolbox.framework; path = Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.15.sdk/System/Library/Frameworks/AudioToolbox.framework; sourceTree = DEVELOPER_DIR; };
 		8EF6B0F925A8CA7800DCA91C /* MobileCoreServices.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = MobileCoreServices.framework; path = Platforms/MacOSX.platform/Developer/SDKs/MacOSX11.1.sdk/System/iOSSupport/System/Library/Frameworks/MobileCoreServices.framework; sourceTree = DEVELOPER_DIR; };
 		8EF6B10125A8CAA600DCA91C /* CoreServices.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreServices.framework; path = Platforms/MacOSX.platform/Developer/SDKs/MacOSX11.1.sdk/System/Library/Frameworks/CoreServices.framework; sourceTree = DEVELOPER_DIR; };
@@ -296,6 +306,7 @@
 				8EBC824024E5E04800B5CA29 /* UIImage+emptyImage.swift */,
 				8E9F0983253CF483009BC968 /* UINavigationController+gestureRecognizerShouldBegin.swift */,
 				8EC5D28C256B154E00F49865 /* UIView+PinToInside.swift */,
+				8ED3651E261B66A900F2A2B6 /* UIView+findViewController.swift */,
 			);
 			path = Extensions;
 			sourceTree = "<group>";
@@ -393,6 +404,8 @@
 		8E976B95260E438C00CA8BF9 /* Help */ = {
 			isa = PBXGroup;
 			children = (
+				8EE141272620EEE200392100 /* onboard.org */,
+				8EE141222620EED500392100 /* onboard.html */,
 				8E976B8A260E435000CA8BF9 /* help.html */,
 				8E976B8B260E435000CA8BF9 /* help.org */,
 				8E976B8C260E435000CA8BF9 /* img */,
@@ -414,6 +427,7 @@
 				8E4ACA852447935600575538 /* HamburgerLayer.swift */,
 				8E2439F524B14F770044AEAB /* Interval.swift */,
 				8E9B804622834870008873BB /* Ladder.swift */,
+				8ED36519261B664D00F2A2B6 /* LadderError.swift */,
 				8ECA9FB62470A1020016D939 /* LadderTemplate.swift */,
 				8E9A065025D9CDC700775531 /* LadderTemplatesModelController.swift */,
 				8E3AD1362459CABF0085BDD4 /* LocationInLadder.swift */,
@@ -422,9 +436,9 @@
 				8E7CCC2A248C30A300018D2C /* Preferences.swift */,
 				8E9B8044228347DE008873BB /* Region.swift */,
 				8ECA9FB42470A07B0016D939 /* RegionTemplate.swift */,
+				8E4086E825F325C4005F53CB /* Rhythm.swift */,
 				8E856CF324EDC5E10064121F /* Segment.swift */,
 				8E982F9224EAF8B500E94F71 /* Zone.swift */,
-				8E4086E825F325C4005F53CB /* Rhythm.swift */,
 			);
 			path = Models;
 			sourceTree = "<group>";
@@ -482,6 +496,7 @@
 				8E2BA1CF24A3BDD7002D997F /* PreferencesView.swift */,
 				8EADC2A824D64E1200C5D3D8 /* SampleSelector.swift */,
 				8E4086E325F30383005F53CB /* RhythmView.swift */,
+				8EE1411D261F9A5B00392100 /* Onboarding.swift */,
 			);
 			path = SwiftUI;
 			sourceTree = "<group>";
@@ -615,11 +630,13 @@
 				8E976B90260E435100CA8BF9 /* img in Resources */,
 				8E04C5CB2569947100946348 /* Startup.storyboard in Resources */,
 				8E976B8E260E435100CA8BF9 /* help.html in Resources */,
+				8EE141232620EED500392100 /* onboard.html in Resources */,
 				8E976B8F260E435100CA8BF9 /* help.org in Resources */,
 				8E7D24CD22779DBF005A1729 /* LaunchScreen.storyboard in Resources */,
 				8E7D24CA22779DBF005A1729 /* Assets.xcassets in Resources */,
 				8E7D24C822779DBD005A1729 /* Main.storyboard in Resources */,
 				8E61C3D725A6260D0064ADC1 /* Startup2.storyboard in Resources */,
+				8EE141282620EEE200392100 /* onboard.org in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -674,6 +691,7 @@
 				8E04C5DB256996E400946348 /* DiagramDocument.swift in Sources */,
 				8E1B6CB8240CAE5300EA88A6 /* ScaledView.swift in Sources */,
 				8E8248DD23B53B55001A85F9 /* SeparatorView.swift in Sources */,
+				8ED3651F261B66A900F2A2B6 /* UIView+findViewController.swift in Sources */,
 				8E671D5224814BB700784EB7 /* LadderTemplatesEditor.swift in Sources */,
 				8E7214DE22E95C860062C094 /* Geometry.swift in Sources */,
 				8E9B8043228345B5008873BB /* Mark.swift in Sources */,
@@ -685,6 +703,7 @@
 				8EDCE17F25EC0C7400B9C7B8 /* Color.swift in Sources */,
 				8E253DD1244A86CB008CC56B /* DiagramViewController+HamburgerTableDelegate.swift in Sources */,
 				8E7CCC2B248C30A300018D2C /* Preferences.swift in Sources */,
+				8EE1411E261F9A5B00392100 /* Onboarding.swift in Sources */,
 				8E4ACA8024478A6E00575538 /* BlackView.swift in Sources */,
 				8EC5D28D256B154E00F49865 /* UIView+PinToInside.swift in Sources */,
 				8ED3B1B62360DA0D00549381 /* Anchor.swift in Sources */,
@@ -700,6 +719,7 @@
 				8E5918BC24AEAB0B00D8ABA3 /* Caliper.swift in Sources */,
 				8EBC824124E5E04800B5CA29 /* UIImage+emptyImage.swift in Sources */,
 				8E982F9324EAF8B500E94F71 /* Zone.swift in Sources */,
+				8ED3651A261B664D00F2A2B6 /* LadderError.swift in Sources */,
 				8E93CA9225A0227100C74F1F /* Global.swift in Sources */,
 				8E033CEA24AC10A300BE6D6F /* Calibration.swift in Sources */,
 				8E9B8045228347DE008873BB /* Region.swift in Sources */,
@@ -903,7 +923,7 @@
 				CODE_SIGN_ENTITLEMENTS = "EP Diagram/EP Diagram.entitlements";
 				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 8;
+				CURRENT_PROJECT_VERSION = 9;
 				DERIVE_MACCATALYST_PRODUCT_BUNDLE_IDENTIFIER = NO;
 				DEVELOPMENT_TEAM = W74NPJXYEG;
 				"ENABLE_HARDENED_RUNTIME[sdk=macosx*]" = YES;
@@ -929,7 +949,7 @@
 				CODE_SIGN_ENTITLEMENTS = "EP Diagram/EP Diagram.entitlements";
 				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 8;
+				CURRENT_PROJECT_VERSION = 9;
 				DERIVE_MACCATALYST_PRODUCT_BUNDLE_IDENTIFIER = NO;
 				DEVELOPMENT_TEAM = W74NPJXYEG;
 				"ENABLE_HARDENED_RUNTIME[sdk=macosx*]" = YES;

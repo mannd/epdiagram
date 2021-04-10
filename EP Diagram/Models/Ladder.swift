@@ -230,6 +230,7 @@ final class Ladder: NSObject, Codable {
         region.marks.removeAll()
     }
 
+   
     // FIXME: update this with all deletions?  Test with new diagram that registry is cleared.
     func removeMarkIdReferences(toMarkId id: UUID) {
         for region in regions {
@@ -316,6 +317,16 @@ final class Ladder: NSObject, Codable {
         return Geometry.areParallel(m1.segment, m2.segment)
     }
 
+    // find latest point of a group of marks
+    func latestPoint(of marks: [Mark]) -> CGPoint {
+        return marks.sorted().last?.latestPoint ?? .zero
+    }
+
+    // find earliest point of a group of marks
+    func earliestPoint(of marks: [Mark]) -> CGPoint {
+        return marks.sorted().first?.earliestPoint ?? .zero
+    }
+
     func meanCL(_ marks: [Mark]) -> CGFloat {
         guard marks.count > 1 else { return 0 }
         let sortedMarks = marks.sorted()
@@ -399,6 +410,12 @@ final class Ladder: NSObject, Codable {
     func setModeForMarkIDs(mode: Mark.Mode, markIDs: LinkedMarkIDs) {
         let linkedMarks = getLinkedMarksFromLinkedMarkIDs(markIDs)
         linkedMarks.setMode(mode)
+    }
+
+    func setModeForMarks(mode: Mark.Mode, marks: [Mark]) {
+        for mark in marks {
+            mark.mode = mode
+        }
     }
 
     func normalizeAllMarks() {
@@ -490,7 +507,7 @@ final class Ladder: NSObject, Codable {
     func availableAnchors(forMark mark: Mark) -> [Anchor] {
         let linkedMarkIDs = mark.linkedMarkIDs
         // FIXME: if attachment is in middle, only allow other end to move
-        if linkedMarkIDs.count < 2 {
+        if linkedMarkIDs.proximal.count == 0 || linkedMarkIDs.distal.count == 0 {
             return defaultAnchors()
         }
         else {
@@ -523,9 +540,6 @@ final class Ladder: NSObject, Codable {
     func defaultAnchor(forMark mark: Mark) -> Anchor {
         return availableAnchors(forMark: mark)[0]
     }
-
-
-
 
     // MARK: Ladder factories
 

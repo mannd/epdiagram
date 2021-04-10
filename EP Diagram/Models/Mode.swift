@@ -8,7 +8,9 @@
 
 import Foundation
 
-// Mode is used by both DiagramViewController, LadderView and CalipersView.
+/// Mode determines the outcome of touch actions in the various views.
+///
+/// Mode is used by DiagramViewController, LadderView and CalipersView.
 enum Mode: Int {
     case normal
     case calibrate

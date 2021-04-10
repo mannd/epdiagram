@@ -32,6 +32,10 @@ struct Preferences {
     static let hideZeroCTKey = "defaultHideZeroCTKey"
     static let markerLineWidthKey = "defaultMarkerLineWidthKey"
 
+    // keys not modifiable by user
+    static let notFirstRunKey = "defaultNotFirstRunKey"
+    static let versionKey = "defaultVersionKey"
+
     // color keys
     static let caliperColorNameKey = "defaultCaliperColorNameKey"
     static let cursorColorNameKey = "defaultCursorColorNameKey"

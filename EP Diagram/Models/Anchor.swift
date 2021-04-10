@@ -8,7 +8,10 @@
 
 import Foundation
 
-/// Used to anchor cursor to a part of a mark.
+/// Used to anchor the cursor to a point of a mark's segment.
+/// Anchors also determine how marks move.  When moving the proximal anchor,
+/// the distal anchor stays fixed, and vice versa.  Moving the middle anchor moves
+/// the whole mark as a unit.
 enum Anchor: Int, Codable {
     case middle
     case proximal

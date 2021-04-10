@@ -522,7 +522,7 @@ class LadderViewTests: XCTestCase {
         ladderView.assessImpulseOrigin(mark: mark3)
         XCTAssertEqual(mark3.impulseOriginSite, .distal)
         // move mark1 next to distal mark3
-        mark1.segment = Mark.changePosition(mark: mark1, movement: .horizontal, to: CGPoint(x: 50, y: 0))
+        mark1.segment = Mark.segmentAfterMovement(mark: mark1, movement: .horizontal, to: CGPoint(x: 50, y: 0))
 //        mark1.move(movement: .horizontal, to: CGPoint(x: 50, y: 0))
         ladderView.assessImpulseOrigin(mark: mark3)
         XCTAssertEqual(mark3.impulseOriginSite, .none)
@@ -577,6 +577,40 @@ class LadderViewTests: XCTestCase {
         XCTAssertEqual(markAV!.segment.distal.x, 200)
         XCTAssertEqual(markA!.linkedMarkIDs.distal.count, 0)
         XCTAssertEqual(markAV!.linkedMarkIDs.proximal.count, 0)
+    }
+
+    func testRemoveOverlappingMarks() {
+        let _ = ladderView.addMarkToActiveRegion(regionPositionX: 100)
+        let _ = ladderView.addMarkToActiveRegion(regionPositionX: 100)
+        let _ = ladderView.addMarkToActiveRegion(regionPositionX: 100)
+        let mark4 = ladderView.addMarkToActiveRegion(regionPositionX: 100)
+        ladderView.removeOverlappingMarks(with: [mark4!])
+        XCTAssertEqual(ladderView.ladder.allMarks().count, 1)
+        XCTAssertEqual(ladderView.ladder.allMarks()[0].id, mark4!.id)
+        let mark5 = ladderView.addMarkToActiveRegion(regionPositionX: 200)
+        mark5?.segment = Segment(proximal: CGPoint(x: 205, y: 0.1), distal: CGPoint(x: 377, y: 0.8))
+        let mark6 = ladderView.addMarkToActiveRegion(regionPositionX: 200)
+        mark6?.segment = Segment(proximal: CGPoint(x: 205, y: 0.1), distal: CGPoint(x: 377, y: 0.8))
+        XCTAssertEqual(ladderView.ladder.allMarks().count, 3)
+        ladderView.removeOverlappingMarks(with: [mark4!, mark5!])
+        XCTAssertEqual(ladderView.ladder.allMarks().count, 2)
+        XCTAssertEqual(ladderView.ladder.allMarks()[1].id, mark5!.id)
+    }
+
+    func testEarliestLatestPoint() {
+        let mark1 = ladderView.addMarkToActiveRegion(regionPositionX: 100)
+        let mark2 = ladderView.addMarkToActiveRegion(regionPositionX: 200)
+        mark1?.segment = Segment(proximal: CGPoint(x: 99, y: 0), distal: CGPoint(x: 190, y: 0.8))
+        mark2?.segment = Segment(proximal: CGPoint(x: 100, y: 0), distal: CGPoint(x: 191, y: 0.8))
+        XCTAssertEqual(ladderView.ladder.earliestPoint(of: [mark1!, mark2!]), CGPoint(x: 99, y: 0))
+        XCTAssertEqual(ladderView.ladder.latestPoint(of: [mark1!, mark2!]), CGPoint(x: 191, y: 0.8))
+        ladderView.setActiveRegion(regionNum: 1)
+        let _ = ladderView.addMarkToActiveRegion(regionPositionX: 300)
+        XCTAssertEqual(ladderView.ladder.latestPoint(of: ladderView.ladder.allMarks()), CGPoint(x: 300, y: 1.0))
+        let _ = ladderView.addMarkToActiveRegion(regionPositionX: 1)
+        XCTAssertEqual(ladderView.ladder.earliestPoint(of: ladderView.ladder.allMarks()), CGPoint(x: 1, y: 0))
+
+
     }
 
 }

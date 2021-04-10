@@ -13,6 +13,13 @@ import Photos
 import os.log
 
 final class DiagramViewController: UIViewController {
+    // For debugging only
+    #if DEBUG
+    var debugShowOnboarding = false
+    #else // Don't change below!
+    var debugShowOnboarding = false
+    #endif
+
     // View, outlets, constraints
     @IBOutlet var _constraintHamburgerWidth: NSLayoutConstraint!
     @IBOutlet var _constraintHamburgerLeft: NSLayoutConstraint!
@@ -31,6 +38,8 @@ final class DiagramViewController: UIViewController {
     static let maxLeftMargin: Float = 100
     static let minSlantAngle: Float = -45
     static let maxSlantAngle: Float = 45
+
+    let stackViewSpacing: CGFloat = 12
 
     let gotoTextFieldTag = 1
 
@@ -304,12 +313,7 @@ final class DiagramViewController: UIViewController {
             try self.ladderView.checkForRhythm()
             self.performShowRhythmSegue()
         } catch {
-            if error is LadderError {
-                let ladderError = error as? LadderError
-                UserAlert.showMessage(viewController: self, title: L("Error Applying Rhythm"), message: ladderError?.errorDescription ?? error.localizedDescription)
-            } else {
-                print("unknown error")
-            }
+            self.showError(title: L("Error Applying Rhythm"), error: error)
         }
     }
 
@@ -330,12 +334,27 @@ final class DiagramViewController: UIViewController {
             try self.ladderView.checkForRepeatCL()
             self.ladderView.performRepeatCL(time: time)
         } catch {
-            if error is LadderError {
-                let ladderError = error as? LadderError
-                UserAlert.showMessage(viewController: self, title: L("Error Repeating Cycle Length"), message: ladderError?.errorDescription ?? error.localizedDescription)
-            } else {
-                print("unknown error")
-            }
+            showError(title: L("Error Repeating Cycle Length"), error: error)
+        }
+    }
+
+    lazy var copyMarksAction = UIAction(title: L("Copy"), image: UIImage(systemName: "doc.on.doc")) { _ in
+        self.showCopyMarksToolbar()
+        self.ladderView.copyMarks()
+    }
+
+    lazy var repeatPatternAction = UIAction(title: L("Repeat pattern"), image: UIImage(systemName: "repeat")) { _ in
+        self.repeatPattern()
+    }
+
+    private func repeatPattern() {
+        do {
+            self.ladderView.setPatternMarks()
+            try self.ladderView.checkForRepeatPattern()
+            self.showRepeatPatternToolbar()
+        } catch {
+            self.showError(title: L("Error Repeating Pattern"), error: error)
+            self.ladderView.patternMarks.removeAll()
         }
     }
 
@@ -344,12 +363,7 @@ final class DiagramViewController: UIViewController {
             let meanCL = try self.ladderView.meanCL()
             self.showAdjustCLToolbar(rawValue: meanCL)
         } catch {
-            if error is LadderError {
-                let ladderError = error as? LadderError
-                UserAlert.showMessage(viewController: self, title: L("Error Adjusting Cycle Length"), message: ladderError?.errorDescription ?? error.localizedDescription)
-            } else {
-                print("unknown error")
-            }
+            self.showError(title: L("Error Adjusting Cycle Length"), error: error)
         }
     }
 
@@ -358,12 +372,7 @@ final class DiagramViewController: UIViewController {
             try self.ladderView.checkForMovement()
             self.showMoveMarksToolbar()
         } catch {
-            if error is LadderError {
-                let ladderError = error as? LadderError
-                UserAlert.showMessage(viewController: self, title: L("Error Moving Marks"), message: ladderError?.errorDescription ?? error.localizedDescription)
-            } else {
-                print("unknown error")
-            }
+            self.showError(title: L("Error Moving Marks"), error: error)
         }
     }
 
@@ -409,9 +418,9 @@ final class DiagramViewController: UIViewController {
         self.ladderView.removeRegion()
     }
 
-    lazy var markMenu = UIMenu(title: L("Mark Menu"), children: [self.styleMenu, self.emphasisMenu, self.impulseOriginMenu, self.blockMenu, self.straightenMenu, self.slantMenu, self.adjustYMenu, self.moveAction, self.adjustCLAction, self.rhythmAction, self.repeatCLMenu, self.unlinkAction, self.deleteAction])
+    lazy var markMenu = UIMenu(title: L("Mark Menu"), children: [self.styleMenu, self.emphasisMenu, self.impulseOriginMenu, self.blockMenu, self.straightenMenu, self.slantMenu, self.adjustYMenu, self.moveAction, self.adjustCLAction, self.rhythmAction, self.repeatCLMenu, self.copyMarksAction, self.repeatPatternAction, self.unlinkAction, self.deleteAction])
 
-    lazy var labelChildren = [self.regionStyleMenu, self.editLabelAction, self.addRegionMenu, self.removeRegionAction, self.regionHeightMenu, self.adjustLeftMarginAction]
+    lazy var labelMenu = [self.regionStyleMenu, self.editLabelAction, self.addRegionMenu, self.removeRegionAction, self.regionHeightMenu, self.adjustLeftMarginAction]
 
     lazy var noSelectionAction = UIAction(title: L("No regions, zones, or marks selected")) { _ in }
 
@@ -420,8 +429,6 @@ final class DiagramViewController: UIViewController {
     override func viewDidLoad() {
         os_log("viewDidLoad() - ViewController", log: OSLog.viewCycle, type: .info)
         super.viewDidLoad()
-
-
 
         // TODO: customization for mac version
         if isRunningOnMac() {
@@ -506,6 +513,18 @@ final class DiagramViewController: UIViewController {
         setTitle()
 
         ladderView.reregisterAllMarks()
+
+        let firstRun: Bool = !UserDefaults.standard.bool(forKey: Preferences.notFirstRunKey)
+
+        if debugShowOnboarding || firstRun { // || first run
+            performShowOnboardingSegue()
+            UserDefaults.standard.set(true, forKey: Preferences.notFirstRunKey)
+            // take this oportunity to save the version, which we can use in the future to determine if we nee to reshow the onboarding (e.g. if onboarding changes).
+            if let version = Version.version {
+                UserDefaults.standard.set(version, forKey: Preferences.versionKey)
+                print("version", version)
+            }
+        }
     }
 
     override func viewWillAppear(_ animated: Bool) {
@@ -516,6 +535,7 @@ final class DiagramViewController: UIViewController {
     var didFirstWillLayout = false
     override func viewWillLayoutSubviews() {
         os_log("viewWillLayoutSubviews() - DiagramViewController", log: OSLog.viewCycle, type: .info)
+
         if didFirstWillLayout { return }
         didFirstWillLayout = true
         if restorationInfo != nil {
@@ -618,7 +638,8 @@ final class DiagramViewController: UIViewController {
     func showSelectToolbar() {
         if selectToolbarButtons == nil {
             let selectAllButton = UIBarButtonItem(title: L("Select All"), style: .plain, target: self, action: #selector(selectAllMarks))
-            let clearButton = UIBarButtonItem(title: L("Clear Selection"), style: .plain, target: self, action: #selector(clearSelection))
+            let clearButtonTitle = isIPad() ? L("Clear Selection") : L("Clear")
+            let clearButton = UIBarButtonItem(title: clearButtonTitle, style: .plain, target: self, action: #selector(clearSelection))
             let doneButton = UIBarButtonItem(barButtonSystemItem: .done, target: self, action: #selector(cancelSelectMode))
             selectToolbarButtons = [selectAllButton, spacer, clearButton, spacer, undoButton, spacer, redoButton, spacer, doneButton]
         }
@@ -674,19 +695,51 @@ final class DiagramViewController: UIViewController {
         slider.setValue(Float(rawValue), animated: false)
         ladderView.adjustCL(cl: rawValue)
         slider.addTarget(self, action: #selector(clSliderValueDidChange(_:)), for: .valueChanged)
-        let doneButton = UIButton(type: .system)
-        doneButton.setTitle(L("Done"), for: .normal)
+        let doneButton = UIButton(type: .close)
         doneButton.addTarget(self, action: #selector(closeAdjustCLToolbar(_:)), for: .touchUpInside)
         let stackView = UIStackView(frame: toolbar.frame)
         stackView.distribution = .fill
         stackView.axis = .horizontal
-        stackView.spacing = 8
+        stackView.spacing = stackViewSpacing
         stackView.addArrangedSubview(labelText)
         stackView.addArrangedSubview(slider)
         stackView.addArrangedSubview(doneButton)
         setToolbarItems([UIBarButtonItem(customView: stackView)], animated: true)
         imageScrollView.isActivated = false
+    }
 
+    func showCopyMarksToolbar() {
+        guard let toolbar = navigationController?.toolbar else { return }
+        // we won't lump copy/pastes together, each one is undoable
+        let labelText = UITextField()
+        labelText.text = L("Tap to paste marks")
+        let doneButton = UIButton(type: .close)
+        doneButton.addTarget(self, action: #selector(closeCopyMarksToolbar(_:)), for: .touchUpInside)
+        let stackView = UIStackView(frame: toolbar.frame)
+        stackView.distribution = .fill
+        stackView.axis = .horizontal
+        stackView.spacing = stackViewSpacing
+        stackView.addArrangedSubview(labelText)
+        stackView.addArrangedSubview(doneButton)
+        setToolbarItems([UIBarButtonItem(customView: stackView)], animated: true)
+        imageScrollView.isActivated = false
+    }
+
+    func showRepeatPatternToolbar() {
+        guard let toolbar = navigationController?.toolbar else { return }
+        currentDocument?.undoManager.beginUndoGrouping()
+        let labelText = UITextField()
+        labelText.text = isIPad() ? L("Tap joining mark once for single copy, double tab for multiple copies") : L("Single or double tap joining mark")
+        let doneButton = UIButton(type: .close)
+        doneButton.addTarget(self, action: #selector(closeRepeatPatternToolbar(_:)), for: .touchUpInside)
+        let stackView = UIStackView(frame: toolbar.frame)
+        stackView.distribution = .fill
+        stackView.axis = .horizontal
+        stackView.spacing = stackViewSpacing
+        stackView.addArrangedSubview(labelText)
+        stackView.addArrangedSubview(doneButton)
+        setToolbarItems([UIBarButtonItem(customView: stackView)], animated: true)
+        imageScrollView.isActivated = false
     }
 
     func showMoveMarksToolbar() {
@@ -695,13 +748,12 @@ final class DiagramViewController: UIViewController {
         let labelText = UITextField()
         labelText.text = L("Drag selected marks")
         ladderView.isDraggingSelectedMarks = true
-        let doneButton = UIButton(type: .system)
-        doneButton.setTitle(L("Done"), for: .normal)
+        let doneButton = UIButton(type: .close)
         doneButton.addTarget(self, action: #selector(closeMoveMarksToolbar(_:)), for: .touchUpInside)
         let stackView = UIStackView(frame: toolbar.frame)
         stackView.distribution = .fill
         stackView.axis = .horizontal
-        stackView.spacing = 8
+        stackView.spacing = stackViewSpacing
         stackView.addArrangedSubview(labelText)
         stackView.addArrangedSubview(doneButton)
         setToolbarItems([UIBarButtonItem(customView: stackView)], animated: true)
@@ -724,13 +776,12 @@ final class DiagramViewController: UIViewController {
             ladderView.slantSelectedMarks(angle: 0, endpoint: activeEndpoint)
         }
         slider.addTarget(self, action: #selector(slantSliderValueDidChange(_:)), for: .valueChanged)
-        let doneButton = UIButton(type: .system)
-        doneButton.setTitle(L("Done"), for: .normal)
+        let doneButton = UIButton(type: .close)
         doneButton.addTarget(self, action: #selector(closeSlantToolbar(_:)), for: .touchUpInside)
         let stackView = UIStackView(frame: toolbar.frame)
         stackView.distribution = .fill
         stackView.axis = .horizontal
-        stackView.spacing = 8
+        stackView.spacing = stackViewSpacing
         stackView.addArrangedSubview(labelText)
         stackView.addArrangedSubview(slider)
         stackView.addArrangedSubview(doneButton)
@@ -748,13 +799,12 @@ final class DiagramViewController: UIViewController {
         slider.maximumValue = Self.maxLeftMargin
         slider.setValue(Float(leftMargin), animated: false)
         slider.addTarget(self, action: #selector(leftMarginSliderValueDidChange(_:)), for: .valueChanged)
-        let doneButton = UIButton(type: .system)
-        doneButton.setTitle(L("Done"), for: .normal)
+        let doneButton = UIButton(type: .close)
         doneButton.addTarget(self, action: #selector(closeAdjustLeftMarginToolbar(_:)), for: .touchUpInside)
         let stackView = UIStackView(frame: toolbar.frame)
         stackView.distribution = .fill
         stackView.axis = .horizontal
-        stackView.spacing = 8
+        stackView.spacing = stackViewSpacing
         stackView.addArrangedSubview(labelText)
         stackView.addArrangedSubview(slider)
         stackView.addArrangedSubview(doneButton)
@@ -779,13 +829,12 @@ final class DiagramViewController: UIViewController {
             ladderView.adjustY(CGFloat(startValue), endpoint: activeEndpoint, adjustment: adjustment)
         }
         slider.addTarget(self, action: #selector(adjustYSliderValueDidChange(_:)), for: .valueChanged)
-        let doneButton = UIButton(type: .system)
-        doneButton.setTitle(L("Done"), for: .normal)
+        let doneButton = UIButton(type: .close)
         doneButton.addTarget(self, action: #selector(closeAdjustYToolbar(_:)), for: .touchUpInside)
         let stackView = UIStackView(frame: toolbar.frame)
         stackView.distribution = .fill
         stackView.axis = .horizontal
-        stackView.spacing = 8
+        stackView.spacing = stackViewSpacing
         stackView.addArrangedSubview(labelText)
         stackView.addArrangedSubview(slider)
         stackView.addArrangedSubview(doneButton)
@@ -821,6 +870,20 @@ final class DiagramViewController: UIViewController {
 
     @objc func closeAdjustCLToolbar(_ sender: UISlider) {
         currentDocument?.undoManager.endUndoGrouping()
+        showSelectToolbar()
+        imageScrollView.isActivated = true
+    }
+
+    @objc func closeCopyMarksToolbar(_ sender: UIAlertAction) {
+        // Do not end undo grouping here, copy/pastes are not grouped!
+        self.ladderView.copiedMarks.removeAll()
+        showSelectToolbar()
+        imageScrollView.isActivated = true
+    }
+
+    @objc func closeRepeatPatternToolbar(_ sender: UIAlertAction) {
+        currentDocument?.undoManager.endUndoGrouping()
+        self.ladderView.patternMarks = []
         showSelectToolbar()
         imageScrollView.isActivated = true
     }
@@ -989,7 +1052,9 @@ final class DiagramViewController: UIViewController {
         os_log("undo action", log: OSLog.action, type: .info)
         if self.currentDocument?.undoManager?.canUndo ?? false {
             // Cursor doesn't track undo and redo well, so hide it!
-            hideCursorAndNormalizeAllMarks()
+            if mode == .normal {
+                hideCursorAndNormalizeAllMarks()
+            }
             self.currentDocument?.undoManager?.undo()
             setViewsNeedDisplay()
         }
@@ -998,7 +1063,9 @@ final class DiagramViewController: UIViewController {
     @objc func redo() {
         os_log("redo action", log: OSLog.action, type: .info)
         if self.currentDocument?.undoManager?.canRedo ?? false {
-            hideCursorAndNormalizeAllMarks()
+            if mode == .normal {
+                hideCursorAndNormalizeAllMarks()
+            }
             self.currentDocument?.undoManager?.redo()
             setViewsNeedDisplay()
         }
@@ -1009,6 +1076,17 @@ final class DiagramViewController: UIViewController {
         UserAlert.showEditLabelAlert(viewController: self, region: selectedRegion, handler: { newLabel, newDescription in
             self.ladderView.undoablySetLabel(newLabel, description: newDescription, forRegion: selectedRegion)
         })
+    }
+
+    func showError(title: String, error: Error) {
+        var message = error.localizedDescription
+        if error is LadderError {
+            if let ladderError = error as? LadderError {
+                message = ladderError.localizedDescription
+            }
+        }
+        UserAlert.showMessage(viewController: self, title: title, message: message)
+        os_log("ERROR: %s, %s", log: .errors, type: .error, title, message)
     }
 
 
@@ -1029,6 +1107,7 @@ final class DiagramViewController: UIViewController {
         }
         if ladderView.mode == .select {
             ladderView.endZoning()
+            ladderView.normalizeRegions()
             ladderView.normalizeAllMarks()
             ladderView.setNeedsDisplay()
         }
@@ -1173,12 +1252,13 @@ final class DiagramViewController: UIViewController {
     override func viewWillTransition(to size: CGSize, with coordinator: UIViewControllerTransitionCoordinator) {
         os_log("viewWillTransition", log: OSLog.viewCycle, type: .info)
         super.viewWillTransition(to: size, with: coordinator)
-        // Hide cursor with rotation, to avoid redrawing it.
-        hideCursorAndNormalizeAllMarks()
+        // Hide cursor with rotation, to avoid redrawing it, but only if in normal mode.
+        if mode == .normal {
+            hideCursorAndNormalizeAllMarks()
+        }
         // Remove separatorView when rotating to let original constraints resume.
         // Otherwise, views are not laid out correctly.
         if let separatorView = separatorView {
-            // Note separatorView is released when removed from superview.
             separatorView.removeFromSuperview()
             self.separatorView = nil
         }
@@ -1241,11 +1321,7 @@ final class DiagramViewController: UIViewController {
     }
 
     @IBSegueAction func showSampleSelector(_ coder: NSCoder) -> UIViewController? {
-        let sampleDiagrams: [Diagram] = [
-            Diagram(name: L("Normal ECG"), description: L("Just a normal ECG"), image: UIImage(named: "SampleECG")!, ladder: Ladder.defaultLadder()),
-            Diagram(name: L("AV Block"), description: L("High grade AV block"), image: UIImage(named: "AVBlock")!, ladder: Ladder.defaultLadder())
-        ]
-        let sampleSelector = SampleSelector(sampleDiagrams: sampleDiagrams, delegate: self)
+        let sampleSelector = SampleSelector(sampleDiagrams: Diagram.sampleDiagrams(), delegate: self)
         let hostingController = UIHostingController(coder: coder, rootView: sampleSelector)
         return hostingController
     }
@@ -1261,6 +1337,17 @@ final class DiagramViewController: UIViewController {
         let rhythmView = RhythmView(dismissAction: applyRhythm(rhythm:))
         let hostingController = UIHostingController(coder: coder, rootView: rhythmView)
         return hostingController
+    }
+
+    @IBSegueAction func performOnboardingSegueAction(_ coder: NSCoder) -> UIViewController? {
+        guard let url = Bundle.main.url(forResource: "onboard", withExtension: "html") else { return nil }
+        do {
+            let contents = try String(contentsOf: url)
+            let onboardingView = Onboarding(onboardText: .constant(contents), url: url)
+            return UIHostingController(coder: coder, rootView: onboardingView)
+        } catch {
+            return nil
+        }
     }
 
     func applyRhythm(rhythm: Rhythm) {
@@ -1288,6 +1375,10 @@ final class DiagramViewController: UIViewController {
     func performShowHelpSegue() {
         P("performShowHelpSegue")
         performSegue(withIdentifier: "showHelpSegue", sender: self)
+    }
+
+    func performShowOnboardingSegue() {
+        performSegue(withIdentifier: "showOnboardingSegue", sender: self)
     }
 
     func performShowPreferencesSegue() {
@@ -1486,7 +1577,6 @@ extension DiagramViewController: NSUserActivityDelegate {
             // intercept and kill userInfo if we closed the document with the close button
             userActivity.userInfo = nil
         }
-//        print("saved user activity info", userActivity.userInfo as Any)
     }
 }
 

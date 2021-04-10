@@ -61,6 +61,8 @@ extension DiagramViewController: UIScrollViewDelegate {
         cursorView.scale = scrollView.zoomScale
         ladderView.scale = scrollView.zoomScale
         calibration.currentZoom = scrollView.zoomScale
+//        ladderView.viewMaxWidth = imageScrollView.frame.width
+        print("viewMaxWidth", ladderView.viewMaxWidth)
         setViewsNeedDisplay()
     }
 

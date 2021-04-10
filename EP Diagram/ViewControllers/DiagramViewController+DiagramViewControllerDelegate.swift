@@ -232,7 +232,7 @@ extension DiagramViewController: DiagramViewControllerDelegate {
 
     func hideCursor() {
         hideCursorAndNormalizeAllMarks()
-    }
+    }    
 
 }
 

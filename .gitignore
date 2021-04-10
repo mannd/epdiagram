@@ -22,3 +22,12 @@ profiles.*
 # Emacs tmp file
 .#*
 \#*
+
+# tex files
+*/Help/*.tex
+*/Help/*.aux
+*/Help/*.toc
+*/Help/*.fmt
+*/Help/*.log
+*/Help/*.pdf
+*/Help/*.out
