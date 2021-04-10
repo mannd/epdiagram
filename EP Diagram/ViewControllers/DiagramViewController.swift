@@ -672,7 +672,8 @@ final class DiagramViewController: UIViewController {
 
     func showConnectToolbar() {
         if connectToolbarButtons == nil {
-            let prompt = makePrompt(text: L("Tap pairs of marks to connect them"))
+            let labelText = isIPad() ? L("Tap pairs of marks to connect them") : L("Tap pairs of marks")
+            let prompt = makePrompt(text: labelText)
             let doneButton = UIBarButtonItem(barButtonSystemItem: .done, target: self, action: #selector(cancelConnectMode))
             connectToolbarButtons = [prompt, spacer, undoButton, spacer, redoButton, spacer, doneButton]
         }
@@ -687,6 +688,7 @@ final class DiagramViewController: UIViewController {
     func showAdjustCLToolbar(rawValue: CGFloat) {
         guard let toolbar = navigationController?.toolbar else { return }
         currentDocument?.undoManager.beginUndoGrouping()
+        ladderView.unlinkAllMarks()
         let labelText = UITextField()
         labelText.text = L("Adjust cycle length")
         let slider = UISlider()
@@ -763,6 +765,8 @@ final class DiagramViewController: UIViewController {
     func showSlantToolbar() {
         guard let toolbar = navigationController?.toolbar else { return }
         currentDocument?.undoManager.beginUndoGrouping()
+        // FIXME: maybe setSegment needs to unlink and relink, maybe not.  And what about snapping?
+        ladderView.unlinkAllMarks()
         let labelText = UITextField()
         labelText.text = L("Adjust mark slant")
         let slider = UISlider()
@@ -869,6 +873,7 @@ final class DiagramViewController: UIViewController {
     }
 
     @objc func closeAdjustCLToolbar(_ sender: UISlider) {
+        ladderView.relinkAllMarks()
         currentDocument?.undoManager.endUndoGrouping()
         showSelectToolbar()
         imageScrollView.isActivated = true
@@ -889,6 +894,7 @@ final class DiagramViewController: UIViewController {
     }
 
     @objc func closeSlantToolbar(_ sender: UIAlertAction) {
+        ladderView.relinkAllMarks()
         currentDocument?.undoManager.endUndoGrouping()
         showSelectToolbar()
         imageScrollView.isActivated = true
