@@ -18,11 +18,11 @@
 #+HTML_HEAD: <link rel="stylesheet" type="text/css" href="./org.css"/>
 * Prerelease notes
 The version of *EP Diagram* is feature complete and a candidate for release.
-** New in this version (1.0.0-rc.1)
-- Add [[*Copy][copy]] and [[*Repeat pattern][repeat pattern]] features.
-- Add onboarding.
+** New in this version (1.0.0-rc.2)
+- Optimized code to make undo/redo faster when dealing with many marks (e.g. in AFB)
+- Disallow long press during certain edit functions to avoid crash from too many nested undos.
 ** What is still missing
-- No new features will be added.  May tighten up the Help file before final release and will be intensively testing this version for the next few days.
+- No new features will be added. 
 - See [[*Known issues/bugs/limitations][Known issues/bugs/limitations]].
 ** Instructions for TestFlight testers
 - Play around with the app.
@@ -471,6 +471,10 @@ We plan to include in the next version:
 - Antiperovitch P, Luna AB de, Alencar JN de, et al. Old teaching tools should not be forgotten: The value of the Lewis ladder diagram in understanding bigeminal rhythms. Annals of Noninvasive Electrocardiology. 2019;24(5):e12685. doi:https://doi.org/10.1111/anec.12685
 * Acknowledgments
 - This app was inspired by someone who complained that the *EP Calipers* app didn't have the ability to draw ladder diagrams, so it was hardly worth $1.99.  As it turns out, implementing a ladder diagram app is a non-trivial operation.  Nevertheless, thanks to this anonymous reviewer for giving me the idea.
+
+- Some public domain clipart used in the figures was obtained from [[https://www.clipartmax.com]].
+
+- Sample ECGs are licensed by [[https://creativecommons.org/licenses/by/3.0/][CC BY 3]] and [[https://creativecommons.org/licenses/by-nc-sa/4.0/][CC BY-NC-SA 4.0]].  Creators include [[https://commons.wikimedia.org/wiki/User:Ceccomaster][Ceccomaster]], and [[https://litfl.com/karel-frederik-wenckebach/][litfl.com]].
 
 - The source code for *EP Diagram* is available on [[https://github.com/mannd/epdiagram][GitHub]].
 
