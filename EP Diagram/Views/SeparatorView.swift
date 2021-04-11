@@ -8,8 +8,8 @@
 
 import UIKit
 
-// FIXME: Refactor for EP Diagram.  Eliminate vertical separator, etc.
 // After https://gist.github.com/ElegyD/c5af8892de04fa8a33e26fb919972d6a
+// Only horizonal type separator used in EP Diagram.
 enum SeparatorType {
     case horizontal
     case vertical
@@ -21,17 +21,16 @@ let margin: CGFloat = (totalSize - visibleSize) / 2
 let minSize: CGFloat = 100
 let indicatorSize: CGFloat = 36  // indicator in middle of separator
 
-
 protocol OnConstraintUpdateProtocol {
     func updateConstraintOnBasisOfTouch(touch: UITouch)
 }
 
 class SeparatorView: UIView {
-
     var startConstraint: NSLayoutConstraint?  // vertical position of separator
     var primaryView: UIView  // view above
     var secondaryView: UIView // view below
 
+    // Separator view needs to communicate with the cursor view, thus...
     weak var cursorViewDelegate: CursorViewDelegate?
 
     var oldPosition: CGFloat = 0  // position of separator before gesture started
@@ -136,15 +135,7 @@ final class HorizontalSeparatorView: SeparatorView, OnConstraintUpdateProtocol {
     }
 
     override func setupParentViewConstraints(parentView: UIView) {
-//        parentView.leadingAnchor.constraint(equalTo: primaryView.leadingAnchor).isActive = true
-//        parentView.trailingAnchor.constraint(equalTo: primaryView.trailingAnchor).isActive = true
-//        parentView.leadingAnchor.constraint(equalTo: secondaryView.leadingAnchor).isActive = true
-//        parentView.trailingAnchor.constraint(equalTo: secondaryView.trailingAnchor).isActive = true
-//        parentView.topAnchor.constraint(equalTo: primaryView.topAnchor).isActive = true
-//        let height = secondaryView.heightAnchor.constraint(equalTo: primaryView.heightAnchor)
-//        height.priority = .defaultLow
-//        height.isActive = true
-//        parentView.bottomAnchor.constraint(equalTo: secondaryView.bottomAnchor).isActive = true
+        // We handle parent view differently, so this method is void
     }
 
     override func setupSeparatorConstraints() {

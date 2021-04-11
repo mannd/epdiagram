@@ -9,15 +9,15 @@
 import UIKit
 import OSLog
 
+/// A view that manages and displays the ladder.
 final class LadderView: ScaledView {
-    typealias MarkSegment = (mark: Mark, segment: Segment)
 
     // For debugging
     #if DEBUG  // Change this for debugging impulse origins and block
     var showProxEnd = false
     var showEarliestPoint = false
     var debugMarkMode = false
-    #else  // Don't ever change this.  They must all be FALSE.
+    #else  // Don't ever change these.  They must all be FALSE.
     var showProxEnd = false
     var showEarliestPoint = false
     var debugMarkMode = false
