@@ -10,6 +10,7 @@ import UIKit
 import OSLog
 
 final class LadderView: ScaledView {
+    typealias MarkSegment = (mark: Mark, segment: Segment)
 
     // For debugging
     #if DEBUG  // Change this for debugging impulse origins and block
@@ -1158,6 +1159,7 @@ final class LadderView: ScaledView {
         cursorViewDelegate.refresh()
     }
 
+    // TODO: change to setSegments()
     private func moveLinkedMarks(forMark mark: Mark) {
         //os_log("moveLinkedMarked(forMark:)", log: .action, type: .info)
         for proximalMark in ladder.getMarkSet(fromMarkIdSet: mark.linkedMarkIDs.proximal) {
@@ -2091,6 +2093,7 @@ final class LadderView: ScaledView {
     func straightenToEndpoint(_ endpoint: Mark.Endpoint) {
         let selectedMarks = ladder.allMarksWithMode(.selected)
         currentDocument?.undoManager.beginUndoGrouping()
+        var segments: [Segment] = []
         selectedMarks.forEach { mark in
             undoablyUnlinkMark(mark: mark)
             let segment: Segment
@@ -2102,15 +2105,19 @@ final class LadderView: ScaledView {
             case .none, .auto, .random:
                 fatalError("Endpoint.none, .random, or .auto inappopriately passed to straightenToEndPoint()")
             }
-            self.setSegment(segment: segment, forMark: mark)
+            segments.append((segment))
+//            self.setSegment(segment: segment, forMark: mark)
         }
+        setSegments(segments: segments, forMarks: selectedMarks)
         // Not clear if undo action needs to relink all marks, but it is working as is.
         relinkAllMarks()
         currentDocument?.undoManager.endUndoGrouping()
     }
 
+    // TODO: change to setSegments()
     func adjustY(_ value: CGFloat, endpoint: Mark.Endpoint, adjustment: Adjustment) {
         let selectedMarks = ladder.allMarksWithMode(.selected)
+        var segments: [Segment] = []
         selectedMarks.forEach { mark in
             undoablyUnlinkMark(mark: mark)
             let segment: Segment
@@ -2128,9 +2135,12 @@ final class LadderView: ScaledView {
                     segment = Segment(proximal: mark.segment.proximal, distal: CGPoint(x: mark.segment.distal.x, y: value))
                 }
             }
-            setSegment(segment: segment, forMark: mark)
+            segments.append(segment)
+//            setSegment(segment: segment, forMark: mark)
         }
-        relinkAllMarks()
+        setSegments(segments: segments, forMarks: selectedMarks)
+        // FIXME: reassess relinking
+//        relinkAllMarks()
     }
 
     func meanCL() throws -> CGFloat {
@@ -2342,12 +2352,15 @@ final class LadderView: ScaledView {
     }
 
     func deleteMarksInRegion(_ region: Region, start: CGFloat, end: CGFloat) {
+        var marksForDeletion: [Mark] = []
         for mark in region.marks {
             if (mark.segment.proximal.x > start || mark.segment.distal.x > start)
                 && (mark.segment.proximal.x < end || mark.segment.distal.x < end) {
-                undoablyDeleteMark(mark: mark)
+                marksForDeletion.append(mark)
             }
         }
+        undoablyDeleteMarks(marks: marksForDeletion)
+
     }
 
     // FIXME: Remove???
@@ -2487,32 +2500,33 @@ final class LadderView: ScaledView {
         relinkAllMarks()
     }
 
-    // FIXME: bottleneck
     func adjustCL(cl: CGFloat) {
         let selectedMarks = ladder.allMarksWithMode(.selected)
         var proxX = selectedMarks[0].segment.proximal.x
         var distalX = selectedMarks[0].segment.distal.x
+        var segments: [Segment] = []
+        segments.append(selectedMarks[0].segment)
         for i in 1..<selectedMarks.count {
             proxX += cl
             distalX += cl
             let newSegment = Segment(proximal: CGPoint(x: proxX, y: selectedMarks[i].segment.proximal.y), distal: CGPoint(x: distalX, y: selectedMarks[i].segment.distal.y))
-            self.setSegment(segment: newSegment, forMark: selectedMarks[i])
+            segments.append(newSegment)
         }
+        self.setSegments(segments: segments, forMarks: selectedMarks)
     }
 
     func slantSelectedMarks(angle: CGFloat, endpoint: Mark.Endpoint) {
         let selectedMarks = ladder.allMarksWithMode(.selected)
+        var segments: [Segment] = []
         selectedMarks.forEach { mark in
-//            let originalSegment = mark.segment
-//            currentDocument?.undoManager.registerUndo(withTarget: self, handler: { target in
-//                self.setSegment(segment: originalSegment, forMark: mark)
-//            })
-//            NotificationCenter.default.post(name: .didUndoableAction, object: nil)
-            slantMark(angle: angle, mark: mark, endpoint: endpoint)
+            segments.append(slantMark(angle: angle, mark: mark, endpoint: endpoint))
         }
+        setSegments(segments: segments, forMarks: selectedMarks)
+        // FIXME: reassess relinking
+//        relinkAllMarks()
     }
 
-    func slantMark(angle: CGFloat, mark: Mark, endpoint: Mark.Endpoint = .proximal) {
+    func slantMark(angle: CGFloat, mark: Mark, endpoint: Mark.Endpoint = .proximal) -> Segment {
         let region = ladder.region(ofMark: mark)
         let segment = transformToScaledViewSegment(regionSegment: mark.segment, region: region)
         let height = segment.distal.y - segment.proximal.y
@@ -2527,8 +2541,8 @@ final class LadderView: ScaledView {
         case .none, .random, .auto:
             fatalError("Endpoint.none, .random, or .auto inappopriately passed to slantMark()")
         }
-        setSegment(segment: transformToRegionSegment(scaledViewSegment: newSegment, region: region), forMark: mark)
-        relinkAllMarks()
+        return transformToRegionSegment(scaledViewSegment: newSegment, region: region)
+//        setSegment(segment: transformToRegionSegment(scaledViewSegment: newSegment, region: region), forMark: mark)
     }
 
     func slantAngle(mark: Mark, endpoint: Mark.Endpoint) -> CGFloat { 
@@ -2561,6 +2575,19 @@ final class LadderView: ScaledView {
         assessBlockAndImpulseOriginOfMark(mark)
     }
 
+    private func setSegments(segments: [Segment], forMarks marks: [Mark]) {
+        let originalSegments = marks.map { $0.segment }
+        currentDocument?.undoManager?.registerUndo(withTarget: self, handler: { target in
+            target.setSegments(segments: originalSegments, forMarks: marks)
+        })
+        NotificationCenter.default.post(name: .didUndoableAction, object: nil)
+        for i in 0..<marks.count {
+            marks[i].segment = segments[i]
+        }
+        updateMarkersAndLadderIntervals()
+        assessBlockAndImpulseOriginForAllMarks()
+    }
+
     func undoablySetLabel(_ label: String, description: String, forRegion region: Region) {
         let originalName = region.name
         let originalDescription = region.longDescription
@@ -2573,11 +2600,6 @@ final class LadderView: ScaledView {
         setNeedsDisplay()
     }
 
-    // TODO: skeleton for add/remove region
-    // region = new region to add.  Index is where to add.  E.g.
-    // 0 is before first region, shift other regions forward by 1
-    // If N is last region index, add to N + 1, as long as N + 1 < max number of regions.
-    // So need to calculate index before calling, and make sure it is legit.
     func undoablyAddRegion(_ region: Region, atIndex index: Int) {
         unlinkAllMarks()
         let originalRegion = region
@@ -2589,7 +2611,6 @@ final class LadderView: ScaledView {
         initializeRegions()
         ladder.reindexMarks()
         relinkAllMarks()
-        // also need to regroup marks
         setNeedsDisplay()
     }
 
