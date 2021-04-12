@@ -8,6 +8,7 @@
 
 import UIKit
 
+/// View that darkens the diagram when the "hamburger" table view (side menu) is shown.  Responds to gestures to show and hide the menu.
 final class BlackView: UIView, UIGestureRecognizerDelegate {
     weak var delegate: HamburgerTableDelegate?
 
@@ -23,8 +24,7 @@ final class BlackView: UIView, UIGestureRecognizerDelegate {
         self.addGestureRecognizer(panGestureRecognizer)
     }
 
-    @objc
-    func gestureTap() {
+    @objc func gestureTap() {
         if let delegate = delegate, delegate.hamburgerMenuIsOpen {
             delegate.hideHamburgerMenu()
         }

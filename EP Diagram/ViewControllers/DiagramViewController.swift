@@ -24,7 +24,7 @@ final class DiagramViewController: UIViewController {
     @IBOutlet var _constraintHamburgerWidth: NSLayoutConstraint!
     @IBOutlet var _constraintHamburgerLeft: NSLayoutConstraint!
     @IBOutlet var imageScrollView: ImageScrollView!
-    @IBOutlet var imageView: ImageView!
+    @IBOutlet var imageView: UIImageView!
     @IBOutlet var imageContainerView: UIView!
     @IBOutlet var ladderView: LadderView!
     @IBOutlet var cursorView: CursorView!

@@ -8,6 +8,7 @@
 
 import UIKit
 
+/// Cell used in "hamburger" table view (side menu), containing an SF icon and a text label
 final class HamburgerCell: UITableViewCell {
     @IBOutlet var label: UILabel!
     @IBOutlet var icon: UIImageView!
@@ -15,13 +16,11 @@ final class HamburgerCell: UITableViewCell {
     override func awakeFromNib() {
         super.awakeFromNib()
         // Initialization code
-        icon.tintColor = UIColor.systemBlue
+        icon.tintColor = UIColor.systemBlue // colors the icon
     }
 
     override func setSelected(_ selected: Bool, animated: Bool) {
         super.setSelected(selected, animated: animated)
-
-        // Configure the view for the selected state
     }
 
 }

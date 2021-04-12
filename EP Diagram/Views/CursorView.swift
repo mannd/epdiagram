@@ -96,7 +96,7 @@ final class CursorView: ScaledView {
         singleTapRecognizer.require(toFail: doubleTapRecognizer)
         self.addGestureRecognizer(doubleTapRecognizer)
 
-        let draggingPanRecognizer = UIPanGestureRecognizer(target: self, action: #selector(self.dragging))
+        let draggingPanRecognizer = UIPanGestureRecognizer(target: self, action: #selector(self.handleDrag(gesture:)))
         self.addGestureRecognizer(draggingPanRecognizer)
 
         let longPressRecognizer = UILongPressGestureRecognizer(target: self, action: #selector(self.longPress))
@@ -185,22 +185,6 @@ final class CursorView: ScaledView {
         }
     }
 
-
-//    func caliperText(rect: CGRect, textPosition: TextPosition, optimizeTextPosition: Bool) {
-//        let text = measurement()
-//        paragraphStyle.lineBreakMode = .byTruncatingTail
-//        paragraphStyle.alignment = .center
-//        var attributes = [NSAttributedString.Key: Any]()
-//        attributes = [
-//            NSAttributedString.Key.font: textFont,
-//            NSAttributedString.Key.paragraphStyle: paragraphStyle,
-//            NSAttributedString.Key.foregroundColor: color
-//        ]
-//        let size = text.size(withAttributes: attributes)
-//        let textRect = caliperTextPosition(left: fmin(bar1Position, bar2Position), right: fmax(bar1Position, bar2Position), center: crossBarPosition, size: size, rect: rect, textPosition: textPosition, optimizeTextPosition: optimizeTextPosition)
-//        text.draw(in: textRect, withAttributes: attributes)
-//    }
-
     func showLockImageWarning(rect: CGRect) {
         let text = L("IMAGE LOCK")
         let attributes: [NSAttributedString.Key: Any] = [
@@ -211,7 +195,13 @@ final class CursorView: ScaledView {
         text.draw(in: lockRect, withAttributes: attributes)
     }
 
-    // FIXME: When resizing ladder view, anchor position is miscalculated on slanted marks.  Fix may be simply to hide cursor when resizing views.
+    /// Sets the y coordinate (== height) of the cursor in cursor view coordinates,
+    /// based on the mark anchor position in ladder view coordinates
+    ///
+    /// Is a noop for `nil` value of anchorPositionY, and if there is no attached anchor.
+    /// When resizing the ladder view, anchor position is miscalculated on slanted marks.  Rather than recalculate the cursor height it
+    /// is easier under these circumstances to hide the cursor when resizing views.
+    /// - Parameter anchorPositionY: ladder view mark anchor y coordinate  as `CGFloat?`
     func setCursorHeight(anchorPositionY: CGFloat? = nil) {
         guard let anchor = attachedMarkAnchor() else { return }
         if let anchorPositionY = anchorPositionY {
@@ -225,13 +215,22 @@ final class CursorView: ScaledView {
     }
 
     // Add tiny circle around intersection of cursor and mark.
+    /// Draws a circle using center and radius parameters
+    /// - Parameters:
+    ///   - context: graphics `CGContext`
+    ///   - center: center of circle as `CGPoint`
+    ///   - radius: radius of circle as `CGFloat`
     private func drawCircle(context: CGContext, center: CGPoint, radius: CGFloat) {
-        // TODO: Assess this which makes the circles more prominent.
+        // Make the circle a little more prominent.
         context.setLineWidth(lineWidth + 1)
         context.addArc(center: center, radius: radius, startAngle: 0.0, endAngle: .pi * 2.0, clockwise: true)
         context.strokePath()
+        // Put the line width back the way we found it.
+        context.setLineWidth(lineWidth)
     }
 
+    /// Get the anchor of the attached mark
+    /// - Returns: `Anchor` of the attached mark, `nil` if no mark is attached
     func attachedMarkAnchor() -> Anchor? {
         return ladderViewDelegate.attachedMarkAnchor()
     }
@@ -299,33 +298,33 @@ final class CursorView: ScaledView {
             break}
     }
 
-    @objc func dragging(pan: UIPanGestureRecognizer) {
+    @objc func handleDrag(gesture: UIPanGestureRecognizer) {
         guard !marksAreHidden else { return }
         switch mode {
         case .calibrate:
-            calibrateModeDrag(pan)
+            calibrateModeDrag(gesture)
         case .normal:
-            normalModeDrag(pan)
+            normalModeDrag(gesture)
         default:
             break
         }
     }
 
-    func normalModeDrag(_ pan: UIPanGestureRecognizer) {
+    func normalModeDrag(_ gesture: UIPanGestureRecognizer) {
         guard let attachedMarkAnchorPosition = ladderViewDelegate.getAttachedMarkScaledAnchorPosition() else { return }
-        if pan.state == .began {
+        if gesture.state == .began {
             currentDocument?.undoManager?.beginUndoGrouping()
             cursorEndPointY = attachedMarkAnchorPosition.y
             ladderViewDelegate.moveAttachedMark(position: attachedMarkAnchorPosition) // This has to be here for undo to work.
         }
-        if pan.state == .changed {
-            let delta = pan.translation(in: self)
+        if gesture.state == .changed {
+            let delta = gesture.translation(in: self)
             cursorMove(delta: delta)
             cursorEndPointY += delta.y
             ladderViewDelegate.moveAttachedMark(position: CGPoint(x: transformToScaledViewPositionX(regionPositionX: cursor.positionX), y: cursorEndPointY))
-            pan.setTranslation(CGPoint(x: 0,y: 0), in: self)
+            gesture.setTranslation(CGPoint(x: 0,y: 0), in: self)
         }
-        if pan.state == .ended {
+        if gesture.state == .ended {
             ladderViewDelegate.linkMarksNearbyAttachedMark()
             currentDocument?.undoManager?.endUndoGrouping()
             ladderViewDelegate.assessBlockAndImpulseOriginAttachedMark()
@@ -335,18 +334,18 @@ final class CursorView: ScaledView {
         setNeedsDisplay()
     }
 
-    private func calibrateModeDrag(_ pan: UIPanGestureRecognizer) {
+    private func calibrateModeDrag(_ gesture: UIPanGestureRecognizer) {
         // No undo for calibration.
-        if pan.state == .began {
-            draggedComponent = caliper.isNearCaliperComponent(point: pan.location(in: self), accuracy: accuracy)
+        if gesture.state == .began {
+            draggedComponent = caliper.isNearCaliperComponent(point: gesture.location(in: self), accuracy: accuracy)
         }
-        else if pan.state == .changed {
+        else if gesture.state == .changed {
             guard let draggedComponent = draggedComponent else { return }
-            let delta = pan.translation(in: self)
+            let delta = gesture.translation(in: self)
             caliper.move(delta: delta, component: draggedComponent)
-            pan.setTranslation(CGPoint(x: 0,y: 0), in: self)
+            gesture.setTranslation(CGPoint(x: 0,y: 0), in: self)
         }
-        else if pan.state == .ended {
+        else if gesture.state == .ended {
             draggedComponent = nil
         }
         setNeedsDisplay()

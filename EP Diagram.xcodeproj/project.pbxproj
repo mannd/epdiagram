@@ -60,7 +60,6 @@
 		8E7D24CA22779DBF005A1729 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 8E7D24C922779DBF005A1729 /* Assets.xcassets */; };
 		8E7D24CD22779DBF005A1729 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 8E7D24CB22779DBF005A1729 /* LaunchScreen.storyboard */; };
 		8E7D24E322779DBF005A1729 /* EP_DiagramUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8E7D24E222779DBF005A1729 /* EP_DiagramUITests.swift */; };
-		8E7D24F12277A00C005A1729 /* ImageView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8E7D24F02277A00C005A1729 /* ImageView.swift */; };
 		8E80F26725BA689900B9E594 /* DiagramViewController+UIContextMenuInteractionDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8E80F26625BA689900B9E594 /* DiagramViewController+UIContextMenuInteractionDelegate.swift */; };
 		8E8248DD23B53B55001A85F9 /* SeparatorView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8E8248DC23B53B55001A85F9 /* SeparatorView.swift */; };
 		8E856CF224EDC53D0064121F /* CGPoint+clampY.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8E856CF124EDC53D0064121F /* CGPoint+clampY.swift */; };
@@ -187,7 +186,6 @@
 		8E7D24DE22779DBF005A1729 /* EP DiagramUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "EP DiagramUITests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
 		8E7D24E222779DBF005A1729 /* EP_DiagramUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EP_DiagramUITests.swift; sourceTree = "<group>"; };
 		8E7D24E422779DBF005A1729 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
-		8E7D24F02277A00C005A1729 /* ImageView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImageView.swift; sourceTree = "<group>"; };
 		8E80F26625BA689900B9E594 /* DiagramViewController+UIContextMenuInteractionDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "DiagramViewController+UIContextMenuInteractionDelegate.swift"; sourceTree = "<group>"; };
 		8E8248DC23B53B55001A85F9 /* SeparatorView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SeparatorView.swift; sourceTree = "<group>"; };
 		8E856CF124EDC53D0064121F /* CGPoint+clampY.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "CGPoint+clampY.swift"; sourceTree = "<group>"; };
@@ -461,7 +459,6 @@
 				8E01D9C622849047000F36FC /* CursorView.swift */,
 				8E4ACA832447905E00575538 /* HamburgerCell.swift */,
 				8EACC27B259E47C500F0BF42 /* ImageScrollView.swift */,
-				8E7D24F02277A00C005A1729 /* ImageView.swift */,
 				8EF9166A227926BC00B51F17 /* LadderView.swift */,
 				8E1B6CB7240CAE5300EA88A6 /* ScaledView.swift */,
 				8E8248DC23B53B55001A85F9 /* SeparatorView.swift */,
@@ -676,7 +673,6 @@
 				8E973F9B24C4BF0800AB41C3 /* String+isBlank.swift in Sources */,
 				8EADC2A924D64E1200C5D3D8 /* SampleSelector.swift in Sources */,
 				8E1276DF24D4734E00AC4B8F /* HelpViewController.swift in Sources */,
-				8E7D24F12277A00C005A1729 /* ImageView.swift in Sources */,
 				8E7D24C522779DBD005A1729 /* DiagramViewController.swift in Sources */,
 				8E9F0984253CF483009BC968 /* UINavigationController+gestureRecognizerShouldBegin.swift in Sources */,
 				8E3AD1372459CABF0085BDD4 /* LocationInLadder.swift in Sources */,
