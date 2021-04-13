@@ -571,7 +571,7 @@ class LadderViewTests: XCTestCase {
         ladderView.linkNearbyMarks(mark: markAV!, nearbyMarks: nearbyMarks)
         XCTAssert(markA!.linkedMarkIDs.distal.contains(markAV!.id))
         XCTAssert(markAV!.linkedMarkIDs.proximal.contains(markA!.id))
-        ladderView.unlinkMark(mark: markAV!)
+        ladderView.unlink(mark: markAV!)
         ladderView.moveMark(movement: .horizontal, mark: markAV!, regionPosition: CGPoint(x: 200, y: 0))
         XCTAssertEqual(markAV!.segment.proximal.x, 200)
         XCTAssertEqual(markAV!.segment.distal.x, 200)

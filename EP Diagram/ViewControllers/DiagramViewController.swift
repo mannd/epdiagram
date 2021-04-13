@@ -77,12 +77,10 @@ final class DiagramViewController: UIViewController {
                 }
                 ladderView.endZoning()
                 ladderView.removeConnectedMarks()
-//                imageScrollView.isScrollEnabled = true
                 showMainToolbar()
             case .select:
                 ladderView.saveState()
                 ladderView.startZoning()
-//                imageScrollView.isScrollEnabled = false
                 showSelectToolbar()
             case .connect:
                 showConnectToolbar()
@@ -902,7 +900,7 @@ final class DiagramViewController: UIViewController {
 
     @objc func closeAdjustYToolbar(_ sender: UIAlertAction) {
         currentDocument?.undoManager.endUndoGrouping()
-        ladderView.swapEndsIfNeeded()
+        ladderView.swapEndpointsIfNeededOfAllMarks()
         showSelectToolbar()
         imageScrollView.isActivated = true
     }

@@ -88,7 +88,7 @@ Ladder diagram terminology is not really standardized.  Here is a glossary of th
 | Conduction direction | optional arrow symbol indicating direction of electrical flow        |
 | Markers              | optional lines on image aligned with marks                           |
 | Mark pattern         | a grouping of marks that form a repeating pattern                    |
-| Joining mark         | mark used to joing together mark patterns                            |
+| Joining mark         | mark used to join together mark patterns                             |
 ** Diagrams
 *** Creating and opening diagrams
 EP Diagram is a file based app, meaning the diagrams you create are stored on your device or on iCloud, and can be processed by the Files app on your device, meaning you can copy them, rename them, or delete them outside of the *EP Diagram* app.  The diagram files you create have a file extension of ~diagram~ and a specific icon and file format.  When you open the app, a screen shows your diagram files and a create file icon.
@@ -300,7 +300,7 @@ You can also use the *Select All* and *Clear Selection* buttons on the toolbar t
 [[./img/context_menu.png]]
 
 *** Menu items
-**** Style
+**** Style:
 Choose between a solid, dashed, or dotted mark line style.
 **** Emphasis
 Marks can have a normal or bold emphasis.  Bold emphasis thickens the line of the mark.
