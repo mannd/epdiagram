@@ -28,7 +28,6 @@ extension ImageScrollView {
     /// Shows a "long press" menu that handles image rotation
     /// - Parameter gestureRecognizer: the long press gesture recognizer, containing the position of the press
     @IBAction func showImageMenu(_ gestureRecognizer: UILongPressGestureRecognizer) {
-        print("long press")
         guard let delegate = diagramViewControllerDelegate, delegate.okToShowLongPressMenu() else { return }
         if gestureRecognizer.state == .began {
             delegate.hideCursor()

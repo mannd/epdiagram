@@ -229,7 +229,6 @@ final class Ladder: NSObject, Codable {
 //        mark.linkedMarkIDs = LinkedMarkIDs()
 
         normalizeAllMarks()
-        // FIXME: do we need to unregister mark?
         unregisterMark(mark)
         if let index = markRegion.marks.firstIndex(where: {$0 === mark}) {
             markRegion.marks.remove(at: index)
@@ -245,7 +244,6 @@ final class Ladder: NSObject, Codable {
     }
 
    
-    // FIXME: update this with all deletions?  Test with new diagram that registry is cleared.
     func removeMarkIdReferences(toMarkId id: UUID) {
         for region in regions {
             for mark in region.marks {
@@ -520,7 +518,6 @@ final class Ladder: NSObject, Codable {
 
     func availableAnchors(forMark mark: Mark) -> [Anchor] {
         let linkedMarkIDs = mark.linkedMarkIDs
-        // FIXME: if attachment is in middle, only allow other end to move
         if linkedMarkIDs.proximal.count == 0 || linkedMarkIDs.distal.count == 0 {
             return defaultAnchors()
         }

@@ -162,7 +162,7 @@ extension DiagramViewController: HamburgerTableDelegate, UIImagePickerController
 
     func getDiagramInfo() {
         os_log("getDiagramInfo()", log: .action, type: .info)
-        // FIXME: Consider killing this.  Files app gives file info.
+        // Consider killing this.  Files app gives file info.
         var message: String = ""
         if let currentDocument = currentDocument {
             let dateFormatter = DateFormatter()
@@ -186,7 +186,6 @@ extension DiagramViewController: HamburgerTableDelegate, UIImagePickerController
             message = L("Could not get diagram file information")
         }
         UserAlert.showMessage(viewController: self, title: L("Diagram Info"), message: message)
-        print(message)
     }
 
 

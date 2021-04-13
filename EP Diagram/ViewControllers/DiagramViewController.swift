@@ -425,14 +425,16 @@ final class DiagramViewController: UIViewController {
         os_log("viewDidLoad() - ViewController", log: OSLog.viewCycle, type: .info)
         super.viewDidLoad()
 
-        for family: String in UIFont.familyNames
-               {
-                   print(family)
-                   for names: String in UIFont.fontNames(forFamilyName: family)
-                   {
-                       print("== \(names)")
-                   }
-               }
+        // Only uncomment this to see what fonts are available.  Right now just using
+        // system fonts.
+        //for family: String in UIFont.familyNames
+        //{
+        //    print(family)
+        //    for names: String in UIFont.fontNames(forFamilyName: family)
+        //    {
+        //        print("== \(names)")
+        //    }
+        // }
 
         // Customization for mac version
         if isRunningOnMac() {
@@ -522,7 +524,6 @@ final class DiagramViewController: UIViewController {
             // take this oportunity to save the version, which we can use in the future to determine if we nee to reshow the onboarding (e.g. if onboarding changes).
             if let version = Version.version {
                 UserDefaults.standard.set(version, forKey: Preferences.versionKey)
-                print("version", version)
             }
         }
     }
@@ -585,7 +586,6 @@ final class DiagramViewController: UIViewController {
     override func updateUserActivityState(_ activity: NSUserActivity) {
         os_log("debug: diagramViewController updateUserActivityState called", log: .debugging, type: .debug)
         let currentDocumentURL: String = currentDocument?.fileURL.lastPathComponent ?? ""
-        print("currentDocumentURL", currentDocumentURL)
         super.updateUserActivityState(activity)
         let info: [AnyHashable: Any] = [
             Self.restorationContentOffsetXKey: imageScrollView.contentOffset.x / imageScrollView.zoomScale,
@@ -760,7 +760,6 @@ final class DiagramViewController: UIViewController {
     func showSlantToolbar() {
         guard let toolbar = navigationController?.toolbar else { return }
         currentDocument?.undoManager.beginUndoGrouping()
-        // FIXME: maybe setSegment needs to unlink and relink, maybe not.  And what about snapping?
         ladderView.unlinkAllMarks()
         let labelText = UITextField()
         labelText.text = L("Adjust mark slant")
@@ -845,13 +844,6 @@ final class DiagramViewController: UIViewController {
         let value: CGFloat = CGFloat(sender.value)
         ladderView.adjustY(value, endpoint: activeEndpoint, adjustment: adjustment)
         ladderView.refresh()
-    }
-
-    @objc func movementStepperDidChange(_ sender: UISlider) {
-        let step: CGFloat = CGFloat(sender.value)
-        print("stepper step = \(step)")
-//        ladderView.moveMarks(step)
-//        ladderView.refresh()
     }
 
     @objc func clSliderValueDidChange(_ sender: UISlider) {
@@ -1135,12 +1127,6 @@ final class DiagramViewController: UIViewController {
 
     func openURL(url: URL) {
         os_log("openURL action", log: OSLog.action, type: .info)
-        // FIXME: self.resetImage sets transform to CGAffineTransformIdentity
-        // this is in EP Calipers (the containe view is not transformed.
-        // Also this is not undoable, so do we need it?
-        // self.resetImage
-//        self.imageContainerView.transform = CGAffineTransform.identity
-
 
         let ext = url.pathExtension.uppercased()
         if ext != "PDF" {

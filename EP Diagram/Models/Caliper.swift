@@ -69,7 +69,6 @@ struct Caliper {
         case .crossbar:
             bar1Position += delta.x
             bar2Position += delta.x
-            // FIXME: this doesn't do what you think it does.  See failing test.
             if delta.y < 0 {
                 crossbarPosition += (crossbarPosition >= minY + boundary ? delta.y : 0)
             } else {

@@ -465,7 +465,6 @@ class LadderViewTests: XCTestCase {
         XCTAssertTrue(nearbyMarksToMark3.middle.contains(mark4!.id))
         mark4?.segment = Segment(proximal:  CGPoint(x:103 + 15, y: 0.2), distal: CGPoint(x: 206, y: 1.0))
         nearbyMarksToMark3 = ladderView.getNearbyMarkIDs(mark: mark3!)
-        print("nearbyMarksToMark3", nearbyMarksToMark3)
         XCTAssertFalse(nearbyMarksToMark3.middle.contains(mark4!.id))
     }
 
