@@ -11,7 +11,6 @@ import XCTest
 
 class DiagramTests: XCTestCase {
 
-    // TODO: expand tests
     func testIsSaved() {
         let diagram = Diagram(name: nil, description: "", image: UIImage(named: "SampleECG")!, ladder: Ladder.defaultLadder())
         XCTAssertEqual(nil, diagram.name)

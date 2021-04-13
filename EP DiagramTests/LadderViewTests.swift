@@ -309,8 +309,7 @@ class LadderViewTests: XCTestCase {
         XCTAssertNil(ladderView.dominantStyleOfMarks(marks: marks))
     }
 
-    // TODO: move to calibration tests
-    func testCalibration() {
+    func testLadderViewCalibration() {
         let calibration = Calibration()
         calibration.set(zoom: 1.0, value: 100)
         ladderView.calibration = calibration

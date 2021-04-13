@@ -9,7 +9,6 @@
 import UIKit
 import SwiftUI
 
-// TODO: remember to register each new user default in AppDelegate()!
 struct Preferences {
     // keys
     static let lineWidthKey = "defaultLineWidthKey"
@@ -86,6 +85,7 @@ struct Preferences {
     static var activeColorName: String = defaultActiveColor.toString
     static var markerColorName: String = defaultMarkerColor.toString
 
+    /// Default preferences, set at app startup
     static func defaults() -> [String: Any] {
         let defaultPreferences: [String: Any] = [
             Preferences.lineWidthKey: Preferences.markLineWidth,

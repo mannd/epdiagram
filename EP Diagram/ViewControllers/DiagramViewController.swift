@@ -188,9 +188,6 @@ final class DiagramViewController: UIViewController {
         self.ladderView.deleteSelectedMarks()
     }
 
-    // TODO: Do we need something like this.  We do if we allow manual setting of block.
-    lazy var reanalyzeLadderAction = UIAction(title: L("Reanalyze ladder")) { action in }
-
     // Linkage
     lazy var unlinkAction = UIAction(title: L("Unlink"), image: UIImage(systemName: "link")) { action in
         self.ladderView.unlinkSelectedMarks()
@@ -428,10 +425,19 @@ final class DiagramViewController: UIViewController {
         os_log("viewDidLoad() - ViewController", log: OSLog.viewCycle, type: .info)
         super.viewDidLoad()
 
-        // TODO: customization for mac version
+        for family: String in UIFont.familyNames
+               {
+                   print(family)
+                   for names: String in UIFont.fontNames(forFamilyName: family)
+                   {
+                       print("== \(names)")
+                   }
+               }
+
+        // Customization for mac version
         if isRunningOnMac() {
             //navigationController?.setNavigationBarHidden(true, animated: false)
-            // TODO: Need to convert hamburger menu to regular menu on Mac.
+            // Need to convert hamburger menu to regular menu on Mac.
         }
 
         // Setup cursor, ladder and image scroll views.
@@ -482,10 +488,6 @@ final class DiagramViewController: UIViewController {
 
         // Navigation buttons
         // Hamburger menu is replaced by main menu on Mac.
-        // TODO: Replace hamburger menu with real menu on Mac.
-        //        if !isRunningOnMac() {
-        //            navigationItem.setLeftBarButton(UIBarButtonItem(image: UIImage(named: "hamburger"), style: .plain, target: self, action: #selector(toggleHamburgerMenu)), animated: true)
-        //        }
         hamburgerButton = UIBarButtonItem(image: UIImage(named: "hamburger"), style: .plain, target: self, action: #selector(toggleHamburgerMenu))
         navigationItem.setLeftBarButton(hamburgerButton, animated: true)
 
@@ -642,11 +644,6 @@ final class DiagramViewController: UIViewController {
             selectToolbarButtons = [selectAllButton, spacer, clearButton, spacer, undoButton, spacer, redoButton, spacer, doneButton]
         }
         setToolbarItems(selectToolbarButtons, animated: false)
-        // TODO: experiment with different bar tint colors to show mode.
-//        if let toolbar = navigationController?.toolbar {
-//            toolbar.barTintColor = UIColor.systemBlue
-//            toolbar.tintColor = UIColor.label
-//        }
     }
 
     @objc func selectAllMarks() {
@@ -1316,8 +1313,6 @@ final class DiagramViewController: UIViewController {
     }
 
     @IBSegueAction func showPreferences(_ coder: NSCoder) -> UIViewController? {
-        // TODO: Necessary to hide tool bar with these SwiftUI views?
-        navigationController?.setToolbarHidden(true, animated: true)
         let diagramModelController = DiagramModelController(diagram: diagram, diagramViewController: self)
         let preferencesView = PreferencesView(diagramController: diagramModelController)
         let hostingController = UIHostingController(coder: coder, rootView: preferencesView)
@@ -1337,7 +1332,6 @@ final class DiagramViewController: UIViewController {
 
     @IBSegueAction func performRhythmSegueAction(_ coder: NSCoder) -> UIViewController? {
         // Have to provide dismiss action to SwiftUI modal view.  It won't dismiss itself.
-        // TODO: Have this action actually handle the application of rhythm to the selection.
         let rhythmView = RhythmView(dismissAction: applyRhythm(rhythm:))
         let hostingController = UIHostingController(coder: coder, rootView: rhythmView)
         return hostingController

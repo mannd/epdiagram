@@ -20,7 +20,6 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         UserDefaults.standard.register(defaults: Preferences.defaults())
 
         // Check for iCloud availability.
-        // TODO: test iCloud availability.
         DispatchQueue.global(qos: .background).async {
             let fileManager = FileManager.default
             let ubiqURL = fileManager.url(forUbiquityContainerIdentifier: nil)

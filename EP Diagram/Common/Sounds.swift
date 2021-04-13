@@ -8,7 +8,6 @@
 
 import AudioToolbox
 
-// TODO: consider preference to turn on/off sounds (they can be annoying).
 class Sounds {
     static func playShutterSound() {
         // See http://iphonedevwiki.net/index.php/AudioServices for complete list os system sounds.
