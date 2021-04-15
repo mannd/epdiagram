@@ -24,7 +24,7 @@ protocol HamburgerTableDelegate: class {
     func selectLadder()
     func renameDiagram()
     func about()
-    func test()
+    func debug()
     func getDiagramInfo()
     func lockLadder()
     func editLadder()
@@ -239,22 +239,23 @@ extension DiagramViewController: HamburgerTableDelegate, UIImagePickerController
         let versionBuild = Version.appVersion()
         let version = versionBuild.version ?? L("unknown")
         let build = versionBuild.build ?? L("unknown")
-        let prereleaseVersion = Version.prereleaseVersion
-        os_log("EP Diagram: prereleaseVersion = %s, version = %s build = %s", log: OSLog.debugging, type: .info, prereleaseVersion ?? "not prerelease", version, build)
-        var prereleaseMessage = ""
-        if let prereleaseVersion = prereleaseVersion {
-            prereleaseMessage = "\nPrerelease version \(prereleaseVersion)+\(build)"
-        }
+        //let prereleaseVersion = Version.prereleaseVersion
+        os_log("EP Diagram: version = %s build = %s", log: OSLog.debugging, type: .info, version, build)
+        // OK to remove code below once release version is published.
+        //var prereleaseMessage = ""
+        //if let prereleaseVersion = prereleaseVersion {
+        //    prereleaseMessage = "\nPrerelease version \(prereleaseVersion)+\(build)"
+        //}
         UserAlert.showMessage(
             viewController: self,
             title: L("EP Diagram"),
-            message: L("Copyright 2021 EP Studios, Inc." + prereleaseMessage + "\nApp Store version \(version)"))
+            message: L("Copyright 2021 EP Studios, Inc." + "\nVersion \(version)"))
     }
 
     // Use to test features during development
     #if DEBUG
-    func test() {
-        os_log("test()", log: .debugging, type: .debug)
+    func debug() {
+        os_log("debug()", log: .debugging, type: .debug)
         ladderView.relinkAllMarks()
         ladderView.assessGlobalImpulseOrigin()
         setViewsNeedDisplay()

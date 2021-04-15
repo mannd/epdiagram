@@ -103,7 +103,7 @@ class HamburgerTableViewController: UITableViewController {
         case .about:
             delegate?.about()
         case .test:
-            delegate?.test()
+            delegate?.debug()
         case .none:
             break
         }

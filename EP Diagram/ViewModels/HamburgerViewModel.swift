@@ -42,11 +42,10 @@ struct HamburgerViewModel {
         // Never show test layer with release build configuration.
         #if DEBUG
         if showTestLayer {
-            let testLayer = HamburgerLayer(withName: "TEST", icon: UIImage(named: "test"), layer: .test)
+            let testLayer = HamburgerLayer(withName: "Debug", icon: UIImage(named: "test"), layer: .test)
             array.append(testLayer)
         }
         #endif
-
 
         return array
     }
