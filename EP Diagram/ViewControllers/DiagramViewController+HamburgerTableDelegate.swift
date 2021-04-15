@@ -256,13 +256,12 @@ extension DiagramViewController: HamburgerTableDelegate, UIImagePickerController
     #if DEBUG
     func debug() {
         os_log("debug()", log: .debugging, type: .debug)
-        ladderView.relinkAllMarks()
-        ladderView.assessGlobalImpulseOrigin()
-        setViewsNeedDisplay()
-
+        for region in ladderView.ladder.regions {
+            print(region, ladderView.ladder.index(ofRegion: region) as Any)
+        }
     }
     #else
-    func test() {}
+    func debug() {}
     #endif
 
     // MARK: - Delegate handlers
@@ -406,6 +405,7 @@ extension DiagramViewController: HamburgerTableDelegate, UIImagePickerController
         constraintHamburgerLeft.constant = 0
         hamburgerMenuIsOpen = true
         self.separatorView?.showIndicator = false
+        self.separatorView?.allowTouches = false
         self.separatorView?.setNeedsDisplay()
         navigationController?.setToolbarHidden(true, animated: true)
         // Always hide cursor when opening hamburger menu.
@@ -427,6 +427,7 @@ extension DiagramViewController: HamburgerTableDelegate, UIImagePickerController
             self.blackView.alpha = 0
         }, completion: { (finished:Bool) in
             self.separatorView?.showIndicator = true
+            self.separatorView?.allowTouches = true
             self.separatorView?.setNeedsDisplay()
             self.setViewsNeedDisplay()
         })

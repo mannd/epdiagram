@@ -531,6 +531,9 @@ final class DiagramViewController: UIViewController {
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
         setupNotifications()
+        // Need to show toolbar before view appears, otherwise views don't layout correctly.
+        navigationController?.setToolbarHidden(false, animated: false)
+
     }
 
     var didFirstWillLayout = false
@@ -573,9 +576,7 @@ final class DiagramViewController: UIViewController {
         updateToolbarButtons()
         updateUndoRedoButtons()
         showMainToolbar()
-
         resetViews(setActiveRegion: false)
-
     }
 
     override func viewWillDisappear(_ animated: Bool) {
@@ -604,8 +605,8 @@ final class DiagramViewController: UIViewController {
         undoablySetLadder(diagram.ladder)
         undoablySetDiagramImage(diagram.image, imageIsUpscaled: false, transform: .identity, scale: 1.0, contentOffset: .zero)
         currentDocument?.undoManager.endUndoGrouping()
-        ladderView.activeRegion = nil
-        mode = .normal
+        ladderView.activeRegion = ladderView.ladder.regions[0]
+        // We can't change mode here, because changing mode restores state, and may put as the active region a region that no longer exists.  But as we can only load sample diagrams from normal mode, there is no need to change mode.
     }
 
     func setTitle() {
@@ -628,7 +629,6 @@ final class DiagramViewController: UIViewController {
             mainToolbarButtons = [calibrateButton, spacer,  connectButton, spacer, selectButton, spacer, undoButton, spacer, redoButton]
         }
         setToolbarItems(mainToolbarButtons, animated: false)
-        navigationController?.setToolbarHidden(false, animated: false)
     }
 
     @objc func launchSelectMode(_: UIAlertAction) {
@@ -1278,7 +1278,7 @@ final class DiagramViewController: UIViewController {
     }
 
     @IBSegueAction func showTemplateEditor(_ coder: NSCoder) -> UIViewController? {
-        navigationController?.setToolbarHidden(true, animated: true)
+        navigationController?.setToolbarHidden(true, animated: false)
         let ladderTemplatesModelController = LadderTemplatesModelController(viewController: self)
         let templateEditor = LadderTemplatesEditor(ladderTemplatesController: ladderTemplatesModelController)
         let hostingController = UIHostingController(coder: coder, rootView: templateEditor)
@@ -1287,7 +1287,7 @@ final class DiagramViewController: UIViewController {
 
     @IBSegueAction func showLadderSelector(_ coder: NSCoder) -> UIViewController? {
         os_log("showLadderSelector")
-        navigationController?.setToolbarHidden(true, animated: true)
+        navigationController?.setToolbarHidden(true, animated: false)
         let ladderTemplates = LadderTemplate.templates()
         let index = ladderTemplates.firstIndex(where: { ladderTemplate in
             ladderTemplate.name == ladderView.ladder.name
@@ -1299,6 +1299,7 @@ final class DiagramViewController: UIViewController {
     }
 
     @IBSegueAction func showPreferences(_ coder: NSCoder) -> UIViewController? {
+        navigationController?.setToolbarHidden(true, animated: false)
         let diagramModelController = DiagramModelController(diagram: diagram, diagramViewController: self)
         let preferencesView = PreferencesView(diagramController: diagramModelController)
         let hostingController = UIHostingController(coder: coder, rootView: preferencesView)
@@ -1306,12 +1307,14 @@ final class DiagramViewController: UIViewController {
     }
 
     @IBSegueAction func showSampleSelector(_ coder: NSCoder) -> UIViewController? {
+        navigationController?.setToolbarHidden(true, animated: false)
         let sampleSelector = SampleSelector(sampleDiagrams: Diagram.sampleDiagrams(), delegate: self)
         let hostingController = UIHostingController(coder: coder, rootView: sampleSelector)
         return hostingController
     }
 
     @IBSegueAction func performShowHelpSegueAction(_ coder: NSCoder) -> HelpViewController? {
+        navigationController?.setToolbarHidden(true, animated: false)
         let helpViewController = HelpViewController(coder: coder)
         return helpViewController
     }
