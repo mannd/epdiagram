@@ -39,6 +39,7 @@ class SeparatorView: UIView {
     var updateListener: OnConstraintUpdateProtocol?
 
     var showIndicator: Bool = true
+    var allowTouches: Bool = true
 
     @discardableResult
     internal static func addSeparatorBetweenViews(separatorType: SeparatorType, primaryView: UIView, secondaryView: UIView, parentView: UIView) -> SeparatorView{
@@ -74,6 +75,7 @@ class SeparatorView: UIView {
     }
 
     override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
+        guard allowTouches else { return }
         self.firstTouch = touches.first?.location(in: self.superview)
         self.startConstraint!.constant = self.oldPosition
         self.startConstraint!.isActive = true
@@ -85,6 +87,8 @@ class SeparatorView: UIView {
     }
 
     override func touchesMoved(_ touches: Set<UITouch>, with event: UIEvent?) {
+        guard allowTouches else { return }
+
         guard let touch = touches.first, let event = event else { return }
 
         let predictedTouch = event.predictedTouches(for: touch)?.last
@@ -96,6 +100,8 @@ class SeparatorView: UIView {
     }
 
     override func touchesEnded(_ touches: Set<UITouch>, with event: UIEvent?) {
+        guard allowTouches else { return }
+
         guard let touch = touches.first else { return }
         updateListener?.updateConstraintOnBasisOfTouch(touch: touch)
         // redraw views.
