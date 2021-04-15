@@ -104,7 +104,7 @@ extension DocumentBrowserViewController: DiagramEditorDelegate {
         diagramViewController?.restorationInfo = restorationInfo
         restorationInfo = nil // don't need it any more
 
-        // FIXME: below needed?
+        // This is not used, probably can delete.
         diagramViewController?.restorationIdentifier = restorationIdentifier
         diagramViewController?.currentDocument = document
         controller.modalPresentationStyle = .fullScreen
@@ -126,7 +126,6 @@ extension DocumentBrowserViewController: DiagramEditorDelegate {
         }
     }
 
-    // FIXME: on mac need to
     private func closeCurrentDocument() {
         currentDocument?.close()
         currentDocument = nil

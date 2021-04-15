@@ -24,7 +24,7 @@ final class DiagramViewController: UIViewController {
     @IBOutlet var _constraintHamburgerWidth: NSLayoutConstraint!
     @IBOutlet var _constraintHamburgerLeft: NSLayoutConstraint!
     @IBOutlet var imageScrollView: ImageScrollView!
-    @IBOutlet var imageView: ImageView!
+    @IBOutlet var imageView: UIImageView!
     @IBOutlet var imageContainerView: UIView!
     @IBOutlet var ladderView: LadderView!
     @IBOutlet var cursorView: CursorView!
@@ -77,12 +77,10 @@ final class DiagramViewController: UIViewController {
                 }
                 ladderView.endZoning()
                 ladderView.removeConnectedMarks()
-//                imageScrollView.isScrollEnabled = true
                 showMainToolbar()
             case .select:
                 ladderView.saveState()
                 ladderView.startZoning()
-//                imageScrollView.isScrollEnabled = false
                 showSelectToolbar()
             case .connect:
                 showConnectToolbar()
@@ -189,9 +187,6 @@ final class DiagramViewController: UIViewController {
     lazy var deleteAction = UIAction(title: L("Delete mark(s)"), image: UIImage(systemName: "trash"), attributes: .destructive) { action in
         self.ladderView.deleteSelectedMarks()
     }
-
-    // TODO: Do we need something like this.  We do if we allow manual setting of block.
-    lazy var reanalyzeLadderAction = UIAction(title: L("Reanalyze ladder")) { action in }
 
     // Linkage
     lazy var unlinkAction = UIAction(title: L("Unlink"), image: UIImage(systemName: "link")) { action in
@@ -338,7 +333,7 @@ final class DiagramViewController: UIViewController {
         }
     }
 
-    lazy var copyMarksAction = UIAction(title: L("Copy"), image: UIImage(systemName: "doc.on.doc")) { _ in
+    lazy var copyMarksAction = UIAction(title: L("Copy and paste"), image: UIImage(systemName: "doc.on.doc")) { _ in
         self.showCopyMarksToolbar()
         self.ladderView.copyMarks()
     }
@@ -430,10 +425,21 @@ final class DiagramViewController: UIViewController {
         os_log("viewDidLoad() - ViewController", log: OSLog.viewCycle, type: .info)
         super.viewDidLoad()
 
-        // TODO: customization for mac version
+        // Only uncomment this to see what fonts are available.  Right now just using
+        // system fonts.
+        //for family: String in UIFont.familyNames
+        //{
+        //    print(family)
+        //    for names: String in UIFont.fontNames(forFamilyName: family)
+        //    {
+        //        print("== \(names)")
+        //    }
+        // }
+
+        // Customization for mac version
         if isRunningOnMac() {
             //navigationController?.setNavigationBarHidden(true, animated: false)
-            // TODO: Need to convert hamburger menu to regular menu on Mac.
+            // Need to convert hamburger menu to regular menu on Mac.
         }
 
         // Setup cursor, ladder and image scroll views.
@@ -484,10 +490,6 @@ final class DiagramViewController: UIViewController {
 
         // Navigation buttons
         // Hamburger menu is replaced by main menu on Mac.
-        // TODO: Replace hamburger menu with real menu on Mac.
-        //        if !isRunningOnMac() {
-        //            navigationItem.setLeftBarButton(UIBarButtonItem(image: UIImage(named: "hamburger"), style: .plain, target: self, action: #selector(toggleHamburgerMenu)), animated: true)
-        //        }
         hamburgerButton = UIBarButtonItem(image: UIImage(named: "hamburger"), style: .plain, target: self, action: #selector(toggleHamburgerMenu))
         navigationItem.setLeftBarButton(hamburgerButton, animated: true)
 
@@ -522,7 +524,6 @@ final class DiagramViewController: UIViewController {
             // take this oportunity to save the version, which we can use in the future to determine if we nee to reshow the onboarding (e.g. if onboarding changes).
             if let version = Version.version {
                 UserDefaults.standard.set(version, forKey: Preferences.versionKey)
-                print("version", version)
             }
         }
     }
@@ -530,6 +531,9 @@ final class DiagramViewController: UIViewController {
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
         setupNotifications()
+        // Need to show toolbar before view appears, otherwise views don't layout correctly.
+        navigationController?.setToolbarHidden(false, animated: false)
+
     }
 
     var didFirstWillLayout = false
@@ -572,9 +576,7 @@ final class DiagramViewController: UIViewController {
         updateToolbarButtons()
         updateUndoRedoButtons()
         showMainToolbar()
-
         resetViews(setActiveRegion: false)
-
     }
 
     override func viewWillDisappear(_ animated: Bool) {
@@ -585,7 +587,6 @@ final class DiagramViewController: UIViewController {
     override func updateUserActivityState(_ activity: NSUserActivity) {
         os_log("debug: diagramViewController updateUserActivityState called", log: .debugging, type: .debug)
         let currentDocumentURL: String = currentDocument?.fileURL.lastPathComponent ?? ""
-        print("currentDocumentURL", currentDocumentURL)
         super.updateUserActivityState(activity)
         let info: [AnyHashable: Any] = [
             Self.restorationContentOffsetXKey: imageScrollView.contentOffset.x / imageScrollView.zoomScale,
@@ -604,8 +605,8 @@ final class DiagramViewController: UIViewController {
         undoablySetLadder(diagram.ladder)
         undoablySetDiagramImage(diagram.image, imageIsUpscaled: false, transform: .identity, scale: 1.0, contentOffset: .zero)
         currentDocument?.undoManager.endUndoGrouping()
-        ladderView.activeRegion = nil
-        mode = .normal
+        ladderView.activeRegion = ladderView.ladder.regions[0]
+        // We can't change mode here, because changing mode restores state, and may put as the active region a region that no longer exists.  But as we can only load sample diagrams from normal mode, there is no need to change mode.
     }
 
     func setTitle() {
@@ -625,10 +626,9 @@ final class DiagramViewController: UIViewController {
             connectButton = UIBarButtonItem(title: L("Connect"), style: .plain, target: self, action: #selector(launchConnectMode))
             undoButton = UIBarButtonItem(barButtonSystemItem: .undo, target: self, action: #selector(undo))
             redoButton = UIBarButtonItem(barButtonSystemItem: .redo, target: self, action: #selector(redo))
-            mainToolbarButtons = [calibrateButton, spacer, selectButton, spacer, connectButton, spacer, undoButton, spacer, redoButton]
+            mainToolbarButtons = [calibrateButton, spacer,  connectButton, spacer, selectButton, spacer, undoButton, spacer, redoButton]
         }
         setToolbarItems(mainToolbarButtons, animated: false)
-        navigationController?.setToolbarHidden(false, animated: false)
     }
 
     @objc func launchSelectMode(_: UIAlertAction) {
@@ -644,11 +644,6 @@ final class DiagramViewController: UIViewController {
             selectToolbarButtons = [selectAllButton, spacer, clearButton, spacer, undoButton, spacer, redoButton, spacer, doneButton]
         }
         setToolbarItems(selectToolbarButtons, animated: false)
-        // TODO: experiment with different bar tint colors to show mode.
-//        if let toolbar = navigationController?.toolbar {
-//            toolbar.barTintColor = UIColor.systemBlue
-//            toolbar.tintColor = UIColor.label
-//        }
     }
 
     @objc func selectAllMarks() {
@@ -765,7 +760,6 @@ final class DiagramViewController: UIViewController {
     func showSlantToolbar() {
         guard let toolbar = navigationController?.toolbar else { return }
         currentDocument?.undoManager.beginUndoGrouping()
-        // FIXME: maybe setSegment needs to unlink and relink, maybe not.  And what about snapping?
         ladderView.unlinkAllMarks()
         let labelText = UITextField()
         labelText.text = L("Adjust mark slant")
@@ -852,13 +846,6 @@ final class DiagramViewController: UIViewController {
         ladderView.refresh()
     }
 
-    @objc func movementStepperDidChange(_ sender: UISlider) {
-        let step: CGFloat = CGFloat(sender.value)
-        print("stepper step = \(step)")
-//        ladderView.moveMarks(step)
-//        ladderView.refresh()
-    }
-
     @objc func clSliderValueDidChange(_ sender: UISlider) {
         let value: CGFloat = CGFloat(sender.value)
         ladderView.adjustCL(cl: value)
@@ -902,7 +889,7 @@ final class DiagramViewController: UIViewController {
 
     @objc func closeAdjustYToolbar(_ sender: UIAlertAction) {
         currentDocument?.undoManager.endUndoGrouping()
-        ladderView.swapEndsIfNeeded()
+        ladderView.swapEndpointsIfNeededOfAllMarks()
         showSelectToolbar()
         imageScrollView.isActivated = true
     }
@@ -1140,12 +1127,6 @@ final class DiagramViewController: UIViewController {
 
     func openURL(url: URL) {
         os_log("openURL action", log: OSLog.action, type: .info)
-        // FIXME: self.resetImage sets transform to CGAffineTransformIdentity
-        // this is in EP Calipers (the containe view is not transformed.
-        // Also this is not undoable, so do we need it?
-        // self.resetImage
-//        self.imageContainerView.transform = CGAffineTransform.identity
-
 
         let ext = url.pathExtension.uppercased()
         if ext != "PDF" {
@@ -1297,7 +1278,7 @@ final class DiagramViewController: UIViewController {
     }
 
     @IBSegueAction func showTemplateEditor(_ coder: NSCoder) -> UIViewController? {
-        navigationController?.setToolbarHidden(true, animated: true)
+        navigationController?.setToolbarHidden(true, animated: false)
         let ladderTemplatesModelController = LadderTemplatesModelController(viewController: self)
         let templateEditor = LadderTemplatesEditor(ladderTemplatesController: ladderTemplatesModelController)
         let hostingController = UIHostingController(coder: coder, rootView: templateEditor)
@@ -1306,7 +1287,7 @@ final class DiagramViewController: UIViewController {
 
     @IBSegueAction func showLadderSelector(_ coder: NSCoder) -> UIViewController? {
         os_log("showLadderSelector")
-        navigationController?.setToolbarHidden(true, animated: true)
+        navigationController?.setToolbarHidden(true, animated: false)
         let ladderTemplates = LadderTemplate.templates()
         let index = ladderTemplates.firstIndex(where: { ladderTemplate in
             ladderTemplate.name == ladderView.ladder.name
@@ -1318,8 +1299,7 @@ final class DiagramViewController: UIViewController {
     }
 
     @IBSegueAction func showPreferences(_ coder: NSCoder) -> UIViewController? {
-        // TODO: Necessary to hide tool bar with these SwiftUI views?
-        navigationController?.setToolbarHidden(true, animated: true)
+        navigationController?.setToolbarHidden(true, animated: false)
         let diagramModelController = DiagramModelController(diagram: diagram, diagramViewController: self)
         let preferencesView = PreferencesView(diagramController: diagramModelController)
         let hostingController = UIHostingController(coder: coder, rootView: preferencesView)
@@ -1327,19 +1307,20 @@ final class DiagramViewController: UIViewController {
     }
 
     @IBSegueAction func showSampleSelector(_ coder: NSCoder) -> UIViewController? {
+        navigationController?.setToolbarHidden(true, animated: false)
         let sampleSelector = SampleSelector(sampleDiagrams: Diagram.sampleDiagrams(), delegate: self)
         let hostingController = UIHostingController(coder: coder, rootView: sampleSelector)
         return hostingController
     }
 
     @IBSegueAction func performShowHelpSegueAction(_ coder: NSCoder) -> HelpViewController? {
+        navigationController?.setToolbarHidden(true, animated: false)
         let helpViewController = HelpViewController(coder: coder)
         return helpViewController
     }
 
     @IBSegueAction func performRhythmSegueAction(_ coder: NSCoder) -> UIViewController? {
         // Have to provide dismiss action to SwiftUI modal view.  It won't dismiss itself.
-        // TODO: Have this action actually handle the application of rhythm to the selection.
         let rhythmView = RhythmView(dismissAction: applyRhythm(rhythm:))
         let hostingController = UIHostingController(coder: coder, rootView: rhythmView)
         return hostingController

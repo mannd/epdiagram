@@ -8,11 +8,13 @@
 
 import UIKit
 
+/// ImageScrollView has a content UIView that wraps a UIImageView, which allows zooming and scrolling of
+/// the content view, while the image view can have rotational transforms applied to it separately.
 class ImageScrollView: UIScrollView {
     weak var diagramViewControllerDelegate: DiagramViewControllerDelegate?
     override var canBecomeFirstResponder: Bool { true }
-    var leftMargin: CGFloat = 0
-    var mode: Mode = .normal
+    var leftMargin: CGFloat = 0 // set by DiagramViewController
+    var mode: Mode = .normal // set by DiagramViewController
     var isActivated: Bool = true {
         didSet {
             isUserInteractionEnabled = isActivated
@@ -22,9 +24,10 @@ class ImageScrollView: UIScrollView {
 }
 
 extension ImageScrollView {
-
+    
+    /// Shows a "long press" menu that handles image rotation
+    /// - Parameter gestureRecognizer: the long press gesture recognizer, containing the position of the press
     @IBAction func showImageMenu(_ gestureRecognizer: UILongPressGestureRecognizer) {
-        print("long press")
         guard let delegate = diagramViewControllerDelegate, delegate.okToShowLongPressMenu() else { return }
         if gestureRecognizer.state == .began {
             delegate.hideCursor()
@@ -49,32 +52,33 @@ extension ImageScrollView {
         }
     }
 
-    @objc func menuDidClose() {
-        print("menu did close")
-    }
+    // Image menu functions.  Most of these just call the DiagramViewController delegate to do the actual work.
 
-    func doNothing() {}
-
+    /// Rotate the UIImageView, parameters passed back to DiagramViewController
+    /// - Parameter degrees: degrees (not radians) as `CGFloat`
     func rotateImage(degrees: CGFloat) {
         assert(leftMargin > 0, "Left margin not set")
         diagramViewControllerDelegate?.rotateImage(degrees: degrees)
         setNeedsDisplay()
     }
 
+    /// Show rotate menu as a toolbar
     @objc func showRotateToolbar() {
         diagramViewControllerDelegate?.showRotateToolbar()
     }
 
+    /// Reset image to a identity transfrom
     @objc func resetImage() {
         diagramViewControllerDelegate?.resetImage()
     }
 
+    /// Closes long press image menu
     @objc func doneAction() {
         self.resignFirstResponder()
     }
 
+    /// Shows PDF menu as a toolbar
     @objc func showPDFToolbar() {
-        print("showPDFToolbar()")
         diagramViewControllerDelegate?.showPDFToolbar()
     }
 }

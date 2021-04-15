@@ -16,97 +16,98 @@
 #+HTML_HEAD: <style media="screen" type="text/css"> img {max-width: 100%; height: auto;} </style>
 #+HTML_HEAD: <style  type="text/css">:root { color-scheme: light dark; }</style>
 #+HTML_HEAD: <link rel="stylesheet" type="text/css" href="./org.css"/>
-* Prerelease notes
-The version of *EP Diagram* is feature complete and a candidate for release.
-** New in this version (1.0.0-rc.2)
-- Optimized code to make undo/redo faster when dealing with many marks (e.g. in AFB)
-- Disallow long press during certain edit functions to avoid crash from too many nested undos.
-** What is still missing
-- No new features will be added. 
-- See [[*Known issues/bugs/limitations][Known issues/bugs/limitations]].
-** Instructions for TestFlight testers
-- Play around with the app.
-- Email me (mannd@epstudiossoftware.com) or use the TestFlight app to report any bugs, crashes, awkwardness, or to request features.
-- If you have sample ECGs that could be included in the app, for example, different types of heart block, premature beats, or tachyarrhythmias, please send them to me.  Make sure they are anonymized and are not copyrighted.
-- If you have ideas for default ladders to be included in the app, let me know.
+* Overview
+- *EP Diagram* creates /ladder diagrams/, a classic form of ECG analysis that depicts the path of the cardiac impulse through anatomic regions of the heart.  Ladder diagrams are useful to understand cardiac arrhythmias such as heart block, reentrant tachycardias, and premature complexes.  Traditionally ladder diagrams are roughly sketched on paper, but with *EP Diagram* you can draw them on your iPad, and, unlike a paper sketch, these diagrams can scroll and zoom, can measure intervals and conduction times automatically, and can be saved as publication quality images.
+
+- *EP Diagram* has a lot of built-in features that simplify the creation of ladder diagrams, and these features are described in this help manual.  The next section, [[*Quick start][Quick start]], contains some tips on how to get started.  However a good way to learn the program is to create some sample ladder diagrams, then use your finger to tap, double-tap, and drag on the ladder to see what happens.  Try out the various buttons.  Experiment!  Most of the functions are intuitive, and if you want more in-depth instruction, have a look at the rest of this help manual.  
 * Quick start
-** Normal mode
-- *EP Diagram* opens and saves /diagram/ files, that will be stored in the Files app on you iPad or iPhone.
-- When you create a new diagram file, you will see a blank area at the top of the screen and a default ladder grid at the bottom.
-- There is a toolbar at the bottom of the screen with buttons that allow you to change the functional mode of the app, as well as undo and redo actions in the app.  The default mode of the app is termed /normal mode/ and this is the mode that you will use to fill in the ladder with marks representing conduction.
-- Use the "hamburger" menu icon at the top left to open the side menu.  You can select an ECG image from your photos or your files and it will appear in the top of the screen.
-- Tap on the image to create marks, which are the lines that you will be drawing on the ladder.  Use the cursor to align the mark with the ECG waveforms.  Tap away from the cursor to hide the cursor.  Tap on a mark to show the cursor and each tap changes the movement point of the mark from middle to proximal to distal.
+** Files screen
+- On the opening screen, tap *Create New Diagram* to create a blank ladder diagram.
+** Load an ECG image
+- Use the "hamburger" menu icon at the top left to open the /side menu/.  You can select an ECG image from your photos or files and it will appear on the top half of the screen.
+** Create marks
+- Tap on the image or the ladder grid to create /marks/, which are the lines that are drawn on the ladder.  Use the /cursor/ (the vertical line extending from the mark to the top of the screen) to align marks with the ECG waveforms.  Tap away from the cursor to hide the cursor.  Tap on a mark to bring back the cursor and each tap changes the /anchor/ point of the mark from middle to proximal to distal.
 - Double tap on a mark to delete it.  Double tap anywhere else to create a mark.  Double tapping is a fast way to create marks.
-- Marks appear in the active region, shown by a colored background.  If you tap on a different region the marks will appear in that region which will become the new active region.  Tapping on the label of a region will also activate or deactivate it.
+- Marks appear in the /active region/, shown by a tinted background.  If you tap on a different region the marks will appear in that region which will become the new active region.  Tapping on the label of a region will also activate or deactivate it.
 - Dragging with your finger in a region will also create a mark.
+** Move marks
+- Dragging on a mark with a cursor (you can drag either the mark itself or its cursor) will move the mark horizontally.
+- The anchor point will determine how the mark moves.  A middle anchor will move the whole mark, but an anchor at an endpoint of a mark will just move that endpoint, while the other endpoint stays fixed.  This will slant the mark.
 - Long press on the cursor to change it to an omnidirectional cursor (it has a large circle on it), allowing marks to move in any direction.  Long press again to change it back.
-- Marks that are placed end to end will automatically link up and move together afterwards.
-** Calibration mode
+- Marks that are placed end to end will automatically link up and move together the next time you move one of them.
+** Calibrate the diagram
 - Tap the *Calibrate* button to show a caliper that can be used to calibrate the diagram to a standard interval of 1000 msec.
 - After calibration, measurements will appear on the diagram.
-** Edit mode
-- Tap *Edit* to allow taps to select marks or regions, or dragging to select zones.
-- Long press on the ladder after selecting marks or regions to show a menu that can be used to customize the appearance of the marks, including their style, emphasis, block, impulse origin, etc.  You can also add groups of marks and even periods of fibrillation to zones and regions using this menu.
-** Connect mode
-- Tap pairs of marks separated by a region to connect the marks.
-- Tap from a mark to an adjacent region to have a mark block in that region.
+** Connect marks
+- You can draw and move marks to connect them, but it is easier to use the *Connect* button.
+- After tapping the *Connect* button, tap pairs of marks separated by a region to connect the marks with a new mark.
+- Tap from a mark to an adjacent region to draw a mark that blocks in that region.
+** Edit the diagram
+- Tap the *Edit* button to unlock techniques for sprucing up your diagram.
+- Tap to select and deselect marks or regions, or drag to select zones.
+- Long press the ladder after selecting marks or regions to show a menu that can be used to customize the appearance of the marks, including their style, emphasis, block, impulse origin, etc.  You can also add groups of marks and even periods of regular rhythm or fibrillation to zones and regions using this menu.  
 ** Undo/Redo
 - Practically anything you do can be undone or redone and these changes are automatically saved.
-** Other features
+** Other features are located on the side menu
 - Change to a different ladder
 - Edit or create ladders
 - Load sample diagrams
+** Take screenshots
 - Take screenshots using the *Screenshot* button at the upper right of the screen, next to the *Close* button.
 ** Preferences
 - Change the overall appearance or behavior of the app.  Many aspects are customizable.
+** Close the diagram
+Use the *Close* button at the upper right of the screen to close the diagram and return to the *Files* screen.  Diagrams are automatically saved as you work with them.
+** Those are the basics
+If you want more detail, read the next section, which is a detailed manual for the app.
 * EP Diagram manual
 ** Introduction
-Ladder diagrams date back at least a century and have been used to analyze arrhythmias and as teaching tools for almost as long as there has been electrocardiography.  For a history and examples of ladder diagrams, see the [[*References][references]].  *EP Diagram* is a full featured ladder drawing program.  It allows you not only to draw ladders, but also to customize their appearance to a fine degree.  As such it is a complex program and it can take a while to learn all its features.  However, it has an extensive undo/redo facility, so feel free to experiment.
+Ladder diagrams date back at least a century and have been used to analyze arrhythmias and as teaching tools for almost as long as there has been electrocardiography.  For a history and examples of ladder diagrams, see the [[*References][references]].  *EP Diagram* is a full-featured ladder drawing program.  It allows you not only to draw ladders, but also to customize their appearance to a fine degree.  As such it is a complex program and it can take a while to learn all its features.  However, it has an extensive undo/redo facility, so feel free to experiment.
 
 *EP Diagram* is optimized for use on an iPad.  It can be used on a phone, but due to the small size of a phone, it may be more difficult to draw ladder diagrams.
 ** Don't panic! (Undo, Redo, and Autosave)
 Practically any change you make while using this app can be reversed by tapping the *Undo* button at the bottom of the screen.  If you change your mind you can revert the undo action by tapping the *Redo* button.  Every change you make is automatically saved.  There is no need to explicity save your diagram files; the app does this in the background.
 ** Terminology
-Ladder diagram terminology is not really standardized.  Here is a glossary of the terms used in this help file.
-|----------------------+----------------------------------------------------------------------|
-| Term                 | Definition                                                           |
-|----------------------+----------------------------------------------------------------------|
-| Diagram              | a file containing an image and a ladder                              |
-| Ladder               | a graphical representation of electrical conduction                  |
-| Region               | an anatomic area of the heart, e.g. atrium or ventricle              |
-| Zone                 | a subset of a region                                                 |
-| Label                | the area to the left of a region containing its name, e.g. A or V    |
-| Mark                 | the lines in each region representing conduction                     |
-| Cursor               | a line connected to a mark used to move and align the mark           |
-| Anchor               | the point on the mark where movement occurs, indicated by the cursor |
-| Link                 | a connection between marks causing them to move together             |
-| Impulse origin       | where conduction starts, indicated by a symbol                       |
-| Block                | where conduction blocks, indicated by a symbol                       |
-| Interval             | time in msec between adjacent marks, i.e. cycle length               |
-| Conduction time      | time in msec between earliest and latest points of a mark            |
-| Caliper              | used to calibrate the diagram to allow measurements                  |
-| Conduction direction | optional arrow symbol indicating direction of electrical flow        |
-| Markers              | optional lines on image aligned with marks                           |
-| Mark pattern         | a grouping of marks that form a repeating pattern                    |
-| Joining mark         | mark used to joing together mark patterns                            |
+Ladder diagram terminology is not standardized.  Here is a glossary of the terms used in this manual.
+|----------------------+-------------------------------------------------------------------|
+| Term                 | Definition                                                        |
+|----------------------+-------------------------------------------------------------------|
+| Diagram              | a file containing an image and a ladder                           |
+| Ladder               | a graphical representation of electrical conduction               |
+| Region               | an anatomic area of the heart, e.g. atrium or ventricle           |
+| Zone                 | a subset of a region                                              |
+| Label                | the area to the left of a region containing its name, e.g. A or V |
+| Mark                 | the lines in each region representing conduction                  |
+| Cursor               | a line connected to a mark used to move and align the mark        |
+| Anchor               | the point on the mark where movement occurs                       |
+| Link                 | a connection between marks causing them to move together          |
+| Impulse origin       | where conduction starts, indicated by a symbol                    |
+| Block                | where conduction blocks, indicated by a symbol                    |
+| Interval             | time in msec between adjacent marks, i.e. cycle length            |
+| Conduction time      | time in msec between earliest and latest points of a mark         |
+| Caliper              | used to calibrate the diagram to allow measurements               |
+| Conduction direction | optional arrow symbol indicating direction of electrical flow     |
+| Markers              | optional lines on image aligned with marks                        |
+| Mark pattern         | a grouping of marks that form a repeating pattern                 |
+| Joining mark         | mark used to join together mark patterns                          |
 ** Diagrams
 *** Creating and opening diagrams
-EP Diagram is a file based app, meaning the diagrams you create are stored on your device or on iCloud, and can be processed by the Files app on your device, meaning you can copy them, rename them, or delete them outside of the *EP Diagram* app.  The diagram files you create have a file extension of ~diagram~ and a specific icon and file format.  When you open the app, a screen shows your diagram files and a create file icon.
+EP Diagram is a file based app, meaning the diagrams you create are stored on your device or on iCloud, and can be processed by the Files app on your device, meaning you can copy them, rename them, or delete them outside of the *EP Diagram* app.  The diagram files you create have a file extension of /diagram/ and a specific icon and file format.  When you open the app, a screen shows your diagram files and a create file icon.
 
 #+CAPTION: EP Diagram files
 [[./img/epdiagram_files.png]]
 
 Tap *Create New Diagram* to create a diagram file, or tap on one of your previously created diagrams to open it.
-*** Renaming a diagram
-New diagrams have a generic file name.  You can rename the diagram in the Files app, or rename using the [[*Side menu items][side menu]] and then choosing *Rename diagram*.
 *** Initial diagram screen
 
 #+CAPTION: New diagram
 [[./img/new_diagram.png]]
 
 A blank diagram has no ECG image and has a default ladder without marks.  You will see how to add an ECG image and markup the ladder in the next sections.
+*** Renaming a diagram
+New diagrams have a generic file name.  You can rename the diagram in the Files app, or rename it using the [[*Side menu items][side menu]] and then choosing *Rename diagram*.
 *** Closing a diagram
-There is no need to specifically save changes you make to a diagram.  Every change you make is automatically saved.  You close a diagram by simply tapping the *X* at the upper right hand corner of the screen.  When you reopen the diagram it will appear like it did when it was last closed.  Note however that undo and redo information is /not/ restored when you close and reopen a diagram.  Undo information can also be reset by the operating system if memory resources are low.  Thus if you have a diagram that you want to "play around with" but don't want to lose its original form, it might be best to duplicate that diagram using the Files app, and work on a copy.  
+There is no need to specifically save changes you make to a diagram.  Every change you make is automatically saved.  You close a diagram by simply tapping the *X* at the upper right hand corner of the screen.  Note however that undo and redo information is /not/ restored when you close and reopen a diagram.  Undo information can also be reset by the operating system if memory resources are low.  Thus if you have a diagram that you want to "play around with" but don't want to lose its original form, it might be best to duplicate that diagram using the Files app, and work on a copy.  
 ** Images
 *** Adding an image
 **** Image types
@@ -119,50 +120,28 @@ Open the /side menu/ and tap *Take photo* to use your camera to create an image,
 
 *** Manipulating the image
 **** Scrolling and zooming
-You can pinch to zoom and use your finger to scroll the image.  If you have created a ladder, you will see the ladder will zoom and scroll appropriately at the same time.  In fact, in *EP Diagram* all zooming and scrolling is done via the image, not via the ladder.
+You can pinch to zoom and use your finger to scroll the image.  If you have created a ladder, you will see the ladder will zoom and scroll appropriately at the same time.  In *EP Diagram* all zooming and scrolling is done via the image, not via the ladder.
 **** Rotating the image
-If the image is out of kilter (this may happen with photos you take), long press on the image and then select in the menu that appears *Rotate*.
-
-#+Caption: Image menu
-[[./img/image_menu.png]]
-
-Use the buttons at the bottom of the screen to rotate the image.  Tap *Reset* to bring the image back to its original orientation.
-
-#+Caption: Rotate menu
-[[./img/rotate_menu.png]]
-
-**** Device rotation
-You can rotate the device itself and the screen will automatically adjust.
+If the image is out of kilter (this may happen with photos you take), long press on the image and then select in the menu that appears *Rotate*.  Use the buttons at the bottom of the screen to rotate the image.  Tap *Reset* to bring the image back to its original orientation.
 **** Adjust the size of the image versus the ladder
 There is a small red horizontal bar between the image and the ladder.  Move this up or down to adjust the relative proportions of the image and the ladder on the screen.
 
 *** PDF files
-Load PDF files like any other image file.  However, some PDF files contain multiple pages.  You can change the page by performing a long press on the image and selected the *PDF* menu item.  A toolbar will appear at the bottom which allows you to change pages.
-
-Note that once a multipage PDF diagram is closed, only the page shown when the diagram is closed will be saved with the diagram.  This is because *EP Diagram* only saves one image at a time.  In order to changes pages after reopening a diagram based on a multipage PDF file, it will be necessary to reload the PDF file.
+Load PDF files like any other image file.  However, some PDF files contain multiple pages.  You can change the page by performing a long press on the image and selected the *PDF* menu item.  A toolbar will appear at the bottom which allows you to change pages.  Note that once a multipage PDF diagram is closed, only the page shown when the diagram is closed will be saved with the diagram.  This is because *EP Diagram* only saves one image at a time.  In order to changes pages after reopening a diagram based on a multipage PDF file, it will be necessary to reload the PDF file.
 
 ** Ladders
 *** Default ladder
-When you create a new diagram, a default ladder is presented initially.  You can [[*Editing and creating ladders][change the default ladder, select a different ladder, or create a new ladder from scratch]].  The default ladder has three regions: A (atrial), AV (atrioventricular), and V (ventricular).  For the purposes of this manual/tutorial we'll use the default ladder as is and start to create some marks.
+When you create a new diagram, a default ladder is presented initially.  You can [[*Editing and creating ladders][change the default ladder, select a different ladder, or create a new ladder from scratch]].  The default ladder has three regions: A (atrial), AV (atrioventricular), and V (ventricular). 
 *** Modes
-Most of the time you will be working with the ladder in /normal/ mode.  This mode allows you to add and delete marks, move marks, link marks together, and in general draw your ladder.  The toolbar menu at the bottom of the screen in normal mode shows the three other modes: /calibrate/, /edit/, and /connect/.  Those modes are used to calibrate the diagram to allow measurements to be made, to edit the ladder, and to quickly connect pairs of marks.  These modes will be discussed in detail later.
+Most of the time you will be working with the ladder in /normal/ mode.  This is the default mode of operation.  This mode allows you to add and delete marks, move marks, link marks together, and in general draw your ladder.  The toolbar menu at the bottom of the screen in normal mode shows the three other modes: /calibrate/, /connect/ and /edit/.   Those modes are used to calibrate the diagram to allow measurements to be made, to quickly connect pairs of marks, and to edit the ladder's appearance.  These modes will be discussed in detail later.
 *** Active region
-In normal mode frequently one of the ladder regions is highlighted, as seen below.  This is the /active region/.
-
-#+CAPTION: The active region is highlighted
-[[./img/active_region.png]]
-
-You can change the active region by tapping the label of another region, or toggle the active region on and off by tapping the label of the active region.  The active region determines into which region a mark will be drawn, when tapping on the image as described next.  Thus if you are tapping on P waves you would want the A region to be active, and you would have the V region active when tapping on QRS complexes.
+In normal mode one of the ladder regions is usually highlighted, as seen in the prior figure.  This is the /active region/.  You can change the active region by tapping the label of another region, or toggle the active region on and off by tapping the label of the active region.  The active region determines into which region a mark will be drawn.  Thus if you are tapping on P waves you would want the A region to be active, and you would have the V region active when tapping on QRS complexes.
 ** Marks
 *** Creating marks
-If you tap once on the image, a vertical mark with an attached cursor will be drawn in the active region.  If there is no active region, the first region in the ladder will become the active region.  If instead of tapping on the image you tap on the ladder, whatever region you tap on will become the active region, and the mark will appear in that region.
-
-Once the mark appears with the cursor, if you do a single tap elsewhere, the cursor will disappear.  Tap again elsewhere on the image to create another mark.  In the figure below we are adding marks in the A region, corresponding to P waves, by tapping on P waves in the image.  
+If you tap once on the image, a vertical mark with an attached cursor will be drawn in the active region.  If there is no active region, the first region in the ladder will become the active region.  If instead of tapping on the image you tap on the ladder, whatever region you tap on will become the active region, and the mark will appear in that region.  Once the mark appears with the cursor, if you do a single tap elsewhere, the cursor will disappear.  Tap again elsewhere on the image to create another mark.  In the figure below we are adding marks in the A region, corresponding to P waves, by tapping on P waves in the image.  
 
 #+CAPTION: Adding marks to the A region
 [[./img/adding_marks.png]]
-
-Note that in these images tiny dots are present above each mark.  These are /impulse origin/ symbols, and they may not appear if you are working through this example yourself, as they depend on app preference settings.  They will be explained later, but ignore them for now.
 
 *** Double tap shortcut for creating and deleting marks
 It's a bit tiresome to tap to create a mark, and then tap again just to make the cursor disappear, and then tap a third time to create the next mark.  So, to make things easier, you can just double tap at each new location to create a new mark.  Here, we first tapped on the label of the V region to make it the active region, and we are double tapping on QRS complexes to make marks in the V region.  If a mark is malpositioned, it is very easy to double tap it again to make it disappear.
@@ -171,79 +150,31 @@ It's a bit tiresome to tap to create a mark, and then tap again just to make the
 [[./img/adding_V_marks.png]]
 
 *** Dragging to create marks
-As described later, it is easy using connect mode to connect the marks we have drawn, but we'll stay in normal mode for now and accomplish the same feat.  Using your finger, drag from the first mark in the A region to the first mark in the V region.  A new mark will be created, and when it is close to the other two marks, they will be highlighted in a purple color, meaning they are close enough to the new mark to be linked.
+As described later, it is easy using connect mode to connect the marks we have drawn, but we'll stay in normal mode for now and accomplish the same feat.  Using your finger, drag from the first mark in the A region to the first mark in the V region.  A new mark will be created, and when it is close to the other two marks, they will be highlighted in a purple color, meaning they are close enough to the new mark to be linked.  When you finish the drag through the AV region and lift your finger, the new mark (if it is close enough) will snap into the correct position, linking the two regions with conduction through the AV region.
 
 #+CAPTION: Dragging to create a mark in the AV region
 [[./img/drag_in_AV.png]]
 
-
-When you finish the drag through the AV region and lift your finger, the new mark (if it is close enough) will snap into the correct position, linking the two regions with conduction through the AV region.
-
-#+CAPTION: Finish mark in AV region
-[[./img/finish_drag_in_AV.png]]
-
 *** Repositioning marks
-Nobody's perfect, and it's likely the marks you create will not be perfectly aligned with the image or with each other.  It's often necessary to reposition marks you have already created.  Let's look at how to fix a misaligned mark.
+Nobody's perfect, and it's likely the marks you create will not be perfectly aligned with the image or with each other.  It's often necessary to reposition marks you have already created.
 
-#+CAPTION: Misaligned mark in AV region
-[[./img/misaligned_mark.png]]
-
-In the above figure, we attempted to create another mark in the AV region by dragging, but we weren't close enough to the other marks to have them link up ("missed it by that much...").  What to do to fix this?
-
-Well, we could hit the *Undo* button or just delete the mark and start over.  But let's reposition this mark instead.
-
-We saw that you can tap on the image or the ladder to create a mark.  What happens if you tap on a mark that you have already created? Tap on the misaligned mark, and you will see it becomes highlighted and has a cursor. 
-
-#+CAPTION: Single tap on mark to activate cursor
-[[./img/single_tap_on_mark.png]]
-
-An important point: if a mark has a cursor, you can move it.  By the same token, you can't move a mark unless it has a cursor, at least while in normal mode.  But before we move the mark, note where the cursor intersects the mark, namely, at its midpoint.  This is called the /anchor/ of the mark.  The way a mark moves depends on its anchor.  Let's address this further.
+In order to move a mark, it must have a cursor attached to it.  By default when you first tap a mark it has a cursor anchored to the middle of the mark.  Dragging the cursor left or right will keep the mark vertical and move it horizontally.  You can move just one endpoint of the mark or the other by changing the /anchor/ point of the mark.
 
 *** Mark anchors
 Once a mark has a cursor, we can change the anchor point by single-tapping on the mark or the cursor.  Marks have at most three anchor points, proximal, middle, and distal, though some marks have only two if they are linked to other marks (i.e. their freedom of movement is restricted).  When we drag the cursor of the mark, the anchor is what moves.
 
-To demonstrate this, single tap on the highlighted mark or its cursor.  The anchor will move from the middle to the proximal end of the mark.  Tap again and it will move the to distal end.  Finally it will cycle back to the middle if you tap again.
+To demonstrate this, single tap on the highlighted mark or its cursor.  The anchor will move from the middle to the proximal end of the mark.  Tap again and it will move the to distal end.  Finally it will cycle back to the middle if you tap again.  In the next figure we see a mark with a proximal anchor in the AV region that has been dragged so it slants.
 
 #+CAPTION: Proximal anchor
 [[./img/proximal_anchor.png]]
 
-#+CAPTION: Distal anchor
-[[./img/distal_anchor.png]]
-
-With the anchor back in the middle, drag the cursor or the mark horizontally.  When it gets close enough it should link with the A and V marks.
-
-#+CAPTION: Moving AV mark into position
-[[./img/moving_AV_mark.png]]
-
-Even though that worked, let's consider another mark that wasn't so perfectly slanted to connect both its ends.  In the figure below, we have used the middle anchor to move the mark so that the A end connects, but the V end is way off.
-
-#+CAPTION: Distal end of AV mark needs positioning.
-[[./img/distal_end_malpositioned.png]]
-
-We don't want to move the mark as a whole; just the distal end.  So tap on it to show the cursor and then tap twice more (not too fast, because a double tap will delete the mark) to bring the anchor point to the distal position as shown below.  Now drag to move the distal end of the mark.
-
-#+CAPTION: Starting to move distal end
-[[./img/move_distal_end.png]]
-
-#+CAPTION: Moving distal end
-[[./img/still_moving_distal_end.png]]
-
-When the end is close enough lift your finger and the marks will link up.
-
 *** Moving marks in all directions
 So far we have used the cursor to move marks purely in a horizontal direction.  But we can also move marks in unlimited directions.  To do this we have to change our cursor to an /omnidirectional/ cursor.
 
-Tap a mark to cause the cursor to appear.  Then do a long press on the cursor.  A circle will appear, indicating the cursor is now omnidirectional.
+Tap a mark to cause the cursor to appear.  Then do a long press on the cursor.  A circle will appear, indicating the cursor is now omnidirectional.  You can now drag it mark in any direction, depending on the anchor point.  Another long press on the cursor will change it back to a normal horizontally moving cursor.
 
 #+CAPTION: Omnidirectional cursor
-[[./img/omnidirectional_cursor.png]]
-
-Tap the cursor to move the anchor to the distal point of the mark.  Now when you move the cursor you can move this point in any direction.
-
-#+CAPTION: Omnidirectional movement
 [[./img/omnidirectional_movement.png]]
-
-Another long press on the cursor will change it back into a normal horizontal movement cursor.
 
 *** Deleting marks
 To delete a mark, simply double tap it.  You can delete multiple marks, or all the marks in a region or in the ladder using [[*Editing marks][edit mode]], as describe later.
@@ -264,27 +195,15 @@ While ladder diagrams are nice, even nicer is the ability to use the ladder to m
 
 Note that this caliper is always set to a measurement of 1000 msec.  In order to calibrate, you must measure a 1000 msec interval with the caliper.  Then tap *Set* to set the calibration, or tap *Clear* to remove calibration.  Once calibrated, you can recalibrate at any time.  Tap *Done* to return to normal mode.
 *** Intervals and conduction times
-After calibration, if preferences are set to show intervals and show conduction times, you will now see measurements on the ladder.  These will change "on the fly" as you modify the ladder.  They will remain accurate even when zooming and scrolling the image.
+After calibration, if preferences are set to show intervals and show conduction times, you will now see measurements on the ladder.  These will change "on the fly" as you modify the ladder.  They will remain accurate even when zooming and scrolling the image, or if you rotate the screen.
 
 #+CAPTION: Measurements
 [[./img/measurements.png]]
 
 ** Connecting marks
-Connect mode is useful to connect marks in different regions rapidly.  Tap the *Connect* button to enter this mode.  Then tap on pairs of marks, separated by a region of conduction to connect them.  
-
-#+CAPTION: Tap on mark in A region
-[[./img/connect_step_1.png]]
-
-#+CAPTION: Tap on mark in V region
-[[./img/connect_step_2.png]]
+Connect mode is useful to connect marks in different regions rapidly.  Tap the *Connect* button to enter this mode.  Then tap on pairs of marks, separated by a region of conduction to connect them.
 
 You can also quickly create a blocked mark in connect mode.  Tap on a mark in the A region, then tap in the AV region.  A new mark will be created with block in the AV region.
-
-#+CAPTION: Tap on mark in A region
-[[./img/connect_block_step_1.png]]
-
-#+CAPTION: Tap in the AV region
-[[./img/connect_block_step_2.png]]
 
 Tap the *Done* button to resume normal mode.
 
@@ -299,40 +218,39 @@ You can also use the *Select All* and *Clear Selection* buttons on the toolbar t
 #+CAPTION: Context menu in edit mode
 [[./img/context_menu.png]]
 
-*** Menu items
-**** Style
+*** Style
 Choose between a solid, dashed, or dotted mark line style.
-**** Emphasis
+*** Emphasis
 Marks can have a normal or bold emphasis.  Bold emphasis thickens the line of the mark.
-**** Impulse origin
+*** Impulse origin
 Impulse origin is normally automatic, but you can override this and place the impulse origin proximally or distally, or have no impulse origin annotated.
-**** Block
+*** Block
 Block is also normally automatically determined, but you can also override this manually.
-**** Straighten marks
+*** Straighten marks
 Makes selected marks vertical.
-**** Slant marks
+*** Slant marks
 Applies a slant to selected marks.
-**** Adjust mark ends
+*** Adjust mark ends
 Fine tune where either endpoint of a mark ends in a region.
-**** Move marks
+*** Move marks
 Move the selected marks as a group by dragging them horizontally after selecting this menu option.
-**** Adjust CL
+*** Adjust CL
 Lengthen or shorten the cycle length of a group of marks.  This option forces all the selected marks to have the same cycle length.
-**** Rhythm
+*** Rhythm
 This is discussed [[*Creating rhythms][below]].
-**** Repeat CL
+*** Repeat CL
 Repeat the cycle length of a pair of marks forward, backward, or bidirectionally.  This is useful in copying a repeating pattern.
-**** Copy
+*** Copy and paste
 Select marks and then with this menu item tap on the ladder to copy them to the point of the tap.  Use [[*Move marks][Move marks]] to fine tune the position of the pasted marks if necessary.
-**** Repeat pattern
+*** Repeat pattern
 This option will take a selected group of marks and repeat them, with one mark acting as a /joining mark/.  This allows the repetition of complex patterns.  You single tap on the joining mark to duplicate the pattern once.  A double tap on the joining mark will duplicate the pattern until the end or begining of the ECG.  A picture is worth a lot of description.
 
 #+CAPTION: Using pattern repeat.  The top panel shows before, and the bottom after the repeat.  The joining mark is indicated by the the green arrow.  A single tap on the joining mark resulted in a duplication of the pattern.
 [[./img/pattern_repeat.png]]
 
-**** Unlink
+*** Unlink
 Unlink the selected marks.
-**** Delete mark(s)
+*** Delete mark(s)
 Delete the selected marks.
 *** Creating rhythms
 If you select a zone or region, and then bring up the context menu with a long press, you can select the *Rhythm* item to display a screen that allows you to fill the region or zone with a rhythm.
@@ -345,9 +263,6 @@ You can choose a regular rhythm or fibrillation.  With fibrillation you will hav
 *** Opening the side menu
 Use the "hamburger" icon at the upper left of the screen to open the side menu.
 
-#+CAPTION: Hamburger icon
-[[./img/hamburger.png]]
-
 #+CAPTION: Side menu
 [[./img/side_menu.png]]
 
@@ -356,7 +271,7 @@ Use your camera to photograph an ECG image that will be directly imported into t
 *** Select image
 Select an image from the Photos app or from your local or iCloud files.  The ladder will be cleared when adding a new image.  You will need to grant access to your photos when selecting an image for the first time.
 *** Select ladder
-Use *Select ladder* to choose a ladder.  Note that when you select a ladder, it will be blank (without marks), though of course you can always use the *Undo* button to go back to the previous ladder.
+Use *Select ladder* to choose a ladder.  Note that when you select a ladder, it will be blank (without marks), though you can always use the *Undo* button to go back to the previous ladder.
 
 #+CAPTION: Select ladder
 [[./img/select_ladder.png]]
@@ -385,26 +300,26 @@ View this help file.
 View a dialog with copyright and version information about the app.
 ** Editing and creating ladders
 You are not limited to the default ladders that come with the app.  You can create your own ladders, change ladders, or delete those that you don't use. There are two ways to edit ladders. 
-*** Long press on a ladder label
+
 If in edit mode you long press on a label of the current ladder, a menu appears that allows you to make changes to the regions and the ladder.
 
 #+CAPTION: Region menu
 [[./img/region_menu.png]]
 
-**** New mark style
+*** New mark style
 Newly added marks just assume the default style set in [[*Preferences][preferences]] but you can change this in a region to a different default.  This does not change the style of marks already present.  Use the *Style* menu item in edit mode to do that.
-**** Edit label
+*** Edit label
 Change the region name and description.
-**** Add region
+*** Add region
 Add a region above or below the selected region.
-**** Remove region
+*** Remove region
 Remove a region.
-**** Region height
+*** Region height
 Change the height of a region.
-**** Adjust left margin
+*** Adjust left margin
 Change the left margin.
 *** The ladder editor
-The ladder editor will not affect diagrams that you have already created.  Instead it affects the templates that new ladders are based on.  On the side menu tap *Ladder editor* to open the editor.
+To change or add to the templates that your ladders are based on, use the *Ladder editor* from the side menu.  The ladder editor will not affect diagrams that you have already created.  Instead it affects the templates that new ladders are based on. 
 
 #+CAPTION: The ladder editor
 [[./img/ladder_editor.png]]
@@ -421,12 +336,12 @@ On this screen you can change the name and description of the ladder, the left m
 #+CAPTION: Region editor
 [[./img/region_editor.png]]
 
-Here you can change the name, description, height, and default mark line style of the region.  The height is a relative height, i.e. a region with a height of 2 will be twice a height twice as much as a region of height 1.  This is why the AV region in the diagrams shown in this help file is twice has tall as the A and V regions.
+Here you can change the name, description, height, and default mark line style of the region.  The height is a relative height, i.e. a region with a height of 2 will be twice a height twice as much as a region of height 1.  This is why the AV region in the diagrams shown in this help file is twice as tall as the A and V regions.
 
 After making changes, hit the back button at the top left to return to your diagram.
 
 ** Preferences
-There are multiple app preferences that you can set, as seen below.  
+There are multiple app preferences that you can set, as shown below.  
 
 #+CAPTION: App preferences
 [[./img/preferences.png]]
@@ -455,11 +370,9 @@ It is recommended to leave this on, so that marks are automatically linked toget
 ** Diagram snapshots
 To create a snapshot and save it to the Photos app, simply tap the *Snapshot* button (next to the *X* close button) at the top right of the screen.  If a dialog appears asking for permission to access your photo library, select access to all photos if you wish to take diagram snapshots.
 
-#+CAPTION: Snapshot button
-[[./img/snapshot_button.png]]
-
 * Known issues/bugs/limitations
-- Mac version still under development.
+- Mac version still under development.  Owners of M1 Macs can use the app as is, but we are working on adapting the app to Intel Macs as well, with a more Mac-like user interface.
+- Complexly linked marks in the same region may not always track with the moving mark.  We can't decide if this is a bug or feature. 
 * Next version plans
 We plan to include in the next version:
 - Refractory periods

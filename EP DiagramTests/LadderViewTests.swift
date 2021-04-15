@@ -309,8 +309,7 @@ class LadderViewTests: XCTestCase {
         XCTAssertNil(ladderView.dominantStyleOfMarks(marks: marks))
     }
 
-    // TODO: move to calibration tests
-    func testCalibration() {
+    func testLadderViewCalibration() {
         let calibration = Calibration()
         calibration.set(zoom: 1.0, value: 100)
         ladderView.calibration = calibration
@@ -466,7 +465,6 @@ class LadderViewTests: XCTestCase {
         XCTAssertTrue(nearbyMarksToMark3.middle.contains(mark4!.id))
         mark4?.segment = Segment(proximal:  CGPoint(x:103 + 15, y: 0.2), distal: CGPoint(x: 206, y: 1.0))
         nearbyMarksToMark3 = ladderView.getNearbyMarkIDs(mark: mark3!)
-        print("nearbyMarksToMark3", nearbyMarksToMark3)
         XCTAssertFalse(nearbyMarksToMark3.middle.contains(mark4!.id))
     }
 
@@ -571,7 +569,7 @@ class LadderViewTests: XCTestCase {
         ladderView.linkNearbyMarks(mark: markAV!, nearbyMarks: nearbyMarks)
         XCTAssert(markA!.linkedMarkIDs.distal.contains(markAV!.id))
         XCTAssert(markAV!.linkedMarkIDs.proximal.contains(markA!.id))
-        ladderView.unlinkMark(mark: markAV!)
+        ladderView.unlink(mark: markAV!)
         ladderView.moveMark(movement: .horizontal, mark: markAV!, regionPosition: CGPoint(x: 200, y: 0))
         XCTAssertEqual(markAV!.segment.proximal.x, 200)
         XCTAssertEqual(markAV!.segment.distal.x, 200)

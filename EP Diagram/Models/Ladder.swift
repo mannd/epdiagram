@@ -11,7 +11,7 @@ import os.log
 
 // MARK: - classes
 
-/// A Ladder is simply a collection of Regions in top down order.
+/// A Ladder is a collection of regions containing marks
 final class Ladder: NSObject, Codable {
     private(set) var id = UUID()
 
@@ -77,7 +77,12 @@ final class Ladder: NSObject, Codable {
         return registry[id]
     }
 
-    // TODO: do we need registry.  With the small number of marks, might be simpler to just search the array of marks...
+    /// This is a non-registry lookup function, not currently used in app
+    ///
+    /// It seems the registry method of lookup is faster, especially when we have potentially hundreds of marks when there is a
+    /// region of fibrillation
+    /// - Parameter id: id of the mark to lookup
+    /// - Returns: the `Mark` found, or `nil` if none found
     func altLookup(id: UUID) -> Mark? {
         var foundMarks = [Mark]()
         for region in regions {
@@ -94,6 +99,9 @@ final class Ladder: NSObject, Codable {
     }
 
     // When diagram reloads, it is necessary to refresh to contents of the registry, otherwise mark linking won't work.
+    /// Refresh the registry by re-registering all the marks
+    ///
+    /// When the diagram loads, the registry is stale, in that the marks in the registry which are reference class objects no longer have valid references.  Thus it is necessary to reload the registry with all the marks in the ladder.
     func reregisterAllMarks() {
         os_log("restoreRegistry", log: .deprecated, type: .debug)
         registry.removeAll()
@@ -194,7 +202,13 @@ final class Ladder: NSObject, Codable {
         return addMark(mark, toRegion: region)
     }
 
-    // All roads lead to this addMark function, which ensures mark is appended to a region and registered.
+    /// All roads lead to this addMark function, which ensures mark is appended to a region and registered
+    ///
+    /// Adding marks without using this function will result in unregistered marks and absolute chaos.
+    /// - Parameters:
+    ///   - mark: mark to be added to the ladder
+    ///   - region: region to which mark will be added
+    /// - Returns: the added `Mark`
     @discardableResult func addMark(_ mark: Mark, toRegion region: Region) -> Mark {
         os_log("addMark(_:toRegion:) - Ladder", log: .action, type: .info)
         mark.style = region.style == .inherited ? defaultMarkStyle : region.style
@@ -215,7 +229,6 @@ final class Ladder: NSObject, Codable {
 //        mark.linkedMarkIDs = LinkedMarkIDs()
 
         normalizeAllMarks()
-        // FIXME: do we need to unregister mark?
         unregisterMark(mark)
         if let index = markRegion.marks.firstIndex(where: {$0 === mark}) {
             markRegion.marks.remove(at: index)
@@ -231,7 +244,6 @@ final class Ladder: NSObject, Codable {
     }
 
    
-    // FIXME: update this with all deletions?  Test with new diagram that registry is cleared.
     func removeMarkIdReferences(toMarkId id: UUID) {
         for region in regions {
             for mark in region.marks {
@@ -506,7 +518,6 @@ final class Ladder: NSObject, Codable {
 
     func availableAnchors(forMark mark: Mark) -> [Anchor] {
         let linkedMarkIDs = mark.linkedMarkIDs
-        // FIXME: if attachment is in middle, only allow other end to move
         if linkedMarkIDs.proximal.count == 0 || linkedMarkIDs.distal.count == 0 {
             return defaultAnchors()
         }
@@ -609,7 +620,7 @@ final class Ladder: NSObject, Codable {
         else if mark.linkedMarkIDs.distal.count > 0 {
             return [.proximal]
         }
-        // TODO: deal with middle marks
+        // else deal with middle marks...
         return []
     }
 

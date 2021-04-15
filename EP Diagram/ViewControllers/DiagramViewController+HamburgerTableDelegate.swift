@@ -24,7 +24,7 @@ protocol HamburgerTableDelegate: class {
     func selectLadder()
     func renameDiagram()
     func about()
-    func test()
+    func debug()
     func getDiagramInfo()
     func lockLadder()
     func editLadder()
@@ -162,7 +162,7 @@ extension DiagramViewController: HamburgerTableDelegate, UIImagePickerController
 
     func getDiagramInfo() {
         os_log("getDiagramInfo()", log: .action, type: .info)
-        // FIXME: Consider killing this.  Files app gives file info.
+        // Consider killing this.  Files app gives file info.
         var message: String = ""
         if let currentDocument = currentDocument {
             let dateFormatter = DateFormatter()
@@ -186,7 +186,6 @@ extension DiagramViewController: HamburgerTableDelegate, UIImagePickerController
             message = L("Could not get diagram file information")
         }
         UserAlert.showMessage(viewController: self, title: L("Diagram Info"), message: message)
-        print(message)
     }
 
 
@@ -240,40 +239,29 @@ extension DiagramViewController: HamburgerTableDelegate, UIImagePickerController
         let versionBuild = Version.appVersion()
         let version = versionBuild.version ?? L("unknown")
         let build = versionBuild.build ?? L("unknown")
-        let prereleaseVersion = Version.prereleaseVersion
-        os_log("EP Diagram: prereleaseVersion = %s, version = %s build = %s", log: OSLog.debugging, type: .info, prereleaseVersion ?? "not prerelease", version, build)
-        var prereleaseMessage = ""
-        if let prereleaseVersion = prereleaseVersion {
-            prereleaseMessage = "\nPrerelease version \(prereleaseVersion)+\(build)"
-        }
+        //let prereleaseVersion = Version.prereleaseVersion
+        os_log("EP Diagram: version = %s build = %s", log: OSLog.debugging, type: .info, version, build)
+        // OK to remove code below once release version is published.
+        //var prereleaseMessage = ""
+        //if let prereleaseVersion = prereleaseVersion {
+        //    prereleaseMessage = "\nPrerelease version \(prereleaseVersion)+\(build)"
+        //}
         UserAlert.showMessage(
             viewController: self,
             title: L("EP Diagram"),
-            message: L("Copyright 2021 EP Studios, Inc." + prereleaseMessage + "\nApp Store version \(version)"))
+            message: L("Copyright 2021 EP Studios, Inc." + "\nVersion \(version)"))
     }
 
     // Use to test features during development
     #if DEBUG
-    func test() {
-        os_log("test()", log: .debugging, type: .debug)
-        print("ladderView.viewMaxWidth", ladderView.viewMaxWidth)
-        //        print("imageView.frame", imageView.frame)
-//        print("container view frame", imageContainerView.frame)
-//        print("imageView.bounds", imageView.bounds)
-//        print("container view bounds", imageContainerView.bounds)
-//        print("********************")
-//        print("diagram.imageIsUpScaled", diagram.imageIsUpscaled)
-//        print("imageView.transform", imageView.transform)
-//        print("imageContainerView.transform", imageContainerView.transform)
-//        print("imageScrollView.zoomScale", imageScrollView.zoomScale)
-//        print("imageScrollView.contentOffset", imageScrollView.contentOffset)
-//        print("imageScrollView.contentInset", imageScrollView.contentInset)
-//        print(calibration)
-//        print("********************")
-//        setViewsNeedDisplay()
+    func debug() {
+        os_log("debug()", log: .debugging, type: .debug)
+        for region in ladderView.ladder.regions {
+            print(region, ladderView.ladder.index(ofRegion: region) as Any)
+        }
     }
     #else
-    func test() {}
+    func debug() {}
     #endif
 
     // MARK: - Delegate handlers
@@ -417,6 +405,7 @@ extension DiagramViewController: HamburgerTableDelegate, UIImagePickerController
         constraintHamburgerLeft.constant = 0
         hamburgerMenuIsOpen = true
         self.separatorView?.showIndicator = false
+        self.separatorView?.allowTouches = false
         self.separatorView?.setNeedsDisplay()
         navigationController?.setToolbarHidden(true, animated: true)
         // Always hide cursor when opening hamburger menu.
@@ -438,6 +427,7 @@ extension DiagramViewController: HamburgerTableDelegate, UIImagePickerController
             self.blackView.alpha = 0
         }, completion: { (finished:Bool) in
             self.separatorView?.showIndicator = true
+            self.separatorView?.allowTouches = true
             self.separatorView?.setNeedsDisplay()
             self.setViewsNeedDisplay()
         })

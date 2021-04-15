@@ -19,7 +19,6 @@ struct HamburgerViewModel {
         array.append(takePhotoLayer)
         let selectImageLayer = HamburgerLayer(withName: L("Select image"), icon: UIImage(systemName: "photo"), layer: .selectImage)
         array.append(selectImageLayer)
-        // FIXME: need ladder svg
         let selectLadderLayer = HamburgerLayer(withName: L("Select ladder"), icon: UIImage(named: "ladder"), layer: .selectLadder)
         array.append(selectLadderLayer)
         let renameDiagramLayer = HamburgerLayer(withName: L("Rename diagram"), icon: UIImage(systemName: "square.and.pencil"), layer: .renameDiagram)
@@ -43,11 +42,10 @@ struct HamburgerViewModel {
         // Never show test layer with release build configuration.
         #if DEBUG
         if showTestLayer {
-            let testLayer = HamburgerLayer(withName: "TEST", icon: UIImage(named: "test"), layer: .test)
+            let testLayer = HamburgerLayer(withName: "Debug", icon: UIImage(named: "test"), layer: .test)
             array.append(testLayer)
         }
         #endif
-
 
         return array
     }

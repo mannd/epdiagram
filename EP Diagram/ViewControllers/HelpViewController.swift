@@ -15,6 +15,9 @@ class HelpViewController: UIViewController, WKNavigationDelegate {
     @IBOutlet var helpWebView: WKWebView!
     @IBOutlet var loadingLabel: UILabel!
 
+    var backButton: UIBarButtonItem!
+    var forwardButton: UIBarButtonItem!
+
     override func viewDidLoad() {
         os_log("viewDidLoad() - HelpViewConroller", log: .viewCycle, type: .info)
         super.viewDidLoad()
@@ -26,11 +29,26 @@ class HelpViewController: UIViewController, WKNavigationDelegate {
         let request = URLRequest(url: url)
         helpWebView.load(request)
         title = L("Help")
+
+        backButton = UIBarButtonItem(image: UIImage(systemName: "chevron.left"), style: .plain, target: self, action: #selector(goBack(_:)))
+        forwardButton = UIBarButtonItem(image: UIImage(systemName: "chevron.right"), style: .plain, target: self, action: #selector(goForward(_:)))
+        navigationItem.setRightBarButtonItems([forwardButton, backButton], animated: true)
+
+        helpWebView.addObserver(self, forKeyPath: #keyPath(WKWebView.canGoBack), options: .new, context: nil)
+        helpWebView.addObserver(self, forKeyPath: #keyPath(WKWebView.canGoForward), options: .new, context: nil)
+        updateButtons()
     }
 
     override func viewDidAppear(_ animated: Bool) {
         os_log("viewDidAppear - HelpViewController", log: .viewCycle, type: .info)
         super.viewDidAppear(animated)
+
+    }
+
+    override func viewDidDisappear(_ animated: Bool) {
+        helpWebView.removeObserver(self, forKeyPath: #keyPath(WKWebView.canGoBack))
+        helpWebView.removeObserver(self, forKeyPath: #keyPath(WKWebView.canGoForward))
+        super.viewDidDisappear(animated)
     }
 
     func webView(_ webView: WKWebView, didStartProvisionalNavigation navigation: WKNavigation!) {
@@ -39,7 +57,28 @@ class HelpViewController: UIViewController, WKNavigationDelegate {
 
     func webView(_ webView: WKWebView, didFinish navigation: WKNavigation!) {
         loadingLabel.isHidden = true
-        // animated: must be true or will not scroll to position.
     }
 
+    @objc func goBack(_ sender: UIBarButtonItem) {
+        if helpWebView.canGoBack {
+            helpWebView.goBack()
+        }
+    }
+
+    @objc func goForward(_ sender: UIBarButtonItem) {
+        if helpWebView.canGoForward {
+            helpWebView.goForward()
+        }
+    }
+
+    func updateButtons() {
+        backButton.isEnabled = helpWebView.canGoBack
+        forwardButton.isEnabled = helpWebView.canGoForward
+    }
+
+    override func observeValue(forKeyPath keyPath: String?, of object: Any?, change: [NSKeyValueChangeKey : Any]?, context: UnsafeMutableRawPointer?) {
+            if keyPath == #keyPath(WKWebView.canGoBack) || keyPath == #keyPath(WKWebView.canGoForward) {
+                  updateButtons()
+            }
+        }
 }

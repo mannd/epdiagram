@@ -39,7 +39,6 @@ final class DiagramDocument: UIDocument {
         do {
             diagram = try decoder.decode(Diagram.self, from: data)
         } catch {
-            // TODO: with version updates, try to load earlier versions here and convert to current diagram format.
             throw DocumentError.corruptDocument
         }
     }

@@ -22,7 +22,7 @@
                                     <view contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="UNx-Xp-4Hk" userLabel="Image Container View">
                                         <rect key="frame" x="0.0" y="0.0" width="1411" height="676"/>
                                         <subviews>
-                                            <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="SampleECG" translatesAutoresizingMaskIntoConstraints="NO" id="Z9T-Bh-sBD" customClass="ImageView" customModule="EP_Diagram" customModuleProvider="target">
+                                            <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" image="SampleECG" translatesAutoresizingMaskIntoConstraints="NO" id="Z9T-Bh-sBD">
                                                 <rect key="frame" x="0.0" y="0.0" width="1411" height="676"/>
                                             </imageView>
                                         </subviews>

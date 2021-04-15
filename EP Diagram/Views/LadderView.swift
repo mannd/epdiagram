@@ -9,6 +9,7 @@
 import UIKit
 import OSLog
 
+/// A view that manages and displays the ladder.
 final class LadderView: ScaledView {
 
     // For debugging
@@ -16,13 +17,15 @@ final class LadderView: ScaledView {
     var showProxEnd = false
     var showEarliestPoint = false
     var debugMarkMode = false
-    #else  // Don't ever change this.  They must all be FALSE.
+    var showPivots = false
+    #else  // Don't ever change these.  They must all be FALSE.
     var showProxEnd = false
     var showEarliestPoint = false
     var debugMarkMode = false
+    var showPivots = false
     #endif
 
-    // TODO: These all may need some tweaking...
+    // Constants
     private let ladderPaddingMultiplier: CGFloat = 0.5
     private let accuracy: CGFloat = 20
     private let lowerLimitMarkHeight: CGFloat = 0.1
@@ -31,18 +34,45 @@ final class LadderView: ScaledView {
     private let arrowHeadAngle = CGFloat(Double.pi / 6)
     private let maxRegionMeasurements = 20
     private let intervalMargin: CGFloat = 10
-    private let maxMarksForIntervals = 200   // If more than this number of marks in a region, don't draw intervals.
+    /// If more than this number of marks in a region, don't draw intervals
+    private let maxMarksForIntervals = 200   // We may revisit this limit in the future.
     private let minRepeatCLInterval: CGFloat = 20
-    var blockMin: CGFloat = 0.1
-    var blockMax: CGFloat = 0.9
+    private let draggedMarkSnapToBoundaryMargin: CGFloat = 0.05
+
+    let measurementTextFontSize: CGFloat = 14.0
+    let labelTextFontSize: CGFloat = 18.0
+    let descriptionTextFontSize: CGFloat = 12.0
 
     lazy var measurementTextAttributes: [NSAttributedString.Key: Any] = {
-        let textFont = UIFont(name: "Helvetica Neue Medium", size: 14.0) ?? UIFont.systemFont(ofSize: 14, weight: UIFont.Weight.medium)
-        let paragraphStyle = NSParagraphStyle.default.mutableCopy() as! NSMutableParagraphStyle
+        let textFont = UIFont.systemFont(ofSize: measurementTextFontSize, weight: UIFont.Weight.medium)
+        let paragraphStyle = NSMutableParagraphStyle()
+        paragraphStyle.alignment = .center
         let attributes = [
             NSAttributedString.Key.font: textFont,
             NSAttributedString.Key.foregroundColor: UIColor.label,
             NSAttributedString.Key.paragraphStyle: paragraphStyle,
+        ]
+        return attributes
+    }()
+
+    lazy var labelTextAttributes: [NSAttributedString.Key: Any] = {
+        let textFont = UIFont.systemFont(ofSize: labelTextFontSize, weight: UIFont.Weight.heavy)
+        let paragraphStyle = NSMutableParagraphStyle()
+        paragraphStyle.alignment = .center
+        let attributes: [NSAttributedString.Key: Any] = [
+            .paragraphStyle: paragraphStyle,
+            .font: textFont,
+        ]
+        return attributes
+    }()
+
+    lazy var descriptionTextAttributes: [NSAttributedString.Key: Any] = {
+        let textFont = UIFont.systemFont(ofSize: descriptionTextFontSize, weight: UIFont.Weight.regular)
+        let paragraphStyle = NSMutableParagraphStyle()
+        paragraphStyle.alignment = .center
+        let attributes: [NSAttributedString.Key: Any] = [
+            .paragraphStyle: paragraphStyle,
+            .font: textFont,
         ]
         return attributes
     }()
@@ -52,7 +82,6 @@ final class LadderView: ScaledView {
     var showImpulseOrigin = true
     var showBlock = true
     var showArrows = false
-    var showPivots = false
     var showIntervals = true
     var showConductionTimes = true
     var showMarkText = true
@@ -95,8 +124,6 @@ final class LadderView: ScaledView {
     }
     private var movingMark: Mark?
     private var regionOfDragOrigin: Region?
-    private var regionProximalToDragOrigin: Region?
-    private var regionDistalToDragOrigin: Region?
     private var dragCreatedMark: Mark?
     private var dragOriginDivision: RegionDivision = .none
     var isDragging: Bool = false
@@ -105,7 +132,7 @@ final class LadderView: ScaledView {
     var movementDiffs: [Mark: (prox: CGFloat, distal: CGFloat)] = [:]
 
     var ladderIntervals: [Int: [Interval]] = [:]
-    
+
     var copiedMarks: [Mark] = []
     var patternMarks: [Mark] = []
 
@@ -127,12 +154,11 @@ final class LadderView: ScaledView {
     var leftMargin: CGFloat = 0
     var viewHeight: CGFloat = 0
     // viewMaxWidth is width of image, or width of ladderView if no image is present
-    // FIXME: Should always be imageViewWidth, unless no image.
     var viewMaxWidth: CGFloat = 0 {
         didSet {
             if viewMaxWidth == 0 { // no image loaded, so use frame.width
                 viewMaxWidth = frame.width
-            } 
+            }
         }
     }
     private var regionUnitHeight: CGFloat = 0
@@ -162,12 +188,9 @@ final class LadderView: ScaledView {
 
     private func setupView() {
         os_log("setupView() - LadderView", log: .action, type: .info)
-        // FIXME: needs to be done later
-//        ladder.reregisterAllMarks()
         viewHeight = self.frame.height
         initializeRegions()
         removeConnectedMarks()
-        // FIXME: snap marks on startup
 
         // Draw border around view.
         layer.masksToBounds = true
@@ -184,7 +207,7 @@ final class LadderView: ScaledView {
         singleTapRecognizer.require(toFail: doubleTapRecognizer)
         self.addGestureRecognizer(doubleTapRecognizer)
 
-        let draggingPanRecognizer = UIPanGestureRecognizer(target: self, action: #selector(self.dragging))
+        let draggingPanRecognizer = UIPanGestureRecognizer(target: self, action: #selector(self.handleDrag))
         self.addGestureRecognizer(draggingPanRecognizer)
     }
 
@@ -353,7 +376,9 @@ final class LadderView: ScaledView {
         if let mark = mark {
             if mark.mode == .attached {
                 attachMark(mark)
-                // TODO: Consider using RegionDivision to position Anchor.  Tapping on cursor it makes sense to just toggle the anchor, but tapping on the mark itself it might be better to position anchor near where you tap.  On other hand, it might be easy to miss the mark division zone.  Also, if not all anchors are available (say the .middle anchor is missing), which anchor do you switch to?  Maybe default to toggleAnchor() if anchor not available.
+                // An alternative would be to use RegionDivision to position the anchor rather than
+                // just toggle the anchor with each tap, but RegionDivision is somewhat imprecise
+                // so we have committed to taps toggling the anchor.
                 toggleAnchor(mark: mark)
                 adjustCursor(mark: mark)
                 cursorViewDelegate.cursorIsVisible = true
@@ -395,12 +420,10 @@ final class LadderView: ScaledView {
                 return mark
             }
         } else if abs(regionDifference) == 1 {
-            print("same region mark")
             if regionDifference > 0 {
                 // If first and secondRegionIndex aren't out of range, markRegion can't be either.
                 let markRegion = ladder.region(atIndex: secondRegionIndex)
                 let segment = Segment(proximal: CGPoint(x: marks[0].segment.distal.x, y: 0), distal: transformToRegionPosition(scaledViewPosition: connectedMarkTapPositions[1], region: markRegion))
-                print("segment", segment)
 
                 let mark = ladder.addMark(fromSegment: segment, toRegion: markRegion)
                 undoablyAddMark(mark: mark)
@@ -409,10 +432,8 @@ final class LadderView: ScaledView {
                 return mark
             }
             if regionDifference < 0 {
-                print("regionDiff", regionDifference)
                 let markRegion = ladder.region(atIndex: firstRegionIndex)
                 let segment = Segment(proximal: CGPoint(x: marks[1].segment.distal.x, y: 0), distal: transformToRegionPosition(scaledViewPosition: connectedMarkTapPositions[0], region: markRegion))
-                print("segment", segment)
                 let mark = ladder.addMark(fromSegment: segment, toRegion: markRegion)
                 undoablyAddMark(mark: mark)
                 let nearbyMarks = getNearbyMarkIDs(mark: mark)
@@ -733,9 +754,9 @@ final class LadderView: ScaledView {
             target.redoablyUndeleteMark(mark: mark)
         })
         NotificationCenter.default.post(name: .didUndoableAction, object: nil)
-
+        let nearbyMarks = getNearbyMarkIDs(mark: mark)
+        unlinkNearbyMarks(mark: mark, nearbyMarks: nearbyMarks)
         ladder.deleteMark(mark)
-        let linkedMarks = ladder.getLinkedMarksFromLinkedMarkIDs(mark.linkedMarkIDs)
         let region = ladder.region(ofMark: mark)
         updateMarkersAndRegionIntervals(region)
         hideCursorAndNormalizeAllMarks()
@@ -743,9 +764,6 @@ final class LadderView: ScaledView {
             ladder.normalizeRegions()
             ladder.hideZone()
         }
-        // No need to link nearby marks, but need to update links of neighboring marks
-        relinkAllMarks()
-        assessBlockAndImpulseOrigin(marks: linkedMarks.allMarks)
     }
 
     func redoablyUndeleteMark(mark: Mark) {
@@ -764,12 +782,11 @@ final class LadderView: ScaledView {
             ladder.normalizeRegions()
             ladder.hideZone()
         }
-        relinkAllMarks()
+        let nearbyMarks = getNearbyMarkIDs(mark: mark)
         snapToNearbyMarks(mark: mark, nearbyMarks: mark.linkedMarkIDs)
+        linkNearbyMarks(mark: mark, nearbyMarks: nearbyMarks)
         assessBlockAndImpulseOriginOfMark(mark)
     }
-
-
 
     // multi-mark variants of above
 
@@ -779,11 +796,8 @@ final class LadderView: ScaledView {
             target.undoablyDeleteMarks(marks: marks)
         })
         NotificationCenter.default.post(name: .didUndoableAction, object: nil)
-
-        relinkAllMarks()
-        // don't snap when undoably adding marks
-        updateMarkersAndLadderIntervals()
-        assessBlockAndImpulseOriginForAllMarks()
+        // We just set up undo/redo with this method.
+        // Assessment of block, IO and intervals is done outside of this procdure.
     }
 
     func undoablyDeleteMarks(marks: [Mark]) {
@@ -795,14 +809,14 @@ final class LadderView: ScaledView {
         for mark in marks {
             ladder.deleteMark(mark)
         }
-        updateMarkersAndLadderIntervals()
         hideCursorAndNormalizeAllMarks()
         if mode == .select {
             ladder.normalizeRegions()
             ladder.hideZone()
         }
-        relinkAllMarks()
-        assessBlockAndImpulseOriginForAllMarks()
+        linkMarks(marks)
+        updateMarkersAndLadderIntervals()
+        assessBlockAndImpulseOriginOfMarks(marks)
     }
 
     func redoablyUndeleteMarks(marks: [Mark]) {
@@ -823,8 +837,9 @@ final class LadderView: ScaledView {
             ladder.normalizeRegions()
             ladder.hideZone()
         }
+        linkMarks(marks)
         updateMarkersAndLadderIntervals()
-        relinkAllMarks()
+        assessBlockAndImpulseOriginOfMarks(marks)
     }
 
     // remove marks that overlap with the marks passed to this function
@@ -838,31 +853,56 @@ final class LadderView: ScaledView {
         }
     }
 
-    func trimMarksOutsideOfImage() {
-        // Any marks less than 0 or greater than maxImageWidth undobably delete
-        // Also need to 
-
-    }
-
     func removeAllOverlappingMarks() {
         removeOverlappingMarks(with: ladder.allMarks())
     }
 
+    // MARK: dragging
 
+    /// Handle dragging (panning) on LadderView, depending on mode
+    /// - Parameter gesture: gesture passed by gesture recognizer
+    @objc func handleDrag(gesture: UIPanGestureRecognizer) {
+        guard !marksAreHidden else { return }
+        switch mode {
+        case .select:
+            handleSelectModeDrag(gesture)
+        case .normal:
+            handleNormalModeDrag(gesture)
+        default:
+            break
+        }
+    }
 
-    private func normalModeDrag(_ pan: UIPanGestureRecognizer) {
-        let position = pan.location(in: self)
-        let state = pan.state
+    /// This method handles moving attached marks and also creating marks using dragging
+    ///
+    /// The movement process is complex, involving moving the mark along with its linked marks,
+    /// moving the cursor in parallel, highlighting nearby marks,
+    /// and snapping to nearby marks at the end of the move, as well as updating intervals as well as block
+    /// and impulse origin of the moving mark and its linked marks.
+    ///
+    /// For an attached mark, the order of events is:
+    ///    move the mark, linked marks, and cursor
+    ///    update markers and intervals while moving
+    ///    highlight nearby marks while moving
+    ///    at end of movement, snap to the nearby marks and add the nearby marks to the linked marks
+    ///    assess block and impulse origin of mark and linked marks
+    ///
+    /// All of the above is completely undoably and redoably.
+    ///
+    /// This method should probably be refactored to separate out the two functions: moving the attached
+    /// mark, and creating a free-form mark.  Also, setNeedsDisplay() is called many times indirectly and
+    /// possibly unnecessarily, but I very much doubt iOS cares about extra setNeedsDisplay() calls.
+    /// - Parameter gesture: gesture passed by gesture recognizer
+    private func handleNormalModeDrag(_ gesture: UIPanGestureRecognizer) {
+        let position = gesture.location(in: self)
+        let state = gesture.state
         let locationInLadder = getLocationInLadder(position: position)
 
         if state == .began {
             isDragging = true
             currentDocument?.undoManager?.beginUndoGrouping()
-            // Activate region and get regions proximal and distal.
             if let region = locationInLadder.region {
                 regionOfDragOrigin = region
-                regionProximalToDragOrigin = ladder.regionBefore(region: region)
-                regionDistalToDragOrigin = ladder.regionAfter(region: region)
                 activeRegion = region
             }
             if let regionOfDragOrigin = regionOfDragOrigin {
@@ -870,12 +910,12 @@ final class LadderView: ScaledView {
                     movingMark = mark
                     // NB: Need to move it nowhere, to let undo get back to starting position!
                     if let anchorPosition = getMarkScaledAnchorPosition(mark) {
-                        moveMark(mark: mark, scaledViewPosition: anchorPosition)
+                        moveMark(mark: mark, scaledViewPosition: anchorPosition) // calls setNeedsDisplay() -- undoable
                     }
                 }
                 else {  // We need to make a new mark.
-                    hideCursorAndNormalizeAllMarks()
-                    unattachAttachedMark()
+                    hideCursorAndNormalizeAllMarks() // doesn't call setNeedsDisplay()
+                    unattachAttachedMark() // doesn't call setNeedsDisplay()
                     // Get the third of region for endpoint of new mark.
                     dragOriginDivision = locationInLadder.regionDivision
                     switch dragOriginDivision {
@@ -885,8 +925,7 @@ final class LadderView: ScaledView {
                         dragCreatedMark?.segment.distal.y = 0.5
                     case .middle:
                         dragCreatedMark = addMarkToActiveRegion(scaledViewPositionX: position.x)
-                        // TODO: REFACTOR
-                        dragCreatedMark?.segment.proximal.y = (position.y - regionOfDragOrigin.proximalBoundaryY) / (regionOfDragOrigin.distalBoundaryY - regionOfDragOrigin.proximalBoundaryY)
+                        dragCreatedMark?.segment.proximal.y = regionOfDragOrigin.relativeYPosition(y: position.y) ?? 0
                         dragCreatedMark?.segment.distal.y = 0.75
                     case .distal:
                         dragCreatedMark = addMarkToActiveRegion(scaledViewPositionX: position.x)
@@ -896,109 +935,112 @@ final class LadderView: ScaledView {
                         assert(false, "Making a mark with a .none regionDivision!")
                     }
                     if let dragCreatedMark = dragCreatedMark {
-                        undoablyAddMark(mark: dragCreatedMark)
+                        // undoablyAddMark updates block, IO, region markers and intervals.
+                        // Block and IO are not updated while when dragging, so until the drag is
+                        // complete, the IO symbol is always at the start of the drag, and there is
+                        // no block symbol.  To avoid this, we set IO setting to .none, so the IO
+                        // symbol is not drawn until we finish the drag.
+                        dragCreatedMark.impulseOriginSetting = .none
+                        undoablyAddMark(mark: dragCreatedMark) // indirectly calls setNeedsDisplay()
                     }
-                    attachMark(dragCreatedMark)
                 }
             }
         }
         if state == .changed {
             if let mark = movingMark {
-                moveMark(mark: mark, scaledViewPosition: position)
-                highlightNearbyMarks(mark)
+                // moveMark() indirectly calls setSegment() for mark and linked marks, which undoably
+                // assesses Block and IO of mark and linked marks, and assesses intervals and markers
+                // in regions of the marks and linked marks.
+                moveMark(mark: mark, scaledViewPosition: position) // calls setNeedsDisplay() - undoable
+                highlightNearbyMarks(mark) // doesn't call setNeedsDisplay()
             }
             else if regionOfDragOrigin == locationInLadder.region, let regionOfDragOrigin = regionOfDragOrigin {
+                // We set the segments directly here, as we don't need to undo setting these segments;
+                // the undo action for a drag created mark is simply to delete it.
                 switch dragOriginDivision {
-                case .proximal:
+                case .proximal, .middle:
                     dragCreatedMark?.segment.distal = transformToRegionPosition(scaledViewPosition: position, region: regionOfDragOrigin)
                 case .distal:
                     dragCreatedMark?.segment.proximal = transformToRegionPosition(scaledViewPosition: position, region: regionOfDragOrigin)
-                case .middle:
-                    dragCreatedMark?.segment.distal = transformToRegionPosition(scaledViewPosition: position, region: regionOfDragOrigin)
                 default:
                     break
                 }
-                highlightNearbyMarks(dragCreatedMark)
-                updateMarkersAndRegionIntervals(activeRegion)
+                highlightNearbyMarks(dragCreatedMark) // doesn't call setNeedsDisplay()
+                // A drag created mark only affects intervals in the active region, and has no
+                // linked marks, so just update the active region markers and intervals.
+                updateMarkersAndRegionIntervals(activeRegion) // calls setNeedsDisplay()
             }
         }
         if state == .ended {
             isDragging = false
             if let movingMark = movingMark {
-                swapEndsIfNeeded(mark: movingMark)
+                swapEndpointsIfNeeded(mark: movingMark) // undoable
                 let newNearbyMarks =
                     getNearbyMarkIDs(mark: movingMark)
-                snapToNearbyMarks(mark: movingMark, nearbyMarks: newNearbyMarks)
-                linkNearbyMarks(mark: movingMark, nearbyMarks: newNearbyMarks)
+                snapToNearbyMarks(mark: movingMark, nearbyMarks: newNearbyMarks) // indirect setNeedsDisplay() - undoable
+                linkNearbyMarks(mark: movingMark, nearbyMarks: newNearbyMarks) // doesn't call setNeedsDisplay()
             }
             else if let dragCreatedMark = dragCreatedMark {
                 if dragCreatedMark.height < lowerLimitMarkHeight && dragCreatedMark.width < lowerLimitMarkWidth {
-                    undoablyDeleteMark(mark: dragCreatedMark)
+                    // Need to undoably delete here, or else undo and redo restores the tiny mark.
+                    undoablyDeleteMark(mark: dragCreatedMark) // indirect setNeedsDisplay()
                 }
                 else {
-                    swapEndsIfNeeded(mark: dragCreatedMark)
-                    let newNearbyMarks = getNearbyMarkIDs(mark: dragCreatedMark)
-                    snapToNearbyMarks(mark: dragCreatedMark, nearbyMarks: newNearbyMarks)
-                    linkNearbyMarks(mark: dragCreatedMark, nearbyMarks: newNearbyMarks)
+                    swapEndpointsIfNeeded(mark: dragCreatedMark)
+                    dragCreatedMark.impulseOriginSetting = .auto
                     // Check if close to boundary
-                    if dragCreatedMark.segment.proximal.y > 0 && dragCreatedMark.segment.proximal.y < 0.05 {
+                    if dragCreatedMark.segment.proximal.y < draggedMarkSnapToBoundaryMargin {
                         var segment = dragCreatedMark.segment
                         segment.proximal.y = 0
-                        setSegment(segment: segment, forMark: dragCreatedMark)
+                        setSegment(segment: segment, forMark: dragCreatedMark) // calls setNeedsDisplay()
                     }
-                    if dragCreatedMark.segment.distal.y < 1.0 && dragCreatedMark.segment.distal.y > 0.95 {
+                    if dragCreatedMark.segment.distal.y < 1.0 && dragCreatedMark.segment.distal.y > (1.0 - draggedMarkSnapToBoundaryMargin) {
                         var segment = dragCreatedMark.segment
                         segment.distal.y = 1.0
-                        setSegment(segment: segment, forMark: dragCreatedMark)
+                        setSegment(segment: segment, forMark: dragCreatedMark) // calls setNeedsDisplay()
                     }
+                    let newNearbyMarks = getNearbyMarkIDs(mark: dragCreatedMark)
+                    snapToNearbyMarks(mark: dragCreatedMark, nearbyMarks: newNearbyMarks) // calls setNeedsDisplay()
+                    linkNearbyMarks(mark: dragCreatedMark, nearbyMarks: newNearbyMarks) // doesn't call setNeedsDisplay() -- undoable
+                    assessBlockAndImpulseOriginOfMark(dragCreatedMark) // doesn't call setNeedsDisplay()
                 }
             }
             currentDocument?.undoManager.endUndoGrouping()
             if !cursorViewDelegate.cursorIsVisible {
-                normalizeAllMarks()
+                normalizeAllMarks() // doesn't call setNeedsDisplay()
             }
-            dragCreatedMark?.mode = .normal
             movingMark = nil
             dragCreatedMark = nil
             regionOfDragOrigin = nil
-            regionProximalToDragOrigin = nil
-            regionDistalToDragOrigin = nil
             dragOriginDivision = .none
         }
         cursorViewDelegate.refresh()
-        setNeedsDisplay()
+        setNeedsDisplay() // Need to reassess earlier redundant calls to setNeedsDisplay()
     }
 
-    @objc func dragging(pan: UIPanGestureRecognizer) {
-        guard !marksAreHidden else { return }
-        switch mode {
-        case .select:
-            selectModeDrag(pan)
-        case .normal:
-            normalModeDrag(pan)
-        default:
-            break
-        }
-    }
 
-    func selectModeDrag(_ pan: UIPanGestureRecognizer) {
+
+    /// Handle dragging in select (edit) mode
+    /// - Parameter gesture: gesture passed by gesture recognizer
+    func handleSelectModeDrag(_ gesture: UIPanGestureRecognizer) {
         if isDraggingSelectedMarks {
-            selectModeMarksDrag(pan)
+            handleSelectModeMarksDrag(gesture)
         } else {
-            selectModeZoneDrag(pan)
+            handleSelectModeZoneDrag(gesture)
         }
     }
 
-    func selectModeMarksDrag(_ pan: UIPanGestureRecognizer) {
+    // Consider change to setSegments() instead of setSegment().
+    func handleSelectModeMarksDrag(_ gesture: UIPanGestureRecognizer) {
         let selectedMarks = ladder.allMarksWithMode(.selected)
         ladder.hideZone()
-        let location = pan.location(in: self)
-        let state = pan.state
+        let location = gesture.location(in: self)
+        let state = gesture.state
         if state == .began {
             isDragging = true
             currentDocument?.undoManager.beginUndoGrouping()
             for mark in selectedMarks {
-                undoablyUnlinkMark(mark: mark)
+                // we don't unlink marks during block movement, they stay linked
                 let proximalPositionX = transformToScaledViewPositionX(regionPositionX: mark.segment.proximal.x)
                 let distalPositionX = transformToScaledViewPositionX(regionPositionX: mark.segment.distal.x)
                 let proximalDiffX = proximalPositionX - location.x
@@ -1019,7 +1061,10 @@ final class LadderView: ScaledView {
             }
         }
         if state == .ended {
-            relinkAllMarks()
+//            relinkAllMarks()
+            linkMarks(selectedMarks)
+            updateMarkersAndLadderIntervals()
+            assessBlockAndImpulseOriginOfMarks(selectedMarks)
             isDragging = false
             movementDiffs.removeAll()
             currentDocument?.undoManager.endUndoGrouping()
@@ -1027,9 +1072,16 @@ final class LadderView: ScaledView {
         setNeedsDisplay()
     }
 
-    func selectModeZoneDrag(_ pan: UIPanGestureRecognizer) {
-        let position = pan.location(in: self)
-        let state = pan.state
+    /// Handles dragging in select mode, except when the move marks feature is active
+    ///
+    /// When draggin in select mode, we want to create a zone, with the marks within the zone selected.
+    /// A zone is very similar to a highlighted selection in a word processor, except when zone encompass
+    /// multiple regions, they can't deselect the region by reversing the direction of the drag.  This is a limitation
+    /// that could be programmed around, but probably not worth the effort.
+    /// - Parameter gesture: gesture passed in by the gesture recognizer
+    func handleSelectModeZoneDrag(_ gesture: UIPanGestureRecognizer) {
+        let position = gesture.location(in: self)
+        let state = gesture.state
         let regionPositionX = transformToRegionPositionX(scaledViewPositionX: position.x)
         let locationInLadder = getLocationInLadder(position: position)
         guard let region = locationInLadder.region else { return }
@@ -1077,6 +1129,7 @@ final class LadderView: ScaledView {
         }
     }
 
+    @available(*, deprecated, message: "Not used in production or test code at present.")
     func setModeInZone(mode: Mark.Mode) {
         let zoneMin = min(zone.start, zone.end)
         let zoneMax = max(zone.start, zone.end)
@@ -1092,37 +1145,40 @@ final class LadderView: ScaledView {
         }
     }
 
-    private func swapEndsIfNeeded(mark: Mark) {
+    /// Enforces that a mark segment proximal y coordinate is always `<=` the distal y coordinate
+    ///
+    /// This is an undoable/redoable method.
+    /// - Parameter mark: mark whose segment endpoints will be swapped if necessary
+    private func swapEndpointsIfNeeded(mark: Mark) {
         os_log("swapEndsIfNeeded(mark:) - LadderView", log: .default, type: .default)
 
         let proximalY = mark.segment.proximal.y
         let distalY = mark.segment.distal.y
         if proximalY > distalY {
-            undoablySwapEnds(mark: mark)
+            undoablySwapEndpoints(mark: mark)
         }
     }
 
-    private func undoablySwapEnds(mark: Mark) {
+    private func undoablySwapEndpoints(mark: Mark) {
         os_log("undoablyUnswapEnds(mark:) - LadderView", log: .default, type: .default)
 
         currentDocument?.undoManager.registerUndo(withTarget: self) { target in
-            target.undoablySwapEnds(mark: mark)
+            target.undoablySwapEndpoints(mark: mark)
         }
         NotificationCenter.default.post(name: .didUndoableAction, object: nil)
         mark.swapEnds()
         mark.swapAnchors()
     }
 
-    func swapEndsIfNeeded() {
+    func swapEndpointsIfNeededOfAllMarks() {
         os_log("swapEndsIfNeeded() - LadderView", log: .default, type: .default)
 
         ladder.regions.forEach {
             region in region.marks.forEach {
-                mark in self.swapEndsIfNeeded(mark: mark)
+                mark in self.swapEndpointsIfNeeded(mark: mark)
             }
         }
     }
-
 
     func moveAttachedMark(position: CGPoint) {
         if let attachedMark = ladder.attachedMark {
@@ -1147,14 +1203,15 @@ final class LadderView: ScaledView {
         if cursorViewDelegate.cursorIsVisible {
             moveMark(movement: cursorViewDelegate.cursorMovement(), mark: mark, regionPosition: regionPosition)
         }
-        updateMarkersAndRegionIntervals(activeRegion)
     }
 
     func moveMark(movement: Movement, mark: Mark, regionPosition: CGPoint) {
+        os_log("****moveMark")
         let segment = Mark.segmentAfterMovement(mark: mark, movement: movement, to: regionPosition)
         setSegment(segment: segment, forMark: mark)
         moveLinkedMarks(forMark: mark)
         adjustCursor(mark: mark)
+        setNeedsDisplay()
         cursorViewDelegate.refresh()
     }
 
@@ -1164,6 +1221,7 @@ final class LadderView: ScaledView {
             if mark == proximalMark { break }
             var segment = proximalMark.segment
             segment.distal.x = mark.segment.proximal.x
+            // We use setSegment() and not setSegments() in this method because the number of linked marks is going to be small, so no difference in performance is anticipated.
             setSegment(segment: segment, forMark: proximalMark)
         }
         for distalMark in ladder.getMarkSet(fromMarkIdSet: mark.linkedMarkIDs.distal) {
@@ -1191,7 +1249,6 @@ final class LadderView: ScaledView {
             }
             setSegment(segment: segment, forMark: middleMark)
         }
-        setNeedsDisplay()
     }
 
     func setSelectedMark(position: CGPoint) {
@@ -1398,20 +1455,12 @@ final class LadderView: ScaledView {
         context.setAlpha(1.0)
     }
 
-    // TODO: implement fitting longer label text into labels
     fileprivate func drawLabel(rect: CGRect, region: Region, context: CGContext) {
         let stringRect = CGRect(x: 0, y: rect.origin.y, width: rect.origin.x, height: rect.height)
-        // TODO: refactor out constant attributes.
-        let paragraphStyle = NSMutableParagraphStyle()
-        paragraphStyle.alignment = .center
-        let attributes: [NSAttributedString.Key: Any] = [
-            .paragraphStyle: paragraphStyle,
-            .font: UIFont.systemFont(ofSize: 18.0),
-            .foregroundColor: region.mode == .active ? activeColor : selectedColor
-        ]
+        labelTextAttributes[.foregroundColor] = region.mode == .active ? activeColor : selectedColor
         let text = region.name
-        let labelText = NSAttributedString(string: text, attributes: attributes)
-        let size: CGSize = text.size(withAttributes: attributes)
+        let labelText = NSAttributedString(string: text, attributes: labelTextAttributes)
+        let size: CGSize = text.size(withAttributes: labelTextAttributes)
         let labelRect = CGRect(x: 0, y: rect.origin.y + (rect.height - size.height) / 2, width: rect.origin.x, height: size.height)
 
         context.addRect(stringRect)
@@ -1427,16 +1476,11 @@ final class LadderView: ScaledView {
         context.setAlpha(1.0)
         labelText.draw(in: labelRect)
 
-        // FIXME: Raise up label a bit to allow room for description
         guard showLabelDescription != .invisible else { return }
-        let descriptionAttributes: [NSAttributedString.Key: Any] = [
-            .paragraphStyle: paragraphStyle,
-            .font: UIFont.systemFont(ofSize: 12.0),
-            .foregroundColor: region.mode == .active ? activeColor : selectedColor
-        ]
-        let descriptionText = NSAttributedString(string: region.longDescription, attributes: descriptionAttributes)
+        descriptionTextAttributes[.foregroundColor] = region.mode == .active ? activeColor : selectedColor
+        let descriptionText = NSAttributedString(string: region.longDescription, attributes: descriptionTextAttributes)
 
-        let descriptionSize: CGSize = region.longDescription.size(withAttributes: descriptionAttributes)
+        let descriptionSize: CGSize = region.longDescription.size(withAttributes: descriptionTextAttributes)
         if showLabelDescription == .visibility || (showLabelDescription == .visibleIfFits && descriptionSize.width < stringRect.width) {
             let descriptionRect = CGRect(x: 0, y: labelRect.minY + labelRect.height, width: rect.origin.x, height: stringRect.height - labelRect.height)
 
@@ -1495,7 +1539,7 @@ final class LadderView: ScaledView {
             p2 = segment.proximal
         }
         context.setStrokeColor(getMarkColor(mark: mark))
-        // FIXME: Do we need both stroke and fill?
+        // Do we need both stroke and fill?
         context.setFillColor(getMarkColor(mark: mark))
         context.setLineWidth(mark.emphasis == .bold ? markLineWidth + 1 :  markLineWidth)
         context.move(to: p1)
@@ -1624,62 +1668,74 @@ final class LadderView: ScaledView {
         updateMarkers()
         updateRegionIntervals(region)
         setNeedsDisplay()
-        print("****updateMarkersAndRegionIntervals")
     }
 
     func updateMarkersAndLadderIntervals() {
         updateMarkers()
         updateLadderIntervals()
         setNeedsDisplay()
-        print("****updateMarksAndLadderIntervals")
     }
 
     func assessBlockAndImpulseOriginOfMark(_ mark: Mark) {
-        let linkedMarks = ladder.getLinkedMarksFromLinkedMarkIDs(mark.linkedMarkIDs)
-        assessBlockAndImpulseOrigin(mark: mark)
-        assessBlockAndImpulseOrigin(marks: linkedMarks.allMarks)
+        DispatchQueue.main.async { [weak self] in
+            if let self = self {
+                let linkedMarks = self.ladder.getLinkedMarksFromLinkedMarkIDs(mark.linkedMarkIDs)
+                self.assessBlockAndImpulseOrigin(mark: mark)
+                self.assessBlockAndImpulseOrigin(marks: linkedMarks.allMarks)
+            }
+        }
     }
 
 
     func assessBlockAndImpulseOrigin(mark: Mark?) {
-        DispatchQueue.main.async { [weak self] in
-            if let self = self {
-                if let mark = mark {
-                    self.assessBlock(mark: mark)
-                    self.assessImpulseOrigin(mark: mark)
-                }
-            }
-
+        if let mark = mark {
+            self.assessBlock(mark: mark)
+            self.assessImpulseOrigin(mark: mark)
         }
+        self.setNeedsDisplay()
     }
 
     func assessBlockAndImpulseOrigin(marks: MarkSet) {
+                for mark in marks {
+                    self.assessBlock(mark: mark)
+                    self.assessImpulseOrigin(mark: mark)
+                }
+                self.setNeedsDisplay()
+    }
+
+    func assessBlockAndImpulseOriginOfMarks(_ marks: [Mark]) {
         DispatchQueue.main.async { [weak self] in
             if let self = self {
                 for mark in marks {
                     self.assessBlock(mark: mark)
                     self.assessImpulseOrigin(mark: mark)
                 }
+                self.setNeedsDisplay()
             }
         }
     }
 
     func assessBlockAndImpulseOriginForAllMarks() {
-        DispatchQueue.main.async {
-            [weak self] in
+        DispatchQueue.main.async { [weak self] in
             if let self = self {
                 for mark in self.ladder.allMarks() {
                     self.assessBlock(mark: mark)
                     self.assessImpulseOrigin(mark: mark)
                 }
+                self.setNeedsDisplay()
             }
         }
     }
 
     func assessGlobalImpulseOrigin() {
-        let marks = ladder.allMarks()
-        for mark in marks {
-            assessImpulseOrigin(mark: mark)
+        DispatchQueue.main.async { [weak self] in
+            if let self = self {
+                let marks = self.ladder.allMarks()
+                for mark in marks {
+                    self.assessImpulseOrigin(mark: mark)
+                }
+            }
+
         }
     }
 
@@ -1687,7 +1743,7 @@ final class LadderView: ScaledView {
         guard snapMarks else { return }
         if mark.blockSetting == .auto {
             mark.blockSite = mark.lateEndpoint
-            if mark.latestPoint.y < 0.1 || mark.latestPoint.y > 0.9 {
+            if mark.latestPoint.y < 0.01 || mark.latestPoint.y > 0.99 {
                 mark.blockSite = .none
             } else {
                 for middleMarkID in mark.linkedMarkIDs.middle {
@@ -1852,7 +1908,7 @@ final class LadderView: ScaledView {
         }
         var text = ""
         if debugMarkMode {
-            text = String(mark.id.uuidString.prefix(4))
+            text = String(mark.id.uuidString.prefix(4)) + String(mark.impulseOriginSite.rawValue)
         } else {
             text = "\(value)"
         }
@@ -1987,8 +2043,6 @@ final class LadderView: ScaledView {
 
     func normalizeAllMarks() {
         ladder.normalizeAllMarks()
-//        ladder.normalizeRegions()
-//        ladder.hideZone()
     }
 
     func normalizeLadder() {
@@ -2026,7 +2080,7 @@ final class LadderView: ScaledView {
         if let selectedRegion = selectedRegions.first {
             currentDocument?.undoManager?.beginUndoGrouping()
             for mark in selectedRegion.marks {
-                undoablyUnlinkMark(mark: mark)
+                undoablyUnlink(mark: mark)
                 undoablyDeleteMark(mark: mark)
             }
             currentDocument?.undoManager?.endUndoGrouping()
@@ -2063,7 +2117,7 @@ final class LadderView: ScaledView {
         currentDocument?.undoManager?.beginUndoGrouping()
         for region in ladder.regions {
             for mark in region.marks {
-                undoablyUnlinkMark(mark: mark)
+                undoablyUnlink(mark: mark)
                 undoablyDeleteMark(mark: mark)
             }
         }
@@ -2076,7 +2130,7 @@ final class LadderView: ScaledView {
     @objc func unlinkSelectedMarks() {
         let selectedMarks = ladder.allMarksWithMode(.selected)
         currentDocument?.undoManager.beginUndoGrouping()
-        selectedMarks.forEach { mark in undoablyUnlinkMark(mark: mark) }
+        selectedMarks.forEach { mark in undoablyUnlink(mark: mark) }
         currentDocument?.undoManager.endUndoGrouping()
     }
 
@@ -2091,8 +2145,9 @@ final class LadderView: ScaledView {
     func straightenToEndpoint(_ endpoint: Mark.Endpoint) {
         let selectedMarks = ladder.allMarksWithMode(.selected)
         currentDocument?.undoManager.beginUndoGrouping()
+        var segments: [Segment] = []
         selectedMarks.forEach { mark in
-            undoablyUnlinkMark(mark: mark)
+            undoablyUnlink(mark: mark)
             let segment: Segment
             switch endpoint {
             case .proximal:
@@ -2102,17 +2157,20 @@ final class LadderView: ScaledView {
             case .none, .auto, .random:
                 fatalError("Endpoint.none, .random, or .auto inappopriately passed to straightenToEndPoint()")
             }
-            self.setSegment(segment: segment, forMark: mark)
+            segments.append((segment))
         }
-        // Not clear if undo action needs to relink all marks, but it is working as is.
-        relinkAllMarks()
+        setSegments(segments: segments, forMarks: selectedMarks)
+        linkMarks(selectedMarks)
+        updateMarkersAndLadderIntervals()
+        assessBlockAndImpulseOriginOfMarks(selectedMarks)
         currentDocument?.undoManager.endUndoGrouping()
     }
 
     func adjustY(_ value: CGFloat, endpoint: Mark.Endpoint, adjustment: Adjustment) {
         let selectedMarks = ladder.allMarksWithMode(.selected)
+        var segments: [Segment] = []
         selectedMarks.forEach { mark in
-            undoablyUnlinkMark(mark: mark)
+            undoablyUnlink(mark: mark)
             let segment: Segment
             switch adjustment {
             case .trim:
@@ -2128,14 +2186,17 @@ final class LadderView: ScaledView {
                     segment = Segment(proximal: mark.segment.proximal, distal: CGPoint(x: mark.segment.distal.x, y: value))
                 }
             }
-            setSegment(segment: segment, forMark: mark)
+            segments.append(segment)
         }
-        relinkAllMarks()
+        setSegments(segments: segments, forMarks: selectedMarks)
+        linkMarks(selectedMarks)
+        updateMarkersAndLadderIntervals()
+        assessBlockAndImpulseOriginOfMarks(selectedMarks)
     }
 
     func meanCL() throws -> CGFloat {
         let selectedMarks = ladder.allMarksWithMode(.selected)
-        // FIXME: is calibration ever nil??
+        // Is calibration ever nil??
         guard let calibration = calibration else {
             fatalError("calibration is nil")
         }
@@ -2180,7 +2241,6 @@ final class LadderView: ScaledView {
         }
     }
 
-    // FIXME: Need better repeatCL, need repeat pattern
     func checkForRepeatCL() throws {
         let selectedMarks = ladder.allMarksWithMode(.selected)
         if selectedMarks.count != 2 {
@@ -2189,13 +2249,16 @@ final class LadderView: ScaledView {
         if ladder.marksAreInDifferentRegions(selectedMarks) {
             throw LadderError.marksInDifferentRegions
         }
-        // FIXME: appropriate short interval
         if ladder.difference(selectedMarks[0], selectedMarks[1]) < minRepeatCLInterval {
             throw LadderError.intervalTooShort
         }
     }
 
     /// Repeats CL and creates new marks.  If marks aren't parallel, uses minimum CL between prox and distal endpoints.
+    ///
+    /// Exactly two marks must be selected, both in the same region.  Marks don't have to be parallel, but if they are not,
+    /// the shorter cyle length is used for the repeat.
+    /// - Parameter time: repeat before or after as a `TemporalRelation`
     func performRepeatCL(time: TemporalRelation) {
         let selectedMarks = ladder.allMarksWithMode(.selected)
         guard selectedMarks.count == 2 else { return }
@@ -2213,6 +2276,9 @@ final class LadderView: ScaledView {
                 newMarks.append(newMark)
             }
             undoablyAddMarks(marks: newMarks)
+            linkMarks(newMarks)
+            updateMarkersAndRegionIntervals(region)
+            assessBlockAndImpulseOriginOfMarks(newMarks)
         }
 
         func repeatCLBefore() {
@@ -2227,6 +2293,9 @@ final class LadderView: ScaledView {
                 newMarks.append(newMark)
             }
             undoablyAddMarks(marks: newMarks)
+            linkMarks(newMarks)
+            updateMarkersAndRegionIntervals(region)
+            assessBlockAndImpulseOriginOfMarks(newMarks)
         }
 
         let mark1 = selectedMarks[0]
@@ -2237,7 +2306,6 @@ final class LadderView: ScaledView {
         let CL = min(proxCL, distalCL)
         let secondMark = mark2 > mark1 ? mark2 : mark1
         let firstMark = mark2 < mark1 ? mark2 : mark1
-        print("firstMark = \(firstMark), secondMark = \(secondMark)")
         switch time {
         case .before:
             repeatCLBefore()
@@ -2247,7 +2315,6 @@ final class LadderView: ScaledView {
             repeatCLAfter()
             repeatCLBefore()
         }
-        relinkAllMarks()
         setNeedsDisplay()
         currentDocument?.undoManager.endUndoGrouping()
     }
@@ -2304,6 +2371,8 @@ final class LadderView: ScaledView {
                 ladder.setMarksWithMode(.selected, inRegion: region)
             }
             undoablyAddMarks(marks: newMarks)
+            updateMarkersAndRegionIntervals(region)
+            assessBlockAndImpulseOriginOfMarks(newMarks)
             setNeedsDisplay()
         }
 
@@ -2342,23 +2411,16 @@ final class LadderView: ScaledView {
     }
 
     func deleteMarksInRegion(_ region: Region, start: CGFloat, end: CGFloat) {
+        var marksForDeletion: [Mark] = []
         for mark in region.marks {
             if (mark.segment.proximal.x > start || mark.segment.distal.x > start)
                 && (mark.segment.proximal.x < end || mark.segment.distal.x < end) {
-                undoablyDeleteMark(mark: mark)
+                marksForDeletion.append(mark)
             }
         }
-    }
+        undoablyDeleteMarks(marks: marksForDeletion)
 
-    // FIXME: Remove???
-//    func moveMarks(_ diff: CGFloat) {
-//        let selectedMarks = ladder.allMarksWithMode(.selected)
-//        let regionDiff = transformToRegionPositionX(scaledViewPositionX: diff)
-//        for mark in selectedMarks {
-//            let newSegment = Segment(proximal: CGPoint(x: mark.segment.proximal.x + regionDiff, y: mark.segment.proximal.y), distal: CGPoint(x: mark.segment.distal.x + regionDiff, y: mark.segment.distal.y))
-//            setSegment(segment: newSegment, forMark: mark)
-//        }
-//    }
+    }
 
     func checkForRepeatPattern() throws {
         guard patternMarks.count > 1 else { throw LadderError.tooFewMarks }
@@ -2392,6 +2454,9 @@ final class LadderView: ScaledView {
             }
             undoablyAddMarks(marks: newMarks)
             removeOverlappingMarks(with: newMarks)
+            linkMarks(newMarks)
+            updateMarkersAndLadderIntervals()
+            assessBlockAndImpulseOriginOfMarks(newMarks)
             // do it again if you like
             patternMarks = newMarks
             ladder.setModeForMarks(mode: .selected, marks: patternMarks)
@@ -2417,8 +2482,10 @@ final class LadderView: ScaledView {
             guard sortedSameRegionMarks.first == mark || sortedSameRegionMarks.last == mark else {
                 throw LadderError.markNotAtEitherEndOfSelection
             }
+            // We don't need to unlink original pattern marks, just leave their links be.
+            // Will just link the new ones.
             var otherMark: Mark
-            // FIXME: remove unwrapped optionals
+            // Note: unwrapped optionals, but they can't be nil per preceding code.
             if mark == sortedSameRegionMarks.last {
                 otherMark = sortedSameRegionMarks.first!
             } else {
@@ -2484,35 +2551,47 @@ final class LadderView: ScaledView {
             newMarks.append(newMark)
         }
         undoablyAddMarks(marks: newMarks)
-        relinkAllMarks()
+        linkMarks(newMarks)
+        updateMarkersAndLadderIntervals()
+        assessBlockAndImpulseOriginOfMarks(newMarks)
     }
 
-    // FIXME: bottleneck
     func adjustCL(cl: CGFloat) {
         let selectedMarks = ladder.allMarksWithMode(.selected)
+        guard selectedMarks.count > 0 else { return }
+        let region = ladder.region(ofMark: selectedMarks[0])
         var proxX = selectedMarks[0].segment.proximal.x
         var distalX = selectedMarks[0].segment.distal.x
+        var segments: [Segment] = []
+        segments.append(selectedMarks[0].segment)
         for i in 1..<selectedMarks.count {
+            undoablyUnlink(mark: selectedMarks[i])
             proxX += cl
             distalX += cl
             let newSegment = Segment(proximal: CGPoint(x: proxX, y: selectedMarks[i].segment.proximal.y), distal: CGPoint(x: distalX, y: selectedMarks[i].segment.distal.y))
-            self.setSegment(segment: newSegment, forMark: selectedMarks[i])
+            segments.append(newSegment)
         }
+        setSegments(segments: segments, forMarks: selectedMarks)
+        linkMarks(selectedMarks)
+        // adjustCL only works on one region at a time
+        updateMarkersAndRegionIntervals(region)
+        assessBlockAndImpulseOriginOfMarks(selectedMarks)
     }
 
     func slantSelectedMarks(angle: CGFloat, endpoint: Mark.Endpoint) {
         let selectedMarks = ladder.allMarksWithMode(.selected)
+        var segments: [Segment] = []
         selectedMarks.forEach { mark in
-//            let originalSegment = mark.segment
-//            currentDocument?.undoManager.registerUndo(withTarget: self, handler: { target in
-//                self.setSegment(segment: originalSegment, forMark: mark)
-//            })
-//            NotificationCenter.default.post(name: .didUndoableAction, object: nil)
-            slantMark(angle: angle, mark: mark, endpoint: endpoint)
+            undoablyUnlink(mark: mark)
+            segments.append(slantMark(angle: angle, mark: mark, endpoint: endpoint))
         }
+        setSegments(segments: segments, forMarks: selectedMarks)
+        linkMarks(selectedMarks)
+        updateMarkersAndLadderIntervals()
+        assessBlockAndImpulseOriginOfMarks(selectedMarks)
     }
 
-    func slantMark(angle: CGFloat, mark: Mark, endpoint: Mark.Endpoint = .proximal) {
+    func slantMark(angle: CGFloat, mark: Mark, endpoint: Mark.Endpoint = .proximal) -> Segment {
         let region = ladder.region(ofMark: mark)
         let segment = transformToScaledViewSegment(regionSegment: mark.segment, region: region)
         let height = segment.distal.y - segment.proximal.y
@@ -2527,11 +2606,11 @@ final class LadderView: ScaledView {
         case .none, .random, .auto:
             fatalError("Endpoint.none, .random, or .auto inappopriately passed to slantMark()")
         }
-        setSegment(segment: transformToRegionSegment(scaledViewSegment: newSegment, region: region), forMark: mark)
-        relinkAllMarks()
+        return transformToRegionSegment(scaledViewSegment: newSegment, region: region)
+//        setSegment(segment: transformToRegionSegment(scaledViewSegment: newSegment, region: region), forMark: mark)
     }
 
-    func slantAngle(mark: Mark, endpoint: Mark.Endpoint) -> CGFloat { 
+    func slantAngle(mark: Mark, endpoint: Mark.Endpoint) -> CGFloat {
         let region = ladder.region(ofMark: mark)
         let segment = transformToScaledViewSegment(regionSegment: mark.segment, region: region)
         if endpoint == .proximal {
@@ -2550,6 +2629,7 @@ final class LadderView: ScaledView {
     }
 
     private func setSegment(segment: Segment, forMark mark: Mark) {
+        os_log("****setSegment")
         if segment.length < Segment.minLength { return }
         let originalSegment = mark.segment
         currentDocument?.undoManager?.registerUndo(withTarget: self, handler: { target in
@@ -2559,6 +2639,17 @@ final class LadderView: ScaledView {
         mark.segment = segment
         updateMarkersAndRegionIntervals(ladder.region(ofMark: mark))
         assessBlockAndImpulseOriginOfMark(mark)
+    }
+
+    private func setSegments(segments: [Segment], forMarks marks: [Mark]) {
+        let originalSegments = marks.map { $0.segment }
+        currentDocument?.undoManager?.registerUndo(withTarget: self, handler: { target in
+            target.setSegments(segments: originalSegments, forMarks: marks)
+        })
+        NotificationCenter.default.post(name: .didUndoableAction, object: nil)
+        for i in 0..<marks.count {
+            marks[i].segment = segments[i]
+        }
     }
 
     func undoablySetLabel(_ label: String, description: String, forRegion region: Region) {
@@ -2573,11 +2664,6 @@ final class LadderView: ScaledView {
         setNeedsDisplay()
     }
 
-    // TODO: skeleton for add/remove region
-    // region = new region to add.  Index is where to add.  E.g.
-    // 0 is before first region, shift other regions forward by 1
-    // If N is last region index, add to N + 1, as long as N + 1 < max number of regions.
-    // So need to calculate index before calling, and make sure it is legit.
     func undoablyAddRegion(_ region: Region, atIndex index: Int) {
         unlinkAllMarks()
         let originalRegion = region
@@ -2589,7 +2675,6 @@ final class LadderView: ScaledView {
         initializeRegions()
         ladder.reindexMarks()
         relinkAllMarks()
-        // also need to regroup marks
         setNeedsDisplay()
     }
 
@@ -2767,8 +2852,8 @@ extension LadderView: LadderViewDelegate {
 
     func linkMarksNearbyAttachedMark() {
         guard let attachedMark = ladder.attachedMark else { return }
-        // FIXME: out of place
-        swapEndsIfNeeded(mark: attachedMark)
+        // Do we really need to swap here?
+        swapEndpointsIfNeeded(mark: attachedMark)
         let newNearbyMarks = getNearbyMarkIDs(mark: attachedMark)
         snapToNearbyMarks(mark: attachedMark, nearbyMarks: newNearbyMarks)
         linkNearbyMarks(mark: attachedMark, nearbyMarks: newNearbyMarks)
@@ -2784,7 +2869,6 @@ extension LadderView: LadderViewDelegate {
         ladder.reregisterAllMarks()
     }
 
-    // FIXME: why does ladder need to deal with connect marks?  change ladder.connectedMarks to connectedMarks?  If it doesn't mess up json file.
     func linkConnectedMarks() {
         guard snapMarks else { return }
         guard ladder.connectedMarks.count == 3 else { return }
@@ -2901,12 +2985,11 @@ extension LadderView: LadderViewDelegate {
 
     func snapToNearbyMarks(mark: Mark, nearbyMarks: LinkedMarkIDs) {
         guard snapMarks else { return }
-
-        // get the new segment to snap to, then set it undoably.
-
         var segment = mark.segment
         if nearbyMarks.proximal.count > 0 {
-            // Only need to snap to one proximal and distal mark.
+            // Only need to snap to one proximal and distal mark.  There are weird situations
+            // where the adjacent region marks are close enough together that more than
+            // one is available to snap to (e.g. AFB), but we will ignore that possibility.
             if let markToSnap = ladder.lookup(id: nearbyMarks.proximal.first!) {
                 segment.proximal.x = markToSnap.segment.distal.x
                 segment.proximal.y = 0
@@ -2921,7 +3004,6 @@ extension LadderView: LadderViewDelegate {
         // Potentially can link to more than one middle marks.
         for middleMarkID in nearbyMarks.middle {
             if let middleMark = ladder.lookup(id: middleMarkID) {
-                // FIXME: this doesn't work for vertical mark.
                 var distanceToProximal = Geometry.distanceSegmentToPoint(segment: middleMark.segment, point: mark.segment.proximal)
                 distanceToProximal = min(distanceToProximal, Geometry.distanceSegmentToPoint(segment: mark.segment, point: middleMark.segment.proximal))
                 var distanceToDistal = Geometry.distanceSegmentToPoint(segment: middleMark.segment, point: mark.segment.distal)
@@ -2952,7 +3034,16 @@ extension LadderView: LadderViewDelegate {
 
     /// Relink all marks, as a side effect it assesses block and impulse origin
     func relinkAllMarks() {
-        let marks = self.ladder.allMarks()
+        linkMarks(ladder.allMarks())
+//        let marks = self.ladder.allMarks()
+//        for mark in marks {
+//            let nearbyMarks = self.getNearbyMarkIDs(mark: mark)
+//            self.linkNearbyMarks(mark: mark, nearbyMarks: nearbyMarks)
+//        }
+//        self.setNeedsDisplay()
+    }
+
+    func linkMarks(_ marks: [Mark]) {
         for mark in marks {
             let nearbyMarks = self.getNearbyMarkIDs(mark: mark)
             self.linkNearbyMarks(mark: mark, nearbyMarks: nearbyMarks)
@@ -2970,75 +3061,81 @@ extension LadderView: LadderViewDelegate {
         let filteredDistal = nearbyMarks.distal.subtracting(mark.linkedMarkIDs.distal)
         let filteredNearbyMarks = LinkedMarkIDs(proximal: filteredProximal, middle: filteredMiddle, distal: filteredDistal)
         currentDocument?.undoManager?.registerUndo(withTarget: self) { target in
-            print("unlinkingNearbyMarks()")
             target.unlinkNearbyMarks(mark: mark, nearbyMarks: filteredNearbyMarks)
         }
         NotificationCenter.default.post(name: .didUndoableAction, object: nil)
         // Need to link the new marks
-        for proximalMark in filteredNearbyMarks.proximal {
-            mark.linkedMarkIDs.proximal.insert(proximalMark)
-            let proxMark = ladder.lookup(id: proximalMark)
-            proxMark?.linkedMarkIDs.distal.insert(mark.id)
+        for proximalMarkID in filteredNearbyMarks.proximal {
+            mark.linkedMarkIDs.proximal.insert(proximalMarkID)
+            let proximalMark = ladder.lookup(id: proximalMarkID)
+            proximalMark?.linkedMarkIDs.distal.insert(mark.id)
         }
-        for middleMark in filteredNearbyMarks.middle {
-            mark.linkedMarkIDs.middle.insert(middleMark)
-            let middleMark = ladder.lookup(id: middleMark)
+        for middleMarkID in filteredNearbyMarks.middle {
+            mark.linkedMarkIDs.middle.insert(middleMarkID)
+            let middleMark = ladder.lookup(id: middleMarkID)
             middleMark?.linkedMarkIDs.middle.insert(mark.id)
         }
-        for distalMark in filteredNearbyMarks.distal {
-            mark.linkedMarkIDs.distal.insert(distalMark)
-            let distalMark = ladder.lookup(id: distalMark)
+        for distalMarkID in filteredNearbyMarks.distal {
+            mark.linkedMarkIDs.distal.insert(distalMarkID)
+            let distalMark = ladder.lookup(id: distalMarkID)
             distalMark?.linkedMarkIDs.proximal.insert(mark.id)
         }
-        // FIXME: Bottleneck
-//        assessBlockAndImpulseOriginOfMark(mark)
     }
 
+    /// Undoably unlink linked marks to mark
+    ///
+    /// Crucially, this method reassesses impulse origin (and block) of each unlinked mark, which allows for undo and redo to work properly.
+    /// - Parameters:
+    ///   - mark: mark to undergo unlinking
+    ///   - nearbyMarks: marks that will be unlinked from the mark
     func unlinkNearbyMarks(mark: Mark, nearbyMarks: LinkedMarkIDs) {
         guard snapMarks else { return }
         currentDocument?.undoManager?.registerUndo(withTarget: self) { target in
-            print("linking nearby marks")
             target.linkNearbyMarks(mark: mark, nearbyMarks: nearbyMarks)
         }
         NotificationCenter.default.post(name: .didUndoableAction, object: nil)
-        for proximalMark in nearbyMarks.proximal {
-            mark.linkedMarkIDs.proximal.remove(proximalMark)
-            let proxMark = ladder.lookup(id: proximalMark)
-            proxMark?.linkedMarkIDs.distal.remove(mark.id)
+        for proximalMarkID in nearbyMarks.proximal {
+            mark.linkedMarkIDs.proximal.remove(proximalMarkID)
+            let proximalMark = ladder.lookup(id: proximalMarkID)
+            proximalMark?.linkedMarkIDs.distal.remove(mark.id)
+            assessBlockAndImpulseOrigin(mark: proximalMark)
         }
-        for middleMark in nearbyMarks.middle {
-            mark.linkedMarkIDs.middle.remove(middleMark)
-            let middleMark = ladder.lookup(id: middleMark)
+        for middleMarkID in nearbyMarks.middle {
+            mark.linkedMarkIDs.middle.remove(middleMarkID)
+            let middleMark = ladder.lookup(id: middleMarkID)
             middleMark?.linkedMarkIDs.middle.remove(mark.id)
+            assessBlockAndImpulseOrigin(mark: middleMark)
         }
-        for distalMark in nearbyMarks.distal {
-            mark.linkedMarkIDs.distal.remove(distalMark)
-            let distalMark = ladder.lookup(id: distalMark)
+        for distalMarkID in nearbyMarks.distal {
+            mark.linkedMarkIDs.distal.remove(distalMarkID)
+            let distalMark = ladder.lookup(id: distalMarkID)
             distalMark?.linkedMarkIDs.proximal.remove(mark.id)
+            assessBlockAndImpulseOrigin(mark: distalMark)
         }
-        assessBlockAndImpulseOriginOfMark(mark)
     }
 
     func unlinkAllMarks() {
         let marks = ladder.allMarks()
         for mark in marks {
-            undoablyUnlinkMark(mark: mark)
+            undoablyUnlink(mark: mark)
         }
     }
 
-    func undoablyUnlinkMark(mark: Mark) {
+    func undoablyUnlink(mark: Mark) {
         let linkedMarkIDs = mark.linkedMarkIDs
         let originalMark = mark
         currentDocument?.undoManager?.registerUndo(withTarget: self) { target in
-            target.undoablyLinkMark(mark: originalMark, linkedMarkIDs: linkedMarkIDs)
+            target.undoablyLink(mark: originalMark, linkedMarkIDs: linkedMarkIDs)
         }
         NotificationCenter.default.post(name: .didUndoableAction, object: nil)
-        unlinkMark(mark: mark)
+        unlink(mark: mark)
         updateMarkersAndRegionIntervals(ladder.region(ofMark: mark))
         assessBlockAndImpulseOrigin(mark: mark)
     }
 
-    func unlinkMark(mark: Mark) {
+    /// Remove all links to a mark, and remove all backlinks to the mark
+    /// - Parameter mark: `Mark` to be unlinked
+    func unlink(mark: Mark) {
         // First remove all backlinks to this mark.
         for m in ladder.allMarks() {
             m.linkedMarkIDs.remove(id: mark.id)
@@ -3047,21 +3144,21 @@ extension LadderView: LadderViewDelegate {
         mark.linkedMarkIDs = LinkedMarkIDs()
     }
 
-    func undoablyLinkMark(mark: Mark, linkedMarkIDs: LinkedMarkIDs) {
+    func undoablyLink(mark: Mark, linkedMarkIDs: LinkedMarkIDs) {
         let originalMark = mark
         currentDocument?.undoManager?.registerUndo(withTarget: self) { target in
-            target.undoablyUnlinkMark(mark: originalMark)
+            target.undoablyUnlink(mark: originalMark)
         }
         NotificationCenter.default.post(name: .didUndoableAction, object: nil)
         let linkedMarks = ladder.getLinkedMarksFromLinkedMarkIDs(linkedMarkIDs)
         for linkedMark in linkedMarks.allMarks {
-            linkMarks(m1: mark, m2: linkedMark)
+            linkMarks(mark, linkedMark)
         }
         updateMarkersAndRegionIntervals(ladder.region(ofMark: mark))
         assessBlockAndImpulseOrigin(mark: mark)
     }
 
-    private func linkMarks(m1: Mark, m2: Mark) {
+    private func linkMarks(_ m1: Mark, _ m2: Mark) {
         let regionRelation = Ladder.regionRelationBetweenMarks(mark: m1, otherMark: m2)
         switch regionRelation {
         case .distant:
@@ -3166,4 +3263,3 @@ enum Adjustment {
     case adjust
     case trim
 }
-
