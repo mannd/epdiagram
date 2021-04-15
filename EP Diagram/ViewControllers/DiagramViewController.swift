@@ -333,7 +333,7 @@ final class DiagramViewController: UIViewController {
         }
     }
 
-    lazy var copyMarksAction = UIAction(title: L("Copy"), image: UIImage(systemName: "doc.on.doc")) { _ in
+    lazy var copyMarksAction = UIAction(title: L("Copy and paste"), image: UIImage(systemName: "doc.on.doc")) { _ in
         self.showCopyMarksToolbar()
         self.ladderView.copyMarks()
     }
@@ -625,7 +625,7 @@ final class DiagramViewController: UIViewController {
             connectButton = UIBarButtonItem(title: L("Connect"), style: .plain, target: self, action: #selector(launchConnectMode))
             undoButton = UIBarButtonItem(barButtonSystemItem: .undo, target: self, action: #selector(undo))
             redoButton = UIBarButtonItem(barButtonSystemItem: .redo, target: self, action: #selector(redo))
-            mainToolbarButtons = [calibrateButton, spacer, selectButton, spacer, connectButton, spacer, undoButton, spacer, redoButton]
+            mainToolbarButtons = [calibrateButton, spacer,  connectButton, spacer, selectButton, spacer, undoButton, spacer, redoButton]
         }
         setToolbarItems(mainToolbarButtons, animated: false)
         navigationController?.setToolbarHidden(false, animated: false)
