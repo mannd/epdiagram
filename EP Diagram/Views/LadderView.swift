@@ -1206,7 +1206,6 @@ final class LadderView: ScaledView {
     }
 
     func moveMark(movement: Movement, mark: Mark, regionPosition: CGPoint) {
-        os_log("****moveMark")
         let segment = Mark.segmentAfterMovement(mark: mark, movement: movement, to: regionPosition)
         setSegment(segment: segment, forMark: mark)
         moveLinkedMarks(forMark: mark)
