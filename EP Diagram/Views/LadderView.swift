@@ -2132,6 +2132,19 @@ final class LadderView: ScaledView {
         currentDocument?.undoManager.endUndoGrouping()
     }
 
+    func snapSelectedMarks() {
+        let selectedMarks = ladder.allMarksWithMode(.selected)
+        currentDocument?.undoManager.beginUndoGrouping()
+        selectedMarks.forEach { mark in
+            let nearbyMarkIDs = self.getNearbyMarkIDs(mark: mark)
+            self.snapToNearbyMarks(mark: mark, nearbyMarks: nearbyMarkIDs)
+            linkNearbyMarks(mark: mark, nearbyMarks: nearbyMarkIDs)
+            assessBlockAndImpulseOrigin(mark: mark)
+        }
+        updateMarkersAndLadderIntervals()
+        currentDocument?.undoManager.endUndoGrouping()
+    }
+
     func soleSelectedMark() -> Mark? {
         let selectedMarks = ladder.allMarksWithMode(.selected)
         if selectedMarks.count == 1 {
