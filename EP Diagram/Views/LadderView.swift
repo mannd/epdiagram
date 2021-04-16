@@ -2218,7 +2218,7 @@ final class LadderView: ScaledView {
         if ladder.marksAreNotContiguous(selectedMarks) {
             throw LadderError.marksNotContiguous
         }
-        return max(Rhythm.minimumFibCL, ladder.meanCL(selectedMarks))
+        return ladder.meanCL(selectedMarks)
     }
 
     func checkForMovement() throws {

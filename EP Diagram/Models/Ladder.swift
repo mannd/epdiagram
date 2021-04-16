@@ -345,10 +345,10 @@ final class Ladder: NSObject, Codable {
     }
 
     func meanCL(_ marks: [Mark]) -> CGFloat {
-        guard marks.count > 2 else { return 0 }
+        guard marks.count > 1 else { return 0 }
         let sortedMarks = marks.sorted()
         let proximalSortedMarks = sortedMarks.filter { $0.segment.proximal.y <= 0 }
-        guard proximalSortedMarks.count > 2 else { return 0 }
+        guard proximalSortedMarks.count > 1 else { return 0 }
         var intervalSum: CGFloat = 0
         for i in 0..<proximalSortedMarks.count {
             if i + 1 < proximalSortedMarks.count {
