@@ -250,6 +250,9 @@ This option will take a selected group of marks and repeat them, with one mark a
 
 *** Unlink
 Unlink the selected marks.
+
+*** Snap to nearby marks
+Move the endpoints of nearby marks together and link the marks.
 *** Delete mark(s)
 Delete the selected marks.
 *** Creating rhythms
