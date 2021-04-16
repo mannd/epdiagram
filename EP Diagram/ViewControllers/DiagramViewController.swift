@@ -192,6 +192,7 @@ final class DiagramViewController: UIViewController {
     lazy var unlinkAction = UIAction(title: L("Unlink"), image: UIImage(systemName: "link")) { action in
         self.ladderView.unlinkSelectedMarks()
     }
+//    lazy var linkAction = UIAction
 
     // Block and impulse origin
     lazy var blockProximalAction = UIAction(title: L("Proximal block")) { action in
@@ -355,7 +356,7 @@ final class DiagramViewController: UIViewController {
 
     lazy var adjustCLAction = UIAction(title: L("Adjust CL..."), image: UIImage(systemName: "slider.horizontal.below.rectangle")) { _  in
         do {
-            let meanCL = try self.ladderView.meanCL()
+            let meanCL = try self.ladderView.meanCL() 
             self.showAdjustCLToolbar(rawValue: meanCL)
         } catch {
             self.showError(title: L("Error Adjusting Cycle Length"), error: error)
@@ -707,7 +708,8 @@ final class DiagramViewController: UIViewController {
 
     func showCopyMarksToolbar() {
         guard let toolbar = navigationController?.toolbar else { return }
-        // we won't lump copy/pastes together, each one is undoable
+        currentDocument?.undoManager?.beginUndoGrouping()
+        ladderView.unlinkAllMarks()
         let labelText = UITextField()
         labelText.text = L("Tap to paste marks")
         let doneButton = UIButton(type: .close)
@@ -725,6 +727,7 @@ final class DiagramViewController: UIViewController {
     func showRepeatPatternToolbar() {
         guard let toolbar = navigationController?.toolbar else { return }
         currentDocument?.undoManager.beginUndoGrouping()
+        ladderView.unlinkAllMarks()
         let labelText = UITextField()
         labelText.text = isIPad() ? L("Tap joining mark once for single copy, double tab for multiple copies") : L("Single or double tap joining mark")
         let doneButton = UIButton(type: .close)
@@ -742,6 +745,7 @@ final class DiagramViewController: UIViewController {
     func showMoveMarksToolbar() {
         guard let toolbar = navigationController?.toolbar else { return }
         currentDocument?.undoManager.beginUndoGrouping()
+        ladderView.unlinkAllMarks()
         let labelText = UITextField()
         labelText.text = L("Drag selected marks")
         ladderView.isDraggingSelectedMarks = true
@@ -813,6 +817,7 @@ final class DiagramViewController: UIViewController {
     func showAdjustYToolbar() {
         guard let toolbar = navigationController?.toolbar else { return }
         currentDocument?.undoManager.beginUndoGrouping() // will end when menu closed
+        ladderView.unlinkAllMarks()
         let labelText = UITextField()
         labelText.text = adjustment == .adjust ? L("Adjust distal Y value") : L("Trim distal Y value")
         let slider = UISlider()
@@ -853,6 +858,7 @@ final class DiagramViewController: UIViewController {
     }
 
     @objc func closeMoveMarksToolbar(_ sender: UISlider) {
+        ladderView.relinkAllMarks()
         currentDocument?.undoManager.endUndoGrouping()
         ladderView.isDraggingSelectedMarks = false
         showSelectToolbar()
@@ -867,13 +873,15 @@ final class DiagramViewController: UIViewController {
     }
 
     @objc func closeCopyMarksToolbar(_ sender: UIAlertAction) {
-        // Do not end undo grouping here, copy/pastes are not grouped!
         self.ladderView.copiedMarks.removeAll()
+        ladderView.relinkAllMarks()
+        currentDocument?.undoManager.endUndoGrouping()
         showSelectToolbar()
         imageScrollView.isActivated = true
     }
 
     @objc func closeRepeatPatternToolbar(_ sender: UIAlertAction) {
+        ladderView.relinkAllMarks()
         currentDocument?.undoManager.endUndoGrouping()
         self.ladderView.patternMarks = []
         showSelectToolbar()
@@ -888,8 +896,9 @@ final class DiagramViewController: UIViewController {
     }
 
     @objc func closeAdjustYToolbar(_ sender: UIAlertAction) {
-        currentDocument?.undoManager.endUndoGrouping()
         ladderView.swapEndpointsIfNeededOfAllMarks()
+        ladderView.relinkAllMarks()
+        currentDocument?.undoManager.endUndoGrouping()
         showSelectToolbar()
         imageScrollView.isActivated = true
     }

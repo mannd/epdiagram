@@ -205,13 +205,18 @@ final class Ladder: NSObject, Codable {
     /// All roads lead to this addMark function, which ensures mark is appended to a region and registered
     ///
     /// Adding marks without using this function will result in unregistered marks and absolute chaos.
+    /// Also, to support undo and redo, marks that have been undoably deleted retain their mark style, as opposed to
+    /// truly newly created marks.
     /// - Parameters:
     ///   - mark: mark to be added to the ladder
     ///   - region: region to which mark will be added
+    ///   - newMark: new marks inherit region style or get the default region style
     /// - Returns: the added `Mark`
-    @discardableResult func addMark(_ mark: Mark, toRegion region: Region) -> Mark {
+    @discardableResult func addMark(_ mark: Mark, toRegion region: Region, newMark: Bool = true) -> Mark {
         os_log("addMark(_:toRegion:) - Ladder", log: .action, type: .info)
-        mark.style = region.style == .inherited ? defaultMarkStyle : region.style
+        if newMark {
+            mark.style = region.style == .inherited ? defaultMarkStyle : region.style
+        }
         region.appendMark(mark)
         registerMark(mark)
         if let index = index(ofRegion: region) {
@@ -340,9 +345,10 @@ final class Ladder: NSObject, Codable {
     }
 
     func meanCL(_ marks: [Mark]) -> CGFloat {
-        guard marks.count > 1 else { return 0 }
+        guard marks.count > 2 else { return 0 }
         let sortedMarks = marks.sorted()
         let proximalSortedMarks = sortedMarks.filter { $0.segment.proximal.y <= 0 }
+        guard proximalSortedMarks.count > 2 else { return 0 }
         var intervalSum: CGFloat = 0
         for i in 0..<proximalSortedMarks.count {
             if i + 1 < proximalSortedMarks.count {
