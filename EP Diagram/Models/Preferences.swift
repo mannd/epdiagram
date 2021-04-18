@@ -48,8 +48,8 @@ struct Preferences {
     // Stored as Int, converted to CGFloat when used.
     static var markLineWidth: Int = 2
     static var cursorLineWidth: Int = 1
-    static var showImpulseOrigin = false
-    static var showBlock = false
+    static var showImpulseOrigin = true
+    static var showBlock = true
     static var showArrows = false
     static var showIntervals = true
     static var showConductionTimes = true
