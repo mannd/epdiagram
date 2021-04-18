@@ -439,11 +439,14 @@ final class DiagramViewController: UIViewController {
         //    }
         // }
 
+        #if targetEnvironment(macCatalyst)
         // Customization for mac version
+        print("Running on Mac")
         if isRunningOnMac() {
             //navigationController?.setNavigationBarHidden(true, animated: false)
             // Need to convert hamburger menu to regular menu on Mac.
         }
+        #endif
 
         // Setup cursor, ladder and image scroll views.
         // These 2 views are guaranteed to exist, so the delegates are implicitly unwrapped optionals.
@@ -589,6 +592,7 @@ final class DiagramViewController: UIViewController {
 
     override func updateUserActivityState(_ activity: NSUserActivity) {
         os_log("debug: diagramViewController updateUserActivityState called", log: .debugging, type: .debug)
+
         let currentDocumentURL: String = currentDocument?.fileURL.lastPathComponent ?? ""
         super.updateUserActivityState(activity)
         let info: [AnyHashable: Any] = [
@@ -613,11 +617,15 @@ final class DiagramViewController: UIViewController {
     }
 
     func setTitle() {
+        var titleLabel = L("EP Diagram")
         if let name = currentDocument?.name(), !name.isEmpty {
-            title = isIPad() ? L("EP Diagram - \(name)") : name
-        } else {
-            title = L("EP Diagram")
+            #if targetEnvironment(macCatalyst)
+            titleLabel = name
+            #else
+            titleLabel = isIPad() ? L("EP Diagram - \(name)") : name
+            #endif
         }
+        title = titleLabel
     }
 
     // MARK: Toolbars, Modes
@@ -1389,14 +1397,24 @@ final class DiagramViewController: UIViewController {
 
     // MARK: - Mac menu actions
 
-    @IBAction func showPreferencesCommand(_ sender: Any) {
-        showPreferences()
+    @IBAction func showPreferencesMenu(_ sender: Any) {
+        performShowPreferencesSegue()
     }
 
     // This is called automatically by the Help menu.
     @IBAction func showHelp(_ sender: Any) {
-        showHelp()
+        performShowHelpSegue()
     }
+
+//    // Return whether action can be performed.
+//    override func canPerformAction(_ action: Selector, withSender sender: Any?) -> Bool {
+//
+//        if action == #selector(self.showHelp(_:)) {
+//            return true
+//        } else {
+//            return super.canPerformAction(action, withSender: sender)
+//        }
+//    }
 
 
     @IBAction func getDiagramInfo(_ sender: Any) {

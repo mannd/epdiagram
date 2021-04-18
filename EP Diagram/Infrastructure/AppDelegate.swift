@@ -39,6 +39,18 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         let sceneConfiguration = UISceneConfiguration(name: "Default Configuration", sessionRole: connectingSceneSession.role)
         return sceneConfiguration
     }
+
+
+    // MARK: - macOS menu
+
+    override func buildMenu(with builder: UIMenuBuilder) {
+        super.buildMenu(with: builder)
+        builder.remove(menu: .format)
+        let preferencesCommand = UIKeyCommand(input: ",", modifierFlags: [.command], action: #selector(DiagramViewController.showPreferencesMenu(_:)))
+        preferencesCommand.title = "Preferences..."
+        let openPreferences = UIMenu(title: "Preferences...", image: nil, identifier: UIMenu.Identifier("openPreferences"), options: .displayInline, children: [preferencesCommand])
+        builder.insertSibling(openPreferences, afterMenu: .about)
+    }
 }
 
 
