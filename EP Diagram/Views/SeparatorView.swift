@@ -39,7 +39,11 @@ class SeparatorView: UIView {
     var updateListener: OnConstraintUpdateProtocol?
 
     var showIndicator: Bool = true
-    var allowTouches: Bool = true
+    var allowTouches: Bool = true {
+        didSet {
+            isUserInteractionEnabled = allowTouches
+        }
+    }
 
     @discardableResult
     internal static func addSeparatorBetweenViews(separatorType: SeparatorType, primaryView: UIView, secondaryView: UIView, parentView: UIView) -> SeparatorView{
@@ -72,11 +76,6 @@ class SeparatorView: UIView {
 
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
-    }
-
-    override func point(inside point: CGPoint, with event: UIEvent?) -> Bool {
-        // We need to pass touches through when side menu is open
-        return allowTouches
     }
 
     override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
