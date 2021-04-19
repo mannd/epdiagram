@@ -473,7 +473,7 @@ final class DiagramViewController: UIViewController {
         // Distinguish the two views using slightly different background colors.
         imageScrollView.backgroundColor = UIColor.secondarySystemBackground
         imageView.backgroundColor = UIColor.secondarySystemBackground
-        ladderView.backgroundColor = UIColor.tertiarySystemBackground
+        ladderView.backgroundColor = UIColor.systemBackground
 
         // Limit max and min scale of image.
         imageScrollView.maximumZoomScale = maxZoom
@@ -1454,13 +1454,17 @@ extension DiagramViewController {
         NotificationCenter.default.addObserver(self, selector: #selector(updatePreferences), name: UserDefaults.didChangeNotification, object: nil)
         NotificationCenter.default.addObserver(self, selector: #selector(didEnterBackground), name: UIScene.didEnterBackgroundNotification, object: nil)
         NotificationCenter.default.addObserver(self, selector: #selector(didDisconnect), name: UIScene.didDisconnectNotification, object: nil)
+        NotificationCenter.default.addObserver(self, selector: #selector(willConnect), name: UIScene.willConnectNotification, object: nil)
         NotificationCenter.default.addObserver(self, selector: #selector(resolveFileConflicts), name: UIDocument.stateChangedNotification, object: nil)
     }
 
     func removeNotifications() {
         NotificationCenter.default.removeObserver(self, name: .didUndoableAction, object: nil)
+        NotificationCenter.default.removeObserver(self, name: UserDefaults.didChangeNotification, object: nil)
         NotificationCenter.default.removeObserver(self, name: UIScene.didEnterBackgroundNotification, object: nil)
+        NotificationCenter.default.removeObserver(self, name: UIScene.willConnectNotification, object: nil)
         NotificationCenter.default.removeObserver(self, name: UIScene.didDisconnectNotification, object: nil)
+        NotificationCenter.default.removeObserver(self, name: UIDocument.stateChangedNotification, object: nil)
     }
 
     @objc func onDidUndoableAction(_ notification: Notification) {
@@ -1478,12 +1482,19 @@ extension DiagramViewController {
     }
 
     @objc func didEnterBackground() {
-        os_log("didEnterBackground()", log: .action, type: .info)
+        os_log("didEnterBackground()", log: .lifeCycle, type: .info)
+    }
+
+    @objc func didEnterForeground() {
+        os_log("didEnterForeground()", log: .lifeCycle, type: .info)
     }
 
     @objc func didDisconnect() {
         os_log("didDisconnect()", log: .lifeCycle, type: .info)
+    }
 
+    @objc func willConnect() {
+        os_log("willConnect()", log: .lifeCycle, type: .info)
     }
 
     func updateToolbarButtons() {

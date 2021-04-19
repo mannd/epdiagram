@@ -48,6 +48,10 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         }
     }
 
+    func sceneDidDisconnect(_ scene: UIScene) {
+        os_log("sceneDidDisconnect(_:) - SceneDelegate, %s", log: .lifeCycle, type: .info, scene.session.persistentIdentifier)
+    }
+
     //    override func buildMenu(with builder: UIMenuBuilder) {
     //        super.buildMenu(with: builder)
     //
@@ -89,4 +93,6 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
     //
     //        }
     //    }
+ 
+ 
 }
