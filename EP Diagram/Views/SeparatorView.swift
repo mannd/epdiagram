@@ -74,6 +74,11 @@ class SeparatorView: UIView {
         fatalError("init(coder:) has not been implemented")
     }
 
+    override func point(inside point: CGPoint, with event: UIEvent?) -> Bool {
+        // We need to pass touches through when side menu is open
+        return allowTouches
+    }
+
     override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
         guard allowTouches else { return }
         self.firstTouch = touches.first?.location(in: self.superview)
