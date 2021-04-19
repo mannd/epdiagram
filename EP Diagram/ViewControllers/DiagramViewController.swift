@@ -538,15 +538,20 @@ final class DiagramViewController: UIViewController {
         super.viewWillAppear(animated)
         setupNotifications()
         // Need to show toolbar before view appears, otherwise views don't layout correctly.
-        navigationController?.setToolbarHidden(false, animated: false)
 
+        // Fixes view opening flush with left margin on Mac.
+        view.layoutIfNeeded()
+        navigationController?.setToolbarHidden(false, animated: false)
     }
 
     var didFirstWillLayout = false
     override func viewWillLayoutSubviews() {
         os_log("viewWillLayoutSubviews() - DiagramViewController", log: OSLog.viewCycle, type: .info)
 
-        if didFirstWillLayout { return }
+        if didFirstWillLayout {
+            super.viewWillLayoutSubviews()
+            return
+        }
         didFirstWillLayout = true
         if restorationInfo != nil {
             if let zoomScale = restorationInfo?[Self.restorationZoomKey] as? CGFloat {
@@ -561,6 +566,7 @@ final class DiagramViewController: UIViewController {
             }
             imageScrollView.setContentOffset(restorationContentOffset, animated: true)
         }
+        super.viewWillLayoutSubviews()
     }
 
     override func viewDidAppear(_ animated: Bool) {
