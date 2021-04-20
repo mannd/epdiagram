@@ -522,6 +522,8 @@ final class DiagramViewController: UIViewController {
 
         ladderView.reregisterAllMarks()
 
+        setupNotifications()
+
         let firstRun: Bool = !UserDefaults.standard.bool(forKey: Preferences.notFirstRunKey)
 
         if debugShowOnboarding || firstRun { // || first run
@@ -536,7 +538,6 @@ final class DiagramViewController: UIViewController {
 
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
-        setupNotifications()
         // Need to show toolbar before view appears, otherwise views don't layout correctly.
 
         // Fixes view opening flush with left margin on Mac.
@@ -593,7 +594,7 @@ final class DiagramViewController: UIViewController {
 
     override func viewWillDisappear(_ animated: Bool) {
         super.viewWillDisappear(animated)
-        removeNotifications()
+        // No need anymore (since iOS9) to remove notifications.
     }
 
     override func updateUserActivityState(_ activity: NSUserActivity) {
@@ -1456,15 +1457,6 @@ extension DiagramViewController {
         NotificationCenter.default.addObserver(self, selector: #selector(didDisconnect), name: UIScene.didDisconnectNotification, object: nil)
         NotificationCenter.default.addObserver(self, selector: #selector(willConnect), name: UIScene.willConnectNotification, object: nil)
         NotificationCenter.default.addObserver(self, selector: #selector(resolveFileConflicts), name: UIDocument.stateChangedNotification, object: nil)
-    }
-
-    func removeNotifications() {
-        NotificationCenter.default.removeObserver(self, name: .didUndoableAction, object: nil)
-        NotificationCenter.default.removeObserver(self, name: UserDefaults.didChangeNotification, object: nil)
-        NotificationCenter.default.removeObserver(self, name: UIScene.didEnterBackgroundNotification, object: nil)
-        NotificationCenter.default.removeObserver(self, name: UIScene.willConnectNotification, object: nil)
-        NotificationCenter.default.removeObserver(self, name: UIScene.didDisconnectNotification, object: nil)
-        NotificationCenter.default.removeObserver(self, name: UIDocument.stateChangedNotification, object: nil)
     }
 
     @objc func onDidUndoableAction(_ notification: Notification) {

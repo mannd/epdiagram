@@ -42,21 +42,21 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 
     // MARK: - macOS menu
 
-    override func buildMenu(with builder: UIMenuBuilder) {
-        print("****app delegate build menu")
-        super.buildMenu(with: builder)
-        builder.remove(menu: .format)
-        //        let preferencesCommand = UIKeyCommand(input: ",", modifierFlags: [.command], action: #selector(DiagramViewController.showPreferencesMenu(_:)))
-        let preferencesCommand = UIKeyCommand(input: ",", modifierFlags: [.command], action: #selector(showPreferencesTest(_:)))
+//    override func buildMenu(with builder: UIMenuBuilder) {
+//        print("****app delegate build menu")
+//        super.buildMenu(with: builder)
+//        builder.remove(menu: .format)
+//        //        let preferencesCommand = UIKeyCommand(input: ",", modifierFlags: [.command], action: #selector(DiagramViewController.showPreferencesMenu(_:)))
+//        let preferencesCommand = UIKeyCommand(input: ",", modifierFlags: [.command], action: #selector(showPreferencesTest(_:)))
+//
+//        preferencesCommand.title = "Preferences..."
+//        let openPreferences = UIMenu(title: "Preferences...", image: nil, identifier: UIMenu.Identifier("openPreferences"), options: .displayInline, children: [preferencesCommand])
+//        builder.insertSibling(openPreferences, afterMenu: .about)
+//
+//    }
 
-        preferencesCommand.title = "Preferences..."
-        let openPreferences = UIMenu(title: "Preferences...", image: nil, identifier: UIMenu.Identifier("openPreferences"), options: .displayInline, children: [preferencesCommand])
-        builder.insertSibling(openPreferences, afterMenu: .about)
-
-    }
-
-    @objc func showPreferencesTest(_ sender: Any) {
-        print("showing preferences")
+//    @objc func showPreferencesTest(_ sender: Any) {
+//        print("showing preferences")
 //        let view = PreferencesView(diagramController: DiagramModelController(diagram: Diagram.defaultDiagram()))
 //        var topWindow: UIWindow? = UIWindow(frame: UIScreen.main.bounds)
 //        topWindow?.rootViewController = UIViewController()
@@ -76,7 +76,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 //        topWindow?.rootViewController?.present(alert, animated: true, completion: nil)
 
         
-    }
+//    }
 
 }
 
