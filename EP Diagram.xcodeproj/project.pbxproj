@@ -79,6 +79,7 @@
 		8E976B90260E435100CA8BF9 /* img in Resources */ = {isa = PBXBuildFile; fileRef = 8E976B8C260E435000CA8BF9 /* img */; };
 		8E976B91260E435100CA8BF9 /* org.css in Resources */ = {isa = PBXBuildFile; fileRef = 8E976B8D260E435000CA8BF9 /* org.css */; };
 		8E982F9324EAF8B500E94F71 /* Zone.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8E982F9224EAF8B500E94F71 /* Zone.swift */; };
+		8E997BD7262F3CF800F0578D /* EPDiagram.help in Resources */ = {isa = PBXBuildFile; fileRef = 8E997BD6262F3CF800F0578D /* EPDiagram.help */; platformFilter = maccatalyst; };
 		8E9A065125D9CDC700775531 /* LadderTemplatesModelController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8E9A065025D9CDC700775531 /* LadderTemplatesModelController.swift */; };
 		8E9A466723005A600037AEAB /* CursorViewTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8E9A466623005A600037AEAB /* CursorViewTests.swift */; };
 		8E9B8043228345B5008873BB /* Mark.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8E9B8042228345B5008873BB /* Mark.swift */; };
@@ -207,6 +208,7 @@
 		8E976B8C260E435000CA8BF9 /* img */ = {isa = PBXFileReference; lastKnownFileType = folder; path = img; sourceTree = "<group>"; };
 		8E976B8D260E435000CA8BF9 /* org.css */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.css; path = org.css; sourceTree = "<group>"; };
 		8E982F9224EAF8B500E94F71 /* Zone.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Zone.swift; sourceTree = "<group>"; };
+		8E997BD6262F3CF800F0578D /* EPDiagram.help */ = {isa = PBXFileReference; lastKnownFileType = folder; name = EPDiagram.help; path = "EP Diagram/EPDiagram.help"; sourceTree = "<group>"; };
 		8E9A065025D9CDC700775531 /* LadderTemplatesModelController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LadderTemplatesModelController.swift; sourceTree = "<group>"; };
 		8E9A466623005A600037AEAB /* CursorViewTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CursorViewTests.swift; sourceTree = "<group>"; };
 		8E9B8042228345B5008873BB /* Mark.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Mark.swift; sourceTree = "<group>"; };
@@ -332,6 +334,7 @@
 		8E7D24B622779DBD005A1729 = {
 			isa = PBXGroup;
 			children = (
+				8E997BD6262F3CF800F0578D /* EPDiagram.help */,
 				8E7D24C122779DBD005A1729 /* EP Diagram */,
 				8E7D24D622779DBF005A1729 /* EP DiagramTests */,
 				8E7D24E122779DBF005A1729 /* EP DiagramUITests */,
@@ -629,6 +632,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				8E997BD7262F3CF800F0578D /* EPDiagram.help in Resources */,
 				8E976B91260E435100CA8BF9 /* org.css in Resources */,
 				8E976B90260E435100CA8BF9 /* img in Resources */,
 				8E04C5CB2569947100946348 /* Startup.storyboard in Resources */,
