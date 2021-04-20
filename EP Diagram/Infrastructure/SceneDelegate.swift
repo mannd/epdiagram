@@ -15,12 +15,16 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
     func scene(_ scene: UIScene, willConnectTo session: UISceneSession, options connectionOptions: UIScene.ConnectionOptions) {
         os_log("scene(scene:willConnectTo:options:) - SceneDelegate", log: .lifeCycle, type: .info)
         guard let scene = (scene as? UIWindowScene) else { return }
-        scene.title = L("EP Diagram")
-        scene.userActivity = session.stateRestorationActivity ?? NSUserActivity(activityType: "org.epstudios.epdiagram.mainActivity")
-        self.scene(scene, openURLContexts: connectionOptions.urlContexts)
+
 
         if let documentBrowserViewController = window?.rootViewController as? DocumentBrowserViewController {
+            scene.title = L("EP Diagram")
+            scene.userActivity = session.stateRestorationActivity ?? NSUserActivity(activityType: "org.epstudios.epdiagram.mainActivity")
+            self.scene(scene, openURLContexts: connectionOptions.urlContexts)
             documentBrowserViewController.restorationInfo = scene.userActivity?.userInfo
+        } else if let macPreferencesViewController = window?.rootViewController as? MacPreferencesViewController  {
+            
+            scene.title = L("Preferences")
         }
     }
 

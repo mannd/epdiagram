@@ -36,24 +36,36 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         os_log("application(_:configurationForConnecting:options:)", log: .lifeCycle, type: .info)
         // Called when a new scene session is being created.
         // Use this method to select a configuration to create the new scene with.
-        let sceneConfiguration = UISceneConfiguration(name: "Default Configuration", sessionRole: connectingSceneSession.role)
-        return sceneConfiguration
+        if options.userActivities.first?.activityType == "preferences" {
+            let configuration = UISceneConfiguration(name: "Default Configuration", sessionRole: connectingSceneSession.role)
+//            configuration.delegateClass = CustomSceneDelegate.self
+            configuration.storyboard = UIStoryboard(name: "Preferences", bundle: Bundle.main)
+            return configuration
+        } else {
+            let sceneConfiguration = UISceneConfiguration(name: "Default Configuration", sessionRole: connectingSceneSession.role)
+            return sceneConfiguration
+        }
     }
 
     // MARK: - macOS menu
 
-//    override func buildMenu(with builder: UIMenuBuilder) {
-//        print("****app delegate build menu")
-//        super.buildMenu(with: builder)
-//        builder.remove(menu: .format)
-//        //        let preferencesCommand = UIKeyCommand(input: ",", modifierFlags: [.command], action: #selector(DiagramViewController.showPreferencesMenu(_:)))
-//        let preferencesCommand = UIKeyCommand(input: ",", modifierFlags: [.command], action: #selector(showPreferencesTest(_:)))
-//
-//        preferencesCommand.title = "Preferences..."
-//        let openPreferences = UIMenu(title: "Preferences...", image: nil, identifier: UIMenu.Identifier("openPreferences"), options: .displayInline, children: [preferencesCommand])
-//        builder.insertSibling(openPreferences, afterMenu: .about)
-//
-//    }
+    // See https://stackoverflow.com/questions/58882047/open-a-new-window-in-mac-catalyst
+    @IBAction func showMacPreferences(_ sender: Any) {
+        var activity = NSUserActivity(activityType: "preferences")
+        UIApplication.shared.requestSceneSessionActivation(nil, userActivity: activity, options: nil) { (error) in
+        }
+        // TODO: inactivate Preferences menu item if preferences already open.
+    }
+
+    override func buildMenu(with builder: UIMenuBuilder) {
+        super.buildMenu(with: builder)
+        builder.remove(menu: .format)
+        let preferencesCommand = UIKeyCommand(input: ",", modifierFlags: [.command], action: #selector(showMacPreferences(_:)))
+        preferencesCommand.title = "Preferences..."
+        let openPreferences = UIMenu(title: "Preferences...", image: nil, identifier: UIMenu.Identifier("openPreferences"), options: .displayInline, children: [preferencesCommand])
+        builder.insertSibling(openPreferences, afterMenu: .about)
+
+    }
 
 //    @objc func showPreferencesTest(_ sender: Any) {
 //        print("showing preferences")

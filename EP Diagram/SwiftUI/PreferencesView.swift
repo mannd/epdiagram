@@ -47,8 +47,9 @@ struct PreferencesView: View {
 
     @State var showAutoLinkWarning = false
 
-    // Pass Diagram as binding to allow changing non-UserDefaults settings
-    // @Binding var diagram: Diagram
+    // TODO: Do we need observed object here to force updates?
+    // Preferences automatically update, and are saved independently,
+    // but maybe we need this to force save diagram.
     @ObservedObject var diagramController: DiagramModelController
     @Environment(\.presentationMode) private var presentationMode: Binding<PresentationMode>
 

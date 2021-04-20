@@ -27,6 +27,8 @@
 		8E25A9B122E5505200D62E18 /* LadderViewTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8E25A9B022E5505200D62E18 /* LadderViewTests.swift */; };
 		8E25A9B322E5515D00D62E18 /* LadderTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8E25A9B222E5515D00D62E18 /* LadderTests.swift */; };
 		8E2BA1D024A3BDD7002D997F /* PreferencesView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8E2BA1CF24A3BDD7002D997F /* PreferencesView.swift */; };
+		8E33927B262E6DE6002A7447 /* Preferences.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 8E33927A262E6DE6002A7447 /* Preferences.storyboard */; };
+		8E339280262E7655002A7447 /* MacPreferencesViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8E33927F262E7655002A7447 /* MacPreferencesViewController.swift */; };
 		8E35924924BE9B27001E23D5 /* DiagramIO.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8E35924824BE9B27001E23D5 /* DiagramIO.swift */; };
 		8E3AD1372459CABF0085BDD4 /* LocationInLadder.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8E3AD1362459CABF0085BDD4 /* LocationInLadder.swift */; };
 		8E3C911E2602FA02001A14BA /* IntervalTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8E3C911D2602FA02001A14BA /* IntervalTests.swift */; };
@@ -146,6 +148,8 @@
 		8E25A9B022E5505200D62E18 /* LadderViewTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LadderViewTests.swift; sourceTree = "<group>"; };
 		8E25A9B222E5515D00D62E18 /* LadderTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LadderTests.swift; sourceTree = "<group>"; };
 		8E2BA1CF24A3BDD7002D997F /* PreferencesView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PreferencesView.swift; sourceTree = "<group>"; };
+		8E33927A262E6DE6002A7447 /* Preferences.storyboard */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; path = Preferences.storyboard; sourceTree = "<group>"; };
+		8E33927F262E7655002A7447 /* MacPreferencesViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MacPreferencesViewController.swift; sourceTree = "<group>"; };
 		8E35924824BE9B27001E23D5 /* DiagramIO.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DiagramIO.swift; sourceTree = "<group>"; };
 		8E3AD1362459CABF0085BDD4 /* LocationInLadder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocationInLadder.swift; sourceTree = "<group>"; };
 		8E3C911D2602FA02001A14BA /* IntervalTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IntervalTests.swift; sourceTree = "<group>"; };
@@ -448,6 +452,7 @@
 				8E7D24CB22779DBF005A1729 /* LaunchScreen.storyboard */,
 				8E04C5CA2569947100946348 /* Startup.storyboard */,
 				8E61C3D625A6260D0064ADC1 /* Startup2.storyboard */,
+				8E33927A262E6DE6002A7447 /* Preferences.storyboard */,
 			);
 			path = Storyboards;
 			sourceTree = "<group>";
@@ -479,6 +484,7 @@
 				8E4ACA8124478D7C00575538 /* HamburgerTableViewController.swift */,
 				8E1276DE24D4734E00AC4B8F /* HelpViewController.swift */,
 				8E04C5CF2569950800946348 /* RootViewController.swift */,
+				8E33927F262E7655002A7447 /* MacPreferencesViewController.swift */,
 			);
 			path = ViewControllers;
 			sourceTree = "<group>";
@@ -626,6 +632,7 @@
 				8E976B91260E435100CA8BF9 /* org.css in Resources */,
 				8E976B90260E435100CA8BF9 /* img in Resources */,
 				8E04C5CB2569947100946348 /* Startup.storyboard in Resources */,
+				8E33927B262E6DE6002A7447 /* Preferences.storyboard in Resources */,
 				8E976B8E260E435100CA8BF9 /* help.html in Resources */,
 				8EE141232620EED500392100 /* onboard.html in Resources */,
 				8E976B8F260E435100CA8BF9 /* help.org in Resources */,
@@ -702,6 +709,7 @@
 				8EE1411E261F9A5B00392100 /* Onboarding.swift in Sources */,
 				8E4ACA8024478A6E00575538 /* BlackView.swift in Sources */,
 				8EC5D28D256B154E00F49865 /* UIView+PinToInside.swift in Sources */,
+				8E339280262E7655002A7447 /* MacPreferencesViewController.swift in Sources */,
 				8ED3B1B62360DA0D00549381 /* Anchor.swift in Sources */,
 				8E4ACA842447905E00575538 /* HamburgerCell.swift in Sources */,
 				8E4ACA862447935600575538 /* HamburgerLayer.swift in Sources */,
