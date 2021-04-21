@@ -11,6 +11,7 @@ import os.log
 
 @UIApplicationMain
 class AppDelegate: UIResponder, UIApplicationDelegate {
+
     var ubiqURL: URL?
     var preferencesDialogIsOpen: Bool = false
 
@@ -32,7 +33,6 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     }
 
     // MARK: UISceneSession Lifecycle
-
     func application(_ application: UIApplication, configurationForConnecting connectingSceneSession: UISceneSession, options: UIScene.ConnectionOptions) -> UISceneConfiguration {
         os_log("application(_:configurationForConnecting:options:)", log: .lifeCycle, type: .info)
         // Called when a new scene session is being created.
@@ -50,9 +50,10 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 
     // MARK: - macOS menu
 
+    #if targetEnvironment(macCatalyst)
+
     // See https://stackoverflow.com/questions/58882047/open-a-new-window-in-mac-catalyst
     @IBAction func showMacPreferences(_ sender: Any) {
-        // For now we don't inactivate preferences dialog when it is open, just
         // prevent the menu from opening more than one.
         guard !preferencesDialogIsOpen else { return }
         let activity = NSUserActivity(activityType: "preferences")
@@ -62,26 +63,52 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         preferencesDialogIsOpen = true
     }
 
-    override func buildMenu(with builder: UIMenuBuilder) {
-        super.buildMenu(with: builder)
-        builder.remove(menu: .format)
-//        builder.remove(menu: .help)
-        let preferencesCommand = UIKeyCommand(input: ",", modifierFlags: [.command], action: #selector(showMacPreferences(_:)))
-        preferencesCommand.title = "Preferences..."
-        let openPreferences = UIMenu(title: "Preferences...", image: nil, identifier: UIMenu.Identifier("openPreferences"), options: .displayInline, children: [preferencesCommand])
-        builder.insertSibling(openPreferences, afterMenu: .about)
-        let newHelpMenu = UIMenu(title: "New Help")
-        builder.insertSibling(newHelpMenu, afterMenu: .lookup)
-    }
-
-    // This sort of works, but crashes if color dialog is open...
 //    override func canPerformAction(_ action: Selector, withSender sender: Any?) -> Bool {
 //        if action == #selector(showMacPreferences(_:)) {
-//            return preferencesDialogIsOpen ? false : true
-//        } else {
-//            return true
+//            return !preferencesDialogIsOpen
 //        }
+//      return super.canPerformAction(action, withSender: sender)
 //    }
+
+    override func buildMenu(with builder: UIMenuBuilder) {
+        super.buildMenu(with: builder)
+        guard builder.system == .main else { return }
+        builder.remove(menu: .format)
+        let preferencesCommand = UIKeyCommand(
+            title: "Preferences...",
+            action: #selector(DiagramViewController.showNewPreferences(_:)),
+//            action: #selector(showMacPreferences(_:)),
+            input: ",",
+            modifierFlags: [.command]
+        )
+        let openPreferencesMenu = UIMenu(
+            title: "",
+            image: nil,
+            identifier: UIMenu.Identifier("openPreferences"),
+            options: .displayInline,
+            children: [preferencesCommand]
+        )
+        builder.insertSibling(openPreferencesMenu, afterMenu: .about)
+
+        let openFileCommand = UIKeyCommand(
+            title: "Open Image...",
+            action: #selector(DocumentBrowserViewController.openImageFile(_:)),
+            input: "o",
+            modifierFlags: [.command]
+        )
+        let openFileMenu = UIMenu(
+            title: "",
+            image: nil,
+            identifier: UIMenu.Identifier("openImage"),
+            options: .displayInline,
+            children: [openFileCommand]
+        )
+        builder.insertSibling(openFileMenu, afterMenu: .newScene)
+
+    }
+
+
+    #endif
 
 }
 

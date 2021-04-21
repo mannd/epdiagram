@@ -22,8 +22,7 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
             scene.userActivity = session.stateRestorationActivity ?? NSUserActivity(activityType: "org.epstudios.epdiagram.mainActivity")
             self.scene(scene, openURLContexts: connectionOptions.urlContexts)
             documentBrowserViewController.restorationInfo = scene.userActivity?.userInfo
-        } else if let macPreferencesViewController = window?.rootViewController as? MacPreferencesViewController  {
-            
+        } else if (window?.rootViewController as? MacPreferencesViewController) != nil  {
             scene.title = L("Preferences")
         }
     }

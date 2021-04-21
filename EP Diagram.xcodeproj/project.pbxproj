@@ -74,8 +74,7 @@
 		8E973F9B24C4BF0800AB41C3 /* String+isBlank.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8E973F9A24C4BF0800AB41C3 /* String+isBlank.swift */; };
 		8E973F9D24C4C71E00AB41C3 /* StringTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8E973F9C24C4C71E00AB41C3 /* StringTests.swift */; };
 		8E973F9F24C4C93000AB41C3 /* DiagramTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8E973F9E24C4C93000AB41C3 /* DiagramTests.swift */; };
-		8E976B8E260E435100CA8BF9 /* help.html in Resources */ = {isa = PBXBuildFile; fileRef = 8E976B8A260E435000CA8BF9 /* help.html */; };
-		8E976B8F260E435100CA8BF9 /* help.org in Resources */ = {isa = PBXBuildFile; fileRef = 8E976B8B260E435000CA8BF9 /* help.org */; };
+		8E976B8E260E435100CA8BF9 /* help.html in Resources */ = {isa = PBXBuildFile; fileRef = 8E976B8A260E435000CA8BF9 /* help.html */; platformFilter = ios; };
 		8E976B90260E435100CA8BF9 /* img in Resources */ = {isa = PBXBuildFile; fileRef = 8E976B8C260E435000CA8BF9 /* img */; };
 		8E976B91260E435100CA8BF9 /* org.css in Resources */ = {isa = PBXBuildFile; fileRef = 8E976B8D260E435000CA8BF9 /* org.css */; };
 		8E982F9324EAF8B500E94F71 /* Zone.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8E982F9224EAF8B500E94F71 /* Zone.swift */; };
@@ -103,7 +102,6 @@
 		8EDCE17F25EC0C7400B9C7B8 /* Color.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8EDCE17E25EC0C7400B9C7B8 /* Color.swift */; };
 		8EE1411E261F9A5B00392100 /* Onboarding.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8EE1411D261F9A5B00392100 /* Onboarding.swift */; };
 		8EE141232620EED500392100 /* onboard.html in Resources */ = {isa = PBXBuildFile; fileRef = 8EE141222620EED500392100 /* onboard.html */; };
-		8EE141282620EEE200392100 /* onboard.org in Resources */ = {isa = PBXBuildFile; fileRef = 8EE141272620EEE200392100 /* onboard.org */; };
 		8EF8B5B72330739F00ADB77A /* ViewControllerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8EF8B5B62330739F00ADB77A /* ViewControllerTests.swift */; };
 		8EF9166B227926BC00B51F17 /* LadderView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8EF9166A227926BC00B51F17 /* LadderView.swift */; };
 /* End PBXBuildFile section */
@@ -639,12 +637,10 @@
 				8E33927B262E6DE6002A7447 /* Preferences.storyboard in Resources */,
 				8E976B8E260E435100CA8BF9 /* help.html in Resources */,
 				8EE141232620EED500392100 /* onboard.html in Resources */,
-				8E976B8F260E435100CA8BF9 /* help.org in Resources */,
 				8E7D24CD22779DBF005A1729 /* LaunchScreen.storyboard in Resources */,
 				8E7D24CA22779DBF005A1729 /* Assets.xcassets in Resources */,
 				8E7D24C822779DBD005A1729 /* Main.storyboard in Resources */,
 				8E61C3D725A6260D0064ADC1 /* Startup2.storyboard in Resources */,
-				8EE141282620EEE200392100 /* onboard.org in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

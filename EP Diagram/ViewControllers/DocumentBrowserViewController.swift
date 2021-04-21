@@ -46,10 +46,10 @@ class DocumentBrowserViewController: UIDocumentBrowserViewController {
                 }
             }
         }
-
     }
 
     override func viewDidAppear(_ animated: Bool) {
+        print("document browser did appear")
         super.viewDidAppear(animated)
 
         if let externalURL = externalURL {
@@ -58,6 +58,11 @@ class DocumentBrowserViewController: UIDocumentBrowserViewController {
                 return
             }
         }
+    }
+
+    override func viewDidDisappear(_ animated: Bool) {
+        super.viewDidDisappear(animated)
+        print("document browser disappeared")
     }
 
     func installDocumentBrowser() {
@@ -85,7 +90,8 @@ protocol DiagramEditorDelegate: AnyObject {
 extension DocumentBrowserViewController: DiagramEditorDelegate {
     func diagramEditorDidFinishEditing(_ controller: DiagramViewController, diagram: Diagram) {
         currentDocument?.diagram = diagram
-        closeDiagramController()
+        // see https://developer.apple.com/forums/thread/670247
+        closeDiagramController(completion: {  UIApplication.shared.windows.first?.rootViewController = self })
     }
 
     func diagramEditorDidUpdateContent(_ controller: DiagramViewController, diagram: Diagram) {
@@ -107,8 +113,14 @@ extension DocumentBrowserViewController: DiagramEditorDelegate {
         // This is not used, probably can delete.
         diagramViewController?.restorationIdentifier = restorationIdentifier
         diagramViewController?.currentDocument = document
-        controller.modalPresentationStyle = .fullScreen
-        self.present(controller, animated: true)
+        // FIXME: This avoids the modal problem, but how to close document??
+//        controller.modalPresentationStyle = .fullScreen
+//        self.present(controller, animated: true)
+        UIApplication.shared.windows.first?.rootViewController = diagramViewController?.navigationController
+
+//        view.window?.rootViewController = controller
+
+
     }
 
     func closeDiagramController(completion: (()->Void)? = nil) {
@@ -169,4 +181,12 @@ extension DocumentBrowserViewController {
         }
         return false
     }
+
+    @IBAction func openImageFile(_ sender: Any) {
+        let controller = DiagramViewController.navigationControllerFactory()
+        let diagramViewController = controller.viewControllers[0] as? DiagramViewController
+        diagramViewController?.becomeFirstResponder()
+        diagramViewController?.openImageFile(sender)
+    }
+
 }

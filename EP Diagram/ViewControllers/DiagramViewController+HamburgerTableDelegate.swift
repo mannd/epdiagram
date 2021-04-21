@@ -31,7 +31,7 @@ protocol HamburgerTableDelegate: class {
     func sampleDiagrams()
     func showPreferences()
     func editTemplates()
-    func showHelp()
+    func showIOSHelp()
     func lockImage()
     func hideHamburgerMenu()
     func showHamburgerMenu()
@@ -230,10 +230,15 @@ extension DiagramViewController: HamburgerTableDelegate, UIImagePickerController
         performShowPreferencesSegue()
     }
 
-    func showHelp() {
-        os_log("showHelp()", log: OSLog.action, type: .info)
+    @IBAction func showNewPreferences(_ sender: Any) {
+        showPreferences()
+    }
+
+    func showIOSHelp() {
+        os_log("showIOSHelp()", log: OSLog.action, type: .info)
         performShowHelpSegue()
     }
+
 
     func about() {
         let versionBuild = Version.appVersion()
@@ -256,7 +261,6 @@ extension DiagramViewController: HamburgerTableDelegate, UIImagePickerController
     #if DEBUG
     func debug() {
         os_log("debug()", log: .debugging, type: .debug)
-        ladderView.relinkAllMarks()
     }
     #else
     func debug() {}
@@ -385,6 +389,12 @@ extension DiagramViewController: HamburgerTableDelegate, UIImagePickerController
             }
         }
         return image
+    }
+
+    @IBAction func openImageFile(_ sender: Any) {
+        print("gotcha")
+        handleSelectFile()
+
     }
  
     // MARK: - Hamburger menu functions

@@ -537,6 +537,7 @@ final class DiagramViewController: UIViewController {
     }
 
     override func viewWillAppear(_ animated: Bool) {
+        os_log("viewWillAppear() - ViewController", log: OSLog.viewCycle, type: .info)
         super.viewWillAppear(animated)
         // Need to show toolbar before view appears, otherwise views don't layout correctly.
 
@@ -548,7 +549,6 @@ final class DiagramViewController: UIViewController {
     var didFirstWillLayout = false
     override func viewWillLayoutSubviews() {
         os_log("viewWillLayoutSubviews() - DiagramViewController", log: OSLog.viewCycle, type: .info)
-
         if didFirstWillLayout {
             super.viewWillLayoutSubviews()
             return
@@ -1409,9 +1409,9 @@ final class DiagramViewController: UIViewController {
     }
 
     // This is called automatically by the Help menu.
-    @IBAction func showHelp(_ sender: Any) {
-        performShowHelpSegue()
-    }
+//    @IBAction func showHelp(_ sender: Any) {
+//        performShowHelpSegue()
+//    }
 
 //    // Return whether action can be performed.
 //    override func canPerformAction(_ action: Selector, withSender sender: Any?) -> Bool {
@@ -1422,6 +1422,8 @@ final class DiagramViewController: UIViewController {
 //            return super.canPerformAction(action, withSender: sender)
 //        }
 //    }
+
+  
 
 
     @IBAction func getDiagramInfo(_ sender: Any) {
