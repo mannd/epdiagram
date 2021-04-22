@@ -15,6 +15,9 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     var ubiqURL: URL?
     var preferencesDialogIsOpen: Bool = false
 
+    static let mainActivityType = "org.epstudios.epdiagram.mainActivity"
+    static let preferencesActivityType = "org.epstudios.epdiagram.preferencesActivity"
+
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
         os_log("application(_:didFinishLaunchingWithOptions:) - AppDelegate", log: .lifeCycle, type: .info)
 
@@ -37,12 +40,12 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         os_log("application(_:configurationForConnecting:options:)", log: .lifeCycle, type: .info)
         // Called when a new scene session is being created.
         // Use this method to select a configuration to create the new scene with.
-        if options.userActivities.first?.activityType == "preferences" {
+        if options.userActivities.first?.activityType == Self.preferencesActivityType {
             let configuration = UISceneConfiguration(name: "Default Configuration", sessionRole: connectingSceneSession.role)
-//            configuration.delegateClass = CustomSceneDelegate.self
+            //            configuration.delegateClass = CustomSceneDelegate.self
             configuration.storyboard = UIStoryboard(name: "Preferences", bundle: Bundle.main)
             return configuration
-        } else {
+        } else { // if options.userActivities.first?.activityType == Self.mainActivityType {
             let sceneConfiguration = UISceneConfiguration(name: "Default Configuration", sessionRole: connectingSceneSession.role)
             return sceneConfiguration
         }
@@ -52,32 +55,15 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 
     #if targetEnvironment(macCatalyst)
 
-    // See https://stackoverflow.com/questions/58882047/open-a-new-window-in-mac-catalyst
-    @IBAction func showMacPreferences(_ sender: Any) {
-        // prevent the menu from opening more than one.
-        guard !preferencesDialogIsOpen else { return }
-        let activity = NSUserActivity(activityType: "preferences")
-        UIApplication.shared.requestSceneSessionActivation(nil, userActivity: activity, options: nil) { (error) in
-            print("Error showing Mac preferences", error.localizedDescription)
-        }
-        preferencesDialogIsOpen = true
-    }
-
-//    override func canPerformAction(_ action: Selector, withSender sender: Any?) -> Bool {
-//        if action == #selector(showMacPreferences(_:)) {
-//            return !preferencesDialogIsOpen
-//        }
-//      return super.canPerformAction(action, withSender: sender)
-//    }
-
     override func buildMenu(with builder: UIMenuBuilder) {
         super.buildMenu(with: builder)
         guard builder.system == .main else { return }
         builder.remove(menu: .format)
+        builder.remove(menu: .newScene)
         let preferencesCommand = UIKeyCommand(
             title: "Preferences...",
-            action: #selector(DiagramViewController.showNewPreferences(_:)),
-//            action: #selector(showMacPreferences(_:)),
+//            action: #selector(DiagramViewController.showNewPreferences(_:)),
+            action: #selector(showMacPreferences(_:)),
             input: ",",
             modifierFlags: [.command]
         )
@@ -91,21 +77,77 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         builder.insertSibling(openPreferencesMenu, afterMenu: .about)
 
         let openFileCommand = UIKeyCommand(
-            title: "Open Image...",
-            action: #selector(DocumentBrowserViewController.openImageFile(_:)),
+            title: "Open...",
+            action: #selector(newScene(_:)),
             input: "o",
             modifierFlags: [.command]
         )
-        let openFileMenu = UIMenu(
+//        let openFileMenu = UIMenu(
+//            title: "",
+//            image: nil,
+//            identifier: UIMenu.Identifier("myOpenFile"),
+//            options: .displayInline,
+//            children: [openFileCommand]
+//        )
+//        builder.replace(menu: .newScene, with: openFileMenu)
+
+//        let newFileCommand = UIKeyCommand(
+//            title: "New",
+//            action: #selector(newFile(_:)),
+//            input: "n",
+//            modifierFlags: [.command]
+//        )
+        let newFileMenu = UIMenu(
             title: "",
             image: nil,
-            identifier: UIMenu.Identifier("openImage"),
+            identifier: UIMenu.Identifier("myNewFile"),
             options: .displayInline,
             children: [openFileCommand]
         )
-        builder.insertSibling(openFileMenu, afterMenu: .newScene)
+        builder.insertChild(newFileMenu, atStartOfMenu: .file)
+
+//        let openFileCommand = UIKeyCommand(
+//            title: "Open Image...",
+//            action: #selector(DocumentBrowserViewController.openImageFile(_:)),
+//            input: "o",
+//            modifierFlags: [.command]
+//        )
+//        let openFileMenu = UIMenu(
+//            title: "",
+//            image: nil,
+//            identifier: UIMenu.Identifier("openImage"),
+//            options: .displayInline,
+//            children: [openFileCommand]
+//        )
+//        builder.insertSibling(openFileMenu, afterMenu: .newScene)
 
     }
+
+    @IBAction func newScene(_ sender: Any) {
+        print("newScene")
+        let activity = NSUserActivity(activityType: Self.mainActivityType)
+        UIApplication.shared.requestSceneSessionActivation(nil, userActivity: activity, options: nil) { (error) in
+            print("Error launching new main activity scene", error.localizedDescription)
+        }
+    }
+
+    // See https://stackoverflow.com/questions/58882047/open-a-new-window-in-mac-catalyst
+    @IBAction func showMacPreferences(_ sender: Any) {
+        // prevent the menu from opening more than one.
+        guard !preferencesDialogIsOpen else { return }
+        let activity = NSUserActivity(activityType: Self.preferencesActivityType)
+        UIApplication.shared.requestSceneSessionActivation(nil, userActivity: activity, options: nil) { (error) in
+            print("Error showing Mac preferences", error.localizedDescription)
+        }
+        preferencesDialogIsOpen = true
+    }
+
+//    override func canPerformAction(_ action: Selector, withSender sender: Any?) -> Bool {
+//        if action == #selector(showMacPreferences(_:)) {
+//            return !preferencesDialogIsOpen
+//        }
+//      return super.canPerformAction(action, withSender: sender)
+//    }
 
 
     #endif

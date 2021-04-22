@@ -90,8 +90,13 @@ protocol DiagramEditorDelegate: AnyObject {
 extension DocumentBrowserViewController: DiagramEditorDelegate {
     func diagramEditorDidFinishEditing(_ controller: DiagramViewController, diagram: Diagram) {
         currentDocument?.diagram = diagram
+        // FIXME: in mac, with diagram opened from Finder, we get endless close/reopen of diagram.
+        #if targetEnvironment(macCatalyst)
         // see https://developer.apple.com/forums/thread/670247
         closeDiagramController(completion: {  UIApplication.shared.windows.first?.rootViewController = self })
+        #else
+        closeDiagramController()
+        #endif
     }
 
     func diagramEditorDidUpdateContent(_ controller: DiagramViewController, diagram: Diagram) {
@@ -113,14 +118,12 @@ extension DocumentBrowserViewController: DiagramEditorDelegate {
         // This is not used, probably can delete.
         diagramViewController?.restorationIdentifier = restorationIdentifier
         diagramViewController?.currentDocument = document
-        // FIXME: This avoids the modal problem, but how to close document??
-//        controller.modalPresentationStyle = .fullScreen
-//        self.present(controller, animated: true)
+        #if targetEnvironment(macCatalyst)
         UIApplication.shared.windows.first?.rootViewController = diagramViewController?.navigationController
-
-//        view.window?.rootViewController = controller
-
-
+        #else
+        controller.modalPresentationStyle = .fullScreen
+        self.present(controller, animated: true)
+        #endif
     }
 
     func closeDiagramController(completion: (()->Void)? = nil) {
@@ -160,17 +163,20 @@ extension DocumentBrowserViewController: DiagramEditorDelegate {
 extension DocumentBrowserViewController {
     func openDocument(url: URL) {
         guard !isDocumentCurrentlyOpen(url: url) else { return }
-        closeDiagramController {
-            let document = DiagramDocument(fileURL: url)
-            document.open { openSuccess in
-                guard openSuccess else {
-                    print ("could not open \(url)")
-                    return
+        DispatchQueue.main.async {
+            self.closeDiagramController {
+                let document = DiagramDocument(fileURL: url)
+                document.open { openSuccess in
+                    guard openSuccess else {
+                        print ("could not open \(url)")
+                        return
+                    }
+                    self.currentDocument = document
+                    self.displayDiagramController()
                 }
-                self.currentDocument = document
-                self.displayDiagramController()
             }
         }
+
     }
 
     private func isDocumentCurrentlyOpen(url: URL) -> Bool {
@@ -181,12 +187,4 @@ extension DocumentBrowserViewController {
         }
         return false
     }
-
-    @IBAction func openImageFile(_ sender: Any) {
-        let controller = DiagramViewController.navigationControllerFactory()
-        let diagramViewController = controller.viewControllers[0] as? DiagramViewController
-        diagramViewController?.becomeFirstResponder()
-        diagramViewController?.openImageFile(sender)
-    }
-
 }

@@ -440,12 +440,8 @@ final class DiagramViewController: UIViewController {
         // }
 
         #if targetEnvironment(macCatalyst)
-        // Customization for mac version
-        print("Running on Mac")
-        if isRunningOnMac() {
-            //navigationController?.setNavigationBarHidden(true, animated: false)
-            // Need to convert hamburger menu to regular menu on Mac.
-        }
+        // Just use regular buttons to close on Mac
+        navigationController?.setNavigationBarHidden(true, animated: false)
         #endif
 
         // Setup cursor, ladder and image scroll views.
@@ -518,7 +514,6 @@ final class DiagramViewController: UIViewController {
         let interaction = UIContextMenuInteraction(delegate: self)
         ladderView.addInteraction(interaction)
 
-        setTitle()
 
         ladderView.reregisterAllMarks()
 
@@ -573,6 +568,9 @@ final class DiagramViewController: UIViewController {
     override func viewDidAppear(_ animated: Bool) {
         os_log("viewDidAppear() - ViewController", log: OSLog.viewCycle, type: .info)
         super.viewDidAppear(animated)
+
+        setTitle()
+
         self.userActivity = self.view.window?.windowScene?.userActivity
         self.userActivity?.delegate = self
         self.restorationInfo = nil
@@ -627,12 +625,15 @@ final class DiagramViewController: UIViewController {
         var titleLabel = L("EP Diagram")
         if let name = currentDocument?.name(), !name.isEmpty {
             #if targetEnvironment(macCatalyst)
-            titleLabel = name
+            titleLabel = L("EP Diagram - \(name)")
             #else
             titleLabel = isIPad() ? L("EP Diagram - \(name)") : name
             #endif
         }
         title = titleLabel
+        #if targetEnvironment(macCatalyst)
+        view.window?.windowScene?.title = titleLabel
+        #endif
     }
 
     // MARK: Toolbars, Modes
