@@ -49,6 +49,8 @@ class DocumentBrowserViewController: UIDocumentBrowserViewController {
                 }
             }
         }
+        #else
+        self.restorationInfo = nil // kill restoration info for Mac
         #endif
     }
 
@@ -63,13 +65,14 @@ class DocumentBrowserViewController: UIDocumentBrowserViewController {
 //            }
 //        }
 
-        if let externalURL = externalURL {
-            if FileManager.default.fileExists(atPath: externalURL.path) {
-                print("externalURL", externalURL)
-                openDocument(url: externalURL)
-                return
-            }
-        }
+        // FIXME: temporarily inhibited
+//        if let externalURL = externalURL {
+//            if FileManager.default.fileExists(atPath: externalURL.path) {
+//                print("externalURL", externalURL)
+//                openDocument(url: externalURL)
+//                return
+//            }
+//        }
     }
 
     override func viewDidDisappear(_ animated: Bool) {

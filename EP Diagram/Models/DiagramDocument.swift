@@ -43,6 +43,7 @@ final class DiagramDocument: UIDocument {
         }
     }
 
+    // FIXME: thrown when trying to open document.
     override func handleError(_ error: Error, userInteractionPermitted: Bool) {
         super.handleError(error, userInteractionPermitted: userInteractionPermitted)
         os_log("handleError called: %s", log: OSLog.errors, type: .error, error.localizedDescription)

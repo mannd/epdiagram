@@ -38,7 +38,9 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         for context in URLContexts {
             let url = context.url
             if url.isFileURL {
-                documentBrowserViewController.externalURL = url
+                // FIXME: changed for mac catalyst
+                documentBrowserViewController.openDocument(url: url)
+//                documentBrowserViewController.externalURL = url
 //                documentBrowserViewController.externalURLs.append(url)
             }
         }
