@@ -142,14 +142,6 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         preferencesDialogIsOpen = true
     }
 
-//    override func canPerformAction(_ action: Selector, withSender sender: Any?) -> Bool {
-//        if action == #selector(showMacPreferences(_:)) {
-//            return !preferencesDialogIsOpen
-//        }
-//      return super.canPerformAction(action, withSender: sender)
-//    }
-
-
     #endif
 
 }

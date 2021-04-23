@@ -24,6 +24,7 @@ class DocumentBrowserViewController: UIDocumentBrowserViewController {
     var restorationInfo: [AnyHashable: Any]?
 
     var externalURL: URL?
+    var externalURLs: [URL] = []
 
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -34,6 +35,8 @@ class DocumentBrowserViewController: UIDocumentBrowserViewController {
         view.tintColor = .systemBlue
         installDocumentBrowser()
 
+        // Ignore restoration with Mac
+        #if !targetEnvironment(macCatalyst)
         let info = self.restorationInfo
         // Fail gently if cached file no longer exists.
         if let lastDocumentURLPath = info?[DiagramViewController.restorationFileNameKey] as? String,
@@ -46,14 +49,23 @@ class DocumentBrowserViewController: UIDocumentBrowserViewController {
                 }
             }
         }
+        #endif
     }
 
     override func viewDidAppear(_ animated: Bool) {
         print("document browser did appear")
         super.viewDidAppear(animated)
 
+//        for externalURL in externalURLs {
+//            if FileManager.default.fileExists(atPath: externalURL.path) {
+//                openDocument(url: externalURL)
+////                return
+//            }
+//        }
+
         if let externalURL = externalURL {
             if FileManager.default.fileExists(atPath: externalURL.path) {
+                print("externalURL", externalURL)
                 openDocument(url: externalURL)
                 return
             }
@@ -142,11 +154,13 @@ extension DocumentBrowserViewController: DiagramEditorDelegate {
     }
 
     private func closeCurrentDocument() {
+        print("****closeCurrentDocument()")
         currentDocument?.close()
         currentDocument = nil
     }
 
     func openRemoteDocument(_ inboundURL: URL, importIfNeeded: Bool) {
+        os_log("openRemoteDocument(_:importIfNeeded:)", log: .debugging, type: .debug)
         revealDocument(at: inboundURL, importIfNeeded: importIfNeeded) { (url, error) in
             if let error = error {
                 let alert = UIAlertController(title: L("Could Not Open Document"), message: L("EP Diagram could not open this document due to error \(error.localizedDescription)"), preferredStyle: .alert)
@@ -161,22 +175,22 @@ extension DocumentBrowserViewController: DiagramEditorDelegate {
 }
 
 extension DocumentBrowserViewController {
+
+    // FIXME: This is point of failure when opening documents from Finder and from Recent Files.
     func openDocument(url: URL) {
+        print("****Calling open document")
         guard !isDocumentCurrentlyOpen(url: url) else { return }
-        DispatchQueue.main.async {
-            self.closeDiagramController {
-                let document = DiagramDocument(fileURL: url)
-                document.open { openSuccess in
-                    guard openSuccess else {
-                        print ("could not open \(url)")
-                        return
-                    }
-                    self.currentDocument = document
-                    self.displayDiagramController()
+        self.closeDiagramController {
+            let document = DiagramDocument(fileURL: url)
+            document.open { openSuccess in
+                guard openSuccess else {
+                    print ("could not open \(url)")
+                    return
                 }
+                self.currentDocument = document
+                self.displayDiagramController()
             }
         }
-
     }
 
     private func isDocumentCurrentlyOpen(url: URL) -> Bool {

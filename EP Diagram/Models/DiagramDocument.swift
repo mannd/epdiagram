@@ -45,7 +45,8 @@ final class DiagramDocument: UIDocument {
 
     override func handleError(_ error: Error, userInteractionPermitted: Bool) {
         super.handleError(error, userInteractionPermitted: userInteractionPermitted)
-        os_log("handleError called %s", log: OSLog.errors, type: .error, error.localizedDescription)
+        os_log("handleError called: %s", log: OSLog.errors, type: .error, error.localizedDescription)
+        print("error", error)
     }
 }
 

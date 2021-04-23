@@ -32,11 +32,14 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
 
     func scene(_ scene: UIScene, openURLContexts URLContexts: Set<UIOpenURLContext>) {
         os_log("scene(_:openURLContexts:) - SceneDelegate", log: .lifeCycle, type: .info)
+        // FIXME: problem is here.  Sometimes diagram view controller is root view controller
+        print("****root view controller", self.window?.rootViewController as Any)
         guard let documentBrowserViewController = self.window?.rootViewController as? DocumentBrowserViewController else { return }
         for context in URLContexts {
             let url = context.url
             if url.isFileURL {
                 documentBrowserViewController.externalURL = url
+//                documentBrowserViewController.externalURLs.append(url)
             }
         }
     }
