@@ -32,16 +32,31 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
 
     func scene(_ scene: UIScene, openURLContexts URLContexts: Set<UIOpenURLContext>) {
         os_log("scene(_:openURLContexts:) - SceneDelegate", log: .lifeCycle, type: .info)
-        // FIXME: problem is here.  Sometimes diagram view controller is root view controller
-        print("****root view controller", self.window?.rootViewController as Any)
+
         guard let documentBrowserViewController = self.window?.rootViewController as? DocumentBrowserViewController else { return }
         for context in URLContexts {
+            print("context path", context.url.path)
+
+            // FIXME: point of failure, open recent... menu item!!!!!
+            if context.options.openInPlace {
+                if !context.url.startAccessingSecurityScopedResource() {
+                    print("Unable to get access to security scoped resource.")
+                    return
+                }
+            }
             let url = context.url
             if url.isFileURL {
-                // FIXME: changed for mac catalyst
                 documentBrowserViewController.openDocument(url: url)
-//                documentBrowserViewController.externalURL = url
-//                documentBrowserViewController.externalURLs.append(url)
+            }
+            if context.options.openInPlace {
+                context.url.stopAccessingSecurityScopedResource()
+            }
+            do {
+                if !context.options.openInPlace {
+                    try FileManager.default.removeItem(at: context.url)
+                }
+            } catch {
+                print(error)
             }
         }
     }

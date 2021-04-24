@@ -172,6 +172,8 @@ final class DiagramViewController: UIViewController {
     static let restorationCaliperBar1Key = "restorationCaliperBar1Key"
     static let restorationCaliperBar2Key = "restorationCaliperBar2Key"
 
+    static let restorationBookmarkKey = "restorationBookmarkKey"
+
     // Speed up appearance of image picker by initializing it here.
     let imagePicker: UIImagePickerController = UIImagePickerController()
     private let maxZoom: CGFloat = 7.0
@@ -600,6 +602,8 @@ final class DiagramViewController: UIViewController {
 
         let currentDocumentURL: String = currentDocument?.fileURL.lastPathComponent ?? ""
         super.updateUserActivityState(activity)
+
+        let bookmarkData = try? currentDocument?.fileURL.bookmarkData()
         let info: [AnyHashable: Any] = [
             Self.restorationContentOffsetXKey: imageScrollView.contentOffset.x / imageScrollView.zoomScale,
             Self.restorationContentOffsetYKey: imageScrollView.contentOffset.y,
@@ -607,6 +611,7 @@ final class DiagramViewController: UIViewController {
             Self.restorationFileNameKey: currentDocumentURL,
             Self.restorationDoRestorationKey: true,
             Self.restorationTransformKey: NSCoder.string(for: imageView.transform),
+            Self.restorationBookmarkKey: bookmarkData as Any,
         ]
         activity.addUserInfoEntries(from: info)
     }

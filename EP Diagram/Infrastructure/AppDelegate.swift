@@ -59,7 +59,8 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         super.buildMenu(with: builder)
         guard builder.system == .main else { return }
         builder.remove(menu: .format)
-        builder.remove(menu: .newScene)
+//        builder.remove(menu: .newScene)
+        builder.remove(menu: .openRecent)
         let preferencesCommand = UIKeyCommand(
             title: "Preferences...",
 //            action: #selector(DiagramViewController.showNewPreferences(_:)),
@@ -76,12 +77,12 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         )
         builder.insertSibling(openPreferencesMenu, afterMenu: .about)
 
-        let openFileCommand = UIKeyCommand(
-            title: "Open...",
-            action: #selector(newScene(_:)),
-            input: "o",
-            modifierFlags: [.command]
-        )
+//        let openFileCommand = UIKeyCommand(
+//            title: "Open...",
+//            action: #selector(newScene(_:)),
+//            input: "o",
+//            modifierFlags: [.command]
+//        )
 //        let openFileMenu = UIMenu(
 //            title: "",
 //            image: nil,
@@ -97,14 +98,14 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 //            input: "n",
 //            modifierFlags: [.command]
 //        )
-        let newFileMenu = UIMenu(
-            title: "",
-            image: nil,
-            identifier: UIMenu.Identifier("myNewFile"),
-            options: .displayInline,
-            children: [openFileCommand]
-        )
-        builder.insertChild(newFileMenu, atStartOfMenu: .file)
+//        let newFileMenu = UIMenu(
+//            title: "",
+//            image: nil,
+//            identifier: UIMenu.Identifier("myNewFile"),
+//            options: .displayInline,
+//            children: [openFileCommand]
+//        )
+//        builder.insertChild(newFileMenu, atStartOfMenu: .file)
 
 //        let openFileCommand = UIKeyCommand(
 //            title: "Open Image...",

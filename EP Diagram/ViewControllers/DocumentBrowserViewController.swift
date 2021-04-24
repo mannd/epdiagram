@@ -23,21 +23,20 @@ class DocumentBrowserViewController: UIDocumentBrowserViewController {
     var browserDelegate = DocumentBrowserDelegate()
     var restorationInfo: [AnyHashable: Any]?
 
-    var externalURL: URL?
-    var externalURLs: [URL] = []
-
     override func viewDidLoad() {
         super.viewDidLoad()
         allowsDocumentCreation = true
+        allowsPickingMultipleItems = false
         localizedCreateDocumentActionTitle = L("Create New Diagram")
         browserUserInterfaceStyle = .light
         delegate = browserDelegate
         view.tintColor = .systemBlue
         installDocumentBrowser()
 
+        let info = self.restorationInfo
+
         // Ignore restoration with Mac
         #if !targetEnvironment(macCatalyst)
-        let info = self.restorationInfo
         // Fail gently if cached file no longer exists.
         if let lastDocumentURLPath = info?[DiagramViewController.restorationFileNameKey] as? String,
            !lastDocumentURLPath.isEmpty,
@@ -50,29 +49,23 @@ class DocumentBrowserViewController: UIDocumentBrowserViewController {
             }
         }
         #else
-        self.restorationInfo = nil // kill restoration info for Mac
+        var bookmarkDataIsStale: Bool = false
+        if let bookmarkData = info?[DiagramViewController.restorationBookmarkKey] as? Data {
+            if let resolvedURL = try? URL(resolvingBookmarkData: bookmarkData, options: NSURL.BookmarkResolutionOptions(), relativeTo: nil, bookmarkDataIsStale: &bookmarkDataIsStale) {
+                if resolvedURL.startAccessingSecurityScopedResource() {
+                    openDocument(url: resolvedURL)
+                    resolvedURL.stopAccessingSecurityScopedResource()
+                }
+
+            }
+        }
+
         #endif
     }
 
     override func viewDidAppear(_ animated: Bool) {
         print("document browser did appear")
         super.viewDidAppear(animated)
-
-//        for externalURL in externalURLs {
-//            if FileManager.default.fileExists(atPath: externalURL.path) {
-//                openDocument(url: externalURL)
-////                return
-//            }
-//        }
-
-        // FIXME: temporarily inhibited
-//        if let externalURL = externalURL {
-//            if FileManager.default.fileExists(atPath: externalURL.path) {
-//                print("externalURL", externalURL)
-//                openDocument(url: externalURL)
-//                return
-//            }
-//        }
     }
 
     override func viewDidDisappear(_ animated: Bool) {
@@ -83,7 +76,6 @@ class DocumentBrowserViewController: UIDocumentBrowserViewController {
     func installDocumentBrowser() {
         browserDelegate.presentationHandler = { [weak self] url, error in
             guard error == nil else {
-                //present error to user e.g UIAlertController
                 let alert = UIAlertController(title: L("Error Opening Diagram"), message: L("This diagram could not be opened."), preferredStyle: .alert)
                 alert.addAction(UIAlertAction(title: L("OK"), style: .cancel, handler: { _ in }))
                 self?.present(alert, animated: true)
