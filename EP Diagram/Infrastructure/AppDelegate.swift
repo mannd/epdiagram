@@ -62,7 +62,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 //        builder.remove(menu: .newScene)
         builder.remove(menu: .openRecent)
         let preferencesCommand = UIKeyCommand(
-            title: "Preferences...",
+            title: L("Preferences..."),
 //            action: #selector(DiagramViewController.showNewPreferences(_:)),
             action: #selector(showMacPreferences(_:)),
             input: ",",
@@ -76,6 +76,52 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
             children: [preferencesCommand]
         )
         builder.insertSibling(openPreferencesMenu, afterMenu: .about)
+
+        let importPhotoCommand = UICommand(
+            title: L("Photo"),
+            action: #selector(DiagramViewController.importPhoto(_:))
+        )
+
+        let importImageFileCommand = UICommand(
+            title: L("Image File"),
+            action: #selector(DiagramViewController.importImageFile(_:))
+        )
+        let importMenu = UIMenu(
+            title: L("Import"),
+            image: nil,
+            identifier: UIMenu.Identifier("importMenu"),
+            children: [importPhotoCommand, importImageFileCommand]
+        )
+        builder.insertSibling(importMenu, afterMenu: .newScene)
+
+        let rotateCommand = UICommand(
+            title: L("Rotate..."),
+            action: #selector(DiagramViewController.showRotateToolbar)
+        )
+        let resetCommand = UICommand(
+            title: L("Reset"),
+            action: #selector(DiagramViewController.resetImage)
+        )
+        let pdfCommand = UICommand(
+            title: L("PDF"),
+            action: #selector(DiagramViewController.showPDFToolbar)
+        )
+
+        let imageMenu = UIMenu(
+            title: L("Image"),
+            identifier: UIMenu.Identifier("imageMenu"),
+            children: [rotateCommand, resetCommand, pdfCommand]
+        )
+        builder.insertSibling(imageMenu, afterMenu: .view)
+
+        let editLadderAction = UICommand(
+            title: L("Edit Ladder"),
+            action: #selector(DiagramViewController.editMacLadder(_:))
+        )
+
+
+        let ladderMenu = UIMenu(title: L("Ladder"), children: [editLadderAction])
+        builder.insertSibling(ladderMenu, afterMenu: UIMenu.Identifier("imageMenu"))
 
 //        let openFileCommand = UIKeyCommand(
 //            title: "Open...",

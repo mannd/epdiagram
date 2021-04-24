@@ -507,14 +507,19 @@ final class DiagramViewController: UIViewController {
         imageScrollView.addGestureRecognizer(singleTapRecognizer)
 
         // Context menus
-        // We use a long press menu for the image, to avoid the view jumping around during normal scrolling, zooming.
-        // Yes, we tried using UIContextMenuInteraction, but it was unusable.
-        let longPressRecognizer = UILongPressGestureRecognizer(target: self.imageScrollView, action: #selector(imageScrollView.showImageMenu))
-        imageScrollView.addGestureRecognizer(longPressRecognizer)
-
-        // Set up context menu.
         let interaction = UIContextMenuInteraction(delegate: self)
         ladderView.addInteraction(interaction)
+
+        #if targetEnvironment(macCatalyst)
+        let imageInteraction = UIContextMenuInteraction(delegate: imageScrollView)
+        imageScrollView.addInteraction(imageInteraction)
+        #else
+        // We use a long press menu for the image, to avoid the view jumping around during normal scrolling, zooming.
+        // Yes, we tried using UIContextMenuInteraction, but it was unusable for iOS.
+        let longPressRecognizer = UILongPressGestureRecognizer(target: self.imageScrollView, action: #selector(imageScrollView.showImageMenu))
+        imageScrollView.addGestureRecognizer(longPressRecognizer)
+        #endif
+
 
 
         ladderView.reregisterAllMarks()
@@ -1419,15 +1424,6 @@ final class DiagramViewController: UIViewController {
 //        performShowHelpSegue()
 //    }
 
-//    // Return whether action can be performed.
-//    override func canPerformAction(_ action: Selector, withSender sender: Any?) -> Bool {
-//
-//        if action == #selector(self.showHelp(_:)) {
-//            return true
-//        } else {
-//            return super.canPerformAction(action, withSender: sender)
-//        }
-//    }
 
   
 

@@ -83,7 +83,7 @@ extension DiagramViewController: DiagramViewControllerDelegate {
 
     }
 
-    func showRotateToolbar() {
+    @IBAction func showRotateToolbar() {
         currentDocument?.undoManager.beginUndoGrouping() // will end when menu closed
         if rotateToolbarButtons == nil {
             let prompt = makePrompt(text: L("Rotate"))
@@ -176,7 +176,7 @@ extension DiagramViewController: DiagramViewControllerDelegate {
         return pdfRef != nil && numberOfPages > 1
     }
 
-    func showPDFToolbar() {
+    @objc func showPDFToolbar() {
         if pdfToolbarButtons == nil {
             let prompt = makePrompt(text: L("PDF"))
             let previousPageButton = UIBarButtonItem(title: L("Previous page"), style: .plain, target: self, action: #selector(previousPage(_:)))
@@ -188,6 +188,14 @@ extension DiagramViewController: DiagramViewControllerDelegate {
         setToolbarItems(pdfToolbarButtons, animated: false)
         showingPDFToolbar = true
         ladderView.isActivated = false
+    }
+
+    override func canPerformAction(_ action: Selector, withSender sender: Any?) -> Bool {
+        if action == #selector(showPDFToolbar) {
+            return showPDFMenuItems() ? true : false
+        } else {
+            return super.canPerformAction(action, withSender: sender)
+        }
     }
 
     @objc func gotoPage(_ sender: AnyObject) {

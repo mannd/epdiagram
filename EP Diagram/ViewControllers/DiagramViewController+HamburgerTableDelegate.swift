@@ -220,6 +220,10 @@ extension DiagramViewController: HamburgerTableDelegate, UIImagePickerController
         performEditLadderSegue()
     }
 
+    @IBAction func editMacLadder(_ sender: Any) {
+        editLadder()
+    }
+
     func editTemplates() {
         os_log("editTemplates()", log: OSLog.action, type: .info)
         performShowTemplateEditorSegue()
@@ -309,6 +313,14 @@ extension DiagramViewController: HamburgerTableDelegate, UIImagePickerController
 
         // Present the document picker.
         present(documentPicker, animated: true, completion: nil)
+    }
+
+    @IBAction func importImageFile(_ sender: Any) {
+        handleSelectFile()
+    }
+
+    @IBAction func importPhoto(_ sender: Any) {
+        handleSelectImage()
     }
 
     func documentPicker(_ controller: UIDocumentPickerViewController, didPickDocumentsAt urls: [URL]) {
