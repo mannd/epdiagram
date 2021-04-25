@@ -133,8 +133,8 @@ final class DiagramViewController: UIViewController {
 
     // PDF and launch from URL stuff
     var pdfRef: CGPDFDocument?
-    var launchFromURL: Bool = false
-    var launchURL: URL?
+//    var launchFromURL: Bool = false
+//    var launchURL: URL?
     var pageNumber: Int = 1
     var enablePageButtons = false
     var numberOfPages: Int = 0
@@ -609,10 +609,11 @@ final class DiagramViewController: UIViewController {
     override func updateUserActivityState(_ activity: NSUserActivity) {
         os_log("debug: diagramViewController updateUserActivityState called", log: .debugging, type: .debug)
 
+        let bookmarkData = try? currentDocument?.fileURL.bookmarkData(options: .withSecurityScope, includingResourceValuesForKeys: nil, relativeTo: nil)
+
         let currentDocumentURL: String = currentDocument?.fileURL.lastPathComponent ?? ""
         super.updateUserActivityState(activity)
 
-        let bookmarkData = try? currentDocument?.fileURL.bookmarkData()
         let info: [AnyHashable: Any] = [
             Self.restorationContentOffsetXKey: imageScrollView.contentOffset.x / imageScrollView.zoomScale,
             Self.restorationContentOffsetYKey: imageScrollView.contentOffset.y,

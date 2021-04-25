@@ -10,7 +10,6 @@
 		8E01D9C722849047000F36FC /* CursorView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8E01D9C622849047000F36FC /* CursorView.swift */; };
 		8E033CEA24AC10A300BE6D6F /* Calibration.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8E033CE924AC10A300BE6D6F /* Calibration.swift */; };
 		8E04C5CB2569947100946348 /* Startup.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 8E04C5CA2569947100946348 /* Startup.storyboard */; };
-		8E04C5D02569950800946348 /* RootViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8E04C5CF2569950800946348 /* RootViewController.swift */; };
 		8E04C5D5256995E000946348 /* DocumentBrowserViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8E04C5D4256995E000946348 /* DocumentBrowserViewController.swift */; };
 		8E04C5DB256996E400946348 /* DiagramDocument.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8E04C5DA256996E400946348 /* DiagramDocument.swift */; };
 		8E04C5FC256A0AD600946348 /* ImageWrapper.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8E04C5FB256A0AD600946348 /* ImageWrapper.swift */; };
@@ -127,7 +126,6 @@
 		8E01D9C622849047000F36FC /* CursorView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CursorView.swift; sourceTree = "<group>"; };
 		8E033CE924AC10A300BE6D6F /* Calibration.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Calibration.swift; sourceTree = "<group>"; };
 		8E04C5CA2569947100946348 /* Startup.storyboard */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; path = Startup.storyboard; sourceTree = "<group>"; };
-		8E04C5CF2569950800946348 /* RootViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RootViewController.swift; sourceTree = "<group>"; };
 		8E04C5D4256995E000946348 /* DocumentBrowserViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DocumentBrowserViewController.swift; sourceTree = "<group>"; };
 		8E04C5DA256996E400946348 /* DiagramDocument.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DiagramDocument.swift; sourceTree = "<group>"; };
 		8E04C5FB256A0AD600946348 /* ImageWrapper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImageWrapper.swift; sourceTree = "<group>"; };
@@ -484,7 +482,6 @@
 				8E04C5D4256995E000946348 /* DocumentBrowserViewController.swift */,
 				8E4ACA8124478D7C00575538 /* HamburgerTableViewController.swift */,
 				8E1276DE24D4734E00AC4B8F /* HelpViewController.swift */,
-				8E04C5CF2569950800946348 /* RootViewController.swift */,
 				8E33927F262E7655002A7447 /* MacPreferencesViewController.swift */,
 			);
 			path = ViewControllers;
@@ -668,7 +665,6 @@
 				8ECA9FB52470A07B0016D939 /* RegionTemplate.swift in Sources */,
 				8E04C5FC256A0AD600946348 /* ImageWrapper.swift in Sources */,
 				8E4ACA8924479C5200575538 /* HamburgerViewModel.swift in Sources */,
-				8E04C5D02569950800946348 /* RootViewController.swift in Sources */,
 				8EACC27C259E47C500F0BF42 /* ImageScrollView.swift in Sources */,
 				8E74D590244FD55E00641E0A /* Logging.swift in Sources */,
 				8E253DD3244A8799008CC56B /* DiagramViewController+UIScrollViewDelegate.swift in Sources */,
