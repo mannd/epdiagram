@@ -18,8 +18,9 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         if let documentBrowserViewController = window?.rootViewController as? DocumentBrowserViewController {
             scene.title = L("EP Diagram")
             scene.userActivity = session.stateRestorationActivity ?? NSUserActivity(activityType: AppDelegate.mainActivityType)
-            self.scene(scene, openURLContexts: connectionOptions.urlContexts)
             documentBrowserViewController.restorationInfo = scene.userActivity?.userInfo
+            // This appears to be necessary for double click to open diagram on Mac (and ? on iPad too).
+            self.scene(scene, openURLContexts: connectionOptions.urlContexts)
         } else if (window?.rootViewController as? MacPreferencesViewController) != nil  {
             scene.title = L("Preferences")
         }
@@ -38,26 +39,26 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
             print("context path", context.url.path)
 
             // FIXME: point of failure, open recent... menu item!!!!!
-            if context.options.openInPlace {
-                if !context.url.startAccessingSecurityScopedResource() {
-                    print("Unable to get access to security scoped resource.")
-                    return
-                }
-            }
+//            if context.options.openInPlace {
+//                if !context.url.startAccessingSecurityScopedResource() {
+//                    print("Unable to get access to security scoped resource.")
+//                    return
+//                }
+//            }
             let url = context.url
             if url.isFileURL {
                 documentBrowserViewController.openDocument(url: url)
             }
-            if context.options.openInPlace {
-                context.url.stopAccessingSecurityScopedResource()
-            }
-            do {
-                if !context.options.openInPlace {
-                    try FileManager.default.removeItem(at: context.url)
-                }
-            } catch {
-                print(error)
-            }
+//            if context.options.openInPlace {
+//                context.url.stopAccessingSecurityScopedResource()
+//            }
+//            do {
+//                if !context.options.openInPlace {
+//                    try FileManager.default.removeItem(at: context.url)
+//                }
+//            } catch {
+//                print(error)
+//            }
         }
     }
 

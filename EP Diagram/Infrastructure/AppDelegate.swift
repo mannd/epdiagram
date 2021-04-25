@@ -51,6 +51,13 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         }
     }
 
+    func application(_ application: UIApplication, didDiscardSceneSessions sceneSessions: Set<UISceneSession>) {
+        os_log("application(_:didDiscardSceneSessions:)", log: .lifeCycle, type: .info)
+            // Called when the user discards a scene session.
+            // If any sessions were discarded while the application was not running, this will be called shortly after application:didFinishLaunchingWithOptions.
+            // Use this method to release any resources that were specific to the discarded scenes, as they will not return.
+        }
+
     // MARK: - macOS menu
 
     #if targetEnvironment(macCatalyst)
@@ -60,7 +67,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         guard builder.system == .main else { return }
         builder.remove(menu: .format)
 //        builder.remove(menu: .newScene)
-        builder.remove(menu: .openRecent)
+//        builder.remove(menu: .openRecent)
         let preferencesCommand = UIKeyCommand(
             title: L("Preferences..."),
 //            action: #selector(DiagramViewController.showNewPreferences(_:)),

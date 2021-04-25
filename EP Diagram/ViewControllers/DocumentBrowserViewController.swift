@@ -112,7 +112,8 @@ extension DocumentBrowserViewController: DiagramEditorDelegate {
 
     func displayDiagramController() {
         os_log("displayDiagramController()", log: .default, type: .default)
-        guard !editingDocument, let document = currentDocument else { return }
+        guard !editingDocument else { return }
+        guard let document = currentDocument else { return }
         editingDocument = true
         let controller = DiagramViewController.navigationControllerFactory()
         let diagramViewController = controller.viewControllers[0] as? DiagramViewController

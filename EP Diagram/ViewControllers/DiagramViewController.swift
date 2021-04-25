@@ -1478,19 +1478,19 @@ extension DiagramViewController {
     }
 
     @objc func didEnterBackground() {
-        os_log("didEnterBackground()", log: .lifeCycle, type: .info)
+        os_log("didEnterBackground() - DiagramViewController", log: .lifeCycle, type: .info)
     }
 
     @objc func didEnterForeground() {
-        os_log("didEnterForeground()", log: .lifeCycle, type: .info)
+        os_log("didEnterForeground() - DiagramViewController", log: .lifeCycle, type: .info)
     }
 
     @objc func didDisconnect() {
-        os_log("didDisconnect()", log: .lifeCycle, type: .info)
+        os_log("didDisconnect() - DiagramViewController", log: .lifeCycle, type: .info)
     }
 
     @objc func willConnect() {
-        os_log("willConnect()", log: .lifeCycle, type: .info)
+        os_log("willConnect() - DiagramViewController", log: .lifeCycle, type: .info)
     }
 
     func updateToolbarButtons() {
