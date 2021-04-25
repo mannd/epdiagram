@@ -56,6 +56,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
             // Called when the user discards a scene session.
             // If any sessions were discarded while the application was not running, this will be called shortly after application:didFinishLaunchingWithOptions.
             // Use this method to release any resources that were specific to the discarded scenes, as they will not return.
+        
         }
 
     // MARK: - macOS menu
@@ -65,12 +66,14 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     override func buildMenu(with builder: UIMenuBuilder) {
         super.buildMenu(with: builder)
         guard builder.system == .main else { return }
+
+        // Remove unwanted menus
         builder.remove(menu: .format)
-//        builder.remove(menu: .newScene)
-//        builder.remove(menu: .openRecent)
+        builder.remove(menu: .openRecent)
+
+        // Preferences menu
         let preferencesCommand = UIKeyCommand(
             title: L("Preferences..."),
-//            action: #selector(DiagramViewController.showNewPreferences(_:)),
             action: #selector(showMacPreferences(_:)),
             input: ",",
             modifierFlags: [.command]
@@ -84,6 +87,50 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         )
         builder.insertSibling(openPreferencesMenu, afterMenu: .about)
 
+        // Diagram Info
+        let diagramInfoCommand = UICommand(
+            title: L("Diagram Info..."),
+            action: #selector(DiagramViewController.getDiagramInfo(_:))
+        )
+        let diagramInfoMenu = UIMenu(
+            title: "",
+            identifier: UIMenu.Identifier("diagramInfoMenu"),
+            options: .displayInline,
+            children: [diagramInfoCommand]
+        )
+        builder.insertSibling(diagramInfoMenu, afterMenu: .close)
+
+        // View menu
+        let zoomInCommand = UIKeyCommand(
+            title: L("Zoom In"),
+            action: #selector(DiagramViewController.doZoom(_:)),
+            input: "=",
+            modifierFlags: [.command],
+            propertyList: "zoomIn"
+        )
+        let zoomOutCommand = UIKeyCommand(
+            title: L("Zoom Out"),
+            action: #selector(DiagramViewController.doZoom(_:)),
+            input: "-",
+            modifierFlags: [.command],
+            propertyList: "zoomOut"
+        )
+        let resetZoomCommand = UIKeyCommand(
+            title: L("Reset Zoom"),
+            action: #selector(DiagramViewController.doZoom(_:)),
+            input: "0",
+            modifierFlags: [.command],
+            propertyList: "resetZoom"
+        )
+        let zoomMenu = UIMenu(
+            title: L("Zoom..."),
+            identifier: UIMenu.Identifier("zoomMenu"),
+            options: .displayInline,
+            children: [zoomInCommand, zoomOutCommand, resetZoomCommand]
+        )
+        builder.insertChild(zoomMenu, atStartOfMenu: .view)
+
+        // Images menu
         let importPhotoCommand = UICommand(
             title: L("Photo"),
             action: #selector(DiagramViewController.importPhoto(_:))
@@ -99,35 +146,34 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
             identifier: UIMenu.Identifier("importMenu"),
             children: [importPhotoCommand, importImageFileCommand]
         )
-        builder.insertSibling(importMenu, afterMenu: .newScene)
 
-        let rotateCommand = UICommand(
-            title: L("Rotate..."),
-            action: #selector(DiagramViewController.showRotateToolbar)
-        )
-        let resetCommand = UICommand(
-            title: L("Reset"),
-            action: #selector(DiagramViewController.resetImage)
-        )
-        let pdfCommand = UICommand(
-            title: L("PDF"),
-            action: #selector(DiagramViewController.showPDFToolbar)
+        let lockImageCommand = UICommand(
+            title: L("Lock Image"),
+            action: #selector(DiagramViewController.lockImage)
         )
 
         let imageMenu = UIMenu(
             title: L("Image"),
             identifier: UIMenu.Identifier("imageMenu"),
-            children: [rotateCommand, resetCommand, pdfCommand]
+            children: [importMenu, lockImageCommand]
         )
         builder.insertSibling(imageMenu, afterMenu: .view)
 
-        let editLadderAction = UICommand(
+        let editLadderCommand = UICommand(
             title: L("Edit Ladder"),
             action: #selector(DiagramViewController.editMacLadder(_:))
         )
+        let selectLadderCommand = UICommand(
+            title: L("Select Ladder"),
+            action: #selector(DiagramViewController.selectLadder)
+        )
+        let lockLadderCommand = UICommand(
+            title: L("Lock Ladder"),
+            action: #selector(DiagramViewController.lockLadder)
+        )
 
 
-        let ladderMenu = UIMenu(title: L("Ladder"), children: [editLadderAction])
+        let ladderMenu = UIMenu(title: L("Ladder"), children: [selectLadderCommand, editLadderCommand, lockLadderCommand])
         builder.insertSibling(ladderMenu, afterMenu: UIMenu.Identifier("imageMenu"))
 
 //        let openFileCommand = UIKeyCommand(

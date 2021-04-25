@@ -46,7 +46,7 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
 //                }
 //            }
             let url = context.url
-            if url.isFileURL {
+            if url.isFileURL && UIApplication.shared.canOpenURL(url) {
                 documentBrowserViewController.openDocument(url: url)
             }
 //            if context.options.openInPlace {

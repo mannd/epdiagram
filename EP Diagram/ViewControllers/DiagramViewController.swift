@@ -43,6 +43,10 @@ final class DiagramViewController: UIViewController {
 
     let gotoTextFieldTag = 1
 
+    // These are taken from the Apple IKImageView demo
+    let zoomInFactor: CGFloat = 1.414214
+    let zoomOutFactor: CGFloat = 0.7071068
+
     // This margin is passed to other views.
     var leftMargin: CGFloat = defaultLeftMargin {
         didSet {
@@ -1388,9 +1392,9 @@ final class DiagramViewController: UIViewController {
         performSegue(withIdentifier: "selectLadderSegue", sender: self)
     }
 
-    func performEditLadderSegue() {
-        performSegue(withIdentifier: "EditLadderSegue", sender: self)
-    }
+//    func performEditLadderSegue() {
+//        performSegue(withIdentifier: "EditLadderSegue", sender: self)
+//    }
 
     func performShowSampleSelectorSegue() {
         performSegue(withIdentifier: "showSampleSelectorSegue", sender: self)
@@ -1665,4 +1669,32 @@ extension DiagramViewController: UITextFieldDelegate {
         }
     }
 }
+
+#if targetEnvironment(macCatalyst)
+extension DiagramViewController {
+    @IBAction func doZoom(_ sender: AnyObject) {
+        var zoomFactor: CGFloat
+        var newZoomFactor: CGFloat = 1.0
+        if let command = sender as? UICommand, let property = command.propertyList as? String {
+            if property == "zoomIn" {
+                zoomFactor = imageScrollView.zoomScale
+                newZoomFactor = zoomFactor * zoomInFactor
+            }
+            if property == "zoomOut" {
+                zoomFactor = imageScrollView.zoomScale
+                newZoomFactor = zoomFactor * zoomOutFactor
+            }
+            if property == "resetZoom" {
+                newZoomFactor = 1.0
+            }
+
+            UIView.animate(withDuration: 0.1) {
+                self.imageScrollView.zoomScale = newZoomFactor
+                self.scrollViewAdjustViews(self.imageScrollView)
+            }
+        }
+    }
+}
+
+#endif
 

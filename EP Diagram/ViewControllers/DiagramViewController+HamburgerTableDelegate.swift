@@ -27,7 +27,7 @@ protocol HamburgerTableDelegate: class {
     func debug()
     func getDiagramInfo()
     func lockLadder()
-    func editLadder()
+//    func editLadder()
     func sampleDiagrams()
     func showPreferences()
     func editTemplates()
@@ -130,7 +130,7 @@ extension DiagramViewController: HamburgerTableDelegate, UIImagePickerController
         chooseSource()
     }
 
-    func selectLadder() {
+    @IBAction func selectLadder() {
         os_log("selectLadder()", log: .action, type: .info)
         performSelectLadderSegue()
     }
@@ -160,7 +160,7 @@ extension DiagramViewController: HamburgerTableDelegate, UIImagePickerController
         present(alert, animated: true)
       }
 
-    func getDiagramInfo() {
+    @IBAction func getDiagramInfo() {
         os_log("getDiagramInfo()", log: .action, type: .info)
         // Consider killing this.  Files app gives file info.
         var message: String = ""
@@ -189,7 +189,7 @@ extension DiagramViewController: HamburgerTableDelegate, UIImagePickerController
     }
 
 
-    func lockImage() {
+    @IBAction func lockImage() {
         imageIsLocked.toggle()
         // Turn off scrolling and zooming, but allow single taps to generate marks with cursors.
         imageScrollView.isScrollEnabled = !imageIsLocked
@@ -201,7 +201,7 @@ extension DiagramViewController: HamburgerTableDelegate, UIImagePickerController
         }
     }
 
-    func lockLadder() {
+    @IBAction func lockLadder() {
         os_log("lockDiagram()", log: .action, type: .info)
         _ladderIsLocked.toggle()
         // Turn off scrolling and zooming, but allow single taps to generate marks with cursors.
@@ -215,13 +215,14 @@ extension DiagramViewController: HamburgerTableDelegate, UIImagePickerController
         }
     }
 
-    func editLadder() {
-        os_log("editLadder(action:)", log: OSLog.action, type: .info)
-        performEditLadderSegue()
-    }
+//    func editLadder() {
+//        os_log("editLadder(action:)", log: OSLog.action, type: .info)
+//        performEditLadderSegue()
+//    }
 
     @IBAction func editMacLadder(_ sender: Any) {
-        editLadder()
+        performShowTemplateEditorSegue()
+
     }
 
     func editTemplates() {
@@ -234,9 +235,9 @@ extension DiagramViewController: HamburgerTableDelegate, UIImagePickerController
         performShowPreferencesSegue()
     }
 
-    @IBAction func showNewPreferences(_ sender: Any) {
-        showPreferences()
-    }
+//    @IBAction func showNewPreferences(_ sender: Any) {
+//        showPreferences()
+//    }
 
     func showIOSHelp() {
         os_log("showIOSHelp()", log: OSLog.action, type: .info)
