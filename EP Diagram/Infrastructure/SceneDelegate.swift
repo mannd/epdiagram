@@ -38,6 +38,20 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         for context in URLContexts {
             print("context path", context.url.path)
 
+//            let userActivity = scene.userActivity
+//            let info = userActivity?.userInfo
+//            var bookmarkDataIsStale: Bool = false
+//            if let bookmarkData = info?[DiagramViewController.restorationBookmarkKey] as? Data {
+//                if let resolvedURL = try? URL(resolvingBookmarkData: bookmarkData, options: NSURL.BookmarkResolutionOptions(), relativeTo: nil, bookmarkDataIsStale: &bookmarkDataIsStale) {
+//                    if resolvedURL.startAccessingSecurityScopedResource() {
+//                        // if !bookmarkDataIsState { ???? needed?
+//                        documentBrowserViewController.openDocument(url: resolvedURL)
+//                        resolvedURL.stopAccessingSecurityScopedResource()
+//                    }
+//
+//                }
+//            }
+            
             // FIXME: point of failure, open recent... menu item!!!!!
 //            if context.options.openInPlace {
 //                if !context.url.startAccessingSecurityScopedResource() {

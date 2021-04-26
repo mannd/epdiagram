@@ -434,6 +434,8 @@ final class DiagramViewController: UIViewController {
         os_log("viewDidLoad() - ViewController", log: OSLog.viewCycle, type: .info)
         super.viewDidLoad()
 
+        print("userInfo", restorationInfo as Any?)
+
         // Only uncomment this to see what fonts are available.  Right now just using
         // system fonts.
         //for family: String in UIFont.familyNames

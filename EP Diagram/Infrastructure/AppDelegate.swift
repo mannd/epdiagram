@@ -176,20 +176,20 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         let ladderMenu = UIMenu(title: L("Ladder"), children: [selectLadderCommand, editLadderCommand, lockLadderCommand])
         builder.insertSibling(ladderMenu, afterMenu: UIMenu.Identifier("imageMenu"))
 
-//        let openFileCommand = UIKeyCommand(
-//            title: "Open...",
-//            action: #selector(newScene(_:)),
-//            input: "o",
-//            modifierFlags: [.command]
-//        )
-//        let openFileMenu = UIMenu(
-//            title: "",
-//            image: nil,
-//            identifier: UIMenu.Identifier("myOpenFile"),
-//            options: .displayInline,
-//            children: [openFileCommand]
-//        )
-//        builder.replace(menu: .newScene, with: openFileMenu)
+        let openFileCommand = UIKeyCommand(
+            title: "Open...",
+            action: #selector(newScene(_:)),
+            input: "o",
+            modifierFlags: [.command]
+        )
+        let openFileMenu = UIMenu(
+            title: "",
+            image: nil,
+            identifier: UIMenu.Identifier("myOpenFile"),
+            options: .displayInline,
+            children: [openFileCommand]
+        )
+        builder.replace(menu: .newScene, with: openFileMenu)
 
 //        let newFileCommand = UIKeyCommand(
 //            title: "New",

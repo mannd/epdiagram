@@ -64,7 +64,6 @@ final class FileIO {
     }
 
     private static func getURL(for directory: Directory) -> URL? {
-        print("****getURL")
         var searchDirectory : FileManager.SearchPathDirectory
         switch directory {
         case .documents:

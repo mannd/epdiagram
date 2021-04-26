@@ -33,9 +33,9 @@ class DocumentBrowserViewController: UIDocumentBrowserViewController {
         view.tintColor = .systemBlue
         installDocumentBrowser()
 
+
         let info = self.restorationInfo
 
-        // Ignore restoration with Mac
         #if !targetEnvironment(macCatalyst)
         // Fail gently if cached file no longer exists.
         if let lastDocumentURLPath = info?[DiagramViewController.restorationFileNameKey] as? String,
@@ -53,6 +53,9 @@ class DocumentBrowserViewController: UIDocumentBrowserViewController {
         if let bookmarkData = info?[DiagramViewController.restorationBookmarkKey] as? Data {
             if let resolvedURL = try? URL(resolvingBookmarkData: bookmarkData, options: NSURL.BookmarkResolutionOptions(), relativeTo: nil, bookmarkDataIsStale: &bookmarkDataIsStale) {
                 if resolvedURL.startAccessingSecurityScopedResource() {
+                    print("****openingURL", resolvedURL)
+                    print("****bookmarkDataIsState", bookmarkDataIsStale)
+                    // if !bookmarkDataIsState { ???? needed?
                     openDocument(url: resolvedURL)
                     resolvedURL.stopAccessingSecurityScopedResource()
                 }
@@ -97,13 +100,15 @@ protocol DiagramEditorDelegate: AnyObject {
 extension DocumentBrowserViewController: DiagramEditorDelegate {
     func diagramEditorDidFinishEditing(_ controller: DiagramViewController, diagram: Diagram) {
         currentDocument?.diagram = diagram
-        // FIXME: in mac, with diagram opened from Finder, we get endless close/reopen of diagram.
-        #if targetEnvironment(macCatalyst)
-        // see https://developer.apple.com/forums/thread/670247
-        closeDiagramController(completion: {  UIApplication.shared.windows.first?.rootViewController = self })
-        #else
+//        #if targetEnvironment(macCatalyst)
+//        // see https://developer.apple.com/forums/thread/670247
+//        closeDiagramController(completion: {
+//            UIApplication.shared.windows.first?.rootViewController = self
+//
+//        })
+//        #else
         closeDiagramController()
-        #endif
+//        #endif
     }
 
     func diagramEditorDidUpdateContent(_ controller: DiagramViewController, diagram: Diagram) {
@@ -116,6 +121,8 @@ extension DocumentBrowserViewController: DiagramEditorDelegate {
         guard let document = currentDocument else { return }
         editingDocument = true
         let controller = DiagramViewController.navigationControllerFactory()
+        // Key step!
+        view.window?.rootViewController = controller
         let diagramViewController = controller.viewControllers[0] as? DiagramViewController
         diagramViewController?.diagramEditorDelegate = self
         diagramViewController?.diagram = document.diagram
@@ -127,7 +134,9 @@ extension DocumentBrowserViewController: DiagramEditorDelegate {
         diagramViewController?.restorationIdentifier = restorationIdentifier
         diagramViewController?.currentDocument = document
         #if targetEnvironment(macCatalyst)
-        UIApplication.shared.windows.first?.rootViewController = diagramViewController?.navigationController
+        controller.modalPresentationStyle = .fullScreen
+        self.present(controller, animated: true)
+//        UIApplication.shared.windows.first?.rootViewController = diagramViewController?.navigationController
         #else
         controller.modalPresentationStyle = .fullScreen
         self.present(controller, animated: true)
