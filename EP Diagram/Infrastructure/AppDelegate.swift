@@ -104,7 +104,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         let zoomInCommand = UIKeyCommand(
             title: L("Zoom In"),
             action: #selector(DiagramViewController.doZoom(_:)),
-            input: "=",
+            input: "+",
             modifierFlags: [.command],
             propertyList: "zoomIn"
         )
@@ -147,12 +147,13 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
             children: [importPhotoCommand, importImageFileCommand]
         )
 
-        let lockImageCommand = UICommand(
-            title: L("Lock Image"),
-            action: #selector(DiagramViewController.lockImage)
-        )
-        // FIXME: Need notification to convey state of this and lock ladder to menu
-//        lockImageCommand.state = .on
+//        var lockImageCommand = UICommand(
+//            title: L("Lock Image"),
+//            action: #selector(DiagramViewController.lockImage(_:)),
+//            state: .off
+//        )
+//        // FIXME: Need notification to convey state of this and lock ladder to menu
+////        lockImageCommand.state = .on
 
         let sampleCommand = UICommand(
             title: L("Samples"),
@@ -162,7 +163,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         let imageMenu = UIMenu(
             title: L("Diagram"),
             identifier: UIMenu.Identifier("imageMenu"),
-            children: [importMenu, lockImageCommand, sampleCommand, diagramInfoMenu]
+            children: [importMenu, sampleCommand, diagramInfoMenu]
         )
         builder.insertSibling(imageMenu, afterMenu: .view)
 //        builder.insertSibling(diagramInfoMenu, afterMenu: UIMenu.Identifier("imageMenu"))
@@ -175,12 +176,12 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
             title: L("Select Ladder"),
             action: #selector(DiagramViewController.selectLadder)
         )
-        let lockLadderCommand = UICommand(
-            title: L("Lock Ladder"),
-            action: #selector(DiagramViewController.lockLadder)
-        )
+//        let lockLadderCommand = UICommand(
+//            title: L("Lock Ladder"),
+//            action: #selector(DiagramViewController.lockLadder)
+//        )
 
-        let ladderMenu = UIMenu(title: L("Ladder"), children: [selectLadderCommand, editLadderCommand, lockLadderCommand])
+        let ladderMenu = UIMenu(title: L("Ladder"), children: [selectLadderCommand, editLadderCommand])
         builder.insertSibling(ladderMenu, afterMenu: UIMenu.Identifier("imageMenu"))
 
         let openFileCommand = UIKeyCommand(
