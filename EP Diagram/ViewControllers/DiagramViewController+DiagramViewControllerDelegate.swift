@@ -193,6 +193,10 @@ extension DiagramViewController: DiagramViewControllerDelegate {
     override func canPerformAction(_ action: Selector, withSender sender: Any?) -> Bool {
         if action == #selector(showPDFToolbar) {
             return showPDFMenuItems() ? true : false
+        } else if action == #selector(undo(_:)) {
+            return currentDocument?.undoManager?.canUndo ?? false
+        } else if action == #selector(redo(_:)) {
+            return currentDocument?.undoManager?.canRedo ?? false
         } else {
             return super.canPerformAction(action, withSender: sender)
         }

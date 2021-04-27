@@ -98,7 +98,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
             options: .displayInline,
             children: [diagramInfoCommand]
         )
-        builder.insertSibling(diagramInfoMenu, afterMenu: .close)
+//        builder.insertSibling(diagramInfoMenu, afterMenu: .close)
 
         // View menu
         let zoomInCommand = UIKeyCommand(
@@ -151,13 +151,21 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
             title: L("Lock Image"),
             action: #selector(DiagramViewController.lockImage)
         )
+        // FIXME: Need notification to convey state of this and lock ladder to menu
+//        lockImageCommand.state = .on
+
+        let sampleCommand = UICommand(
+            title: L("Samples"),
+            action: #selector(DiagramViewController.sampleDiagrams(_:))
+        )
 
         let imageMenu = UIMenu(
-            title: L("Image"),
+            title: L("Diagram"),
             identifier: UIMenu.Identifier("imageMenu"),
-            children: [importMenu, lockImageCommand]
+            children: [importMenu, lockImageCommand, sampleCommand, diagramInfoMenu]
         )
         builder.insertSibling(imageMenu, afterMenu: .view)
+//        builder.insertSibling(diagramInfoMenu, afterMenu: UIMenu.Identifier("imageMenu"))
 
         let editLadderCommand = UICommand(
             title: L("Edit Ladder"),
@@ -172,12 +180,12 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
             action: #selector(DiagramViewController.lockLadder)
         )
 
-
         let ladderMenu = UIMenu(title: L("Ladder"), children: [selectLadderCommand, editLadderCommand, lockLadderCommand])
         builder.insertSibling(ladderMenu, afterMenu: UIMenu.Identifier("imageMenu"))
 
         let openFileCommand = UIKeyCommand(
             title: "Open...",
+//            action: #selector(DocumentBrowserViewController.displayDiagramController),
             action: #selector(newScene(_:)),
             input: "o",
             modifierFlags: [.command]

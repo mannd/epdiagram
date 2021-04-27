@@ -115,14 +115,16 @@ extension DocumentBrowserViewController: DiagramEditorDelegate {
         currentDocument?.diagram = diagram
     }
 
-    func displayDiagramController() {
+    @objc func displayDiagramController() {
         os_log("displayDiagramController()", log: .default, type: .default)
         guard !editingDocument else { return }
         guard let document = currentDocument else { return }
         editingDocument = true
         let controller = DiagramViewController.navigationControllerFactory()
-        // Key step!
+        // Key step! for mac Catalyst!
+        #if targetEnvironment(macCatalyst)
         view.window?.rootViewController = controller
+        #endif
         let diagramViewController = controller.viewControllers[0] as? DiagramViewController
         diagramViewController?.diagramEditorDelegate = self
         diagramViewController?.diagram = document.diagram
@@ -181,7 +183,6 @@ extension DocumentBrowserViewController: DiagramEditorDelegate {
 
 extension DocumentBrowserViewController {
 
-    // FIXME: This is point of failure when opening documents from Finder and from Recent Files.
     func openDocument(url: URL) {
         print("****Calling open document")
         guard !isDocumentCurrentlyOpen(url: url) else { return }

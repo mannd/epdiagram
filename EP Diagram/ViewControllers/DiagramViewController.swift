@@ -434,7 +434,7 @@ final class DiagramViewController: UIViewController {
         os_log("viewDidLoad() - ViewController", log: OSLog.viewCycle, type: .info)
         super.viewDidLoad()
 
-        print("userInfo", restorationInfo as Any?)
+        print("userInfo", restorationInfo as Any)
 
         // Only uncomment this to see what fonts are available.  Right now just using
         // system fonts.
@@ -447,10 +447,7 @@ final class DiagramViewController: UIViewController {
         //    }
         // }
 
-        #if targetEnvironment(macCatalyst)
-        // Just use regular buttons to close on Mac
-        navigationController?.setNavigationBarHidden(true, animated: false)
-        #endif
+
 
         // Setup cursor, ladder and image scroll views.
         // These 2 views are guaranteed to exist, so the delegates are implicitly unwrapped optionals.
@@ -552,6 +549,10 @@ final class DiagramViewController: UIViewController {
         // Fixes view opening flush with left margin on Mac.
         view.layoutIfNeeded()
         navigationController?.setToolbarHidden(false, animated: false)
+        #if targetEnvironment(macCatalyst)
+        // Just use regular buttons to close on Mac
+        navigationController?.setNavigationBarHidden(true, animated: false)
+        #endif
     }
 
     var didFirstWillLayout = false
@@ -611,7 +612,11 @@ final class DiagramViewController: UIViewController {
     override func updateUserActivityState(_ activity: NSUserActivity) {
         os_log("debug: diagramViewController updateUserActivityState called", log: .debugging, type: .debug)
 
+        #if targetEnvironment(macCatalyst)
         let bookmarkData = try? currentDocument?.fileURL.bookmarkData(options: .withSecurityScope, includingResourceValuesForKeys: nil, relativeTo: nil)
+        #else
+        let bookmarkData = try? currentDocument?.fileURL.bookmarkData(options: [], includingResourceValuesForKeys: nil, relativeTo: nil)
+        #endif
 
         let currentDocumentURL: String = currentDocument?.fileURL.lastPathComponent ?? ""
         super.updateUserActivityState(activity)
@@ -1085,7 +1090,7 @@ final class DiagramViewController: UIViewController {
         imageScrollView.isActivated = true
     }
 
-    @objc func undo() {
+    @objc func undo(_ sender: Any) {
         os_log("undo action", log: OSLog.action, type: .info)
         if self.currentDocument?.undoManager?.canUndo ?? false {
             // Cursor doesn't track undo and redo well, so hide it!
@@ -1097,7 +1102,7 @@ final class DiagramViewController: UIViewController {
         }
     }
 
-    @objc func redo() {
+    @objc func redo(_ sender: Any) {
         os_log("redo action", log: OSLog.action, type: .info)
         if self.currentDocument?.undoManager?.canRedo ?? false {
             if mode == .normal {
@@ -1107,6 +1112,7 @@ final class DiagramViewController: UIViewController {
             setViewsNeedDisplay()
         }
     }
+
 
     func editLabel() {
         guard let selectedRegion = ladderView.selectedLabelRegion() else { return }
