@@ -69,7 +69,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 
         // Remove unwanted menus
         builder.remove(menu: .format)
-        builder.remove(menu: .openRecent)
+//        builder.remove(menu: .openRecent)
 
         // Preferences menu
         let preferencesCommand = UIKeyCommand(

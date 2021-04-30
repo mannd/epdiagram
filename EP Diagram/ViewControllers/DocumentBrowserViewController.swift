@@ -69,6 +69,9 @@ class DocumentBrowserViewController: UIDocumentBrowserViewController {
     override func viewDidAppear(_ animated: Bool) {
         print("document browser did appear")
         super.viewDidAppear(animated)
+        #if targetEnvironment(macCatalyst)
+        view.window?.rootViewController = self
+        #endif
     }
 
     override func viewDidDisappear(_ animated: Bool) {
