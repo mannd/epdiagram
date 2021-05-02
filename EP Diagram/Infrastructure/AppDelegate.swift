@@ -41,10 +41,8 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         // Called when a new scene session is being created.
         // Use this method to select a configuration to create the new scene with.
         if options.userActivities.first?.activityType == Self.preferencesActivityType {
-            let configuration = UISceneConfiguration(name: "Default Configuration", sessionRole: connectingSceneSession.role)
-            //            configuration.delegateClass = CustomSceneDelegate.self
-            configuration.storyboard = UIStoryboard(name: "Preferences", bundle: Bundle.main)
-            return configuration
+            let sceneConfiguration = UISceneConfiguration(name: "Preferences Configuration", sessionRole: connectingSceneSession.role)
+            return sceneConfiguration
         } else { // if options.userActivities.first?.activityType == Self.mainActivityType {
             let sceneConfiguration = UISceneConfiguration(name: "Default Configuration", sessionRole: connectingSceneSession.role)
             return sceneConfiguration
@@ -56,12 +54,6 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         // Called when the user discards a scene session.
         // If any sessions were discarded while the application was not running, this will be called shortly after application:didFinishLaunchingWithOptions.
         // Use this method to release any resources that were specific to the discarded scenes, as they will not return.
-        // Close diagram view controllers?
-        for session in sceneSessions {
-            print("session", session as Any)
-            print("configuration", session.configuration as Any)
-        }
-        
     }
 
     // MARK: - macOS menu
@@ -74,7 +66,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 
         // Remove unwanted menus
         builder.remove(menu: .format)
-//        builder.remove(menu: .openRecent)
+        builder.remove(menu: .openRecent) // Just doesn't seem to work with Catalyst
 
         // Preferences menu
         let preferencesCommand = UIKeyCommand(
@@ -92,18 +84,21 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         )
         builder.insertSibling(openPreferencesMenu, afterMenu: .about)
 
-        // Diagram Info
-        let diagramInfoCommand = UICommand(
-            title: L("Diagram Info..."),
-            action: #selector(DiagramViewController.getDiagramInfo(_:))
+        // File menu
+        let openFileCommand = UIKeyCommand(
+            title: "Open...",
+            action: #selector(newScene(_:)),
+            input: "o",
+            modifierFlags: [.command]
         )
-        let diagramInfoMenu = UIMenu(
+        let openFileMenu = UIMenu(
             title: "",
-            identifier: UIMenu.Identifier("diagramInfoMenu"),
+            image: nil,
+            identifier: UIMenu.Identifier("CustomOpenFile"),
             options: .displayInline,
-            children: [diagramInfoCommand]
+            children: [openFileCommand]
         )
-//        builder.insertSibling(diagramInfoMenu, afterMenu: .close)
+        builder.replace(menu: .newScene, with: openFileMenu)
 
         // View menu
         let zoomInCommand = UIKeyCommand(
@@ -135,43 +130,39 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         )
         builder.insertChild(zoomMenu, atStartOfMenu: .view)
 
-        // Images menu
+        // Diagram menu
         let importPhotoCommand = UICommand(
             title: L("Photo"),
             action: #selector(DiagramViewController.importPhoto(_:))
         )
 
         let importImageFileCommand = UICommand(
-            title: L("Image File"),
+            title: L("File"),
             action: #selector(DiagramViewController.importImageFile(_:))
         )
+
         let importMenu = UIMenu(
-            title: L("Import"),
+            title: L("Import Image"),
             image: nil,
             identifier: UIMenu.Identifier("importMenu"),
             children: [importPhotoCommand, importImageFileCommand]
         )
-
-//        var lockImageCommand = UICommand(
-//            title: L("Lock Image"),
-//            action: #selector(DiagramViewController.lockImage(_:)),
-//            state: .off
-//        )
-//        // FIXME: Need notification to convey state of this and lock ladder to menu
-////        lockImageCommand.state = .on
 
         let sampleCommand = UICommand(
             title: L("Samples"),
             action: #selector(DiagramViewController.sampleDiagrams(_:))
         )
 
-        let imageMenu = UIMenu(
-            title: L("Diagram"),
-            identifier: UIMenu.Identifier("imageMenu"),
-            children: [importMenu, sampleCommand, diagramInfoMenu]
+        let diagramInfoCommand = UICommand(
+            title: L("Diagram Info..."),
+            action: #selector(DiagramViewController.getDiagramInfo(_:))
         )
-        builder.insertSibling(imageMenu, afterMenu: .view)
-//        builder.insertSibling(diagramInfoMenu, afterMenu: UIMenu.Identifier("imageMenu"))
+        let diagramInfoMenu = UIMenu(
+            title: "",
+            identifier: UIMenu.Identifier("diagramInfoMenu"),
+            options: .displayInline,
+            children: [diagramInfoCommand]
+        )
 
         let editLadderCommand = UICommand(
             title: L("Edit Ladder"),
@@ -181,60 +172,15 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
             title: L("Select Ladder"),
             action: #selector(DiagramViewController.selectLadder)
         )
-//        let lockLadderCommand = UICommand(
-//            title: L("Lock Ladder"),
-//            action: #selector(DiagramViewController.lockLadder)
-//        )
 
         let ladderMenu = UIMenu(title: L("Ladder"), children: [selectLadderCommand, editLadderCommand])
-        builder.insertSibling(ladderMenu, afterMenu: UIMenu.Identifier("imageMenu"))
 
-        let openFileCommand = UIKeyCommand(
-            title: "Open...",
-//            action: #selector(DocumentBrowserViewController.displayDiagramController),
-            action: #selector(newScene(_:)),
-            input: "o",
-            modifierFlags: [.command]
+        let diagramMenu = UIMenu(
+            title: L("Diagram"),
+            identifier: UIMenu.Identifier("diagramMenu"),
+            children: [importMenu, ladderMenu, sampleCommand, diagramInfoMenu]
         )
-        let openFileMenu = UIMenu(
-            title: "",
-            image: nil,
-            identifier: UIMenu.Identifier("myOpenFile"),
-            options: .displayInline,
-            children: [openFileCommand]
-        )
-        builder.replace(menu: .newScene, with: openFileMenu)
-
-//        let newFileCommand = UIKeyCommand(
-//            title: "New",
-//            action: #selector(newFile(_:)),
-//            input: "n",
-//            modifierFlags: [.command]
-//        )
-//        let newFileMenu = UIMenu(
-//            title: "",
-//            image: nil,
-//            identifier: UIMenu.Identifier("myNewFile"),
-//            options: .displayInline,
-//            children: [openFileCommand]
-//        )
-//        builder.insertChild(newFileMenu, atStartOfMenu: .file)
-
-//        let openFileCommand = UIKeyCommand(
-//            title: "Open Image...",
-//            action: #selector(DocumentBrowserViewController.openImageFile(_:)),
-//            input: "o",
-//            modifierFlags: [.command]
-//        )
-//        let openFileMenu = UIMenu(
-//            title: "",
-//            image: nil,
-//            identifier: UIMenu.Identifier("openImage"),
-//            options: .displayInline,
-//            children: [openFileCommand]
-//        )
-//        builder.insertSibling(openFileMenu, afterMenu: .newScene)
-
+        builder.insertSibling(diagramMenu, afterMenu: .view)
     }
 
     @IBAction func newScene(_ sender: Any) {
@@ -255,7 +201,6 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         }
         preferencesDialogIsOpen = true
     }
-
     #endif
 
 }

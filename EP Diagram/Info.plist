@@ -69,6 +69,14 @@
 					<key>UISceneStoryboardFile</key>
 					<string>Startup2</string>
 				</dict>
+				<dict>
+					<key>UISceneDelegateClassName</key>
+					<string>$(PRODUCT_MODULE_NAME).SceneDelegate</string>
+					<key>UISceneConfigurationName</key>
+					<string>Preferences Configuration</string>
+					<key>UISceneStoryboardFile</key>
+					<string>Preferences</string>
+				</dict>
 			</array>
 		</dict>
 	</dict>

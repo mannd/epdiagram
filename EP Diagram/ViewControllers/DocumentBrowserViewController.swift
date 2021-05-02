@@ -53,16 +53,14 @@ class DocumentBrowserViewController: UIDocumentBrowserViewController {
         if let bookmarkData = info?[DiagramViewController.restorationBookmarkKey] as? Data {
             if let resolvedURL = try? URL(resolvingBookmarkData: bookmarkData, options: NSURL.BookmarkResolutionOptions(), relativeTo: nil, bookmarkDataIsStale: &bookmarkDataIsStale) {
                 if resolvedURL.startAccessingSecurityScopedResource() {
-                    print("****openingURL", resolvedURL)
-                    print("****bookmarkDataIsState", bookmarkDataIsStale)
-                    // if !bookmarkDataIsState { ???? needed?
-                    openDocument(url: resolvedURL)
+                    if !bookmarkDataIsStale {
+                        openDocument(url: resolvedURL)
+                    }
                     resolvedURL.stopAccessingSecurityScopedResource()
                 }
 
             }
         }
-
         #endif
     }
 
@@ -70,7 +68,9 @@ class DocumentBrowserViewController: UIDocumentBrowserViewController {
         print("document browser did appear")
         super.viewDidAppear(animated)
         #if targetEnvironment(macCatalyst)
-        view.window?.rootViewController = self
+        // FIXME: What do we really need to do here?
+        print("*******rootViewController", view.window?.rootViewController as Any)
+//        view.window?.rootViewController = self
         #endif
     }
 
@@ -126,7 +126,9 @@ extension DocumentBrowserViewController: DiagramEditorDelegate {
         let controller = DiagramViewController.navigationControllerFactory()
         // Key step! for mac Catalyst!
         #if targetEnvironment(macCatalyst)
+        // FIXME: rootViewController is nil after this!! but it still seems to be necessary.
         view.window?.rootViewController = controller
+        print("****&&&rootviewcontroller", view.window?.rootViewController as Any)
         #endif
         let diagramViewController = controller.viewControllers[0] as? DiagramViewController
         diagramViewController?.diagramEditorDelegate = self
@@ -140,7 +142,24 @@ extension DocumentBrowserViewController: DiagramEditorDelegate {
 
         diagramViewController?.currentDocument = document
         controller.modalPresentationStyle = .fullScreen
-        self.present(controller, animated: true)
+
+        // TODO: Test for iOS.
+        if let topVC = topMostController(), topVC != controller {
+            topVC.present(controller, animated: true)
+        } else {
+            self.present(controller, animated: true)
+        }
+    }
+
+    // See https://stackoverflow.com/questions/57134259/how-to-resolve-keywindow-was-deprecated-in-ios-13-0
+    func topMostController() -> UIViewController? {
+        let keyWindow = UIApplication.shared.windows.filter {$0.isKeyWindow}.first
+
+        let topController: UIViewController? = keyWindow?.rootViewController
+//        while (topController.presentedViewController != nil) {
+//            topController = topController.presentedViewController!
+//        }
+        return topController
     }
 
     func closeDiagramController(completion: (()->Void)? = nil) {

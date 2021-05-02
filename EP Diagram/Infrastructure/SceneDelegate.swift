@@ -24,7 +24,7 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         } else if (window?.rootViewController as? MacPreferencesViewController) != nil  {
             scene.title = L("Preferences")
         } else {
-            print("***************calling new scene from diagram view controller")
+            print("Error: unknown scene")
         }
     }
 
@@ -35,66 +35,18 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
 
     func scene(_ scene: UIScene, openURLContexts URLContexts: Set<UIOpenURLContext>) {
         os_log("scene(_:openURLContexts:) - SceneDelegate", log: .lifeCycle, type: .info)
-
         guard let documentBrowserViewController = self.window?.rootViewController as? DocumentBrowserViewController else { return }
         for context in URLContexts {
             print("context path", context.url.path)
-
-//            let userActivity = scene.userActivity
-//            let info = userActivity?.userInfo
-//            var bookmarkDataIsStale: Bool = false
-//            if let bookmarkData = info?[DiagramViewController.restorationBookmarkKey] as? Data {
-//                if let resolvedURL = try? URL(resolvingBookmarkData: bookmarkData, options: NSURL.BookmarkResolutionOptions(), relativeTo: nil, bookmarkDataIsStale: &bookmarkDataIsStale) {
-//                    if resolvedURL.startAccessingSecurityScopedResource() {
-//                        // if !bookmarkDataIsState { ???? needed?
-//                        documentBrowserViewController.openDocument(url: resolvedURL)
-//                        resolvedURL.stopAccessingSecurityScopedResource()
-//                    }
-//
-//                }
-//            }
-            
-            // FIXME: point of failure, open recent... menu item!!!!!
-//            if context.options.openInPlace {
-//                if !context.url.startAccessingSecurityScopedResource() {
-//                    print("Unable to get access to security scoped resource.")
-//                    return
-//                }
-//            }
             let url = context.url
-            // FIXME: Trouble spot
             if url.isFileURL && UIApplication.shared.canOpenURL(url) {
                 documentBrowserViewController.openDocument(url: url)
             }
-            // FIXME: Do we need to reveal document??
-//                documentBrowserViewController.revealDocument(at: url, importIfNeeded: true) { (revealedURL, error) in
-//                    if let error = error {
-//                        // Handle the error appropriately
-//                        print("Failed to reveal the document at URL \(url) with error: '\(error)'")
-//                        return
-//                    }
-//
-//                    // Present the Document View Controller for the revealed URL
-//                    documentBrowserViewController.openDocument(url: revealedURL!)
-//                }
-////                documentBrowserViewController.openDocument(url: url)
-//            }
-//            if context.options.openInPlace {
-//                context.url.stopAccessingSecurityScopedResource()
-//            }
-//            do {
-//                if !context.options.openInPlace {
-//                    try FileManager.default.removeItem(at: context.url)
-//                }
-//            } catch {
-//                print(error)
-//            }
-        }
+         }
     }
 
     func scene(_ scene: UIScene, continue userActivity: NSUserActivity) {
         os_log("scene(_:continue:) - SceneDelegate, %s", log: .lifeCycle, type: .info, scene.session.persistentIdentifier)
-
         if let window = self.window {
             window.rootViewController?.restoreUserActivityState(userActivity)
         }
@@ -103,5 +55,4 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
     func sceneDidDisconnect(_ scene: UIScene) {
         os_log("sceneDidDisconnect(_:) - SceneDelegate, %s", log: .lifeCycle, type: .info, scene.session.persistentIdentifier)
     }
-
 }

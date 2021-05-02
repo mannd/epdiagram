@@ -135,7 +135,7 @@ extension DiagramViewController: HamburgerTableDelegate, UIImagePickerController
         performSelectLadderSegue()
     }
 
-    func renameDiagram() {
+    @objc func renameDiagram() {
           os_log("renameDiagram()", log: .action, type: .info)
           // Just fail gracefully if name is nil, renameDiagram should not be available if name is nil.
         guard let diagramName = currentDocument?.name(), !diagramName.isBlank else { return }
