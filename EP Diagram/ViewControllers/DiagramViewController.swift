@@ -447,16 +447,14 @@ final class DiagramViewController: UIViewController {
         //    }
         // }
 
-
-
         // Setup cursor, ladder and image scroll views.
         // These 2 views are guaranteed to exist, so the delegates are implicitly unwrapped optionals.
         cursorView.ladderViewDelegate = ladderView
         ladderView.cursorViewDelegate = cursorView
 
-        // Current document needed to access UndoManager.
-        cursorView.currentDocument = currentDocument
-        ladderView.currentDocument = currentDocument
+//        // Current document needed to access UndoManager.
+//        cursorView.currentDocument = currentDocument
+//        ladderView.currentDocument = currentDocument
 
         leftMargin = diagram.ladder.leftMargin
 
@@ -522,8 +520,6 @@ final class DiagramViewController: UIViewController {
         let longPressRecognizer = UILongPressGestureRecognizer(target: self.imageScrollView, action: #selector(imageScrollView.showImageMenu))
         imageScrollView.addGestureRecognizer(longPressRecognizer)
         #endif
-
-
 
         ladderView.reregisterAllMarks()
 
@@ -656,6 +652,18 @@ final class DiagramViewController: UIViewController {
         #if targetEnvironment(macCatalyst)
         view.window?.windowScene?.title = titleLabel
         #endif
+    }
+
+    func setDocument(_ document: DiagramDocument, completion: @escaping() -> Void) {
+        self.currentDocument = document
+        loadViewIfNeeded()
+        document.open(completionHandler: { success in
+            if success {
+                self.ladderView.currentDocument = document
+                self.cursorView.currentDocument = document
+            }
+            completion()
+        })
     }
 
     // MARK: Toolbars, Modes
@@ -1579,6 +1587,7 @@ extension DiagramViewController {
 
 }
 
+// FIXME: Consider drag and drop diagrams for macOS
 extension DiagramViewController: UIDropInteractionDelegate {
     func dropInteraction(_ interaction: UIDropInteraction, canHandle session: UIDropSession) -> Bool {
         let typeIdentifiers = [UTType.image.identifier]
@@ -1613,6 +1622,7 @@ extension DiagramViewController: UIDropInteractionDelegate {
 
 extension DiagramViewController: NSUserActivityDelegate {
     func userActivityWillSave(_ userActivity: NSUserActivity) {
+
         let currentDocumentURL: String = currentDocument?.fileURL.lastPathComponent ?? ""
         print("currentDocumentURL", currentDocumentURL)
         if documentIsClosing {
@@ -1631,6 +1641,7 @@ extension DiagramViewController {
         return controller
     }
 
+    // FIXME: Doesn't work on mac due to sandboxing
     func renameDocument(oldURL: URL, newURL: URL) {
         os_log("renameDocument", log: .action, type: .info)
         guard oldURL != newURL else { return }

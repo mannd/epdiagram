@@ -103,15 +103,15 @@ protocol DiagramEditorDelegate: AnyObject {
 extension DocumentBrowserViewController: DiagramEditorDelegate {
     func diagramEditorDidFinishEditing(_ controller: DiagramViewController, diagram: Diagram) {
         currentDocument?.diagram = diagram
-//        #if targetEnvironment(macCatalyst)
-//        // see https://developer.apple.com/forums/thread/670247
-//        closeDiagramController(completion: {
-//            UIApplication.shared.windows.first?.rootViewController = self
-//
-//        })
-//        #else
+        #if targetEnvironment(macCatalyst)
+        // see https://developer.apple.com/forums/thread/670247
+        closeDiagramController(completion: {
+            UIApplication.shared.windows.first?.rootViewController = self
+
+        })
+        #else
         closeDiagramController()
-//        #endif
+        #endif
     }
 
     func diagramEditorDidUpdateContent(_ controller: DiagramViewController, diagram: Diagram) {
@@ -137,15 +137,21 @@ extension DocumentBrowserViewController: DiagramEditorDelegate {
 
         // This is not used, probably can delete.
         diagramViewController?.restorationIdentifier = restorationIdentifier
-        diagramViewController?.currentDocument = document
-        #if targetEnvironment(macCatalyst)
-        controller.modalPresentationStyle = .fullScreen
-        self.present(controller, animated: true)
-//        UIApplication.shared.windows.first?.rootViewController = diagramViewController?.navigationController
-        #else
-        controller.modalPresentationStyle = .fullScreen
-        self.present(controller, animated: true)
-        #endif
+        
+        diagramViewController?.setDocument(document, completion: { [weak self] in
+            controller.modalPresentationStyle = .fullScreen
+            self?.present(controller, animated: true)
+        })
+
+//        diagramViewController?.currentDocument = document
+//        #if targetEnvironment(macCatalyst)
+//        controller.modalPresentationStyle = .fullScreen
+//        self.present(controller, animated: true)
+////        UIApplication.shared.windows.first?.rootViewController = diagramViewController?.navigationController
+//        #else
+//        controller.modalPresentationStyle = .fullScreen
+//        self.present(controller, animated: true)
+//        #endif
     }
 
     func closeDiagramController(completion: (()->Void)? = nil) {
@@ -164,7 +170,6 @@ extension DocumentBrowserViewController: DiagramEditorDelegate {
     }
 
     private func closeCurrentDocument() {
-        print("****closeCurrentDocument()")
         currentDocument?.close()
         currentDocument = nil
     }
@@ -187,9 +192,8 @@ extension DocumentBrowserViewController: DiagramEditorDelegate {
 extension DocumentBrowserViewController {
 
     func openDocument(url: URL) {
-        print("****Calling open document")
         guard !isDocumentCurrentlyOpen(url: url) else { return }
-        self.closeDiagramController {
+        closeDiagramController {
             let document = DiagramDocument(fileURL: url)
             document.open { openSuccess in
                 guard openSuccess else {

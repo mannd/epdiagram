@@ -23,6 +23,8 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
             self.scene(scene, openURLContexts: connectionOptions.urlContexts)
         } else if (window?.rootViewController as? MacPreferencesViewController) != nil  {
             scene.title = L("Preferences")
+        } else {
+            print("***************calling new scene from diagram view controller")
         }
     }
 
@@ -60,9 +62,23 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
 //                }
 //            }
             let url = context.url
+            // FIXME: Trouble spot
             if url.isFileURL && UIApplication.shared.canOpenURL(url) {
                 documentBrowserViewController.openDocument(url: url)
             }
+            // FIXME: Do we need to reveal document??
+//                documentBrowserViewController.revealDocument(at: url, importIfNeeded: true) { (revealedURL, error) in
+//                    if let error = error {
+//                        // Handle the error appropriately
+//                        print("Failed to reveal the document at URL \(url) with error: '\(error)'")
+//                        return
+//                    }
+//
+//                    // Present the Document View Controller for the revealed URL
+//                    documentBrowserViewController.openDocument(url: revealedURL!)
+//                }
+////                documentBrowserViewController.openDocument(url: url)
+//            }
 //            if context.options.openInPlace {
 //                context.url.stopAccessingSecurityScopedResource()
 //            }
