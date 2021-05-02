@@ -452,9 +452,9 @@ final class DiagramViewController: UIViewController {
         cursorView.ladderViewDelegate = ladderView
         ladderView.cursorViewDelegate = cursorView
 
-//        // Current document needed to access UndoManager.
-//        cursorView.currentDocument = currentDocument
-//        ladderView.currentDocument = currentDocument
+        // Current document needed to access UndoManager.
+        cursorView.currentDocument = currentDocument
+        ladderView.currentDocument = currentDocument
 
         leftMargin = diagram.ladder.leftMargin
 
@@ -652,18 +652,6 @@ final class DiagramViewController: UIViewController {
         #if targetEnvironment(macCatalyst)
         view.window?.windowScene?.title = titleLabel
         #endif
-    }
-
-    func setDocument(_ document: DiagramDocument, completion: @escaping() -> Void) {
-        self.currentDocument = document
-        loadViewIfNeeded()
-        document.open(completionHandler: { success in
-            if success {
-                self.ladderView.currentDocument = document
-                self.cursorView.currentDocument = document
-            }
-            completion()
-        })
     }
 
     // MARK: Toolbars, Modes

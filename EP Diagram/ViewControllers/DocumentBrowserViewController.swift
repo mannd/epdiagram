@@ -137,21 +137,10 @@ extension DocumentBrowserViewController: DiagramEditorDelegate {
 
         // This is not used, probably can delete.
         diagramViewController?.restorationIdentifier = restorationIdentifier
-        
-        diagramViewController?.setDocument(document, completion: { [weak self] in
-            controller.modalPresentationStyle = .fullScreen
-            self?.present(controller, animated: true)
-        })
 
-//        diagramViewController?.currentDocument = document
-//        #if targetEnvironment(macCatalyst)
-//        controller.modalPresentationStyle = .fullScreen
-//        self.present(controller, animated: true)
-////        UIApplication.shared.windows.first?.rootViewController = diagramViewController?.navigationController
-//        #else
-//        controller.modalPresentationStyle = .fullScreen
-//        self.present(controller, animated: true)
-//        #endif
+        diagramViewController?.currentDocument = document
+        controller.modalPresentationStyle = .fullScreen
+        self.present(controller, animated: true)
     }
 
     func closeDiagramController(completion: (()->Void)? = nil) {
@@ -195,6 +184,7 @@ extension DocumentBrowserViewController {
         guard !isDocumentCurrentlyOpen(url: url) else { return }
         closeDiagramController {
             let document = DiagramDocument(fileURL: url)
+            self.loadViewIfNeeded()
             document.open { openSuccess in
                 guard openSuccess else {
                     print ("could not open \(url)")
