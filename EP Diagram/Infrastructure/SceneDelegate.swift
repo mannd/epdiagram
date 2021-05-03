@@ -20,7 +20,8 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
             scene.userActivity = session.stateRestorationActivity ?? NSUserActivity(activityType: AppDelegate.mainActivityType)
             documentBrowserViewController.restorationInfo = scene.userActivity?.userInfo
             // This appears to be necessary for double click to open diagram on Mac (and ? on iPad too).
-            self.scene(scene, openURLContexts: connectionOptions.urlContexts)
+            // FIXME: don't we still need this at least for iOS???
+//            self.scene(scene, openURLContexts: connectionOptions.urlContexts)
         } else if (window?.rootViewController as? MacPreferencesViewController) != nil  {
             scene.title = L("Preferences")
         } else {

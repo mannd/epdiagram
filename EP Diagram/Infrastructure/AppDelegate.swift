@@ -98,7 +98,8 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
             options: .displayInline,
             children: [openFileCommand]
         )
-        builder.replace(menu: .newScene, with: openFileMenu)
+        builder.insertSibling(openFileMenu, afterMenu: .newScene)
+//        builder.replace(menu: .newScene, with: openFileMenu)
 
         // View menu
         let zoomInCommand = UIKeyCommand(

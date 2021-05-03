@@ -32,7 +32,16 @@ class DocumentBrowserViewController: UIDocumentBrowserViewController {
         delegate = browserDelegate
         view.tintColor = .systemBlue
         installDocumentBrowser()
+    }
 
+    override func viewDidAppear(_ animated: Bool) {
+        print("document browser did appear")
+        super.viewDidAppear(animated)
+//        #if targetEnvironment(macCatalyst)
+//        // FIXME: What do we really need to do here?
+//        print("*******rootViewController", view.window?.rootViewController as Any)
+//        view.window?.rootViewController = self
+//        #endif
 
         let info = self.restorationInfo
 
@@ -62,16 +71,7 @@ class DocumentBrowserViewController: UIDocumentBrowserViewController {
             }
         }
         #endif
-    }
 
-    override func viewDidAppear(_ animated: Bool) {
-        print("document browser did appear")
-        super.viewDidAppear(animated)
-        #if targetEnvironment(macCatalyst)
-        // FIXME: What do we really need to do here?
-        print("*******rootViewController", view.window?.rootViewController as Any)
-//        view.window?.rootViewController = self
-        #endif
     }
 
     override func viewDidDisappear(_ animated: Bool) {
@@ -103,15 +103,15 @@ protocol DiagramEditorDelegate: AnyObject {
 extension DocumentBrowserViewController: DiagramEditorDelegate {
     func diagramEditorDidFinishEditing(_ controller: DiagramViewController, diagram: Diagram) {
         currentDocument?.diagram = diagram
-        #if targetEnvironment(macCatalyst)
-        // see https://developer.apple.com/forums/thread/670247
-        closeDiagramController(completion: {
-            UIApplication.shared.windows.first?.rootViewController = self
-
-        })
-        #else
+//        #if targetEnvironment(macCatalyst)
+//        // see https://developer.apple.com/forums/thread/670247
+//        closeDiagramController(completion: {
+//            UIApplication.shared.windows.first?.rootViewController = self
+//
+//        })
+//        #else
         closeDiagramController()
-        #endif
+//        #endif
     }
 
     func diagramEditorDidUpdateContent(_ controller: DiagramViewController, diagram: Diagram) {
@@ -123,13 +123,13 @@ extension DocumentBrowserViewController: DiagramEditorDelegate {
         guard !editingDocument else { return }
         guard let document = currentDocument else { return }
         editingDocument = true
+
         let controller = DiagramViewController.navigationControllerFactory()
-        // Key step! for mac Catalyst!
-        #if targetEnvironment(macCatalyst)
-        // FIXME: rootViewController is nil after this!! but it still seems to be necessary.
-        view.window?.rootViewController = controller
-        print("****&&&rootviewcontroller", view.window?.rootViewController as Any)
-        #endif
+        // Key step! for mac Catalyst!  But causes the problem with view hierarchy!
+//        #if targetEnvironment(macCatalyst)
+//        // FIXME: rootViewController is nil after this!! but it still seems to be necessary.
+//        view.window?.rootViewController = controller
+//        #endif
         let diagramViewController = controller.viewControllers[0] as? DiagramViewController
         diagramViewController?.diagramEditorDelegate = self
         diagramViewController?.diagram = document.diagram
@@ -141,23 +141,29 @@ extension DocumentBrowserViewController: DiagramEditorDelegate {
         diagramViewController?.restorationIdentifier = restorationIdentifier
 
         diagramViewController?.currentDocument = document
+
         controller.modalPresentationStyle = .fullScreen
 
-        // TODO: Test for iOS.
-        if let topVC = topMostController(), topVC != controller {
-            topVC.present(controller, animated: true)
-        } else {
-            self.present(controller, animated: true)
+        self.present(controller, animated: true) {
+            // FIXME: This almost works too....
+            #if targetEnvironment(macCatalyst)
+            // FIXME: rootViewController is nil after this!! but it still seems to be necessary.
+            self.view.window?.rootViewController = controller
+            #endif
         }
+
     }
 
     // See https://stackoverflow.com/questions/57134259/how-to-resolve-keywindow-was-deprecated-in-ios-13-0
     func topMostController() -> UIViewController? {
         let keyWindow = UIApplication.shared.windows.filter {$0.isKeyWindow}.first
 
-        let topController: UIViewController? = keyWindow?.rootViewController
-//        while (topController.presentedViewController != nil) {
-//            topController = topController.presentedViewController!
+         let topController = keyWindow?.rootViewController
+//         {
+//            while (topController.presentedViewController != nil) {
+//                topController = topController.presentedViewController!
+//            }
+//            return topController
 //        }
         return topController
     }
@@ -172,6 +178,7 @@ extension DocumentBrowserViewController: DiagramEditorDelegate {
             self.dismiss(animated: true) {
                 compositeClosure()
             }
+
         } else {
             compositeClosure()
         }
@@ -200,6 +207,7 @@ extension DocumentBrowserViewController: DiagramEditorDelegate {
 extension DocumentBrowserViewController {
 
     func openDocument(url: URL) {
+        os_log("openDocument(url:)")
         guard !isDocumentCurrentlyOpen(url: url) else { return }
         closeDiagramController {
             let document = DiagramDocument(fileURL: url)

@@ -10,7 +10,7 @@
 
 // We import UIKit here and elsewhere to use CGFloat consistently and avoid conversions
 // of Double to CGFloat.
-import UIKit
+import Foundation
 import os.log
 
 // MARK: - typealiases

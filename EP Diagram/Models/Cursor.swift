@@ -6,7 +6,7 @@
 //  Copyright © 2019 EP Studios. All rights reserved.
 //
 
-import UIKit
+import Foundation
 
 // Cursor is a vertical line that is used to move and set Marks.
 final class Cursor  {
