@@ -63,7 +63,12 @@ class DocumentBrowserViewController: UIDocumentBrowserViewController {
             if let resolvedURL = try? URL(resolvingBookmarkData: bookmarkData, options: NSURL.BookmarkResolutionOptions(), relativeTo: nil, bookmarkDataIsStale: &bookmarkDataIsStale) {
                 if resolvedURL.startAccessingSecurityScopedResource() {
                     if !bookmarkDataIsStale {
-                        openDocument(url: resolvedURL)
+                        // If there is bookmark data and if the user left windows open
+                        // on closing the app, and if System Preferences close windows
+                        // on app exit is unchecked, then these windows will be opened
+                        // automatically by the system, and we need to fill them with
+                        // the bookmarked urls.
+                        openDocument(url: resolvedURL, openNewWindow: false)
                     }
                     resolvedURL.stopAccessingSecurityScopedResource()
                 }
@@ -118,7 +123,7 @@ extension DocumentBrowserViewController: DiagramEditorDelegate {
         currentDocument?.diagram = diagram
     }
 
-    @objc func displayDiagramController() {
+    @objc func displayDiagramController(openNewWindow: Bool = true) {
         os_log("displayDiagramController()", log: .default, type: .default)
         guard !editingDocument else { return }
         guard let document = currentDocument else { return }
@@ -126,10 +131,10 @@ extension DocumentBrowserViewController: DiagramEditorDelegate {
 
         let controller = DiagramViewController.navigationControllerFactory()
         // Key step! for mac Catalyst!  But causes the problem with view hierarchy!
-//        #if targetEnvironment(macCatalyst)
-//        // FIXME: rootViewController is nil after this!! but it still seems to be necessary.
-//        view.window?.rootViewController = controller
-//        #endif
+        #if targetEnvironment(macCatalyst)
+        // FIXME: rootViewController is nil after this!! but it still seems to be necessary.
+            view.window?.rootViewController = controller
+        #endif
         let diagramViewController = controller.viewControllers[0] as? DiagramViewController
         diagramViewController?.diagramEditorDelegate = self
         diagramViewController?.diagram = document.diagram
@@ -143,13 +148,8 @@ extension DocumentBrowserViewController: DiagramEditorDelegate {
         diagramViewController?.currentDocument = document
 
         controller.modalPresentationStyle = .fullScreen
-
-        self.present(controller, animated: true) {
-            // FIXME: This almost works too....
-            #if targetEnvironment(macCatalyst)
-            // FIXME: rootViewController is nil after this!! but it still seems to be necessary.
-            self.view.window?.rootViewController = controller
-            #endif
+        if !openNewWindow {
+            self.present(controller, animated: true)
         }
 
     }
@@ -189,24 +189,25 @@ extension DocumentBrowserViewController: DiagramEditorDelegate {
         currentDocument = nil
     }
 
-    func openRemoteDocument(_ inboundURL: URL, importIfNeeded: Bool) {
-        os_log("openRemoteDocument(_:importIfNeeded:)", log: .debugging, type: .debug)
-        revealDocument(at: inboundURL, importIfNeeded: importIfNeeded) { (url, error) in
-            if let error = error {
-                let alert = UIAlertController(title: L("Could Not Open Document"), message: L("EP Diagram could not open this document due to error \(error.localizedDescription)"), preferredStyle: .alert)
-                alert.addAction(UIAlertAction(title: NSLocalizedString("OK", comment: "Default action"), style: .default))
-                self.present(alert, animated: true)
-                os_log("import did fail - %s", log: .errors, type: .error, error.localizedDescription)
-            } else if let url = url {
-                self.openDocument(url: url)
-            }
-        }
-    }
+    // FIXME: Not used...
+//    func openRemoteDocument(_ inboundURL: URL, importIfNeeded: Bool) {
+//        os_log("openRemoteDocument(_:importIfNeeded:)", log: .debugging, type: .debug)
+//        revealDocument(at: inboundURL, importIfNeeded: importIfNeeded) { (url, error) in
+//            if let error = error {
+//                let alert = UIAlertController(title: L("Could Not Open Document"), message: L("EP Diagram could not open this document due to error \(error.localizedDescription)"), preferredStyle: .alert)
+//                alert.addAction(UIAlertAction(title: NSLocalizedString("OK", comment: "Default action"), style: .default))
+//                self.present(alert, animated: true)
+//                os_log("import did fail - %s", log: .errors, type: .error, error.localizedDescription)
+//            } else if let url = url {
+//                self.openDocument(url: url)
+//            }
+//        }
+//    }
 }
 
 extension DocumentBrowserViewController {
 
-    func openDocument(url: URL) {
+    func openDocument(url: URL, openNewWindow: Bool = true) {
         os_log("openDocument(url:)")
         guard !isDocumentCurrentlyOpen(url: url) else { return }
         closeDiagramController {
@@ -218,7 +219,7 @@ extension DocumentBrowserViewController {
                     return
                 }
                 self.currentDocument = document
-                self.displayDiagramController()
+                self.displayDiagramController(openNewWindow: openNewWindow)
             }
         }
     }
@@ -230,5 +231,10 @@ extension DocumentBrowserViewController {
             }
         }
         return false
+    }
+
+    @IBAction func test() {
+        let rootViewController = view.window?.rootViewController
+        print("rootViewController", rootViewController as Any)
     }
 }

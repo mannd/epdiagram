@@ -87,7 +87,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         // File menu
         let openFileCommand = UIKeyCommand(
             title: "Open...",
-            action: #selector(newScene(_:)),
+            action: #selector(openScene(_:)),
             input: "o",
             modifierFlags: [.command]
         )
@@ -176,16 +176,36 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 
         let ladderMenu = UIMenu(title: L("Ladder"), children: [selectLadderCommand, editLadderCommand])
 
+        let testCommand = UICommand(
+            title: "TEST",
+            action: #selector(DocumentBrowserViewController.test)
+        )
+
+        let test2Command = UICommand(
+            title: "TEST2",
+            action: #selector(DiagramViewController.test2)
+        )
+
         let diagramMenu = UIMenu(
             title: L("Diagram"),
             identifier: UIMenu.Identifier("diagramMenu"),
-            children: [importMenu, ladderMenu, sampleCommand, diagramInfoMenu]
+            children: [importMenu, ladderMenu, sampleCommand, diagramInfoMenu, testCommand, test2Command]
         )
         builder.insertSibling(diagramMenu, afterMenu: .view)
     }
 
-    @IBAction func newScene(_ sender: Any) {
+    @IBAction func openScene(_ sender: Any) {
         print("newScene")
+
+        let scene = UIApplication.shared.connectedScenes.first
+        print("scene", scene as Any)
+        let session = scene?.session
+        let role = session?.configuration.role
+        print("role", role as Any)
+
+
+        
+
         let activity = NSUserActivity(activityType: Self.mainActivityType)
         UIApplication.shared.requestSceneSessionActivation(nil, userActivity: activity, options: nil) { (error) in
             print("Error launching new main activity scene", error.localizedDescription)
@@ -202,6 +222,8 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         }
         preferencesDialogIsOpen = true
     }
+
+
     #endif
 
 }

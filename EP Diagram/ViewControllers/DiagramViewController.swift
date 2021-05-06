@@ -1702,6 +1702,11 @@ extension DiagramViewController {
             }
         }
     }
+
+    @IBAction func test2() {
+        let rootViewController = view.window?.rootViewController
+        print("rootViewController", rootViewController as Any)
+    }
 }
 
 #endif
