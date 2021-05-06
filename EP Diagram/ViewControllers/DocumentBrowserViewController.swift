@@ -24,6 +24,8 @@ class DocumentBrowserViewController: UIDocumentBrowserViewController {
     var restorationInfo: [AnyHashable: Any]?
 
     override func viewDidLoad() {
+        os_log("viewDidLoad() - DocumentBrowserViewController", log: .default, type: .default)
+
         super.viewDidLoad()
         allowsDocumentCreation = true
         allowsPickingMultipleItems = false
@@ -35,11 +37,10 @@ class DocumentBrowserViewController: UIDocumentBrowserViewController {
     }
 
     override func viewDidAppear(_ animated: Bool) {
-        print("document browser did appear")
+        os_log("viewDidAppear(_:) - DocumentBrowserViewController", log: .default, type: .default)
         super.viewDidAppear(animated)
 //        #if targetEnvironment(macCatalyst)
 //        // FIXME: What do we really need to do here?
-//        print("*******rootViewController", view.window?.rootViewController as Any)
 //        view.window?.rootViewController = self
 //        #endif
 
@@ -63,16 +64,10 @@ class DocumentBrowserViewController: UIDocumentBrowserViewController {
             if let resolvedURL = try? URL(resolvingBookmarkData: bookmarkData, options: NSURL.BookmarkResolutionOptions(), relativeTo: nil, bookmarkDataIsStale: &bookmarkDataIsStale) {
                 if resolvedURL.startAccessingSecurityScopedResource() {
                     if !bookmarkDataIsStale {
-                        // If there is bookmark data and if the user left windows open
-                        // on closing the app, and if System Preferences close windows
-                        // on app exit is unchecked, then these windows will be opened
-                        // automatically by the system, and we need to fill them with
-                        // the bookmarked urls.
-                        openDocument(url: resolvedURL, openNewWindow: false)
+                        openDocument(url: resolvedURL)
                     }
                     resolvedURL.stopAccessingSecurityScopedResource()
                 }
-
             }
         }
         #endif
@@ -80,8 +75,8 @@ class DocumentBrowserViewController: UIDocumentBrowserViewController {
     }
 
     override func viewDidDisappear(_ animated: Bool) {
+        os_log("viewDidDisappear(_:) - DocumentBrowserViewController", log: .default, type: .default)
         super.viewDidDisappear(animated)
-        print("document browser disappeared")
     }
 
     func installDocumentBrowser() {
@@ -102,11 +97,13 @@ class DocumentBrowserViewController: UIDocumentBrowserViewController {
 
 protocol DiagramEditorDelegate: AnyObject {
     func diagramEditorDidFinishEditing(_ controller: DiagramViewController, diagram: Diagram)
-    func diagramEditorDidUpdateContent(_ controller: DiagramViewController, diagram: Diagram)
+        func diagramEditorDidUpdateContent(_ controller: DiagramViewController, diagram: Diagram)
 }
 
 extension DocumentBrowserViewController: DiagramEditorDelegate {
     func diagramEditorDidFinishEditing(_ controller: DiagramViewController, diagram: Diagram) {
+        os_log("diagramEditorDidFinishEditing(_:diagram:) - DocumentBrowserViewController", log: .default, type: .default)
+
         currentDocument?.diagram = diagram
 //        #if targetEnvironment(macCatalyst)
 //        // see https://developer.apple.com/forums/thread/670247
@@ -120,22 +117,22 @@ extension DocumentBrowserViewController: DiagramEditorDelegate {
     }
 
     func diagramEditorDidUpdateContent(_ controller: DiagramViewController, diagram: Diagram) {
+        os_log("diagramEditorDidUpdateContent(_:diagram:) - DocumentBrowserViewController", log: .default, type: .default)
+
         currentDocument?.diagram = diagram
     }
 
-    @objc func displayDiagramController(openNewWindow: Bool = true) {
+    @objc func displayDiagramController() {
         os_log("displayDiagramController()", log: .default, type: .default)
         guard !editingDocument else { return }
         guard let document = currentDocument else { return }
+        print("****document found****")
         editingDocument = true
 
         let controller = DiagramViewController.navigationControllerFactory()
-        // Key step! for mac Catalyst!  But causes the problem with view hierarchy!
-        #if targetEnvironment(macCatalyst)
-        // FIXME: rootViewController is nil after this!! but it still seems to be necessary.
-            view.window?.rootViewController = controller
-        #endif
+
         let diagramViewController = controller.viewControllers[0] as? DiagramViewController
+        diagramViewController?.currentDocument = document
         diagramViewController?.diagramEditorDelegate = self
         diagramViewController?.diagram = document.diagram
 
@@ -145,13 +142,15 @@ extension DocumentBrowserViewController: DiagramEditorDelegate {
         // This is not used, probably can delete.
         diagramViewController?.restorationIdentifier = restorationIdentifier
 
-        diagramViewController?.currentDocument = document
 
+        // Key step! for mac Catalyst!  But causes the problem with view hierarchy!
+        #if targetEnvironment(macCatalyst)
+        view.window?.rootViewController = controller
+//        view.window?.makeKeyAndVisible()
+        #else
         controller.modalPresentationStyle = .fullScreen
-        if !openNewWindow {
-            self.present(controller, animated: true)
-        }
-
+        self.present(controller, animated: true)
+        #endif
     }
 
     // See https://stackoverflow.com/questions/57134259/how-to-resolve-keywindow-was-deprecated-in-ios-13-0
@@ -178,7 +177,6 @@ extension DocumentBrowserViewController: DiagramEditorDelegate {
             self.dismiss(animated: true) {
                 compositeClosure()
             }
-
         } else {
             compositeClosure()
         }
@@ -207,8 +205,9 @@ extension DocumentBrowserViewController: DiagramEditorDelegate {
 
 extension DocumentBrowserViewController {
 
-    func openDocument(url: URL, openNewWindow: Bool = true) {
-        os_log("openDocument(url:)")
+    // FIXME: Looks like diagram should load when this is set to false after initial load of the windows.  New diagram should replace old.  But it isn't happening for some reason.
+    func openDocument(url: URL) {
+        os_log("openDocument(url:) %s", url.path)
         guard !isDocumentCurrentlyOpen(url: url) else { return }
         closeDiagramController {
             let document = DiagramDocument(fileURL: url)
@@ -219,7 +218,7 @@ extension DocumentBrowserViewController {
                     return
                 }
                 self.currentDocument = document
-                self.displayDiagramController(openNewWindow: openNewWindow)
+                self.displayDiagramController()
             }
         }
     }

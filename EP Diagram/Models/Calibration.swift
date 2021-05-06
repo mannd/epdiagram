@@ -6,7 +6,7 @@
 //  Copyright © 2020 EP Studios. All rights reserved.
 //
 
-import Foundation
+import UIKit
 
 /// Calibration is used to convert distances between marks into measurements in msec.
 /// A calFactor  is determined that is a ratio of msec to screen points.  Calibration adjusts automatically

@@ -552,6 +552,7 @@ final class DiagramViewController: UIViewController {
     }
 
     var didFirstWillLayout = false
+    // FIXME: Endless loop here
     override func viewWillLayoutSubviews() {
         os_log("viewWillLayoutSubviews() - DiagramViewController", log: OSLog.viewCycle, type: .info)
         if didFirstWillLayout {
