@@ -23,6 +23,8 @@ class DocumentBrowserViewController: UIDocumentBrowserViewController {
     var browserDelegate = DocumentBrowserDelegate()
     var restorationInfo: [AnyHashable: Any]?
 
+    var newWindow = true
+
     override func viewDidLoad() {
         os_log("viewDidLoad() - DocumentBrowserViewController", log: .default, type: .default)
 
@@ -34,6 +36,8 @@ class DocumentBrowserViewController: UIDocumentBrowserViewController {
         delegate = browserDelegate
         view.tintColor = .systemBlue
         installDocumentBrowser()
+
+
     }
 
     override func viewDidAppear(_ animated: Bool) {
@@ -56,6 +60,7 @@ class DocumentBrowserViewController: UIDocumentBrowserViewController {
                 if FileManager.default.fileExists(atPath: fileURL.path) {
                     openDocument(url: fileURL)
                 }
+
             }
         }
         #else
@@ -68,12 +73,16 @@ class DocumentBrowserViewController: UIDocumentBrowserViewController {
                     }
                     resolvedURL.stopAccessingSecurityScopedResource()
                 }
-                let delegate = UIApplication.shared.delegate as! AppDelegate
-                delegate.hasBadWindows = true
             }
         }
         #endif
 
+
+
+    }
+
+    override func viewWillDisappear(_ animated: Bool) {
+        super.viewWillDisappear(animated)
     }
 
     override func viewDidDisappear(_ animated: Bool) {
@@ -146,8 +155,14 @@ extension DocumentBrowserViewController: DiagramEditorDelegate {
 
         // Key step! for mac Catalyst!
         #if targetEnvironment(macCatalyst)
-        UIApplication.shared.windows.first?.rootViewController = controller
-//        self.view.window?.rootViewController = controller
+        // OK, below lets new scene work, but only the last view controller is non-blank
+//        UIApplication.shared.windows.first?.rootViewController = controller
+        // Below shows all the diagram view controllers, but new scene doesn't work
+        if newWindow {
+            UIApplication.shared.windows.first?.rootViewController = controller
+        } else {
+            self.view.window?.rootViewController = controller
+        }
         #else
         controller.modalPresentationStyle = .fullScreen
         self.present(controller, animated: true)
@@ -233,8 +248,4 @@ extension DocumentBrowserViewController {
         return false
     }
 
-    @IBAction func test() {
-        let rootViewController = view.window?.rootViewController
-        print("rootViewController", rootViewController as Any)
-    }
 }

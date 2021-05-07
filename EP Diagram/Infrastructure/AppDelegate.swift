@@ -14,7 +14,6 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 
     var ubiqURL: URL?
     var preferencesDialogIsOpen: Bool = false
-    var hasBadWindows = false
 
     static let mainActivityType = "org.epstudios.epdiagram.mainActivity"
     static let preferencesActivityType = "org.epstudios.epdiagram.preferencesActivity"
@@ -177,35 +176,17 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 
         let ladderMenu = UIMenu(title: L("Ladder"), children: [selectLadderCommand, editLadderCommand])
 
-        let testCommand = UICommand(
-            title: "TEST",
-            action: #selector(DocumentBrowserViewController.test)
-        )
-
-        let test2Command = UICommand(
-            title: "TEST2",
-            action: #selector(DiagramViewController.test2)
-        )
-
         let diagramMenu = UIMenu(
             title: L("Diagram"),
             identifier: UIMenu.Identifier("diagramMenu"),
-            children: [importMenu, ladderMenu, sampleCommand, diagramInfoMenu, testCommand, test2Command]
+            children: [importMenu, ladderMenu, sampleCommand, diagramInfoMenu]
         )
         builder.insertSibling(diagramMenu, afterMenu: .view)
     }
 
     @IBAction func openScene(_ sender: Any) {
-        print("newScene")
-
-        let scene = UIApplication.shared.connectedScenes.first
-        print("scene", scene as Any)
-        let session = scene?.session
-        let role = session?.configuration.role
-        print("role", role as Any)
-
-
-        print("has bad windows")
+        let count = UIApplication.shared.connectedScenes.count
+        if count > 0 { return }
         let activity = NSUserActivity(activityType: Self.mainActivityType)
         UIApplication.shared.requestSceneSessionActivation(nil, userActivity: activity, options: nil) { (error) in
             print("Error launching new main activity scene", error.localizedDescription)
