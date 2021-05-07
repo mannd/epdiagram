@@ -130,8 +130,12 @@ extension DiagramViewController: HamburgerTableDelegate, UIImagePickerController
         chooseSource()
     }
 
-    @IBAction func selectLadder() {
+    @IBAction func selectLadder(_ sender: Any) {
         os_log("selectLadder()", log: .action, type: .info)
+        selectLadder()
+    }
+
+    func selectLadder() {
         performSelectLadderSegue()
     }
 
@@ -473,7 +477,8 @@ import PhotosUI
 
 extension DiagramViewController: PHPickerViewControllerDelegate {
     func picker(_ picker: PHPickerViewController, didFinishPicking results: [PHPickerResult]) {
-        dismiss(animated: true)
+        picker.dismiss(animated: true)
+//        dismiss(animated: true)
         if let itemProvider = results.first?.itemProvider {
             if itemProvider.canLoadObject(ofClass: UIImage.self) {
                 itemProvider.loadObject(ofClass: UIImage.self) { [weak self] image, error in

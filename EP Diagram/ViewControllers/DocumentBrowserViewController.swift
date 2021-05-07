@@ -23,6 +23,8 @@ class DocumentBrowserViewController: UIDocumentBrowserViewController {
     var browserDelegate = DocumentBrowserDelegate()
     var restorationInfo: [AnyHashable: Any]?
 
+    var diagramViewController: DiagramViewController?
+
     var newWindow = true
 
     override func viewDidLoad() {
@@ -60,7 +62,6 @@ class DocumentBrowserViewController: UIDocumentBrowserViewController {
                 if FileManager.default.fileExists(atPath: fileURL.path) {
                     openDocument(url: fileURL)
                 }
-
             }
         }
         #else
@@ -68,17 +69,14 @@ class DocumentBrowserViewController: UIDocumentBrowserViewController {
         if let bookmarkData = info?[DiagramViewController.restorationBookmarkKey] as? Data {
             if let resolvedURL = try? URL(resolvingBookmarkData: bookmarkData, options: NSURL.BookmarkResolutionOptions(), relativeTo: nil, bookmarkDataIsStale: &bookmarkDataIsStale) {
                 if resolvedURL.startAccessingSecurityScopedResource() {
-                    if !bookmarkDataIsStale {
+//                    if !bookmarkDataIsStale {
                         openDocument(url: resolvedURL)
-                    }
+//                    }
                     resolvedURL.stopAccessingSecurityScopedResource()
                 }
             }
         }
         #endif
-
-
-
     }
 
     override func viewWillDisappear(_ animated: Bool) {
@@ -116,15 +114,7 @@ extension DocumentBrowserViewController: DiagramEditorDelegate {
         os_log("diagramEditorDidFinishEditing(_:diagram:) - DocumentBrowserViewController", log: .default, type: .default)
 
         currentDocument?.diagram = diagram
-//        #if targetEnvironment(macCatalyst)
-//        // see https://developer.apple.com/forums/thread/670247
-//        closeDiagramController(completion: {
-//            UIApplication.shared.windows.first?.rootViewController = self
-//
-//        })
-//        #else
         closeDiagramController()
-//        #endif
     }
 
     func diagramEditorDidUpdateContent(_ controller: DiagramViewController, diagram: Diagram) {
@@ -154,19 +144,20 @@ extension DocumentBrowserViewController: DiagramEditorDelegate {
 
 
         // Key step! for mac Catalyst!
-        #if targetEnvironment(macCatalyst)
-        // OK, below lets new scene work, but only the last view controller is non-blank
-//        UIApplication.shared.windows.first?.rootViewController = controller
-        // Below shows all the diagram view controllers, but new scene doesn't work
-        if newWindow {
-            UIApplication.shared.windows.first?.rootViewController = controller
-        } else {
-            self.view.window?.rootViewController = controller
-        }
-        #else
+//        #if targetEnvironment(macCatalyst)
+//        // OK, below lets new scene work, but only the last view controller is non-blank
+////        UIApplication.shared.windows.first?.rootViewController = controller
+//        // Below shows all the diagram view controllers, but new scene doesn't work
+//        if newWindow {
+//            UIApplication.shared.windows.first?.rootViewController = controller
+//        } else {
+//            self.view.window?.rootViewController = controller
+//        }
+//        #else
         controller.modalPresentationStyle = .fullScreen
         self.present(controller, animated: true)
-        #endif
+        self.diagramViewController = diagramViewController
+//        #endif
     }
 
     // See https://stackoverflow.com/questions/57134259/how-to-resolve-keywindow-was-deprecated-in-ios-13-0
@@ -247,5 +238,49 @@ extension DocumentBrowserViewController {
         }
         return false
     }
+
+    #if targetEnvironment(macCatalyst)
+
+
+    // Forward actions to the diagramViewController as needed
+
+    @IBAction func undo(_ sender: Any) {
+        if let diagramViewController = diagramViewController {
+            diagramViewController.undo(sender)
+        }
+    }
+
+    @IBAction func redo(_ sender: Any) {
+        if let diagramViewController = diagramViewController {
+            diagramViewController.redo(sender)
+        }
+    }
+
+    @IBAction func getDiagramInfo(_ sender: Any) {
+        if let diagramViewController = diagramViewController {
+            diagramViewController.getDiagramInfo(sender)
+        }
+    }
+
+    @IBAction func importPhoto(_ sender: Any) {
+        if let diagramViewController = diagramViewController {
+            diagramViewController.importPhoto(sender)
+        }
+    }
+
+    @IBAction func importImageFile(_ sender: Any) {
+        if let diagramViewController = diagramViewController {
+            diagramViewController.importImageFile(sender)
+        }
+    }
+
+    @IBAction func selectLadder(_ sender: Any) {
+        if let diagramViewController = diagramViewController {
+            diagramViewController.selectLadder(sender)
+        }
+    }
+
+    #endif
+
 
 }
