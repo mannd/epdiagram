@@ -68,6 +68,8 @@ class DocumentBrowserViewController: UIDocumentBrowserViewController {
                     }
                     resolvedURL.stopAccessingSecurityScopedResource()
                 }
+                let delegate = UIApplication.shared.delegate as! AppDelegate
+                delegate.hasBadWindows = true
             }
         }
         #endif
@@ -97,7 +99,7 @@ class DocumentBrowserViewController: UIDocumentBrowserViewController {
 
 protocol DiagramEditorDelegate: AnyObject {
     func diagramEditorDidFinishEditing(_ controller: DiagramViewController, diagram: Diagram)
-        func diagramEditorDidUpdateContent(_ controller: DiagramViewController, diagram: Diagram)
+    func diagramEditorDidUpdateContent(_ controller: DiagramViewController, diagram: Diagram)
 }
 
 extension DocumentBrowserViewController: DiagramEditorDelegate {
@@ -118,7 +120,6 @@ extension DocumentBrowserViewController: DiagramEditorDelegate {
 
     func diagramEditorDidUpdateContent(_ controller: DiagramViewController, diagram: Diagram) {
         os_log("diagramEditorDidUpdateContent(_:diagram:) - DocumentBrowserViewController", log: .default, type: .default)
-
         currentDocument?.diagram = diagram
     }
 
@@ -126,7 +127,7 @@ extension DocumentBrowserViewController: DiagramEditorDelegate {
         os_log("displayDiagramController()", log: .default, type: .default)
         guard !editingDocument else { return }
         guard let document = currentDocument else { return }
-        print("****document found****")
+
         editingDocument = true
 
         let controller = DiagramViewController.navigationControllerFactory()
@@ -140,13 +141,13 @@ extension DocumentBrowserViewController: DiagramEditorDelegate {
         restorationInfo = nil // don't need it any more
 
         // This is not used, probably can delete.
-        diagramViewController?.restorationIdentifier = restorationIdentifier
+//        diagramViewController?.restorationIdentifier = restorationIdentifier
 
 
-        // Key step! for mac Catalyst!  But causes the problem with view hierarchy!
+        // Key step! for mac Catalyst!
         #if targetEnvironment(macCatalyst)
-        view.window?.rootViewController = controller
-//        view.window?.makeKeyAndVisible()
+        UIApplication.shared.windows.first?.rootViewController = controller
+//        self.view.window?.rootViewController = controller
         #else
         controller.modalPresentationStyle = .fullScreen
         self.present(controller, animated: true)
@@ -211,7 +212,7 @@ extension DocumentBrowserViewController {
         guard !isDocumentCurrentlyOpen(url: url) else { return }
         closeDiagramController {
             let document = DiagramDocument(fileURL: url)
-            self.loadViewIfNeeded()
+//            self.loadViewIfNeeded()
             document.open { openSuccess in
                 guard openSuccess else {
                     print ("could not open \(url)")

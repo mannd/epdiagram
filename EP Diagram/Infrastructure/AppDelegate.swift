@@ -14,6 +14,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 
     var ubiqURL: URL?
     var preferencesDialogIsOpen: Bool = false
+    var hasBadWindows = false
 
     static let mainActivityType = "org.epstudios.epdiagram.mainActivity"
     static let preferencesActivityType = "org.epstudios.epdiagram.preferencesActivity"
@@ -204,8 +205,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         print("role", role as Any)
 
 
-        
-
+        print("has bad windows")
         let activity = NSUserActivity(activityType: Self.mainActivityType)
         UIApplication.shared.requestSceneSessionActivation(nil, userActivity: activity, options: nil) { (error) in
             print("Error launching new main activity scene", error.localizedDescription)
