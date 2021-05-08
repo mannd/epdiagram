@@ -218,7 +218,6 @@ extension DocumentBrowserViewController {
         guard !isDocumentCurrentlyOpen(url: url) else { return }
         closeDiagramController {
             let document = DiagramDocument(fileURL: url)
-//            self.loadViewIfNeeded()
             document.open { openSuccess in
                 guard openSuccess else {
                     print ("could not open \(url)")
@@ -238,11 +237,14 @@ extension DocumentBrowserViewController {
         }
         return false
     }
+}
 
-    #if targetEnvironment(macCatalyst)
-
+#if targetEnvironment(macCatalyst)
+extension DocumentBrowserViewController {
 
     // Forward actions to the diagramViewController as needed
+
+    // Edit menu
 
     @IBAction func undo(_ sender: Any) {
         if let diagramViewController = diagramViewController {
@@ -255,6 +257,16 @@ extension DocumentBrowserViewController {
             diagramViewController.redo(sender)
         }
     }
+
+    // View menu
+
+    @IBAction func doZoom(_ sender: Any) {
+        if let diagramViewController = diagramViewController {
+            diagramViewController.doZoom(sender)
+        }
+    }
+
+    // Diagram menu
 
     @IBAction func getDiagramInfo(_ sender: Any) {
         if let diagramViewController = diagramViewController {
@@ -280,7 +292,16 @@ extension DocumentBrowserViewController {
         }
     }
 
-    #endif
+    @IBAction func editLadder(_ sender: Any) {
+        if let diagramViewController = diagramViewController {
+            diagramViewController.editLadder(sender)
+        }
+    }
 
-
+    @IBAction func sampleDiagrams(_ sender: Any) {
+        if let diagramViewController = diagramViewController {
+            diagramViewController.sampleDiagrams(sender)
+        }
+    }
 }
+#endif

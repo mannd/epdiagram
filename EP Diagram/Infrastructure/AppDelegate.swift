@@ -48,10 +48,12 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
             return sceneConfiguration
         }
     }
+}
+
+#if targetEnvironment(macCatalyst)
+extension AppDelegate {
 
     // MARK: - macOS menu
-
-    #if targetEnvironment(macCatalyst)
 
     override func buildMenu(with builder: UIMenuBuilder) {
         super.buildMenu(with: builder)
@@ -76,23 +78,6 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
             children: [preferencesCommand]
         )
         builder.insertSibling(openPreferencesMenu, afterMenu: .about)
-
-        // File menu
-        let openFileCommand = UIKeyCommand(
-            title: "Open...",
-            action: #selector(openScene(_:)),
-            input: "o",
-            modifierFlags: [.command]
-        )
-        let openFileMenu = UIMenu(
-            title: "",
-            image: nil,
-            identifier: UIMenu.Identifier("CustomOpenFile"),
-            options: .displayInline,
-            children: [openFileCommand]
-        )
-        builder.insertSibling(openFileMenu, afterMenu: .newScene)
-//        builder.replace(menu: .newScene, with: openFileMenu)
 
         // View menu
         let zoomInCommand = UIKeyCommand(
@@ -160,7 +145,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 
         let editLadderCommand = UICommand(
             title: L("Edit Ladder"),
-            action: #selector(DiagramViewController.editMacLadder(_:))
+            action: #selector(DiagramViewController.editLadder(_:))
         )
         let selectLadderCommand = UICommand(
             title: L("Select Ladder"),
@@ -177,15 +162,6 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         builder.insertSibling(diagramMenu, afterMenu: .view)
     }
 
-    @IBAction func openScene(_ sender: Any) {
-        let count = UIApplication.shared.connectedScenes.count
-        if count > 0 { return }
-        let activity = NSUserActivity(activityType: Self.mainActivityType)
-        UIApplication.shared.requestSceneSessionActivation(nil, userActivity: activity, options: nil) { (error) in
-            print("Error launching new main activity scene", error.localizedDescription)
-        }
-    }
-
     // See https://stackoverflow.com/questions/58882047/open-a-new-window-in-mac-catalyst
     @IBAction func showMacPreferences(_ sender: Any) {
         // prevent the menu from opening more than one.
@@ -197,9 +173,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         preferencesDialogIsOpen = true
     }
 
-
-    #endif
-
 }
+#endif
 
 

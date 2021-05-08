@@ -27,7 +27,6 @@ protocol HamburgerTableDelegate: class {
     func debug()
     func getDiagramInfo()
     func lockLadder()
-//    func editLadder()
     func sampleDiagrams()
     func showPreferences()
     func editTemplates()
@@ -130,11 +129,6 @@ extension DiagramViewController: HamburgerTableDelegate, UIImagePickerController
         chooseSource()
     }
 
-    @IBAction func selectLadder(_ sender: Any) {
-        os_log("selectLadder()", log: .action, type: .info)
-        selectLadder()
-    }
-
     func selectLadder() {
         performSelectLadderSegue()
     }
@@ -219,16 +213,6 @@ extension DiagramViewController: HamburgerTableDelegate, UIImagePickerController
         }
     }
 
-//    func editLadder() {
-//        os_log("editLadder(action:)", log: OSLog.action, type: .info)
-//        performEditLadderSegue()
-//    }
-
-    @IBAction func editMacLadder(_ sender: Any) {
-        performShowTemplateEditorSegue()
-
-    }
-
     func editTemplates() {
         os_log("editTemplates()", log: OSLog.action, type: .info)
         performShowTemplateEditorSegue()
@@ -308,7 +292,7 @@ extension DiagramViewController: HamburgerTableDelegate, UIImagePickerController
         present(alert, animated: true, completion: nil)
     }
 
-    private func handleSelectFile() {
+    func handleSelectFile() {
         let supportedTypes: [UTType] = [UTType.image, UTType.pdf]
         let documentPicker = UIDocumentPickerViewController(forOpeningContentTypes: supportedTypes, asCopy: true)
         documentPicker.delegate = self
@@ -320,19 +304,11 @@ extension DiagramViewController: HamburgerTableDelegate, UIImagePickerController
         present(documentPicker, animated: true, completion: nil)
     }
 
-    @IBAction func importImageFile(_ sender: Any) {
-        handleSelectFile()
-    }
-
-    @IBAction func importPhoto(_ sender: Any) {
-        handleSelectImage()
-    }
-
     func documentPicker(_ controller: UIDocumentPickerViewController, didPickDocumentsAt urls: [URL]) {
         self.openURL(url: urls[0])
     }
 
-    private func handleSelectImage() {
+    func handleSelectImage() {
         os_log("handleSelectImage()", log: .action, type: .info)
         presentPhotosForImages()
     }

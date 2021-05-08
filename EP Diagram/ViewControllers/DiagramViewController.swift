@@ -1423,20 +1423,58 @@ final class DiagramViewController: UIViewController {
         performSegue(withIdentifier: "showTemplateEditorSegue", sender: self)
     }
 
+}
+
+#if targetEnvironment(macCatalyst)
+extension DiagramViewController {
     // MARK: - Mac menu actions
 
-    @IBAction func showPreferencesMenu(_ sender: Any) {
-        performShowPreferencesSegue()
+    // View menu
+
+    @IBAction func doZoom(_ sender: Any) {
+        // No zooming if no image
+        guard imageView.image != nil else { return }
+        var zoomFactor: CGFloat
+        var newZoomFactor: CGFloat = 1.0
+        if let command = sender as? UICommand, let property = command.propertyList as? String {
+            if property == "zoomIn" {
+                zoomFactor = imageScrollView.zoomScale
+                newZoomFactor = zoomFactor * zoomInFactor
+            }
+            if property == "zoomOut" {
+                zoomFactor = imageScrollView.zoomScale
+                newZoomFactor = zoomFactor * zoomOutFactor
+            }
+            if property == "resetZoom" {
+                newZoomFactor = 1.0
+            }
+
+            UIView.animate(withDuration: 0.1) {
+                self.imageScrollView.zoomScale = newZoomFactor
+                self.scrollViewAdjustViews(self.imageScrollView)
+            }
+        }
     }
 
-    // This is called automatically by the Help menu.
-//    @IBAction func showHelp(_ sender: Any) {
-//        performShowHelpSegue()
-//    }
+    // Diagram menu
 
 
-  
+    @IBAction func importPhoto(_ sender: Any) {
+        handleSelectImage()
+    }
 
+    @IBAction func importImageFile(_ sender: Any) {
+        handleSelectFile()
+    }
+
+    @IBAction func selectLadder(_ sender: Any) {
+        os_log("selectLadder()", log: .action, type: .info)
+        selectLadder()
+    }
+
+    @IBAction func editLadder(_ sender: Any) {
+        editTemplates()
+    }
 
     @IBAction func getDiagramInfo(_ sender: Any) {
         getDiagramInfo()
@@ -1445,23 +1483,8 @@ final class DiagramViewController: UIViewController {
     @IBAction func sampleDiagrams(_ sender: Any) {
         sampleDiagrams()
     }
-
-    @IBAction func openImage(_ sender: AnyObject) {
-        /* Present open panel. */
-        //        guard let window = self.window else { return }
-        //        let openPanel = NSOpenPanel()
-        //        openPanel.allowedFileTypes = validFileExtensions()
-        //        openPanel.canSelectHiddenExtension = true
-        //        openPanel.beginSheetModal(for: window,
-        //            completionHandler: {
-        //                (result: NSApplication.ModalResponse) -> Void in
-        //                if result == .OK {
-        //                    self.openURL(openPanel.url, addToRecentDocuments: true)
-        //               }
-        //            }
-        //        )
-    }
 }
+#endif
 
 extension DiagramViewController {
     func setupNotifications() {
@@ -1678,33 +1701,4 @@ extension DiagramViewController: UITextFieldDelegate {
         }
     }
 }
-
-#if targetEnvironment(macCatalyst)
-extension DiagramViewController {
-    @IBAction func doZoom(_ sender: AnyObject) {
-        var zoomFactor: CGFloat
-        var newZoomFactor: CGFloat = 1.0
-        if let command = sender as? UICommand, let property = command.propertyList as? String {
-            if property == "zoomIn" {
-                zoomFactor = imageScrollView.zoomScale
-                newZoomFactor = zoomFactor * zoomInFactor
-            }
-            if property == "zoomOut" {
-                zoomFactor = imageScrollView.zoomScale
-                newZoomFactor = zoomFactor * zoomOutFactor
-            }
-            if property == "resetZoom" {
-                newZoomFactor = 1.0
-            }
-
-            UIView.animate(withDuration: 0.1) {
-                self.imageScrollView.zoomScale = newZoomFactor
-                self.scrollViewAdjustViews(self.imageScrollView)
-            }
-        }
-    }
-
-}
-
-#endif
 
