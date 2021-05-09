@@ -25,8 +25,6 @@ class DocumentBrowserViewController: UIDocumentBrowserViewController {
 
     var diagramViewController: DiagramViewController?
 
-    var newWindow = true
-
     override func viewDidLoad() {
         os_log("viewDidLoad() - DocumentBrowserViewController", log: .default, type: .default)
 
@@ -38,17 +36,6 @@ class DocumentBrowserViewController: UIDocumentBrowserViewController {
         delegate = browserDelegate
         view.tintColor = .systemBlue
         installDocumentBrowser()
-
-
-    }
-
-    override func viewDidAppear(_ animated: Bool) {
-        os_log("viewDidAppear(_:) - DocumentBrowserViewController", log: .default, type: .default)
-        super.viewDidAppear(animated)
-//        #if targetEnvironment(macCatalyst)
-//        // FIXME: What do we really need to do here?
-//        view.window?.rootViewController = self
-//        #endif
 
         let info = self.restorationInfo
 
@@ -69,15 +56,20 @@ class DocumentBrowserViewController: UIDocumentBrowserViewController {
         if let bookmarkData = info?[DiagramViewController.restorationBookmarkKey] as? Data {
             if let resolvedURL = try? URL(resolvingBookmarkData: bookmarkData, options: NSURL.BookmarkResolutionOptions(), relativeTo: nil, bookmarkDataIsStale: &bookmarkDataIsStale) {
                 if resolvedURL.startAccessingSecurityScopedResource() {
-//                    if !bookmarkDataIsStale {
-                        openDocument(url: resolvedURL)
-//                    }
+                    // Doesn't matter if bookmark data is stale, bookmarks are created anew
+                    // when documents are opened.
+                    openDocument(url: resolvedURL)
                     resolvedURL.stopAccessingSecurityScopedResource()
                 }
             }
         }
         #endif
     }
+
+    override func viewDidAppear(_ animated: Bool) {
+        os_log("viewDidAppear(_:) - DocumentBrowserViewController", log: .default, type: .default)
+        super.viewDidAppear(animated)
+     }
 
     override func viewWillDisappear(_ animated: Bool) {
         super.viewWillDisappear(animated)
@@ -121,98 +113,10 @@ extension DocumentBrowserViewController: DiagramEditorDelegate {
         os_log("diagramEditorDidUpdateContent(_:diagram:) - DocumentBrowserViewController", log: .default, type: .default)
         currentDocument?.diagram = diagram
     }
-
-    @objc func displayDiagramController() {
-        os_log("displayDiagramController()", log: .default, type: .default)
-        guard !editingDocument else { return }
-        guard let document = currentDocument else { return }
-
-        editingDocument = true
-
-        let controller = DiagramViewController.navigationControllerFactory()
-
-        let diagramViewController = controller.viewControllers[0] as? DiagramViewController
-        diagramViewController?.currentDocument = document
-        diagramViewController?.diagramEditorDelegate = self
-        diagramViewController?.diagram = document.diagram
-
-        diagramViewController?.restorationInfo = restorationInfo
-        restorationInfo = nil // don't need it any more
-
-        // This is not used, probably can delete.
-//        diagramViewController?.restorationIdentifier = restorationIdentifier
-
-
-        // Key step! for mac Catalyst!
-//        #if targetEnvironment(macCatalyst)
-//        // OK, below lets new scene work, but only the last view controller is non-blank
-////        UIApplication.shared.windows.first?.rootViewController = controller
-//        // Below shows all the diagram view controllers, but new scene doesn't work
-//        if newWindow {
-//            UIApplication.shared.windows.first?.rootViewController = controller
-//        } else {
-//            self.view.window?.rootViewController = controller
-//        }
-//        #else
-        controller.modalPresentationStyle = .fullScreen
-        self.present(controller, animated: true)
-        self.diagramViewController = diagramViewController
-//        #endif
-    }
-
-    // See https://stackoverflow.com/questions/57134259/how-to-resolve-keywindow-was-deprecated-in-ios-13-0
-    func topMostController() -> UIViewController? {
-        let keyWindow = UIApplication.shared.windows.filter {$0.isKeyWindow}.first
-
-         let topController = keyWindow?.rootViewController
-//         {
-//            while (topController.presentedViewController != nil) {
-//                topController = topController.presentedViewController!
-//            }
-//            return topController
-//        }
-        return topController
-    }
-
-    func closeDiagramController(completion: (()->Void)? = nil) {
-        let compositeClosure = {
-            self.closeCurrentDocument()
-            self.editingDocument = false
-            completion?()
-        }
-        if editingDocument {
-            self.dismiss(animated: true) {
-                compositeClosure()
-            }
-        } else {
-            compositeClosure()
-        }
-    }
-
-    private func closeCurrentDocument() {
-        currentDocument?.close()
-        currentDocument = nil
-    }
-
-    // FIXME: Not used...
-//    func openRemoteDocument(_ inboundURL: URL, importIfNeeded: Bool) {
-//        os_log("openRemoteDocument(_:importIfNeeded:)", log: .debugging, type: .debug)
-//        revealDocument(at: inboundURL, importIfNeeded: importIfNeeded) { (url, error) in
-//            if let error = error {
-//                let alert = UIAlertController(title: L("Could Not Open Document"), message: L("EP Diagram could not open this document due to error \(error.localizedDescription)"), preferredStyle: .alert)
-//                alert.addAction(UIAlertAction(title: NSLocalizedString("OK", comment: "Default action"), style: .default))
-//                self.present(alert, animated: true)
-//                os_log("import did fail - %s", log: .errors, type: .error, error.localizedDescription)
-//            } else if let url = url {
-//                self.openDocument(url: url)
-//            }
-//        }
-//    }
 }
 
 extension DocumentBrowserViewController {
 
-    // FIXME: Looks like diagram should load when this is set to false after initial load of the windows.  New diagram should replace old.  But it isn't happening for some reason.
     func openDocument(url: URL) {
         os_log("openDocument(url:) %s", url.path)
         guard !isDocumentCurrentlyOpen(url: url) else { return }
@@ -237,6 +141,55 @@ extension DocumentBrowserViewController {
         }
         return false
     }
+
+    @objc func displayDiagramController() {
+        os_log("displayDiagramController()", log: .default, type: .default)
+        guard !editingDocument else { return }
+        guard let document = currentDocument else { return }
+
+        editingDocument = true
+
+        let controller = DiagramViewController.navigationControllerFactory()
+
+        let diagramViewController = controller.viewControllers[0] as? DiagramViewController
+        diagramViewController?.currentDocument = document
+        diagramViewController?.diagramEditorDelegate = self
+        diagramViewController?.diagram = document.diagram
+
+        diagramViewController?.restorationInfo = restorationInfo
+        restorationInfo = nil // don't need it any more
+
+        controller.modalPresentationStyle = .fullScreen
+        #if targetEnvironment(macCatalyst)
+        // Sadly this might be the best solution.  Only one window open at a time.
+        // FIXME: and this doesn't even work, because now the dialogs don't open.
+        UIApplication.topViewController()?.present(controller, animated: true)
+        #else
+        self.present(controller, animated: true)
+        #endif
+        self.diagramViewController = diagramViewController
+    }
+
+    func closeDiagramController(completion: (()->Void)? = nil) {
+        let compositeClosure = {
+            self.closeCurrentDocument()
+            self.editingDocument = false
+            completion?()
+        }
+        if editingDocument {
+            self.dismiss(animated: true) {
+                compositeClosure()
+            }
+        } else {
+            compositeClosure()
+        }
+    }
+
+    private func closeCurrentDocument() {
+        currentDocument?.close()
+        currentDocument = nil
+    }
+
 }
 
 #if targetEnvironment(macCatalyst)
@@ -305,3 +258,20 @@ extension DocumentBrowserViewController {
     }
 }
 #endif
+
+extension UIApplication {
+    class func topViewController(base: UIViewController? = UIApplication.shared.keyWindow?.rootViewController) -> UIViewController? {
+        if let nav = base as? UINavigationController {
+            return topViewController(base: nav.visibleViewController)
+        }
+        if let tab = base as? UITabBarController {
+            if let selected = tab.selectedViewController {
+                return topViewController(base: selected)
+            }
+        }
+        if let presented = base?.presentedViewController {
+            return topViewController(base: presented)
+        }
+        return base
+    }
+}

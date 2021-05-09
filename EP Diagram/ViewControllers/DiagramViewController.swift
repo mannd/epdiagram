@@ -511,7 +511,7 @@ final class DiagramViewController: UIViewController {
         let interaction = UIContextMenuInteraction(delegate: self)
         ladderView.addInteraction(interaction)
 
-        #if targetEnvironment(macCatalyst)
+        #if targetEnvironment(macCatalyst) // context menu works better on Mac here
         let imageInteraction = UIContextMenuInteraction(delegate: imageScrollView)
         imageScrollView.addInteraction(imageInteraction)
         #else
@@ -1599,10 +1599,10 @@ extension DiagramViewController {
 
 }
 
-// FIXME: Consider drag and drop diagrams for macOS
+// FIXME: Take out PDF is not implemented.
 extension DiagramViewController: UIDropInteractionDelegate {
     func dropInteraction(_ interaction: UIDropInteraction, canHandle session: UIDropSession) -> Bool {
-        let typeIdentifiers = [UTType.image.identifier]
+        let typeIdentifiers = [UTType.image.identifier, UTType.pdf.identifier]
         return session.hasItemsConforming(toTypeIdentifiers: typeIdentifiers ) && session.items.count == 1
     }
 
@@ -1623,12 +1623,19 @@ extension DiagramViewController: UIDropInteractionDelegate {
 
     func dropInteraction(_ interaction: UIDropInteraction, performDrop session: UIDropSession) {
         // Consume drag items (in this example, of type UIImage).
-        session.loadObjects(ofClass: UIImage.self) { imageItems in
-            if let images = imageItems as? [UIImage] {
-                self.undoablySetDiagramImageAndResetLadder(images.first, imageIsUpscaled: false, transform: .identity, scale: 1.0, contentOffset: .zero)
-                return
+        if session.hasItemsConforming(toTypeIdentifiers: [UTType.image.identifier]) {
+            session.loadObjects(ofClass: UIImage.self) { imageItems in
+                if let images = imageItems as? [UIImage] {
+                    self.undoablySetDiagramImageAndResetLadder(images.first, imageIsUpscaled: false, transform: .identity, scale: 1.0, contentOffset: .zero)
+                    return
+                }
             }
+        } else if session.hasItemsConforming(toTypeIdentifiers: [UTType.pdf.identifier]) {
+            print("dropping PDF")
+            // FIXME: Implement this???
         }
+        // FIXME: implement drop diagrams?
+        // See https://stackoverflow.com/questions/53563061/collectionview-drop-pdf-file-onto-collectionview-loadobjectofclass-not-wor
     }
 }
 

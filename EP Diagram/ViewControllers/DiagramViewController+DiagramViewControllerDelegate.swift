@@ -95,7 +95,9 @@ extension DiagramViewController: DiagramViewControllerDelegate {
             let rotate01LButton = UIBarButtonItem(title: L("0.1°L"), style: .plain, target: self, action: #selector(rotate01L))
             let resetRotationButton = UIBarButtonItem(title: L("Reset"), style: .plain, target: self, action: #selector(resetImage))
             let doneButton = UIBarButtonItem(barButtonSystemItem: .done, target: self, action: #selector(closeRotateToolbar(_:)))
-            rotateToolbarButtons = isIPad() || isRunningOnMac() ? [prompt, spacer, rotate90RButton, spacer, rotate90LButton, spacer, rotate1RButton, spacer, rotate1LBButton, spacer, rotate01RButton, spacer, rotate01LButton, spacer, resetRotationButton, spacer, doneButton] : [rotate90RButton, spacer, rotate90LButton, spacer, rotate1RButton, spacer, rotate1LBButton, spacer, rotate01RButton, spacer, rotate01LButton, spacer, doneButton] // leave out prompt and reset button so menu fits on iPhone SE2
+            rotateToolbarButtons = isIPad() || isRunningOnMac() ? 
+                [prompt, spacer, rotate90RButton, spacer, rotate90LButton, spacer, rotate1RButton, spacer, rotate1LBButton, spacer, rotate01RButton, spacer, rotate01LButton, spacer, resetRotationButton, spacer, doneButton] 
+                : [rotate90RButton, spacer, rotate90LButton, spacer, rotate1RButton, spacer, rotate1LBButton, spacer, rotate01RButton, spacer, rotate01LButton, spacer, doneButton] // leave out prompt and reset button so menu fits on iPhone SE2
         }
         setToolbarItems(rotateToolbarButtons, animated: false)
         showingRotateToolbar = true

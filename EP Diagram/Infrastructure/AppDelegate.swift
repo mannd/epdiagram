@@ -38,12 +38,13 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     // MARK: UISceneSession Lifecycle
     func application(_ application: UIApplication, configurationForConnecting connectingSceneSession: UISceneSession, options: UIScene.ConnectionOptions) -> UISceneConfiguration {
         os_log("application(_:configurationForConnecting:options:)", log: .lifeCycle, type: .info)
+        print("***activity", options.userActivities.first?.activityType as Any)
         // Called when a new scene session is being created.
         // Use this method to select a configuration to create the new scene with.
         if options.userActivities.first?.activityType == Self.preferencesActivityType {
             let sceneConfiguration = UISceneConfiguration(name: "Preferences Configuration", sessionRole: connectingSceneSession.role)
             return sceneConfiguration
-        } else { // if options.userActivities.first?.activityType == Self.mainActivityType {
+        } else { //if options.userActivities.first?.activityType == Self.mainActivityType {
             let sceneConfiguration = UISceneConfiguration(name: "Default Configuration", sessionRole: connectingSceneSession.role)
             return sceneConfiguration
         }
