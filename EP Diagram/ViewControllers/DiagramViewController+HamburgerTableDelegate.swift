@@ -11,7 +11,7 @@ import UniformTypeIdentifiers
 import AVFoundation
 import os.log
 
-protocol HamburgerTableDelegate: class {
+protocol HamburgerTableDelegate: AnyObject {
     var hamburgerMenuIsOpen: Bool { get set }
     var constraintHamburgerLeft: NSLayoutConstraint { get set }
     var constraintHamburgerWidth: NSLayoutConstraint { get set }

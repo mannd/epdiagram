@@ -1,0 +1,28 @@
+#+TITLE:     EP Diagram Help
+#+AUTHOR:    David Mann
+#+EMAIL:     mannd@epstudiossoftware.com
+#+DATE:      [2020-07-31 Fri]
+#+DESCRIPTION: Welcome to EP Diagram
+#+KEYWORDS: ladder diagrams, EP Diagram index
+#+LANGUAGE:  en
+#+OPTIONS:   H:3 num:nil toc:nil \n:nil ::t |:t ^:t -:t f:t *:t <:t
+#+OPTIONS:   d:nil todo:t pri:nil tags:not-in-toc
+#+INFOJS_OPT: view:nil toc:nil ltoc:t mouse:underline buttons:0 path:http://orgmode.org/org-info.js
+#+EXPORT_SELECT_TAGS: export
+#+EXPORT_EXCLUDE_TAGS: noexport
+#+LINK_UP:   
+#+LINK_HOME: 
+#+XSLT:
+#+HTML_HEAD: <style media="screen" type="text/css"> img {max-width: 100%; height: auto;} </style>
+#+HTML_HEAD: <style  type="text/css">:root { color-scheme: light dark; }</style>
+#+HTML_HEAD: <link rel="stylesheet" type="text/css" href="../../shrd/org.css"/>
+#+HTML_HEAD: <meta name="robots" content="anchors" />
+#+HTML_HEAD: <meta name="robots" content="keywords" />
+* [[../../shrd/64.png]] Issues
+#+BEGIN_EXPORT html
+<a name="EP Diagram index"></a>
+#+END_EXPORT
+
+* Known issues/bugs/limitations
+- Mac version still under development.  Owners of M1 Macs can use the app as is, but we are working on adapting the app to Intel Macs as well, with a more Mac-like user interface.
+- Complexly linked marks in the same region may not always track with the moving mark.  We can't decide if this is a bug or feature. 

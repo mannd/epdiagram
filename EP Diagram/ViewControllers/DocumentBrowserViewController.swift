@@ -94,28 +94,6 @@ class DocumentBrowserViewController: UIDocumentBrowserViewController {
             }
         }
     }
-}
-
-protocol DiagramEditorDelegate: AnyObject {
-    func diagramEditorDidFinishEditing(_ controller: DiagramViewController, diagram: Diagram)
-    func diagramEditorDidUpdateContent(_ controller: DiagramViewController, diagram: Diagram)
-}
-
-extension DocumentBrowserViewController: DiagramEditorDelegate {
-    func diagramEditorDidFinishEditing(_ controller: DiagramViewController, diagram: Diagram) {
-        os_log("diagramEditorDidFinishEditing(_:diagram:) - DocumentBrowserViewController", log: .default, type: .default)
-
-        currentDocument?.diagram = diagram
-        closeDiagramController()
-    }
-
-    func diagramEditorDidUpdateContent(_ controller: DiagramViewController, diagram: Diagram) {
-        os_log("diagramEditorDidUpdateContent(_:diagram:) - DocumentBrowserViewController", log: .default, type: .default)
-        currentDocument?.diagram = diagram
-    }
-}
-
-extension DocumentBrowserViewController {
 
     func openDocument(url: URL) {
         os_log("openDocument(url:) %s", url.path)
@@ -160,13 +138,13 @@ extension DocumentBrowserViewController {
         restorationInfo = nil // don't need it any more
 
         controller.modalPresentationStyle = .fullScreen
-        #if targetEnvironment(macCatalyst)
+//        #if targetEnvironment(macCatalyst)
         // Sadly this might be the best solution.  Only one window open at a time.
         // FIXME: and this doesn't even work, because now the dialogs don't open.
-        UIApplication.topViewController()?.present(controller, animated: true)
-        #else
+//        UIApplication.topViewController()?.present(controller, animated: true)
+//        #else
         self.present(controller, animated: true)
-        #endif
+//        #endif
         self.diagramViewController = diagramViewController
     }
 
@@ -190,6 +168,26 @@ extension DocumentBrowserViewController {
         currentDocument = nil
     }
 
+}
+
+
+protocol DiagramEditorDelegate: AnyObject {
+    func diagramEditorDidFinishEditing(_ controller: DiagramViewController, diagram: Diagram)
+    func diagramEditorDidUpdateContent(_ controller: DiagramViewController, diagram: Diagram)
+}
+
+extension DocumentBrowserViewController: DiagramEditorDelegate {
+    func diagramEditorDidFinishEditing(_ controller: DiagramViewController, diagram: Diagram) {
+        os_log("diagramEditorDidFinishEditing(_:diagram:) - DocumentBrowserViewController", log: .default, type: .default)
+
+        currentDocument?.diagram = diagram
+        closeDiagramController()
+    }
+
+    func diagramEditorDidUpdateContent(_ controller: DiagramViewController, diagram: Diagram) {
+        os_log("diagramEditorDidUpdateContent(_:diagram:) - DocumentBrowserViewController", log: .default, type: .default)
+        currentDocument?.diagram = diagram
+    }
 }
 
 #if targetEnvironment(macCatalyst)
@@ -259,19 +257,19 @@ extension DocumentBrowserViewController {
 }
 #endif
 
-extension UIApplication {
-    class func topViewController(base: UIViewController? = UIApplication.shared.keyWindow?.rootViewController) -> UIViewController? {
-        if let nav = base as? UINavigationController {
-            return topViewController(base: nav.visibleViewController)
-        }
-        if let tab = base as? UITabBarController {
-            if let selected = tab.selectedViewController {
-                return topViewController(base: selected)
-            }
-        }
-        if let presented = base?.presentedViewController {
-            return topViewController(base: presented)
-        }
-        return base
-    }
-}
+//extension UIApplication {
+//    class func topViewController(base: UIViewController? = UIApplication.shared.keyWindow?.rootViewController) -> UIViewController? {
+//        if let nav = base as? UINavigationController {
+//            return topViewController(base: nav.visibleViewController)
+//        }
+//        if let tab = base as? UITabBarController {
+//            if let selected = tab.selectedViewController {
+//                return topViewController(base: selected)
+//            }
+//        }
+//        if let presented = base?.presentedViewController {
+//            return topViewController(base: presented)
+//        }
+//        return base
+//    }
+//}

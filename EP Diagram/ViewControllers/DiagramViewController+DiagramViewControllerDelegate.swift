@@ -10,7 +10,7 @@ import UIKit
 import CoreImage
 import os.log
 
-protocol DiagramViewControllerDelegate: class {
+protocol DiagramViewControllerDelegate: AnyObject {
     func selectLadderTemplate(ladderTemplate: LadderTemplate?)
     func saveTemplates(_ templates: [LadderTemplate])
     func selectSampleDiagram(_ diagram: Diagram?)
