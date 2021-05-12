@@ -11,6 +11,8 @@ import AppKit
 class MacSupport: NSObject, SharedProtocol {
     required override init() {}
 
+    var openPanel: NSPanel?
+
     func sayHello() {
         let alert = NSAlert()
         alert.alertStyle = .informational
@@ -35,4 +37,11 @@ class MacSupport: NSObject, SharedProtocol {
         }
         NSDocumentController.shared.value(forKey: "_installOpenRecentMenus")
     }
+
+//    func openDiagramDocument(_ sender: Any) {
+//        if openPanel == nil {
+//            openPanel = NSPanel(
+//        }
+//
+//    }
 }

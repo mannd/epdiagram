@@ -58,7 +58,7 @@ class DocumentBrowserViewController: UIDocumentBrowserViewController {
                 if resolvedURL.startAccessingSecurityScopedResource() {
                     // Doesn't matter if bookmark data is stale, bookmarks are created anew
                     // when documents are opened.
-                    openDocument(url: resolvedURL)
+                    openDocument(url: resolvedURL, useBookmark: false)
                     resolvedURL.stopAccessingSecurityScopedResource()
                 }
             }
@@ -95,21 +95,41 @@ class DocumentBrowserViewController: UIDocumentBrowserViewController {
         }
     }
 
-    func openDocument(url: URL) {
+    func openDocument(url: URL, useBookmark: Bool = true) {
         os_log("openDocument(url:) %s", url.path)
         guard !isDocumentCurrentlyOpen(url: url) else { return }
-        // FIXME: save bookmark here to a recent files list?  Maybe array of user defaults, check if bookmark present and open it instead of url???
-        let folder = url.deletingLastPathComponent()
-        print("****folder", folder)
         closeDiagramController {
-            let document = DiagramDocument(fileURL: url)
-            document.open { openSuccess in
-                guard openSuccess else {
-                    print ("could not open \(url)")
-                    return
+            if useBookmark {
+                let accessKey = "Access:\(url.path)"
+                if let bookmarkData = UserDefaults.standard.value(forKey: accessKey) as? Data {
+                    var bookmarkDataIsStale: Bool = false
+                    if let resolvedURL = try? URL(resolvingBookmarkData: bookmarkData, options: NSURL.BookmarkResolutionOptions(), relativeTo: nil, bookmarkDataIsStale: &bookmarkDataIsStale) {
+                        if resolvedURL.startAccessingSecurityScopedResource() {
+                            // Doesn't matter if bookmark data is stale, bookmarks are created anew
+                            // when documents are opened.
+                            let document = DiagramDocument(fileURL: resolvedURL)
+                            document.open { openSuccess in
+                                guard openSuccess else {
+                                    print ("could not open \(url)")
+                                    return
+                                }
+                                self.currentDocument = document
+                                self.displayDiagramController()
+                            }
+                            resolvedURL.stopAccessingSecurityScopedResource()
+                        }
+                    }
                 }
-                self.currentDocument = document
-                self.displayDiagramController()
+            } else {
+                let document = DiagramDocument(fileURL: url)
+                document.open { openSuccess in
+                    guard openSuccess else {
+                        print ("could not open \(url)")
+                        return
+                    }
+                    self.currentDocument = document
+                    self.displayDiagramController()
+                }
             }
         }
     }

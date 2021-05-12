@@ -1281,6 +1281,22 @@ final class DiagramViewController: UIViewController {
         numberOfPages = 0
     }
 
+    #if targetEnvironment(macCatalyst)
+
+    // TODO: Needed or not to open diagrams (as opposed to new window) in mac?
+    @IBAction func selectDiagram(_ sender: Any) {
+        let supportedTypes: [UTType] = [UTType.image, UTType.pdf]
+        let documentPicker = UIDocumentPickerViewController(forOpeningContentTypes: supportedTypes, asCopy: true)
+        documentPicker.delegate = self
+
+        // Set the initial directory.
+        documentPicker.directoryURL = FileIO.getDocumentsURL()
+
+        // Present the document picker.
+        present(documentPicker, animated: true, completion: nil)    }
+    #endif
+
+
     // MARK: - Rotate screen
 
     override func viewWillTransition(to size: CGSize, with coordinator: UIViewControllerTransitionCoordinator) {

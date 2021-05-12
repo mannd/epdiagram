@@ -86,7 +86,7 @@ extension AppDelegate {
 
         // Remove unwanted menus
         builder.remove(menu: .format)
-        builder.remove(menu: .openRecent) // Just doesn't seem to work with Catalyst
+//        builder.remove(menu: .openRecent) // Just doesn't seem to work with Catalyst
 
         // Preferences menu
         let preferencesCommand = UIKeyCommand(
@@ -105,13 +105,13 @@ extension AppDelegate {
         builder.insertSibling(openPreferencesMenu, afterMenu: .about)
 
         // File menu
-        let openRecentMenu = UIMenu(
-            title: "Open Recent",
-            identifier: UIMenu.Identifier("open_recent"),
-            options: [],
-            children: []
-        )
-        builder.insertSibling(openRecentMenu, beforeMenu: .close)
+//        let openRecentMenu = UIMenu(
+//            title: "Open Recent",
+//            identifier: UIMenu.Identifier("open_recent"),
+//            options: [],
+//            children: []
+//        )
+//        builder.insertSibling(openRecentMenu, beforeMenu: .close)
 
         // View menu
         let zoomInCommand = UIKeyCommand(
@@ -186,12 +186,12 @@ extension AppDelegate {
             action: #selector(DiagramViewController.selectLadder(_:))
         )
 
-//        let testCommand = UICommand(
-//            title: "Test",
-//            action: #selector(loadPlugin(_:))
-//        )
+        let testCommand = UICommand(
+            title: "Test",
+            action: #selector(DiagramViewController.selectDiagram(_:))
+        )
 
-        let ladderMenu = UIMenu(title: L("Ladder"), children: [selectLadderCommand, editLadderCommand])
+        let ladderMenu = UIMenu(title: L("Ladder"), children: [selectLadderCommand, editLadderCommand, testCommand])
 
         let diagramMenu = UIMenu(
             title: L("Diagram"),
@@ -200,9 +200,9 @@ extension AppDelegate {
         )
         builder.insertSibling(diagramMenu, afterMenu: .view)
 
-        DispatchQueue.main.async {
-            self.loadPlugin()
-        }
+//        DispatchQueue.main.async {
+//            self.loadPlugin()
+//        }
     }
 
     // See https://stackoverflow.com/questions/58882047/open-a-new-window-in-mac-catalyst

@@ -33,6 +33,12 @@ class DocumentBrowserDelegate: NSObject, UIDocumentBrowserViewControllerDelegate
 
     func documentBrowser(_ controller: UIDocumentBrowserViewController, didPickDocumentURLs documentURLs: [URL]) {
         guard let pickedURL = documentURLs.first else { return }
+        if let bookmark = try? pickedURL.bookmarkData(options: .withSecurityScope, includingResourceValuesForKeys: nil, relativeTo: nil) {
+            let access = "Access:\(pickedURL.path)"
+            UserDefaults.standard.setValue(bookmark, forKey: access)
+        } else {
+            print("Could not create bookmark")
+        }
         presentationHandler?(pickedURL, nil)
     }
 
