@@ -61,8 +61,8 @@ extension AppDelegate {
 
     // MARK: - macOS menu
 
-    @objc func loadPlugin(_ sender: Any) {
-        let bundleFileName = "EP-DiagramMacSupportBundle.bundle"
+    @objc func loadPlugin() {
+        let bundleFileName = "MacSupport.bundle"
         guard let bundleURL = Bundle.main.builtInPlugInsURL?
                 .appendingPathComponent(bundleFileName) else { return }
 
@@ -70,12 +70,13 @@ extension AppDelegate {
         guard let bundle = Bundle(url: bundleURL) else { return }
 
         /// 3. Load the bundle and our plugin class
-        let className = "EP_DiagramMacSupportBundle.MacPlugin"
-        guard let pluginClass = bundle.classNamed(className) as? Plugin.Type else { return }
+        let className = "MacSupport.MacSupport"
+        guard let pluginClass = bundle.classNamed(className) as? SharedProtocol.Type else { return }
 
         /// 4. Create an instance of the plugin class
         let plugin = pluginClass.init()
-        plugin.sayHello()
+        plugin.loadRecentMenu()
+//        plugin.sayHello()
     }
 
 
@@ -102,6 +103,15 @@ extension AppDelegate {
             children: [preferencesCommand]
         )
         builder.insertSibling(openPreferencesMenu, afterMenu: .about)
+
+        // File menu
+        let openRecentMenu = UIMenu(
+            title: "Open Recent",
+            identifier: UIMenu.Identifier("open_recent"),
+            options: [],
+            children: []
+        )
+        builder.insertSibling(openRecentMenu, beforeMenu: .close)
 
         // View menu
         let zoomInCommand = UIKeyCommand(
@@ -176,12 +186,12 @@ extension AppDelegate {
             action: #selector(DiagramViewController.selectLadder(_:))
         )
 
-        let testCommand = UICommand(
-            title: "Test",
-            action: #selector(loadPlugin(_:))
-        )
+//        let testCommand = UICommand(
+//            title: "Test",
+//            action: #selector(loadPlugin(_:))
+//        )
 
-        let ladderMenu = UIMenu(title: L("Ladder"), children: [selectLadderCommand, editLadderCommand, testCommand])
+        let ladderMenu = UIMenu(title: L("Ladder"), children: [selectLadderCommand, editLadderCommand])
 
         let diagramMenu = UIMenu(
             title: L("Diagram"),
@@ -189,6 +199,10 @@ extension AppDelegate {
             children: [importMenu, ladderMenu, sampleCommand, diagramInfoMenu]
         )
         builder.insertSibling(diagramMenu, afterMenu: .view)
+
+        DispatchQueue.main.async {
+            self.loadPlugin()
+        }
     }
 
     // See https://stackoverflow.com/questions/58882047/open-a-new-window-in-mac-catalyst
