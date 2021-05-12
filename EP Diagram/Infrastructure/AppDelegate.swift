@@ -8,6 +8,10 @@
 
 import UIKit
 import os.log
+#if targetEnvironment(macCatalyst)
+import AppKit
+#endif
+
 
 @UIApplicationMain
 class AppDelegate: UIResponder, UIApplicationDelegate {
@@ -32,6 +36,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
                 self.ubiqURL = ubiqURL
             }
         }
+
         return true
     }
 
@@ -55,6 +60,24 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 extension AppDelegate {
 
     // MARK: - macOS menu
+
+    @objc func loadPlugin(_ sender: Any) {
+        let bundleFileName = "EP-DiagramMacSupportBundle.bundle"
+        guard let bundleURL = Bundle.main.builtInPlugInsURL?
+                .appendingPathComponent(bundleFileName) else { return }
+
+        /// 2. Create a bundle instance with the plugin URL
+        guard let bundle = Bundle(url: bundleURL) else { return }
+
+        /// 3. Load the bundle and our plugin class
+        let className = "EP_DiagramMacSupportBundle.MacPlugin"
+        guard let pluginClass = bundle.classNamed(className) as? Plugin.Type else { return }
+
+        /// 4. Create an instance of the plugin class
+        let plugin = pluginClass.init()
+        plugin.sayHello()
+    }
+
 
     override func buildMenu(with builder: UIMenuBuilder) {
         super.buildMenu(with: builder)
@@ -153,7 +176,12 @@ extension AppDelegate {
             action: #selector(DiagramViewController.selectLadder(_:))
         )
 
-        let ladderMenu = UIMenu(title: L("Ladder"), children: [selectLadderCommand, editLadderCommand])
+        let testCommand = UICommand(
+            title: "Test",
+            action: #selector(loadPlugin(_:))
+        )
+
+        let ladderMenu = UIMenu(title: L("Ladder"), children: [selectLadderCommand, editLadderCommand, testCommand])
 
         let diagramMenu = UIMenu(
             title: L("Diagram"),

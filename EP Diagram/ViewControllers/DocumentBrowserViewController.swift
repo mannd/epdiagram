@@ -98,6 +98,9 @@ class DocumentBrowserViewController: UIDocumentBrowserViewController {
     func openDocument(url: URL) {
         os_log("openDocument(url:) %s", url.path)
         guard !isDocumentCurrentlyOpen(url: url) else { return }
+        // FIXME: save bookmark here to a recent files list?  Maybe array of user defaults, check if bookmark present and open it instead of url???
+        let folder = url.deletingLastPathComponent()
+        print("****folder", folder)
         closeDiagramController {
             let document = DiagramDocument(fileURL: url)
             document.open { openSuccess in

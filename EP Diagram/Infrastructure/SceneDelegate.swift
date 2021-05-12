@@ -19,6 +19,12 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
             scene.title = L("EP Diagram")
             scene.userActivity = session.stateRestorationActivity ?? NSUserActivity(activityType: AppDelegate.mainActivityType)
             documentBrowserViewController.restorationInfo = scene.userActivity?.userInfo
+
+            #if targetEnvironment(macCatalyst)
+            scene.titlebar?.toolbar = NSToolbar()
+            // populate toolbar
+
+            #endif
             // This appears to be necessary for double click to open diagram on Mac (and ? on iPad too).
             // FIXME: don't we still need this at least for iOS???
 //            self.scene(scene, openURLContexts: connectionOptions.urlContexts)
