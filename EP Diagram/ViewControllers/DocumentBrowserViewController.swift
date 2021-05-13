@@ -36,39 +36,18 @@ class DocumentBrowserViewController: UIDocumentBrowserViewController {
         delegate = browserDelegate
         view.tintColor = .systemBlue
         installDocumentBrowser()
-
-        let info = self.restorationInfo
-
-        #if !targetEnvironment(macCatalyst)
-        // Fail gently if cached file no longer exists.
-        if let lastDocumentURLPath = info?[DiagramViewController.restorationFileNameKey] as? String,
-           !lastDocumentURLPath.isEmpty,
-           info?[DiagramViewController.restorationDoRestorationKey] as? Bool ?? false {
-            if let docURL = FileIO.getDocumentsURL() {
-                let fileURL = docURL.appendingPathComponent(lastDocumentURLPath)
-                if FileManager.default.fileExists(atPath: fileURL.path) {
-                    openDocument(url: fileURL)
-                }
-            }
-        }
-        #else
-        var bookmarkDataIsStale: Bool = false
-        if let bookmarkData = info?[DiagramViewController.restorationBookmarkKey] as? Data {
-            if let resolvedURL = try? URL(resolvingBookmarkData: bookmarkData, options: NSURL.BookmarkResolutionOptions(), relativeTo: nil, bookmarkDataIsStale: &bookmarkDataIsStale) {
-                if resolvedURL.startAccessingSecurityScopedResource() {
-                    // Doesn't matter if bookmark data is stale, bookmarks are created anew
-                    // when documents are opened.
-                    openDocument(url: resolvedURL, useBookmark: false)
-                    resolvedURL.stopAccessingSecurityScopedResource()
-                }
-            }
-        }
-        #endif
     }
 
     override func viewDidAppear(_ animated: Bool) {
         os_log("viewDidAppear(_:) - DocumentBrowserViewController", log: .default, type: .default)
         super.viewDidAppear(animated)
+
+        let info = self.restorationInfo
+        if info?[DiagramViewController.restorationDoRestorationKey] as? Bool ?? false {
+            if let documentURL = info?[DiagramViewController.restorationDocumentURLKey] as? URL {
+                openDocument(url: documentURL)
+            }
+        }
      }
 
     override func viewWillDisappear(_ animated: Bool) {
@@ -88,49 +67,45 @@ class DocumentBrowserViewController: UIDocumentBrowserViewController {
                 self?.present(alert, animated: true)
                 return
             }
-
             if let url = url, let self = self {
                 self.openDocument(url: url)
             }
         }
     }
 
-    func openDocument(url: URL, useBookmark: Bool = true) {
+    func openDocument(url: URL) {
         os_log("openDocument(url:) %s", url.path)
         guard !isDocumentCurrentlyOpen(url: url) else { return }
         closeDiagramController {
-            if useBookmark {
-                let accessKey = "Access:\(url.path)"
-                if let bookmarkData = UserDefaults.standard.value(forKey: accessKey) as? Data {
-                    var bookmarkDataIsStale: Bool = false
-                    if let resolvedURL = try? URL(resolvingBookmarkData: bookmarkData, options: NSURL.BookmarkResolutionOptions(), relativeTo: nil, bookmarkDataIsStale: &bookmarkDataIsStale) {
-                        if resolvedURL.startAccessingSecurityScopedResource() {
-                            // Doesn't matter if bookmark data is stale, bookmarks are created anew
-                            // when documents are opened.
-                            let document = DiagramDocument(fileURL: resolvedURL)
-                            document.open { openSuccess in
-                                guard openSuccess else {
-                                    print ("could not open \(url)")
-                                    return
-                                }
-                                self.currentDocument = document
-                                self.displayDiagramController()
-                            }
-                            resolvedURL.stopAccessingSecurityScopedResource()
-                        }
+            let accessKey = "Access:\(url.path)"
+            #if targetEnvironment(macCatalyst)
+            let bookmarkOptions: URL.BookmarkResolutionOptions = [.withSecurityScope]
+            #else
+            let bookmarkOptions: URL.BookmarkResolutionOptions = []
+            #endif
+            if let bookmarkData = UserDefaults.standard.value(forKey: accessKey) as? Data {
+                var bookmarkDataIsStale: Bool = false
+                if let resolvedURL = try? URL(resolvingBookmarkData: bookmarkData, options: bookmarkOptions, relativeTo: nil, bookmarkDataIsStale: &bookmarkDataIsStale) {
+                    if resolvedURL.startAccessingSecurityScopedResource() {
+                        // Doesn't matter if bookmark data is stale, bookmarks are created anew
+                        // when documents are opened.
+                        self.openDocumentURL(resolvedURL)
+                        resolvedURL.stopAccessingSecurityScopedResource()
                     }
-                }
-            } else {
-                let document = DiagramDocument(fileURL: url)
-                document.open { openSuccess in
-                    guard openSuccess else {
-                        print ("could not open \(url)")
-                        return
-                    }
-                    self.currentDocument = document
-                    self.displayDiagramController()
                 }
             }
+        } 
+    }
+
+    private func openDocumentURL(_ url: URL) {
+        let document = DiagramDocument(fileURL: url)
+        document.open { openSuccess in
+            guard openSuccess else {
+                print ("could not open \(url)")
+                return
+            }
+            self.currentDocument = document
+            self.displayDiagramController()
         }
     }
 
@@ -175,6 +150,7 @@ class DocumentBrowserViewController: UIDocumentBrowserViewController {
         let compositeClosure = {
             self.closeCurrentDocument()
             self.editingDocument = false
+//            self.diagramViewController = nil
             completion?()
         }
         if editingDocument {
@@ -193,7 +169,6 @@ class DocumentBrowserViewController: UIDocumentBrowserViewController {
 
 }
 
-
 protocol DiagramEditorDelegate: AnyObject {
     func diagramEditorDidFinishEditing(_ controller: DiagramViewController, diagram: Diagram)
     func diagramEditorDidUpdateContent(_ controller: DiagramViewController, diagram: Diagram)
@@ -202,7 +177,6 @@ protocol DiagramEditorDelegate: AnyObject {
 extension DocumentBrowserViewController: DiagramEditorDelegate {
     func diagramEditorDidFinishEditing(_ controller: DiagramViewController, diagram: Diagram) {
         os_log("diagramEditorDidFinishEditing(_:diagram:) - DocumentBrowserViewController", log: .default, type: .default)
-
         currentDocument?.diagram = diagram
         closeDiagramController()
     }

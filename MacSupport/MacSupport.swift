@@ -38,6 +38,15 @@ class MacSupport: NSObject, SharedProtocol {
         NSDocumentController.shared.value(forKey: "_installOpenRecentMenus")
     }
 
+    func printMainWindow(_ sender: Any) {
+
+        let windows = NSApplication.shared.windows
+        for w in windows {
+            print("*****window vc", w.contentViewController as Any)
+
+        }
+    }
+
 //    func openDiagramDocument(_ sender: Any) {
 //        if openPanel == nil {
 //            openPanel = NSPanel(

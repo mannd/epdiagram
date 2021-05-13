@@ -18,6 +18,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 
     var ubiqURL: URL?
     var preferencesDialogIsOpen: Bool = false
+    var plugin: SharedProtocol?
 
     static let mainActivityType = "org.epstudios.epdiagram.mainActivity"
     static let preferencesActivityType = "org.epstudios.epdiagram.preferencesActivity"
@@ -56,8 +57,10 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     }
 }
 
+
 #if targetEnvironment(macCatalyst)
 extension AppDelegate {
+
 
     // MARK: - macOS menu
 
@@ -74,8 +77,8 @@ extension AppDelegate {
         guard let pluginClass = bundle.classNamed(className) as? SharedProtocol.Type else { return }
 
         /// 4. Create an instance of the plugin class
-        let plugin = pluginClass.init()
-        plugin.loadRecentMenu()
+        self.plugin = pluginClass.init()
+//        plugin.loadRecentMenu()
 //        plugin.sayHello()
     }
 
@@ -188,7 +191,7 @@ extension AppDelegate {
 
         let testCommand = UICommand(
             title: "Test",
-            action: #selector(DiagramViewController.selectDiagram(_:))
+            action: #selector(printMainWindow(_:))
         )
 
         let ladderMenu = UIMenu(title: L("Ladder"), children: [selectLadderCommand, editLadderCommand, testCommand])
@@ -200,9 +203,16 @@ extension AppDelegate {
         )
         builder.insertSibling(diagramMenu, afterMenu: .view)
 
-//        DispatchQueue.main.async {
-//            self.loadPlugin()
-//        }
+        DispatchQueue.main.async {
+            self.loadPlugin()
+//            self.plugin?.printMainWindow(self)
+        }
+    }
+
+    @IBAction func printMainWindow(_ sender: Any) {
+        if let plugin = self.plugin {
+            plugin.printMainWindow(sender)
+        }
     }
 
     // See https://stackoverflow.com/questions/58882047/open-a-new-window-in-mac-catalyst

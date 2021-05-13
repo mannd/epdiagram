@@ -167,6 +167,7 @@ final class DiagramViewController: UIViewController {
     static let restorationContentOffsetYKey = "restorationContentOffsetYKey"
     static let restorationZoomKey = "restorationZoomKey"
     static let restorationFileNameKey = "restorationFileNameKey"
+    static let restorationDocumentURLKey = "restorationDocumentURLKey"
     static let restorationNeededKey = "restorationNeededKey"
     static let restorationTransformKey = "restorationTranslateKey"
     //    static let restorationActiveRegionIndexKey = "restorationActiveRegionIndexKey"
@@ -609,23 +610,15 @@ final class DiagramViewController: UIViewController {
     override func updateUserActivityState(_ activity: NSUserActivity) {
         os_log("debug: diagramViewController updateUserActivityState called", log: .debugging, type: .debug)
 
-        #if targetEnvironment(macCatalyst)
-        let bookmarkData = try? currentDocument?.fileURL.bookmarkData(options: .withSecurityScope, includingResourceValuesForKeys: nil, relativeTo: nil)
-        #else
-        let bookmarkData = try? currentDocument?.fileURL.bookmarkData(options: [], includingResourceValuesForKeys: nil, relativeTo: nil)
-        #endif
-
-        let currentDocumentURL: String = currentDocument?.fileURL.lastPathComponent ?? ""
         super.updateUserActivityState(activity)
 
         let info: [AnyHashable: Any] = [
             Self.restorationContentOffsetXKey: imageScrollView.contentOffset.x / imageScrollView.zoomScale,
             Self.restorationContentOffsetYKey: imageScrollView.contentOffset.y,
             Self.restorationZoomKey: imageScrollView.zoomScale,
-            Self.restorationFileNameKey: currentDocumentURL,
             Self.restorationDoRestorationKey: true,
             Self.restorationTransformKey: NSCoder.string(for: imageView.transform),
-            Self.restorationBookmarkKey: bookmarkData as Any,
+            Self.restorationDocumentURLKey: currentDocument?.fileURL ?? "",
         ]
         activity.addUserInfoEntries(from: info)
     }

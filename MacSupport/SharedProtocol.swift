@@ -14,4 +14,5 @@ protocol SharedProtocol: NSObjectProtocol {
 
     func sayHello()  // for testing
     func loadRecentMenu()
+    func printMainWindow(_ sender: Any)
 }
