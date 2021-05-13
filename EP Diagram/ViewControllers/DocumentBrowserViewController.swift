@@ -35,7 +35,7 @@ class DocumentBrowserViewController: UIDocumentBrowserViewController {
         browserUserInterfaceStyle = .light
         delegate = browserDelegate
         view.tintColor = .systemBlue
-        installDocumentBrowser()
+        installPresentationHandler()
     }
 
     override func viewDidAppear(_ animated: Bool) {
@@ -59,7 +59,7 @@ class DocumentBrowserViewController: UIDocumentBrowserViewController {
         super.viewDidDisappear(animated)
     }
 
-    func installDocumentBrowser() {
+    func installPresentationHandler() {
         browserDelegate.presentationHandler = { [weak self] url, error in
             guard error == nil else {
                 let alert = UIAlertController(title: L("Error Opening Diagram"), message: L("This diagram could not be opened."), preferredStyle: .alert)
@@ -89,20 +89,40 @@ class DocumentBrowserViewController: UIDocumentBrowserViewController {
                     if resolvedURL.startAccessingSecurityScopedResource() {
                         // Doesn't matter if bookmark data is stale, bookmarks are created anew
                         // when documents are opened.
+                        if bookmarkDataIsStale {
+                            print("Stale bookmark data.")
+                        }
                         self.openDocumentURL(resolvedURL)
                         resolvedURL.stopAccessingSecurityScopedResource()
                     }
                 }
+            } else {
+                self.openDocumentURL(url, createBookmark: true)
             }
-        } 
+        }
     }
 
-    private func openDocumentURL(_ url: URL) {
+    private func openDocumentURL(_ url: URL, createBookmark: Bool = false) {
         let document = DiagramDocument(fileURL: url)
         document.open { openSuccess in
             guard openSuccess else {
                 print ("could not open \(url)")
                 return
+            }
+            if createBookmark {
+                // In the case of new documents, we can't create a bookmark until the document is opened.   
+                #if targetEnvironment(macCatalyst)
+                let bookmarkOptions: URL.BookmarkCreationOptions = [.withSecurityScope]
+                #else
+                let bookmarkOptions: URL.BookmarkCreationOptions = []
+                #endif
+                if let bookmarkData = try? url.bookmarkData(options: bookmarkOptions, includingResourceValuesForKeys: nil, relativeTo: nil) {
+                    let access = "Access:\(url.path)"
+                    UserDefaults.standard.setValue(bookmarkData, forKey: access)
+                    print("****New bookmark created successfully")
+                } else {
+                    print("*******Could not create bookmark")
+                }
             }
             self.currentDocument = document
             self.displayDiagramController()
@@ -136,9 +156,7 @@ class DocumentBrowserViewController: UIDocumentBrowserViewController {
         restorationInfo = nil // don't need it any more
 
         controller.modalPresentationStyle = .fullScreen
-//        #if targetEnvironment(macCatalyst)
-        // Sadly this might be the best solution.  Only one window open at a time.
-        // FIXME: and this doesn't even work, because now the dialogs don't open.
+//        #if targetEnvironment(macCatalyst) // open one window only
 //        UIApplication.topViewController()?.present(controller, animated: true)
 //        #else
         self.present(controller, animated: true)
@@ -186,6 +204,7 @@ extension DocumentBrowserViewController: DiagramEditorDelegate {
         currentDocument?.diagram = diagram
     }
 }
+
 
 #if targetEnvironment(macCatalyst)
 extension DocumentBrowserViewController {
@@ -270,3 +289,5 @@ extension DocumentBrowserViewController {
 //        return base
 //    }
 //}
+
+
