@@ -107,6 +107,8 @@
 		8EEE3C80264B7A5B0084D968 /* MacSupport.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8EEE3C7F264B7A5B0084D968 /* MacSupport.swift */; };
 		8EF8B5B72330739F00ADB77A /* ViewControllerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8EF8B5B62330739F00ADB77A /* ViewControllerTests.swift */; };
 		8EF9166B227926BC00B51F17 /* LadderView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8EF9166A227926BC00B51F17 /* LadderView.swift */; };
+		8EF9CA24264F0138007AA24A /* Dynamic in Frameworks */ = {isa = PBXBuildFile; productRef = 8EF9CA23264F0138007AA24A /* Dynamic */; };
+		8EF9CA26264F016C007AA24A /* UIWindow+nsWindow.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8EF9CA25264F016C007AA24A /* UIWindow+nsWindow.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -265,6 +267,7 @@
 		8EF6B10125A8CAA600DCA91C /* CoreServices.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreServices.framework; path = Platforms/MacOSX.platform/Developer/SDKs/MacOSX11.1.sdk/System/Library/Frameworks/CoreServices.framework; sourceTree = DEVELOPER_DIR; };
 		8EF8B5B62330739F00ADB77A /* ViewControllerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ViewControllerTests.swift; sourceTree = "<group>"; };
 		8EF9166A227926BC00B51F17 /* LadderView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LadderView.swift; sourceTree = "<group>"; };
+		8EF9CA25264F016C007AA24A /* UIWindow+nsWindow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "UIWindow+nsWindow.swift"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -272,6 +275,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				8EF9CA24264F0138007AA24A /* Dynamic in Frameworks */,
 				8EBBDE2726111E26004DDD2B /* BetterCodable in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -344,6 +348,7 @@
 				8E9F0983253CF483009BC968 /* UINavigationController+gestureRecognizerShouldBegin.swift */,
 				8EC5D28C256B154E00F49865 /* UIView+PinToInside.swift */,
 				8ED3651E261B66A900F2A2B6 /* UIView+findViewController.swift */,
+				8EF9CA25264F016C007AA24A /* UIWindow+nsWindow.swift */,
 			);
 			path = Extensions;
 			sourceTree = "<group>";
@@ -587,6 +592,7 @@
 			name = "EP Diagram";
 			packageProductDependencies = (
 				8EBBDE2626111E26004DDD2B /* BetterCodable */,
+				8EF9CA23264F0138007AA24A /* Dynamic */,
 			);
 			productName = "EP Diagram";
 			productReference = 8E7D24BF22779DBD005A1729 /* EP Diagram.app */;
@@ -683,6 +689,7 @@
 			mainGroup = 8E7D24B622779DBD005A1729;
 			packageReferences = (
 				8EBBDE2526111E26004DDD2B /* XCRemoteSwiftPackageReference "BetterCodable" */,
+				8EF9CA22264F0138007AA24A /* XCRemoteSwiftPackageReference "Dynamic" */,
 			);
 			productRefGroup = 8E7D24C022779DBD005A1729 /* Products */;
 			projectDirPath = "";
@@ -743,6 +750,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				8EF9CA26264F016C007AA24A /* UIWindow+nsWindow.swift in Sources */,
 				8ECA9FB52470A07B0016D939 /* RegionTemplate.swift in Sources */,
 				8E04C5FC256A0AD600946348 /* ImageWrapper.swift in Sources */,
 				8E4ACA8924479C5200575538 /* HamburgerViewModel.swift in Sources */,
@@ -1259,6 +1267,14 @@
 				minimumVersion = 0.3.0;
 			};
 		};
+		8EF9CA22264F0138007AA24A /* XCRemoteSwiftPackageReference "Dynamic" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/mhdhejazi/Dynamic.git";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 1.2.0;
+			};
+		};
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
@@ -1266,6 +1282,11 @@
 			isa = XCSwiftPackageProductDependency;
 			package = 8EBBDE2526111E26004DDD2B /* XCRemoteSwiftPackageReference "BetterCodable" */;
 			productName = BetterCodable;
+		};
+		8EF9CA23264F0138007AA24A /* Dynamic */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 8EF9CA22264F0138007AA24A /* XCRemoteSwiftPackageReference "Dynamic" */;
+			productName = Dynamic;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};

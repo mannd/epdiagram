@@ -11,18 +11,25 @@ import os.log
 
 class SceneDelegate: UIResponder, UIWindowSceneDelegate {
     var window: UIWindow?
+    private let zoomInToolbarButton = NSToolbarItem.Identifier(rawValue: "macZoomInButton")
+    private let zoomOutToolbarButton = NSToolbarItem.Identifier(rawValue: "macZoomOutButton")
+    private let zoomResetToolbarButton = NSToolbarItem.Identifier(rawValue: "macZoomResetButton")
+    private let closeToolbarButton = NSToolbarItem.Identifier(rawValue: "macCloseButton")
 
     func scene(_ scene: UIScene, willConnectTo session: UISceneSession, options connectionOptions: UIScene.ConnectionOptions) {
         os_log("scene(scene:willConnectTo:options:) - SceneDelegate", log: .lifeCycle, type: .info)
         guard let scene = (scene as? UIWindowScene) else { return }
         if let documentBrowserViewController = window?.rootViewController as? DocumentBrowserViewController {
-            print("*****connecting to documentBrowserVC")
             scene.title = L("EP Diagram")
             scene.userActivity = session.stateRestorationActivity ?? NSUserActivity(activityType: AppDelegate.mainActivityType)
             documentBrowserViewController.restorationInfo = scene.userActivity?.userInfo
 
             #if targetEnvironment(macCatalyst)
-            scene.titlebar?.toolbar = NSToolbar()
+            let toolbar = NSToolbar(identifier: "EP Diagram Mac Toolbar")
+            toolbar.delegate = self
+            toolbar.displayMode = .iconOnly
+            scene.titlebar?.toolbar = toolbar
+            scene.titlebar?.toolbarStyle = .automatic
             // populate toolbar
 
             #endif
@@ -87,3 +94,46 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
 //    }
   
 }
+
+#if targetEnvironment(macCatalyst)
+extension SceneDelegate: NSToolbarDelegate {
+    func toolbarDefaultItemIdentifiers(_ toolbar: NSToolbar) -> [NSToolbarItem.Identifier] {
+        return [zoomInToolbarButton, zoomOutToolbarButton, zoomResetToolbarButton, NSToolbarItem.Identifier.flexibleSpace, closeToolbarButton]
+    }
+
+    func toolbarAllowedItemIdentifiers(_ toolbar: NSToolbar) -> [NSToolbarItem.Identifier] {
+        return toolbarDefaultItemIdentifiers(toolbar)
+    }
+
+    func toolbar(_ toolbar: NSToolbar, itemForItemIdentifier itemIdentifier: NSToolbarItem.Identifier, willBeInsertedIntoToolbar flag: Bool) -> NSToolbarItem? {
+        if itemIdentifier == closeToolbarButton {
+            let barButtonItem = UIBarButtonItem(title: L("Close Diagram"), style: .plain, target: nil, action: #selector(DiagramViewController.macCloseDocument(_:)))
+            let button = NSToolbarItem(itemIdentifier: itemIdentifier, barButtonItem: barButtonItem)
+            button.image = UIImage(systemName: "xmark")
+            return button
+        } else if itemIdentifier == zoomInToolbarButton {
+            let barButtonItem = UIBarButtonItem(barButtonSystemItem: .add, target: nil, action: #selector(DiagramViewController.doZoom(_:)))
+            let button = NSToolbarItem(itemIdentifier: itemIdentifier, barButtonItem: barButtonItem)
+            button.tag = 0
+            return button
+        } else if itemIdentifier == zoomOutToolbarButton {
+            let barButtonItem = UIBarButtonItem(barButtonSystemItem: .done, target: nil, action: #selector(DiagramViewController.doZoom(_:)))
+            let button = NSToolbarItem(itemIdentifier: itemIdentifier, barButtonItem: barButtonItem)
+            button.tag = 1
+            return button
+        } else if itemIdentifier == zoomResetToolbarButton {
+            let barButtonItem = UIBarButtonItem(barButtonSystemItem: .cancel, target: nil, action: #selector(DiagramViewController.doZoom(_:)))
+            let button = NSToolbarItem(itemIdentifier: itemIdentifier, barButtonItem: barButtonItem)
+            button.tag = 2
+            return button
+        }
+        return nil
+    }
+
+
+//    @IBAction func macCloseDocument(_ sender: Any) {
+//        print("close it")
+//    }
+
+}
+#endif

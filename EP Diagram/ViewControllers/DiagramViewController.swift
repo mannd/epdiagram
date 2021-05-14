@@ -435,7 +435,7 @@ final class DiagramViewController: UIViewController {
         os_log("viewDidLoad() - ViewController", log: OSLog.viewCycle, type: .info)
         super.viewDidLoad()
 
-        print("userInfo", restorationInfo as Any)
+        //print("userInfo", restorationInfo as Any)
 
         // Only uncomment this to see what fonts are available.  Right now just using
         // system fonts.
@@ -581,6 +581,14 @@ final class DiagramViewController: UIViewController {
         os_log("viewDidAppear() - ViewController", log: OSLog.viewCycle, type: .info)
         super.viewDidAppear(animated)
 
+        if let appDelegate = UIApplication.shared.delegate as? AppDelegate {
+            if let plugin = appDelegate.plugin {
+                if let nsWindow = view.window?.nsWindow {
+                    plugin.disableCloseButton(nsWindow: nsWindow)
+                }
+            }
+        }
+
         setTitle()
 
         self.userActivity = self.view.window?.windowScene?.userActivity
@@ -605,10 +613,6 @@ final class DiagramViewController: UIViewController {
     override func viewWillDisappear(_ animated: Bool) {
         super.viewWillDisappear(animated)
         // No need anymore (since iOS9) to remove notifications.
-        // iOS closes document using button.
-        #if targetEnvironment(macCatalyst)
-        closeDocument()
-        #endif
     }
 
     override func updateUserActivityState(_ activity: NSUserActivity) {
@@ -966,6 +970,13 @@ final class DiagramViewController: UIViewController {
         currentDocument?.undoManager.removeAllActions()
         diagramEditorDelegate?.diagramEditorDidFinishEditing(self, diagram: diagram)
     }
+
+    #if targetEnvironment(macCatalyst)
+    @IBAction func macCloseDocument(_ sender: Any) {
+        closeDocument()
+    }
+    #endif
+
 
     @objc func snapshotDiagram() {
         os_log("snapshotDiagram()", log: .action, type: .info)
@@ -1460,11 +1471,24 @@ extension DiagramViewController {
             if property == "resetZoom" {
                 newZoomFactor = 1.0
             }
-
-            UIView.animate(withDuration: 0.1) {
-                self.imageScrollView.zoomScale = newZoomFactor
-                self.scrollViewAdjustViews(self.imageScrollView)
+        }
+        if let sender = sender as? NSToolbarItem {
+            switch sender.tag {
+            case 0:
+                zoomFactor = imageScrollView.zoomScale
+                newZoomFactor = zoomFactor * zoomInFactor
+            case 1:
+                zoomFactor = imageScrollView.zoomScale
+                newZoomFactor = zoomFactor * zoomOutFactor
+            case 2:
+                newZoomFactor = 1.0
+            default:
+                break
             }
+        }
+        UIView.animate(withDuration: 0.2) {
+            self.imageScrollView.zoomScale = newZoomFactor
+            self.scrollViewAdjustViews(self.imageScrollView)
         }
     }
 

@@ -285,6 +285,12 @@ extension DocumentBrowserViewController {
             diagramViewController.sampleDiagrams(sender)
         }
     }
+
+    @IBAction func macCloseDocument(_ sender: Any) {
+        if let diagramViewController = diagramViewController {
+            diagramViewController.macCloseDocument(sender)
+        }
+    }
 }
 #endif
 

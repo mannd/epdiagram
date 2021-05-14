@@ -6,7 +6,7 @@
 //  Copyright © 2021 EP Studios. All rights reserved.
 //
 
-import Foundation
+import AppKit
 
 @objc(SharedProtocol)
 protocol SharedProtocol: NSObjectProtocol {
@@ -17,4 +17,6 @@ protocol SharedProtocol: NSObjectProtocol {
     func printMainWindow(_ sender: Any)
     func closeWindows(_ sender: Any)
     func setupNotifications()
+    func disableCloseButton()
+    func disableCloseButton(nsWindow: AnyObject)
 }

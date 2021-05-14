@@ -39,8 +39,6 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         }
 
         loadPlugin()
-        plugin?.setupNotifications()
-
         return true
     }
 
@@ -84,7 +82,6 @@ extension AppDelegate {
 //        plugin.loadRecentMenu()
 //        plugin.sayHello()
 //        plugin?.closeWindows(self)
-        plugin?.setupNotifications()
     }
 
 
@@ -123,7 +120,7 @@ extension AppDelegate {
 
         let myCloseCommand = UICommand(
             title: "My Close",
-            action: #selector(DiagramViewController.closeDocument)
+            action: #selector(DiagramViewController.macCloseDocument(_:))
         )
         let myCloseMenu = UIMenu(
             title: "",

@@ -1,12 +1,12 @@
 EP Diagram
 ==========
 
-## Create ladder diagrams of ECG and EP recordings The purpose of EP
-Diagram is to create ladder diagrams as they appear in textbooks, but
-interactively on an iOS phone or tablet (or M1 Mac, and soon, Intel
-Mac).  Ladder diagrams are a useful teaching tool for cardiologists
-and medical students.  EP Studios is not liable for any errors that
-might occur from using this app.
+## Create ladder diagrams of ECG and EP recordings
+The purpose of EP Diagram is to create ladder diagrams as they appear
+in textbooks, but interactively on an iOS phone or tablet (or M1 Mac,
+and soon, Intel Mac).  Ladder diagrams are a useful teaching tool for
+cardiologists and medical students.  EP Studios is not liable for any
+errors that might occur from using this app.
 
 ## License
 EP Diagram is open source, and licensed under the 
@@ -16,7 +16,9 @@ EP Diagram uses the Swift package
 [BetterCodable](https://github.com/marksands/BetterCodable) whick is
 licensed under the
 [MIT License](https://github.com/marksands/BetterCodable/blob/master/LICENSE)
-and is copyright 2019 by Mark Sands.
+and is copyright 2019 by Mark Sands.  EP Diagram also uses the
+[Dynamic](https://github.com/mhdhejazi/Dynamic#installation) package
+of Mhd Hejaz.  No license or copyright information available.
 
 Some public domain clipart used in the figures was obtained from (https://www.clipartmax.com).
 

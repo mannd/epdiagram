@@ -65,8 +65,23 @@ class MacSupport: NSObject, SharedProtocol {
     }
 
     @objc
+    func disableCloseButton(nsWindow: AnyObject) {
+        if let nsWindow = nsWindow as? NSWindow {
+            nsWindow.standardWindowButton(.closeButton)?.isHidden = true
+        }
+    }
+
+    @objc
     func windowClosing() {
         print("$$$$window closing")
+    }
+
+    @objc
+    func disableCloseButton() {
+        for window in NSApplication.shared.windows {
+            window.standardWindowButton(.closeButton)?.isHidden = true
+            print("****window view controller", window.windowController?.contentViewController as Any)
+        }
     }
 
 }
