@@ -16,6 +16,7 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         os_log("scene(scene:willConnectTo:options:) - SceneDelegate", log: .lifeCycle, type: .info)
         guard let scene = (scene as? UIWindowScene) else { return }
         if let documentBrowserViewController = window?.rootViewController as? DocumentBrowserViewController {
+            print("*****connecting to documentBrowserVC")
             scene.title = L("EP Diagram")
             scene.userActivity = session.stateRestorationActivity ?? NSUserActivity(activityType: AppDelegate.mainActivityType)
             documentBrowserViewController.restorationInfo = scene.userActivity?.userInfo
@@ -60,11 +61,29 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
     }
 
     func sceneDidDisconnect(_ scene: UIScene) {
-        os_log("sceneDidDisconnect(_:) - SceneDelegate, %s", log: .lifeCycle, type: .info, scene.session.persistentIdentifier)
+        os_log("$$$sceneDidDisconnect(_:) - SceneDelegate, %s", log: .lifeCycle, type: .info, scene.session.persistentIdentifier)
+    }
+
+    func sceneWillResignActive(_ scene: UIScene) {
+        os_log("$$$sceneWillResignActive(_:) - SceneDeleage", log: .lifeCycle, type: .info)
     }
 
     func scene(_ scene: UIScene, didFailToContinueUserActivityWithType userActivityType: String, error: Error) {
         print("****scene did fail to continue user activity")
     }
+
+    func sceneDidEnterBackground(_ scene: UIScene) {
+        print("sceneDid")
+    }
+
+    // from https://gist.github.com/steipete/30c33740bf0ebc34a0da897cba52fefe
+//    func nsWindow(from window: UIWindow) -> AnyObject? {
+//        guard let nsWindows = NSClassFromString("NSApplication")?.value(forKeyPath: "sharedApplication.windows") as? [AnyObject] else { return nil }
+//        for nsWindow in nsWindows {
+//            let uiWindows = nsWindow.value(forKeyPath: "uiWindows") as? [UIWindow] ?? []
+//            if uiWindows.contains(window) { return nsWindow }
+//        }
+//        return nil
+//    }
   
 }

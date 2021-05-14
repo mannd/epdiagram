@@ -23,7 +23,7 @@ class DocumentBrowserViewController: UIDocumentBrowserViewController {
     var browserDelegate = DocumentBrowserDelegate()
     var restorationInfo: [AnyHashable: Any]?
 
-    var diagramViewController: DiagramViewController?
+    weak var diagramViewController: DiagramViewController?
 
     override func viewDidLoad() {
         os_log("viewDidLoad() - DocumentBrowserViewController", log: .default, type: .default)
@@ -36,18 +36,22 @@ class DocumentBrowserViewController: UIDocumentBrowserViewController {
         delegate = browserDelegate
         view.tintColor = .systemBlue
         installPresentationHandler()
+
+        let info = self.restorationInfo
+        if info?[DiagramViewController.restorationDoRestorationKey] as? Bool ?? false {
+            if let documentURL = info?[DiagramViewController.restorationDocumentURLKey] as? URL {
+//                if let presentationHandler = browserDelegate.presentationHandler {
+//                    presentationHandler(documentURL, nil)
+                openDocument(url: documentURL)
+//                }
+            }
+        }
     }
 
     override func viewDidAppear(_ animated: Bool) {
         os_log("viewDidAppear(_:) - DocumentBrowserViewController", log: .default, type: .default)
         super.viewDidAppear(animated)
 
-        let info = self.restorationInfo
-        if info?[DiagramViewController.restorationDoRestorationKey] as? Bool ?? false {
-            if let documentURL = info?[DiagramViewController.restorationDocumentURLKey] as? URL {
-                openDocument(url: documentURL)
-            }
-        }
      }
 
     override func viewWillDisappear(_ animated: Bool) {
@@ -76,8 +80,9 @@ class DocumentBrowserViewController: UIDocumentBrowserViewController {
     func openDocument(url: URL) {
         os_log("openDocument(url:) %s", url.path)
         guard !isDocumentCurrentlyOpen(url: url) else { return }
+
         closeDiagramController {
-            let accessKey = "Access:\(url.path)"
+            let accessKey = self.getAccessKey(url: url)
             #if targetEnvironment(macCatalyst)
             let bookmarkOptions: URL.BookmarkResolutionOptions = [.withSecurityScope]
             #else
@@ -90,7 +95,10 @@ class DocumentBrowserViewController: UIDocumentBrowserViewController {
                         // Doesn't matter if bookmark data is stale, bookmarks are created anew
                         // when documents are opened.
                         if bookmarkDataIsStale {
-                            print("Stale bookmark data.")
+                            // create new bookmark if possible
+                            self.openDocumentURL(url, createBookmark: true)
+                            resolvedURL.stopAccessingSecurityScopedResource()
+                            print("Attempt to refresh bookmark")
                         }
                         self.openDocumentURL(resolvedURL)
                         resolvedURL.stopAccessingSecurityScopedResource()
@@ -116,17 +124,23 @@ class DocumentBrowserViewController: UIDocumentBrowserViewController {
                 #else
                 let bookmarkOptions: URL.BookmarkCreationOptions = []
                 #endif
+                let accessKey = self.getAccessKey(url: url)
                 if let bookmarkData = try? url.bookmarkData(options: bookmarkOptions, includingResourceValuesForKeys: nil, relativeTo: nil) {
-                    let access = "Access:\(url.path)"
-                    UserDefaults.standard.setValue(bookmarkData, forKey: access)
+                    UserDefaults.standard.setValue(bookmarkData, forKey: accessKey)
                     print("****New bookmark created successfully")
                 } else {
+                    // remove saved bookmark if it exists
+                    UserDefaults.standard.removeObject(forKey: accessKey)
                     print("*******Could not create bookmark")
                 }
             }
             self.currentDocument = document
             self.displayDiagramController()
         }
+    }
+
+    private func getAccessKey(url: URL) -> String {
+        return "Access:\(url.path)"
     }
 
     private func isDocumentCurrentlyOpen(url: URL) -> Bool {
@@ -158,9 +172,9 @@ class DocumentBrowserViewController: UIDocumentBrowserViewController {
         controller.modalPresentationStyle = .fullScreen
 //        #if targetEnvironment(macCatalyst) // open one window only
 //        UIApplication.topViewController()?.present(controller, animated: true)
-//        #else
-        self.present(controller, animated: true)
-//        #endif
+        print("******", self as Any, controller as Any)
+        self.view.window?.rootViewController?.present(controller, animated: true)
+//        self.present(controller, animated: true)
         self.diagramViewController = diagramViewController
     }
 
@@ -173,6 +187,7 @@ class DocumentBrowserViewController: UIDocumentBrowserViewController {
         }
         if editingDocument {
             self.dismiss(animated: true) {
+                print("$$$$dismiss called")
                 compositeClosure()
             }
         } else {

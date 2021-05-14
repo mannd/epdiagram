@@ -38,6 +38,9 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
             }
         }
 
+        loadPlugin()
+        plugin?.setupNotifications()
+
         return true
     }
 
@@ -80,6 +83,8 @@ extension AppDelegate {
         self.plugin = pluginClass.init()
 //        plugin.loadRecentMenu()
 //        plugin.sayHello()
+//        plugin?.closeWindows(self)
+        plugin?.setupNotifications()
     }
 
 
@@ -115,6 +120,16 @@ extension AppDelegate {
 //            children: []
 //        )
 //        builder.insertSibling(openRecentMenu, beforeMenu: .close)
+
+        let myCloseCommand = UICommand(
+            title: "My Close",
+            action: #selector(DiagramViewController.closeDocument)
+        )
+        let myCloseMenu = UIMenu(
+            title: "",
+            options: .displayInline, children: [myCloseCommand]
+        )
+        builder.insertChild(myCloseMenu, atEndOfMenu: .file)
 
         // View menu
         let zoomInCommand = UIKeyCommand(
@@ -189,9 +204,13 @@ extension AppDelegate {
             action: #selector(DiagramViewController.selectLadder(_:))
         )
 
-        let testCommand = UICommand(
+        let testCommand = UIKeyCommand(
             title: "Test",
-            action: #selector(printMainWindow(_:))
+//            action: #selector(DiagramViewController.closeDocument),
+            action: #selector(loadPlugin),
+//            action: #selector(printMainWindow(_:)),
+            input: "t",
+            modifierFlags: [.command]
         )
 
         let ladderMenu = UIMenu(title: L("Ladder"), children: [selectLadderCommand, editLadderCommand, testCommand])

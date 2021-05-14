@@ -605,6 +605,10 @@ final class DiagramViewController: UIViewController {
     override func viewWillDisappear(_ animated: Bool) {
         super.viewWillDisappear(animated)
         // No need anymore (since iOS9) to remove notifications.
+        // iOS closes document using button.
+        #if targetEnvironment(macCatalyst)
+        closeDocument()
+        #endif
     }
 
     override func updateUserActivityState(_ activity: NSUserActivity) {
@@ -956,7 +960,7 @@ final class DiagramViewController: UIViewController {
     // MARK: -  Actions
 
     @objc func closeDocument() {
-        os_log("closeDocument()", log: .action, type: .info)
+        os_log("$$$$$closeDocument()", log: .action, type: .info)
         view.endEditing(true)
         documentIsClosing = true
         currentDocument?.undoManager.removeAllActions()
@@ -965,7 +969,6 @@ final class DiagramViewController: UIViewController {
 
     @objc func snapshotDiagram() {
         os_log("snapshotDiagram()", log: .action, type: .info)
-
         checkPhotoLibraryStatus()
     }
 

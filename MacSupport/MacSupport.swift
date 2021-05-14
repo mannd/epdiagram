@@ -13,6 +13,12 @@ class MacSupport: NSObject, SharedProtocol {
 
     var openPanel: NSPanel?
 
+
+    func setupNotifications() {
+        NotificationCenter.default.addObserver(self, selector: #selector(windowClosing), name: NSWindow.willCloseNotification, object: nil)
+    }
+
+
     func sayHello() {
         let alert = NSAlert()
         alert.alertStyle = .informational
@@ -39,18 +45,34 @@ class MacSupport: NSObject, SharedProtocol {
     }
 
     func printMainWindow(_ sender: Any) {
-
+        let mw = NSApplication.shared.mainWindow
+        print("*****mainWindow", mw as Any)
+        let kw = NSApplication.shared.keyWindow
+        print("*****keyWindow", kw as Any)
         let windows = NSApplication.shared.windows
         for w in windows {
-            print("*****window vc", w.contentViewController as Any)
+            print("*****window", w as Any)
+            w.close()
+        }
+        print("***********************")
+    }
 
+    @objc
+    func closeWindows(_ sender: Any) {
+        for window in NSApplication.shared.windows {
+            window.standardWindowButton(.closeButton)?.isHidden = true
         }
     }
 
-//    func openDiagramDocument(_ sender: Any) {
-//        if openPanel == nil {
-//            openPanel = NSPanel(
-//        }
-//
-//    }
+    @objc
+    func windowClosing() {
+        print("$$$$window closing")
+    }
+
 }
+
+//class WindowController: NSWindowController {
+//    override var shouldCloseDocument: Bool {
+//        return true
+//    }
+//}
