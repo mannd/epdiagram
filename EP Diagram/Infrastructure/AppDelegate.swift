@@ -112,23 +112,17 @@ extension AppDelegate {
         builder.insertSibling(openPreferencesMenu, afterMenu: .about)
 
         // File menu
-//        let openRecentMenu = UIMenu(
-//            title: "Open Recent",
-//            identifier: UIMenu.Identifier("open_recent"),
-//            options: [],
-//            children: []
-//        )
-//        builder.insertSibling(openRecentMenu, beforeMenu: .close)
-
-        let myCloseCommand = UICommand(
-            title: "My Close",
-            action: #selector(DiagramViewController.macCloseDocument(_:))
+        let closeDiagramCommand = UIKeyCommand(
+            title: "Close Diagram",
+            action: #selector(DiagramViewController.macCloseDocument(_:)),
+            input: "w",
+            modifierFlags: [.command]
         )
         let myCloseMenu = UIMenu(
             title: "",
-            options: .displayInline, children: [myCloseCommand]
+            options: .displayInline, children: [closeDiagramCommand]
         )
-        builder.insertChild(myCloseMenu, atEndOfMenu: .file)
+        builder.replace(menu: .close, with: myCloseMenu)
 
         // View menu
         let zoomInCommand = UIKeyCommand(

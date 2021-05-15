@@ -15,7 +15,7 @@ import os.log
 final class DiagramViewController: UIViewController {
     // For debugging only
     #if DEBUG
-    var debugShowOnboarding = false
+    var debugForceOnboarding = true
     #else // Don't change below!
     var debugShowOnboarding = false
     #endif
@@ -517,7 +517,7 @@ final class DiagramViewController: UIViewController {
 
         let firstRun: Bool = !UserDefaults.standard.bool(forKey: Preferences.notFirstRunKey)
 
-        if debugShowOnboarding || firstRun { // || first run
+        if debugForceOnboarding || firstRun { // || first run
             performShowOnboardingSegue()
             UserDefaults.standard.set(true, forKey: Preferences.notFirstRunKey)
             // take this oportunity to save the version, which we can use in the future to determine if we nee to reshow the onboarding (e.g. if onboarding changes).
@@ -1636,13 +1636,15 @@ extension DiagramViewController {
             currentDocument.diagram = diagram
         }
     }
-
 }
 
-// FIXME: Take out PDF is not implemented.
 extension DiagramViewController: UIDropInteractionDelegate {
+
+    //TODO: At present we can only drag and drop image files.  We would like to drag and drop PDFs and also diagram files.  For PDFs it will probably be necessary to rewrite all the PDF code to use the PDFDocument class, rather than the core foundation PDF functions.  We will plan this for a future update.
     func dropInteraction(_ interaction: UIDropInteraction, canHandle session: UIDropSession) -> Bool {
-        let typeIdentifiers = [UTType.image.identifier, UTType.pdf.identifier]
+        let typeIdentifiers = [UTType.image.identifier]
+        // For future implementation, add PDFs, diagram files to drag and drop.
+        //let typeIdentifiers = [UTType.image.identifier, UTType.pdf.identifier]
         return session.hasItemsConforming(toTypeIdentifiers: typeIdentifiers ) && session.items.count == 1
     }
 
@@ -1667,15 +1669,17 @@ extension DiagramViewController: UIDropInteractionDelegate {
             session.loadObjects(ofClass: UIImage.self) { imageItems in
                 if let images = imageItems as? [UIImage] {
                     self.undoablySetDiagramImageAndResetLadder(images.first, imageIsUpscaled: false, transform: .identity, scale: 1.0, contentOffset: .zero)
-                    return
                 }
             }
-        } else if session.hasItemsConforming(toTypeIdentifiers: [UTType.pdf.identifier]) {
-            print("dropping PDF")
-            // FIXME: Implement this???
         }
-        // FIXME: implement drop diagrams?
-        // See https://stackoverflow.com/questions/53563061/collectionview-drop-pdf-file-onto-collectionview-loadobjectofclass-not-wor
+        else if session.hasItemsConforming(toTypeIdentifiers: [UTType.pdf.identifier]) {
+            print("dropping PDF")
+            _ = session.loadObjects(ofClass: URL.self) { pdfItems in
+                if let url = pdfItems.first {
+                    self.openURL(url: url)
+                }
+            }
+        }
     }
 }
 

@@ -105,27 +105,32 @@ extension SceneDelegate: NSToolbarDelegate {
     func toolbar(_ toolbar: NSToolbar, itemForItemIdentifier itemIdentifier: NSToolbarItem.Identifier, willBeInsertedIntoToolbar flag: Bool) -> NSToolbarItem? {
         switch itemIdentifier {
         case closeToolbarButton:
-            let barButtonItem = UIBarButtonItem(barButtonSystemItem: .done, target: nil, action: #selector(DiagramViewController.macCloseDocument(_:)))
+            let barButtonItem = UIBarButtonItem(title: L("Close"), style: .done, target: nil, action: #selector(DiagramViewController.macCloseDocument(_:)))
             let button = NSToolbarItem(itemIdentifier: itemIdentifier, barButtonItem: barButtonItem)
+            button.toolTip = L("Close diagram")
             return button
         case zoomInToolbarButton:
             let barButtonItem = UIBarButtonItem(image: UIImage(systemName: "plus.magnifyingglass"), style: .plain, target: nil, action:  #selector(DiagramViewController.doZoom(_:)))
             let button = NSToolbarItem(itemIdentifier: itemIdentifier, barButtonItem: barButtonItem)
             button.tag = 0
+            button.toolTip = L("Zoom in")
             return button
         case zoomOutToolbarButton:
             let barButtonItem = UIBarButtonItem(image: UIImage(systemName: "minus.magnifyingglass"), style: .plain, target: nil, action:  #selector(DiagramViewController.doZoom(_:)))
             let button = NSToolbarItem(itemIdentifier: itemIdentifier, barButtonItem: barButtonItem)
             button.tag = 1
+            button.toolTip = L("Zoom out")
             return button
         case zoomResetToolbarButton:
             let barButtonItem = UIBarButtonItem(image: UIImage(systemName: "1.magnifyingglass"), style: .plain, target: nil, action:  #selector(DiagramViewController.doZoom(_:)))
             let button = NSToolbarItem(itemIdentifier: itemIdentifier, barButtonItem: barButtonItem)
             button.tag = 2
+            button.toolTip = L("Reset zoom")
             return button
         case undoToolbarButton:
             let barButtonItem = UIBarButtonItem(image: UIImage(systemName: "arrow.uturn.left"), style: .plain, target: nil, action: #selector(DiagramViewController.undo))
             let button = NSToolbarItem(itemIdentifier: itemIdentifier, barButtonItem: barButtonItem)
+            button.toolTip = L("Undo")
             return button
         case redoToolbarButton:
             let barButtonItem = UIBarButtonItem(image: UIImage(systemName: "arrow.uturn.right"), style: .plain, target: nil, action: #selector(DiagramViewController.redo))
@@ -135,6 +140,7 @@ extension SceneDelegate: NSToolbarDelegate {
         case snapshotToolbarButton:
             let barButtonItem = UIBarButtonItem(image: UIImage(systemName: "photo.on.rectangle"), style: .plain, target: nil, action: #selector(DiagramViewController.macSnapshotDiagram(_:)))
             let button = NSToolbarItem(itemIdentifier: itemIdentifier, barButtonItem: barButtonItem)
+            button.toolTip = L("Snapshot diagram")
             return button
         default:
             return nil
