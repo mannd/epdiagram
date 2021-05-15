@@ -11,10 +11,15 @@ import os.log
 
 class SceneDelegate: UIResponder, UIWindowSceneDelegate {
     var window: UIWindow?
+    #if targetEnvironment(macCatalyst)
     private let zoomInToolbarButton = NSToolbarItem.Identifier(rawValue: "macZoomInButton")
     private let zoomOutToolbarButton = NSToolbarItem.Identifier(rawValue: "macZoomOutButton")
     private let zoomResetToolbarButton = NSToolbarItem.Identifier(rawValue: "macZoomResetButton")
     private let closeToolbarButton = NSToolbarItem.Identifier(rawValue: "macCloseButton")
+    private let undoToolbarButton = NSToolbarItem.Identifier(rawValue: "macUndoButton")
+    private let redoToolbarButton = NSToolbarItem.Identifier(rawValue: "macRedoButton")
+    private let snapshotToolbarButton = NSToolbarItem.Identifier(rawValue: "macSnapshotButton")
+    #endif
 
     func scene(_ scene: UIScene, willConnectTo session: UISceneSession, options connectionOptions: UIScene.ConnectionOptions) {
         os_log("scene(scene:willConnectTo:options:) - SceneDelegate", log: .lifeCycle, type: .info)
@@ -28,8 +33,10 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
             let toolbar = NSToolbar(identifier: "EP Diagram Mac Toolbar")
             toolbar.delegate = self
             toolbar.displayMode = .iconOnly
+            toolbar.allowsUserCustomization = true
             scene.titlebar?.toolbar = toolbar
             scene.titlebar?.toolbarStyle = .automatic
+            scene.titlebar?.titleVisibility = .visible
             // populate toolbar
 
             #endif
@@ -82,23 +89,13 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
     func sceneDidEnterBackground(_ scene: UIScene) {
         print("sceneDid")
     }
-
-    // from https://gist.github.com/steipete/30c33740bf0ebc34a0da897cba52fefe
-//    func nsWindow(from window: UIWindow) -> AnyObject? {
-//        guard let nsWindows = NSClassFromString("NSApplication")?.value(forKeyPath: "sharedApplication.windows") as? [AnyObject] else { return nil }
-//        for nsWindow in nsWindows {
-//            let uiWindows = nsWindow.value(forKeyPath: "uiWindows") as? [UIWindow] ?? []
-//            if uiWindows.contains(window) { return nsWindow }
-//        }
-//        return nil
-//    }
-  
 }
 
 #if targetEnvironment(macCatalyst)
 extension SceneDelegate: NSToolbarDelegate {
     func toolbarDefaultItemIdentifiers(_ toolbar: NSToolbar) -> [NSToolbarItem.Identifier] {
-        return [zoomInToolbarButton, zoomOutToolbarButton, zoomResetToolbarButton, NSToolbarItem.Identifier.flexibleSpace, closeToolbarButton]
+        let space = NSToolbarItem.Identifier.space
+        return [NSToolbarItem.Identifier.flexibleSpace, undoToolbarButton, redoToolbarButton, space, zoomInToolbarButton, zoomOutToolbarButton, zoomResetToolbarButton, space, snapshotToolbarButton, space, closeToolbarButton]
     }
 
     func toolbarAllowedItemIdentifiers(_ toolbar: NSToolbar) -> [NSToolbarItem.Identifier] {
@@ -106,34 +103,43 @@ extension SceneDelegate: NSToolbarDelegate {
     }
 
     func toolbar(_ toolbar: NSToolbar, itemForItemIdentifier itemIdentifier: NSToolbarItem.Identifier, willBeInsertedIntoToolbar flag: Bool) -> NSToolbarItem? {
-        if itemIdentifier == closeToolbarButton {
-            let barButtonItem = UIBarButtonItem(title: L("Close Diagram"), style: .plain, target: nil, action: #selector(DiagramViewController.macCloseDocument(_:)))
+        switch itemIdentifier {
+        case closeToolbarButton:
+            let barButtonItem = UIBarButtonItem(barButtonSystemItem: .done, target: nil, action: #selector(DiagramViewController.macCloseDocument(_:)))
             let button = NSToolbarItem(itemIdentifier: itemIdentifier, barButtonItem: barButtonItem)
-            button.image = UIImage(systemName: "xmark")
             return button
-        } else if itemIdentifier == zoomInToolbarButton {
-            let barButtonItem = UIBarButtonItem(barButtonSystemItem: .add, target: nil, action: #selector(DiagramViewController.doZoom(_:)))
+        case zoomInToolbarButton:
+            let barButtonItem = UIBarButtonItem(image: UIImage(systemName: "plus.magnifyingglass"), style: .plain, target: nil, action:  #selector(DiagramViewController.doZoom(_:)))
             let button = NSToolbarItem(itemIdentifier: itemIdentifier, barButtonItem: barButtonItem)
             button.tag = 0
             return button
-        } else if itemIdentifier == zoomOutToolbarButton {
-            let barButtonItem = UIBarButtonItem(barButtonSystemItem: .done, target: nil, action: #selector(DiagramViewController.doZoom(_:)))
+        case zoomOutToolbarButton:
+            let barButtonItem = UIBarButtonItem(image: UIImage(systemName: "minus.magnifyingglass"), style: .plain, target: nil, action:  #selector(DiagramViewController.doZoom(_:)))
             let button = NSToolbarItem(itemIdentifier: itemIdentifier, barButtonItem: barButtonItem)
             button.tag = 1
             return button
-        } else if itemIdentifier == zoomResetToolbarButton {
-            let barButtonItem = UIBarButtonItem(barButtonSystemItem: .cancel, target: nil, action: #selector(DiagramViewController.doZoom(_:)))
+        case zoomResetToolbarButton:
+            let barButtonItem = UIBarButtonItem(image: UIImage(systemName: "1.magnifyingglass"), style: .plain, target: nil, action:  #selector(DiagramViewController.doZoom(_:)))
             let button = NSToolbarItem(itemIdentifier: itemIdentifier, barButtonItem: barButtonItem)
             button.tag = 2
             return button
+        case undoToolbarButton:
+            let barButtonItem = UIBarButtonItem(image: UIImage(systemName: "arrow.uturn.left"), style: .plain, target: nil, action: #selector(DiagramViewController.undo))
+            let button = NSToolbarItem(itemIdentifier: itemIdentifier, barButtonItem: barButtonItem)
+            return button
+        case redoToolbarButton:
+            let barButtonItem = UIBarButtonItem(image: UIImage(systemName: "arrow.uturn.right"), style: .plain, target: nil, action: #selector(DiagramViewController.redo))
+            let button = NSToolbarItem(itemIdentifier: itemIdentifier, barButtonItem: barButtonItem)
+            button.toolTip = L("Redo")
+            return button
+        case snapshotToolbarButton:
+            let barButtonItem = UIBarButtonItem(image: UIImage(systemName: "photo.on.rectangle"), style: .plain, target: nil, action: #selector(DiagramViewController.macSnapshotDiagram(_:)))
+            let button = NSToolbarItem(itemIdentifier: itemIdentifier, barButtonItem: barButtonItem)
+            return button
+        default:
+            return nil
         }
-        return nil
     }
-
-
-//    @IBAction func macCloseDocument(_ sender: Any) {
-//        print("close it")
-//    }
 
 }
 #endif

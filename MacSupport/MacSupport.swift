@@ -8,7 +8,7 @@
 
 import AppKit
 
-class MacSupport: NSObject, SharedProtocol {
+class MacSupport: NSObject, SharedAppKitProtocol {
     required override init() {}
 
     var openPanel: NSPanel?
@@ -44,19 +44,6 @@ class MacSupport: NSObject, SharedProtocol {
         NSDocumentController.shared.value(forKey: "_installOpenRecentMenus")
     }
 
-    func printMainWindow(_ sender: Any) {
-        let mw = NSApplication.shared.mainWindow
-        print("*****mainWindow", mw as Any)
-        let kw = NSApplication.shared.keyWindow
-        print("*****keyWindow", kw as Any)
-        let windows = NSApplication.shared.windows
-        for w in windows {
-            print("*****window", w as Any)
-            w.close()
-        }
-        print("***********************")
-    }
-
     @objc
     func closeWindows(_ sender: Any) {
         for window in NSApplication.shared.windows {
@@ -74,14 +61,6 @@ class MacSupport: NSObject, SharedProtocol {
     @objc
     func windowClosing() {
         print("$$$$window closing")
-    }
-
-    @objc
-    func disableCloseButton() {
-        for window in NSApplication.shared.windows {
-            window.standardWindowButton(.closeButton)?.isHidden = true
-            print("****window view controller", window.windowController?.contentViewController as Any)
-        }
     }
 
 }

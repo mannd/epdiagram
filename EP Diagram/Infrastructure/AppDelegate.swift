@@ -18,7 +18,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 
     var ubiqURL: URL?
     var preferencesDialogIsOpen: Bool = false
-    var plugin: SharedProtocol?
+    var appKitPlugin: SharedAppKitProtocol?
 
     static let mainActivityType = "org.epstudios.epdiagram.mainActivity"
     static let preferencesActivityType = "org.epstudios.epdiagram.preferencesActivity"
@@ -37,8 +37,10 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
                 self.ubiqURL = ubiqURL
             }
         }
+        #if targetEnvironment(macCatalyst)
+        loadAppKitPlugin()
+        #endif
 
-        loadPlugin()
         return true
     }
 
@@ -65,7 +67,7 @@ extension AppDelegate {
 
     // MARK: - macOS menu
 
-    @objc func loadPlugin() {
+    @objc func loadAppKitPlugin() {
         let bundleFileName = "MacSupport.bundle"
         guard let bundleURL = Bundle.main.builtInPlugInsURL?
                 .appendingPathComponent(bundleFileName) else { return }
@@ -75,10 +77,10 @@ extension AppDelegate {
 
         /// 3. Load the bundle and our plugin class
         let className = "MacSupport.MacSupport"
-        guard let pluginClass = bundle.classNamed(className) as? SharedProtocol.Type else { return }
+        guard let pluginClass = bundle.classNamed(className) as? SharedAppKitProtocol.Type else { return }
 
         /// 4. Create an instance of the plugin class
-        self.plugin = pluginClass.init()
+        self.appKitPlugin = pluginClass.init()
 //        plugin.loadRecentMenu()
 //        plugin.sayHello()
 //        plugin?.closeWindows(self)
@@ -204,7 +206,7 @@ extension AppDelegate {
         let testCommand = UIKeyCommand(
             title: "Test",
 //            action: #selector(DiagramViewController.closeDocument),
-            action: #selector(loadPlugin),
+            action: #selector(loadAppKitPlugin),
 //            action: #selector(printMainWindow(_:)),
             input: "t",
             modifierFlags: [.command]
@@ -220,14 +222,8 @@ extension AppDelegate {
         builder.insertSibling(diagramMenu, afterMenu: .view)
 
         DispatchQueue.main.async {
-            self.loadPlugin()
+            self.loadAppKitPlugin()
 //            self.plugin?.printMainWindow(self)
-        }
-    }
-
-    @IBAction func printMainWindow(_ sender: Any) {
-        if let plugin = self.plugin {
-            plugin.printMainWindow(sender)
         }
     }
 

@@ -102,8 +102,8 @@
 		8EE1411E261F9A5B00392100 /* Onboarding.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8EE1411D261F9A5B00392100 /* Onboarding.swift */; };
 		8EE141232620EED500392100 /* onboard.html in Resources */ = {isa = PBXBuildFile; fileRef = 8EE141222620EED500392100 /* onboard.html */; };
 		8EEE3C77264B79360084D968 /* MacSupport.bundle in Embed PlugIns */ = {isa = PBXBuildFile; fileRef = 8EEE3C71264B79060084D968 /* MacSupport.bundle */; platformFilter = maccatalyst; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
-		8EEE3C7D264B798A0084D968 /* SharedProtocol.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8EEE3C7C264B798A0084D968 /* SharedProtocol.swift */; };
-		8EEE3C7E264B799A0084D968 /* SharedProtocol.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8EEE3C7C264B798A0084D968 /* SharedProtocol.swift */; };
+		8EEE3C7D264B798A0084D968 /* SharedAppKitProtocol.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8EEE3C7C264B798A0084D968 /* SharedAppKitProtocol.swift */; };
+		8EEE3C7E264B799A0084D968 /* SharedAppKitProtocol.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8EEE3C7C264B798A0084D968 /* SharedAppKitProtocol.swift */; };
 		8EEE3C80264B7A5B0084D968 /* MacSupport.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8EEE3C7F264B7A5B0084D968 /* MacSupport.swift */; };
 		8EF8B5B72330739F00ADB77A /* ViewControllerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8EF8B5B62330739F00ADB77A /* ViewControllerTests.swift */; };
 		8EF9166B227926BC00B51F17 /* LadderView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8EF9166A227926BC00B51F17 /* LadderView.swift */; };
@@ -261,7 +261,7 @@
 		8EEE3C71264B79060084D968 /* MacSupport.bundle */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = MacSupport.bundle; sourceTree = BUILT_PRODUCTS_DIR; };
 		8EEE3C73264B79060084D968 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		8EEE3C7B264B798A0084D968 /* MacSupport-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "MacSupport-Bridging-Header.h"; sourceTree = "<group>"; };
-		8EEE3C7C264B798A0084D968 /* SharedProtocol.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SharedProtocol.swift; sourceTree = "<group>"; };
+		8EEE3C7C264B798A0084D968 /* SharedAppKitProtocol.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SharedAppKitProtocol.swift; sourceTree = "<group>"; };
 		8EEE3C7F264B7A5B0084D968 /* MacSupport.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MacSupport.swift; sourceTree = "<group>"; };
 		8EF6B0F925A8CA7800DCA91C /* MobileCoreServices.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = MobileCoreServices.framework; path = Platforms/MacOSX.platform/Developer/SDKs/MacOSX11.1.sdk/System/iOSSupport/System/Library/Frameworks/MobileCoreServices.framework; sourceTree = DEVELOPER_DIR; };
 		8EF6B10125A8CAA600DCA91C /* CoreServices.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreServices.framework; path = Platforms/MacOSX.platform/Developer/SDKs/MacOSX11.1.sdk/System/Library/Frameworks/CoreServices.framework; sourceTree = DEVELOPER_DIR; };
@@ -565,7 +565,7 @@
 			isa = PBXGroup;
 			children = (
 				8EEE3C73264B79060084D968 /* Info.plist */,
-				8EEE3C7C264B798A0084D968 /* SharedProtocol.swift */,
+				8EEE3C7C264B798A0084D968 /* SharedAppKitProtocol.swift */,
 				8EEE3C7B264B798A0084D968 /* MacSupport-Bridging-Header.h */,
 				8EEE3C7F264B7A5B0084D968 /* MacSupport.swift */,
 			);
@@ -772,7 +772,7 @@
 				8E93CA7C25A00C0E00C74F1F /* UserAlert.swift in Sources */,
 				8E253DD5244A8B17008CC56B /* Version.swift in Sources */,
 				8E6EB6C2248477D500E5F883 /* DiagramViewController+DiagramViewControllerDelegate.swift in Sources */,
-				8EEE3C7E264B799A0084D968 /* SharedProtocol.swift in Sources */,
+				8EEE3C7E264B799A0084D968 /* SharedAppKitProtocol.swift in Sources */,
 				8E4A52EF24886B16007406F5 /* Diagram.swift in Sources */,
 				8E6A0298246DFB3700A10C9F /* LadderTemplateEditor.swift in Sources */,
 				8E2BA1D024A3BDD7002D997F /* PreferencesView.swift in Sources */,
@@ -857,7 +857,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				8EEE3C7D264B798A0084D968 /* SharedProtocol.swift in Sources */,
+				8EEE3C7D264B798A0084D968 /* SharedAppKitProtocol.swift in Sources */,
 				8EEE3C80264B7A5B0084D968 /* MacSupport.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

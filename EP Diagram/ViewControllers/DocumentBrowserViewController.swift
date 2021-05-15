@@ -291,6 +291,31 @@ extension DocumentBrowserViewController {
             diagramViewController.macCloseDocument(sender)
         }
     }
+
+    @IBAction func macShowCalibrateToolbar(_ sender: Any) {
+        if let diagramViewController = diagramViewController {
+            diagramViewController.macShowCalibrateToolbar(sender)
+        }
+    }
+
+    @IBAction func macSnapshotDiagram(_ sender: Any) {
+        if let diagramViewController = diagramViewController {
+            diagramViewController.macSnapshotDiagram(sender)
+        }
+    }
+
+    override func canPerformAction(_ action: Selector, withSender sender: Any?) -> Bool {
+         if action == #selector(undo(_:)) {
+            return diagramViewController?.imageScrollView.isActivated ?? false &&
+                currentDocument?.undoManager?.canUndo ?? false
+        } else if action == #selector(redo(_:)) {
+            return diagramViewController?.imageScrollView.isActivated ?? false &&
+                currentDocument?.undoManager?.canRedo ?? false
+        } else {
+            return super.canPerformAction(action, withSender: sender)
+        }
+    }
+
 }
 #endif
 

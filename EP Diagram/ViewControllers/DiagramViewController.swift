@@ -437,17 +437,6 @@ final class DiagramViewController: UIViewController {
 
         //print("userInfo", restorationInfo as Any)
 
-        // Only uncomment this to see what fonts are available.  Right now just using
-        // system fonts.
-        //for family: String in UIFont.familyNames
-        //{
-        //    print(family)
-        //    for names: String in UIFont.fontNames(forFamilyName: family)
-        //    {
-        //        print("== \(names)")
-        //    }
-        // }
-
         // Setup cursor, ladder and image scroll views.
         // These 2 views are guaranteed to exist, so the delegates are implicitly unwrapped optionals.
         cursorView.ladderViewDelegate = ladderView
@@ -545,11 +534,15 @@ final class DiagramViewController: UIViewController {
 
         // Fixes view opening flush with left margin on Mac.
         view.layoutIfNeeded()
-        navigationController?.setToolbarHidden(false, animated: false)
+        
         #if targetEnvironment(macCatalyst)
-        // Just use regular buttons to close on Mac
-        navigationController?.setNavigationBarHidden(true, animated: false)
+        navigationController?.setNavigationBarHidden(true, animated: animated)
+//        navigationController?.setToolbarHidden(true, animated: animated)
+        #else
+        navigationController?.setNavigationBarHidden(false, animated: animated)
+//        navigationController?.setToolbarHidden(false, animated: animated)
         #endif
+        navigationController?.setToolbarHidden(false, animated: animated)
     }
 
     var didFirstWillLayout = false
@@ -582,7 +575,7 @@ final class DiagramViewController: UIViewController {
         super.viewDidAppear(animated)
 
         if let appDelegate = UIApplication.shared.delegate as? AppDelegate {
-            if let plugin = appDelegate.plugin {
+            if let plugin = appDelegate.appKitPlugin {
                 if let nsWindow = view.window?.nsWindow {
                     plugin.disableCloseButton(nsWindow: nsWindow)
                 }
@@ -665,7 +658,13 @@ final class DiagramViewController: UIViewController {
             connectButton = UIBarButtonItem(title: L("Connect"), style: .plain, target: self, action: #selector(launchConnectMode))
             undoButton = UIBarButtonItem(barButtonSystemItem: .undo, target: self, action: #selector(undo))
             redoButton = UIBarButtonItem(barButtonSystemItem: .redo, target: self, action: #selector(redo))
+            #if targetEnvironment(macCatalyst)
+            mainToolbarButtons = [calibrateButton, spacer,  connectButton, spacer, selectButton]
+            #else
             mainToolbarButtons = [calibrateButton, spacer,  connectButton, spacer, selectButton, spacer, undoButton, spacer, redoButton]
+            #endif
+
+
         }
         setToolbarItems(mainToolbarButtons, animated: false)
     }
@@ -680,7 +679,11 @@ final class DiagramViewController: UIViewController {
             let clearButtonTitle = isIPad() ? L("Clear Selection") : L("Clear")
             let clearButton = UIBarButtonItem(title: clearButtonTitle, style: .plain, target: self, action: #selector(clearSelection))
             let doneButton = UIBarButtonItem(barButtonSystemItem: .done, target: self, action: #selector(cancelSelectMode))
+            #if targetEnvironment(macCatalyst)
+            selectToolbarButtons = [selectAllButton, spacer, clearButton, spacer, doneButton]
+            #else
             selectToolbarButtons = [selectAllButton, spacer, clearButton, spacer, undoButton, spacer, redoButton, spacer, doneButton]
+            #endif
         }
         setToolbarItems(selectToolbarButtons, animated: false)
     }
@@ -709,7 +712,12 @@ final class DiagramViewController: UIViewController {
             let labelText = isIPad() ? L("Tap pairs of marks to connect them") : L("Tap pairs of marks")
             let prompt = makePrompt(text: labelText)
             let doneButton = UIBarButtonItem(barButtonSystemItem: .done, target: self, action: #selector(cancelConnectMode))
+            #if targetEnvironment(macCatalyst)
+            connectToolbarButtons = [prompt, spacer, doneButton]
+            #else
             connectToolbarButtons = [prompt, spacer, undoButton, spacer, redoButton, spacer, doneButton]
+            #endif
+
         }
         setToolbarItems(connectToolbarButtons, animated: false)
     }
@@ -971,11 +979,7 @@ final class DiagramViewController: UIViewController {
         diagramEditorDelegate?.diagramEditorDidFinishEditing(self, diagram: diagram)
     }
 
-    #if targetEnvironment(macCatalyst)
-    @IBAction func macCloseDocument(_ sender: Any) {
-        closeDocument()
-    }
-    #endif
+
 
 
     @objc func snapshotDiagram() {
@@ -1745,3 +1749,39 @@ extension DiagramViewController: UITextFieldDelegate {
     }
 }
 
+// Mac catalyst specific functions
+#if targetEnvironment(macCatalyst)
+extension DiagramViewController {
+    @IBAction func macCloseDocument(_ sender: Any) {
+        closeDocument()
+    }
+
+    @IBAction func macSnapshotDiagram(_ sender: Any) {
+        snapshotDiagram()
+    }
+
+    @IBAction func macShowCalibrateToolbar(_ sender: Any) {
+        mode = .calibrate
+        navigationController?.setToolbarHidden(false, animated: true)
+    }
+
+
+}
+#endif
+
+// for debugging
+extension DiagramViewController {
+
+    #if DEBUG
+    func debugPrintFonts() {
+        for family: String in UIFont.familyNames
+        {
+            print(family)
+            for names: String in UIFont.fontNames(forFamilyName: family)
+            {
+                print("== \(names)")
+            }
+        }
+    }
+    #endif
+}
