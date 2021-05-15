@@ -18,6 +18,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 
     var ubiqURL: URL?
     var preferencesDialogIsOpen: Bool = false
+    var appKitPlugin: SharedAppKitProtocol?
 
     static let mainActivityType = "org.epstudios.epdiagram.mainActivity"
     static let preferencesActivityType = "org.epstudios.epdiagram.preferencesActivity"
@@ -36,6 +37,9 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
                 self.ubiqURL = ubiqURL
             }
         }
+        #if targetEnvironment(macCatalyst)
+        loadAppKitPlugin()
+        #endif
 
         return true
     }
@@ -56,13 +60,15 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     }
 }
 
+
 #if targetEnvironment(macCatalyst)
 extension AppDelegate {
 
+
     // MARK: - macOS menu
 
-    @objc func loadPlugin(_ sender: Any) {
-        let bundleFileName = "EP-DiagramMacSupportBundle.bundle"
+    @objc func loadAppKitPlugin() {
+        let bundleFileName = "MacSupport.bundle"
         guard let bundleURL = Bundle.main.builtInPlugInsURL?
                 .appendingPathComponent(bundleFileName) else { return }
 
@@ -70,12 +76,14 @@ extension AppDelegate {
         guard let bundle = Bundle(url: bundleURL) else { return }
 
         /// 3. Load the bundle and our plugin class
-        let className = "EP_DiagramMacSupportBundle.MacPlugin"
-        guard let pluginClass = bundle.classNamed(className) as? Plugin.Type else { return }
+        let className = "MacSupport.MacSupport"
+        guard let pluginClass = bundle.classNamed(className) as? SharedAppKitProtocol.Type else { return }
 
         /// 4. Create an instance of the plugin class
-        let plugin = pluginClass.init()
-        plugin.sayHello()
+        self.appKitPlugin = pluginClass.init()
+//        plugin.loadRecentMenu()
+//        plugin.sayHello()
+//        plugin?.closeWindows(self)
     }
 
 
@@ -85,7 +93,7 @@ extension AppDelegate {
 
         // Remove unwanted menus
         builder.remove(menu: .format)
-        builder.remove(menu: .openRecent) // Just doesn't seem to work with Catalyst
+//        builder.remove(menu: .openRecent) // Just doesn't seem to work with Catalyst
 
         // Preferences menu
         let preferencesCommand = UIKeyCommand(
@@ -102,6 +110,25 @@ extension AppDelegate {
             children: [preferencesCommand]
         )
         builder.insertSibling(openPreferencesMenu, afterMenu: .about)
+
+        // File menu
+//        let openRecentMenu = UIMenu(
+//            title: "Open Recent",
+//            identifier: UIMenu.Identifier("open_recent"),
+//            options: [],
+//            children: []
+//        )
+//        builder.insertSibling(openRecentMenu, beforeMenu: .close)
+
+        let myCloseCommand = UICommand(
+            title: "My Close",
+            action: #selector(DiagramViewController.macCloseDocument(_:))
+        )
+        let myCloseMenu = UIMenu(
+            title: "",
+            options: .displayInline, children: [myCloseCommand]
+        )
+        builder.insertChild(myCloseMenu, atEndOfMenu: .file)
 
         // View menu
         let zoomInCommand = UIKeyCommand(
@@ -176,9 +203,13 @@ extension AppDelegate {
             action: #selector(DiagramViewController.selectLadder(_:))
         )
 
-        let testCommand = UICommand(
+        let testCommand = UIKeyCommand(
             title: "Test",
-            action: #selector(loadPlugin(_:))
+//            action: #selector(DiagramViewController.closeDocument),
+            action: #selector(loadAppKitPlugin),
+//            action: #selector(printMainWindow(_:)),
+            input: "t",
+            modifierFlags: [.command]
         )
 
         let ladderMenu = UIMenu(title: L("Ladder"), children: [selectLadderCommand, editLadderCommand, testCommand])
@@ -189,6 +220,11 @@ extension AppDelegate {
             children: [importMenu, ladderMenu, sampleCommand, diagramInfoMenu]
         )
         builder.insertSibling(diagramMenu, afterMenu: .view)
+
+        DispatchQueue.main.async {
+            self.loadAppKitPlugin()
+//            self.plugin?.printMainWindow(self)
+        }
     }
 
     // See https://stackoverflow.com/questions/58882047/open-a-new-window-in-mac-catalyst

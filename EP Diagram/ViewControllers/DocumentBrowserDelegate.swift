@@ -43,7 +43,6 @@ class DocumentBrowserDelegate: NSObject, UIDocumentBrowserViewControllerDelegate
     func documentBrowser(_ controller: UIDocumentBrowserViewController, failedToImportDocumentAt documentURL: URL, error: Error?) {
         presentationHandler?(documentURL, error)
     }
-
 }
 
 extension DocumentBrowserDelegate {

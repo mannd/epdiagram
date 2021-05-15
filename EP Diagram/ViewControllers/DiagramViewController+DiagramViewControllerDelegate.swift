@@ -196,9 +196,11 @@ extension DiagramViewController: DiagramViewControllerDelegate {
         if action == #selector(showPDFToolbar) {
             return showPDFMenuItems() ? true : false
         } else if action == #selector(undo(_:)) {
-            return currentDocument?.undoManager?.canUndo ?? false
+            return imageScrollView.isActivated &&
+                currentDocument?.undoManager?.canUndo ?? false
         } else if action == #selector(redo(_:)) {
-            return currentDocument?.undoManager?.canRedo ?? false
+            return imageScrollView.isActivated &&
+                currentDocument?.undoManager?.canRedo ?? false
         } else {
             return super.canPerformAction(action, withSender: sender)
         }

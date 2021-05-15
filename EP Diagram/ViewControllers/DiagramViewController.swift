@@ -167,6 +167,7 @@ final class DiagramViewController: UIViewController {
     static let restorationContentOffsetYKey = "restorationContentOffsetYKey"
     static let restorationZoomKey = "restorationZoomKey"
     static let restorationFileNameKey = "restorationFileNameKey"
+    static let restorationDocumentURLKey = "restorationDocumentURLKey"
     static let restorationNeededKey = "restorationNeededKey"
     static let restorationTransformKey = "restorationTranslateKey"
     //    static let restorationActiveRegionIndexKey = "restorationActiveRegionIndexKey"
@@ -434,18 +435,7 @@ final class DiagramViewController: UIViewController {
         os_log("viewDidLoad() - ViewController", log: OSLog.viewCycle, type: .info)
         super.viewDidLoad()
 
-        print("userInfo", restorationInfo as Any)
-
-        // Only uncomment this to see what fonts are available.  Right now just using
-        // system fonts.
-        //for family: String in UIFont.familyNames
-        //{
-        //    print(family)
-        //    for names: String in UIFont.fontNames(forFamilyName: family)
-        //    {
-        //        print("== \(names)")
-        //    }
-        // }
+        //print("userInfo", restorationInfo as Any)
 
         // Setup cursor, ladder and image scroll views.
         // These 2 views are guaranteed to exist, so the delegates are implicitly unwrapped optionals.
@@ -544,11 +534,15 @@ final class DiagramViewController: UIViewController {
 
         // Fixes view opening flush with left margin on Mac.
         view.layoutIfNeeded()
-        navigationController?.setToolbarHidden(false, animated: false)
+        
         #if targetEnvironment(macCatalyst)
-        // Just use regular buttons to close on Mac
-        navigationController?.setNavigationBarHidden(true, animated: false)
+        navigationController?.setNavigationBarHidden(true, animated: animated)
+//        navigationController?.setToolbarHidden(true, animated: animated)
+        #else
+        navigationController?.setNavigationBarHidden(false, animated: animated)
+//        navigationController?.setToolbarHidden(false, animated: animated)
         #endif
+        navigationController?.setToolbarHidden(false, animated: animated)
     }
 
     var didFirstWillLayout = false
@@ -580,6 +574,14 @@ final class DiagramViewController: UIViewController {
         os_log("viewDidAppear() - ViewController", log: OSLog.viewCycle, type: .info)
         super.viewDidAppear(animated)
 
+        if let appDelegate = UIApplication.shared.delegate as? AppDelegate {
+            if let plugin = appDelegate.appKitPlugin {
+                if let nsWindow = view.window?.nsWindow {
+                    plugin.disableCloseButton(nsWindow: nsWindow)
+                }
+            }
+        }
+
         setTitle()
 
         self.userActivity = self.view.window?.windowScene?.userActivity
@@ -609,23 +611,15 @@ final class DiagramViewController: UIViewController {
     override func updateUserActivityState(_ activity: NSUserActivity) {
         os_log("debug: diagramViewController updateUserActivityState called", log: .debugging, type: .debug)
 
-        #if targetEnvironment(macCatalyst)
-        let bookmarkData = try? currentDocument?.fileURL.bookmarkData(options: .withSecurityScope, includingResourceValuesForKeys: nil, relativeTo: nil)
-        #else
-        let bookmarkData = try? currentDocument?.fileURL.bookmarkData(options: [], includingResourceValuesForKeys: nil, relativeTo: nil)
-        #endif
-
-        let currentDocumentURL: String = currentDocument?.fileURL.lastPathComponent ?? ""
         super.updateUserActivityState(activity)
 
         let info: [AnyHashable: Any] = [
             Self.restorationContentOffsetXKey: imageScrollView.contentOffset.x / imageScrollView.zoomScale,
             Self.restorationContentOffsetYKey: imageScrollView.contentOffset.y,
             Self.restorationZoomKey: imageScrollView.zoomScale,
-            Self.restorationFileNameKey: currentDocumentURL,
             Self.restorationDoRestorationKey: true,
             Self.restorationTransformKey: NSCoder.string(for: imageView.transform),
-            Self.restorationBookmarkKey: bookmarkData as Any,
+            Self.restorationDocumentURLKey: currentDocument?.fileURL ?? "",
         ]
         activity.addUserInfoEntries(from: info)
     }
@@ -664,7 +658,13 @@ final class DiagramViewController: UIViewController {
             connectButton = UIBarButtonItem(title: L("Connect"), style: .plain, target: self, action: #selector(launchConnectMode))
             undoButton = UIBarButtonItem(barButtonSystemItem: .undo, target: self, action: #selector(undo))
             redoButton = UIBarButtonItem(barButtonSystemItem: .redo, target: self, action: #selector(redo))
+            #if targetEnvironment(macCatalyst)
+            mainToolbarButtons = [calibrateButton, spacer,  connectButton, spacer, selectButton]
+            #else
             mainToolbarButtons = [calibrateButton, spacer,  connectButton, spacer, selectButton, spacer, undoButton, spacer, redoButton]
+            #endif
+
+
         }
         setToolbarItems(mainToolbarButtons, animated: false)
     }
@@ -679,7 +679,11 @@ final class DiagramViewController: UIViewController {
             let clearButtonTitle = isIPad() ? L("Clear Selection") : L("Clear")
             let clearButton = UIBarButtonItem(title: clearButtonTitle, style: .plain, target: self, action: #selector(clearSelection))
             let doneButton = UIBarButtonItem(barButtonSystemItem: .done, target: self, action: #selector(cancelSelectMode))
+            #if targetEnvironment(macCatalyst)
+            selectToolbarButtons = [selectAllButton, spacer, clearButton, spacer, doneButton]
+            #else
             selectToolbarButtons = [selectAllButton, spacer, clearButton, spacer, undoButton, spacer, redoButton, spacer, doneButton]
+            #endif
         }
         setToolbarItems(selectToolbarButtons, animated: false)
     }
@@ -708,7 +712,12 @@ final class DiagramViewController: UIViewController {
             let labelText = isIPad() ? L("Tap pairs of marks to connect them") : L("Tap pairs of marks")
             let prompt = makePrompt(text: labelText)
             let doneButton = UIBarButtonItem(barButtonSystemItem: .done, target: self, action: #selector(cancelConnectMode))
+            #if targetEnvironment(macCatalyst)
+            connectToolbarButtons = [prompt, spacer, doneButton]
+            #else
             connectToolbarButtons = [prompt, spacer, undoButton, spacer, redoButton, spacer, doneButton]
+            #endif
+
         }
         setToolbarItems(connectToolbarButtons, animated: false)
     }
@@ -963,16 +972,18 @@ final class DiagramViewController: UIViewController {
     // MARK: -  Actions
 
     @objc func closeDocument() {
-        os_log("closeDocument()", log: .action, type: .info)
+        os_log("$$$$$closeDocument()", log: .action, type: .info)
         view.endEditing(true)
         documentIsClosing = true
         currentDocument?.undoManager.removeAllActions()
         diagramEditorDelegate?.diagramEditorDidFinishEditing(self, diagram: diagram)
     }
 
+
+
+
     @objc func snapshotDiagram() {
         os_log("snapshotDiagram()", log: .action, type: .info)
-
         checkPhotoLibraryStatus()
     }
 
@@ -1281,6 +1292,22 @@ final class DiagramViewController: UIViewController {
         numberOfPages = 0
     }
 
+    #if targetEnvironment(macCatalyst)
+
+    // TODO: Needed or not to open diagrams (as opposed to new window) in mac?
+    @IBAction func selectDiagram(_ sender: Any) {
+        let supportedTypes: [UTType] = [UTType.image, UTType.pdf]
+        let documentPicker = UIDocumentPickerViewController(forOpeningContentTypes: supportedTypes, asCopy: true)
+        documentPicker.delegate = self
+
+        // Set the initial directory.
+        documentPicker.directoryURL = FileIO.getDocumentsURL()
+
+        // Present the document picker.
+        present(documentPicker, animated: true, completion: nil)    }
+    #endif
+
+
     // MARK: - Rotate screen
 
     override func viewWillTransition(to size: CGSize, with coordinator: UIViewControllerTransitionCoordinator) {
@@ -1448,11 +1475,24 @@ extension DiagramViewController {
             if property == "resetZoom" {
                 newZoomFactor = 1.0
             }
-
-            UIView.animate(withDuration: 0.1) {
-                self.imageScrollView.zoomScale = newZoomFactor
-                self.scrollViewAdjustViews(self.imageScrollView)
+        }
+        if let sender = sender as? NSToolbarItem {
+            switch sender.tag {
+            case 0:
+                zoomFactor = imageScrollView.zoomScale
+                newZoomFactor = zoomFactor * zoomInFactor
+            case 1:
+                zoomFactor = imageScrollView.zoomScale
+                newZoomFactor = zoomFactor * zoomOutFactor
+            case 2:
+                newZoomFactor = 1.0
+            default:
+                break
             }
+        }
+        UIView.animate(withDuration: 0.2) {
+            self.imageScrollView.zoomScale = newZoomFactor
+            self.scrollViewAdjustViews(self.imageScrollView)
         }
     }
 
@@ -1709,3 +1749,39 @@ extension DiagramViewController: UITextFieldDelegate {
     }
 }
 
+// Mac catalyst specific functions
+#if targetEnvironment(macCatalyst)
+extension DiagramViewController {
+    @IBAction func macCloseDocument(_ sender: Any) {
+        closeDocument()
+    }
+
+    @IBAction func macSnapshotDiagram(_ sender: Any) {
+        snapshotDiagram()
+    }
+
+    @IBAction func macShowCalibrateToolbar(_ sender: Any) {
+        mode = .calibrate
+        navigationController?.setToolbarHidden(false, animated: true)
+    }
+
+
+}
+#endif
+
+// for debugging
+extension DiagramViewController {
+
+    #if DEBUG
+    func debugPrintFonts() {
+        for family: String in UIFont.familyNames
+        {
+            print(family)
+            for names: String in UIFont.fontNames(forFamilyName: family)
+            {
+                print("== \(names)")
+            }
+        }
+    }
+    #endif
+}

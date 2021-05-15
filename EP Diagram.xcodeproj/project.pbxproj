@@ -101,12 +101,14 @@
 		8EDCE17F25EC0C7400B9C7B8 /* Color.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8EDCE17E25EC0C7400B9C7B8 /* Color.swift */; };
 		8EE1411E261F9A5B00392100 /* Onboarding.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8EE1411D261F9A5B00392100 /* Onboarding.swift */; };
 		8EE141232620EED500392100 /* onboard.html in Resources */ = {isa = PBXBuildFile; fileRef = 8EE141222620EED500392100 /* onboard.html */; };
-		8EEE3C60264B6B2F0084D968 /* EP-DiagramMacSupportBundle.bundle in Embed PlugIns */ = {isa = PBXBuildFile; fileRef = 8EEE3C5A264B689D0084D968 /* EP-DiagramMacSupportBundle.bundle */; platformFilter = maccatalyst; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
-		8EEE3C66264B6E270084D968 /* Plugin.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8EEE3C65264B6E270084D968 /* Plugin.swift */; };
-		8EEE3C67264B6E270084D968 /* Plugin.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8EEE3C65264B6E270084D968 /* Plugin.swift */; };
-		8EEE3C69264B6EC70084D968 /* MacPlugin.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8EEE3C68264B6EC70084D968 /* MacPlugin.swift */; };
+		8EEE3C77264B79360084D968 /* MacSupport.bundle in Embed PlugIns */ = {isa = PBXBuildFile; fileRef = 8EEE3C71264B79060084D968 /* MacSupport.bundle */; platformFilter = maccatalyst; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
+		8EEE3C7D264B798A0084D968 /* SharedAppKitProtocol.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8EEE3C7C264B798A0084D968 /* SharedAppKitProtocol.swift */; };
+		8EEE3C7E264B799A0084D968 /* SharedAppKitProtocol.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8EEE3C7C264B798A0084D968 /* SharedAppKitProtocol.swift */; };
+		8EEE3C80264B7A5B0084D968 /* MacSupport.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8EEE3C7F264B7A5B0084D968 /* MacSupport.swift */; };
 		8EF8B5B72330739F00ADB77A /* ViewControllerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8EF8B5B62330739F00ADB77A /* ViewControllerTests.swift */; };
 		8EF9166B227926BC00B51F17 /* LadderView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8EF9166A227926BC00B51F17 /* LadderView.swift */; };
+		8EF9CA24264F0138007AA24A /* Dynamic in Frameworks */ = {isa = PBXBuildFile; productRef = 8EF9CA23264F0138007AA24A /* Dynamic */; };
+		8EF9CA26264F016C007AA24A /* UIWindow+nsWindow.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8EF9CA25264F016C007AA24A /* UIWindow+nsWindow.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -124,23 +126,23 @@
 			remoteGlobalIDString = 8E7D24BE22779DBD005A1729;
 			remoteInfo = "EP Diagram";
 		};
-		8EEE3C61264B6B2F0084D968 /* PBXContainerItemProxy */ = {
+		8EEE3C78264B79360084D968 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = 8E7D24B722779DBD005A1729 /* Project object */;
 			proxyType = 1;
-			remoteGlobalIDString = 8EEE3C59264B689D0084D968;
-			remoteInfo = "EP-DiagramMacSupportBundle";
+			remoteGlobalIDString = 8EEE3C70264B79060084D968;
+			remoteInfo = MacSupport;
 		};
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXCopyFilesBuildPhase section */
-		8EEE3C63264B6B2F0084D968 /* Embed PlugIns */ = {
+		8EEE3C7A264B79360084D968 /* Embed PlugIns */ = {
 			isa = PBXCopyFilesBuildPhase;
 			buildActionMask = 2147483647;
 			dstPath = "";
 			dstSubfolderSpec = 13;
 			files = (
-				8EEE3C60264B6B2F0084D968 /* EP-DiagramMacSupportBundle.bundle in Embed PlugIns */,
+				8EEE3C77264B79360084D968 /* MacSupport.bundle in Embed PlugIns */,
 			);
 			name = "Embed PlugIns";
 			runOnlyForDeploymentPostprocessing = 0;
@@ -256,15 +258,16 @@
 		8EE141222620EED500392100 /* onboard.html */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.html; path = onboard.html; sourceTree = "<group>"; };
 		8EE141272620EEE200392100 /* onboard.org */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = onboard.org; sourceTree = "<group>"; };
 		8EE311E524A8FE01003C7AF6 /* AudioToolbox.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AudioToolbox.framework; path = Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.15.sdk/System/Library/Frameworks/AudioToolbox.framework; sourceTree = DEVELOPER_DIR; };
-		8EEE3C5A264B689D0084D968 /* EP-DiagramMacSupportBundle.bundle */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "EP-DiagramMacSupportBundle.bundle"; sourceTree = BUILT_PRODUCTS_DIR; };
-		8EEE3C5C264B689D0084D968 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
-		8EEE3C64264B6E260084D968 /* EP-DiagramMacSupportBundle-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "EP-DiagramMacSupportBundle-Bridging-Header.h"; sourceTree = "<group>"; };
-		8EEE3C65264B6E270084D968 /* Plugin.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Plugin.swift; sourceTree = "<group>"; };
-		8EEE3C68264B6EC70084D968 /* MacPlugin.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MacPlugin.swift; sourceTree = "<group>"; };
+		8EEE3C71264B79060084D968 /* MacSupport.bundle */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = MacSupport.bundle; sourceTree = BUILT_PRODUCTS_DIR; };
+		8EEE3C73264B79060084D968 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		8EEE3C7B264B798A0084D968 /* MacSupport-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "MacSupport-Bridging-Header.h"; sourceTree = "<group>"; };
+		8EEE3C7C264B798A0084D968 /* SharedAppKitProtocol.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SharedAppKitProtocol.swift; sourceTree = "<group>"; };
+		8EEE3C7F264B7A5B0084D968 /* MacSupport.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MacSupport.swift; sourceTree = "<group>"; };
 		8EF6B0F925A8CA7800DCA91C /* MobileCoreServices.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = MobileCoreServices.framework; path = Platforms/MacOSX.platform/Developer/SDKs/MacOSX11.1.sdk/System/iOSSupport/System/Library/Frameworks/MobileCoreServices.framework; sourceTree = DEVELOPER_DIR; };
 		8EF6B10125A8CAA600DCA91C /* CoreServices.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreServices.framework; path = Platforms/MacOSX.platform/Developer/SDKs/MacOSX11.1.sdk/System/Library/Frameworks/CoreServices.framework; sourceTree = DEVELOPER_DIR; };
 		8EF8B5B62330739F00ADB77A /* ViewControllerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ViewControllerTests.swift; sourceTree = "<group>"; };
 		8EF9166A227926BC00B51F17 /* LadderView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LadderView.swift; sourceTree = "<group>"; };
+		8EF9CA25264F016C007AA24A /* UIWindow+nsWindow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "UIWindow+nsWindow.swift"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -272,6 +275,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				8EF9CA24264F0138007AA24A /* Dynamic in Frameworks */,
 				8EBBDE2726111E26004DDD2B /* BetterCodable in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -290,7 +294,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
-		8EEE3C57264B689D0084D968 /* Frameworks */ = {
+		8EEE3C6E264B79060084D968 /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -344,6 +348,7 @@
 				8E9F0983253CF483009BC968 /* UINavigationController+gestureRecognizerShouldBegin.swift */,
 				8EC5D28C256B154E00F49865 /* UIView+PinToInside.swift */,
 				8ED3651E261B66A900F2A2B6 /* UIView+findViewController.swift */,
+				8EF9CA25264F016C007AA24A /* UIWindow+nsWindow.swift */,
 			);
 			path = Extensions;
 			sourceTree = "<group>";
@@ -371,7 +376,7 @@
 				8E7D24C122779DBD005A1729 /* EP Diagram */,
 				8E7D24D622779DBF005A1729 /* EP DiagramTests */,
 				8E7D24E122779DBF005A1729 /* EP DiagramUITests */,
-				8EEE3C5B264B689D0084D968 /* EP-DiagramMacSupportBundle */,
+				8EEE3C72264B79060084D968 /* MacSupport */,
 				8E7D24C022779DBD005A1729 /* Products */,
 				8EE311E424A8FE01003C7AF6 /* Frameworks */,
 			);
@@ -383,7 +388,7 @@
 				8E7D24BF22779DBD005A1729 /* EP Diagram.app */,
 				8E7D24D322779DBF005A1729 /* EP DiagramTests.xctest */,
 				8E7D24DE22779DBF005A1729 /* EP DiagramUITests.xctest */,
-				8EEE3C5A264B689D0084D968 /* EP-DiagramMacSupportBundle.bundle */,
+				8EEE3C71264B79060084D968 /* MacSupport.bundle */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -556,15 +561,15 @@
 			name = Frameworks;
 			sourceTree = "<group>";
 		};
-		8EEE3C5B264B689D0084D968 /* EP-DiagramMacSupportBundle */ = {
+		8EEE3C72264B79060084D968 /* MacSupport */ = {
 			isa = PBXGroup;
 			children = (
-				8EEE3C5C264B689D0084D968 /* Info.plist */,
-				8EEE3C65264B6E270084D968 /* Plugin.swift */,
-				8EEE3C64264B6E260084D968 /* EP-DiagramMacSupportBundle-Bridging-Header.h */,
-				8EEE3C68264B6EC70084D968 /* MacPlugin.swift */,
+				8EEE3C73264B79060084D968 /* Info.plist */,
+				8EEE3C7C264B798A0084D968 /* SharedAppKitProtocol.swift */,
+				8EEE3C7B264B798A0084D968 /* MacSupport-Bridging-Header.h */,
+				8EEE3C7F264B7A5B0084D968 /* MacSupport.swift */,
 			);
-			path = "EP-DiagramMacSupportBundle";
+			path = MacSupport;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -577,16 +582,17 @@
 				8E7D24BB22779DBD005A1729 /* Sources */,
 				8E7D24BC22779DBD005A1729 /* Frameworks */,
 				8E7D24BD22779DBD005A1729 /* Resources */,
-				8EEE3C63264B6B2F0084D968 /* Embed PlugIns */,
+				8EEE3C7A264B79360084D968 /* Embed PlugIns */,
 			);
 			buildRules = (
 			);
 			dependencies = (
-				8EEE3C62264B6B2F0084D968 /* PBXTargetDependency */,
+				8EEE3C79264B79360084D968 /* PBXTargetDependency */,
 			);
 			name = "EP Diagram";
 			packageProductDependencies = (
 				8EBBDE2626111E26004DDD2B /* BetterCodable */,
+				8EF9CA23264F0138007AA24A /* Dynamic */,
 			);
 			productName = "EP Diagram";
 			productReference = 8E7D24BF22779DBD005A1729 /* EP Diagram.app */;
@@ -628,21 +634,21 @@
 			productReference = 8E7D24DE22779DBF005A1729 /* EP DiagramUITests.xctest */;
 			productType = "com.apple.product-type.bundle.ui-testing";
 		};
-		8EEE3C59264B689D0084D968 /* EP-DiagramMacSupportBundle */ = {
+		8EEE3C70264B79060084D968 /* MacSupport */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = 8EEE3C5F264B689D0084D968 /* Build configuration list for PBXNativeTarget "EP-DiagramMacSupportBundle" */;
+			buildConfigurationList = 8EEE3C74264B79060084D968 /* Build configuration list for PBXNativeTarget "MacSupport" */;
 			buildPhases = (
-				8EEE3C56264B689D0084D968 /* Sources */,
-				8EEE3C57264B689D0084D968 /* Frameworks */,
-				8EEE3C58264B689D0084D968 /* Resources */,
+				8EEE3C6D264B79060084D968 /* Sources */,
+				8EEE3C6E264B79060084D968 /* Frameworks */,
+				8EEE3C6F264B79060084D968 /* Resources */,
 			);
 			buildRules = (
 			);
 			dependencies = (
 			);
-			name = "EP-DiagramMacSupportBundle";
-			productName = "EP-DiagramMacSupportBundle";
-			productReference = 8EEE3C5A264B689D0084D968 /* EP-DiagramMacSupportBundle.bundle */;
+			name = MacSupport;
+			productName = MacSupport;
+			productReference = 8EEE3C71264B79060084D968 /* MacSupport.bundle */;
 			productType = "com.apple.product-type.bundle";
 		};
 /* End PBXNativeTarget section */
@@ -666,7 +672,7 @@
 						CreatedOnToolsVersion = 10.2.1;
 						TestTargetID = 8E7D24BE22779DBD005A1729;
 					};
-					8EEE3C59264B689D0084D968 = {
+					8EEE3C70264B79060084D968 = {
 						CreatedOnToolsVersion = 12.5;
 						LastSwiftMigration = 1250;
 					};
@@ -683,6 +689,7 @@
 			mainGroup = 8E7D24B622779DBD005A1729;
 			packageReferences = (
 				8EBBDE2526111E26004DDD2B /* XCRemoteSwiftPackageReference "BetterCodable" */,
+				8EF9CA22264F0138007AA24A /* XCRemoteSwiftPackageReference "Dynamic" */,
 			);
 			productRefGroup = 8E7D24C022779DBD005A1729 /* Products */;
 			projectDirPath = "";
@@ -691,7 +698,7 @@
 				8E7D24BE22779DBD005A1729 /* EP Diagram */,
 				8E7D24D222779DBF005A1729 /* EP DiagramTests */,
 				8E7D24DD22779DBF005A1729 /* EP DiagramUITests */,
-				8EEE3C59264B689D0084D968 /* EP-DiagramMacSupportBundle */,
+				8EEE3C70264B79060084D968 /* MacSupport */,
 			);
 		};
 /* End PBXProject section */
@@ -729,7 +736,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
-		8EEE3C58264B689D0084D968 /* Resources */ = {
+		8EEE3C6F264B79060084D968 /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -743,6 +750,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				8EF9CA26264F016C007AA24A /* UIWindow+nsWindow.swift in Sources */,
 				8ECA9FB52470A07B0016D939 /* RegionTemplate.swift in Sources */,
 				8E04C5FC256A0AD600946348 /* ImageWrapper.swift in Sources */,
 				8E4ACA8924479C5200575538 /* HamburgerViewModel.swift in Sources */,
@@ -764,6 +772,7 @@
 				8E93CA7C25A00C0E00C74F1F /* UserAlert.swift in Sources */,
 				8E253DD5244A8B17008CC56B /* Version.swift in Sources */,
 				8E6EB6C2248477D500E5F883 /* DiagramViewController+DiagramViewControllerDelegate.swift in Sources */,
+				8EEE3C7E264B799A0084D968 /* SharedAppKitProtocol.swift in Sources */,
 				8E4A52EF24886B16007406F5 /* Diagram.swift in Sources */,
 				8E6A0298246DFB3700A10C9F /* LadderTemplateEditor.swift in Sources */,
 				8E2BA1D024A3BDD7002D997F /* PreferencesView.swift in Sources */,
@@ -794,7 +803,6 @@
 				8E2439F624B14F770044AEAB /* Interval.swift in Sources */,
 				8ECA9FB72470A1020016D939 /* LadderTemplate.swift in Sources */,
 				8E80F26725BA689900B9E594 /* DiagramViewController+UIContextMenuInteractionDelegate.swift in Sources */,
-				8EEE3C66264B6E270084D968 /* Plugin.swift in Sources */,
 				8E01D9C722849047000F36FC /* CursorView.swift in Sources */,
 				8E77BDA4253F5AA600FD51E5 /* RegionTemplateEditor.swift in Sources */,
 				8EA444C02476E471005B5452 /* LadderSelector.swift in Sources */,
@@ -845,12 +853,12 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
-		8EEE3C56264B689D0084D968 /* Sources */ = {
+		8EEE3C6D264B79060084D968 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				8EEE3C69264B6EC70084D968 /* MacPlugin.swift in Sources */,
-				8EEE3C67264B6E270084D968 /* Plugin.swift in Sources */,
+				8EEE3C7D264B798A0084D968 /* SharedAppKitProtocol.swift in Sources */,
+				8EEE3C80264B7A5B0084D968 /* MacSupport.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -867,11 +875,11 @@
 			target = 8E7D24BE22779DBD005A1729 /* EP Diagram */;
 			targetProxy = 8E7D24DF22779DBF005A1729 /* PBXContainerItemProxy */;
 		};
-		8EEE3C62264B6B2F0084D968 /* PBXTargetDependency */ = {
+		8EEE3C79264B79360084D968 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			platformFilter = maccatalyst;
-			target = 8EEE3C59264B689D0084D968 /* EP-DiagramMacSupportBundle */;
-			targetProxy = 8EEE3C61264B6B2F0084D968 /* PBXContainerItemProxy */;
+			target = 8EEE3C70264B79060084D968 /* MacSupport */;
+			targetProxy = 8EEE3C78264B79360084D968 /* PBXContainerItemProxy */;
 		};
 /* End PBXTargetDependency section */
 
@@ -1149,14 +1157,14 @@
 			};
 			name = Release;
 		};
-		8EEE3C5D264B689D0084D968 /* Debug */ = {
+		8EEE3C75264B79060084D968 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
 				DEVELOPMENT_TEAM = W74NPJXYEG;
-				INFOPLIST_FILE = "EP-DiagramMacSupportBundle/Info.plist";
+				INFOPLIST_FILE = MacSupport/Info.plist;
 				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Bundles";
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
@@ -1164,25 +1172,25 @@
 					"@loader_path/../Frameworks",
 				);
 				MACOSX_DEPLOYMENT_TARGET = 11.3;
-				PRODUCT_BUNDLE_IDENTIFIER = "org.epstudios.EP-DiagramMacSupportBundle";
+				PRODUCT_BUNDLE_IDENTIFIER = org.epstudios.MacSupport;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = macosx;
 				SKIP_INSTALL = YES;
-				SWIFT_OBJC_BRIDGING_HEADER = "EP-DiagramMacSupportBundle/EP-DiagramMacSupportBundle-Bridging-Header.h";
+				SWIFT_OBJC_BRIDGING_HEADER = "MacSupport/MacSupport-Bridging-Header.h";
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 				SWIFT_VERSION = 5.0;
 				WRAPPER_EXTENSION = bundle;
 			};
 			name = Debug;
 		};
-		8EEE3C5E264B689D0084D968 /* Release */ = {
+		8EEE3C76264B79060084D968 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
 				DEVELOPMENT_TEAM = W74NPJXYEG;
-				INFOPLIST_FILE = "EP-DiagramMacSupportBundle/Info.plist";
+				INFOPLIST_FILE = MacSupport/Info.plist;
 				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Bundles";
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
@@ -1190,11 +1198,11 @@
 					"@loader_path/../Frameworks",
 				);
 				MACOSX_DEPLOYMENT_TARGET = 11.3;
-				PRODUCT_BUNDLE_IDENTIFIER = "org.epstudios.EP-DiagramMacSupportBundle";
+				PRODUCT_BUNDLE_IDENTIFIER = org.epstudios.MacSupport;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = macosx;
 				SKIP_INSTALL = YES;
-				SWIFT_OBJC_BRIDGING_HEADER = "EP-DiagramMacSupportBundle/EP-DiagramMacSupportBundle-Bridging-Header.h";
+				SWIFT_OBJC_BRIDGING_HEADER = "MacSupport/MacSupport-Bridging-Header.h";
 				SWIFT_VERSION = 5.0;
 				WRAPPER_EXTENSION = bundle;
 			};
@@ -1239,11 +1247,11 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		8EEE3C5F264B689D0084D968 /* Build configuration list for PBXNativeTarget "EP-DiagramMacSupportBundle" */ = {
+		8EEE3C74264B79060084D968 /* Build configuration list for PBXNativeTarget "MacSupport" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
-				8EEE3C5D264B689D0084D968 /* Debug */,
-				8EEE3C5E264B689D0084D968 /* Release */,
+				8EEE3C75264B79060084D968 /* Debug */,
+				8EEE3C76264B79060084D968 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
@@ -1259,6 +1267,14 @@
 				minimumVersion = 0.3.0;
 			};
 		};
+		8EF9CA22264F0138007AA24A /* XCRemoteSwiftPackageReference "Dynamic" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/mhdhejazi/Dynamic.git";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 1.2.0;
+			};
+		};
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
@@ -1266,6 +1282,11 @@
 			isa = XCSwiftPackageProductDependency;
 			package = 8EBBDE2526111E26004DDD2B /* XCRemoteSwiftPackageReference "BetterCodable" */;
 			productName = BetterCodable;
+		};
+		8EF9CA23264F0138007AA24A /* Dynamic */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 8EF9CA22264F0138007AA24A /* XCRemoteSwiftPackageReference "Dynamic" */;
+			productName = Dynamic;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};
