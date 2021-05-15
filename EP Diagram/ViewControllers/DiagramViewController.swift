@@ -485,12 +485,16 @@ final class DiagramViewController: UIViewController {
 
         // Navigation buttons
         // Hamburger menu is replaced by main menu on Mac.
+        #if !targetEnvironment(macCatalyst)
         hamburgerButton = UIBarButtonItem(image: UIImage(named: "hamburger"), style: .plain, target: self, action: #selector(toggleHamburgerMenu))
         navigationItem.setLeftBarButton(hamburgerButton, animated: true)
-
         let snapshotButton = UIBarButtonItem(image: UIImage(systemName: "photo.on.rectangle"), style: .plain, target: self, action: #selector(snapshotDiagram))
         let closeButton = UIBarButtonItem(image: UIImage(systemName: "xmark"), style: .done, target: self, action: #selector(closeDocument))
         navigationItem.setRightBarButtonItems([closeButton, snapshotButton], animated: true)
+        #endif
+
+        let backButton = UIBarButtonItem(title: L("Done"), style: .done, target: nil, action: nil)
+        navigationItem.backBarButtonItem = backButton
 
         // Set up touches
         let singleTapRecognizer = UITapGestureRecognizer(target: self, action: #selector(self.singleTap))
@@ -1401,7 +1405,10 @@ final class DiagramViewController: UIViewController {
     }
 
     @IBSegueAction func performOnboardingSegueAction(_ coder: NSCoder) -> UIViewController? {
-        guard let url = Bundle.main.url(forResource: "onboard", withExtension: "html") else { return nil }
+        guard let url = Bundle.main.url(
+                forResource: isRunningOnMac() ? "maconboard" : "onboard",
+                withExtension: "html")
+        else { return nil }
         do {
             let contents = try String(contentsOf: url)
             let onboardingView = Onboarding(onboardText: .constant(contents), url: url)

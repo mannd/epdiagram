@@ -40,6 +40,8 @@
 		8E4ACA842447905E00575538 /* HamburgerCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8E4ACA832447905E00575538 /* HamburgerCell.swift */; };
 		8E4ACA862447935600575538 /* HamburgerLayer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8E4ACA852447935600575538 /* HamburgerLayer.swift */; };
 		8E4ACA8924479C5200575538 /* HamburgerViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8E4ACA8824479C5200575538 /* HamburgerViewModel.swift */; };
+		8E4D02FC265048C500F3CF53 /* maconboard.html in Resources */ = {isa = PBXBuildFile; fileRef = 8E4D02FA265048C500F3CF53 /* maconboard.html */; };
+		8E4D02FD265048C500F3CF53 /* maconboard.org in Resources */ = {isa = PBXBuildFile; fileRef = 8E4D02FB265048C500F3CF53 /* maconboard.org */; };
 		8E55612922A5FEDC00C4D391 /* Cursor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8E55612822A5FEDC00C4D391 /* Cursor.swift */; };
 		8E5918BC24AEAB0B00D8ABA3 /* Caliper.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8E5918BB24AEAB0B00D8ABA3 /* Caliper.swift */; };
 		8E5918BE24AEAFE100D8ABA3 /* CaliperTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8E5918BD24AEAFE100D8ABA3 /* CaliperTests.swift */; };
@@ -186,6 +188,8 @@
 		8E4ACA832447905E00575538 /* HamburgerCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HamburgerCell.swift; sourceTree = "<group>"; };
 		8E4ACA852447935600575538 /* HamburgerLayer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HamburgerLayer.swift; sourceTree = "<group>"; };
 		8E4ACA8824479C5200575538 /* HamburgerViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HamburgerViewModel.swift; sourceTree = "<group>"; };
+		8E4D02FA265048C500F3CF53 /* maconboard.html */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.html; path = maconboard.html; sourceTree = "<group>"; };
+		8E4D02FB265048C500F3CF53 /* maconboard.org */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = maconboard.org; sourceTree = "<group>"; };
 		8E55612822A5FEDC00C4D391 /* Cursor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Cursor.swift; sourceTree = "<group>"; };
 		8E5918BB24AEAB0B00D8ABA3 /* Caliper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Caliper.swift; sourceTree = "<group>"; };
 		8E5918BD24AEAFE100D8ABA3 /* CaliperTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CaliperTests.swift; sourceTree = "<group>"; };
@@ -449,6 +453,8 @@
 		8E976B95260E438C00CA8BF9 /* Help */ = {
 			isa = PBXGroup;
 			children = (
+				8E4D02FA265048C500F3CF53 /* maconboard.html */,
+				8E4D02FB265048C500F3CF53 /* maconboard.org */,
 				8EE141272620EEE200392100 /* onboard.org */,
 				8EE141222620EED500392100 /* onboard.html */,
 				8E976B8A260E435000CA8BF9 /* help.html */,
@@ -708,9 +714,11 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				8E4D02FC265048C500F3CF53 /* maconboard.html in Resources */,
 				8E997BD7262F3CF800F0578D /* EPDiagram.help in Resources */,
 				8E976B91260E435100CA8BF9 /* org.css in Resources */,
 				8E976B90260E435100CA8BF9 /* img in Resources */,
+				8E4D02FD265048C500F3CF53 /* maconboard.org in Resources */,
 				8E04C5CB2569947100946348 /* Startup.storyboard in Resources */,
 				8E33927B262E6DE6002A7447 /* Preferences.storyboard in Resources */,
 				8E976B8E260E435100CA8BF9 /* help.html in Resources */,

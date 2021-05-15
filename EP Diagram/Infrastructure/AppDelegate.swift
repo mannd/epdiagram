@@ -112,17 +112,34 @@ extension AppDelegate {
         builder.insertSibling(openPreferencesMenu, afterMenu: .about)
 
         // File menu
+        let saveScreenshotCommand = UIKeyCommand(
+            title: "Save Screenshot",
+            action: #selector(DiagramViewController.macSnapshotDiagram),
+            input: "s",
+            modifierFlags: [.command]
+        )
+        let saveScreenshotMenu = UIMenu(
+            title: "",
+            identifier: UIMenu.Identifier("saveScreenshotMenu"),
+            options: .displayInline,
+            children: [saveScreenshotCommand]
+        )
+
         let closeDiagramCommand = UIKeyCommand(
             title: "Close Diagram",
             action: #selector(DiagramViewController.macCloseDocument(_:)),
             input: "w",
             modifierFlags: [.command]
         )
-        let myCloseMenu = UIMenu(
+        let closeDiagramMenu = UIMenu(
             title: "",
-            options: .displayInline, children: [closeDiagramCommand]
+            identifier: UIMenu.Identifier("closeDiagramMenu"),
+            options: .displayInline,
+            children: [closeDiagramCommand]
         )
-        builder.replace(menu: .close, with: myCloseMenu)
+        builder.replace(menu: .close, with: closeDiagramMenu)
+        builder.insertSibling(saveScreenshotMenu, beforeMenu: UIMenu.Identifier("closeDiagramMenu"))
+
 
         // View menu
         let zoomInCommand = UIKeyCommand(
