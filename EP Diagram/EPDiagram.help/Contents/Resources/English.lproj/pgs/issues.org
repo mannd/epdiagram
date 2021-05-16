@@ -24,5 +24,12 @@
 #+END_EXPORT
 
 * Known issues/bugs/limitations
-- Mac version still under development.  Owners of M1 Macs can use the app as is, but we are working on adapting the app to Intel Macs as well, with a more Mac-like user interface.
+- If you are used to the iPad version of *EP Diagram*, there are some differences and limitations relating to porting the app to the Mac.  These include:
+  - Renaming files.  Unlike the iOS version, files cannot be renamed withing the app itself.  It is necessary to rename diagram files using a Finder window.  This is related to the app sandbox that is required for Mac apps hosted on the App Store.
+  - Locking and unlocking of the image and ladder are not implemented on the Mac.
+  - The red close window button is disabled on the Mac.  It is necessary to use the *Close Diagram* toolbar button or menu command to close the diagram window.  This is a limitation due to a bug in the implementation of document-based apps on the Mac using Mac Catalyst.
+- Drag and drop works for image files (e.g. JPG files) but not for PDF or diagram files.  This will be addressed in a future release.
+- Calibration is not saved if there is no image file loaded.
 - Complexly linked marks in the same region may not always track with the moving mark.  We can't decide if this is a bug or feature. 
+
+

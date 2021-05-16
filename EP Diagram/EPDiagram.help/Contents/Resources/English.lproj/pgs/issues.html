@@ -3,7 +3,7 @@
 "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
 <head>
-<!-- 2021-05-10 Mon 10:24 -->
+<!-- 2021-05-16 Sun 09:01 -->
 <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>EP Diagram Help</title>
@@ -227,18 +227,25 @@
 <body>
 <div id="content">
 <h1 class="title">EP Diagram Help</h1>
-<div id="outline-container-org0a6d53c" class="outline-2">
-<h2 id="org0a6d53c"><img src="../../shrd/64.png" alt="64.png" /> Issues</h2>
-<div class="outline-text-2" id="text-org0a6d53c">
+<div id="outline-container-org6ef3f06" class="outline-2">
+<h2 id="org6ef3f06"><img src="../../shrd/64.png" alt="64.png" /> Issues</h2>
+<div class="outline-text-2" id="text-org6ef3f06">
 <a name="EP Diagram index"></a>
 </div>
 </div>
 
-<div id="outline-container-org46423bc" class="outline-2">
-<h2 id="org46423bc">Known issues/bugs/limitations</h2>
-<div class="outline-text-2" id="text-org46423bc">
+<div id="outline-container-orgc5c38ff" class="outline-2">
+<h2 id="orgc5c38ff">Known issues/bugs/limitations</h2>
+<div class="outline-text-2" id="text-orgc5c38ff">
 <ul class="org-ul">
-<li>Mac version still under development.  Owners of M1 Macs can use the app as is, but we are working on adapting the app to Intel Macs as well, with a more Mac-like user interface.</li>
+<li>If you are used to the iPad version of <b>EP Diagram</b>, there are some differences and limitations relating to porting the app to the Mac.  These include:
+<ul class="org-ul">
+<li>Renaming files.  Unlike the iOS version, files cannot be renamed withing the app itself.  It is necessary to rename diagram files using a Finder window.  This is related to the app sandbox that is required for Mac apps hosted on the App Store.</li>
+<li>Locking and unlocking of the image and ladder are not implemented on the Mac.</li>
+<li>The red close window button is disabled on the Mac.  It is necessary to use the <b>Close Diagram</b> toolbar button or menu command to close the diagram window.  This is a limitation due to a bug in the implementation of document-based apps on the Mac using Mac Catalyst.</li>
+</ul></li>
+<li>Drag and drop works for image files (e.g. JPG files) but not for PDF or diagram files.  This will be addressed in a future release.</li>
+<li>Calibration is not saved if there is no image file loaded.</li>
 <li>Complexly linked marks in the same region may not always track with the moving mark.  We can't decide if this is a bug or feature.</li>
 </ul>
 </div>

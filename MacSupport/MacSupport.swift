@@ -64,9 +64,3 @@ class MacSupport: NSObject, SharedAppKitProtocol {
     }
 
 }
-
-//class WindowController: NSWindowController {
-//    override var shouldCloseDocument: Bool {
-//        return true
-//    }
-//}

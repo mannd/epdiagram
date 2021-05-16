@@ -279,9 +279,11 @@ extension DiagramViewController: HamburgerTableDelegate, UIImagePickerController
     }
 
     private func chooseSource() {
-        let alert = UIAlertController(title: NSLocalizedString("Image Source", comment: ""), message:nil, preferredStyle: .actionSheet)
+        let alert = UIAlertController(title: NSLocalizedString("Image Source", comment: ""), message:nil, preferredStyle: isRunningOnMac() ? .alert : .actionSheet)
+        #if !targetEnvironment(macCatalyst)
         alert.modalPresentationStyle = .popover
         alert.popoverPresentationController?.barButtonItem = navigationItem.leftBarButtonItem
+        #endif
         alert.addAction(UIAlertAction(title: NSLocalizedString("Photos", comment: ""), style: .default, handler: { _ in
             self.handleSelectImage()
         }))

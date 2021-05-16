@@ -19,6 +19,7 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
     private let undoToolbarButton = NSToolbarItem.Identifier(rawValue: "macUndoButton")
     private let redoToolbarButton = NSToolbarItem.Identifier(rawValue: "macRedoButton")
     private let snapshotToolbarButton = NSToolbarItem.Identifier(rawValue: "macSnapshotButton")
+    private let importImageToolbarButton = NSToolbarItem.Identifier(rawValue: "macImportImageButton")
     #endif
 
     func scene(_ scene: UIScene, willConnectTo session: UISceneSession, options connectionOptions: UIScene.ConnectionOptions) {
@@ -75,27 +76,24 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
     }
 
     func sceneDidDisconnect(_ scene: UIScene) {
-        os_log("$$$sceneDidDisconnect(_:) - SceneDelegate, %s", log: .lifeCycle, type: .info, scene.session.persistentIdentifier)
+        os_log("sceneDidDisconnect(_:) - SceneDelegate, %s", log: .lifeCycle, type: .info, scene.session.persistentIdentifier)
     }
 
     func sceneWillResignActive(_ scene: UIScene) {
-        os_log("$$$sceneWillResignActive(_:) - SceneDeleage", log: .lifeCycle, type: .info)
+        os_log("sceneWillResignActive(_:) - SceneDeleage", log: .lifeCycle, type: .info)
     }
 
     func scene(_ scene: UIScene, didFailToContinueUserActivityWithType userActivityType: String, error: Error) {
-        print("****scene did fail to continue user activity")
+        print("scene did fail to continue user activity")
     }
 
-    func sceneDidEnterBackground(_ scene: UIScene) {
-        print("sceneDid")
-    }
 }
 
 #if targetEnvironment(macCatalyst)
 extension SceneDelegate: NSToolbarDelegate {
     func toolbarDefaultItemIdentifiers(_ toolbar: NSToolbar) -> [NSToolbarItem.Identifier] {
         let space = NSToolbarItem.Identifier.space
-        return [NSToolbarItem.Identifier.flexibleSpace, undoToolbarButton, redoToolbarButton, space, zoomInToolbarButton, zoomOutToolbarButton, zoomResetToolbarButton, space, snapshotToolbarButton, space, closeToolbarButton]
+        return [NSToolbarItem.Identifier.flexibleSpace, importImageToolbarButton, space,  undoToolbarButton, redoToolbarButton, space, zoomInToolbarButton, zoomOutToolbarButton, zoomResetToolbarButton, space, snapshotToolbarButton, space, closeToolbarButton]
     }
 
     func toolbarAllowedItemIdentifiers(_ toolbar: NSToolbar) -> [NSToolbarItem.Identifier] {
@@ -138,9 +136,14 @@ extension SceneDelegate: NSToolbarDelegate {
             button.toolTip = L("Redo")
             return button
         case snapshotToolbarButton:
-            let barButtonItem = UIBarButtonItem(image: UIImage(systemName: "photo.on.rectangle"), style: .plain, target: nil, action: #selector(DiagramViewController.macSnapshotDiagram(_:)))
+            let barButtonItem = UIBarButtonItem(image: UIImage(systemName: "camera.on.rectangle"), style: .plain, target: nil, action: #selector(DiagramViewController.macSnapshotDiagram(_:)))
             let button = NSToolbarItem(itemIdentifier: itemIdentifier, barButtonItem: barButtonItem)
-            button.toolTip = L("Snapshot diagram")
+            button.toolTip = L("Save screenshot of diagram")
+            return button
+        case importImageToolbarButton:
+            let barButtonItem = UIBarButtonItem(image: UIImage(systemName: "square.and.arrow.down"), style: .plain, target: nil, action: #selector(DiagramViewController.macSelectImage(_:)))
+            let button = NSToolbarItem(itemIdentifier: itemIdentifier, barButtonItem: barButtonItem)
+            button.toolTip = L("Import image")
             return button
         default:
             return nil

@@ -374,7 +374,8 @@ It is recommended to leave this on, so that marks are automatically linked toget
 To create a snapshot and save it to the Photos app, simply tap the *Snapshot* button (next to the *X* close button) at the top right of the screen.  If a dialog appears asking for permission to access your photo library, select access to all photos if you wish to take diagram snapshots.
 
 * Known issues/bugs/limitations
-- Mac version still under development.  Owners of M1 Macs can use the app as is, but we are working on adapting the app to Intel Macs as well, with a more Mac-like user interface.
+- Drag and drop works for image files (e.g. JPG files) but not for PDF or diagram files.  This will be addressed in a future release.
+- Calibration is not saved if there is no image file loaded.
 - Complexly linked marks in the same region may not always track with the moving mark.  We can't decide if this is a bug or feature. 
 * Next version plans
 We plan to include in the next version:

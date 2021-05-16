@@ -304,6 +304,12 @@ extension DocumentBrowserViewController {
         }
     }
 
+    @IBAction func macSelectImage(_ sender: Any) {
+        if let diagramViewController = diagramViewController {
+            diagramViewController.macSelectImage(sender)
+        }
+    }
+
     override func canPerformAction(_ action: Selector, withSender sender: Any?) -> Bool {
          if action == #selector(undo(_:)) {
             return diagramViewController?.imageScrollView.isActivated ?? false &&

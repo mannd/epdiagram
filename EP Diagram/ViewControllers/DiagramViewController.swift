@@ -15,7 +15,7 @@ import os.log
 final class DiagramViewController: UIViewController {
     // For debugging only
     #if DEBUG
-    var debugForceOnboarding = true
+    var debugForceOnboarding = false
     #else // Don't change below!
     var debugShowOnboarding = false
     #endif
@@ -1776,6 +1776,9 @@ extension DiagramViewController {
         navigationController?.setToolbarHidden(false, animated: true)
     }
 
+    @IBAction func macSelectImage(_ sender: Any) {
+        selectImage()
+    }
 
 }
 #endif
