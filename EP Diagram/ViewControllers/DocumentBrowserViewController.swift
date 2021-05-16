@@ -35,12 +35,12 @@ class DocumentBrowserViewController: UIDocumentBrowserViewController {
         browserUserInterfaceStyle = .light
         delegate = browserDelegate
         view.tintColor = .systemBlue
-        installPresentationHandler()
+        installInportHandler()
 
         let info = self.restorationInfo
         if info?[DiagramViewController.restorationDoRestorationKey] as? Bool ?? false {
             if let documentURL = info?[DiagramViewController.restorationDocumentURLKey] as? URL {
-                if let presentationHandler = browserDelegate.presentationHandler {
+                if let presentationHandler = browserDelegate.inportHandler {
                     presentationHandler(documentURL, nil)
                 openDocument(url: documentURL)
                 }
@@ -63,8 +63,8 @@ class DocumentBrowserViewController: UIDocumentBrowserViewController {
         super.viewDidDisappear(animated)
     }
 
-    func installPresentationHandler() {
-        browserDelegate.presentationHandler = { [weak self] url, error in
+    func installInportHandler() {
+        browserDelegate.inportHandler = { [weak self] url, error in
             guard error == nil else {
                 let alert = UIAlertController(title: L("Error Opening Diagram"), message: L("This diagram could not be opened."), preferredStyle: .alert)
                 alert.addAction(UIAlertAction(title: L("OK"), style: .cancel, handler: { _ in }))
@@ -79,7 +79,9 @@ class DocumentBrowserViewController: UIDocumentBrowserViewController {
 
     func openDocument(url: URL) {
         os_log("openDocument(url:) %s", url.path)
-        guard !isDocumentCurrentlyOpen(url: url) else { return }
+        guard !isDocumentCurrentlyOpen(url: url) else {
+            print("document is not currently open")
+            return }
 
         closeDiagramController {
             let accessKey = self.getAccessKey(url: url)
@@ -95,13 +97,14 @@ class DocumentBrowserViewController: UIDocumentBrowserViewController {
                         // Doesn't matter if bookmark data is stale, bookmarks are created anew
                         // when documents are opened.
                         if bookmarkDataIsStale {
+                            resolvedURL.stopAccessingSecurityScopedResource()
                             // create new bookmark if possible
                             self.openDocumentURL(url, createBookmark: true)
-                            resolvedURL.stopAccessingSecurityScopedResource()
                             print("Attempt to refresh bookmark")
+                        } else {
+                            self.openDocumentURL(resolvedURL)
+                            resolvedURL.stopAccessingSecurityScopedResource()
                         }
-                        self.openDocumentURL(resolvedURL)
-                        resolvedURL.stopAccessingSecurityScopedResource()
                     }
                 }
             } else {
@@ -111,6 +114,8 @@ class DocumentBrowserViewController: UIDocumentBrowserViewController {
     }
 
     private func openDocumentURL(_ url: URL, createBookmark: Bool = false) {
+        os_log("openDocumentURL(_:) %s", url.path)
+
         let document = DiagramDocument(fileURL: url)
         document.open { openSuccess in
             guard openSuccess else {
@@ -196,7 +201,15 @@ class DocumentBrowserViewController: UIDocumentBrowserViewController {
     }
 
     private func closeCurrentDocument() {
-        currentDocument?.close()
+        guard currentDocument != nil else {
+            print("current document is nil!"); return
+        }
+        currentDocument?.close() { success in
+            guard success else {
+                print("failed to close document")
+                return
+            }
+        }
         currentDocument = nil
     }
 
