@@ -40,10 +40,10 @@ class DocumentBrowserViewController: UIDocumentBrowserViewController {
         let info = self.restorationInfo
         if info?[DiagramViewController.restorationDoRestorationKey] as? Bool ?? false {
             if let documentURL = info?[DiagramViewController.restorationDocumentURLKey] as? URL {
-//                if let presentationHandler = browserDelegate.presentationHandler {
-//                    presentationHandler(documentURL, nil)
+                if let presentationHandler = browserDelegate.presentationHandler {
+                    presentationHandler(documentURL, nil)
                 openDocument(url: documentURL)
-//                }
+                }
             }
         }
     }

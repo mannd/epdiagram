@@ -983,9 +983,6 @@ final class DiagramViewController: UIViewController {
         diagramEditorDelegate?.diagramEditorDidFinishEditing(self, diagram: diagram)
     }
 
-
-
-
     @objc func snapshotDiagram() {
         os_log("snapshotDiagram()", log: .action, type: .info)
         checkPhotoLibraryStatus()
