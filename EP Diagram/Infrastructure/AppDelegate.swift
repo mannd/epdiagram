@@ -217,8 +217,8 @@ extension AppDelegate {
         let testCommand = UIKeyCommand(
             title: "Test",
 //            action: #selector(DiagramViewController.closeDocument),
-            action: #selector(loadAppKitPlugin),
-//            action: #selector(printMainWindow(_:)),
+            action: #selector(DiagramViewController.addDirectoryToSandbox(_:)),
+                //            action: #selector(printMainWindow(_:)),
             input: "t",
             modifierFlags: [.command]
         )

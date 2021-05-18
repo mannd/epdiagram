@@ -97,17 +97,19 @@ class DocumentBrowserViewController: UIDocumentBrowserViewController {
                         // Doesn't matter if bookmark data is stale, bookmarks are created anew
                         // when documents are opened.
                         if bookmarkDataIsStale {
+                            print("Bookmark is stale")
                             resolvedURL.stopAccessingSecurityScopedResource()
                             // create new bookmark if possible
                             self.openDocumentURL(url, createBookmark: true)
                             print("Attempt to refresh bookmark")
                         } else {
                             self.openDocumentURL(resolvedURL)
-                            resolvedURL.stopAccessingSecurityScopedResource()
                         }
+                        resolvedURL.stopAccessingSecurityScopedResource()
                     }
                 }
             } else {
+                print("could not find bookmark")
                 self.openDocumentURL(url, createBookmark: true)
             }
         }
@@ -123,24 +125,28 @@ class DocumentBrowserViewController: UIDocumentBrowserViewController {
                 return
             }
             if createBookmark {
-                // In the case of new documents, we can't create a bookmark until the document is opened.   
-                #if targetEnvironment(macCatalyst)
-                let bookmarkOptions: URL.BookmarkCreationOptions = [.withSecurityScope]
-                #else
-                let bookmarkOptions: URL.BookmarkCreationOptions = []
-                #endif
-                let accessKey = self.getAccessKey(url: url)
-                if let bookmarkData = try? url.bookmarkData(options: bookmarkOptions, includingResourceValuesForKeys: nil, relativeTo: nil) {
-                    UserDefaults.standard.setValue(bookmarkData, forKey: accessKey)
-                    print("****New bookmark created successfully")
-                } else {
-                    // remove saved bookmark if it exists
-                    UserDefaults.standard.removeObject(forKey: accessKey)
-                    print("*******Could not create bookmark")
-                }
+                self.createBookmarkFromURL(url)
             }
             self.currentDocument = document
             self.displayDiagramController()
+        }
+    }
+
+    func createBookmarkFromURL(_ url: URL) {
+        // In the case of new documents, we can't create a bookmark until the document is opened.
+        #if targetEnvironment(macCatalyst)
+        let bookmarkOptions: URL.BookmarkCreationOptions = [.withSecurityScope]
+        #else
+        let bookmarkOptions: URL.BookmarkCreationOptions = []
+        #endif
+        let accessKey = self.getAccessKey(url: url)
+        if let bookmarkData = try? url.bookmarkData(options: bookmarkOptions, includingResourceValuesForKeys: nil, relativeTo: nil) {
+            UserDefaults.standard.setValue(bookmarkData, forKey: accessKey)
+            print("****New bookmark created successfully")
+        } else {
+            // remove saved bookmark if it exists
+            UserDefaults.standard.removeObject(forKey: accessKey)
+            print("*******Could not create bookmark")
         }
     }
 
@@ -175,11 +181,8 @@ class DocumentBrowserViewController: UIDocumentBrowserViewController {
         restorationInfo = nil // don't need it any more
 
         controller.modalPresentationStyle = .fullScreen
-//        #if targetEnvironment(macCatalyst) // open one window only
 //        UIApplication.topViewController()?.present(controller, animated: true)
-        print("******", self as Any, controller as Any)
-        self.view.window?.rootViewController?.present(controller, animated: true)
-//        self.present(controller, animated: true)
+        self.present(controller, animated: true)
         self.diagramViewController = diagramViewController
     }
 
@@ -192,7 +195,6 @@ class DocumentBrowserViewController: UIDocumentBrowserViewController {
         }
         if editingDocument {
             self.dismiss(animated: true) {
-                print("$$$$dismiss called")
                 compositeClosure()
             }
         } else {
@@ -323,6 +325,12 @@ extension DocumentBrowserViewController {
         }
     }
 
+    @IBAction func addDirectoryToSandbox(_ sender: Any) {
+        if let diagramViewController = diagramViewController {
+            diagramViewController.addDirectoryToSandbox(sender)
+        }
+    }
+
     override func canPerformAction(_ action: Selector, withSender sender: Any?) -> Bool {
          if action == #selector(undo(_:)) {
             return diagramViewController?.imageScrollView.isActivated ?? false &&
@@ -337,22 +345,5 @@ extension DocumentBrowserViewController {
 
 }
 #endif
-
-//extension UIApplication {
-//    class func topViewController(base: UIViewController? = UIApplication.shared.keyWindow?.rootViewController) -> UIViewController? {
-//        if let nav = base as? UINavigationController {
-//            return topViewController(base: nav.visibleViewController)
-//        }
-//        if let tab = base as? UITabBarController {
-//            if let selected = tab.selectedViewController {
-//                return topViewController(base: selected)
-//            }
-//        }
-//        if let presented = base?.presentedViewController {
-//            return topViewController(base: presented)
-//        }
-//        return base
-//    }
-//}
 
 

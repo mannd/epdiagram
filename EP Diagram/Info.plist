@@ -4,6 +4,8 @@
 <dict>
 	<key>CFBundleDevelopmentRegion</key>
 	<string>$(DEVELOPMENT_LANGUAGE)</string>
+	<key>CFBundleDisplayName</key>
+	<string></string>
 	<key>CFBundleDocumentTypes</key>
 	<array>
 		<dict>
@@ -23,6 +25,10 @@
 	</array>
 	<key>CFBundleExecutable</key>
 	<string>$(EXECUTABLE_NAME)</string>
+	<key>CFBundleHelpBookFolder</key>
+	<string>EPDiagram.help</string>
+	<key>CFBundleHelpBookName</key>
+	<string>org.epstudios.EP-Diagram.help</string>
 	<key>CFBundleIdentifier</key>
 	<string>$(PRODUCT_BUNDLE_IDENTIFIER)</string>
 	<key>CFBundleInfoDictionaryVersion</key>
@@ -47,6 +53,8 @@
 	<string>EP Diagram would like to import images from your Photo Library so they can be diagramed.</string>
 	<key>NSCameraUsageDescription</key>
 	<string>EP Diagram needs to use your camera to take photos that can be diagramed.</string>
+	<key>NSHumanReadableCopyright</key>
+	<string>Copyright © 2017 – 2021 EP Studios, Inc. All rights reserved.</string>
 	<key>NSPhotoLibraryUsageDescription</key>
 	<string>EP Diagram would like to save diagram images to your Photo Library.</string>
 	<key>NSUserActivityTypes</key>
@@ -70,10 +78,10 @@
 					<string>Startup2</string>
 				</dict>
 				<dict>
-					<key>UISceneDelegateClassName</key>
-					<string>$(PRODUCT_MODULE_NAME).SceneDelegate</string>
 					<key>UISceneConfigurationName</key>
 					<string>Preferences Configuration</string>
+					<key>UISceneDelegateClassName</key>
+					<string>$(PRODUCT_MODULE_NAME).SceneDelegate</string>
 					<key>UISceneStoryboardFile</key>
 					<string>Preferences</string>
 				</dict>
@@ -127,13 +135,5 @@
 			</dict>
 		</dict>
 	</array>
-	<key>NSHumanReadableCopyright</key>
-	<string>Copyright © 2017 – 2021 EP Studios, Inc. All rights reserved.</string>
-	<key>CFBundleHelpBookFolder</key>
-	<string>EPDiagram.help</string>
-	<key>CFBundleDisplayName</key>
-	<string></string>
-	<key>CFBundleHelpBookName</key>
-	<string>org.epstudios.EP-Diagram.help</string>
 </dict>
 </plist>

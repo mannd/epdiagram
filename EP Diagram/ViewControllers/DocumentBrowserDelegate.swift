@@ -9,7 +9,7 @@
 import UIKit
 
 class DocumentBrowserDelegate: NSObject, UIDocumentBrowserViewControllerDelegate {
-    var presentationHandler: ((URL?, Error?) -> Void)?
+    var inportHandler: ((URL?, Error?) -> Void)?
 
     func documentBrowser(_ controller: UIDocumentBrowserViewController, didRequestDocumentCreationWithHandler importHandler: @escaping (URL?, UIDocumentBrowserViewController.ImportMode) -> Void) {
 
@@ -33,15 +33,46 @@ class DocumentBrowserDelegate: NSObject, UIDocumentBrowserViewControllerDelegate
 
     func documentBrowser(_ controller: UIDocumentBrowserViewController, didPickDocumentURLs documentURLs: [URL]) {
         guard let pickedURL = documentURLs.first else { return }
-        presentationHandler?(pickedURL, nil)
+        // Need to expand sandbox here
+        inportHandler?(pickedURL, nil)
     }
 
     func documentBrowser(_ controller: UIDocumentBrowserViewController, didImportDocumentAt sourceURL: URL, toDestinationURL destinationURL: URL) {
-        presentationHandler?(destinationURL, nil)
+        inportHandler?(destinationURL, nil)
     }
 
     func documentBrowser(_ controller: UIDocumentBrowserViewController, failedToImportDocumentAt documentURL: URL, error: Error?) {
-        presentationHandler?(documentURL, error)
+        inportHandler?(documentURL, error)
+    }
+
+    func createBookmarkFromURL(_ url: URL) {
+        // In the case of new documents, we can't create a bookmark until the document is opened.
+        #if targetEnvironment(macCatalyst)
+        let bookmarkOptions: URL.BookmarkCreationOptions = [.withSecurityScope]
+        #else
+        let bookmarkOptions: URL.BookmarkCreationOptions = []
+        #endif
+        let accessKey = self.getAccessKey(url: url)
+        let didStartAccessing = url.startAccessingSecurityScopedResource()
+        defer {
+            if didStartAccessing {
+                url.stopAccessingSecurityScopedResource()
+            }
+        }
+        if didStartAccessing {
+            if let bookmarkData = try? url.bookmarkData(options: bookmarkOptions, includingResourceValuesForKeys: nil, relativeTo: nil) {
+                UserDefaults.standard.setValue(bookmarkData, forKey: accessKey)
+                print("****New bookmark created successfully")
+            } else {
+                // remove saved bookmark if it exists
+                UserDefaults.standard.removeObject(forKey: accessKey)
+                print("*******Could not create bookmark")
+            }
+        }
+    }
+
+    private func getAccessKey(url: URL) -> String {
+        return "Access:\(url.path)"
     }
 }
 

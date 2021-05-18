@@ -11,6 +11,10 @@ import SwiftUI
 import UniformTypeIdentifiers
 import Photos
 import os.log
+#if targetEnvironment(macCatalyst)
+import Dynamic
+#endif
+
 
 final class DiagramViewController: UIViewController {
     // For debugging only
@@ -1775,6 +1779,22 @@ extension DiagramViewController {
 
     @IBAction func macSelectImage(_ sender: Any) {
         selectImage()
+    }
+
+    @IBAction func addDirectoryToSandbox(_ sender: Any) {
+        // TODO: insert alert explaining why we need to add directory to sandbox.
+        var directoryURL: URL? = nil
+        if let appDelegate = UIApplication.shared.delegate as? AppDelegate {
+            if let plugin = appDelegate.appKitPlugin {
+                if let nsWindow = view.window?.nsWindow {
+                    let completion: ((URL)->Void) = { url in
+                        directoryURL = url
+                        print("directoryURL", directoryURL as Any)
+                    }
+                    plugin.getDirectory(nsWindow: nsWindow, startingURL: nil, completion: completion)
+                }
+            }
+        }
     }
 
 }
