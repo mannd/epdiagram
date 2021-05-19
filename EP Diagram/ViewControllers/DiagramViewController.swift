@@ -1782,20 +1782,56 @@ extension DiagramViewController {
     }
 
     @IBAction func addDirectoryToSandbox(_ sender: Any) {
-        // TODO: insert alert explaining why we need to add directory to sandbox.
-        var directoryURL: URL? = nil
-        if let appDelegate = UIApplication.shared.delegate as? AppDelegate {
-            if let plugin = appDelegate.appKitPlugin {
-                if let nsWindow = view.window?.nsWindow {
-                    let completion: ((URL)->Void) = { url in
-                        directoryURL = url
-                        print("directoryURL", directoryURL as Any)
+        let action: ((UIAlertAction)->Void) = { _ in
+            if let appDelegate = UIApplication.shared.delegate as? AppDelegate {
+                if let plugin = appDelegate.appKitPlugin {
+                    if let nsWindow = self.view.window?.nsWindow {
+                        let completion: ((URL)->Void) = { url in
+                            self.storeDirectoryBookmark(from: url)
+                            print("directoryURL", url as Any)
+                        }
+                        plugin.getDirectory(nsWindow: nsWindow, startingURL: nil, completion: completion)
                     }
-                    plugin.getDirectory(nsWindow: nsWindow, startingURL: nil, completion: completion)
                 }
             }
         }
+        UserAlert.showWarning(viewController: self, title: L("Add Directory To Sandbox"), message: L("In order to save diagram files to this folder, it is necessary to add the folder to the app sandbox.  Use the open dialog that appears when you select OK to select the folder.  You should only need to do this once per folder.  If you want to abort opening the file, select Cancel.  Note: You can reset the app sandbox at any time using the Clear Sandbox menu item in the Files menu."), action: action)
     }
+
+    @IBAction func clearSandbox(_ sender: Any) {
+        for key in UserDefaults.standard.dictionaryRepresentation().keys {
+            if key.starts(with: "AccessDirectory:") {
+                print(key)
+                UserDefaults.standard.removeObject(forKey: key)
+            }
+        }
+
+        // TODO: implement
+        // find keys starting with "Access" and delete them
+    }
+
+    func storeDirectoryBookmark(from url: URL) {
+        guard url.hasDirectoryPath else {
+            print("URL not a directory")
+            return
+        }
+        #if targetEnvironment(macCatalyst)
+        let bookmarkOptions: URL.BookmarkCreationOptions = [.withSecurityScope]
+        #else
+        let bookmarkOptions: URL.BookmarkCreationOptions = []
+        #endif
+        let key = getAccessDirectoryKey(for: url)
+        if let bookmark = try? url.bookmarkData(options: bookmarkOptions, includingResourceValuesForKeys: nil, relativeTo: nil) {
+            UserDefaults.standard.setValue(bookmark, forKey: key)
+        } else {
+            print("Could not create directory bookmark.")
+        }
+    }
+
+    private func getAccessDirectoryKey(for url: URL) -> String {
+        return "AccessDirectory:\(url.path)"
+    }
+
 
 }
 #endif

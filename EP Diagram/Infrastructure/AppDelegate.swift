@@ -125,6 +125,21 @@ extension AppDelegate {
             children: [saveScreenshotCommand]
         )
 
+        let addDirectoryToSandboxCommand = UICommand(
+            title: "Add Directory To Sandbox",
+            action: #selector(DiagramViewController.addDirectoryToSandbox(_:))
+        )
+        let clearSandbox = UICommand(
+            title: "Clear Sandbox",
+            action: #selector(DiagramViewController.clearSandbox(_:))
+        )
+        let sandboxMenu = UIMenu(
+            title: "",
+            identifier: UIMenu.Identifier("sandboxMenu"),
+            options: .displayInline,
+            children: [addDirectoryToSandboxCommand, clearSandbox]
+        )
+
         let closeDiagramCommand = UIKeyCommand(
             title: "Close Diagram",
             action: #selector(DiagramViewController.macCloseDocument(_:)),
@@ -139,7 +154,7 @@ extension AppDelegate {
         )
         builder.replace(menu: .close, with: closeDiagramMenu)
         builder.insertSibling(saveScreenshotMenu, beforeMenu: UIMenu.Identifier("closeDiagramMenu"))
-
+        builder.insertSibling(sandboxMenu, beforeMenu: UIMenu.Identifier("saveScreenshotMenu"))
 
         // View menu
         let zoomInCommand = UIKeyCommand(
