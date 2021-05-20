@@ -9,7 +9,6 @@
 /* Begin PBXBuildFile section */
 		8E01D9C722849047000F36FC /* CursorView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8E01D9C622849047000F36FC /* CursorView.swift */; };
 		8E033CEA24AC10A300BE6D6F /* Calibration.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8E033CE924AC10A300BE6D6F /* Calibration.swift */; };
-		8E04C5CB2569947100946348 /* Startup.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 8E04C5CA2569947100946348 /* Startup.storyboard */; };
 		8E04C5D5256995E000946348 /* DocumentBrowserViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8E04C5D4256995E000946348 /* DocumentBrowserViewController.swift */; };
 		8E04C5DB256996E400946348 /* DiagramDocument.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8E04C5DA256996E400946348 /* DiagramDocument.swift */; };
 		8E04C5FC256A0AD600946348 /* ImageWrapper.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8E04C5FB256A0AD600946348 /* ImageWrapper.swift */; };
@@ -155,7 +154,6 @@
 /* Begin PBXFileReference section */
 		8E01D9C622849047000F36FC /* CursorView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CursorView.swift; sourceTree = "<group>"; };
 		8E033CE924AC10A300BE6D6F /* Calibration.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Calibration.swift; sourceTree = "<group>"; };
-		8E04C5CA2569947100946348 /* Startup.storyboard */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; path = Startup.storyboard; sourceTree = "<group>"; };
 		8E04C5D4256995E000946348 /* DocumentBrowserViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DocumentBrowserViewController.swift; sourceTree = "<group>"; };
 		8E04C5DA256996E400946348 /* DiagramDocument.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DiagramDocument.swift; sourceTree = "<group>"; };
 		8E04C5FB256A0AD600946348 /* ImageWrapper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImageWrapper.swift; sourceTree = "<group>"; };
@@ -502,7 +500,6 @@
 			children = (
 				8E7D24C622779DBD005A1729 /* Main.storyboard */,
 				8E7D24CB22779DBF005A1729 /* LaunchScreen.storyboard */,
-				8E04C5CA2569947100946348 /* Startup.storyboard */,
 				8E61C3D625A6260D0064ADC1 /* Startup2.storyboard */,
 				8E33927A262E6DE6002A7447 /* Preferences.storyboard */,
 			);
@@ -722,7 +719,6 @@
 				8E976B91260E435100CA8BF9 /* org.css in Resources */,
 				8E976B90260E435100CA8BF9 /* img in Resources */,
 				8E4D02FD265048C500F3CF53 /* maconboard.org in Resources */,
-				8E04C5CB2569947100946348 /* Startup.storyboard in Resources */,
 				8E33927B262E6DE6002A7447 /* Preferences.storyboard in Resources */,
 				8E976B8E260E435100CA8BF9 /* help.html in Resources */,
 				8EE141232620EED500392100 /* onboard.html in Resources */,
