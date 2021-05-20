@@ -63,4 +63,28 @@ class MacSupport: NSObject, SharedAppKitProtocol {
         print("$$$$window closing")
     }
 
+    @objc func getDirectory(nsWindow: AnyObject, startingURL: URL?, completion: ((URL)->Void)?){
+        guard let nsWindow = nsWindow as? NSWindow else { return }
+        let panel = NSOpenPanel()
+        panel.prompt = ("Select")
+        panel.message = ("Please select a folder to add to the App Sandbox")
+        panel.canChooseFiles = false
+        panel.allowedFileTypes = ["N/A"]
+        panel.allowsOtherFileTypes = false
+        panel.allowsMultipleSelection = false
+        panel.canChooseDirectories = true
+        if let startingURL = startingURL {
+            panel.directoryURL = startingURL
+            print("panel.directoryURL", panel.directoryURL as Any)
+        }
+
+        panel.beginSheetModal(for: nsWindow, completionHandler: { response in
+            if let url: URL = panel.urls.first {
+                print("url = \(url)")
+                if let completion = completion {
+                    completion(url)
+                }
+            }
+        })
+    }
 }

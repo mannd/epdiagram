@@ -111,6 +111,7 @@
 		8EF9166B227926BC00B51F17 /* LadderView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8EF9166A227926BC00B51F17 /* LadderView.swift */; };
 		8EF9CA24264F0138007AA24A /* Dynamic in Frameworks */ = {isa = PBXBuildFile; productRef = 8EF9CA23264F0138007AA24A /* Dynamic */; };
 		8EF9CA26264F016C007AA24A /* UIWindow+nsWindow.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8EF9CA25264F016C007AA24A /* UIWindow+nsWindow.swift */; };
+		8EFCC99E2655B4F000EEABBB /* Sandbox.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8EFCC99D2655B4F000EEABBB /* Sandbox.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -272,6 +273,7 @@
 		8EF8B5B62330739F00ADB77A /* ViewControllerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ViewControllerTests.swift; sourceTree = "<group>"; };
 		8EF9166A227926BC00B51F17 /* LadderView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LadderView.swift; sourceTree = "<group>"; };
 		8EF9CA25264F016C007AA24A /* UIWindow+nsWindow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "UIWindow+nsWindow.swift"; sourceTree = "<group>"; };
+		8EFCC99D2655B4F000EEABBB /* Sandbox.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Sandbox.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -369,6 +371,7 @@
 				8E93CA7B25A00C0E00C74F1F /* UserAlert.swift */,
 				8E93CA8C25A0157F00C74F1F /* Transform.swift */,
 				8E93CA9125A0227100C74F1F /* Global.swift */,
+				8EFCC99D2655B4F000EEABBB /* Sandbox.swift */,
 			);
 			path = Common;
 			sourceTree = "<group>";
@@ -827,6 +830,7 @@
 				8EBC824324E6EBA700B5CA29 /* Sounds.swift in Sources */,
 				8E7D24C322779DBD005A1729 /* AppDelegate.swift in Sources */,
 				8E35924924BE9B27001E23D5 /* DiagramIO.swift in Sources */,
+				8EFCC99E2655B4F000EEABBB /* Sandbox.swift in Sources */,
 				8E9A065125D9CDC700775531 /* LadderTemplatesModelController.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

@@ -11,6 +11,9 @@ import SwiftUI
 import UniformTypeIdentifiers
 import Photos
 import os.log
+#if targetEnvironment(macCatalyst)
+import Dynamic
+#endif
 
 final class DiagramViewController: UIViewController {
     // For debugging only
@@ -154,6 +157,9 @@ final class DiagramViewController: UIViewController {
             diagramEditorDelegate?.diagramEditorDidUpdateContent(self, diagram: diagram)
         }
     }
+
+    // Sandbox
+    var requestSandboxExpansion: Bool = false
 
     // Diagram preferences
     var playSounds: Bool = true
@@ -586,6 +592,12 @@ final class DiagramViewController: UIViewController {
             }
         }
 
+        #if targetEnvironment(macCatalyst)
+        if requestSandboxExpansion {
+            addDirectoryToSandbox(self)
+        }
+        #endif
+
         setTitle()
 
         self.userActivity = self.view.window?.windowScene?.userActivity
@@ -612,6 +624,10 @@ final class DiagramViewController: UIViewController {
         // No need anymore (since iOS9) to remove notifications.
     }
 
+    deinit {
+        print("*****DiagramViewController deinit()******")
+    }
+
     override func updateUserActivityState(_ activity: NSUserActivity) {
         os_log("debug: diagramViewController updateUserActivityState called", log: .debugging, type: .debug)
 
@@ -626,6 +642,13 @@ final class DiagramViewController: UIViewController {
             Self.restorationDocumentURLKey: currentDocument?.fileURL ?? "",
         ]
         activity.addUserInfoEntries(from: info)
+        #if !targetEnvironment(macCatalyst)
+        if let currentDocument = currentDocument {
+            let directoryURL = currentDocument.fileURL.deletingLastPathComponent()
+            Sandbox.storeDirectoryBookmark(from: directoryURL)
+        }
+        #endif
+
     }
 
     func loadSampleDiagram(_ diagram: Diagram) {
@@ -1776,6 +1799,76 @@ extension DiagramViewController {
     @IBAction func macSelectImage(_ sender: Any) {
         selectImage()
     }
+
+    @IBAction func addDirectoryToSandbox(_ sender: Any) {
+        let action: ((UIAlertAction)->Void) = { _ in
+            if let appDelegate = UIApplication.shared.delegate as? AppDelegate {
+                if let plugin = appDelegate.appKitPlugin {
+                    if let nsWindow = self.view.window?.nsWindow {
+                        let completion: ((URL)->Void) = { url in
+                            self.storeDirectoryBookmark(from: url)
+                            print("directoryURL", url as Any)
+                        }
+                        plugin.getDirectory(nsWindow: nsWindow, startingURL: nil, completion: completion)
+                    }
+                }
+            }
+        }
+
+        let currentDocumentURL = currentDocument?.fileURL.deletingLastPathComponent()
+        print("current directory", currentDocumentURL?.path as Any)
+        let folder = currentDocumentURL == nil ? L("folder") : L("\(currentDocumentURL!.path) folder")
+
+        let message = """
+        In order to use the \(folder), it is necessary to add the \(folder) to the App Sandbox.
+
+        You should only need to do this once for each folder where you save Diagram files.
+
+        Choose OK and in the files dialog box that appears next, the \(folder) should be already selected, so just choose the Select button, or navigate to a different folder that you wish to add to the Sandbox first.
+
+        Note: You can clear the directories that you have added to the App Sandbox at any time using the Clear Sandbox menu item in the Files menu.  You can read more about the App Sandbox in EP Diagram Help.
+        """
+        let translatedMessage = L(message)
+        UserAlert.showWarning(viewController: self, 
+            title: L("Add Directory To Sandbox"), 
+            message: translatedMessage, action: action
+        )
+    }
+
+    @IBAction func clearSandbox(_ sender: Any) {
+        for key in UserDefaults.standard.dictionaryRepresentation().keys {
+            if key.starts(with: "AccessDirectory:") {
+                print(key)
+                UserDefaults.standard.removeObject(forKey: key)
+            }
+        }
+
+        // TODO: implement
+        // find keys starting with "Access" and delete them
+    }
+
+    func storeDirectoryBookmark(from url: URL) {
+        guard url.hasDirectoryPath else {
+            print("URL not a directory")
+            return
+        }
+        #if targetEnvironment(macCatalyst)
+        let bookmarkOptions: URL.BookmarkCreationOptions = [.withSecurityScope]
+        #else
+        let bookmarkOptions: URL.BookmarkCreationOptions = []
+        #endif
+        let key = getAccessDirectoryKey(for: url)
+        if let bookmark = try? url.bookmarkData(options: bookmarkOptions, includingResourceValuesForKeys: nil, relativeTo: nil) {
+            UserDefaults.standard.setValue(bookmark, forKey: key)
+        } else {
+            print("Could not create directory bookmark.")
+        }
+    }
+
+    private func getAccessDirectoryKey(for url: URL) -> String {
+        return "AccessDirectory:\(url.path)"
+    }
+
 
 }
 #endif
