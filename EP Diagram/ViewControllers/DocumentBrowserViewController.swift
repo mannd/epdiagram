@@ -77,56 +77,14 @@ class DocumentBrowserViewController: UIDocumentBrowserViewController {
         }
     }
 
-    func openDocument3(url: URL) {
-        os_log("openDocument(url:) %s", url.path)
-        guard !isDocumentCurrentlyOpen(url: url) else {
-            print("document is not currently open")
-            return }
-        closeDiagramController {
-            let accessKey = self.getAccessKey(url: url)
-            #if targetEnvironment(macCatalyst)
-            let bookmarkOptions: URL.BookmarkResolutionOptions = [.withSecurityScope]
-            #else
-            let bookmarkOptions: URL.BookmarkResolutionOptions = []
-            #endif
-            if let bookmarkData = UserDefaults.standard.value(forKey: accessKey) as? Data {
-                var bookmarkDataIsStale: Bool = false
-                if let resolvedURL = try? URL(resolvingBookmarkData: bookmarkData, options: bookmarkOptions, relativeTo: nil, bookmarkDataIsStale: &bookmarkDataIsStale) {
-                    if resolvedURL.startAccessingSecurityScopedResource() {
-                        // Doesn't matter if bookmark data is stale, bookmarks are created anew
-                        // when documents are opened.
-                        if bookmarkDataIsStale {
-                            print("Bookmark is stale")
-                            resolvedURL.stopAccessingSecurityScopedResource()
-                            // create new bookmark if possible
-                            self.openDocumentURL(url, createBookmark: true)
-                            print("Attempt to refresh bookmark")
-                        } else {
-                            self.openDocumentURL(resolvedURL)
-                        }
-                        resolvedURL.stopAccessingSecurityScopedResource()
-                    }
-                }
-            } else {
-                print("could not find bookmark")
-                self.openDocumentURL(url, createBookmark: true)
-            }
-        }
-    }
-
     func openDocument(url: URL) {
         os_log("openDocument(url:) %s", url.path)
         guard !isDocumentCurrentlyOpen(url: url) else {
             print("document is not currently open")
             return
         }
-//        if self.getDirectoryBookmarkData(url: url.deletingLastPathComponent()) == nil {
-//            print("No bookmark data")
-//            addDirectoryToSandbox(self)
-//            return
-//        }
         closeDiagramController {
-            if var persistentDirectoryURL = self.getPersistentDirectoryURL(forFileURL: url) {
+            if var persistentDirectoryURL = Sandbox.getPersistentDirectoryURL(forFileURL: url) {
                 let didStartAccessing = persistentDirectoryURL.startAccessingSecurityScopedResource()
                 defer {
                     if didStartAccessing {
@@ -145,144 +103,22 @@ class DocumentBrowserViewController: UIDocumentBrowserViewController {
                 }
             } else {
                 print("could not get bookmark")
-//                self.createBookmarkFromURL(url.deletingLastPathComponent())
+                self.openDocumentURL(url)
             }
         }
     }
 
-
-    private func openDocumentURL(_ url: URL, createBookmark: Bool = false) {
+    private func openDocumentURL(_ url: URL) {
         os_log("openDocumentURL(_:) %s", url.path)
-
         let document = DiagramDocument(fileURL: url)
         document.open { openSuccess in
             guard openSuccess else {
                 print ("could not open \(url)")
                 return
             }
-//            if createBookmark {
-//                self.createBookmarkFromURL(url)
-//            }
             self.currentDocument = document
-            self.displayDiagramController()
+            self.displayDiagramController(requestSandboxExpansion: true)
         }
-    }
-
-    func createBookmarkFromURL(_ url: URL) {
-        // In the case of new documents, we can't create a bookmark until the document is opened.
-        #if targetEnvironment(macCatalyst)
-        let bookmarkOptions: URL.BookmarkCreationOptions = [.withSecurityScope]
-        #else
-        let bookmarkOptions: URL.BookmarkCreationOptions = []
-        #endif
-        let accessKey = self.getAccessKey(url: url)
-        if let bookmarkData = try? url.bookmarkData(options: bookmarkOptions, includingResourceValuesForKeys: nil, relativeTo: nil) {
-            UserDefaults.standard.setValue(bookmarkData, forKey: accessKey)
-            print("****New bookmark created successfully")
-        } else {
-            // remove saved bookmark if it exists
-            UserDefaults.standard.removeObject(forKey: accessKey)
-            print("*******Could not create bookmark")
-        }
-    }
-
-    private func getAccessKey(url: URL) -> String {
-        return "Access:\(url.path)"
-    }
-
-    func storeDirectoryBookmark(from url: URL) {
-        guard url.hasDirectoryPath else {
-            print("URL not a directory")
-            return
-        }
-        #if targetEnvironment(macCatalyst)
-        let bookmarkOptions: URL.BookmarkCreationOptions = [.withSecurityScope]
-        #else
-        let bookmarkOptions: URL.BookmarkCreationOptions = []
-        #endif
-        let key = getAccessDirectoryKey(for: url)
-        if let bookmark = try? url.bookmarkData(options: bookmarkOptions, includingResourceValuesForKeys: nil, relativeTo: nil) {
-            UserDefaults.standard.setValue(bookmark, forKey: key)
-        } else {
-            print("Could not create directory bookmark.")
-        }
-    }
-
-    /// Get the persisted directory location via bookmarks for a file url
-    /// - Parameter url: The URL of the file to be opened.
-    /// - Returns: The persistent URL of the directory containing that file.
-    func getPersistentDirectoryURL(forFileURL url: URL) -> URL? {
-        if let bookmark = getDirectoryBookmarkData(url: url) {
-            if let persistentURL = getPersistenDirectoryURL(forBookmarkData: bookmark, directoryURL: url) {
-                return persistentURL
-            } else {
-                print("Could not retrieve bookmark")
-                return nil
-            }
-        }
-        else {
-            print("Could not get bookmark from UserDefaults")
-            return nil
-        }
-//        // Get directory part of url
-//        let directory = url.deletingLastPathComponent()
-//        guard directory.hasDirectoryPath else { return nil }
-//        let key = getAccessDirectoryKey(for: directory)
-//        if let bookmark = UserDefaults.standard.value(forKey: key) as? Data {
-//            #if targetEnvironment(macCatalyst)
-//            let bookmarkOptions: URL.BookmarkResolutionOptions = [.withSecurityScope]
-//            #else
-//            let bookmarkOptions: URL.BookmarkResolutionOptions = []
-//            #endif
-//            var bookmarkDataIsStale: Bool = false
-//            if let urlForBookmark = try? URL(resolvingBookmarkData: bookmark, options: bookmarkOptions, relativeTo: nil, bookmarkDataIsStale: &bookmarkDataIsStale) {
-//                if bookmarkDataIsStale {
-//                    print("Regenerating stale bookmark")
-//                    storeDirectoryBookmark(from: directory)
-//                    return nil
-//                } else {
-//                    return urlForBookmark
-//                }
-//            } else {
-//                print("Could not retrieve bookmark")
-//                return nil
-//            }
-//        } else {
-//            print("Could not get bookmark from UserDefaults")
-//            return nil
-//        }
-    }
-
-    func getPersistenDirectoryURL(forBookmarkData bookmark: Data, directoryURL directory: URL) -> URL? {
-        #if targetEnvironment(macCatalyst)
-        let bookmarkOptions: URL.BookmarkResolutionOptions = [.withSecurityScope]
-        #else
-        let bookmarkOptions: URL.BookmarkResolutionOptions = []
-        #endif
-        var bookmarkDataIsStale: Bool = false
-        if let urlForBookmark = try? URL(resolvingBookmarkData: bookmark, options: bookmarkOptions, relativeTo: nil, bookmarkDataIsStale: &bookmarkDataIsStale) {
-            if bookmarkDataIsStale {
-                print("Regenerating stale bookmark")
-                storeDirectoryBookmark(from: directory)
-                return nil
-            } else {
-                return urlForBookmark
-            }
-        } else {
-            print("Could not retrieve bookmark")
-            return nil
-        }
-    }
-
-    func getDirectoryBookmarkData(url: URL) -> Data? {
-        let directory = url.deletingLastPathComponent()
-        guard directory.hasDirectoryPath else { return nil }
-        let key = getAccessDirectoryKey(for: directory)
-        return UserDefaults.standard.value(forKey: key) as? Data
-    }
-
-    private func getAccessDirectoryKey(for url: URL) -> String {
-        return "AccessDirectory:\(url.path)"
     }
 
     private func isDocumentCurrentlyOpen(url: URL) -> Bool {
@@ -294,7 +130,7 @@ class DocumentBrowserViewController: UIDocumentBrowserViewController {
         return false
     }
 
-    @objc func displayDiagramController() {
+    @objc func displayDiagramController(requestSandboxExpansion: Bool = false) {
         os_log("displayDiagramController()", log: .default, type: .default)
         guard !editingDocument else { return }
         guard let document = currentDocument else { return }
@@ -307,12 +143,12 @@ class DocumentBrowserViewController: UIDocumentBrowserViewController {
         diagramViewController?.currentDocument = document
         diagramViewController?.diagramEditorDelegate = self
         diagramViewController?.diagram = document.diagram
+        diagramViewController?.requestSandboxExpansion = requestSandboxExpansion
 
         diagramViewController?.restorationInfo = restorationInfo
         restorationInfo = nil // don't need it any more
 
         controller.modalPresentationStyle = .fullScreen
-//        UIApplication.topViewController()?.present(controller, animated: true)
         self.present(controller, animated: true)
         self.diagramViewController = diagramViewController
     }
@@ -321,7 +157,6 @@ class DocumentBrowserViewController: UIDocumentBrowserViewController {
         let compositeClosure = {
             self.closeCurrentDocument()
             self.editingDocument = false
-//            self.diagramViewController = nil
             completion?()
         }
         if editingDocument {
@@ -365,7 +200,6 @@ extension DocumentBrowserViewController: DiagramEditorDelegate {
         currentDocument?.diagram = diagram
     }
 }
-
 
 #if targetEnvironment(macCatalyst)
 extension DocumentBrowserViewController {
@@ -462,7 +296,7 @@ extension DocumentBrowserViewController {
                 if let plugin = appDelegate.appKitPlugin {
                     if let nsWindow = self.view.window?.nsWindow {
                         let completion: ((URL)->Void) = { url in
-                            self.storeDirectoryBookmark(from: url)
+                            Sandbox.storeDirectoryBookmark(from: url)
                             print("directoryURL", url as Any)
                         }
                         plugin.getDirectory(nsWindow: nsWindow, startingURL: nil, completion: completion)
@@ -490,7 +324,6 @@ extension DocumentBrowserViewController {
             return super.canPerformAction(action, withSender: sender)
         }
     }
-
 }
 #endif
 

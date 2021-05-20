@@ -67,7 +67,7 @@ class MacSupport: NSObject, SharedAppKitProtocol {
         guard let nsWindow = nsWindow as? NSWindow else { return }
         let panel = NSOpenPanel()
         panel.prompt = ("Select")
-        panel.message = ("Please select a folder")
+        panel.message = ("Please select a folder to add to the App Sandbox")
         panel.canChooseFiles = false
         panel.allowedFileTypes = ["N/A"]
         panel.allowsOtherFileTypes = false

@@ -15,7 +15,6 @@ import os.log
 import Dynamic
 #endif
 
-
 final class DiagramViewController: UIViewController {
     // For debugging only
     #if DEBUG
@@ -158,6 +157,9 @@ final class DiagramViewController: UIViewController {
             diagramEditorDelegate?.diagramEditorDidUpdateContent(self, diagram: diagram)
         }
     }
+
+    // Sandbox
+    var requestSandboxExpansion: Bool = false
 
     // Diagram preferences
     var playSounds: Bool = true
@@ -590,6 +592,12 @@ final class DiagramViewController: UIViewController {
             }
         }
 
+        #if targetEnvironment(macCatalyst)
+        if requestSandboxExpansion {
+            addDirectoryToSandbox(self)
+        }
+        #endif
+
         setTitle()
 
         self.userActivity = self.view.window?.windowScene?.userActivity
@@ -616,6 +624,10 @@ final class DiagramViewController: UIViewController {
         // No need anymore (since iOS9) to remove notifications.
     }
 
+    deinit {
+        print("*****DiagramViewController deinit()******")
+    }
+
     override func updateUserActivityState(_ activity: NSUserActivity) {
         os_log("debug: diagramViewController updateUserActivityState called", log: .debugging, type: .debug)
 
@@ -630,6 +642,13 @@ final class DiagramViewController: UIViewController {
             Self.restorationDocumentURLKey: currentDocument?.fileURL ?? "",
         ]
         activity.addUserInfoEntries(from: info)
+        #if !targetEnvironment(macCatalyst)
+        if let currentDocument = currentDocument {
+            let directoryURL = currentDocument.fileURL.deletingLastPathComponent()
+            Sandbox.storeDirectoryBookmark(from: directoryURL)
+        }
+        #endif
+
     }
 
     func loadSampleDiagram(_ diagram: Diagram) {
@@ -1795,7 +1814,25 @@ extension DiagramViewController {
                 }
             }
         }
-        UserAlert.showWarning(viewController: self, title: L("Add Directory To Sandbox"), message: L("In order to save diagram files to this folder, it is necessary to add the folder to the app sandbox.  Use the open dialog that appears when you select OK to select the folder.  You should only need to do this once per folder.  If you want to abort opening the file, select Cancel.  Note: You can reset the app sandbox at any time using the Clear Sandbox menu item in the Files menu."), action: action)
+
+        let currentDocumentURL = currentDocument?.fileURL.deletingLastPathComponent()
+        print("current directory", currentDocumentURL?.path as Any)
+        let folder = currentDocumentURL == nil ? L("folder") : L("\(currentDocumentURL!.path) folder")
+
+        let message = """
+        In order to use the \(folder), it is necessary to add the \(folder) to the App Sandbox.
+
+        You should only need to do this once for each folder where you save Diagram files.
+
+        Choose OK and in the files dialog box that appears next, the \(folder) should be already selected, so just choose the Select button, or navigate to a different folder that you wish to add to the Sandbox first.
+
+        Note: You can clear the directories that you have added to the App Sandbox at any time using the Clear Sandbox menu item in the Files menu.  You can read more about the App Sandbox in EP Diagram Help.
+        """
+        let translatedMessage = L(message)
+        UserAlert.showWarning(viewController: self, 
+            title: L("Add Directory To Sandbox"), 
+            message: translatedMessage, action: action
+        )
     }
 
     @IBAction func clearSandbox(_ sender: Any) {

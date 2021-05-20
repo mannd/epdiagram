@@ -12,7 +12,7 @@ import os.log
 class HamburgerTableViewController: UITableViewController {
     var hamburgerViewModel: HamburgerViewModel = HamburgerViewModel()
     var rows = [HamburgerLayer]()
-    var delegate: HamburgerTableDelegate?
+    weak var delegate: HamburgerTableDelegate?
     var imageIsLocked: Bool = false
     var ladderIsLocked: Bool = false
 
