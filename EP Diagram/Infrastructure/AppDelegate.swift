@@ -93,7 +93,6 @@ extension AppDelegate {
 
         // Remove unwanted menus
         builder.remove(menu: .format)
-//        builder.remove(menu: .openRecent) // Just doesn't seem to work with Catalyst
 
         // Preferences menu
         let preferencesCommand = UIKeyCommand(
@@ -140,6 +139,13 @@ extension AppDelegate {
             children: [addDirectoryToSandboxCommand, clearSandbox]
         )
 
+        let renameCommand = UIKeyCommand(
+            title: L("Rename Diagram..."),
+            action: #selector(DiagramViewController.renameDiagram),
+            input: "r",
+            modifierFlags: [.command]
+        )
+
         let closeDiagramCommand = UIKeyCommand(
             title: "Close Diagram",
             action: #selector(DiagramViewController.macCloseDocument(_:)),
@@ -150,7 +156,7 @@ extension AppDelegate {
             title: "",
             identifier: UIMenu.Identifier("closeDiagramMenu"),
             options: .displayInline,
-            children: [closeDiagramCommand]
+            children: [renameCommand, closeDiagramCommand]
         )
         builder.replace(menu: .close, with: closeDiagramMenu)
         builder.insertSibling(saveScreenshotMenu, beforeMenu: UIMenu.Identifier("closeDiagramMenu"))
@@ -231,9 +237,7 @@ extension AppDelegate {
 
         let testCommand = UIKeyCommand(
             title: "Test",
-//            action: #selector(DiagramViewController.closeDocument),
-            action: #selector(DiagramViewController.addDirectoryToSandbox(_:)),
-                //            action: #selector(printMainWindow(_:)),
+            action: #selector(DiagramViewController.renameDiagram),
             input: "t",
             modifierFlags: [.command]
         )
@@ -249,7 +253,6 @@ extension AppDelegate {
 
         DispatchQueue.main.async {
             self.loadAppKitPlugin()
-//            self.plugin?.printMainWindow(self)
         }
     }
 

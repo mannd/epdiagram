@@ -23,9 +23,9 @@
 <a name="EP Diagram index"></a>
 #+END_EXPORT
 * [[./pgs/overview.html][Overview]]
-Rationale and basic use of *EP Diagram*.
+Use *EP Diagram* to create ladder diagrams.
 * [[./pgs/quick_start.org][Quick start]]
-Read this first.
+Create your first ladder diagram
 * [[./pgs/manual.html][EP Diagram manual]]
 Detailed and advanced use of *EP Diagram*.
 * [[./pgs/issues.html][Known issues/bugs/limitations]]

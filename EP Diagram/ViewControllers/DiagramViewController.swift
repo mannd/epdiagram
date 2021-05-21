@@ -136,8 +136,8 @@ final class DiagramViewController: UIViewController {
 
     // PDF and launch from URL stuff
     var pdfRef: CGPDFDocument?
-//    var launchFromURL: Bool = false
-//    var launchURL: URL?
+    //    var launchFromURL: Bool = false
+    //    var launchURL: URL?
     var pageNumber: Int = 1
     var enablePageButtons = false
     var numberOfPages: Int = 0
@@ -547,10 +547,10 @@ final class DiagramViewController: UIViewController {
         
         #if targetEnvironment(macCatalyst)
         navigationController?.setNavigationBarHidden(true, animated: animated)
-//        navigationController?.setToolbarHidden(true, animated: animated)
+        //        navigationController?.setToolbarHidden(true, animated: animated)
         #else
         navigationController?.setNavigationBarHidden(false, animated: animated)
-//        navigationController?.setToolbarHidden(false, animated: animated)
+        //        navigationController?.setToolbarHidden(false, animated: animated)
         #endif
         navigationController?.setToolbarHidden(false, animated: animated)
     }
@@ -1452,9 +1452,9 @@ final class DiagramViewController: UIViewController {
         performSegue(withIdentifier: "selectLadderSegue", sender: self)
     }
 
-//    func performEditLadderSegue() {
-//        performSegue(withIdentifier: "EditLadderSegue", sender: self)
-//    }
+    //    func performEditLadderSegue() {
+    //        performSegue(withIdentifier: "EditLadderSegue", sender: self)
+    //    }
 
     func performShowSampleSelectorSegue() {
         performSegue(withIdentifier: "showSampleSelectorSegue", sender: self)
@@ -1735,37 +1735,50 @@ extension DiagramViewController {
     func renameDocument(oldURL: URL, newURL: URL) {
         os_log("renameDocument", log: .action, type: .info)
         guard oldURL != newURL else { return }
+
         DispatchQueue.global(qos: .background).async {
             self.currentDocument?.close { success in
                 if success {
-                    let error: NSError? = nil
-                    let fileCoordinator = NSFileCoordinator()
-                    var moveError = error
-                    fileCoordinator.coordinate(writingItemAt: oldURL, options: .forMoving, writingItemAt: newURL, options: .forReplacing, error: &moveError, byAccessor: { newURL1, newURL2 in
-                        let fileManager = FileManager.default
-                        fileCoordinator.item(at: oldURL, willMoveTo: newURL)
-                        if (try? fileManager.moveItem(at: newURL1, to: newURL2)) != nil {
-                            fileCoordinator.item(at: oldURL, didMoveTo: newURL)
-                            self.currentDocument = DiagramDocument(fileURL: newURL)
-                            self.currentDocument?.open { openSuccess in
-                                guard openSuccess else {
-                                    print ("could not open \(newURL)")
-                                    return
-                                }
-                                // Try to delete old document, ignore errors.
-                                if fileManager.isDeletableFile(atPath: oldURL.path) {
-                                    try? fileManager.removeItem(atPath: oldURL.path)
-                                }
-                                DispatchQueue.main.async {
-                                    self.currentDocument?.diagram = self.diagram
-                                    self.setTitle()
-                                }
+                    if let resolvedDirectoryURL = Sandbox.getPersistentDirectoryURL(forFileURL: oldURL) {
+                        let startAccessing = resolvedDirectoryURL.startAccessingSecurityScopedResource()
+                        defer {
+                            if startAccessing {
+                                resolvedDirectoryURL.stopAccessingSecurityScopedResource()
                             }
                         }
-                        if let error = error {
-                            print("error = \(error.localizedDescription)")
-                        }
-                    })
+
+                        let error: NSError? = nil
+                        let fileCoordinator = NSFileCoordinator()
+                        var moveError = error
+                        fileCoordinator.coordinate(writingItemAt: oldURL, options: .forMoving, writingItemAt: newURL, options: .forReplacing, error: &moveError, byAccessor: { newURL1, newURL2 in
+                            let fileManager = FileManager.default
+                            fileCoordinator.item(at: oldURL, willMoveTo: newURL)
+                            if (try? fileManager.moveItem(at: newURL1, to: newURL2)) != nil {
+                                fileCoordinator.item(at: oldURL, didMoveTo: newURL)
+                                DispatchQueue.main.async {
+                                    self.currentDocument = DiagramDocument(fileURL: newURL)
+                                    self.currentDocument?.open { openSuccess in
+                                        guard openSuccess else {
+                                            print ("could not open \(newURL)")
+                                            return
+                                        }
+                                        self.currentDocument?.diagram = self.diagram
+                                        self.setTitle()
+                                        self.currentDocument?.updateChangeCount(.done)
+                                        // Try to delete old document, ignore errors.
+                                        DispatchQueue.global(qos: .background).async {
+                                            if fileManager.isDeletableFile(atPath: oldURL.path) {
+                                                try? fileManager.removeItem(atPath: oldURL.path)
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                            if let error = error {
+                                print("error = \(error.localizedDescription)")
+                            }
+                        })
+                    }
                 }
             }
         }
@@ -1830,8 +1843,8 @@ extension DiagramViewController {
         """
         let translatedMessage = L(message)
         UserAlert.showWarning(viewController: self, 
-            title: L("Add Directory To Sandbox"), 
-            message: translatedMessage, action: action
+                              title: L("Add Directory To Sandbox"),
+                              message: translatedMessage, action: action
         )
     }
 

@@ -1,9 +1,9 @@
-#+TITLE:     EP Diagram Help
+#+TITLE:     
 #+AUTHOR:    David Mann
 #+EMAIL:     mannd@epstudiossoftware.com
 #+DATE:      [2020-07-31 Fri]
-#+DESCRIPTION: Welcome to EP Diagram
-#+KEYWORDS: ladder diagrams, EP Diagram index
+#+DESCRIPTION: EP Diagram manual
+#+KEYWORDS: ladder diagrams, EP Diagram manual
 #+LANGUAGE:  en
 #+OPTIONS:   H:3 num:nil toc:nil \n:nil ::t |:t ^:t -:t f:t *:t <:t
 #+OPTIONS:   d:nil todo:t pri:nil tags:not-in-toc
@@ -23,9 +23,7 @@
 <a name="EP Diagram index"></a>
 #+END_EXPORT
 ** Introduction
-Ladder diagrams date back at least a century and have been used to analyze arrhythmias and as teaching tools for almost as long as there has been electrocardiography.  For a history and examples of ladder diagrams, see the [[*References][references].  *EP Diagram* is a full-featured ladder drawing program.  It allows you not only to draw ladders, but also to customize their appearance to a fine degree.  As such it is a complex program and it can take a while to learn all its features.  However, it has an extensive undo/redo facility, so feel free to experiment.
-
-*EP Diagram* is optimized for use on an iPad.  It can be used on a phone, but due to the small size of a phone, it may be more difficult to draw ladder diagrams.
+Ladder diagrams date back at least a century and have been used to analyze arrhythmias and as teaching tools for almost as long as there has been electrocardiography.  For a history and examples of ladder diagrams, see the [[file:misc.org::*References][references]].  *EP Diagram* is a full-featured ladder drawing program.  It allows you not only to draw ladders, but also to customize their appearance to a fine degree.  As such it is a complex program and it can take a while to learn all its features.  However, it has an extensive undo/redo facility, so feel free to experiment.
 ** Don't panic! (Undo, Redo, and Autosave)
 Practically any change you make while using this app can be reversed by tapping the *Undo* button at the bottom of the screen.  If you change your mind you can revert the undo action by tapping the *Redo* button.  Every change you make is automatically saved.  There is no need to explicity save your diagram files; the app does this in the background.
 ** Terminology
@@ -51,30 +49,39 @@ Ladder diagram terminology is not standardized.  Here is a glossary of the terms
 | Markers              | optional lines on image aligned with marks                        |
 | Mark pattern         | a grouping of marks that form a repeating pattern                 |
 | Joining mark         | mark used to join together mark patterns                          |
+** Keyboard shortcuts
+| Key | Function                |
+|-----+-------------------------|
+| ⌘N  | New window/open diagram |
+| ⌘,  | Open preferences        |
+| ⌘W  | Close diagram           |
+| ⌘+  | Zoom in                 |
+| ⌘-  | Zoom out                |
+| ⌘0  | Reset zoom              |
+| ⌘Q  | Quit app                |
 ** Diagrams
 *** Creating and opening diagrams
-EP Diagram is a file based app, meaning the diagrams you create are stored on your device or on iCloud, and can be processed by the Files app on your device, meaning you can copy them, rename them, or delete them outside of the *EP Diagram* app.  The diagram files you create have a file extension of /diagram/ and a specific icon and file format.  When you open the app, a screen shows your diagram files and a create file icon.
+EP Diagram is a file based app, meaning the diagrams you create are stored on your Mac or on iCloud, and you can copy them, rename them, or delete them outside of the *EP Diagram* app.  The diagram files you create have a file extension of /diagram/ and a specific icon and file format.  When you open the app, the initial screen is a file browser that allows you to create a new diagram or open a previously created diagram.  Use the *File | New* menu item to bring up this file selection screen at any time.  Using this it is possible to have multiple diagram windows open at once.
 
 #+CAPTION: EP Diagram files
 [[./img/epdiagram_files.png]]
 
-Tap *Create New Diagram* to create a diagram file, or tap on one of your previously created diagrams to open it.
+Tap *New Document* to create a diagram file, or tap on one of your previously created diagrams to open it.
+*** Dealing with the app sandbox
 *** Initial diagram screen
 
 #+CAPTION: New diagram
 [[./img/new_diagram.png]]
 
 A blank diagram has no ECG image and has a default ladder without marks.  You will see how to add an ECG image and markup the ladder in the next sections.
-*** Renaming a diagram
-New diagrams have a generic file name.  You can rename the diagram in the Files app, or rename it using the [[*Side menu items][side menu]] and then choosing *Rename diagram*.
 *** Closing a diagram
-There is no need to specifically save changes you make to a diagram.  Every change you make is automatically saved.  You close a diagram by simply tapping the *X* at the upper right hand corner of the screen.  Note however that undo and redo information is /not/ restored when you close and reopen a diagram.  Undo information can also be reset by the operating system if memory resources are low.  Thus if you have a diagram that you want to "play around with" but don't want to lose its original form, it might be best to duplicate that diagram using the Files app, and work on a copy.  
+There is no need to specifically save changes you make to a diagram.  Every change you make is automatically saved.  You close a diagram by simply tapping the *Close* button at the upper right hand corner of the screen, or use the *File | Close Diagram* menu item.  Note however that undo and redo information is /not/ restored when you close and reopen a diagram.  Thus if you have a diagram that you want to "play around with" but don't want to lose its original form, it might be best to duplicate that diagram using Finder, and work on a copy.  
 ** Images
 *** Adding an image
 **** Image types
-*EP Diagram* supports most image formats, such as jpg and png, and it also can load PDF files.  In addition you can take an photo with your device's camera and directly import it into the app.
+*EP Diagram* supports most image formats, such as jpg and png, and it also can load PDF files. 
 **** Selecting images
-Open the /side menu/ and tap *Take photo* to use your camera to create an image, or tap *Select image* and choose *Photos* or *Files* as the image source.  If a dialog appears asking for permission to access the camera or your Photos app, go ahead and grant permission.  If you don't, you will need to grant this permission in the Settings app of your device in order to import images.  After selecting an image, it will appear in the top half of the diagram.
+Use the *Diagram | Import Image* menu item to import an image the Photos app or from your files to import and image into your diagram.  You can also drag and drop images files (except for PDF files) on the diagram window.  If a dialog appears asking for permission to access your files Photos app, go ahead and grant permission.  *EP Diagram* does not alter the image in your Photos app or the original image file in any way.  After selecting an image, it will appear in the top half of the diagram.
 
 #+Caption: Diagram with image added
 [[./img/diagram_with_image.png]]

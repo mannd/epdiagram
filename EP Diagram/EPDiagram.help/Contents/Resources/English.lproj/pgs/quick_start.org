@@ -1,4 +1,4 @@
-#+TITLE:     Quick Start
+#+TITLE:     
 #+AUTHOR:    David Mann
 #+EMAIL:     mannd@epstudiossoftware.com
 #+DATE:      [2020-07-31 Fri]
@@ -22,24 +22,28 @@
 #+BEGIN_EXPORT html
 <a name="Quick start"></a>
 #+END_EXPORT
-* Quick start
-** Files screen
-- On the opening screen, tap *Create New Diagram* to create a blank ladder diagram.
+* [[../../shrd/64.png]] Quick start
+** Create a diagram file
+- On starting the app, a file selection screen should appear.  You can get to this screen anytime by selecting *File | New* from the main menu, or typing *Command-N*.  To create a diagram file, tap the *New Document* button at the lower left corner of the window.  (Note: throughout this help text, we use the term "tap" to indicate tapping on a trackpad or clicking with a mouse.  Similarly double-tap equals double-click, and drag equals hold the left mouse button and move the mouse.  When gestures are markedly different, such as a two-finger tap versus a right-button click of the mouse, we'll get more specific).
+** Deal with the Mac sandbox
+- The Mac sandbox is a requirment of apps sold on the Mac App Store.  The sandbox is the group of folders where the user is permitted to open and save files.  The user must grant permission to access folders (such as Documents or Downloads) outside of the storage assigned to the app itself.  The bottom line is that the first time you create a new document in a folder, the app will ask you to confirm this by asking you to select the folder from a list of folders.  Once this is done, the app shouldn't ever need to bother you about this again, at least for that particular folder.  So follow the prompts in the dialog that appears, and move on to the next step.  
 ** Load an ECG image
-- Use the "hamburger" menu icon at the top left to open the /side menu/.  You can select an ECG image from your photos or files and it will appear on the top half of the screen.
+- You should at this point have a nice blank ladder diagram on your screen, with a blank space above.  This is where the ECG image goes.
+- Use the *Import image* toolbar button, or *Diagram | Import Image* main menu item to import an image from the Photos app or from your files.  You can also drag and drop an image onto the window.
+- Use gestures to scroll and zoom the image, or tap on the zoom toolbar buttons.
 ** Create marks
 - Tap on the image or the ladder grid to create /marks/, which are the lines that are drawn on the ladder.  Use the /cursor/ (the vertical line extending from the mark to the top of the screen) to align marks with the ECG waveforms.  Tap away from the cursor to hide the cursor.  Tap on a mark to bring back the cursor and each tap changes the /anchor/ point of the mark from middle to proximal to distal.
 - Double tap on a mark to delete it.  Double tap anywhere else to create a mark.  Double tapping is a fast way to create marks.
 - Marks appear in the /active region/, shown by a tinted background.  If you tap on a different region the marks will appear in that region which will become the new active region.  Tapping on the label of a region will also activate or deactivate it.
-- Dragging with your finger in a region will also create a mark.
+- Dragging in a region will also create a mark.
 ** Move marks
 - Dragging on a mark with a cursor (you can drag either the mark itself or its cursor) will move the mark horizontally.
 - The anchor point will determine how the mark moves.  A middle anchor will move the whole mark, but an anchor at an endpoint of a mark will just move that endpoint, while the other endpoint stays fixed.  This will slant the mark.
 - Long press on the cursor to change it to an omnidirectional cursor (it has a large circle on it), allowing marks to move in any direction.  Long press again to change it back.
 - Marks that are placed end to end will automatically link up and move together the next time you move one of them.
 ** Calibrate the diagram
-- Tap the *Calibrate* button to show a caliper that can be used to calibrate the diagram to a standard interval of 1000 msec.
-- After calibration, measurements will appear on the diagram.
+- Optionally, tap the *Calibrate* button to show a caliper that can be used to calibrate the diagram to a standard interval of 1000 msec.
+- After calibration, measurements will appear on the diagram, provided the *Show intervals* and *Show conduction times* app preferences are turned on.
 ** Connect marks
 - You can draw and move marks to connect them, but it is easier to use the *Connect* button.
 - After tapping the *Connect* button, tap pairs of marks separated by a region to connect the marks with a new mark.
@@ -47,17 +51,17 @@
 ** Edit the diagram
 - Tap the *Edit* button to unlock techniques for sprucing up your diagram.
 - Tap to select and deselect marks or regions, or drag to select zones.
-- Long press the ladder after selecting marks or regions to show a menu that can be used to customize the appearance of the marks, including their style, emphasis, block, impulse origin, etc.  You can also add groups of marks and even periods of regular rhythm or fibrillation to zones and regions using this menu.  
+- Two-finger press or right-click if you are using a mouse the ladder after selecting marks or regions to show a menu that can be used to customize the appearance of the marks, including their style, emphasis, block, impulse origin, etc.  You can also add groups of marks and even periods of regular rhythm or fibrillation to zones and regions using this menu.  
 ** Undo/Redo
-- Practically anything you do can be undone or redone and these changes are automatically saved.
-** Other features are located on the side menu
-- Change to a different ladder
-- Edit or create ladders
-- Load sample diagrams
+- Practically anything you do can be undone or redone and these changes are automatically saved.  You /do not/ need to specifically save your diagram.  All changes are saved as they are made automatically.
+** Other features are located in the main menu
+- Change to a different ladder (*Diagram | Ladder | Select Ladder*)
+- Edit or create ladders (*Diagram | Ladder | Edit Ladder*)
+- Load sample diagrams (*Diagram | Samples*)
 ** Take screenshots
 - Take screenshots using the *Screenshot* button at the upper right of the screen, next to the *Close* button.
 ** Preferences
-- Change the overall appearance or behavior of the app.  Many aspects are customizable.
+- Use the *EP Diagram | Preferences* menu item, or type *Command-,* to open the preferences window and change the overall appearance or behavior of the app.  Many aspects are customizable.
 ** Close the diagram
 Use the *Close* button at the upper right of the screen to close the diagram and return to the *Files* screen.  Diagrams are automatically saved as you work with them.
 ** Those are the basics
