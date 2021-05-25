@@ -20,7 +20,7 @@
 #+HTML_HEAD: <meta name="robots" content="keywords" />
 * [[../../shrd/64.png]] EP Diagram manual
 #+BEGIN_EXPORT html
-<a name="EP Diagram index"></a>
+<a name="EP Diagram manual"></a>
 #+END_EXPORT
 ** Introduction
 Ladder diagrams date back at least a century and have been used to analyze arrhythmias and as teaching tools for almost as long as there has been electrocardiography.  For a history and examples of ladder diagrams, see the [[file:misc.org::*References][references]].  *EP Diagram* is a full-featured ladder drawing program.  It allows you not only to draw ladders, but also to customize their appearance to a fine degree.  As such it is a complex program and it can take a while to learn all its features.  However, it has an extensive undo/redo facility, so feel free to experiment.
@@ -58,6 +58,7 @@ Ladder diagram terminology is not standardized.  Here is a glossary of the terms
 | ⌘+  | Zoom in                 |
 | ⌘-  | Zoom out                |
 | ⌘0  | Reset zoom              |
+| ⌘S  | Save screenshot         |
 | ⌘Q  | Quit app                |
 ** Diagrams
 *** Creating and opening diagrams
@@ -67,13 +68,15 @@ EP Diagram is a file based app, meaning the diagrams you create are stored on yo
 [[./img/epdiagram_files.png]]
 
 Tap *New Document* to create a diagram file, or tap on one of your previously created diagrams to open it.
-*** Dealing with the app sandbox
+*** TODO Dealing with the app sandbox
 *** Initial diagram screen
 
 #+CAPTION: New diagram
 [[./img/new_diagram.png]]
 
 A blank diagram has no ECG image and has a default ladder without marks.  You will see how to add an ECG image and markup the ladder in the next sections.
+*** Renaming a diagram
+New diagrams have a generic file name.  You can rename the diagram in the Finder, or rename it from the app using the main menu item *File | Rename Diagram*.
 *** Closing a diagram
 There is no need to specifically save changes you make to a diagram.  Every change you make is automatically saved.  You close a diagram by simply tapping the *Close* button at the upper right hand corner of the screen, or use the *File | Close Diagram* menu item.  Note however that undo and redo information is /not/ restored when you close and reopen a diagram.  Thus if you have a diagram that you want to "play around with" but don't want to lose its original form, it might be best to duplicate that diagram using Finder, and work on a copy.  
 ** Images
@@ -81,25 +84,25 @@ There is no need to specifically save changes you make to a diagram.  Every chan
 **** Image types
 *EP Diagram* supports most image formats, such as jpg and png, and it also can load PDF files. 
 **** Selecting images
-Use the *Diagram | Import Image* menu item to import an image the Photos app or from your files to import and image into your diagram.  You can also drag and drop images files (except for PDF files) on the diagram window.  If a dialog appears asking for permission to access your files Photos app, go ahead and grant permission.  *EP Diagram* does not alter the image in your Photos app or the original image file in any way.  After selecting an image, it will appear in the top half of the diagram.
+Use the *Diagram | Import Image* menu item or toolbar button to import an image from the Photos app or from your files.  You can also drag and drop images files (except for PDF files) on the diagram window.  If a dialog appears asking for permission to access your files Photos app, go ahead and grant permission.  *EP Diagram* does not alter the image in your Photos app or the original image file in any way.  After selecting an image, it will appear in the top half of the diagram.
 
 #+Caption: Diagram with image added
 [[./img/diagram_with_image.png]]
 
 *** Manipulating the image
 **** Scrolling and zooming
-You can pinch to zoom and use your finger to scroll the image.  If you have created a ladder, you will see the ladder will zoom and scroll appropriately at the same time.  In *EP Diagram* all zooming and scrolling is done via the image, not via the ladder.
+Using a trackpad you can pinch to zoom and use your finger to scroll the image or use a mouse to scroll the image and the zoom toolbar buttons to zoom.  You can also use the keyboard shortcuts *Command-+*, *Command--*, and *Command-0* (zero) to zoom in and out or reset the image size.  If you have created a ladder, you will see the ladder will zoom and scroll appropriately at the same time.  In *EP Diagram* all zooming and scrolling is done via the image, not via the ladder.
 **** Rotating the image
-If the image is out of kilter (this may happen with photos you take), long press on the image and then select in the menu that appears *Rotate*.  Use the buttons at the bottom of the screen to rotate the image.  Tap *Reset* to bring the image back to its original orientation.
+If the image is out of kilter, Two finger press or right click on the image and then select in the menu that appears *Rotate*.  Use the buttons at the bottom of the screen to rotate the image.  Tap *Reset* to bring the image back to its original orientation.
 **** Adjust the size of the image versus the ladder
 There is a small red horizontal bar between the image and the ladder.  Move this up or down to adjust the relative proportions of the image and the ladder on the screen.
 
 *** PDF files
-Load PDF files like any other image file.  However, some PDF files contain multiple pages.  You can change the page by performing a long press on the image and selected the *PDF* menu item.  A toolbar will appear at the bottom which allows you to change pages.  Note that once a multipage PDF diagram is closed, only the page shown when the diagram is closed will be saved with the diagram.  This is because *EP Diagram* only saves one image at a time.  In order to changes pages after reopening a diagram based on a multipage PDF file, it will be necessary to reload the PDF file.
+Load PDF files like any other image file.  However, some PDF files contain multiple pages.  You can change the page by performing a long press on the image and selected the *PDF* menu item.  A toolbar will appear at the bottom which allows you to change pages.  Note that once a multipage PDF diagram is closed, only the page shown when the diagram is closed will be saved with the diagram.  This is because *EP Diagram* only saves one image at a time.  In order to change pages after reopening a diagram based on a multipage PDF file, it will be necessary to reload the PDF file.
 
 ** Ladders
 *** Default ladder
-When you create a new diagram, a default ladder is presented initially.  You can [[*Editing and creating ladders][change the default ladder, select a different ladder, or create a new ladder from scratch]].  The default ladder has three regions: A (atrial), AV (atrioventricular), and V (ventricular). 
+When you create a new diagram, a default ladder is presented initially.  You can [[*Selecting, editing and creating ladders][change the default ladder, select a different ladder, or create a new ladder from scratch]].  The default ladder has three regions: A (atrial), AV (atrioventricular), and V (ventricular). 
 *** Modes
 Most of the time you will be working with the ladder in /normal/ mode.  This is the default mode of operation.  This mode allows you to add and delete marks, move marks, link marks together, and in general draw your ladder.  The toolbar menu at the bottom of the screen in normal mode shows the three other modes: /calibrate/, /connect/ and /edit/.   Those modes are used to calibrate the diagram to allow measurements to be made, to quickly connect pairs of marks, and to edit the ladder's appearance.  These modes will be discussed in detail later.
 *** Active region
@@ -118,7 +121,7 @@ It's a bit tiresome to tap to create a mark, and then tap again just to make the
 [[./img/adding_V_marks.png]]
 
 *** Dragging to create marks
-As described later, it is easy using connect mode to connect the marks we have drawn, but we'll stay in normal mode for now and accomplish the same feat.  Using your finger, drag from the first mark in the A region to the first mark in the V region.  A new mark will be created, and when it is close to the other two marks, they will be highlighted in a purple color, meaning they are close enough to the new mark to be linked.  When you finish the drag through the AV region and lift your finger, the new mark (if it is close enough) will snap into the correct position, linking the two regions with conduction through the AV region.
+As described later, it is easy using connect mode to connect the marks we have drawn, but we'll stay in normal mode for now and accomplish the same feat.  Drag from the first mark in the A region to the first mark in the V region.  A new mark will be created, and when it is close to the other two marks, they will be highlighted in a purple color, meaning they are close enough to the new mark to be linked.  When you finish the drag through the AV region, the new mark (if it is close enough) will snap into the correct position, linking the two regions with conduction through the AV region.
 
 #+CAPTION: Dragging to create a mark in the AV region
 [[./img/drag_in_AV.png]]
@@ -139,7 +142,7 @@ To demonstrate this, single tap on the highlighted mark or its cursor.  The anch
 *** Moving marks in all directions
 So far we have used the cursor to move marks purely in a horizontal direction.  But we can also move marks in unlimited directions.  To do this we have to change our cursor to an /omnidirectional/ cursor.
 
-Tap a mark to cause the cursor to appear.  Then do a long press on the cursor.  A circle will appear, indicating the cursor is now omnidirectional.  You can now drag it mark in any direction, depending on the anchor point.  Another long press on the cursor will change it back to a normal horizontally moving cursor.
+Tap a mark to cause the cursor to appear.  Then do a long press on the cursor.  A circle will appear, indicating the cursor is now omnidirectional.  You can now drag the mark in any direction, depending on the anchor point.  Another long press on the cursor will change it back to a normal horizontally moving cursor.
 
 #+CAPTION: Omnidirectional cursor
 [[./img/omnidirectional_movement.png]]
@@ -163,7 +166,7 @@ While ladder diagrams are nice, even nicer is the ability to use the ladder to m
 
 Note that this caliper is always set to a measurement of 1000 msec.  In order to calibrate, you must measure a 1000 msec interval with the caliper.  Then tap *Set* to set the calibration, or tap *Clear* to remove calibration.  Once calibrated, you can recalibrate at any time.  Tap *Done* to return to normal mode.
 *** Intervals and conduction times
-After calibration, if preferences are set to show intervals and show conduction times, you will now see measurements on the ladder.  These will change "on the fly" as you modify the ladder.  They will remain accurate even when zooming and scrolling the image, or if you rotate the screen.
+After calibration, if preferences are set to show intervals and show conduction times, you will now see measurements on the ladder.  These will change "on the fly" as you modify the ladder.  They will remain accurate even when zooming and scrolling the image.
 
 #+CAPTION: Measurements
 [[./img/measurements.png]]
@@ -205,7 +208,12 @@ Move the selected marks as a group by dragging them horizontally after selecting
 *** Adjust CL
 Lengthen or shorten the cycle length of a group of marks.  This option forces all the selected marks to have the same cycle length.
 *** Rhythm
-This is discussed [[*Creating rhythms][below]].
+If you select a zone or region, and then bring up the context menu with a long press, you can select the *Rhythm* item to display a screen that allows you to fill the region or zone with a rhythm.
+
+#+CAPTION: Rhythm selection
+[[./img/rhythm.png]]
+
+You can choose a regular rhythm or fibrillation.  With fibrillation you will have a random cycle length defined by an upper and lower limit.  You can also randomize parameters such as the impulse origin, conduction time, and conduction direction.
 *** Repeat CL
 Repeat the cycle length of a pair of marks forward, backward, or bidirectionally.  This is useful in copying a repeating pattern.
 *** Copy and paste
@@ -218,61 +226,17 @@ This option will take a selected group of marks and repeat them, with one mark a
 
 *** Unlink
 Unlink the selected marks.
-
 *** Snap to nearby marks
 Move the endpoints of nearby marks together and link the marks.
 *** Delete mark(s)
 Delete the selected marks.
-*** Creating rhythms
-If you select a zone or region, and then bring up the context menu with a long press, you can select the *Rhythm* item to display a screen that allows you to fill the region or zone with a rhythm.
 
-#+CAPTION: Rhythm selection
-[[./img/rhythm.png]]
+** Selecting, editing and creating ladders
+Use the *Diagram | Ladder | Select Ladder* menu item to select from a list of ladders.   Note that when you select a ladder, it will clear any marks already present, though you can always use the *Undo* button to go back to the previous ladder with its marks.
 
-You can choose a regular rhythm or fibrillation.  With fibrillation you will have a random cycle length defined by an upper and lower limit.  You can also randomize parameters such as the impulse origin, conduction time, and conduction direction.
-** Side menu items
-*** Opening the side menu
-Use the "hamburger" icon at the upper left of the screen to open the side menu.
-
-#+CAPTION: Side menu
-[[./img/side_menu.png]]
-
-*** Take photo
-Use your camera to photograph an ECG image that will be directly imported into the diagram.  Adding a new image will blank the ladder, though you can always undo back to the previous app state.  You will need to grant permission to the app to use the camera when doing this the first time.
-*** Select image
-Select an image from the Photos app or from your local or iCloud files.  The ladder will be cleared when adding a new image.  You will need to grant access to your photos when selecting an image for the first time.
-*** Select ladder
-Use *Select ladder* to choose a ladder.  Note that when you select a ladder, it will be blank (without marks), though you can always use the *Undo* button to go back to the previous ladder.
-
-#+CAPTION: Select ladder
-[[./img/select_ladder.png]]
-
-*** Rename diagram
-Change the name of your diagram file.
-*** Diagram info
-Displays a dialog box with information about the current diagram.
-*** Sample diagrams
-Select a sample diagram.
-
-#+CAPTION: Sample diagrams
-[[./img/sample_diagrams.png]]
-
-*** Lock image
-Prevent the image from scrolling or zooming.  The same button, titled *Unlock image* is used to unlock the image.
-*** Lock ladder
-Prevent changes to the ladder (although the *Undo* and *Redo* buttons still affect the ladder).  Unlock the ladder with the same button. 
-*** Ladder editor
-Editing and creating ladders are discussed [[*Editing and creating ladders][below]].
-*** Preferences
-Preferences are discussed [[*Preferences][below]].
-*** Help
-View this help file.
-*** About
-View a dialog with copyright and version information about the app.
-** Editing and creating ladders
 You are not limited to the default ladders that come with the app.  You can create your own ladders, change ladders, or delete those that you don't use. There are two ways to edit ladders. 
 
-If in edit mode you long press on a label of the current ladder, a menu appears that allows you to make changes to the regions and the ladder.
+If in edit mode you two finger press or right click on a label of the current ladder, a menu appears that allows you to make changes to the regions and the ladder.
 
 #+CAPTION: Region menu
 [[./img/region_menu.png]]
@@ -286,11 +250,11 @@ Add a region above or below the selected region.
 *** Remove region
 Remove a region.
 *** Region height
-Change the height of a region.
+Change the relative height of a region.
 *** Adjust left margin
-Change the left margin.
+Change the left margin width.
 *** The ladder editor
-To change or add to the templates that your ladders are based on, use the *Ladder editor* from the side menu.  The ladder editor will not affect diagrams that you have already created.  Instead it affects the templates that new ladders are based on. 
+To change or add to the templates that your ladders are based on, use the *Diagram | Ladder | Edit Ladder* menu item.  The ladder editor will not affect diagrams that you have already created.  Instead it affects the templates that new ladders are based on. 
 
 #+CAPTION: The ladder editor
 [[./img/ladder_editor.png]]
@@ -310,9 +274,11 @@ On this screen you can change the name and description of the ladder, the left m
 Here you can change the name, description, height, and default mark line style of the region.  The height is a relative height, i.e. a region with a height of 2 will be twice a height twice as much as a region of height 1.  This is why the AV region in the diagrams shown in this help file is twice as tall as the A and V regions.
 
 After making changes, hit the back button at the top left to return to your diagram.
+** Screenshots
+Use the *File | Save Screenshot* menu item, type *Command-S,* or tap the *Screenshot* toolbar button (just to the left of the *Close* button) to take a screenshot image of a diagram and save it to your Photos app.  If a dialog appears asking for permission to access your photo library, select access to all photos if you wish to take diagram snapshots.
 
 ** Preferences
-There are multiple app preferences that you can set, as shown below.  
+There are multiple app preferences that you can set, as shown below.  Use the *EP Diagram | Preferences* menu item, type *Command-,*  to open the preferences window.
 
 #+CAPTION: App preferences
 [[./img/preferences.png]]
@@ -334,9 +300,5 @@ The style of new marks added to the ladder.  This can be overridden by the regio
 Set this to show the label description under the name of the label.
 *** Hide all marks
 For teaching purposes, it may be useful to hide the ladder marks and just show the ECG image.
-*** Play sounds
-Play the lock sounds when the image or ladder is locked.
 *** Auto-link marks
 It is recommended to leave this on, so that marks are automatically linked together and "snap" into position.  If it is turned off, all mark alignment will need to be performed manually.  In addition, impulse origin and block may need to be set manually as they cannot be ascertained automatically.
-** Diagram snapshots
-To create a snapshot and save it to the Photos app, simply tap the *Snapshot* button (next to the *X* close button) at the top right of the screen.  If a dialog appears asking for permission to access your photo library, select access to all photos if you wish to take diagram snapshots.

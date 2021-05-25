@@ -1731,7 +1731,6 @@ extension DiagramViewController {
         return controller
     }
 
-    // FIXME: Doesn't work on mac due to sandboxing
     func renameDocument(oldURL: URL, newURL: URL) {
         os_log("renameDocument", log: .action, type: .info)
         guard oldURL != newURL else { return }
@@ -1752,7 +1751,8 @@ extension DiagramViewController {
                         var moveError = error
                         fileCoordinator.coordinate(writingItemAt: oldURL, options: .forMoving, writingItemAt: newURL, options: .forReplacing, error: &moveError, byAccessor: { newURL1, newURL2 in
                             let fileManager = FileManager.default
-                            fileCoordinator.item(at: oldURL, willMoveTo: newURL)
+                            // Below gives sandbox error on mac
+                            //fileCoordinator.item(at: oldURL, willMoveTo: newURL)
                             if (try? fileManager.moveItem(at: newURL1, to: newURL2)) != nil {
                                 fileCoordinator.item(at: oldURL, didMoveTo: newURL)
                                 DispatchQueue.main.async {

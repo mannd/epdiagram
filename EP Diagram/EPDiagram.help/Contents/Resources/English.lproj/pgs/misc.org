@@ -2,8 +2,8 @@
 #+AUTHOR:    David Mann
 #+EMAIL:     mannd@epstudiossoftware.com
 #+DATE:      [2020-07-31 Fri]
-#+DESCRIPTION: Welcome to EP Diagram
-#+KEYWORDS: ladder diagrams, EP Diagram index
+#+DESCRIPTION: Miscellaneous
+#+KEYWORDS: ladder diagrams, EP Diagram index, references, acknowledgments
 #+LANGUAGE:  en
 #+OPTIONS:   H:3 num:nil toc:nil \n:nil ::t |:t ^:t -:t f:t *:t <:t
 #+OPTIONS:   d:nil todo:t pri:nil tags:not-in-toc
@@ -20,7 +20,7 @@
 #+HTML_HEAD: <meta name="robots" content="keywords" />
 * [[../../shrd/64.png]] Miscellaneous
 #+BEGIN_EXPORT html
-<a name="EP Diagram index"></a>
+<a name="miscellaneous"></a>
 #+END_EXPORT
 * References
 - Johnson NP, Denes P. The Ladder Diagram (A 100+ Year History). American Journal of Cardiology. 2008;101(12):1801-1804. doi:10.1016/j.amjcard.2008.02.085

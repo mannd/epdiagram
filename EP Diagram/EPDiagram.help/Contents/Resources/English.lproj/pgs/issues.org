@@ -2,8 +2,8 @@
 #+AUTHOR:    David Mann
 #+EMAIL:     mannd@epstudiossoftware.com
 #+DATE:      [2020-07-31 Fri]
-#+DESCRIPTION: Welcome to EP Diagram
-#+KEYWORDS: ladder diagrams, EP Diagram index
+#+DESCRIPTION: Issues, bugs, limitations
+#+KEYWORDS: ladder diagrams, EP Diagram index, bugs, issues, limitations
 #+LANGUAGE:  en
 #+OPTIONS:   H:3 num:nil toc:nil \n:nil ::t |:t ^:t -:t f:t *:t <:t
 #+OPTIONS:   d:nil todo:t pri:nil tags:not-in-toc
@@ -20,7 +20,7 @@
 #+HTML_HEAD: <meta name="robots" content="keywords" />
 * [[../../shrd/64.png]] Issues
 #+BEGIN_EXPORT html
-<a name="EP Diagram index"></a>
+<a name="issues"></a>
 #+END_EXPORT
 
 * Known issues/bugs/limitations
@@ -30,6 +30,7 @@
   - The red close window button is disabled on the Mac.  It is necessary to use the *Close Diagram* toolbar button or menu command to close the diagram window.  This is a limitation due to a bug in the implementation of document-based apps on the Mac using Mac Catalyst.
 - Drag and drop works for image files (e.g. JPG files) but not for PDF or diagram files.  This will be addressed in a future release.
 - Calibration is not saved if there is no image file loaded.
-- Complexly linked marks in the same region may not always track with the moving mark.  We can't decide if this is a bug or feature. 
+- Complexly linked marks in the same region may not always track with the moving mark.  We can't decide if this is a bug or feature.
+- Sandboxing which is required by Apple for a Mac App Store app, can sometimes result in blank windows when reopening the app, and other strange effects.  These are issues with the Apple Mac Catalyst system that we hope will be fixed in later versions.
 
 

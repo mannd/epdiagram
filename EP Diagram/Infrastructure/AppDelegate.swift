@@ -235,14 +235,14 @@ extension AppDelegate {
             action: #selector(DiagramViewController.selectLadder(_:))
         )
 
-        let testCommand = UIKeyCommand(
-            title: "Test",
-            action: #selector(DiagramViewController.renameDiagram),
-            input: "t",
-            modifierFlags: [.command]
-        )
+//        let testCommand = UIKeyCommand(
+//            title: "Test",
+//            action: #selector(DiagramViewController.renameDiagram),
+//            input: "t",
+//            modifierFlags: [.command]
+//        )
 
-        let ladderMenu = UIMenu(title: L("Ladder"), children: [selectLadderCommand, editLadderCommand, testCommand])
+        let ladderMenu = UIMenu(title: L("Ladder"), children: [selectLadderCommand, editLadderCommand])
 
         let diagramMenu = UIMenu(
             title: L("Diagram"),
