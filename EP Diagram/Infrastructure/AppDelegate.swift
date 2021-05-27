@@ -12,7 +12,6 @@ import os.log
 import AppKit
 #endif
 
-
 @UIApplicationMain
 class AppDelegate: UIResponder, UIApplicationDelegate {
 
@@ -47,7 +46,6 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     // MARK: UISceneSession Lifecycle
     func application(_ application: UIApplication, configurationForConnecting connectingSceneSession: UISceneSession, options: UIScene.ConnectionOptions) -> UISceneConfiguration {
         os_log("application(_:configurationForConnecting:options:)", log: .lifeCycle, type: .info)
-        print("***activity", options.userActivities.first?.activityType as Any)
         // Called when a new scene session is being created.
         // Use this method to select a configuration to create the new scene with.
         if options.userActivities.first?.activityType == Self.preferencesActivityType {
@@ -64,28 +62,22 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 #if targetEnvironment(macCatalyst)
 extension AppDelegate {
 
-
-    // MARK: - macOS menu
+    // MARK: - Mac support app kit plugin
 
     @objc func loadAppKitPlugin() {
         let bundleFileName = "MacSupport.bundle"
         guard let bundleURL = Bundle.main.builtInPlugInsURL?
                 .appendingPathComponent(bundleFileName) else { return }
 
-        /// 2. Create a bundle instance with the plugin URL
         guard let bundle = Bundle(url: bundleURL) else { return }
 
-        /// 3. Load the bundle and our plugin class
         let className = "MacSupport.MacSupport"
         guard let pluginClass = bundle.classNamed(className) as? SharedAppKitProtocol.Type else { return }
 
-        /// 4. Create an instance of the plugin class
         self.appKitPlugin = pluginClass.init()
-//        plugin.loadRecentMenu()
-//        plugin.sayHello()
-//        plugin?.closeWindows(self)
     }
 
+    // MARK: - macOS menu
 
     override func buildMenu(with builder: UIMenuBuilder) {
         super.buildMenu(with: builder)
@@ -125,11 +117,11 @@ extension AppDelegate {
         )
 
         let addDirectoryToSandboxCommand = UICommand(
-            title: "Add Directory To Sandbox",
+            title: L("Add Folder to Sandbox"),
             action: #selector(DiagramViewController.addDirectoryToSandbox(_:))
         )
         let clearSandbox = UICommand(
-            title: "Clear Sandbox",
+            title: L("Reset Sandbox"),
             action: #selector(DiagramViewController.clearSandbox(_:))
         )
         let sandboxMenu = UIMenu(
@@ -147,7 +139,7 @@ extension AppDelegate {
         )
 
         let closeDiagramCommand = UIKeyCommand(
-            title: "Close Diagram",
+            title: L("Close Diagram"),
             action: #selector(DiagramViewController.macCloseDocument(_:)),
             input: "w",
             modifierFlags: [.command]
@@ -251,9 +243,6 @@ extension AppDelegate {
         )
         builder.insertSibling(diagramMenu, afterMenu: .view)
 
-        DispatchQueue.main.async {
-            self.loadAppKitPlugin()
-        }
     }
 
     // See https://stackoverflow.com/questions/58882047/open-a-new-window-in-mac-catalyst
@@ -269,5 +258,3 @@ extension AppDelegate {
 
 }
 #endif
-
-

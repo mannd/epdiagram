@@ -1814,38 +1814,31 @@ extension DiagramViewController {
     }
 
     @IBAction func addDirectoryToSandbox(_ sender: Any) {
-        let action: ((UIAlertAction)->Void) = { _ in
-            if let appDelegate = UIApplication.shared.delegate as? AppDelegate {
-                if let plugin = appDelegate.appKitPlugin {
-                    if let nsWindow = self.view.window?.nsWindow {
-                        let completion: ((URL)->Void) = { url in
-                            self.storeDirectoryBookmark(from: url)
-                            print("directoryURL", url as Any)
-                        }
-                        plugin.getDirectory(nsWindow: nsWindow, startingURL: nil, completion: completion)
+        let currentDocumentURL: URL?
+        if let _ = sender as? DiagramViewController {
+            currentDocumentURL = getCurrentDirectoryURL()
+        } else  {
+            currentDocumentURL = nil
+        }
+        if let appDelegate = UIApplication.shared.delegate as? AppDelegate {
+            if let plugin = appDelegate.appKitPlugin {
+                if let nsWindow = self.view.window?.nsWindow {
+                    let completion: ((URL)->Void) = { url in
+                        self.storeDirectoryBookmark(from: url)
+                        print("directoryURL", url as Any)
                     }
+                    plugin.getDirectory(nsWindow: nsWindow, startingURL: currentDocumentURL, completion: completion)
                 }
             }
         }
+    }
 
-        let currentDocumentURL = currentDocument?.fileURL.deletingLastPathComponent()
-        print("current directory", currentDocumentURL?.path as Any)
-        let folder = currentDocumentURL == nil ? L("folder") : L("\(currentDocumentURL!.path) folder")
-
-        let message = """
-        In order to use the \(folder), it is necessary to add the \(folder) to the App Sandbox.
-
-        You should only need to do this once for each folder where you save Diagram files.
-
-        Choose OK and in the files dialog box that appears next, the \(folder) should be already selected, so just choose the Select button, or navigate to a different folder that you wish to add to the Sandbox first.
-
-        Note: You can clear the directories that you have added to the App Sandbox at any time using the Clear Sandbox menu item in the Files menu.  You can read more about the App Sandbox in EP Diagram Help.
-        """
-        let translatedMessage = L(message)
-        UserAlert.showWarning(viewController: self, 
-                              title: L("Add Directory To Sandbox"),
-                              message: translatedMessage, action: action
-        )
+    private func getCurrentDirectoryURL() -> URL? {
+        if let currentDocument = currentDocument {
+            let url = currentDocument.fileURL.deletingLastPathComponent()
+            return url
+        }
+        return nil
     }
 
     @IBAction func clearSandbox(_ sender: Any) {
