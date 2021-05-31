@@ -25,7 +25,7 @@
 		8E25A9B122E5505200D62E18 /* LadderViewTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8E25A9B022E5505200D62E18 /* LadderViewTests.swift */; };
 		8E25A9B322E5515D00D62E18 /* LadderTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8E25A9B222E5515D00D62E18 /* LadderTests.swift */; };
 		8E2BA1D024A3BDD7002D997F /* PreferencesView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8E2BA1CF24A3BDD7002D997F /* PreferencesView.swift */; };
-		8E33927B262E6DE6002A7447 /* Preferences.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 8E33927A262E6DE6002A7447 /* Preferences.storyboard */; };
+		8E33927B262E6DE6002A7447 /* Preferences.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 8E33927A262E6DE6002A7447 /* Preferences.storyboard */; platformFilter = maccatalyst; };
 		8E339280262E7655002A7447 /* MacPreferencesViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8E33927F262E7655002A7447 /* MacPreferencesViewController.swift */; };
 		8E35924924BE9B27001E23D5 /* DiagramIO.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8E35924824BE9B27001E23D5 /* DiagramIO.swift */; };
 		8E3AD1372459CABF0085BDD4 /* LocationInLadder.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8E3AD1362459CABF0085BDD4 /* LocationInLadder.swift */; };
@@ -39,7 +39,7 @@
 		8E4ACA842447905E00575538 /* HamburgerCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8E4ACA832447905E00575538 /* HamburgerCell.swift */; };
 		8E4ACA862447935600575538 /* HamburgerLayer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8E4ACA852447935600575538 /* HamburgerLayer.swift */; };
 		8E4ACA8924479C5200575538 /* HamburgerViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8E4ACA8824479C5200575538 /* HamburgerViewModel.swift */; };
-		8E4D02FC265048C500F3CF53 /* maconboard.html in Resources */ = {isa = PBXBuildFile; fileRef = 8E4D02FA265048C500F3CF53 /* maconboard.html */; };
+		8E4D02FC265048C500F3CF53 /* maconboard.html in Resources */ = {isa = PBXBuildFile; fileRef = 8E4D02FA265048C500F3CF53 /* maconboard.html */; platformFilter = maccatalyst; };
 		8E4D02FD265048C500F3CF53 /* maconboard.org in Resources */ = {isa = PBXBuildFile; fileRef = 8E4D02FB265048C500F3CF53 /* maconboard.org */; };
 		8E55612922A5FEDC00C4D391 /* Cursor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8E55612822A5FEDC00C4D391 /* Cursor.swift */; };
 		8E5918BC24AEAB0B00D8ABA3 /* Caliper.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8E5918BB24AEAB0B00D8ABA3 /* Caliper.swift */; };
@@ -75,7 +75,7 @@
 		8E973F9D24C4C71E00AB41C3 /* StringTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8E973F9C24C4C71E00AB41C3 /* StringTests.swift */; };
 		8E973F9F24C4C93000AB41C3 /* DiagramTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8E973F9E24C4C93000AB41C3 /* DiagramTests.swift */; };
 		8E976B8E260E435100CA8BF9 /* help.html in Resources */ = {isa = PBXBuildFile; fileRef = 8E976B8A260E435000CA8BF9 /* help.html */; platformFilter = ios; };
-		8E976B90260E435100CA8BF9 /* img in Resources */ = {isa = PBXBuildFile; fileRef = 8E976B8C260E435000CA8BF9 /* img */; };
+		8E976B90260E435100CA8BF9 /* img in Resources */ = {isa = PBXBuildFile; fileRef = 8E976B8C260E435000CA8BF9 /* img */; platformFilter = ios; };
 		8E976B91260E435100CA8BF9 /* org.css in Resources */ = {isa = PBXBuildFile; fileRef = 8E976B8D260E435000CA8BF9 /* org.css */; };
 		8E982F9324EAF8B500E94F71 /* Zone.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8E982F9224EAF8B500E94F71 /* Zone.swift */; };
 		8E997BD7262F3CF800F0578D /* EPDiagram.help in Resources */ = {isa = PBXBuildFile; fileRef = 8E997BD6262F3CF800F0578D /* EPDiagram.help */; platformFilter = maccatalyst; };
@@ -101,14 +101,14 @@
 		8ED8CBD125D8B1FF00A6234F /* DiagramModelController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8ED8CBD025D8B1FF00A6234F /* DiagramModelController.swift */; };
 		8EDCE17F25EC0C7400B9C7B8 /* Color.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8EDCE17E25EC0C7400B9C7B8 /* Color.swift */; };
 		8EE1411E261F9A5B00392100 /* Onboarding.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8EE1411D261F9A5B00392100 /* Onboarding.swift */; };
-		8EE141232620EED500392100 /* onboard.html in Resources */ = {isa = PBXBuildFile; fileRef = 8EE141222620EED500392100 /* onboard.html */; };
+		8EE141232620EED500392100 /* onboard.html in Resources */ = {isa = PBXBuildFile; fileRef = 8EE141222620EED500392100 /* onboard.html */; platformFilter = ios; };
 		8EEE3C77264B79360084D968 /* MacSupport.bundle in Embed PlugIns */ = {isa = PBXBuildFile; fileRef = 8EEE3C71264B79060084D968 /* MacSupport.bundle */; platformFilter = maccatalyst; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		8EEE3C7D264B798A0084D968 /* SharedAppKitProtocol.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8EEE3C7C264B798A0084D968 /* SharedAppKitProtocol.swift */; };
 		8EEE3C7E264B799A0084D968 /* SharedAppKitProtocol.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8EEE3C7C264B798A0084D968 /* SharedAppKitProtocol.swift */; };
 		8EEE3C80264B7A5B0084D968 /* MacSupport.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8EEE3C7F264B7A5B0084D968 /* MacSupport.swift */; };
 		8EF8B5B72330739F00ADB77A /* ViewControllerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8EF8B5B62330739F00ADB77A /* ViewControllerTests.swift */; };
 		8EF9166B227926BC00B51F17 /* LadderView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8EF9166A227926BC00B51F17 /* LadderView.swift */; };
-		8EF9CA24264F0138007AA24A /* Dynamic in Frameworks */ = {isa = PBXBuildFile; productRef = 8EF9CA23264F0138007AA24A /* Dynamic */; };
+		8EF9CA24264F0138007AA24A /* Dynamic in Frameworks */ = {isa = PBXBuildFile; platformFilter = maccatalyst; productRef = 8EF9CA23264F0138007AA24A /* Dynamic */; };
 		8EF9CA26264F016C007AA24A /* UIWindow+nsWindow.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8EF9CA25264F016C007AA24A /* UIWindow+nsWindow.swift */; };
 		8EFCC99E2655B4F000EEABBB /* Sandbox.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8EFCC99D2655B4F000EEABBB /* Sandbox.swift */; };
 /* End PBXBuildFile section */

@@ -11,9 +11,9 @@ import SwiftUI
 import UniformTypeIdentifiers
 import Photos
 import os.log
-#if targetEnvironment(macCatalyst)
-import Dynamic
-#endif
+//#if targetEnvironment(macCatalyst)
+//import Dynamic
+//#endif
 
 final class DiagramViewController: UIViewController {
     // For debugging only
@@ -584,6 +584,7 @@ final class DiagramViewController: UIViewController {
         os_log("viewDidAppear() - ViewController", log: OSLog.viewCycle, type: .info)
         super.viewDidAppear(animated)
 
+        #if targetEnvironment(macCatalyst)
         if let appDelegate = UIApplication.shared.delegate as? AppDelegate {
             if let plugin = appDelegate.appKitPlugin {
                 if let nsWindow = view.window?.nsWindow {
@@ -592,7 +593,6 @@ final class DiagramViewController: UIViewController {
             }
         }
 
-        #if targetEnvironment(macCatalyst)
         if requestSandboxExpansion {
             addDirectoryToSandbox(self)
         }

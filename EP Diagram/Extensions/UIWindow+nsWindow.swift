@@ -6,6 +6,7 @@
 //  Copyright © 2021 EP Studios. All rights reserved.
 //
 
+#if targetEnvironment(macCatalyst)
 import UIKit
 import Dynamic
 
@@ -18,3 +19,4 @@ extension UIWindow {
         return nsWindow.asObject
     }
 }
+#endif
