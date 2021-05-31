@@ -1,0 +1,46 @@
+#+TITLE:     
+#+AUTHOR:    David Mann
+#+EMAIL:     mannd@epstudiossoftware.com
+#+DATE:      [2021-04-09 Fri]
+#+DESCRIPTION: EP Diagram Help
+#+KEYWORDS:
+#+LANGUAGE:  en
+#+OPTIONS:   H:3 num:nil toc:nil \n:nil ::t |:t ^:t -:t f:t *:t <:t
+
+#+OPTIONS:   d:nil todo:t pri:nil tags:not-in-toc
+#+INFOJS_OPT: view:nil toc:nil ltoc:t mouse:underline buttons:0 path:http://orgmode.org/org-info.js
+#+EXPORT_SELECT_TAGS: export
+#+EXPORT_EXCLUDE_TAGS: noexport
+#+LINK_UP:   
+#+LINK_HOME: 
+#+XSLT:
+#+HTML_HEAD: <style media="screen" type="text/css"> img {max-width: 100%; height: auto;} </style>
+#+HTML_HEAD: <style  type="text/css">:root { color-scheme: light dark; }</style>
+#+HTML_HEAD: <link rel="stylesheet" type="text/css" href="./org.css"/>
+
+
+* Load images using the Diagram | Import Image menu item
+- You can load images from your photos or from any image file, including PDF files.
+
+* Scroll and zoom the image
+- Use the usual trackpad gestures, or click on the zoom buttons in the toolbar.
+
+* Tap the /Connect/ button to connect marks
+- Tap or click pairs of marks, or tap a mark and an adjacent region to connect marks.
+
+* Tap the /Edit/ button to edit the ladder
+- Tap, click, or drag to select regions and marks.  Then right click or two-finger press on the ladder to open a menu with options to style marks, copy and paste, generate rhythms, and much more.  Also try a right click or two finger press on the ladder labels and image while in Edit mode.
+
+* Use the /Calibrate/ button to calibrate your diagram
+- Afterwards intervals and conduction times will appear on your diagram (make sure these are set to show up in /Preferences/.
+
+* Autosave and the /Undo/ and /Redo/ buttons are your friends
+- All changes are automatically saved.  Use the /Undo/ and /Redo/ toolbar buttons to revert and restore your changes.  Tap the /Close Diagram/ button at the top right of the toolbar to close your diagram.
+
+* Play around and experiment.
+- There are a lot of features to explore.  Use the /Help/ menu item to learn new features.
+
+* That's it!
+- Hit the back button at the top left to begin using *EP Diagram*.
+
+

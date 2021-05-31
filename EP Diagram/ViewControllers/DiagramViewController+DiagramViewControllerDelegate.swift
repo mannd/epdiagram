@@ -10,7 +10,7 @@ import UIKit
 import CoreImage
 import os.log
 
-protocol DiagramViewControllerDelegate: class {
+protocol DiagramViewControllerDelegate: AnyObject {
     func selectLadderTemplate(ladderTemplate: LadderTemplate?)
     func saveTemplates(_ templates: [LadderTemplate])
     func selectSampleDiagram(_ diagram: Diagram?)
@@ -83,7 +83,7 @@ extension DiagramViewController: DiagramViewControllerDelegate {
 
     }
 
-    func showRotateToolbar() {
+    @IBAction func showRotateToolbar() {
         currentDocument?.undoManager.beginUndoGrouping() // will end when menu closed
         if rotateToolbarButtons == nil {
             let prompt = makePrompt(text: L("Rotate"))
@@ -95,7 +95,9 @@ extension DiagramViewController: DiagramViewControllerDelegate {
             let rotate01LButton = UIBarButtonItem(title: L("0.1°L"), style: .plain, target: self, action: #selector(rotate01L))
             let resetRotationButton = UIBarButtonItem(title: L("Reset"), style: .plain, target: self, action: #selector(resetImage))
             let doneButton = UIBarButtonItem(barButtonSystemItem: .done, target: self, action: #selector(closeRotateToolbar(_:)))
-            rotateToolbarButtons = isIPad() || isRunningOnMac() ? [prompt, spacer, rotate90RButton, spacer, rotate90LButton, spacer, rotate1RButton, spacer, rotate1LBButton, spacer, rotate01RButton, spacer, rotate01LButton, spacer, resetRotationButton, spacer, doneButton] : [rotate90RButton, spacer, rotate90LButton, spacer, rotate1RButton, spacer, rotate1LBButton, spacer, rotate01RButton, spacer, rotate01LButton, spacer, doneButton] // leave out prompt and reset button so menu fits on iPhone SE2
+            rotateToolbarButtons = isIPad() || isRunningOnMac() ? 
+                [prompt, spacer, rotate90RButton, spacer, rotate90LButton, spacer, rotate1RButton, spacer, rotate1LBButton, spacer, rotate01RButton, spacer, rotate01LButton, spacer, resetRotationButton, spacer, doneButton] 
+                : [rotate90RButton, spacer, rotate90LButton, spacer, rotate1RButton, spacer, rotate1LBButton, spacer, rotate01RButton, spacer, rotate01LButton, spacer, doneButton] // leave out prompt and reset button so menu fits on iPhone SE2
         }
         setToolbarItems(rotateToolbarButtons, animated: false)
         showingRotateToolbar = true
@@ -176,7 +178,7 @@ extension DiagramViewController: DiagramViewControllerDelegate {
         return pdfRef != nil && numberOfPages > 1
     }
 
-    func showPDFToolbar() {
+    @objc func showPDFToolbar() {
         if pdfToolbarButtons == nil {
             let prompt = makePrompt(text: L("PDF"))
             let previousPageButton = UIBarButtonItem(title: L("Previous page"), style: .plain, target: self, action: #selector(previousPage(_:)))
@@ -188,6 +190,20 @@ extension DiagramViewController: DiagramViewControllerDelegate {
         setToolbarItems(pdfToolbarButtons, animated: false)
         showingPDFToolbar = true
         ladderView.isActivated = false
+    }
+
+    override func canPerformAction(_ action: Selector, withSender sender: Any?) -> Bool {
+        if action == #selector(showPDFToolbar) {
+            return showPDFMenuItems() ? true : false
+        } else if action == #selector(undo(_:)) {
+            return imageScrollView.isActivated &&
+                currentDocument?.undoManager?.canUndo ?? false
+        } else if action == #selector(redo(_:)) {
+            return imageScrollView.isActivated &&
+                currentDocument?.undoManager?.canRedo ?? false
+        } else {
+            return super.canPerformAction(action, withSender: sender)
+        }
     }
 
     @objc func gotoPage(_ sender: AnyObject) {

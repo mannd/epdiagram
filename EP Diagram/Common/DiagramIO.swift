@@ -11,6 +11,7 @@ import os.log
 
 class DiagramIO {
     static func getEPDiagramsDirURL() throws -> URL {
+        os_log("getEPDiagramsDirURL()", log: .debugging, type: .debug)
         guard let documentDirURL = FileIO.getDocumentsURL() else {
             throw FileIOError.documentDirectoryNotFound
         }

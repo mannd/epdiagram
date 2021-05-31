@@ -1,0 +1,41 @@
+#+TITLE:     EP Diagram Help
+#+AUTHOR:    David Mann
+#+EMAIL:     mannd@epstudiossoftware.com
+#+DATE:      [2020-07-31 Fri]
+#+DESCRIPTION: Miscellaneous
+#+KEYWORDS: ladder diagrams, EP Diagram index, references, acknowledgments
+#+LANGUAGE:  en
+#+OPTIONS:   H:3 num:nil toc:nil \n:nil ::t |:t ^:t -:t f:t *:t <:t
+#+OPTIONS:   d:nil todo:t pri:nil tags:not-in-toc
+#+INFOJS_OPT: view:nil toc:nil ltoc:t mouse:underline buttons:0 path:http://orgmode.org/org-info.js
+#+EXPORT_SELECT_TAGS: export
+#+EXPORT_EXCLUDE_TAGS: noexport
+#+LINK_UP:   
+#+LINK_HOME: 
+#+XSLT:
+#+HTML_HEAD: <style media="screen" type="text/css"> img {max-width: 100%; height: auto;} </style>
+#+HTML_HEAD: <style  type="text/css">:root { color-scheme: light dark; }</style>
+#+HTML_HEAD: <link rel="stylesheet" type="text/css" href="../../shrd/org.css"/>
+#+HTML_HEAD: <meta name="robots" content="anchors" />
+#+HTML_HEAD: <meta name="robots" content="keywords" />
+* [[../../shrd/64.png]] Miscellaneous
+#+BEGIN_EXPORT html
+<a name="miscellaneous"></a>
+#+END_EXPORT
+* References
+- Johnson NP, Denes P. The Ladder Diagram (A 100+ Year History). American Journal of Cardiology. 2008;101(12):1801-1804. doi:10.1016/j.amjcard.2008.02.085
+- Antiperovitch P, Luna AB de, Alencar JN de, et al. Old teaching tools should not be forgotten: The value of the Lewis ladder diagram in understanding bigeminal rhythms. Annals of Noninvasive Electrocardiology. 2019;24(5):e12685. doi:https://doi.org/10.1111/anec.12685
+* Acknowledgments
+- This app was inspired by someone who complained that the *EP Calipers* app didn't have the ability to draw ladder diagrams, so it was hardly worth $1.99.  As it turns out, implementing a ladder diagram app is a non-trivial operation.  Nevertheless, thanks to this anonymous reviewer for giving me the idea.
+
+- Some public domain clipart used in the figures was obtained from [[https://www.clipartmax.com]].
+
+- Sample ECGs are licensed by [[https://creativecommons.org/licenses/by/3.0/][CC BY 3]] and [[https://creativecommons.org/licenses/by-nc-sa/4.0/][CC BY-NC-SA 4.0]].  Creators include [[https://commons.wikimedia.org/wiki/User:Ceccomaster][Ceccomaster]], and [[https://litfl.com/karel-frederik-wenckebach/][litfl.com]].
+
+- The source code for *EP Diagram* is available on [[https://github.com/mannd/epdiagram][GitHub]].
+
+- *EP Diagram* is open source software and is licensed under the Apache License Version 2.0. No guarantees are made as to the accuracy of the app, so use at your own risk.
+
+- For questions, error reporting or suggestions contact mannd@epstudiossoftware.com
+
+- Website: https://www.epstudiossoftware.com

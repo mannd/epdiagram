@@ -9,7 +9,7 @@
 import UIKit
 
 class DocumentBrowserDelegate: NSObject, UIDocumentBrowserViewControllerDelegate {
-    var presentationHandler: ((URL?, Error?) -> Void)?
+    var inportHandler: ((URL?, Error?) -> Void)?
 
     func documentBrowser(_ controller: UIDocumentBrowserViewController, didRequestDocumentCreationWithHandler importHandler: @escaping (URL?, UIDocumentBrowserViewController.ImportMode) -> Void) {
 
@@ -31,19 +31,18 @@ class DocumentBrowserDelegate: NSObject, UIDocumentBrowserViewControllerDelegate
         }
     }
 
-    func documentBrowser(_ controller: UIDocumentBrowserViewController, didPickDocumentURLs documentURLs: [URL]) {
+    func documentBrowser(_ controller: UIDocumentBrowserViewController, didPickDocumentsAt documentURLs: [URL]) {
         guard let pickedURL = documentURLs.first else { return }
-        presentationHandler?(pickedURL, nil)
+        inportHandler?(pickedURL, nil)
     }
 
     func documentBrowser(_ controller: UIDocumentBrowserViewController, didImportDocumentAt sourceURL: URL, toDestinationURL destinationURL: URL) {
-        presentationHandler?(destinationURL, nil)
+        inportHandler?(destinationURL, nil)
     }
 
     func documentBrowser(_ controller: UIDocumentBrowserViewController, failedToImportDocumentAt documentURL: URL, error: Error?) {
-        presentationHandler?(documentURL, error)
+        inportHandler?(documentURL, error)
     }
-
 }
 
 extension DocumentBrowserDelegate {

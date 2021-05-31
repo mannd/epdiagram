@@ -7,7 +7,7 @@
 #+LANGUAGE:  en
 #+OPTIONS:   H:3 num:nil toc:t \n:nil ::t |:t ^:t -:t f:t *:t <:t
 #+OPTIONS:   d:nil todo:t pri:nil tags:not-in-toc
-#+INFOJS_OPT: view:nil toc:nil ltoc:t mouse:underline buttons:0 path:http://orgmode.org/org-info.js
+#+INFOJS_OPT: view:nil tgc:nil ltoc:t mouse:underline buttons:0 path:http://orgmode.org/org-info.js
 #+EXPORT_SELECT_TAGS: export
 #+EXPORT_EXCLUDE_TAGS: noexport
 #+LINK_UP:   
@@ -127,7 +127,7 @@ If the image is out of kilter (this may happen with photos you take), long press
 There is a small red horizontal bar between the image and the ladder.  Move this up or down to adjust the relative proportions of the image and the ladder on the screen.
 
 *** PDF files
-Load PDF files like any other image file.  However, some PDF files contain multiple pages.  You can change the page by performing a long press on the image and selected the *PDF* menu item.  A toolbar will appear at the bottom which allows you to change pages.  Note that once a multipage PDF diagram is closed, only the page shown when the diagram is closed will be saved with the diagram.  This is because *EP Diagram* only saves one image at a time.  In order to changes pages after reopening a diagram based on a multipage PDF file, it will be necessary to reload the PDF file.
+Load PDF files like any other image file.  However, some PDF files contain multiple pages.  You can change the page by performing a long press on the image and selected the *PDF* menu item.  A toolbar will appear at the bottom which allows you to change pages.  Note that once a multipage PDF diagram is closed, only the page shown when the diagram is closed will be saved with the diagram.  This is because *EP Diagram* only saves one image at a time.  In order to change pages after reopening a diagram based on a multipage PDF file, it will be necessary to reload the PDF file.
 
 ** Ladders
 *** Default ladder
@@ -171,7 +171,7 @@ To demonstrate this, single tap on the highlighted mark or its cursor.  The anch
 *** Moving marks in all directions
 So far we have used the cursor to move marks purely in a horizontal direction.  But we can also move marks in unlimited directions.  To do this we have to change our cursor to an /omnidirectional/ cursor.
 
-Tap a mark to cause the cursor to appear.  Then do a long press on the cursor.  A circle will appear, indicating the cursor is now omnidirectional.  You can now drag it mark in any direction, depending on the anchor point.  Another long press on the cursor will change it back to a normal horizontally moving cursor.
+Tap a mark to cause the cursor to appear.  Then do a long press on the cursor.  A circle will appear, indicating the cursor is now omnidirectional.  You can now drag the mark in any direction, depending on the anchor point.  Another long press on the cursor will change it back to a normal horizontally moving cursor.
 
 #+CAPTION: Omnidirectional cursor
 [[./img/omnidirectional_movement.png]]
@@ -237,7 +237,12 @@ Move the selected marks as a group by dragging them horizontally after selecting
 *** Adjust CL
 Lengthen or shorten the cycle length of a group of marks.  This option forces all the selected marks to have the same cycle length.
 *** Rhythm
-This is discussed [[*Creating rhythms][below]].
+If you select a zone or region, and then bring up the context menu with a long press, you can select the *Rhythm* item to display a screen that allows you to fill the region or zone with a rhythm.
+
+#+CAPTION: Rhythm selection
+[[./img/rhythm.png]]
+
+You can choose a regular rhythm or fibrillation.  With fibrillation you will have a random cycle length defined by an upper and lower limit.  You can also randomize parameters such as the impulse origin, conduction time, and conduction direction.
 *** Repeat CL
 Repeat the cycle length of a pair of marks forward, backward, or bidirectionally.  This is useful in copying a repeating pattern.
 *** Copy and paste
@@ -255,13 +260,6 @@ Unlink the selected marks.
 Move the endpoints of nearby marks together and link the marks.
 *** Delete mark(s)
 Delete the selected marks.
-*** Creating rhythms
-If you select a zone or region, and then bring up the context menu with a long press, you can select the *Rhythm* item to display a screen that allows you to fill the region or zone with a rhythm.
-
-#+CAPTION: Rhythm selection
-[[./img/rhythm.png]]
-
-You can choose a regular rhythm or fibrillation.  With fibrillation you will have a random cycle length defined by an upper and lower limit.  You can also randomize parameters such as the impulse origin, conduction time, and conduction direction.
 ** Side menu items
 *** Opening the side menu
 Use the "hamburger" icon at the upper left of the screen to open the side menu.
@@ -374,7 +372,8 @@ It is recommended to leave this on, so that marks are automatically linked toget
 To create a snapshot and save it to the Photos app, simply tap the *Snapshot* button (next to the *X* close button) at the top right of the screen.  If a dialog appears asking for permission to access your photo library, select access to all photos if you wish to take diagram snapshots.
 
 * Known issues/bugs/limitations
-- Mac version still under development.  Owners of M1 Macs can use the app as is, but we are working on adapting the app to Intel Macs as well, with a more Mac-like user interface.
+- Drag and drop works for image files (e.g. JPG files) but not for PDF or diagram files.  This will be addressed in a future release.
+- Calibration is not saved if there is no image file loaded.
 - Complexly linked marks in the same region may not always track with the moving mark.  We can't decide if this is a bug or feature. 
 * Next version plans
 We plan to include in the next version:

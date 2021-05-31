@@ -1,0 +1,36 @@
+#+TITLE:     EP Diagram Help
+#+AUTHOR:    David Mann
+#+EMAIL:     mannd@epstudiossoftware.com
+#+DATE:      [2020-07-31 Fri]
+#+DESCRIPTION: Issues, bugs, limitations
+#+KEYWORDS: ladder diagrams, EP Diagram index, bugs, issues, limitations
+#+LANGUAGE:  en
+#+OPTIONS:   H:3 num:nil toc:nil \n:nil ::t |:t ^:t -:t f:t *:t <:t
+#+OPTIONS:   d:nil todo:t pri:nil tags:not-in-toc
+#+INFOJS_OPT: view:nil toc:nil ltoc:t mouse:underline buttons:0 path:http://orgmode.org/org-info.js
+#+EXPORT_SELECT_TAGS: export
+#+EXPORT_EXCLUDE_TAGS: noexport
+#+LINK_UP:   
+#+LINK_HOME: 
+#+XSLT:
+#+HTML_HEAD: <style media="screen" type="text/css"> img {max-width: 100%; height: auto;} </style>
+#+HTML_HEAD: <style  type="text/css">:root { color-scheme: light dark; }</style>
+#+HTML_HEAD: <link rel="stylesheet" type="text/css" href="../../shrd/org.css"/>
+#+HTML_HEAD: <meta name="robots" content="anchors" />
+#+HTML_HEAD: <meta name="robots" content="keywords" />
+* [[../../shrd/64.png]] Issues
+#+BEGIN_EXPORT html
+<a name="issues"></a>
+#+END_EXPORT
+
+* Known issues/bugs/limitations
+- If you are used to the iPad version of *EP Diagram*, there are some differences and limitations relating to porting the app to the Mac.  These include:
+  - Renaming files.  Unlike the iOS version, files cannot be renamed withing the app itself.  It is necessary to rename diagram files using a Finder window.  This is related to the app sandbox that is required for Mac apps hosted on the App Store.
+  - Locking and unlocking of the image and ladder are not implemented on the Mac.
+  - The red close window button is disabled on the Mac.  It is necessary to use the *Close Diagram* toolbar button or menu command to close the diagram window.  This is a limitation due to a bug in the implementation of document-based apps on the Mac using Mac Catalyst.
+- Drag and drop works for image files (e.g. JPG files) but not for PDF or diagram files.  This will be addressed in a future release.
+- Calibration is not saved if there is no image file loaded.
+- Complexly linked marks in the same region may not always track with the moving mark.  We can't decide if this is a bug or feature.
+- Sandboxing which is required by Apple for a Mac App Store app, can sometimes result in blank windows when reopening the app, and other strange effects.  These are issues with the Apple Mac Catalyst system that we hope will be fixed in later versions.
+
+

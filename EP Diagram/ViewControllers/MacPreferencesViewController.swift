@@ -28,9 +28,9 @@ struct SecondView: View {
 
 class MacPreferencesViewController: UIHostingController<PreferencesView> {
 
-        required init?(coder aDecoder: NSCoder) {
-            super.init(coder: aDecoder, rootView: PreferencesView(diagramController: DiagramModelController(diagram: Diagram.defaultDiagram())))
-        }
+    required init?(coder aDecoder: NSCoder) {
+        super.init(coder: aDecoder, rootView: PreferencesView(diagramController: DiagramModelController(diagram: Diagram.defaultDiagram())))
+    }
 
     override func viewDidLoad() {
         super.viewDidLoad()

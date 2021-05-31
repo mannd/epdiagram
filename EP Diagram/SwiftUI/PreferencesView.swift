@@ -70,11 +70,13 @@ struct PreferencesView: View {
         NavigationView {
             VStack {
                 Form {
+                    #if !targetEnvironment(macCatalyst)
                     Section(header: Text("General")) {
                         Toggle(isOn: $playSounds) {
                             Text("Play sounds")
                         }
                     }
+                    #endif
                     Section(header: Text("Ladder")) {
                         Picker(selection: $labelDescriptionVisibility, label: Text("Label description visibility"), content: {
                             Text("Visible").tag(TextVisibility.visibility.rawValue)
