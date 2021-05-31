@@ -999,7 +999,7 @@ final class DiagramViewController: UIViewController {
     // MARK: -  Actions
 
     @objc func closeDocument() {
-        os_log("$$$$$closeDocument()", log: .action, type: .info)
+        os_log("closeDocument()", log: .action, type: .info)
         view.endEditing(true)
         documentIsClosing = true
         currentDocument?.undoManager.removeAllActions()
@@ -1177,6 +1177,7 @@ final class DiagramViewController: UIViewController {
     @objc func singleTap(tap: UITapGestureRecognizer) {
         os_log("singleTap - ViewController", log: OSLog.touches, type: .info)
         guard !marksAreHidden else { return }
+        guard ladderView.isActivated else { return }
         if cursorView.mode == .calibrate {
             return
         }
@@ -1419,7 +1420,7 @@ final class DiagramViewController: UIViewController {
 
     @IBSegueAction func performRhythmSegueAction(_ coder: NSCoder) -> UIViewController? {
         // Have to provide dismiss action to SwiftUI modal view.  It won't dismiss itself.
-        let rhythmView = RhythmView(dismissAction: applyRhythm(rhythm:))
+        let rhythmView = RhythmView(dismissAction: applyRhythm(rhythm:cancel:))
         let hostingController = UIHostingController(coder: coder, rootView: rhythmView)
         return hostingController
     }
@@ -1438,9 +1439,11 @@ final class DiagramViewController: UIViewController {
         }
     }
 
-    func applyRhythm(rhythm: Rhythm) {
+    func applyRhythm(rhythm: Rhythm, cancel: Bool) {
         print(rhythm)
-        ladderView.fillWithRhythm(rhythm)
+        if !cancel {
+            ladderView.fillWithRhythm(rhythm)
+        }
         self.dismiss(animated: true, completion: nil)
     }
 

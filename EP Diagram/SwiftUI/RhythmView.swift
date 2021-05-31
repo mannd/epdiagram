@@ -9,7 +9,7 @@
 import SwiftUI
 
 struct RhythmView: View {
-    var dismissAction: ((Rhythm) -> Void)?
+    var dismissAction: ((Rhythm, Bool) -> Void)?
 
     @State var rhythm: Rhythm = Rhythm(meanCL: 600, regularity: .regular, minCL: 100, maxCL: 150, randomizeImpulseOrigin: false, randomizeConductionTime: false, impulseOrigin: .proximal, replaceExistingMarks: true)
 
@@ -59,10 +59,9 @@ struct RhythmView: View {
                         Text("Delete marks in selected area first?")
                     }
                 }
-            }.navigationBarTitle("Rhythm Details", displayMode: .inline)
-            .navigationBarItems(trailing: Button(action: {
-                self.applyRhythm()
-
+            }
+            .navigationBarTitle("Rhythm Details", displayMode: .inline)
+            .navigationBarItems(leading: Button(action: { self.applyRhythm(cancel: true) }, label: { Text("Cancel")}), trailing: Button(action: { self.applyRhythm(cancel: false)
             }, label: {
                 Text("Apply")
             }))
@@ -70,9 +69,9 @@ struct RhythmView: View {
 
     }
 
-    func applyRhythm() {
+    func applyRhythm(cancel: Bool) {
         if let dismissAction = dismissAction {
-            dismissAction(rhythm)
+            dismissAction(rhythm, cancel)
         }
     }
 }
