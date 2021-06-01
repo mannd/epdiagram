@@ -28,8 +28,7 @@ class MacSupport: NSObject, SharedAppKitProtocol {
         alert.runModal()
     }
 
-    // FIXME: This substitutes for the catalyst open recent menu, but with the same problems.
-    // Still getting sandbox type errors.
+    // Note used
     func loadRecentMenu() {
         for menu in NSApp.mainMenu!.items {
             for submenu in menu.submenu!.items {

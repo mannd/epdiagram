@@ -556,7 +556,6 @@ final class DiagramViewController: UIViewController {
     }
 
     var didFirstWillLayout = false
-    // FIXME: Endless loop here
     override func viewWillLayoutSubviews() {
         os_log("viewWillLayoutSubviews() - DiagramViewController", log: OSLog.viewCycle, type: .info)
         if didFirstWillLayout {
@@ -1319,7 +1318,7 @@ final class DiagramViewController: UIViewController {
 
     #if targetEnvironment(macCatalyst)
 
-    // TODO: Needed or not to open diagrams (as opposed to new window) in mac?
+    // Not used
     @IBAction func selectDiagram(_ sender: Any) {
         let supportedTypes: [UTType] = [UTType.image, UTType.pdf]
         let documentPicker = UIDocumentPickerViewController(forOpeningContentTypes: supportedTypes, asCopy: true)
@@ -1851,9 +1850,6 @@ extension DiagramViewController {
                 UserDefaults.standard.removeObject(forKey: key)
             }
         }
-
-        // TODO: implement
-        // find keys starting with "Access" and delete them
     }
 
     func storeDirectoryBookmark(from url: URL) {
