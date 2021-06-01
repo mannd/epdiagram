@@ -20,7 +20,7 @@ final class DiagramViewController: UIViewController {
     #if DEBUG
     var debugForceOnboarding = false
     #else // Don't change below!
-    var debugShowOnboarding = false
+    var debugForceOnboarding = false
     #endif
 
     // View, outlets, constraints
