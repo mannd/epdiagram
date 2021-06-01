@@ -1332,7 +1332,6 @@ final class LadderView: ScaledView {
     }
 
     func setSelectedRegionsStyle(style: Mark.Style) {
-        // FIXME: we don't want selected regions here, we want selected label
         let selectedRegions: [Region] = ladder.allRegionsWithMode(.labelSelected)
         currentDocument?.undoManager.beginUndoGrouping()
         selectedRegions.forEach { region in self.undoablySetRegionStyle(region: region, style: style) }

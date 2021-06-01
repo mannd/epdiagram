@@ -42,6 +42,7 @@ extension DiagramViewController: UIContextMenuInteractionDelegate {
     func contextMenuInteraction(_ interaction: UIContextMenuInteraction, willEndFor configuration: UIContextMenuConfiguration, animator: UIContextMenuInteractionAnimating?) {
         os_log("contextMenuInteraction(_:willEndFor:animator:)", log: .action, type: .info)
         ladderView.clearSelectedLabels()
+        ladderView.refresh()
     }
 
     // MARK: Prepare menus

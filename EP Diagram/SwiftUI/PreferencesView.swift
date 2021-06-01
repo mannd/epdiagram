@@ -47,21 +47,36 @@ struct PreferencesView: View {
 
     @State var showAutoLinkWarning = false
 
-    // Pass Diagram as binding to allow changing non-UserDefaults settings
-    // @Binding var diagram: Diagram
+    // TODO: Do we need observed object here to force updates?
+    // Preferences automatically update, and are saved independently,
+    // but maybe we need this to force save diagram.
     @ObservedObject var diagramController: DiagramModelController
     @Environment(\.presentationMode) private var presentationMode: Binding<PresentationMode>
+
+    fileprivate func getColorPicker(title: LocalizedStringKey, selection: Binding<Color>) -> some View {
+        #if targetEnvironment(macCatalyst)
+        return HStack {
+            Text(title)
+            Spacer()
+            ColorPicker("", selection: selection).frame(maxWidth: 100)
+        }
+        #else
+        return ColorPicker(title, selection: selection)
+        #endif
+    }
 
     // Note: At most 10 views in a Section.  Wrap views in Group{} if more than 10 views.  See https://stackoverflow.com/questions/61178868/swiftui-random-extra-argument-in-call-error.
     var body: some View {
         NavigationView {
             VStack {
                 Form {
+                    #if !targetEnvironment(macCatalyst)
                     Section(header: Text("General")) {
                         Toggle(isOn: $playSounds) {
                             Text("Play sounds")
                         }
                     }
+                    #endif
                     Section(header: Text("Ladder")) {
                         Picker(selection: $labelDescriptionVisibility, label: Text("Label description visibility"), content: {
                             Text("Visible").tag(TextVisibility.visibility.rawValue)
@@ -84,7 +99,7 @@ struct PreferencesView: View {
                             Text("Show markers")
                         }
                         Stepper("Marker width = \(markerLineWidth)", value: $markerLineWidth, in: 1...6, step: 1)
-                        ColorPicker("Marker color", selection: Binding(
+                        getColorPicker(title: "Marker color", selection: Binding(
                                         get: { markerColor },
                                         set: { newValue in
                                             markerColorName = newValue.toString
@@ -92,7 +107,7 @@ struct PreferencesView: View {
                                         }))
                     }
                     Section(header: Text("Region")) {
-                        ColorPicker("Active region color", selection: Binding(
+                        getColorPicker(title: "Active region color", selection: Binding(
                                         get: { activeColor },
                                         set: { newValue in
                                             activeColorName = newValue.toString
@@ -103,25 +118,25 @@ struct PreferencesView: View {
                     Section(header: Text("Mark")) {
                         Group {
                             Stepper("Mark width = \(markLineWidth)", value: $markLineWidth, in: 1...6, step: 1)
-                            ColorPicker("Highlighted color", selection: Binding(
+                            getColorPicker(title: "Highlighted color", selection: Binding(
                                             get: { attachedColor },
                                             set: { newValue in
                                                 attachedColorName = newValue.toString
                                                 attachedColor = newValue
                                             }))
-                            ColorPicker("Connected color", selection: Binding(
+                            getColorPicker(title: "Connected color", selection: Binding(
                                             get: { connectedColor },
                                             set: { newValue in
                                                 connectedColorName = newValue.toString
                                                 connectedColor = newValue
                                             }))
-                            ColorPicker("Selected color", selection: Binding(
+                            getColorPicker(title: "Selected color", selection: Binding(
                                             get: { selectedColor },
                                             set: { newValue in
                                                 selectedColorName = newValue.toString
                                                 selectedColor = newValue
                                             }))
-                            ColorPicker("Linked color", selection: Binding(
+                            getColorPicker(title: "Linked color", selection: Binding(
                                             get: { linkedColor },
                                             set: { newValue in
                                                 linkedColorName = newValue.toString
@@ -133,14 +148,15 @@ struct PreferencesView: View {
                             Toggle(isOn: $showBlock) {
                                 Text("Show block")
                             }
-                            Toggle(isOn: $doubleLineBlockerMarker) {
-                                Text("Double line block marker")
-                            }
-                            Toggle(isOn: $showArrows) {
-                                Text("Show direction of conduction")
-                            }
                             // Only 10 items in each group allowed.
                             Group {
+                                Toggle(isOn: $doubleLineBlockerMarker) {
+                                    Text("Double line block marker")
+                                }
+                                Toggle(isOn: $showArrows) {
+                                    Text("Show direction of conduction")
+                                }
+
                                 Toggle(isOn: $snapMarks) {
                                     Text("Auto-link marks")
                                 }
@@ -160,7 +176,7 @@ struct PreferencesView: View {
                     }
                     Section(header: Text("Cursor")) {
                         Stepper("Cursor width = \(cursorLineWidth)", value: $cursorLineWidth, in: 1...6, step: 1)
-                        ColorPicker("Cursor color", selection: Binding(
+                        getColorPicker(title: "Cursor color", selection: Binding(
                                         get: { cursorColor },
                                         set: { newValue in
                                             cursorColorName = newValue.toString
@@ -169,7 +185,7 @@ struct PreferencesView: View {
                     }
                     Section(header: Text("Caliper")) {
                         Stepper("Caliper width = \(caliperLineWidth)", value: $caliperLineWidth, in: 1...6, step: 1)
-                        ColorPicker("Caliper color", selection: Binding(
+                        getColorPicker(title: "Caliper color", selection: Binding(
                                         get: { caliperColor },
                                         set: { newValue in
                                             caliperColorName = newValue.toString

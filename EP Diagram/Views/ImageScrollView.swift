@@ -67,6 +67,26 @@ extension ImageScrollView {
         diagramViewControllerDelegate?.showRotateToolbar()
     }
 
+    @IBAction func showMacRotateToolbar(_ sender: Any) {
+        showRotateToolbar()
+    }
+
+//    override func canPerformAction(_ action: Selector, withSender sender: Any?) -> Bool {
+//        if action == #selector(showMacRotateToolbar(_:)) {
+//            return true
+//        } else {
+//            return super.canPerformAction(action, withSender: sender)
+//        }
+//    }
+
+    @IBAction func resetMacImage(_ sender: Any) {
+        resetImage()
+    }
+
+    @IBAction func showMacPDFToolbar(_ sender: Any) {
+        showPDFToolbar()
+    }
+
     /// Reset image to a identity transfrom
     @objc func resetImage() {
         diagramViewControllerDelegate?.resetImage()
@@ -82,4 +102,35 @@ extension ImageScrollView {
         diagramViewControllerDelegate?.showPDFToolbar()
     }
 }
+
+#if targetEnvironment(macCatalyst)
+extension ImageScrollView: UIContextMenuInteractionDelegate {
+    func contextMenuInteraction(_ interaction: UIContextMenuInteraction, configurationForMenuAtLocation location: CGPoint) -> UIContextMenuConfiguration? {
+        print("image scroll view context menu")
+        guard let delegate = diagramViewControllerDelegate, delegate.okToShowLongPressMenu() else { return nil }
+        delegate.hideCursor()
+        return imageScrollViewContextMenuConfiguration(at: location)
+    }
+
+    func imageScrollViewContextMenuConfiguration(at location: CGPoint) -> UIContextMenuConfiguration {
+        return UIContextMenuConfiguration(identifier: nil, previewProvider: nil) { suggestedActions in
+            if self.contentSize == CGSize.zero { return nil }
+            let rotateAction = UIAction(title: L("Rotate")) { action in
+                self.showRotateToolbar()
+            }
+            let resetAction = UIAction(title: L("Reset")) { action in
+                self.resetImage()
+            }
+            let pdfAction = UIAction(title: L("PDF")) { action in
+                self.showPDFToolbar()
+            }
+            if let delegate = self.diagramViewControllerDelegate, delegate.showPDFMenuItems() {
+                return UIMenu(title: "", children: [rotateAction, resetAction, pdfAction])
+            } else {
+                return UIMenu(title: "", children: [rotateAction, resetAction])
+            }
+        }
+    }
+}
+#endif
 

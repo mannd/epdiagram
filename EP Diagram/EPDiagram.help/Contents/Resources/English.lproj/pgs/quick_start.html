@@ -1,0 +1,364 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
+<head>
+<!-- 2021-05-31 Mon 19:13 -->
+<meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>&lrm;</title>
+<meta name="generator" content="Org mode" />
+<meta name="author" content="David Mann" />
+<meta name="description" content="EP Diagram quick start"
+ />
+<meta name="keywords" content="ladder diagrams, quick start" />
+<style type="text/css">
+ <!--/*--><![CDATA[/*><!--*/
+  .title  { text-align: center;
+             margin-bottom: .2em; }
+  .subtitle { text-align: center;
+              font-size: medium;
+              font-weight: bold;
+              margin-top:0; }
+  .todo   { font-family: monospace; color: red; }
+  .done   { font-family: monospace; color: green; }
+  .priority { font-family: monospace; color: orange; }
+  .tag    { background-color: #eee; font-family: monospace;
+            padding: 2px; font-size: 80%; font-weight: normal; }
+  .timestamp { color: #bebebe; }
+  .timestamp-kwd { color: #5f9ea0; }
+  .org-right  { margin-left: auto; margin-right: 0px;  text-align: right; }
+  .org-left   { margin-left: 0px;  margin-right: auto; text-align: left; }
+  .org-center { margin-left: auto; margin-right: auto; text-align: center; }
+  .underline { text-decoration: underline; }
+  #postamble p, #preamble p { font-size: 90%; margin: .2em; }
+  p.verse { margin-left: 3%; }
+  pre {
+    border: 1px solid #ccc;
+    box-shadow: 3px 3px 3px #eee;
+    padding: 8pt;
+    font-family: monospace;
+    overflow: auto;
+    margin: 1.2em;
+  }
+  pre.src {
+    position: relative;
+    overflow: auto;
+    padding-top: 1.2em;
+  }
+  pre.src:before {
+    display: none;
+    position: absolute;
+    background-color: white;
+    top: -10px;
+    right: 10px;
+    padding: 3px;
+    border: 1px solid black;
+  }
+  pre.src:hover:before { display: inline; margin-top: 14px;}
+  /* Languages per Org manual */
+  pre.src-asymptote:before { content: 'Asymptote'; }
+  pre.src-awk:before { content: 'Awk'; }
+  pre.src-C:before { content: 'C'; }
+  /* pre.src-C++ doesn't work in CSS */
+  pre.src-clojure:before { content: 'Clojure'; }
+  pre.src-css:before { content: 'CSS'; }
+  pre.src-D:before { content: 'D'; }
+  pre.src-ditaa:before { content: 'ditaa'; }
+  pre.src-dot:before { content: 'Graphviz'; }
+  pre.src-calc:before { content: 'Emacs Calc'; }
+  pre.src-emacs-lisp:before { content: 'Emacs Lisp'; }
+  pre.src-fortran:before { content: 'Fortran'; }
+  pre.src-gnuplot:before { content: 'gnuplot'; }
+  pre.src-haskell:before { content: 'Haskell'; }
+  pre.src-hledger:before { content: 'hledger'; }
+  pre.src-java:before { content: 'Java'; }
+  pre.src-js:before { content: 'Javascript'; }
+  pre.src-latex:before { content: 'LaTeX'; }
+  pre.src-ledger:before { content: 'Ledger'; }
+  pre.src-lisp:before { content: 'Lisp'; }
+  pre.src-lilypond:before { content: 'Lilypond'; }
+  pre.src-lua:before { content: 'Lua'; }
+  pre.src-matlab:before { content: 'MATLAB'; }
+  pre.src-mscgen:before { content: 'Mscgen'; }
+  pre.src-ocaml:before { content: 'Objective Caml'; }
+  pre.src-octave:before { content: 'Octave'; }
+  pre.src-org:before { content: 'Org mode'; }
+  pre.src-oz:before { content: 'OZ'; }
+  pre.src-plantuml:before { content: 'Plantuml'; }
+  pre.src-processing:before { content: 'Processing.js'; }
+  pre.src-python:before { content: 'Python'; }
+  pre.src-R:before { content: 'R'; }
+  pre.src-ruby:before { content: 'Ruby'; }
+  pre.src-sass:before { content: 'Sass'; }
+  pre.src-scheme:before { content: 'Scheme'; }
+  pre.src-screen:before { content: 'Gnu Screen'; }
+  pre.src-sed:before { content: 'Sed'; }
+  pre.src-sh:before { content: 'shell'; }
+  pre.src-sql:before { content: 'SQL'; }
+  pre.src-sqlite:before { content: 'SQLite'; }
+  /* additional languages in org.el's org-babel-load-languages alist */
+  pre.src-forth:before { content: 'Forth'; }
+  pre.src-io:before { content: 'IO'; }
+  pre.src-J:before { content: 'J'; }
+  pre.src-makefile:before { content: 'Makefile'; }
+  pre.src-maxima:before { content: 'Maxima'; }
+  pre.src-perl:before { content: 'Perl'; }
+  pre.src-picolisp:before { content: 'Pico Lisp'; }
+  pre.src-scala:before { content: 'Scala'; }
+  pre.src-shell:before { content: 'Shell Script'; }
+  pre.src-ebnf2ps:before { content: 'ebfn2ps'; }
+  /* additional language identifiers per "defun org-babel-execute"
+       in ob-*.el */
+  pre.src-cpp:before  { content: 'C++'; }
+  pre.src-abc:before  { content: 'ABC'; }
+  pre.src-coq:before  { content: 'Coq'; }
+  pre.src-groovy:before  { content: 'Groovy'; }
+  /* additional language identifiers from org-babel-shell-names in
+     ob-shell.el: ob-shell is the only babel language using a lambda to put
+     the execution function name together. */
+  pre.src-bash:before  { content: 'bash'; }
+  pre.src-csh:before  { content: 'csh'; }
+  pre.src-ash:before  { content: 'ash'; }
+  pre.src-dash:before  { content: 'dash'; }
+  pre.src-ksh:before  { content: 'ksh'; }
+  pre.src-mksh:before  { content: 'mksh'; }
+  pre.src-posh:before  { content: 'posh'; }
+  /* Additional Emacs modes also supported by the LaTeX listings package */
+  pre.src-ada:before { content: 'Ada'; }
+  pre.src-asm:before { content: 'Assembler'; }
+  pre.src-caml:before { content: 'Caml'; }
+  pre.src-delphi:before { content: 'Delphi'; }
+  pre.src-html:before { content: 'HTML'; }
+  pre.src-idl:before { content: 'IDL'; }
+  pre.src-mercury:before { content: 'Mercury'; }
+  pre.src-metapost:before { content: 'MetaPost'; }
+  pre.src-modula-2:before { content: 'Modula-2'; }
+  pre.src-pascal:before { content: 'Pascal'; }
+  pre.src-ps:before { content: 'PostScript'; }
+  pre.src-prolog:before { content: 'Prolog'; }
+  pre.src-simula:before { content: 'Simula'; }
+  pre.src-tcl:before { content: 'tcl'; }
+  pre.src-tex:before { content: 'TeX'; }
+  pre.src-plain-tex:before { content: 'Plain TeX'; }
+  pre.src-verilog:before { content: 'Verilog'; }
+  pre.src-vhdl:before { content: 'VHDL'; }
+  pre.src-xml:before { content: 'XML'; }
+  pre.src-nxml:before { content: 'XML'; }
+  /* add a generic configuration mode; LaTeX export needs an additional
+     (add-to-list 'org-latex-listings-langs '(conf " ")) in .emacs */
+  pre.src-conf:before { content: 'Configuration File'; }
+
+  table { border-collapse:collapse; }
+  caption.t-above { caption-side: top; }
+  caption.t-bottom { caption-side: bottom; }
+  td, th { vertical-align:top;  }
+  th.org-right  { text-align: center;  }
+  th.org-left   { text-align: center;   }
+  th.org-center { text-align: center; }
+  td.org-right  { text-align: right;  }
+  td.org-left   { text-align: left;   }
+  td.org-center { text-align: center; }
+  dt { font-weight: bold; }
+  .footpara { display: inline; }
+  .footdef  { margin-bottom: 1em; }
+  .figure { padding: 1em; }
+  .figure p { text-align: center; }
+  .equation-container {
+    display: table;
+    text-align: center;
+    width: 100%;
+  }
+  .equation {
+    vertical-align: middle;
+  }
+  .equation-label {
+    display: table-cell;
+    text-align: right;
+    vertical-align: middle;
+  }
+  .inlinetask {
+    padding: 10px;
+    border: 2px solid gray;
+    margin: 10px;
+    background: #ffffcc;
+  }
+  #org-div-home-and-up
+   { text-align: right; font-size: 70%; white-space: nowrap; }
+  textarea { overflow-x: auto; }
+  .linenr { font-size: smaller }
+  .code-highlighted { background-color: #ffff00; }
+  .org-info-js_info-navigation { border-style: none; }
+  #org-info-js_console-label
+    { font-size: 10px; font-weight: bold; white-space: nowrap; }
+  .org-info-js_search-highlight
+    { background-color: #ffff00; color: #000000; font-weight: bold; }
+  .org-svg { width: 90%; }
+  /*]]>*/-->
+</style>
+<style media="screen" type="text/css"> img {max-width: 100%; height: auto;} </style>
+<style  type="text/css">:root { color-scheme: light dark; }</style>
+<link rel="stylesheet" type="text/css" href="../../shrd/org.css"/>
+<meta name="robots" content="anchors" />
+<meta name="robots" content="keywords" />
+<script type="text/javascript">
+// @license magnet:?xt=urn:btih:e95b018ef3580986a04669f1b5879592219e2a7a&dn=public-domain.txt Public Domain
+<!--/*--><![CDATA[/*><!--*/
+     function CodeHighlightOn(elem, id)
+     {
+       var target = document.getElementById(id);
+       if(null != target) {
+         elem.classList.add("code-highlighted");
+         target.classList.add("code-highlighted");
+       }
+     }
+     function CodeHighlightOff(elem, id)
+     {
+       var target = document.getElementById(id);
+       if(null != target) {
+         elem.classList.remove("code-highlighted");
+         target.classList.remove("code-highlighted");
+       }
+     }
+    /*]]>*///-->
+// @license-end
+</script>
+</head>
+<body>
+<div id="content">
+<a name="Quick start"></a>
+<div id="outline-container-orgfc2f65e" class="outline-2">
+<h2 id="orgfc2f65e"><img src="../../shrd/64.png" alt="64.png" /> Quick start</h2>
+<div class="outline-text-2" id="text-orgfc2f65e">
+</div>
+<div id="outline-container-orgef1b581" class="outline-3">
+<h3 id="orgef1b581">Create a diagram file</h3>
+<div class="outline-text-3" id="text-orgef1b581">
+<ul class="org-ul">
+<li>On starting the app, a file selection screen should appear.  You can get to this screen anytime by selecting <b>File | New</b> from the main menu, or typing <b>Command-N</b>.  To create a diagram file, tap the <b>New Document</b> button at the lower left corner of the window.  (Note: throughout this help text, we use the term "tap" to indicate tapping on a trackpad or clicking with a mouse.  Similarly double-tap equals double-click, and drag equals hold the left mouse button and move the mouse.  When gestures are markedly different, such as a two-finger tap versus a right-button click of the mouse, we'll get more specific).</li>
+</ul>
+</div>
+</div>
+<div id="outline-container-orgdf42333" class="outline-3">
+<h3 id="orgdf42333">Deal with the Mac sandbox</h3>
+<div class="outline-text-3" id="text-orgdf42333">
+<ul class="org-ul">
+<li>The Mac sandbox is a requirment of apps sold on the Mac App Store.  The sandbox is the group of folders where the user is permitted to open and save files.  The user must grant permission to access folders (such as Documents or Downloads) outside of the storage assigned to the app itself.  The bottom line is that the first time you create a new document in a folder, the app will ask you to confirm this by asking you to select the folder from a list of folders.  Once this is done, the app shouldn't ever need to bother you about this again, at least for that particular folder.  So follow the prompts in the dialog that appears, and move on to the next step.</li>
+</ul>
+</div>
+</div>
+<div id="outline-container-org6b794b0" class="outline-3">
+<h3 id="org6b794b0">Load an ECG image</h3>
+<div class="outline-text-3" id="text-org6b794b0">
+<ul class="org-ul">
+<li>You should at this point have a nice blank ladder diagram on your screen, with a blank space above.  This is where the ECG image goes.</li>
+<li>Use the <b>Import image</b> toolbar button, or <b>Diagram | Import Image</b> main menu item to import an image from the Photos app or from your files.  You can also drag and drop an image onto the window.</li>
+<li>Use gestures to scroll and zoom the image, or tap on the zoom toolbar buttons.</li>
+</ul>
+</div>
+</div>
+<div id="outline-container-org48d8107" class="outline-3">
+<h3 id="org48d8107">Create marks</h3>
+<div class="outline-text-3" id="text-org48d8107">
+<ul class="org-ul">
+<li>Tap on the image or the ladder grid to create <i>marks</i>, which are the lines that are drawn on the ladder.  Use the <i>cursor</i> (the vertical line extending from the mark to the top of the screen) to align marks with the ECG waveforms.  Tap away from the cursor to hide the cursor.  Tap on a mark to bring back the cursor and each tap changes the <i>anchor</i> point of the mark from middle to proximal to distal.</li>
+<li>Double tap on a mark to delete it.  Double tap anywhere else to create a mark.  Double tapping is a fast way to create marks.</li>
+<li>Marks appear in the <i>active region</i>, shown by a tinted background.  If you tap on a different region the marks will appear in that region which will become the new active region.  Tapping on the label of a region will also activate or deactivate it.</li>
+<li>Dragging in a region will also create a mark.</li>
+</ul>
+</div>
+</div>
+<div id="outline-container-orge9ef0a6" class="outline-3">
+<h3 id="orge9ef0a6">Move marks</h3>
+<div class="outline-text-3" id="text-orge9ef0a6">
+<ul class="org-ul">
+<li>Dragging on a mark with a cursor (you can drag either the mark itself or its cursor) will move the mark horizontally.</li>
+<li>The anchor point will determine how the mark moves.  A middle anchor will move the whole mark, but an anchor at an endpoint of a mark will just move that endpoint, while the other endpoint stays fixed.  This will slant the mark.</li>
+<li>Long press on the cursor to change it to an omnidirectional cursor (it has a large circle on it), allowing marks to move in any direction.  Long press again to change it back.</li>
+<li>Marks that are placed end to end will automatically link up and move together the next time you move one of them.</li>
+</ul>
+</div>
+</div>
+<div id="outline-container-org1d9f06d" class="outline-3">
+<h3 id="org1d9f06d">Calibrate the diagram</h3>
+<div class="outline-text-3" id="text-org1d9f06d">
+<ul class="org-ul">
+<li>Optionally, tap the <b>Calibrate</b> button to show a caliper that can be used to calibrate the diagram to a standard interval of 1000 msec.</li>
+<li>After calibration, measurements will appear on the diagram, provided the <b>Show intervals</b> and <b>Show conduction times</b> app preferences are turned on.</li>
+</ul>
+</div>
+</div>
+<div id="outline-container-org923379d" class="outline-3">
+<h3 id="org923379d">Connect marks</h3>
+<div class="outline-text-3" id="text-org923379d">
+<ul class="org-ul">
+<li>You can draw and move marks to connect them, but it is easier to use the <b>Connect</b> button.</li>
+<li>After tapping the <b>Connect</b> button, tap pairs of marks separated by a region to connect the marks with a new mark.</li>
+<li>Tap from a mark to an adjacent region to draw a mark that blocks in that region.</li>
+</ul>
+</div>
+</div>
+<div id="outline-container-org7c4a3a9" class="outline-3">
+<h3 id="org7c4a3a9">Edit the diagram</h3>
+<div class="outline-text-3" id="text-org7c4a3a9">
+<ul class="org-ul">
+<li>Tap the <b>Edit</b> button to unlock techniques for sprucing up your diagram.</li>
+<li>Tap to select and deselect marks or regions, or drag to select zones.</li>
+<li>Two-finger press (right-click if you are using a mouse) on the ladder after selecting marks or regions to show a menu that can be used to customize the appearance of the marks, including their style, emphasis, block, impulse origin, etc.  You can also add groups of marks and even periods of regular rhythm or fibrillation to zones and regions using this menu.</li>
+</ul>
+</div>
+</div>
+<div id="outline-container-orgef89371" class="outline-3">
+<h3 id="orgef89371">Undo/Redo</h3>
+<div class="outline-text-3" id="text-orgef89371">
+<ul class="org-ul">
+<li>Practically anything you do can be undone or redone and these changes are automatically saved.  You <i>do not</i> need to specifically save your diagram.  All changes are saved as they are made automatically.</li>
+</ul>
+</div>
+</div>
+<div id="outline-container-orga5ae683" class="outline-3">
+<h3 id="orga5ae683">Other features are located in the main menu</h3>
+<div class="outline-text-3" id="text-orga5ae683">
+<ul class="org-ul">
+<li>Change to a different ladder (<b>Diagram | Ladder | Select Ladder</b>)</li>
+<li>Edit or create ladders (<b>Diagram | Ladder | Edit Ladder</b>)</li>
+<li>Load sample diagrams (<b>Diagram | Samples</b>)</li>
+</ul>
+</div>
+</div>
+<div id="outline-container-org26086a9" class="outline-3">
+<h3 id="org26086a9">Take screenshots</h3>
+<div class="outline-text-3" id="text-org26086a9">
+<ul class="org-ul">
+<li>Take screenshots using the <b>Screenshot</b> button at the upper right of the screen, next to the <b>Close</b> button.</li>
+</ul>
+</div>
+</div>
+<div id="outline-container-orgdce2dba" class="outline-3">
+<h3 id="orgdce2dba">Preferences</h3>
+<div class="outline-text-3" id="text-orgdce2dba">
+<ul class="org-ul">
+<li>Use the <b>EP Diagram | Preferences</b> menu item, or type <b>Command-,</b> to open the preferences window and change the overall appearance or behavior of the app.  Many aspects are customizable.</li>
+</ul>
+</div>
+</div>
+<div id="outline-container-org3db5d89" class="outline-3">
+<h3 id="org3db5d89">Close the diagram</h3>
+<div class="outline-text-3" id="text-org3db5d89">
+<p>
+Use the <b>Close</b> button at the upper right of the screen to close the diagram and return to the <b>Files</b> screen.  Diagrams are automatically saved as you work with them.
+</p>
+</div>
+</div>
+<div id="outline-container-orgcf24fd2" class="outline-3">
+<h3 id="orgcf24fd2">Those are the basics</h3>
+<div class="outline-text-3" id="text-orgcf24fd2">
+<p>
+If you want more detail, read the <a href="./manual.html">EP Diagram manual</a>.
+</p>
+</div>
+</div>
+</div>
+</div>
+</body>
+</html>

@@ -39,7 +39,11 @@ class SeparatorView: UIView {
     var updateListener: OnConstraintUpdateProtocol?
 
     var showIndicator: Bool = true
-    var allowTouches: Bool = true
+    var allowTouches: Bool = true {
+        didSet {
+            isUserInteractionEnabled = allowTouches
+        }
+    }
 
     @discardableResult
     internal static func addSeparatorBetweenViews(separatorType: SeparatorType, primaryView: UIView, secondaryView: UIView, parentView: UIView) -> SeparatorView{

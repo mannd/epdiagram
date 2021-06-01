@@ -7,7 +7,7 @@
 #+LANGUAGE:  en
 #+OPTIONS:   H:3 num:nil toc:t \n:nil ::t |:t ^:t -:t f:t *:t <:t
 #+OPTIONS:   d:nil todo:t pri:nil tags:not-in-toc
-#+INFOJS_OPT: view:nil toc:nil ltoc:t mouse:underline buttons:0 path:http://orgmode.org/org-info.js
+#+INFOJS_OPT: view:nil tgc:nil ltoc:t mouse:underline buttons:0 path:http://orgmode.org/org-info.js
 #+EXPORT_SELECT_TAGS: export
 #+EXPORT_EXCLUDE_TAGS: noexport
 #+LINK_UP:   
@@ -17,6 +17,10 @@
 #+HTML_HEAD: <style  type="text/css">:root { color-scheme: light dark; }</style>
 #+HTML_HEAD: <link rel="stylesheet" type="text/css" href="./org.css"/>
 * Overview
+
+#+CAPTION: Early ladder diagram (Sir Thomas Lewis, 1920)
+[[./img/early_ladder.png]]
+
 - *EP Diagram* creates /ladder diagrams/, a classic form of ECG analysis that depicts the path of the cardiac impulse through anatomic regions of the heart.  Ladder diagrams are useful to understand cardiac arrhythmias such as heart block, reentrant tachycardias, and premature complexes.  Traditionally ladder diagrams are roughly sketched on paper, but with *EP Diagram* you can draw them on your iPad, and, unlike a paper sketch, these diagrams can scroll and zoom, can measure intervals and conduction times automatically, and can be saved as publication quality images.
 
 - *EP Diagram* has a lot of built-in features that simplify the creation of ladder diagrams, and these features are described in this help manual.  The next section, [[*Quick start][Quick start]], contains some tips on how to get started.  However a good way to learn the program is to create some sample ladder diagrams, then use your finger to tap, double-tap, and drag on the ladder to see what happens.  Try out the various buttons.  Experiment!  Most of the functions are intuitive, and if you want more in-depth instruction, have a look at the rest of this help manual.  
@@ -83,7 +87,7 @@ Ladder diagram terminology is not standardized.  Here is a glossary of the terms
 | Link                 | a connection between marks causing them to move together          |
 | Impulse origin       | where conduction starts, indicated by a symbol                    |
 | Block                | where conduction blocks, indicated by a symbol                    |
-| Interval             | time in msec between adjacent marks, i.e. cycle length            |
+| Interval             | time in msec between adjacent marks
 | Conduction time      | time in msec between earliest and latest points of a mark         |
 | Caliper              | used to calibrate the diagram to allow measurements               |
 | Conduction direction | optional arrow symbol indicating direction of electrical flow     |
@@ -127,7 +131,7 @@ If the image is out of kilter (this may happen with photos you take), long press
 There is a small red horizontal bar between the image and the ladder.  Move this up or down to adjust the relative proportions of the image and the ladder on the screen.
 
 *** PDF files
-Load PDF files like any other image file.  However, some PDF files contain multiple pages.  You can change the page by performing a long press on the image and selected the *PDF* menu item.  A toolbar will appear at the bottom which allows you to change pages.  Note that once a multipage PDF diagram is closed, only the page shown when the diagram is closed will be saved with the diagram.  This is because *EP Diagram* only saves one image at a time.  In order to changes pages after reopening a diagram based on a multipage PDF file, it will be necessary to reload the PDF file.
+Load PDF files like any other image file.  However, some PDF files contain multiple pages.  You can change the page by performing a long press on the image and selecting the *PDF* menu item.  A toolbar will appear at the bottom which allows you to change pages.  Note that once a multipage PDF diagram is closed, only the page shown when the diagram is closed will be saved with the diagram.  This is because *EP Diagram* only saves one image at a time.  In order to change pages after reopening a diagram based on a multipage PDF file, it will be necessary to reload the PDF file.
 
 ** Ladders
 *** Default ladder
@@ -171,7 +175,7 @@ To demonstrate this, single tap on the highlighted mark or its cursor.  The anch
 *** Moving marks in all directions
 So far we have used the cursor to move marks purely in a horizontal direction.  But we can also move marks in unlimited directions.  To do this we have to change our cursor to an /omnidirectional/ cursor.
 
-Tap a mark to cause the cursor to appear.  Then do a long press on the cursor.  A circle will appear, indicating the cursor is now omnidirectional.  You can now drag it mark in any direction, depending on the anchor point.  Another long press on the cursor will change it back to a normal horizontally moving cursor.
+Tap a mark to cause the cursor to appear.  Then do a long press on the cursor.  A circle will appear, indicating the cursor is now omnidirectional.  You can now drag the mark in any direction, depending on the anchor point.  Another long press on the cursor will change it back to a normal horizontally moving cursor.
 
 #+CAPTION: Omnidirectional cursor
 [[./img/omnidirectional_movement.png]]
@@ -181,7 +185,7 @@ To delete a mark, simply double tap it.  You can delete multiple marks, or all t
 *** Linked marks
 Once marks are linked, moving one linked mark will also move the marks it is linked to.  In order to unlink marks, you can use the *Undo* button, or delete and then re-add a linked mark, or use edit mode.
 *** Block and impulse origin
-In the course of add, deleting, and moving marks, if the app preferences are set to /show impulse origin/ or /show block/, the app will try to determine automatically where the impulse origin is and where block is, depending on the direction of the marks and their linking, and will show this with symbols as seen below.  You can also manually set impulse origin and block using edit mode.
+In the course of adding, deleting, and moving marks, if the app preferences are set to /show impulse origin/ or /show block/, the app will try to determine automatically where the impulse origin is and where block is, depending on the direction of the marks and their linking, and will show this with symbols as seen below.  You can also manually set impulse origin and block using edit mode.
 
 #+CAPTION: Impulse origin and block
 [[./img/impulse_origin_block.png]]
@@ -223,9 +227,9 @@ Choose between a solid, dashed, or dotted mark line style.
 *** Emphasis
 Marks can have a normal or bold emphasis.  Bold emphasis thickens the line of the mark.
 *** Impulse origin
-Impulse origin is normally automatic, but you can override this and place the impulse origin proximally or distally, or have no impulse origin annotated.
+Impulse origin is normally automatically determined, but you can override this and place the impulse origin proximally or distally, or have no impulse origin annotated.
 *** Block
-Block is also normally automatically determined, but you can also override this manually.
+Block is normally automatically determined, but you can also override this manually.
 *** Straighten marks
 Makes selected marks vertical.
 *** Slant marks
@@ -237,7 +241,12 @@ Move the selected marks as a group by dragging them horizontally after selecting
 *** Adjust CL
 Lengthen or shorten the cycle length of a group of marks.  This option forces all the selected marks to have the same cycle length.
 *** Rhythm
-This is discussed [[*Creating rhythms][below]].
+If you select a zone or region, and then bring up the context menu with a long press, you can select the *Rhythm* item to display a screen that allows you to fill the region or zone with a rhythm.
+
+#+CAPTION: Rhythm selection
+[[./img/rhythm.png]]
+
+You can choose a regular rhythm or fibrillation.  With fibrillation you will have a random cycle length defined by an upper and lower limit.  You can also randomize parameters such as the impulse origin, conduction time, and conduction direction.
 *** Repeat CL
 Repeat the cycle length of a pair of marks forward, backward, or bidirectionally.  This is useful in copying a repeating pattern.
 *** Copy and paste
@@ -255,13 +264,6 @@ Unlink the selected marks.
 Move the endpoints of nearby marks together and link the marks.
 *** Delete mark(s)
 Delete the selected marks.
-*** Creating rhythms
-If you select a zone or region, and then bring up the context menu with a long press, you can select the *Rhythm* item to display a screen that allows you to fill the region or zone with a rhythm.
-
-#+CAPTION: Rhythm selection
-[[./img/rhythm.png]]
-
-You can choose a regular rhythm or fibrillation.  With fibrillation you will have a random cycle length defined by an upper and lower limit.  You can also randomize parameters such as the impulse origin, conduction time, and conduction direction.
 ** Side menu items
 *** Opening the side menu
 Use the "hamburger" icon at the upper left of the screen to open the side menu.
@@ -374,7 +376,8 @@ It is recommended to leave this on, so that marks are automatically linked toget
 To create a snapshot and save it to the Photos app, simply tap the *Snapshot* button (next to the *X* close button) at the top right of the screen.  If a dialog appears asking for permission to access your photo library, select access to all photos if you wish to take diagram snapshots.
 
 * Known issues/bugs/limitations
-- Mac version still under development.  Owners of M1 Macs can use the app as is, but we are working on adapting the app to Intel Macs as well, with a more Mac-like user interface.
+- Drag and drop works for image files (e.g. JPG files) but not for PDF or diagram files.  This will be addressed in a future release.
+- Calibration is not saved if there is no image file loaded.
 - Complexly linked marks in the same region may not always track with the moving mark.  We can't decide if this is a bug or feature. 
 * Next version plans
 We plan to include in the next version:

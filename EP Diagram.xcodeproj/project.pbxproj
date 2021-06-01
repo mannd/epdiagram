@@ -9,8 +9,6 @@
 /* Begin PBXBuildFile section */
 		8E01D9C722849047000F36FC /* CursorView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8E01D9C622849047000F36FC /* CursorView.swift */; };
 		8E033CEA24AC10A300BE6D6F /* Calibration.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8E033CE924AC10A300BE6D6F /* Calibration.swift */; };
-		8E04C5CB2569947100946348 /* Startup.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 8E04C5CA2569947100946348 /* Startup.storyboard */; };
-		8E04C5D02569950800946348 /* RootViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8E04C5CF2569950800946348 /* RootViewController.swift */; };
 		8E04C5D5256995E000946348 /* DocumentBrowserViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8E04C5D4256995E000946348 /* DocumentBrowserViewController.swift */; };
 		8E04C5DB256996E400946348 /* DiagramDocument.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8E04C5DA256996E400946348 /* DiagramDocument.swift */; };
 		8E04C5FC256A0AD600946348 /* ImageWrapper.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8E04C5FB256A0AD600946348 /* ImageWrapper.swift */; };
@@ -27,6 +25,8 @@
 		8E25A9B122E5505200D62E18 /* LadderViewTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8E25A9B022E5505200D62E18 /* LadderViewTests.swift */; };
 		8E25A9B322E5515D00D62E18 /* LadderTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8E25A9B222E5515D00D62E18 /* LadderTests.swift */; };
 		8E2BA1D024A3BDD7002D997F /* PreferencesView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8E2BA1CF24A3BDD7002D997F /* PreferencesView.swift */; };
+		8E33927B262E6DE6002A7447 /* Preferences.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 8E33927A262E6DE6002A7447 /* Preferences.storyboard */; platformFilter = maccatalyst; };
+		8E339280262E7655002A7447 /* MacPreferencesViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8E33927F262E7655002A7447 /* MacPreferencesViewController.swift */; };
 		8E35924924BE9B27001E23D5 /* DiagramIO.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8E35924824BE9B27001E23D5 /* DiagramIO.swift */; };
 		8E3AD1372459CABF0085BDD4 /* LocationInLadder.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8E3AD1362459CABF0085BDD4 /* LocationInLadder.swift */; };
 		8E3C911E2602FA02001A14BA /* IntervalTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8E3C911D2602FA02001A14BA /* IntervalTests.swift */; };
@@ -39,6 +39,8 @@
 		8E4ACA842447905E00575538 /* HamburgerCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8E4ACA832447905E00575538 /* HamburgerCell.swift */; };
 		8E4ACA862447935600575538 /* HamburgerLayer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8E4ACA852447935600575538 /* HamburgerLayer.swift */; };
 		8E4ACA8924479C5200575538 /* HamburgerViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8E4ACA8824479C5200575538 /* HamburgerViewModel.swift */; };
+		8E4D02FC265048C500F3CF53 /* maconboard.html in Resources */ = {isa = PBXBuildFile; fileRef = 8E4D02FA265048C500F3CF53 /* maconboard.html */; platformFilter = maccatalyst; };
+		8E4D02FD265048C500F3CF53 /* maconboard.org in Resources */ = {isa = PBXBuildFile; fileRef = 8E4D02FB265048C500F3CF53 /* maconboard.org */; };
 		8E55612922A5FEDC00C4D391 /* Cursor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8E55612822A5FEDC00C4D391 /* Cursor.swift */; };
 		8E5918BC24AEAB0B00D8ABA3 /* Caliper.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8E5918BB24AEAB0B00D8ABA3 /* Caliper.swift */; };
 		8E5918BE24AEAFE100D8ABA3 /* CaliperTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8E5918BD24AEAFE100D8ABA3 /* CaliperTests.swift */; };
@@ -72,11 +74,11 @@
 		8E973F9B24C4BF0800AB41C3 /* String+isBlank.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8E973F9A24C4BF0800AB41C3 /* String+isBlank.swift */; };
 		8E973F9D24C4C71E00AB41C3 /* StringTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8E973F9C24C4C71E00AB41C3 /* StringTests.swift */; };
 		8E973F9F24C4C93000AB41C3 /* DiagramTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8E973F9E24C4C93000AB41C3 /* DiagramTests.swift */; };
-		8E976B8E260E435100CA8BF9 /* help.html in Resources */ = {isa = PBXBuildFile; fileRef = 8E976B8A260E435000CA8BF9 /* help.html */; };
-		8E976B8F260E435100CA8BF9 /* help.org in Resources */ = {isa = PBXBuildFile; fileRef = 8E976B8B260E435000CA8BF9 /* help.org */; };
-		8E976B90260E435100CA8BF9 /* img in Resources */ = {isa = PBXBuildFile; fileRef = 8E976B8C260E435000CA8BF9 /* img */; };
+		8E976B8E260E435100CA8BF9 /* help.html in Resources */ = {isa = PBXBuildFile; fileRef = 8E976B8A260E435000CA8BF9 /* help.html */; platformFilter = ios; };
+		8E976B90260E435100CA8BF9 /* img in Resources */ = {isa = PBXBuildFile; fileRef = 8E976B8C260E435000CA8BF9 /* img */; platformFilter = ios; };
 		8E976B91260E435100CA8BF9 /* org.css in Resources */ = {isa = PBXBuildFile; fileRef = 8E976B8D260E435000CA8BF9 /* org.css */; };
 		8E982F9324EAF8B500E94F71 /* Zone.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8E982F9224EAF8B500E94F71 /* Zone.swift */; };
+		8E997BD7262F3CF800F0578D /* EPDiagram.help in Resources */ = {isa = PBXBuildFile; fileRef = 8E997BD6262F3CF800F0578D /* EPDiagram.help */; platformFilter = maccatalyst; };
 		8E9A065125D9CDC700775531 /* LadderTemplatesModelController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8E9A065025D9CDC700775531 /* LadderTemplatesModelController.swift */; };
 		8E9A466723005A600037AEAB /* CursorViewTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8E9A466623005A600037AEAB /* CursorViewTests.swift */; };
 		8E9B8043228345B5008873BB /* Mark.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8E9B8042228345B5008873BB /* Mark.swift */; };
@@ -99,10 +101,16 @@
 		8ED8CBD125D8B1FF00A6234F /* DiagramModelController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8ED8CBD025D8B1FF00A6234F /* DiagramModelController.swift */; };
 		8EDCE17F25EC0C7400B9C7B8 /* Color.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8EDCE17E25EC0C7400B9C7B8 /* Color.swift */; };
 		8EE1411E261F9A5B00392100 /* Onboarding.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8EE1411D261F9A5B00392100 /* Onboarding.swift */; };
-		8EE141232620EED500392100 /* onboard.html in Resources */ = {isa = PBXBuildFile; fileRef = 8EE141222620EED500392100 /* onboard.html */; };
-		8EE141282620EEE200392100 /* onboard.org in Resources */ = {isa = PBXBuildFile; fileRef = 8EE141272620EEE200392100 /* onboard.org */; };
+		8EE141232620EED500392100 /* onboard.html in Resources */ = {isa = PBXBuildFile; fileRef = 8EE141222620EED500392100 /* onboard.html */; platformFilter = ios; };
+		8EEE3C77264B79360084D968 /* MacSupport.bundle in Embed PlugIns */ = {isa = PBXBuildFile; fileRef = 8EEE3C71264B79060084D968 /* MacSupport.bundle */; platformFilter = maccatalyst; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
+		8EEE3C7D264B798A0084D968 /* SharedAppKitProtocol.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8EEE3C7C264B798A0084D968 /* SharedAppKitProtocol.swift */; };
+		8EEE3C7E264B799A0084D968 /* SharedAppKitProtocol.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8EEE3C7C264B798A0084D968 /* SharedAppKitProtocol.swift */; };
+		8EEE3C80264B7A5B0084D968 /* MacSupport.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8EEE3C7F264B7A5B0084D968 /* MacSupport.swift */; };
 		8EF8B5B72330739F00ADB77A /* ViewControllerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8EF8B5B62330739F00ADB77A /* ViewControllerTests.swift */; };
 		8EF9166B227926BC00B51F17 /* LadderView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8EF9166A227926BC00B51F17 /* LadderView.swift */; };
+		8EF9CA24264F0138007AA24A /* Dynamic in Frameworks */ = {isa = PBXBuildFile; platformFilter = maccatalyst; productRef = 8EF9CA23264F0138007AA24A /* Dynamic */; };
+		8EF9CA26264F016C007AA24A /* UIWindow+nsWindow.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8EF9CA25264F016C007AA24A /* UIWindow+nsWindow.swift */; };
+		8EFCC99E2655B4F000EEABBB /* Sandbox.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8EFCC99D2655B4F000EEABBB /* Sandbox.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -120,13 +128,32 @@
 			remoteGlobalIDString = 8E7D24BE22779DBD005A1729;
 			remoteInfo = "EP Diagram";
 		};
+		8EEE3C78264B79360084D968 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 8E7D24B722779DBD005A1729 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 8EEE3C70264B79060084D968;
+			remoteInfo = MacSupport;
+		};
 /* End PBXContainerItemProxy section */
+
+/* Begin PBXCopyFilesBuildPhase section */
+		8EEE3C7A264B79360084D968 /* Embed PlugIns */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 13;
+			files = (
+				8EEE3C77264B79360084D968 /* MacSupport.bundle in Embed PlugIns */,
+			);
+			name = "Embed PlugIns";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
 		8E01D9C622849047000F36FC /* CursorView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CursorView.swift; sourceTree = "<group>"; };
 		8E033CE924AC10A300BE6D6F /* Calibration.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Calibration.swift; sourceTree = "<group>"; };
-		8E04C5CA2569947100946348 /* Startup.storyboard */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; path = Startup.storyboard; sourceTree = "<group>"; };
-		8E04C5CF2569950800946348 /* RootViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RootViewController.swift; sourceTree = "<group>"; };
 		8E04C5D4256995E000946348 /* DocumentBrowserViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DocumentBrowserViewController.swift; sourceTree = "<group>"; };
 		8E04C5DA256996E400946348 /* DiagramDocument.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DiagramDocument.swift; sourceTree = "<group>"; };
 		8E04C5FB256A0AD600946348 /* ImageWrapper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImageWrapper.swift; sourceTree = "<group>"; };
@@ -146,6 +173,8 @@
 		8E25A9B022E5505200D62E18 /* LadderViewTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LadderViewTests.swift; sourceTree = "<group>"; };
 		8E25A9B222E5515D00D62E18 /* LadderTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LadderTests.swift; sourceTree = "<group>"; };
 		8E2BA1CF24A3BDD7002D997F /* PreferencesView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PreferencesView.swift; sourceTree = "<group>"; };
+		8E33927A262E6DE6002A7447 /* Preferences.storyboard */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; path = Preferences.storyboard; sourceTree = "<group>"; };
+		8E33927F262E7655002A7447 /* MacPreferencesViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MacPreferencesViewController.swift; sourceTree = "<group>"; };
 		8E35924824BE9B27001E23D5 /* DiagramIO.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DiagramIO.swift; sourceTree = "<group>"; };
 		8E3AD1362459CABF0085BDD4 /* LocationInLadder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocationInLadder.swift; sourceTree = "<group>"; };
 		8E3C911D2602FA02001A14BA /* IntervalTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IntervalTests.swift; sourceTree = "<group>"; };
@@ -158,6 +187,8 @@
 		8E4ACA832447905E00575538 /* HamburgerCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HamburgerCell.swift; sourceTree = "<group>"; };
 		8E4ACA852447935600575538 /* HamburgerLayer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HamburgerLayer.swift; sourceTree = "<group>"; };
 		8E4ACA8824479C5200575538 /* HamburgerViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HamburgerViewModel.swift; sourceTree = "<group>"; };
+		8E4D02FA265048C500F3CF53 /* maconboard.html */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.html; path = maconboard.html; sourceTree = "<group>"; };
+		8E4D02FB265048C500F3CF53 /* maconboard.org */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = maconboard.org; sourceTree = "<group>"; };
 		8E55612822A5FEDC00C4D391 /* Cursor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Cursor.swift; sourceTree = "<group>"; };
 		8E5918BB24AEAB0B00D8ABA3 /* Caliper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Caliper.swift; sourceTree = "<group>"; };
 		8E5918BD24AEAFE100D8ABA3 /* CaliperTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CaliperTests.swift; sourceTree = "<group>"; };
@@ -203,6 +234,7 @@
 		8E976B8C260E435000CA8BF9 /* img */ = {isa = PBXFileReference; lastKnownFileType = folder; path = img; sourceTree = "<group>"; };
 		8E976B8D260E435000CA8BF9 /* org.css */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.css; path = org.css; sourceTree = "<group>"; };
 		8E982F9224EAF8B500E94F71 /* Zone.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Zone.swift; sourceTree = "<group>"; };
+		8E997BD6262F3CF800F0578D /* EPDiagram.help */ = {isa = PBXFileReference; lastKnownFileType = folder; name = EPDiagram.help; path = "EP Diagram/EPDiagram.help"; sourceTree = "<group>"; };
 		8E9A065025D9CDC700775531 /* LadderTemplatesModelController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LadderTemplatesModelController.swift; sourceTree = "<group>"; };
 		8E9A466623005A600037AEAB /* CursorViewTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CursorViewTests.swift; sourceTree = "<group>"; };
 		8E9B8042228345B5008873BB /* Mark.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Mark.swift; sourceTree = "<group>"; };
@@ -229,10 +261,17 @@
 		8EE141222620EED500392100 /* onboard.html */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.html; path = onboard.html; sourceTree = "<group>"; };
 		8EE141272620EEE200392100 /* onboard.org */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = onboard.org; sourceTree = "<group>"; };
 		8EE311E524A8FE01003C7AF6 /* AudioToolbox.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AudioToolbox.framework; path = Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.15.sdk/System/Library/Frameworks/AudioToolbox.framework; sourceTree = DEVELOPER_DIR; };
+		8EEE3C71264B79060084D968 /* MacSupport.bundle */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = MacSupport.bundle; sourceTree = BUILT_PRODUCTS_DIR; };
+		8EEE3C73264B79060084D968 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		8EEE3C7B264B798A0084D968 /* MacSupport-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "MacSupport-Bridging-Header.h"; sourceTree = "<group>"; };
+		8EEE3C7C264B798A0084D968 /* SharedAppKitProtocol.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SharedAppKitProtocol.swift; sourceTree = "<group>"; };
+		8EEE3C7F264B7A5B0084D968 /* MacSupport.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MacSupport.swift; sourceTree = "<group>"; };
 		8EF6B0F925A8CA7800DCA91C /* MobileCoreServices.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = MobileCoreServices.framework; path = Platforms/MacOSX.platform/Developer/SDKs/MacOSX11.1.sdk/System/iOSSupport/System/Library/Frameworks/MobileCoreServices.framework; sourceTree = DEVELOPER_DIR; };
 		8EF6B10125A8CAA600DCA91C /* CoreServices.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreServices.framework; path = Platforms/MacOSX.platform/Developer/SDKs/MacOSX11.1.sdk/System/Library/Frameworks/CoreServices.framework; sourceTree = DEVELOPER_DIR; };
 		8EF8B5B62330739F00ADB77A /* ViewControllerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ViewControllerTests.swift; sourceTree = "<group>"; };
 		8EF9166A227926BC00B51F17 /* LadderView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LadderView.swift; sourceTree = "<group>"; };
+		8EF9CA25264F016C007AA24A /* UIWindow+nsWindow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "UIWindow+nsWindow.swift"; sourceTree = "<group>"; };
+		8EFCC99D2655B4F000EEABBB /* Sandbox.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Sandbox.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -240,6 +279,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				8EF9CA24264F0138007AA24A /* Dynamic in Frameworks */,
 				8EBBDE2726111E26004DDD2B /* BetterCodable in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -252,6 +292,13 @@
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 		8E7D24DB22779DBF005A1729 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		8EEE3C6E264B79060084D968 /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -305,6 +352,7 @@
 				8E9F0983253CF483009BC968 /* UINavigationController+gestureRecognizerShouldBegin.swift */,
 				8EC5D28C256B154E00F49865 /* UIView+PinToInside.swift */,
 				8ED3651E261B66A900F2A2B6 /* UIView+findViewController.swift */,
+				8EF9CA25264F016C007AA24A /* UIWindow+nsWindow.swift */,
 			);
 			path = Extensions;
 			sourceTree = "<group>";
@@ -321,6 +369,7 @@
 				8E93CA7B25A00C0E00C74F1F /* UserAlert.swift */,
 				8E93CA8C25A0157F00C74F1F /* Transform.swift */,
 				8E93CA9125A0227100C74F1F /* Global.swift */,
+				8EFCC99D2655B4F000EEABBB /* Sandbox.swift */,
 			);
 			path = Common;
 			sourceTree = "<group>";
@@ -328,9 +377,11 @@
 		8E7D24B622779DBD005A1729 = {
 			isa = PBXGroup;
 			children = (
+				8E997BD6262F3CF800F0578D /* EPDiagram.help */,
 				8E7D24C122779DBD005A1729 /* EP Diagram */,
 				8E7D24D622779DBF005A1729 /* EP DiagramTests */,
 				8E7D24E122779DBF005A1729 /* EP DiagramUITests */,
+				8EEE3C72264B79060084D968 /* MacSupport */,
 				8E7D24C022779DBD005A1729 /* Products */,
 				8EE311E424A8FE01003C7AF6 /* Frameworks */,
 			);
@@ -342,6 +393,7 @@
 				8E7D24BF22779DBD005A1729 /* EP Diagram.app */,
 				8E7D24D322779DBF005A1729 /* EP DiagramTests.xctest */,
 				8E7D24DE22779DBF005A1729 /* EP DiagramUITests.xctest */,
+				8EEE3C71264B79060084D968 /* MacSupport.bundle */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -402,6 +454,8 @@
 		8E976B95260E438C00CA8BF9 /* Help */ = {
 			isa = PBXGroup;
 			children = (
+				8E4D02FA265048C500F3CF53 /* maconboard.html */,
+				8E4D02FB265048C500F3CF53 /* maconboard.org */,
 				8EE141272620EEE200392100 /* onboard.org */,
 				8EE141222620EED500392100 /* onboard.html */,
 				8E976B8A260E435000CA8BF9 /* help.html */,
@@ -446,8 +500,8 @@
 			children = (
 				8E7D24C622779DBD005A1729 /* Main.storyboard */,
 				8E7D24CB22779DBF005A1729 /* LaunchScreen.storyboard */,
-				8E04C5CA2569947100946348 /* Startup.storyboard */,
 				8E61C3D625A6260D0064ADC1 /* Startup2.storyboard */,
+				8E33927A262E6DE6002A7447 /* Preferences.storyboard */,
 			);
 			path = Storyboards;
 			sourceTree = "<group>";
@@ -478,7 +532,7 @@
 				8E04C5D4256995E000946348 /* DocumentBrowserViewController.swift */,
 				8E4ACA8124478D7C00575538 /* HamburgerTableViewController.swift */,
 				8E1276DE24D4734E00AC4B8F /* HelpViewController.swift */,
-				8E04C5CF2569950800946348 /* RootViewController.swift */,
+				8E33927F262E7655002A7447 /* MacPreferencesViewController.swift */,
 			);
 			path = ViewControllers;
 			sourceTree = "<group>";
@@ -513,6 +567,17 @@
 			name = Frameworks;
 			sourceTree = "<group>";
 		};
+		8EEE3C72264B79060084D968 /* MacSupport */ = {
+			isa = PBXGroup;
+			children = (
+				8EEE3C73264B79060084D968 /* Info.plist */,
+				8EEE3C7C264B798A0084D968 /* SharedAppKitProtocol.swift */,
+				8EEE3C7B264B798A0084D968 /* MacSupport-Bridging-Header.h */,
+				8EEE3C7F264B7A5B0084D968 /* MacSupport.swift */,
+			);
+			path = MacSupport;
+			sourceTree = "<group>";
+		};
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
@@ -523,14 +588,17 @@
 				8E7D24BB22779DBD005A1729 /* Sources */,
 				8E7D24BC22779DBD005A1729 /* Frameworks */,
 				8E7D24BD22779DBD005A1729 /* Resources */,
+				8EEE3C7A264B79360084D968 /* Embed PlugIns */,
 			);
 			buildRules = (
 			);
 			dependencies = (
+				8EEE3C79264B79360084D968 /* PBXTargetDependency */,
 			);
 			name = "EP Diagram";
 			packageProductDependencies = (
 				8EBBDE2626111E26004DDD2B /* BetterCodable */,
+				8EF9CA23264F0138007AA24A /* Dynamic */,
 			);
 			productName = "EP Diagram";
 			productReference = 8E7D24BF22779DBD005A1729 /* EP Diagram.app */;
@@ -572,6 +640,23 @@
 			productReference = 8E7D24DE22779DBF005A1729 /* EP DiagramUITests.xctest */;
 			productType = "com.apple.product-type.bundle.ui-testing";
 		};
+		8EEE3C70264B79060084D968 /* MacSupport */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 8EEE3C74264B79060084D968 /* Build configuration list for PBXNativeTarget "MacSupport" */;
+			buildPhases = (
+				8EEE3C6D264B79060084D968 /* Sources */,
+				8EEE3C6E264B79060084D968 /* Frameworks */,
+				8EEE3C6F264B79060084D968 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = MacSupport;
+			productName = MacSupport;
+			productReference = 8EEE3C71264B79060084D968 /* MacSupport.bundle */;
+			productType = "com.apple.product-type.bundle";
+		};
 /* End PBXNativeTarget section */
 
 /* Begin PBXProject section */
@@ -593,6 +678,10 @@
 						CreatedOnToolsVersion = 10.2.1;
 						TestTargetID = 8E7D24BE22779DBD005A1729;
 					};
+					8EEE3C70264B79060084D968 = {
+						CreatedOnToolsVersion = 12.5;
+						LastSwiftMigration = 1250;
+					};
 				};
 			};
 			buildConfigurationList = 8E7D24BA22779DBD005A1729 /* Build configuration list for PBXProject "EP Diagram" */;
@@ -606,6 +695,7 @@
 			mainGroup = 8E7D24B622779DBD005A1729;
 			packageReferences = (
 				8EBBDE2526111E26004DDD2B /* XCRemoteSwiftPackageReference "BetterCodable" */,
+				8EF9CA22264F0138007AA24A /* XCRemoteSwiftPackageReference "Dynamic" */,
 			);
 			productRefGroup = 8E7D24C022779DBD005A1729 /* Products */;
 			projectDirPath = "";
@@ -614,6 +704,7 @@
 				8E7D24BE22779DBD005A1729 /* EP Diagram */,
 				8E7D24D222779DBF005A1729 /* EP DiagramTests */,
 				8E7D24DD22779DBF005A1729 /* EP DiagramUITests */,
+				8EEE3C70264B79060084D968 /* MacSupport */,
 			);
 		};
 /* End PBXProject section */
@@ -623,17 +714,18 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				8E4D02FC265048C500F3CF53 /* maconboard.html in Resources */,
+				8E997BD7262F3CF800F0578D /* EPDiagram.help in Resources */,
 				8E976B91260E435100CA8BF9 /* org.css in Resources */,
 				8E976B90260E435100CA8BF9 /* img in Resources */,
-				8E04C5CB2569947100946348 /* Startup.storyboard in Resources */,
+				8E4D02FD265048C500F3CF53 /* maconboard.org in Resources */,
+				8E33927B262E6DE6002A7447 /* Preferences.storyboard in Resources */,
 				8E976B8E260E435100CA8BF9 /* help.html in Resources */,
 				8EE141232620EED500392100 /* onboard.html in Resources */,
-				8E976B8F260E435100CA8BF9 /* help.org in Resources */,
 				8E7D24CD22779DBF005A1729 /* LaunchScreen.storyboard in Resources */,
 				8E7D24CA22779DBF005A1729 /* Assets.xcassets in Resources */,
 				8E7D24C822779DBD005A1729 /* Main.storyboard in Resources */,
 				8E61C3D725A6260D0064ADC1 /* Startup2.storyboard in Resources */,
-				8EE141282620EEE200392100 /* onboard.org in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -651,6 +743,13 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		8EEE3C6F264B79060084D968 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
@@ -658,10 +757,10 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				8EF9CA26264F016C007AA24A /* UIWindow+nsWindow.swift in Sources */,
 				8ECA9FB52470A07B0016D939 /* RegionTemplate.swift in Sources */,
 				8E04C5FC256A0AD600946348 /* ImageWrapper.swift in Sources */,
 				8E4ACA8924479C5200575538 /* HamburgerViewModel.swift in Sources */,
-				8E04C5D02569950800946348 /* RootViewController.swift in Sources */,
 				8EACC27C259E47C500F0BF42 /* ImageScrollView.swift in Sources */,
 				8E74D590244FD55E00641E0A /* Logging.swift in Sources */,
 				8E253DD3244A8799008CC56B /* DiagramViewController+UIScrollViewDelegate.swift in Sources */,
@@ -680,6 +779,7 @@
 				8E93CA7C25A00C0E00C74F1F /* UserAlert.swift in Sources */,
 				8E253DD5244A8B17008CC56B /* Version.swift in Sources */,
 				8E6EB6C2248477D500E5F883 /* DiagramViewController+DiagramViewControllerDelegate.swift in Sources */,
+				8EEE3C7E264B799A0084D968 /* SharedAppKitProtocol.swift in Sources */,
 				8E4A52EF24886B16007406F5 /* Diagram.swift in Sources */,
 				8E6A0298246DFB3700A10C9F /* LadderTemplateEditor.swift in Sources */,
 				8E2BA1D024A3BDD7002D997F /* PreferencesView.swift in Sources */,
@@ -702,6 +802,7 @@
 				8EE1411E261F9A5B00392100 /* Onboarding.swift in Sources */,
 				8E4ACA8024478A6E00575538 /* BlackView.swift in Sources */,
 				8EC5D28D256B154E00F49865 /* UIView+PinToInside.swift in Sources */,
+				8E339280262E7655002A7447 /* MacPreferencesViewController.swift in Sources */,
 				8ED3B1B62360DA0D00549381 /* Anchor.swift in Sources */,
 				8E4ACA842447905E00575538 /* HamburgerCell.swift in Sources */,
 				8E4ACA862447935600575538 /* HamburgerLayer.swift in Sources */,
@@ -725,6 +826,7 @@
 				8EBC824324E6EBA700B5CA29 /* Sounds.swift in Sources */,
 				8E7D24C322779DBD005A1729 /* AppDelegate.swift in Sources */,
 				8E35924924BE9B27001E23D5 /* DiagramIO.swift in Sources */,
+				8EFCC99E2655B4F000EEABBB /* Sandbox.swift in Sources */,
 				8E9A065125D9CDC700775531 /* LadderTemplatesModelController.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -759,6 +861,15 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		8EEE3C6D264B79060084D968 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				8EEE3C7D264B798A0084D968 /* SharedAppKitProtocol.swift in Sources */,
+				8EEE3C80264B7A5B0084D968 /* MacSupport.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXTargetDependency section */
@@ -771,6 +882,12 @@
 			isa = PBXTargetDependency;
 			target = 8E7D24BE22779DBD005A1729 /* EP Diagram */;
 			targetProxy = 8E7D24DF22779DBF005A1729 /* PBXContainerItemProxy */;
+		};
+		8EEE3C79264B79360084D968 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			platformFilter = maccatalyst;
+			target = 8EEE3C70264B79060084D968 /* MacSupport */;
+			targetProxy = 8EEE3C78264B79360084D968 /* PBXContainerItemProxy */;
 		};
 /* End PBXTargetDependency section */
 
@@ -915,11 +1032,12 @@
 		8E7D24E822779DBF005A1729 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_ENTITLEMENTS = "EP Diagram/EP Diagram.entitlements";
 				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 15;
+				CURRENT_PROJECT_VERSION = 16;
 				DERIVE_MACCATALYST_PRODUCT_BUNDLE_IDENTIFIER = NO;
 				DEVELOPMENT_TEAM = W74NPJXYEG;
 				"ENABLE_HARDENED_RUNTIME[sdk=macosx*]" = YES;
@@ -941,11 +1059,12 @@
 		8E7D24E922779DBF005A1729 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_ENTITLEMENTS = "EP Diagram/EP Diagram.entitlements";
 				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 15;
+				CURRENT_PROJECT_VERSION = 16;
 				DERIVE_MACCATALYST_PRODUCT_BUNDLE_IDENTIFIER = NO;
 				DEVELOPMENT_TEAM = W74NPJXYEG;
 				"ENABLE_HARDENED_RUNTIME[sdk=macosx*]" = YES;
@@ -1046,6 +1165,57 @@
 			};
 			name = Release;
 		};
+		8EEE3C75264B79060084D968 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CLANG_ENABLE_MODULES = YES;
+				CODE_SIGN_STYLE = Automatic;
+				COMBINE_HIDPI_IMAGES = YES;
+				DEVELOPMENT_TEAM = W74NPJXYEG;
+				INFOPLIST_FILE = MacSupport/Info.plist;
+				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Bundles";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+					"@loader_path/../Frameworks",
+				);
+				MACOSX_DEPLOYMENT_TARGET = 11.3;
+				PRODUCT_BUNDLE_IDENTIFIER = org.epstudios.MacSupport;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = macosx;
+				SKIP_INSTALL = YES;
+				SWIFT_OBJC_BRIDGING_HEADER = "MacSupport/MacSupport-Bridging-Header.h";
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_VERSION = 5.0;
+				WRAPPER_EXTENSION = bundle;
+			};
+			name = Debug;
+		};
+		8EEE3C76264B79060084D968 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CLANG_ENABLE_MODULES = YES;
+				CODE_SIGN_STYLE = Automatic;
+				COMBINE_HIDPI_IMAGES = YES;
+				DEVELOPMENT_TEAM = W74NPJXYEG;
+				INFOPLIST_FILE = MacSupport/Info.plist;
+				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Bundles";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+					"@loader_path/../Frameworks",
+				);
+				MACOSX_DEPLOYMENT_TARGET = 11.3;
+				PRODUCT_BUNDLE_IDENTIFIER = org.epstudios.MacSupport;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = macosx;
+				SKIP_INSTALL = YES;
+				SWIFT_OBJC_BRIDGING_HEADER = "MacSupport/MacSupport-Bridging-Header.h";
+				SWIFT_VERSION = 5.0;
+				WRAPPER_EXTENSION = bundle;
+			};
+			name = Release;
+		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
@@ -1085,6 +1255,15 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
+		8EEE3C74264B79060084D968 /* Build configuration list for PBXNativeTarget "MacSupport" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				8EEE3C75264B79060084D968 /* Debug */,
+				8EEE3C76264B79060084D968 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
 /* End XCConfigurationList section */
 
 /* Begin XCRemoteSwiftPackageReference section */
@@ -1096,6 +1275,14 @@
 				minimumVersion = 0.3.0;
 			};
 		};
+		8EF9CA22264F0138007AA24A /* XCRemoteSwiftPackageReference "Dynamic" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/mhdhejazi/Dynamic.git";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 1.2.0;
+			};
+		};
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
@@ -1103,6 +1290,11 @@
 			isa = XCSwiftPackageProductDependency;
 			package = 8EBBDE2526111E26004DDD2B /* XCRemoteSwiftPackageReference "BetterCodable" */;
 			productName = BetterCodable;
+		};
+		8EF9CA23264F0138007AA24A /* Dynamic */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 8EF9CA22264F0138007AA24A /* XCRemoteSwiftPackageReference "Dynamic" */;
+			productName = Dynamic;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};

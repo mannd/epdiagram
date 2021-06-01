@@ -1,0 +1,35 @@
+#+TITLE:     
+#+AUTHOR:    David Mann
+#+EMAIL:     mannd@epstudiossoftware.com
+#+DATE:      [2020-07-31 Fri]
+#+DESCRIPTION: Welcome to EP Diagram
+#+KEYWORDS: ladder diagrams, EP Diagram index
+#+LANGUAGE:  en
+#+OPTIONS:   H:3 num:nil toc:nil \n:nil ::t |:t ^:t -:t f:t *:t <:t
+#+OPTIONS:   d:nil todo:t pri:nil tags:not-in-toc
+#+INFOJS_OPT: view:nil toc:nil ltoc:t mouse:underline buttons:0 path:http://orgmode.org/org-info.js
+#+EXPORT_SELECT_TAGS: export
+#+EXPORT_EXCLUDE_TAGS: noexport
+#+LINK_UP:   
+#+LINK_HOME: 
+#+XSLT:
+#+HTML_HEAD: <style media="screen" type="text/css"> img {max-width: 100%; height: auto;} </style>
+#+HTML_HEAD: <style  type="text/css">:root { color-scheme: light dark; }</style>
+#+HTML_HEAD: <link rel="stylesheet" type="text/css" href="../shrd/org.css"/>
+#+HTML_HEAD: <meta name="robots" content="anchors" />
+#+HTML_HEAD: <meta name="robots" content="keywords" />
+* [[../shrd/64.png]] EP Diagram Help 
+#+BEGIN_EXPORT html
+<a name="EP Diagram index"></a>
+#+END_EXPORT
+* [[./pgs/overview.html][Overview]]
+Use *EP Diagram* to create ladder diagrams.
+* [[./pgs/quick_start.org][Quick start]]
+Create your first ladder diagram
+* [[./pgs/manual.html][EP Diagram manual]]
+Detailed and advanced use of *EP Diagram*.
+* [[./pgs/issues.html][Known issues/bugs/limitations]]
+Some glitches we're still working on.
+* [[./pgs/misc.html][Fine print]]
+Miscellaneous stuff.
+

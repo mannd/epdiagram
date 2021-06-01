@@ -11,7 +11,7 @@ import UniformTypeIdentifiers
 import AVFoundation
 import os.log
 
-protocol HamburgerTableDelegate: class {
+protocol HamburgerTableDelegate: AnyObject {
     var hamburgerMenuIsOpen: Bool { get set }
     var constraintHamburgerLeft: NSLayoutConstraint { get set }
     var constraintHamburgerWidth: NSLayoutConstraint { get set }
@@ -27,11 +27,10 @@ protocol HamburgerTableDelegate: class {
     func debug()
     func getDiagramInfo()
     func lockLadder()
-    func editLadder()
     func sampleDiagrams()
     func showPreferences()
     func editTemplates()
-    func showHelp()
+    func showIOSHelp()
     func lockImage()
     func hideHamburgerMenu()
     func showHamburgerMenu()
@@ -131,11 +130,10 @@ extension DiagramViewController: HamburgerTableDelegate, UIImagePickerController
     }
 
     func selectLadder() {
-        os_log("selectLadder()", log: .action, type: .info)
         performSelectLadderSegue()
     }
 
-    func renameDiagram() {
+    @objc func renameDiagram() {
           os_log("renameDiagram()", log: .action, type: .info)
           // Just fail gracefully if name is nil, renameDiagram should not be available if name is nil.
         guard let diagramName = currentDocument?.name(), !diagramName.isBlank else { return }
@@ -160,7 +158,7 @@ extension DiagramViewController: HamburgerTableDelegate, UIImagePickerController
         present(alert, animated: true)
       }
 
-    func getDiagramInfo() {
+    @IBAction func getDiagramInfo() {
         os_log("getDiagramInfo()", log: .action, type: .info)
         // Consider killing this.  Files app gives file info.
         var message: String = ""
@@ -189,7 +187,7 @@ extension DiagramViewController: HamburgerTableDelegate, UIImagePickerController
     }
 
 
-    func lockImage() {
+    @IBAction func lockImage() {
         imageIsLocked.toggle()
         // Turn off scrolling and zooming, but allow single taps to generate marks with cursors.
         imageScrollView.isScrollEnabled = !imageIsLocked
@@ -201,7 +199,7 @@ extension DiagramViewController: HamburgerTableDelegate, UIImagePickerController
         }
     }
 
-    func lockLadder() {
+    @IBAction func lockLadder() {
         os_log("lockDiagram()", log: .action, type: .info)
         _ladderIsLocked.toggle()
         // Turn off scrolling and zooming, but allow single taps to generate marks with cursors.
@@ -215,11 +213,6 @@ extension DiagramViewController: HamburgerTableDelegate, UIImagePickerController
         }
     }
 
-    func editLadder() {
-        os_log("editLadder(action:)", log: OSLog.action, type: .info)
-        performEditLadderSegue()
-    }
-
     func editTemplates() {
         os_log("editTemplates()", log: OSLog.action, type: .info)
         performShowTemplateEditorSegue()
@@ -230,10 +223,15 @@ extension DiagramViewController: HamburgerTableDelegate, UIImagePickerController
         performShowPreferencesSegue()
     }
 
-    func showHelp() {
-        os_log("showHelp()", log: OSLog.action, type: .info)
+//    @IBAction func showNewPreferences(_ sender: Any) {
+//        showPreferences()
+//    }
+
+    func showIOSHelp() {
+        os_log("showIOSHelp()", log: OSLog.action, type: .info)
         performShowHelpSegue()
     }
+
 
     func about() {
         let versionBuild = Version.appVersion()
@@ -256,7 +254,6 @@ extension DiagramViewController: HamburgerTableDelegate, UIImagePickerController
     #if DEBUG
     func debug() {
         os_log("debug()", log: .debugging, type: .debug)
-        ladderView.relinkAllMarks()
     }
     #else
     func debug() {}
@@ -282,9 +279,11 @@ extension DiagramViewController: HamburgerTableDelegate, UIImagePickerController
     }
 
     private func chooseSource() {
-        let alert = UIAlertController(title: NSLocalizedString("Image Source", comment: ""), message:nil, preferredStyle: .actionSheet)
+        let alert = UIAlertController(title: NSLocalizedString("Image Source", comment: ""), message:nil, preferredStyle: isRunningOnMac() ? .alert : .actionSheet)
+        #if !targetEnvironment(macCatalyst)
         alert.modalPresentationStyle = .popover
         alert.popoverPresentationController?.barButtonItem = navigationItem.leftBarButtonItem
+        #endif
         alert.addAction(UIAlertAction(title: NSLocalizedString("Photos", comment: ""), style: .default, handler: { _ in
             self.handleSelectImage()
         }))
@@ -295,7 +294,7 @@ extension DiagramViewController: HamburgerTableDelegate, UIImagePickerController
         present(alert, animated: true, completion: nil)
     }
 
-    private func handleSelectFile() {
+    func handleSelectFile() {
         let supportedTypes: [UTType] = [UTType.image, UTType.pdf]
         let documentPicker = UIDocumentPickerViewController(forOpeningContentTypes: supportedTypes, asCopy: true)
         documentPicker.delegate = self
@@ -311,7 +310,7 @@ extension DiagramViewController: HamburgerTableDelegate, UIImagePickerController
         self.openURL(url: urls[0])
     }
 
-    private func handleSelectImage() {
+    func handleSelectImage() {
         os_log("handleSelectImage()", log: .action, type: .info)
         presentPhotosForImages()
     }
@@ -386,6 +385,12 @@ extension DiagramViewController: HamburgerTableDelegate, UIImagePickerController
         }
         return image
     }
+
+    @IBAction func openImageFile(_ sender: Any) {
+        print("gotcha")
+        handleSelectFile()
+
+    }
  
     // MARK: - Hamburger menu functions
 
@@ -450,7 +455,8 @@ import PhotosUI
 
 extension DiagramViewController: PHPickerViewControllerDelegate {
     func picker(_ picker: PHPickerViewController, didFinishPicking results: [PHPickerResult]) {
-        dismiss(animated: true)
+        picker.dismiss(animated: true)
+//        dismiss(animated: true)
         if let itemProvider = results.first?.itemProvider {
             if itemProvider.canLoadObject(ofClass: UIImage.self) {
                 itemProvider.loadObject(ofClass: UIImage.self) { [weak self] image, error in

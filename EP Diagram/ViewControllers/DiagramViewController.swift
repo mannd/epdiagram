@@ -11,13 +11,16 @@ import SwiftUI
 import UniformTypeIdentifiers
 import Photos
 import os.log
+//#if targetEnvironment(macCatalyst)
+//import Dynamic
+//#endif
 
 final class DiagramViewController: UIViewController {
     // For debugging only
     #if DEBUG
-    var debugShowOnboarding = false
+    var debugForceOnboarding = false
     #else // Don't change below!
-    var debugShowOnboarding = false
+    var debugForceOnboarding = false
     #endif
 
     // View, outlets, constraints
@@ -42,6 +45,10 @@ final class DiagramViewController: UIViewController {
     let stackViewSpacing: CGFloat = 12
 
     let gotoTextFieldTag = 1
+
+    // These are taken from the Apple IKImageView demo
+    let zoomInFactor: CGFloat = 1.414214
+    let zoomOutFactor: CGFloat = 0.7071068
 
     // This margin is passed to other views.
     var leftMargin: CGFloat = defaultLeftMargin {
@@ -129,8 +136,8 @@ final class DiagramViewController: UIViewController {
 
     // PDF and launch from URL stuff
     var pdfRef: CGPDFDocument?
-    var launchFromURL: Bool = false
-    var launchURL: URL?
+    //    var launchFromURL: Bool = false
+    //    var launchURL: URL?
     var pageNumber: Int = 1
     var enablePageButtons = false
     var numberOfPages: Int = 0
@@ -151,6 +158,9 @@ final class DiagramViewController: UIViewController {
         }
     }
 
+    // Sandbox
+    var requestSandboxExpansion: Bool = false
+
     // Diagram preferences
     var playSounds: Bool = true
 
@@ -163,6 +173,7 @@ final class DiagramViewController: UIViewController {
     static let restorationContentOffsetYKey = "restorationContentOffsetYKey"
     static let restorationZoomKey = "restorationZoomKey"
     static let restorationFileNameKey = "restorationFileNameKey"
+    static let restorationDocumentURLKey = "restorationDocumentURLKey"
     static let restorationNeededKey = "restorationNeededKey"
     static let restorationTransformKey = "restorationTranslateKey"
     //    static let restorationActiveRegionIndexKey = "restorationActiveRegionIndexKey"
@@ -171,6 +182,8 @@ final class DiagramViewController: UIViewController {
     static let restorationCaliperCrossbarKey = "restorationCaliperCrossbarKey"
     static let restorationCaliperBar1Key = "restorationCaliperBar1Key"
     static let restorationCaliperBar2Key = "restorationCaliperBar2Key"
+
+    static let restorationBookmarkKey = "restorationBookmarkKey"
 
     // Speed up appearance of image picker by initializing it here.
     let imagePicker: UIImagePickerController = UIImagePickerController()
@@ -428,22 +441,7 @@ final class DiagramViewController: UIViewController {
         os_log("viewDidLoad() - ViewController", log: OSLog.viewCycle, type: .info)
         super.viewDidLoad()
 
-        // Only uncomment this to see what fonts are available.  Right now just using
-        // system fonts.
-        //for family: String in UIFont.familyNames
-        //{
-        //    print(family)
-        //    for names: String in UIFont.fontNames(forFamilyName: family)
-        //    {
-        //        print("== \(names)")
-        //    }
-        // }
-
-        // Customization for mac version
-        if isRunningOnMac() {
-            //navigationController?.setNavigationBarHidden(true, animated: false)
-            // Need to convert hamburger menu to regular menu on Mac.
-        }
+        //print("userInfo", restorationInfo as Any)
 
         // Setup cursor, ladder and image scroll views.
         // These 2 views are guaranteed to exist, so the delegates are implicitly unwrapped optionals.
@@ -461,8 +459,8 @@ final class DiagramViewController: UIViewController {
         cursorView.calibration = diagram.calibration
         ladderView.calibration = diagram.calibration
         ladderView.ladder = diagram.ladder
-        // Diagram image already scaled, so don't scale again here.
-        imageView.image = diagram.image
+
+        imageView.image = scaleImageForImageView(diagram.image)
         ladderView.viewMaxWidth = imageView.frame.width
 
         imageScrollView.delegate = self
@@ -470,7 +468,7 @@ final class DiagramViewController: UIViewController {
         // Distinguish the two views using slightly different background colors.
         imageScrollView.backgroundColor = UIColor.secondarySystemBackground
         imageView.backgroundColor = UIColor.secondarySystemBackground
-        ladderView.backgroundColor = UIColor.tertiarySystemBackground
+        ladderView.backgroundColor = UIColor.systemBackground
 
         // Limit max and min scale of image.
         imageScrollView.maximumZoomScale = maxZoom
@@ -493,12 +491,16 @@ final class DiagramViewController: UIViewController {
 
         // Navigation buttons
         // Hamburger menu is replaced by main menu on Mac.
+        #if !targetEnvironment(macCatalyst)
         hamburgerButton = UIBarButtonItem(image: UIImage(named: "hamburger"), style: .plain, target: self, action: #selector(toggleHamburgerMenu))
         navigationItem.setLeftBarButton(hamburgerButton, animated: true)
-
         let snapshotButton = UIBarButtonItem(image: UIImage(systemName: "photo.on.rectangle"), style: .plain, target: self, action: #selector(snapshotDiagram))
         let closeButton = UIBarButtonItem(image: UIImage(systemName: "xmark"), style: .done, target: self, action: #selector(closeDocument))
         navigationItem.setRightBarButtonItems([closeButton, snapshotButton], animated: true)
+        #endif
+
+        let backButton = UIBarButtonItem(title: L("Done"), style: .done, target: nil, action: nil)
+        navigationItem.backBarButtonItem = backButton
 
         // Set up touches
         let singleTapRecognizer = UITapGestureRecognizer(target: self, action: #selector(self.singleTap))
@@ -506,22 +508,26 @@ final class DiagramViewController: UIViewController {
         imageScrollView.addGestureRecognizer(singleTapRecognizer)
 
         // Context menus
-        // We use a long press menu for the image, to avoid the view jumping around during normal scrolling, zooming.
-        // Yes, we tried using UIContextMenuInteraction, but it was unusable.
-        let longPressRecognizer = UILongPressGestureRecognizer(target: self.imageScrollView, action: #selector(imageScrollView.showImageMenu))
-        imageScrollView.addGestureRecognizer(longPressRecognizer)
-
-        // Set up context menu.
         let interaction = UIContextMenuInteraction(delegate: self)
         ladderView.addInteraction(interaction)
 
-        setTitle()
+        #if targetEnvironment(macCatalyst) // context menu works better on Mac here
+        let imageInteraction = UIContextMenuInteraction(delegate: imageScrollView)
+        imageScrollView.addInteraction(imageInteraction)
+        #else
+        // We use a long press menu for the image, to avoid the view jumping around during normal scrolling, zooming.
+        // Yes, we tried using UIContextMenuInteraction, but it was unusable for iOS.
+        let longPressRecognizer = UILongPressGestureRecognizer(target: self.imageScrollView, action: #selector(imageScrollView.showImageMenu))
+        imageScrollView.addGestureRecognizer(longPressRecognizer)
+        #endif
 
         ladderView.reregisterAllMarks()
 
+        setupNotifications()
+
         let firstRun: Bool = !UserDefaults.standard.bool(forKey: Preferences.notFirstRunKey)
 
-        if debugShowOnboarding || firstRun { // || first run
+        if debugForceOnboarding || firstRun { // || first run
             performShowOnboardingSegue()
             UserDefaults.standard.set(true, forKey: Preferences.notFirstRunKey)
             // take this oportunity to save the version, which we can use in the future to determine if we nee to reshow the onboarding (e.g. if onboarding changes).
@@ -532,18 +538,30 @@ final class DiagramViewController: UIViewController {
     }
 
     override func viewWillAppear(_ animated: Bool) {
+        os_log("viewWillAppear() - ViewController", log: OSLog.viewCycle, type: .info)
         super.viewWillAppear(animated)
-        setupNotifications()
         // Need to show toolbar before view appears, otherwise views don't layout correctly.
-        navigationController?.setToolbarHidden(false, animated: false)
 
+        // Fixes view opening flush with left margin on Mac.
+        view.layoutIfNeeded()
+        
+        #if targetEnvironment(macCatalyst)
+        navigationController?.setNavigationBarHidden(true, animated: animated)
+        //        navigationController?.setToolbarHidden(true, animated: animated)
+        #else
+        navigationController?.setNavigationBarHidden(false, animated: animated)
+        //        navigationController?.setToolbarHidden(false, animated: animated)
+        #endif
+        navigationController?.setToolbarHidden(false, animated: animated)
     }
 
     var didFirstWillLayout = false
     override func viewWillLayoutSubviews() {
         os_log("viewWillLayoutSubviews() - DiagramViewController", log: OSLog.viewCycle, type: .info)
-
-        if didFirstWillLayout { return }
+        if didFirstWillLayout {
+            super.viewWillLayoutSubviews()
+            return
+        }
         didFirstWillLayout = true
         if restorationInfo != nil {
             if let zoomScale = restorationInfo?[Self.restorationZoomKey] as? CGFloat {
@@ -558,11 +576,29 @@ final class DiagramViewController: UIViewController {
             }
             imageScrollView.setContentOffset(restorationContentOffset, animated: true)
         }
+        super.viewWillLayoutSubviews()
     }
 
     override func viewDidAppear(_ animated: Bool) {
         os_log("viewDidAppear() - ViewController", log: OSLog.viewCycle, type: .info)
         super.viewDidAppear(animated)
+
+        #if targetEnvironment(macCatalyst)
+        if let appDelegate = UIApplication.shared.delegate as? AppDelegate {
+            if let plugin = appDelegate.appKitPlugin {
+                if let nsWindow = view.window?.nsWindow {
+                    plugin.disableCloseButton(nsWindow: nsWindow)
+                }
+            }
+        }
+
+        if requestSandboxExpansion {
+            addDirectoryToSandbox(self)
+        }
+        #endif
+
+        setTitle()
+
         self.userActivity = self.view.window?.windowScene?.userActivity
         self.userActivity?.delegate = self
         self.restorationInfo = nil
@@ -584,22 +620,34 @@ final class DiagramViewController: UIViewController {
 
     override func viewWillDisappear(_ animated: Bool) {
         super.viewWillDisappear(animated)
-        removeNotifications()
+        // No need anymore (since iOS9) to remove notifications.
+    }
+
+    deinit {
+        print("*****DiagramViewController deinit()******")
     }
 
     override func updateUserActivityState(_ activity: NSUserActivity) {
         os_log("debug: diagramViewController updateUserActivityState called", log: .debugging, type: .debug)
-        let currentDocumentURL: String = currentDocument?.fileURL.lastPathComponent ?? ""
+
         super.updateUserActivityState(activity)
+
         let info: [AnyHashable: Any] = [
             Self.restorationContentOffsetXKey: imageScrollView.contentOffset.x / imageScrollView.zoomScale,
             Self.restorationContentOffsetYKey: imageScrollView.contentOffset.y,
             Self.restorationZoomKey: imageScrollView.zoomScale,
-            Self.restorationFileNameKey: currentDocumentURL,
             Self.restorationDoRestorationKey: true,
             Self.restorationTransformKey: NSCoder.string(for: imageView.transform),
+            Self.restorationDocumentURLKey: currentDocument?.fileURL ?? "",
         ]
         activity.addUserInfoEntries(from: info)
+        #if !targetEnvironment(macCatalyst)
+        if let currentDocument = currentDocument {
+            let directoryURL = currentDocument.fileURL.deletingLastPathComponent()
+            Sandbox.storeDirectoryBookmark(from: directoryURL)
+        }
+        #endif
+
     }
 
     func loadSampleDiagram(_ diagram: Diagram) {
@@ -613,11 +661,18 @@ final class DiagramViewController: UIViewController {
     }
 
     func setTitle() {
+        var titleLabel = L("EP Diagram")
         if let name = currentDocument?.name(), !name.isEmpty {
-            title = isIPad() ? L("EP Diagram - \(name)") : name
-        } else {
-            title = L("EP Diagram")
+            #if targetEnvironment(macCatalyst)
+            titleLabel = L("EP Diagram - \(name)")
+            #else
+            titleLabel = isIPad() ? L("EP Diagram - \(name)") : name
+            #endif
         }
+        title = titleLabel
+        #if targetEnvironment(macCatalyst)
+        view.window?.windowScene?.title = titleLabel
+        #endif
     }
 
     // MARK: Toolbars, Modes
@@ -629,7 +684,13 @@ final class DiagramViewController: UIViewController {
             connectButton = UIBarButtonItem(title: L("Connect"), style: .plain, target: self, action: #selector(launchConnectMode))
             undoButton = UIBarButtonItem(barButtonSystemItem: .undo, target: self, action: #selector(undo))
             redoButton = UIBarButtonItem(barButtonSystemItem: .redo, target: self, action: #selector(redo))
+            #if targetEnvironment(macCatalyst)
+            mainToolbarButtons = [calibrateButton, spacer,  connectButton, spacer, selectButton]
+            #else
             mainToolbarButtons = [calibrateButton, spacer,  connectButton, spacer, selectButton, spacer, undoButton, spacer, redoButton]
+            #endif
+
+
         }
         setToolbarItems(mainToolbarButtons, animated: false)
     }
@@ -644,7 +705,11 @@ final class DiagramViewController: UIViewController {
             let clearButtonTitle = isIPad() ? L("Clear Selection") : L("Clear")
             let clearButton = UIBarButtonItem(title: clearButtonTitle, style: .plain, target: self, action: #selector(clearSelection))
             let doneButton = UIBarButtonItem(barButtonSystemItem: .done, target: self, action: #selector(cancelSelectMode))
+            #if targetEnvironment(macCatalyst)
+            selectToolbarButtons = [selectAllButton, spacer, clearButton, spacer, doneButton]
+            #else
             selectToolbarButtons = [selectAllButton, spacer, clearButton, spacer, undoButton, spacer, redoButton, spacer, doneButton]
+            #endif
         }
         setToolbarItems(selectToolbarButtons, animated: false)
     }
@@ -673,7 +738,12 @@ final class DiagramViewController: UIViewController {
             let labelText = isIPad() ? L("Tap pairs of marks to connect them") : L("Tap pairs of marks")
             let prompt = makePrompt(text: labelText)
             let doneButton = UIBarButtonItem(barButtonSystemItem: .done, target: self, action: #selector(cancelConnectMode))
+            #if targetEnvironment(macCatalyst)
+            connectToolbarButtons = [prompt, spacer, doneButton]
+            #else
             connectToolbarButtons = [prompt, spacer, undoButton, spacer, redoButton, spacer, doneButton]
+            #endif
+
         }
         setToolbarItems(connectToolbarButtons, animated: false)
     }
@@ -937,7 +1007,6 @@ final class DiagramViewController: UIViewController {
 
     @objc func snapshotDiagram() {
         os_log("snapshotDiagram()", log: .action, type: .info)
-
         checkPhotoLibraryStatus()
     }
 
@@ -1052,7 +1121,7 @@ final class DiagramViewController: UIViewController {
         imageScrollView.isActivated = true
     }
 
-    @objc func undo() {
+    @objc func undo(_ sender: Any) {
         os_log("undo action", log: OSLog.action, type: .info)
         if self.currentDocument?.undoManager?.canUndo ?? false {
             // Cursor doesn't track undo and redo well, so hide it!
@@ -1064,7 +1133,7 @@ final class DiagramViewController: UIViewController {
         }
     }
 
-    @objc func redo() {
+    @objc func redo(_ sender: Any) {
         os_log("redo action", log: OSLog.action, type: .info)
         if self.currentDocument?.undoManager?.canRedo ?? false {
             if mode == .normal {
@@ -1074,6 +1143,7 @@ final class DiagramViewController: UIViewController {
             setViewsNeedDisplay()
         }
     }
+
 
     func editLabel() {
         guard let selectedRegion = ladderView.selectedLabelRegion() else { return }
@@ -1106,6 +1176,7 @@ final class DiagramViewController: UIViewController {
     @objc func singleTap(tap: UITapGestureRecognizer) {
         os_log("singleTap - ViewController", log: OSLog.touches, type: .info)
         guard !marksAreHidden else { return }
+        guard ladderView.isActivated else { return }
         if cursorView.mode == .calibrate {
             return
         }
@@ -1245,6 +1316,22 @@ final class DiagramViewController: UIViewController {
         numberOfPages = 0
     }
 
+    #if targetEnvironment(macCatalyst)
+
+    // Not used
+    @IBAction func selectDiagram(_ sender: Any) {
+        let supportedTypes: [UTType] = [UTType.image, UTType.pdf]
+        let documentPicker = UIDocumentPickerViewController(forOpeningContentTypes: supportedTypes, asCopy: true)
+        documentPicker.delegate = self
+
+        // Set the initial directory.
+        documentPicker.directoryURL = FileIO.getDocumentsURL()
+
+        // Present the document picker.
+        present(documentPicker, animated: true, completion: nil)    }
+    #endif
+
+
     // MARK: - Rotate screen
 
     override func viewWillTransition(to size: CGSize, with coordinator: UIViewControllerTransitionCoordinator) {
@@ -1332,13 +1419,16 @@ final class DiagramViewController: UIViewController {
 
     @IBSegueAction func performRhythmSegueAction(_ coder: NSCoder) -> UIViewController? {
         // Have to provide dismiss action to SwiftUI modal view.  It won't dismiss itself.
-        let rhythmView = RhythmView(dismissAction: applyRhythm(rhythm:))
+        let rhythmView = RhythmView(dismissAction: applyRhythm(rhythm:cancel:))
         let hostingController = UIHostingController(coder: coder, rootView: rhythmView)
         return hostingController
     }
 
     @IBSegueAction func performOnboardingSegueAction(_ coder: NSCoder) -> UIViewController? {
-        guard let url = Bundle.main.url(forResource: "onboard", withExtension: "html") else { return nil }
+        guard let url = Bundle.main.url(
+                forResource: isRunningOnMac() ? "maconboard" : "onboard",
+                withExtension: "html")
+        else { return nil }
         do {
             let contents = try String(contentsOf: url)
             let onboardingView = Onboarding(onboardText: .constant(contents), url: url)
@@ -1348,9 +1438,11 @@ final class DiagramViewController: UIViewController {
         }
     }
 
-    func applyRhythm(rhythm: Rhythm) {
+    func applyRhythm(rhythm: Rhythm, cancel: Bool) {
         print(rhythm)
-        ladderView.fillWithRhythm(rhythm)
+        if !cancel {
+            ladderView.fillWithRhythm(rhythm)
+        }
         self.dismiss(animated: true, completion: nil)
     }
 
@@ -1362,9 +1454,9 @@ final class DiagramViewController: UIViewController {
         performSegue(withIdentifier: "selectLadderSegue", sender: self)
     }
 
-    func performEditLadderSegue() {
-        performSegue(withIdentifier: "EditLadderSegue", sender: self)
-    }
+    //    func performEditLadderSegue() {
+    //        performSegue(withIdentifier: "EditLadderSegue", sender: self)
+    //    }
 
     func performShowSampleSelectorSegue() {
         performSegue(withIdentifier: "showSampleSelectorSegue", sender: self)
@@ -1387,17 +1479,71 @@ final class DiagramViewController: UIViewController {
         performSegue(withIdentifier: "showTemplateEditorSegue", sender: self)
     }
 
+}
+
+#if targetEnvironment(macCatalyst)
+extension DiagramViewController {
     // MARK: - Mac menu actions
 
-    @IBAction func showPreferencesCommand(_ sender: Any) {
-        showPreferences()
+    // View menu
+
+    @IBAction func doZoom(_ sender: Any) {
+        // No zooming if no image
+        guard imageView.image != nil else { return }
+        var zoomFactor: CGFloat
+        var newZoomFactor: CGFloat = 1.0
+        if let command = sender as? UICommand, let property = command.propertyList as? String {
+            if property == "zoomIn" {
+                zoomFactor = imageScrollView.zoomScale
+                newZoomFactor = zoomFactor * zoomInFactor
+            }
+            if property == "zoomOut" {
+                zoomFactor = imageScrollView.zoomScale
+                newZoomFactor = zoomFactor * zoomOutFactor
+            }
+            if property == "resetZoom" {
+                newZoomFactor = 1.0
+            }
+        }
+        if let sender = sender as? NSToolbarItem {
+            switch sender.tag {
+            case 0:
+                zoomFactor = imageScrollView.zoomScale
+                newZoomFactor = zoomFactor * zoomInFactor
+            case 1:
+                zoomFactor = imageScrollView.zoomScale
+                newZoomFactor = zoomFactor * zoomOutFactor
+            case 2:
+                newZoomFactor = 1.0
+            default:
+                break
+            }
+        }
+        UIView.animate(withDuration: 0.2) {
+            self.imageScrollView.zoomScale = newZoomFactor
+            self.scrollViewAdjustViews(self.imageScrollView)
+        }
     }
 
-    // This is called automatically by the Help menu.
-    @IBAction func showHelp(_ sender: Any) {
-        showHelp()
+    // Diagram menu
+
+
+    @IBAction func importPhoto(_ sender: Any) {
+        handleSelectImage()
     }
 
+    @IBAction func importImageFile(_ sender: Any) {
+        handleSelectFile()
+    }
+
+    @IBAction func selectLadder(_ sender: Any) {
+        os_log("selectLadder()", log: .action, type: .info)
+        selectLadder()
+    }
+
+    @IBAction func editLadder(_ sender: Any) {
+        editTemplates()
+    }
 
     @IBAction func getDiagramInfo(_ sender: Any) {
         getDiagramInfo()
@@ -1406,23 +1552,8 @@ final class DiagramViewController: UIViewController {
     @IBAction func sampleDiagrams(_ sender: Any) {
         sampleDiagrams()
     }
-
-    @IBAction func openImage(_ sender: AnyObject) {
-        /* Present open panel. */
-        //        guard let window = self.window else { return }
-        //        let openPanel = NSOpenPanel()
-        //        openPanel.allowedFileTypes = validFileExtensions()
-        //        openPanel.canSelectHiddenExtension = true
-        //        openPanel.beginSheetModal(for: window,
-        //            completionHandler: {
-        //                (result: NSApplication.ModalResponse) -> Void in
-        //                if result == .OK {
-        //                    self.openURL(openPanel.url, addToRecentDocuments: true)
-        //               }
-        //            }
-        //        )
-    }
 }
+#endif
 
 extension DiagramViewController {
     func setupNotifications() {
@@ -1430,13 +1561,8 @@ extension DiagramViewController {
         NotificationCenter.default.addObserver(self, selector: #selector(updatePreferences), name: UserDefaults.didChangeNotification, object: nil)
         NotificationCenter.default.addObserver(self, selector: #selector(didEnterBackground), name: UIScene.didEnterBackgroundNotification, object: nil)
         NotificationCenter.default.addObserver(self, selector: #selector(didDisconnect), name: UIScene.didDisconnectNotification, object: nil)
+        NotificationCenter.default.addObserver(self, selector: #selector(willConnect), name: UIScene.willConnectNotification, object: nil)
         NotificationCenter.default.addObserver(self, selector: #selector(resolveFileConflicts), name: UIDocument.stateChangedNotification, object: nil)
-    }
-
-    func removeNotifications() {
-        NotificationCenter.default.removeObserver(self, name: .didUndoableAction, object: nil)
-        NotificationCenter.default.removeObserver(self, name: UIScene.didEnterBackgroundNotification, object: nil)
-        NotificationCenter.default.removeObserver(self, name: UIScene.didDisconnectNotification, object: nil)
     }
 
     @objc func onDidUndoableAction(_ notification: Notification) {
@@ -1454,12 +1580,19 @@ extension DiagramViewController {
     }
 
     @objc func didEnterBackground() {
-        os_log("didEnterBackground()", log: .action, type: .info)
+        os_log("didEnterBackground() - DiagramViewController", log: .lifeCycle, type: .info)
+    }
+
+    @objc func didEnterForeground() {
+        os_log("didEnterForeground() - DiagramViewController", log: .lifeCycle, type: .info)
     }
 
     @objc func didDisconnect() {
-        os_log("didDisconnect()", log: .lifeCycle, type: .info)
+        os_log("didDisconnect() - DiagramViewController", log: .lifeCycle, type: .info)
+    }
 
+    @objc func willConnect() {
+        os_log("willConnect() - DiagramViewController", log: .lifeCycle, type: .info)
     }
 
     func updateToolbarButtons() {
@@ -1532,12 +1665,15 @@ extension DiagramViewController {
             currentDocument.diagram = diagram
         }
     }
-
 }
 
 extension DiagramViewController: UIDropInteractionDelegate {
+
+    //TODO: At present we can only drag and drop image files.  We would like to drag and drop PDFs and also diagram files.  For PDFs it will probably be necessary to rewrite all the PDF code to use the PDFDocument class, rather than the core foundation PDF functions.  We will plan this for a future update.
     func dropInteraction(_ interaction: UIDropInteraction, canHandle session: UIDropSession) -> Bool {
         let typeIdentifiers = [UTType.image.identifier]
+        // For future implementation, add PDFs, diagram files to drag and drop.
+        //let typeIdentifiers = [UTType.image.identifier, UTType.pdf.identifier]
         return session.hasItemsConforming(toTypeIdentifiers: typeIdentifiers ) && session.items.count == 1
     }
 
@@ -1558,10 +1694,19 @@ extension DiagramViewController: UIDropInteractionDelegate {
 
     func dropInteraction(_ interaction: UIDropInteraction, performDrop session: UIDropSession) {
         // Consume drag items (in this example, of type UIImage).
-        session.loadObjects(ofClass: UIImage.self) { imageItems in
-            if let images = imageItems as? [UIImage] {
-                self.undoablySetDiagramImageAndResetLadder(images.first, imageIsUpscaled: false, transform: .identity, scale: 1.0, contentOffset: .zero)
-                return
+        if session.hasItemsConforming(toTypeIdentifiers: [UTType.image.identifier]) {
+            session.loadObjects(ofClass: UIImage.self) { imageItems in
+                if let images = imageItems as? [UIImage] {
+                    self.undoablySetDiagramImageAndResetLadder(images.first, imageIsUpscaled: false, transform: .identity, scale: 1.0, contentOffset: .zero)
+                }
+            }
+        }
+        else if session.hasItemsConforming(toTypeIdentifiers: [UTType.pdf.identifier]) {
+            print("dropping PDF")
+            _ = session.loadObjects(ofClass: URL.self) { pdfItems in
+                if let url = pdfItems.first {
+                    self.openURL(url: url)
+                }
             }
         }
     }
@@ -1569,6 +1714,7 @@ extension DiagramViewController: UIDropInteractionDelegate {
 
 extension DiagramViewController: NSUserActivityDelegate {
     func userActivityWillSave(_ userActivity: NSUserActivity) {
+
         let currentDocumentURL: String = currentDocument?.fileURL.lastPathComponent ?? ""
         print("currentDocumentURL", currentDocumentURL)
         if documentIsClosing {
@@ -1590,37 +1736,51 @@ extension DiagramViewController {
     func renameDocument(oldURL: URL, newURL: URL) {
         os_log("renameDocument", log: .action, type: .info)
         guard oldURL != newURL else { return }
+
         DispatchQueue.global(qos: .background).async {
             self.currentDocument?.close { success in
                 if success {
-                    let error: NSError? = nil
-                    let fileCoordinator = NSFileCoordinator()
-                    var moveError = error
-                    fileCoordinator.coordinate(writingItemAt: oldURL, options: .forMoving, writingItemAt: newURL, options: .forReplacing, error: &moveError, byAccessor: { newURL1, newURL2 in
-                        let fileManager = FileManager.default
-                        fileCoordinator.item(at: oldURL, willMoveTo: newURL)
-                        if (try? fileManager.moveItem(at: newURL1, to: newURL2)) != nil {
-                            fileCoordinator.item(at: oldURL, didMoveTo: newURL)
-                            self.currentDocument = DiagramDocument(fileURL: newURL)
-                            self.currentDocument?.open { openSuccess in
-                                guard openSuccess else {
-                                    print ("could not open \(newURL)")
-                                    return
-                                }
-                                // Try to delete old document, ignore errors.
-                                if fileManager.isDeletableFile(atPath: oldURL.path) {
-                                    try? fileManager.removeItem(atPath: oldURL.path)
-                                }
-                                DispatchQueue.main.async {
-                                    self.currentDocument?.diagram = self.diagram
-                                    self.setTitle()
-                                }
+                    if let resolvedDirectoryURL = Sandbox.getPersistentDirectoryURL(forFileURL: oldURL) {
+                        let startAccessing = resolvedDirectoryURL.startAccessingSecurityScopedResource()
+                        defer {
+                            if startAccessing {
+                                resolvedDirectoryURL.stopAccessingSecurityScopedResource()
                             }
                         }
-                        if let error = error {
-                            print("error = \(error.localizedDescription)")
-                        }
-                    })
+
+                        let error: NSError? = nil
+                        let fileCoordinator = NSFileCoordinator()
+                        var moveError = error
+                        fileCoordinator.coordinate(writingItemAt: oldURL, options: .forMoving, writingItemAt: newURL, options: .forReplacing, error: &moveError, byAccessor: { newURL1, newURL2 in
+                            let fileManager = FileManager.default
+                            // Below gives sandbox error on mac
+                            //fileCoordinator.item(at: oldURL, willMoveTo: newURL)
+                            if (try? fileManager.moveItem(at: newURL1, to: newURL2)) != nil {
+                                fileCoordinator.item(at: oldURL, didMoveTo: newURL)
+                                DispatchQueue.main.async {
+                                    self.currentDocument = DiagramDocument(fileURL: newURL)
+                                    self.currentDocument?.open { openSuccess in
+                                        guard openSuccess else {
+                                            print ("could not open \(newURL)")
+                                            return
+                                        }
+                                        self.currentDocument?.diagram = self.diagram
+                                        self.setTitle()
+                                        self.currentDocument?.updateChangeCount(.done)
+                                        // Try to delete old document, ignore errors.
+                                        DispatchQueue.global(qos: .background).async {
+                                            if fileManager.isDeletableFile(atPath: oldURL.path) {
+                                                try? fileManager.removeItem(atPath: oldURL.path)
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                            if let error = error {
+                                print("error = \(error.localizedDescription)")
+                            }
+                        })
+                    }
                 }
             }
         }
@@ -1635,3 +1795,102 @@ extension DiagramViewController: UITextFieldDelegate {
     }
 }
 
+// Mac catalyst specific functions
+#if targetEnvironment(macCatalyst)
+extension DiagramViewController {
+    @IBAction func macCloseDocument(_ sender: Any) {
+        closeDocument()
+    }
+
+    @IBAction func macSnapshotDiagram(_ sender: Any) {
+        snapshotDiagram()
+    }
+
+    @IBAction func macShowCalibrateToolbar(_ sender: Any) {
+        mode = .calibrate
+        navigationController?.setToolbarHidden(false, animated: true)
+    }
+
+    @IBAction func macSelectImage(_ sender: Any) {
+        selectImage()
+    }
+
+    @IBAction func addDirectoryToSandbox(_ sender: Any) {
+        let currentDocumentURL: URL?
+        if let _ = sender as? DiagramViewController {
+            currentDocumentURL = getCurrentDirectoryURL()
+        } else  {
+            currentDocumentURL = nil
+        }
+        if let appDelegate = UIApplication.shared.delegate as? AppDelegate {
+            if let plugin = appDelegate.appKitPlugin {
+                if let nsWindow = self.view.window?.nsWindow {
+                    let completion: ((URL)->Void) = { url in
+                        self.storeDirectoryBookmark(from: url)
+                        print("directoryURL", url as Any)
+                    }
+                    plugin.getDirectory(nsWindow: nsWindow, startingURL: currentDocumentURL, completion: completion)
+                }
+            }
+        }
+    }
+
+    private func getCurrentDirectoryURL() -> URL? {
+        if let currentDocument = currentDocument {
+            let url = currentDocument.fileURL.deletingLastPathComponent()
+            return url
+        }
+        return nil
+    }
+
+    @IBAction func clearSandbox(_ sender: Any) {
+        for key in UserDefaults.standard.dictionaryRepresentation().keys {
+            if key.starts(with: "AccessDirectory:") {
+                print(key)
+                UserDefaults.standard.removeObject(forKey: key)
+            }
+        }
+    }
+
+    func storeDirectoryBookmark(from url: URL) {
+        guard url.hasDirectoryPath else {
+            print("URL not a directory")
+            return
+        }
+        #if targetEnvironment(macCatalyst)
+        let bookmarkOptions: URL.BookmarkCreationOptions = [.withSecurityScope]
+        #else
+        let bookmarkOptions: URL.BookmarkCreationOptions = []
+        #endif
+        let key = getAccessDirectoryKey(for: url)
+        if let bookmark = try? url.bookmarkData(options: bookmarkOptions, includingResourceValuesForKeys: nil, relativeTo: nil) {
+            UserDefaults.standard.setValue(bookmark, forKey: key)
+        } else {
+            print("Could not create directory bookmark.")
+        }
+    }
+
+    private func getAccessDirectoryKey(for url: URL) -> String {
+        return "AccessDirectory:\(url.path)"
+    }
+
+
+}
+#endif
+
+// for debugging
+extension DiagramViewController {
+
+    #if DEBUG
+    func debugPrintFonts() {
+        for family: String in UIFont.familyNames
+        {
+            print(family)
+            for names: String in UIFont.fontNames(forFamilyName: family)
+            {
+                print("== \(names)")
+            }
+        }
+    }
+    #endif
+}
