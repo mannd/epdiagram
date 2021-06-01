@@ -25,11 +25,11 @@
 * [[./pgs/overview.html][Overview]]
 Use *EP Diagram* to create ladder diagrams.
 * [[./pgs/quick_start.org][Quick start]]
-Create your first ladder diagram
+Create your first ladder diagram.
 * [[./pgs/manual.html][EP Diagram manual]]
 Detailed and advanced use of *EP Diagram*.
 * [[./pgs/issues.html][Known issues/bugs/limitations]]
-Some glitches we're still working on.
+Some improvements we're still working on.
 * [[./pgs/misc.html][Fine print]]
 Miscellaneous stuff.
 

@@ -14,41 +14,55 @@ struct Onboarding: View {
     @Binding var onboardText: String
     var url: URL? = nil
 
-    let step1Text = isRunningOnMac() ? "Single tap or click on ladder to create a vertical mark or to attach a cursor to a mark." : "Single tap ladder to create a vertical mark or to attach a cursor to a mark."
-    let step2Text = isRunningOnMac() ? "Repeat single taps or clicks on mark or cursor to toggle the anchor point which affects how the mark can move." : "Repeat single taps on mark or cursor to toggle the anchor point which affects how the mark can move."
-    let step3Text = "Drag the cursor to move the mark.  You can also drag in a region to create a new mark."
-    let step4Text = isRunningOnMac() ? "Double tap or double click to delete a mark.  Double tap or click again to create a new mark." : "Double tap to delete a mark.  Double tap again to create a new mark."
+    let step1Text = isRunningOnMac() ? "Click on the ladder to create a mark." : "Single tap ladder to create a mark."
+    let step2Text = isRunningOnMac() ? "Click on the mark to toggle the movement anchor point." : "Tap on the mark to toggle the movement anchor point."
+    let step3Text = "Drag to move the mark."
+    let step4Text = isRunningOnMac() ? "Double-click to delete the mark." : "Double tap to delete the mark."
+    let step5Text = "Select EP Diagram Help from the menu and read the Quick Start section."
+    let step5EndText = "Click the Done button to begin using EP Diagram."
 
     var body: some View {
         TabView {
             VStack {
                 Text(step1Text)
                     .padding()
-                Image("single-tap-1").resizable()
+                Image(isRunningOnMac() ? "single-tap-1-mac" : "single-tap-1").resizable()
                     .aspectRatio(contentMode: .fit)
 
             }
             VStack {
                 Text(step2Text)
                     .padding()
-                Image("single-tap-2").resizable()
+                Image(isRunningOnMac() ? "single-tap-2-mac" : "single-tap-2").resizable()
                     .aspectRatio(contentMode: .fit)
 
             }
             VStack {
                 Text(step3Text)
                     .padding()
-                Image("move-mark").resizable()
+                Image(isRunningOnMac() ? "move-mark-mac" : "move-mark").resizable()
                     .aspectRatio(contentMode: .fit)
 
             }
             VStack {
                 Text(step4Text)
                     .padding()
-                Image("double-tap").resizable()
+                Image(isRunningOnMac() ? "double-tap-mac" : "double-tap").resizable()
                     .aspectRatio(contentMode: .fit)
             }
+            #if targetEnvironment(macCatalyst)
+            VStack {
+                Text(step5Text)
+                    .padding()
+                Image("help-menu").resizable()
+                    .aspectRatio(contentMode: .fit)
+                Text(step5EndText)
+                    .padding()
+            }
+            #else
             WebView(text: $onboardText, url: url)
+            #endif
+
         }
         .font(.largeTitle)
         .multilineTextAlignment(.center)

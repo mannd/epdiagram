@@ -22,6 +22,8 @@ of Mhd Hejaz.  No license or copyright information available.
 
 Some public domain clipart used in the figures was obtained from
 (https://www.clipartmax.com).
+The mouse cursor icon was created by iconpacks from the Noun Project and
+is licensed under a Creative Commons license.  See [here](https://thenounproject.com/term/mouse-cursor/2280971/).
 
 Some sample ECGs are licensed by
 [CC BY 3](https://creativecommons.org/licenses/by/3.0/) and
