@@ -19,28 +19,27 @@
 #+HTML_HEAD: <link rel="stylesheet" type="text/css" href="./org.css"/>
 
 
-* Load images using the Diagram | Import Image menu item
+* Click the /Import image/ toolbar button to add an image to your diagram
 - You can load images from your photos or from any image file, including PDF files.
 
-* Scroll and zoom the image
-- Use the usual trackpad gestures, or click on the zoom buttons in the toolbar.
+* Pan and zoom the image
+- Pan and pinch to zoom using a trackpad, or click on the zoom buttons in the toolbar.
 
-* Tap the /Connect/ button to connect marks
-- Tap or click pairs of marks, or tap a mark and an adjacent region to connect marks.
+* Click the /Connect/ button to connect marks
+- Click pairs of marks, or click a mark and an adjacent region to connect marks.
 
-* Tap the /Edit/ button to edit the ladder
-- Tap, click, or drag to select regions and marks.  Then right click or two-finger press on the ladder to open a menu with options to style marks, copy and paste, generate rhythms, and much more.  Also try a right click or two finger press on the ladder labels and image while in Edit mode.
+* Click the /Edit/ button to edit the ladder
+- Click or click and drag to select regions and marks.  Then Control-click the ladder to open a menu with options to style marks, copy and paste, generate rhythms, and much more.  Also try Control-clicking the ladder labels and image while in Edit mode.
 
-* Use the /Calibrate/ button to calibrate your diagram
-- Afterwards intervals and conduction times will appear on your diagram (make sure these are set to show up in /Preferences/.
+* Click the /Calibrate/ button to calibrate your diagram
+- After calibration, intervals and conduction times will appear on your diagram.
 
-* Autosave and the /Undo/ and /Redo/ buttons are your friends
-- All changes are automatically saved.  Use the /Undo/ and /Redo/ toolbar buttons to revert and restore your changes.  Tap the /Close Diagram/ button at the top right of the toolbar to close your diagram.
+* Autosave and the /Undo/ and /Redo/ buttons
+- All changes are automatically saved.  Click the /Undo/ and /Redo/ toolbar buttons to revert and restore your changes.  Click the /Close Diagram/ button at the top right of the toolbar to close your diagram.
 
-* Play around and experiment.
-- There are a lot of features to explore.  Use the /Help/ menu item to learn new features.
+* Play around and experiment
+- There are a lot of features to explore.  Use the /EP Diagram Help/ menu item to learn new features.
 
-* That's it!
-- Hit the back button at the top left to begin using *EP Diagram*.
+* That's it! Click the Done button to begin using *EP Diagram*
 
 
