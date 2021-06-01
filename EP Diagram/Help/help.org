@@ -17,6 +17,10 @@
 #+HTML_HEAD: <style  type="text/css">:root { color-scheme: light dark; }</style>
 #+HTML_HEAD: <link rel="stylesheet" type="text/css" href="./org.css"/>
 * Overview
+
+#+CAPTION: Early ladder diagram (Sir Thomas Lewis, 1920)
+[[./img/early_ladder.png]]
+
 - *EP Diagram* creates /ladder diagrams/, a classic form of ECG analysis that depicts the path of the cardiac impulse through anatomic regions of the heart.  Ladder diagrams are useful to understand cardiac arrhythmias such as heart block, reentrant tachycardias, and premature complexes.  Traditionally ladder diagrams are roughly sketched on paper, but with *EP Diagram* you can draw them on your iPad, and, unlike a paper sketch, these diagrams can scroll and zoom, can measure intervals and conduction times automatically, and can be saved as publication quality images.
 
 - *EP Diagram* has a lot of built-in features that simplify the creation of ladder diagrams, and these features are described in this help manual.  The next section, [[*Quick start][Quick start]], contains some tips on how to get started.  However a good way to learn the program is to create some sample ladder diagrams, then use your finger to tap, double-tap, and drag on the ladder to see what happens.  Try out the various buttons.  Experiment!  Most of the functions are intuitive, and if you want more in-depth instruction, have a look at the rest of this help manual.  
@@ -83,7 +87,7 @@ Ladder diagram terminology is not standardized.  Here is a glossary of the terms
 | Link                 | a connection between marks causing them to move together          |
 | Impulse origin       | where conduction starts, indicated by a symbol                    |
 | Block                | where conduction blocks, indicated by a symbol                    |
-| Interval             | time in msec between adjacent marks, i.e. cycle length            |
+| Interval             | time in msec between adjacent marks
 | Conduction time      | time in msec between earliest and latest points of a mark         |
 | Caliper              | used to calibrate the diagram to allow measurements               |
 | Conduction direction | optional arrow symbol indicating direction of electrical flow     |
@@ -127,7 +131,7 @@ If the image is out of kilter (this may happen with photos you take), long press
 There is a small red horizontal bar between the image and the ladder.  Move this up or down to adjust the relative proportions of the image and the ladder on the screen.
 
 *** PDF files
-Load PDF files like any other image file.  However, some PDF files contain multiple pages.  You can change the page by performing a long press on the image and selected the *PDF* menu item.  A toolbar will appear at the bottom which allows you to change pages.  Note that once a multipage PDF diagram is closed, only the page shown when the diagram is closed will be saved with the diagram.  This is because *EP Diagram* only saves one image at a time.  In order to change pages after reopening a diagram based on a multipage PDF file, it will be necessary to reload the PDF file.
+Load PDF files like any other image file.  However, some PDF files contain multiple pages.  You can change the page by performing a long press on the image and selecting the *PDF* menu item.  A toolbar will appear at the bottom which allows you to change pages.  Note that once a multipage PDF diagram is closed, only the page shown when the diagram is closed will be saved with the diagram.  This is because *EP Diagram* only saves one image at a time.  In order to change pages after reopening a diagram based on a multipage PDF file, it will be necessary to reload the PDF file.
 
 ** Ladders
 *** Default ladder
@@ -181,7 +185,7 @@ To delete a mark, simply double tap it.  You can delete multiple marks, or all t
 *** Linked marks
 Once marks are linked, moving one linked mark will also move the marks it is linked to.  In order to unlink marks, you can use the *Undo* button, or delete and then re-add a linked mark, or use edit mode.
 *** Block and impulse origin
-In the course of add, deleting, and moving marks, if the app preferences are set to /show impulse origin/ or /show block/, the app will try to determine automatically where the impulse origin is and where block is, depending on the direction of the marks and their linking, and will show this with symbols as seen below.  You can also manually set impulse origin and block using edit mode.
+In the course of adding, deleting, and moving marks, if the app preferences are set to /show impulse origin/ or /show block/, the app will try to determine automatically where the impulse origin is and where block is, depending on the direction of the marks and their linking, and will show this with symbols as seen below.  You can also manually set impulse origin and block using edit mode.
 
 #+CAPTION: Impulse origin and block
 [[./img/impulse_origin_block.png]]
@@ -223,9 +227,9 @@ Choose between a solid, dashed, or dotted mark line style.
 *** Emphasis
 Marks can have a normal or bold emphasis.  Bold emphasis thickens the line of the mark.
 *** Impulse origin
-Impulse origin is normally automatic, but you can override this and place the impulse origin proximally or distally, or have no impulse origin annotated.
+Impulse origin is normally automatically determined, but you can override this and place the impulse origin proximally or distally, or have no impulse origin annotated.
 *** Block
-Block is also normally automatically determined, but you can also override this manually.
+Block is normally automatically determined, but you can also override this manually.
 *** Straighten marks
 Makes selected marks vertical.
 *** Slant marks

@@ -25,7 +25,7 @@
 ** Introduction
 Ladder diagrams date back at least a century and have been used to analyze arrhythmias and as teaching tools for almost as long as there has been electrocardiography.  For a history and examples of ladder diagrams, see the [[file:misc.org::*References][references]].  *EP Diagram* is a full-featured ladder drawing program.  It allows you not only to draw ladders, but also to customize their appearance to a fine degree.  As such it is a complex program and it can take a while to learn all its features.  However, it has an extensive undo/redo facility, so feel free to experiment.
 ** Don't panic! (Undo, Redo, and Autosave)
-Practically any change you make while using this app can be reversed by tapping the *Undo* button at the bottom of the screen.  If you change your mind you can revert the undo action by tapping the *Redo* button.  Every change you make is automatically saved.  There is no need to explicity save your diagram files; the app does this in the background.
+Practically any change you make while using this app can be reversed by tapping the *Undo* button on the toolbar at the top of the diagram window (or type *Command-Z*).  If you change your mind you can revert the undo action by tapping the *Redo* button (or *Shift-Command-Z*).  Every change you make is automatically saved.  There is no need to explicity save your diagram files; the app does this in the background.
 ** Terminology
 Ladder diagram terminology is not standardized.  Here is a glossary of the terms used in this manual.
 |----------------------+-------------------------------------------------------------------|
@@ -42,7 +42,7 @@ Ladder diagram terminology is not standardized.  Here is a glossary of the terms
 | Link                 | a connection between marks causing them to move together          |
 | Impulse origin       | where conduction starts, indicated by a symbol                    |
 | Block                | where conduction blocks, indicated by a symbol                    |
-| Interval             | time in msec between adjacent marks, i.e. cycle length            |
+| Interval             | time in msec between adjacent marks
 | Conduction time      | time in msec between earliest and latest points of a mark         |
 | Caliper              | used to calibrate the diagram to allow measurements               |
 | Conduction direction | optional arrow symbol indicating direction of electrical flow     |
@@ -58,13 +58,15 @@ Ladder diagram terminology is not standardized.  Here is a glossary of the terms
 | ⌘+  | Zoom in                 |
 | ⌘-  | Zoom out                |
 | ⌘0  | Reset zoom              |
+| ⌘Z  | Undo                    |
+| ⇧⌘Z | Redo                    |
 | ⌘S  | Save screenshot         |
 | ⌘Q  | Quit app                |
 ** Diagrams
 *** Creating and opening diagrams
 EP Diagram is a file based app, meaning the diagrams you create are stored on your Mac or on iCloud, and you can copy them, rename them, or delete them outside of the *EP Diagram* app.  The diagram files you create have a file extension of /diagram/ and a specific icon and file format.  When you open the app, the initial screen is a file browser that allows you to create a new diagram or open a previously created diagram.  Use the *File | New* menu item to bring up this file selection screen at any time.  Using this it is possible to have multiple diagram windows open at once.
 
-#+CAPTION: EP Diagram files
+#+CAPTION: File dialog
 [[../gfx/epdiagram_files.png]]
 
 Tap *New Document* to create a diagram file, or tap on one of your previously created diagrams to open it.
@@ -87,7 +89,7 @@ A blank diagram has no ECG image and has a default ladder without marks.  You wi
 *** Renaming a diagram
 New diagrams have a generic file name.  You can rename the diagram in the Finder, or rename it from the app using the main menu item *File | Rename Diagram*.
 *** Closing a diagram
-There is no need to specifically save changes you make to a diagram.  Every change you make is automatically saved.  You close a diagram by simply tapping the *Close* button at the upper right hand corner of the screen, or use the *File | Close Diagram* menu item.  Note however that undo and redo information is /not/ restored when you close and reopen a diagram.  Thus if you have a diagram that you want to "play around with" but don't want to lose its original form, it might be best to duplicate that diagram using Finder, and work on a copy.  
+There is no need to specifically save changes you make to a diagram.  Every change you make is automatically saved.  You close a diagram by simply tapping the *Close* button at the upper right hand corner of the screen, or use the *File | Close Diagram* menu item, or type *Command-W*.  Note however that undo and redo information is /not/ restored when you close and reopen a diagram.  Thus if you have a diagram that you want to "play around with" but don't want to lose its original form, it might be best to duplicate that diagram using Finder, and work on a copy.  
 ** Images
 *** Adding an image
 **** Image types
@@ -102,12 +104,12 @@ Use the *Diagram | Import Image* menu item or toolbar button to import an image 
 **** Scrolling and zooming
 Using a trackpad you can pinch to zoom and use your finger to scroll the image or use a mouse to scroll the image and the zoom toolbar buttons to zoom.  You can also use the keyboard shortcuts *Command-+*, *Command--*, and *Command-0* (zero) to zoom in and out or reset the image size.  If you have created a ladder, you will see the ladder will zoom and scroll appropriately at the same time.  In *EP Diagram* all zooming and scrolling is done via the image, not via the ladder.
 **** Rotating the image
-If the image is out of kilter, Two finger press or right click on the image and then select in the menu that appears *Rotate*.  Use the buttons at the bottom of the screen to rotate the image.  Tap *Reset* to bring the image back to its original orientation.
+If the image is out of kilter, two finger press or right click on the image and then select in the menu that appears *Rotate*.  Use the buttons at the bottom of the screen to rotate the image.  Tap *Reset* to bring the image back to its original orientation.
 **** Adjust the size of the image versus the ladder
 There is a small red horizontal bar between the image and the ladder.  Move this up or down to adjust the relative proportions of the image and the ladder on the screen.
 
 *** PDF files
-Load PDF files like any other image file.  However, some PDF files contain multiple pages.  You can change the page by performing a long press on the image and selected the *PDF* menu item.  A toolbar will appear at the bottom which allows you to change pages.  Note that once a multipage PDF diagram is closed, only the page shown when the diagram is closed will be saved with the diagram.  This is because *EP Diagram* only saves one image at a time.  In order to change pages after reopening a diagram based on a multipage PDF file, it will be necessary to reload the PDF file.
+Load PDF files like any other image file.  However, some PDF files contain multiple pages.  You can change the page by performing a two-finger press (mouse right-click) on the image and selecting the *PDF* menu item.  A toolbar will appear at the bottom which allows you to change pages.  Note that once a multipage PDF diagram is closed, only the page shown when the diagram is closed will be saved with the diagram.  This is because *EP Diagram* only saves one image at a time.  In order to change pages after reopening a diagram based on a multipage PDF file, it will be necessary to reload the PDF file.
 
 ** Ladders
 *** Default ladder
@@ -130,7 +132,7 @@ It's a bit tiresome to tap to create a mark, and then tap again just to make the
 [[../gfx/adding_V_marks.png]]
 
 *** Dragging to create marks
-As described later, it is easy using connect mode to connect the marks we have drawn, but we'll stay in normal mode for now and accomplish the same feat.  Drag from the first mark in the A region to the first mark in the V region.  A new mark will be created, and when it is close to the other two marks, they will be highlighted in a purple color, meaning they are close enough to the new mark to be linked.  When you finish the drag through the AV region, the new mark (if it is close enough) will snap into the correct position, linking the two regions with conduction through the AV region.
+As described later, it is easy using connect mode to connect the marks we have drawn, but we'll stay in normal mode for now and accomplish the same feat.  Drag from the first mark in the A region to the first mark in the V region.  A new mark will be created, and when it is close to the other two marks, they will be highlighted in a different color, meaning they are close enough to the new mark to be linked.  When you finish the drag through the AV region, the new mark (if it is close enough) will snap into the correct position, linking the two regions with conduction through the AV region.
 
 #+CAPTION: Dragging to create a mark in the AV region
 [[../gfx/drag_in_AV.png]]
@@ -161,7 +163,7 @@ To delete a mark, simply double tap it.  You can delete multiple marks, or all t
 *** Linked marks
 Once marks are linked, moving one linked mark will also move the marks it is linked to.  In order to unlink marks, you can use the *Undo* button, or delete and then re-add a linked mark, or use edit mode.
 *** Block and impulse origin
-In the course of add, deleting, and moving marks, if the app preferences are set to /show impulse origin/ or /show block/, the app will try to determine automatically where the impulse origin is and where block is, depending on the direction of the marks and their linking, and will show this with symbols.  You can also manually set impulse origin and block using edit mode.
+In the course of adding, deleting, and moving marks, if the app preferences are set to /show impulse origin/ or /show block/, the app will try to determine automatically where the impulse origin is and where block is, depending on the direction of the marks and their linking, and will show this with symbols.  You can also manually set impulse origin and block using edit mode.
 
 ** Calibration and measurements
 *** Calibrating the diagram
@@ -200,9 +202,9 @@ Choose between a solid, dashed, or dotted mark line style.
 *** Emphasis
 Marks can have a normal or bold emphasis.  Bold emphasis thickens the line of the mark.
 *** Impulse origin
-Impulse origin is normally automatic, but you can override this and place the impulse origin proximally or distally, or have no impulse origin annotated.
+Impulse origin is normally automatically determined, but you can override this and place the impulse origin proximally or distally, or have no impulse origin annotated.
 *** Block
-Block is also normally automatically determined, but you can also override this manually.
+Block is normally automatically determined, but you can also override this manually.
 *** Straighten marks
 Makes selected marks vertical.
 *** Slant marks

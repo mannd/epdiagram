@@ -51,7 +51,7 @@
 ** Edit the diagram
 - Tap the *Edit* button to unlock techniques for sprucing up your diagram.
 - Tap to select and deselect marks or regions, or drag to select zones.
-- Two-finger press or right-click if you are using a mouse the ladder after selecting marks or regions to show a menu that can be used to customize the appearance of the marks, including their style, emphasis, block, impulse origin, etc.  You can also add groups of marks and even periods of regular rhythm or fibrillation to zones and regions using this menu.  
+- Two-finger press (right-click if you are using a mouse) on the ladder after selecting marks or regions to show a menu that can be used to customize the appearance of the marks, including their style, emphasis, block, impulse origin, etc.  You can also add groups of marks and even periods of regular rhythm or fibrillation to zones and regions using this menu.  
 ** Undo/Redo
 - Practically anything you do can be undone or redone and these changes are automatically saved.  You /do not/ need to specifically save your diagram.  All changes are saved as they are made automatically.
 ** Other features are located in the main menu
@@ -65,4 +65,4 @@
 ** Close the diagram
 Use the *Close* button at the upper right of the screen to close the diagram and return to the *Files* screen.  Diagrams are automatically saved as you work with them.
 ** Those are the basics
-If you want more detail, read the next section, which is a detailed manual for the app.
+If you want more detail, read the [[./manual.html][EP Diagram manual]].
