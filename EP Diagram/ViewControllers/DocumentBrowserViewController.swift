@@ -42,7 +42,7 @@ class DocumentBrowserViewController: UIDocumentBrowserViewController {
             if let documentURL = info?[DiagramViewController.restorationDocumentURLKey] as? URL {
                 if let presentationHandler = browserDelegate.inportHandler {
                     presentationHandler(documentURL, nil)
-                openDocument(url: documentURL)
+                    openDocument(url: documentURL)
                 }
             }
         }
@@ -83,7 +83,8 @@ class DocumentBrowserViewController: UIDocumentBrowserViewController {
             print("document is not currently open")
             return
         }
-        closeDiagramController {
+        closeDiagramController { [weak self] in
+            guard let self = self else { return }
             if var persistentDirectoryURL = Sandbox.getPersistentDirectoryURL(forFileURL: url) {
                 let didStartAccessing = persistentDirectoryURL.startAccessingSecurityScopedResource()
                 defer {
@@ -111,7 +112,8 @@ class DocumentBrowserViewController: UIDocumentBrowserViewController {
     private func openDocumentURL(_ url: URL) {
         os_log("openDocumentURL(_:) %s", url.path)
         let document = DiagramDocument(fileURL: url)
-        document.open { openSuccess in
+        document.open { [weak self] openSuccess in
+            guard let self = self else { return }
             guard openSuccess else {
                 print ("could not open \(url)")
                 return
@@ -154,7 +156,8 @@ class DocumentBrowserViewController: UIDocumentBrowserViewController {
     }
 
     func closeDiagramController(completion: (()->Void)? = nil) {
-        let compositeClosure = {
+        let compositeClosure = { [weak self] in
+            guard let self = self else { return }
             self.closeCurrentDocument()
             self.editingDocument = false
             completion?()

@@ -33,6 +33,7 @@ final class DiagramViewController: UIViewController {
     @IBOutlet var cursorView: CursorView!
     @IBOutlet var blackView: BlackView!
     var hamburgerTableViewController: HamburgerTableViewController? // We get this view via its embed segue!
+
     var separatorView: SeparatorView?
 
     // Constants
@@ -624,6 +625,7 @@ final class DiagramViewController: UIViewController {
     }
 
     deinit {
+
         print("*****DiagramViewController deinit()******")
     }
 
@@ -1007,6 +1009,10 @@ final class DiagramViewController: UIViewController {
 
     @objc func closeDocument() {
         os_log("closeDocument()", log: .action, type: .info)
+        if let separatorView = separatorView {
+            separatorView.removeFromSuperview()
+            self.separatorView = nil
+        }
         view.endEditing(true)
         documentIsClosing = true
         currentDocument?.undoManager.removeAllActions()
@@ -1365,7 +1371,7 @@ final class DiagramViewController: UIViewController {
         os_log("resetViews() - ViewController", log: .action, type: .info)
         // Add back in separatorView after rotation.
         if (separatorView == nil) {
-            separatorView = HorizontalSeparatorView.addSeparatorBetweenViews(separatorType: .horizontal, primaryView: imageScrollView, secondaryView: ladderView, parentView: self.view)
+            separatorView = HorizontalSeparatorView.addSeparatorBetweenViews(primaryView: imageScrollView, secondaryView: ladderView, parentView: self.view)
             separatorView?.cursorViewDelegate = cursorView
         }
         self.ladderView.resetSize(setActiveRegion: setActiveRegion, width: imageView.frame.width)
@@ -1580,7 +1586,6 @@ extension DiagramViewController {
     }
 
     func updateUndoRedoButtons() {
-        // DispatchQueue here forces UI to finish up its tasks before performing below on the main thread.
         DispatchQueue.main.async {
             self.undoButton.isEnabled = self.currentDocument?.undoManager?.canUndo ?? false
             self.redoButton.isEnabled = self.currentDocument?.undoManager?.canRedo ?? false

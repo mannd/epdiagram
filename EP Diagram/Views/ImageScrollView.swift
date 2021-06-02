@@ -21,10 +21,13 @@ class ImageScrollView: UIScrollView {
             alpha = isActivated ? 1.0 : 0.4
         }
     }
+
+    deinit {
+        print("*****ImageScrollView deinit()******")
+    }
 }
 
 extension ImageScrollView {
-    
     /// Shows a "long press" menu that handles image rotation
     /// - Parameter gestureRecognizer: the long press gesture recognizer, containing the position of the press
     @IBAction func showImageMenu(_ gestureRecognizer: UILongPressGestureRecognizer) {

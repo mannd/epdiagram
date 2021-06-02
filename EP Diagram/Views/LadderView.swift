@@ -164,13 +164,14 @@ final class LadderView: ScaledView {
     private var regionUnitHeight: CGFloat = 0
 
     weak var cursorViewDelegate: CursorViewDelegate! // Note IUO.
-    var currentDocument: DiagramDocument?
+    weak var currentDocument: DiagramDocument?
 
     override var canBecomeFirstResponder: Bool { return true }
 
     // MARK: - init
 
     required init?(coder aDecoder: NSCoder) {
+        print("****LadderView init*****")
         os_log("init(coder:) - LadderView", log: .viewCycle, type: .info)
         super.init(coder: aDecoder)
         setupView()
@@ -180,6 +181,10 @@ final class LadderView: ScaledView {
     override init(frame: CGRect) {
         super.init(frame: frame)
         setupView()
+    }
+
+    deinit {
+        print("*****LadderView deinit()******")
     }
 
     func reset() {

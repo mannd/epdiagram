@@ -205,6 +205,7 @@ struct PreferencesView: View {
                 }
             }
             .navigationBarTitle("Preferences", displayMode: .inline)
+            .navigationBarHidden(isRunningOnMac() ? true : false)
         }
         .navigationViewStyle(StackNavigationViewStyle())
     }

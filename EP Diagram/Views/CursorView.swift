@@ -65,7 +65,7 @@ final class CursorView: ScaledView {
     var imageIsLocked = false
 
     weak var ladderViewDelegate: LadderViewDelegate! // Note IUO.
-    var currentDocument: DiagramDocument?
+    weak var currentDocument: DiagramDocument?
 
     // MARK: - init
 
@@ -78,6 +78,10 @@ final class CursorView: ScaledView {
     override init(frame: CGRect) {
         super.init(frame: frame)
         setupView()
+    }
+
+    deinit {
+        print("*****CursorView deinit()******")
     }
 
     private func setupView() {
