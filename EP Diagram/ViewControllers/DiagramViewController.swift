@@ -460,7 +460,8 @@ final class DiagramViewController: UIViewController {
         ladderView.calibration = diagram.calibration
         ladderView.ladder = diagram.ladder
 
-        imageView.image = scaleImageForImageView(diagram.image)
+        imageView.image = diagram.image
+//        imageView.image = scaleImageForImageView(diagram.image)
         ladderView.viewMaxWidth = imageView.frame.width
 
         imageScrollView.delegate = self
