@@ -27,8 +27,8 @@ protocol OnConstraintUpdateProtocol {
 
 class SeparatorView: UIView {
     var startConstraint: NSLayoutConstraint?  // vertical position of separator
-    var primaryView: UIView  // view above
-    var secondaryView: UIView // view below
+    weak var primaryView: UIView?  // view above
+    weak var secondaryView: UIView? // view below
 
     // Separator view needs to communicate with the cursor view, thus...
     weak var cursorViewDelegate: CursorViewDelegate?
@@ -62,6 +62,7 @@ class SeparatorView: UIView {
     }
 
     init(primaryView: UIView, secondaryView: UIView) {
+        print("****separatorView init****")
         self.primaryView = primaryView
         self.secondaryView = secondaryView
         super.init(frame: CGRect.zero)
@@ -110,7 +111,7 @@ class SeparatorView: UIView {
         updateListener?.updateConstraintOnBasisOfTouch(touch: touch)
         // redraw views.
         let ladderView = secondaryView as? LadderView
-        let caliperMaxY = primaryView.frame.height
+        let caliperMaxY = primaryView?.frame.height ?? 0
         ladderView?.resetSize()
         ladderView?.caliperMaxY = caliperMaxY
         ladderView?.refresh()
@@ -144,6 +145,11 @@ final class HorizontalSeparatorView: SeparatorView, OnConstraintUpdateProtocol {
         fatalError("init(coder:) has not been implemented")
     }
 
+    // FIXME: This is never called!
+    deinit {
+        print("*****SeparatorView deinit()******")
+    }
+
     override func setupParentViewConstraints(parentView: UIView) {
         // We handle parent view differently, so this method is void
     }
@@ -152,8 +158,8 @@ final class HorizontalSeparatorView: SeparatorView, OnConstraintUpdateProtocol {
         self.heightAnchor.constraint(equalToConstant: totalSize).isActive = true
         self.superview?.leadingAnchor.constraint(equalTo: self.leadingAnchor).isActive = true
         self.superview?.trailingAnchor.constraint(equalTo: self.trailingAnchor).isActive = true
-        primaryView.bottomAnchor.constraint(equalTo: self.topAnchor, constant: margin + visibleSize / 2).isActive = true
-        secondaryView.topAnchor.constraint(equalTo: self.bottomAnchor, constant: -(margin + visibleSize / 2)).isActive = true
+        primaryView?.bottomAnchor.constraint(equalTo: self.topAnchor, constant: margin + visibleSize / 2).isActive = true
+        secondaryView?.topAnchor.constraint(equalTo: self.bottomAnchor, constant: -(margin + visibleSize / 2)).isActive = true
         startConstraint = self.topAnchor.constraint(equalTo: self.superview!.topAnchor, constant: 0)
     }
 
@@ -171,11 +177,12 @@ final class HorizontalSeparatorView: SeparatorView, OnConstraintUpdateProtocol {
     }
 
     func updateConstraintOnBasisOfTouch(touch: UITouch) {
+        guard let primaryView = primaryView, let secondaryView = secondaryView else { return }
         // calculate where separator should be moved to
         var y: CGFloat = self.oldPosition + touch.location(in: self.superview).y - self.firstTouch!.y
         // make sure the views above and below are not too small
-        y = max(y, self.primaryView.frame.origin.y + minSize - margin)
-        y = min(y, self.secondaryView.frame.origin.y + self.secondaryView.frame.size.height - (margin + minSize))
+        y = max(y, primaryView.frame.origin.y + minSize - margin)
+        y = min(y, secondaryView.frame.origin.y + secondaryView.frame.size.height - (margin + minSize))
 
         // set constraint
         self.startConstraint!.constant = y
@@ -202,26 +209,26 @@ final class VerticalSeparatorView: SeparatorView, OnConstraintUpdateProtocol {
        }
 
        override func setupParentViewConstraints(parentView: UIView) {
-           parentView.topAnchor.constraint(equalTo: primaryView.topAnchor).isActive = true
-           parentView.topAnchor.constraint(equalTo: secondaryView.topAnchor).isActive = true
-           parentView.bottomAnchor.constraint(equalTo: primaryView.bottomAnchor).isActive = true
-           parentView.leadingAnchor.constraint(equalTo: secondaryView.leadingAnchor).isActive = true
-           parentView.bottomAnchor.constraint(equalTo: secondaryView.bottomAnchor).isActive = true
-           parentView.leadingAnchor.constraint(equalTo: primaryView.leadingAnchor).isActive = true
-           let width = secondaryView.widthAnchor.constraint(equalTo: primaryView.widthAnchor)
-           width.priority = .defaultLow
-           width.isActive = true
-           parentView.trailingAnchor.constraint(equalTo: secondaryView.trailingAnchor).isActive = true
+//           parentView.topAnchor.constraint(equalTo: primaryView.topAnchor).isActive = true
+//           parentView.topAnchor.constraint(equalTo: secondaryView.topAnchor).isActive = true
+//           parentView.bottomAnchor.constraint(equalTo: primaryView.bottomAnchor).isActive = true
+//           parentView.leadingAnchor.constraint(equalTo: secondaryView.leadingAnchor).isActive = true
+//           parentView.bottomAnchor.constraint(equalTo: secondaryView.bottomAnchor).isActive = true
+//           parentView.leadingAnchor.constraint(equalTo: primaryView.leadingAnchor).isActive = true
+//           let width = secondaryView.widthAnchor.constraint(equalTo: primaryView.widthAnchor)
+//           width.priority = .defaultLow
+//           width.isActive = true
+//           parentView.trailingAnchor.constraint(equalTo: secondaryView.trailingAnchor).isActive = true
        }
 
        override func setupSeparatorConstraints() {
-           self.widthAnchor.constraint(equalToConstant: totalSize).isActive = true
-           self.superview?.topAnchor.constraint(equalTo: self.topAnchor).isActive = true
-           self.superview?.bottomAnchor.constraint(equalTo: self.bottomAnchor).isActive = true
-           primaryView.trailingAnchor.constraint(equalTo: self.leadingAnchor, constant:  margin + visibleSize / 2).isActive = true
-           secondaryView.leadingAnchor.constraint(equalTo: self.trailingAnchor, constant: -(margin + visibleSize / 2)).isActive = true
-
-           startConstraint = self.leadingAnchor.constraint(equalTo: self.superview!.leadingAnchor, constant: 0)
+//           self.widthAnchor.constraint(equalToConstant: totalSize).isActive = true
+//           self.superview?.topAnchor.constraint(equalTo: self.topAnchor).isActive = true
+//           self.superview?.bottomAnchor.constraint(equalTo: self.bottomAnchor).isActive = true
+//           primaryView.trailingAnchor.constraint(equalTo: self.leadingAnchor, constant:  margin + visibleSize / 2).isActive = true
+//           secondaryView.leadingAnchor.constraint(equalTo: self.trailingAnchor, constant: -(margin + visibleSize / 2)).isActive = true
+//
+//           startConstraint = self.leadingAnchor.constraint(equalTo: self.superview!.leadingAnchor, constant: 0)
        }
 
        override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
@@ -238,15 +245,15 @@ final class VerticalSeparatorView: SeparatorView, OnConstraintUpdateProtocol {
        }
 
        func updateConstraintOnBasisOfTouch(touch: UITouch) {
-           // calculate where separator should be moved to
-           var x: CGFloat = self.oldPosition + touch.location(in: self.superview).x - self.firstTouch!.x
-
-           // make sure the views above and below are not too small
-           x = max(x, self.primaryView.frame.origin.x + minSize - margin)
-           x = min(x, self.secondaryView.frame.origin.x + self.secondaryView.frame.size.width - (margin + minSize))
-
-           // set constraint
-           self.startConstraint!.constant = x
+//           // calculate where separator should be moved to
+//           var x: CGFloat = self.oldPosition + touch.location(in: self.superview).x - self.firstTouch!.x
+//
+//           // make sure the views above and below are not too small
+//           x = max(x, self.primaryView.frame.origin.x + minSize - margin)
+//           x = min(x, self.secondaryView.frame.origin.x + self.secondaryView.frame.size.width - (margin + minSize))
+//
+//           // set constraint
+//           self.startConstraint!.constant = x
        }
 
        override func draw(_ rect: CGRect) {

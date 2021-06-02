@@ -182,6 +182,10 @@ final class LadderView: ScaledView {
         setupView()
     }
 
+    deinit {
+        print("*****LadderView deinit()******")
+    }
+
     func reset() {
         os_log("reset() - LadderView", log: .action, type: .info)
     }

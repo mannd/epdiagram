@@ -24,6 +24,10 @@ final class BlackView: UIView, UIGestureRecognizerDelegate {
         self.addGestureRecognizer(panGestureRecognizer)
     }
 
+    deinit {
+        print("*****BlackView deinit()******")
+    }
+
     @objc func gestureTap() {
         if let delegate = delegate, delegate.hamburgerMenuIsOpen {
             delegate.hideHamburgerMenu()

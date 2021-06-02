@@ -21,6 +21,10 @@ class ImageScrollView: UIScrollView {
             alpha = isActivated ? 1.0 : 0.4
         }
     }
+
+    deinit {
+        print("*****ImageScrollView deinit()******")
+    }
 }
 
 extension ImageScrollView {

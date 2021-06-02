@@ -80,6 +80,10 @@ final class CursorView: ScaledView {
         setupView()
     }
 
+    deinit {
+        print("*****CursorView deinit()******")
+    }
+
     private func setupView() {
         self.isOpaque = false // CursorView is mostly transparent, so let iOS know.
         self.layer.masksToBounds = true // Draw a border around the view.

@@ -33,6 +33,7 @@ final class DiagramViewController: UIViewController {
     @IBOutlet var cursorView: CursorView!
     @IBOutlet var blackView: BlackView!
     var hamburgerTableViewController: HamburgerTableViewController? // We get this view via its embed segue!
+
     var separatorView: SeparatorView?
 
     // Constants
@@ -460,8 +461,7 @@ final class DiagramViewController: UIViewController {
         ladderView.calibration = diagram.calibration
         ladderView.ladder = diagram.ladder
 
-        imageView.image = diagram.image
-//        imageView.image = scaleImageForImageView(diagram.image)
+        imageView.image = scaleImageForImageView(diagram.image)
         ladderView.viewMaxWidth = imageView.frame.width
 
         imageScrollView.delegate = self
@@ -625,6 +625,7 @@ final class DiagramViewController: UIViewController {
     }
 
     deinit {
+
         print("*****DiagramViewController deinit()******")
     }
 
@@ -1008,6 +1009,10 @@ final class DiagramViewController: UIViewController {
 
     @objc func closeDocument() {
         os_log("closeDocument()", log: .action, type: .info)
+        if let separatorView = separatorView {
+            separatorView.removeFromSuperview()
+            self.separatorView = nil
+        }
         view.endEditing(true)
         documentIsClosing = true
         currentDocument?.undoManager.removeAllActions()
