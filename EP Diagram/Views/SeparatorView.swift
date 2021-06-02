@@ -141,19 +141,6 @@ final class HorizontalSeparatorView: SeparatorView, OnConstraintUpdateProtocol {
         print("*****SeparatorView deinit()******")
     }
 
-    override func setupParentViewConstraints(parentView: UIView) {
-        guard let primaryView = primaryView, let secondaryView = secondaryView else { return }
-        parentView.leadingAnchor.constraint(equalTo: primaryView.leadingAnchor).isActive = true
-        parentView.trailingAnchor.constraint(equalTo: primaryView.trailingAnchor).isActive = true
-        parentView.leadingAnchor.constraint(equalTo: secondaryView.leadingAnchor).isActive = true
-        parentView.trailingAnchor.constraint(equalTo: secondaryView.trailingAnchor).isActive = true
-        parentView.topAnchor.constraint(equalTo: primaryView.topAnchor).isActive = true
-        let height = secondaryView.heightAnchor.constraint(equalTo: primaryView.heightAnchor)
-        height.priority = .defaultLow
-        height.isActive = true
-        parentView.bottomAnchor.constraint(equalTo: secondaryView.bottomAnchor).isActive = true
-    }
-
     override func setupSeparatorConstraints() {
         self.heightAnchor.constraint(equalToConstant: totalSize).isActive = true
         self.superview?.leadingAnchor.constraint(equalTo: self.leadingAnchor).isActive = true
