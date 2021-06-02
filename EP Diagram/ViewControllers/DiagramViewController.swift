@@ -735,7 +735,11 @@ final class DiagramViewController: UIViewController {
 
     func showConnectToolbar() {
         if connectToolbarButtons == nil {
+            #if targetEnvironment(macCatalyst)
+            let labelText = L("Click pairs of marks to connect them")
+            #else
             let labelText = isIPad() ? L("Tap pairs of marks to connect them") : L("Tap pairs of marks")
+            #endif
             let prompt = makePrompt(text: labelText)
             let doneButton = UIBarButtonItem(barButtonSystemItem: .done, target: self, action: #selector(cancelConnectMode))
             #if targetEnvironment(macCatalyst)
@@ -783,7 +787,7 @@ final class DiagramViewController: UIViewController {
         currentDocument?.undoManager?.beginUndoGrouping()
         ladderView.unlinkAllMarks()
         let labelText = UITextField()
-        labelText.text = L("Tap to paste marks")
+        labelText.text = isRunningOnMac() ? L("Click to paste marks") : L("Tap to paste marks")
         let doneButton = UIButton(type: .close)
         doneButton.addTarget(self, action: #selector(closeCopyMarksToolbar(_:)), for: .touchUpInside)
         let stackView = UIStackView(frame: toolbar.frame)
@@ -801,7 +805,11 @@ final class DiagramViewController: UIViewController {
         currentDocument?.undoManager.beginUndoGrouping()
         ladderView.unlinkAllMarks()
         let labelText = UITextField()
-        labelText.text = isIPad() ? L("Tap joining mark once for single copy, double tab for multiple copies") : L("Single or double tap joining mark")
+        #if targetEnvironment(macCatalyst)
+        labelText.text = L("Click joining mark once for a single copy, double-click for multiple copies")
+        #else
+        labelText.text = isIPad() ? L("Tap joining mark once for single copy, double tap for multiple copies") : L("Single or double tap joining mark")
+        #endif
         let doneButton = UIButton(type: .close)
         doneButton.addTarget(self, action: #selector(closeRepeatPatternToolbar(_:)), for: .touchUpInside)
         let stackView = UIStackView(frame: toolbar.frame)

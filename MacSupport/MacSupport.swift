@@ -59,7 +59,7 @@ class MacSupport: NSObject, SharedAppKitProtocol {
 
     @objc
     func windowClosing() {
-        print("$$$$window closing")
+        print("window closing")
     }
 
     @objc func getDirectory(nsWindow: AnyObject, startingURL: URL?, completion: ((URL)->Void)?) {
@@ -67,7 +67,7 @@ class MacSupport: NSObject, SharedAppKitProtocol {
         let panel = NSOpenPanel()
         panel.prompt = ("Select")
         if let startingURL = startingURL  {
-            panel.message = "EP Diagram needs permission to access the \(startingURL.lastPathComponent) folder.  It should be already selected and all you need to do is tap the Select button."
+            panel.message = "EP Diagram needs permission to access the \(startingURL.lastPathComponent) folder.  It should be already selected and all you need to do is click the Select button."
         } else {
             panel.message = "Please select a folder to add to the App Sandbox"
         }

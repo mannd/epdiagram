@@ -62,7 +62,7 @@ extension LadderError: LocalizedError {
         case .illegalJoiningMark:
             return L("Mark doesn't qualify as joining mark.")
         case .didNotTapAMark:
-            return L("You must tap a mark.")
+            return L("You must select a mark.")
         case .onlyOneSelectedMarkInRegion:
             return L("There is only one selected mark in this region.")
         case .markNotAtEitherEndOfSelection:
