@@ -51,6 +51,7 @@ final class Ladder: NSObject, Codable {
     private var registry: [UUID: Mark] = [:] // marks are registered for quick lookup
 
     init(template: LadderTemplate) {
+        print("*****Ladder init*****")
         os_log("init ladder from template", log: .action, type: .info)
         self.template = template
         name = template.name
@@ -60,6 +61,10 @@ final class Ladder: NSObject, Codable {
             let region = Region(template: regionTemplate)
             regions.append(region)
         }
+    }
+
+    deinit {
+        print("****Ladder deinit*****")
     }
 
     // MARK: - Mark registration, indexing

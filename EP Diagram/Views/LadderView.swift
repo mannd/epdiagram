@@ -164,7 +164,7 @@ final class LadderView: ScaledView {
     private var regionUnitHeight: CGFloat = 0
 
     weak var cursorViewDelegate: CursorViewDelegate! // Note IUO.
-    var currentDocument: DiagramDocument?
+    weak var currentDocument: DiagramDocument?
 
     override var canBecomeFirstResponder: Bool { return true }
 

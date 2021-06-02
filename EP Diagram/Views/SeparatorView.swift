@@ -10,10 +10,6 @@ import UIKit
 
 // After https://gist.github.com/ElegyD/c5af8892de04fa8a33e26fb919972d6a
 // Only horizonal type separator used in EP Diagram.
-enum SeparatorType {
-    case horizontal
-    case vertical
-}
 
 let totalSize: CGFloat = 18
 let visibleSize: CGFloat = 8
@@ -21,7 +17,7 @@ let margin: CGFloat = (totalSize - visibleSize) / 2
 let minSize: CGFloat = 100
 let indicatorSize: CGFloat = 36  // indicator in middle of separator
 
-protocol OnConstraintUpdateProtocol {
+protocol OnConstraintUpdateProtocol: AnyObject {
     func updateConstraintOnBasisOfTouch(touch: UITouch)
 }
 
@@ -36,7 +32,7 @@ class SeparatorView: UIView {
     var oldPosition: CGFloat = 0  // position of separator before gesture started
     var firstTouch: CGPoint? // point where drag started
 
-    var updateListener: OnConstraintUpdateProtocol?
+    weak var updateListener: OnConstraintUpdateProtocol?
 
     var showIndicator: Bool = true
     var allowTouches: Bool = true {
@@ -46,14 +42,9 @@ class SeparatorView: UIView {
     }
 
     @discardableResult
-    internal static func addSeparatorBetweenViews(separatorType: SeparatorType, primaryView: UIView, secondaryView: UIView, parentView: UIView) -> SeparatorView{
-        var separator: SeparatorView
-        if separatorType == .horizontal {
-            separator = HorizontalSeparatorView(primaryView: primaryView, secondaryView: secondaryView)
-        }
-        else {
-            separator = VerticalSeparatorView(primaryView: primaryView, secondaryView: secondaryView)
-        }
+    internal static func addSeparatorBetweenViews(primaryView: UIView, secondaryView: UIView, parentView: UIView) -> SeparatorView{
+        let separator = HorizontalSeparatorView(primaryView: primaryView, secondaryView: secondaryView)
+
         separator.setupParentViewConstraints(parentView: parentView)
         parentView.addSubview(separator)
         separator.setupSeparatorConstraints()
@@ -151,7 +142,16 @@ final class HorizontalSeparatorView: SeparatorView, OnConstraintUpdateProtocol {
     }
 
     override func setupParentViewConstraints(parentView: UIView) {
-        // We handle parent view differently, so this method is void
+        guard let primaryView = primaryView, let secondaryView = secondaryView else { return }
+        parentView.leadingAnchor.constraint(equalTo: primaryView.leadingAnchor).isActive = true
+        parentView.trailingAnchor.constraint(equalTo: primaryView.trailingAnchor).isActive = true
+        parentView.leadingAnchor.constraint(equalTo: secondaryView.leadingAnchor).isActive = true
+        parentView.trailingAnchor.constraint(equalTo: secondaryView.trailingAnchor).isActive = true
+        parentView.topAnchor.constraint(equalTo: primaryView.topAnchor).isActive = true
+        let height = secondaryView.heightAnchor.constraint(equalTo: primaryView.heightAnchor)
+        height.priority = .defaultLow
+        height.isActive = true
+        parentView.bottomAnchor.constraint(equalTo: secondaryView.bottomAnchor).isActive = true
     }
 
     override func setupSeparatorConstraints() {
@@ -195,72 +195,4 @@ final class HorizontalSeparatorView: SeparatorView, OnConstraintUpdateProtocol {
         super.drawSeparator(separatorRect, with: .clear)
         super.drawIndicator(indicatorRect, with: .systemRed)
     }
-}
-
-// Vertical separator not used in EP Diagram.
-final class VerticalSeparatorView: SeparatorView, OnConstraintUpdateProtocol {
-    override init(primaryView: UIView, secondaryView: UIView) {
-           super.init(primaryView: primaryView, secondaryView: secondaryView)
-           updateListener = self
-       }
-
-       required init?(coder aDecoder: NSCoder) {
-           fatalError("init(coder:) has not been implemented")
-       }
-
-       override func setupParentViewConstraints(parentView: UIView) {
-//           parentView.topAnchor.constraint(equalTo: primaryView.topAnchor).isActive = true
-//           parentView.topAnchor.constraint(equalTo: secondaryView.topAnchor).isActive = true
-//           parentView.bottomAnchor.constraint(equalTo: primaryView.bottomAnchor).isActive = true
-//           parentView.leadingAnchor.constraint(equalTo: secondaryView.leadingAnchor).isActive = true
-//           parentView.bottomAnchor.constraint(equalTo: secondaryView.bottomAnchor).isActive = true
-//           parentView.leadingAnchor.constraint(equalTo: primaryView.leadingAnchor).isActive = true
-//           let width = secondaryView.widthAnchor.constraint(equalTo: primaryView.widthAnchor)
-//           width.priority = .defaultLow
-//           width.isActive = true
-//           parentView.trailingAnchor.constraint(equalTo: secondaryView.trailingAnchor).isActive = true
-       }
-
-       override func setupSeparatorConstraints() {
-//           self.widthAnchor.constraint(equalToConstant: totalSize).isActive = true
-//           self.superview?.topAnchor.constraint(equalTo: self.topAnchor).isActive = true
-//           self.superview?.bottomAnchor.constraint(equalTo: self.bottomAnchor).isActive = true
-//           primaryView.trailingAnchor.constraint(equalTo: self.leadingAnchor, constant:  margin + visibleSize / 2).isActive = true
-//           secondaryView.leadingAnchor.constraint(equalTo: self.trailingAnchor, constant: -(margin + visibleSize / 2)).isActive = true
-//
-//           startConstraint = self.leadingAnchor.constraint(equalTo: self.superview!.leadingAnchor, constant: 0)
-       }
-
-       override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
-           self.oldPosition = self.frame.origin.x
-           super.touchesBegan(touches, with: event)
-       }
-
-       override func touchesMoved(_ touches: Set<UITouch>, with event: UIEvent?) {
-           super.touchesMoved(touches, with: event)
-       }
-
-       override func touchesEnded(_ touches: Set<UITouch>, with event: UIEvent?) {
-           super.touchesEnded(touches, with: event)
-       }
-
-       func updateConstraintOnBasisOfTouch(touch: UITouch) {
-//           // calculate where separator should be moved to
-//           var x: CGFloat = self.oldPosition + touch.location(in: self.superview).x - self.firstTouch!.x
-//
-//           // make sure the views above and below are not too small
-//           x = max(x, self.primaryView.frame.origin.x + minSize - margin)
-//           x = min(x, self.secondaryView.frame.origin.x + self.secondaryView.frame.size.width - (margin + minSize))
-//
-//           // set constraint
-//           self.startConstraint!.constant = x
-       }
-
-       override func draw(_ rect: CGRect) {
-           let separatorRect = CGRect(x: margin, y: 0, width: visibleSize, height: self.bounds.size.height)
-           let indicatorRect = CGRect(x: margin + (visibleSize - (visibleSize / 4)) / 2, y: (self.bounds.size.height - indicatorSize) / 2, width: visibleSize / 4, height: indicatorSize)
-           super.drawSeparator(separatorRect, with: .white)
-           super.drawIndicator(indicatorRect, with: .lightGray)
-       }
-
 }

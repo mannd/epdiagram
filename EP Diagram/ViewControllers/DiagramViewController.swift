@@ -1371,7 +1371,7 @@ final class DiagramViewController: UIViewController {
         os_log("resetViews() - ViewController", log: .action, type: .info)
         // Add back in separatorView after rotation.
         if (separatorView == nil) {
-            separatorView = HorizontalSeparatorView.addSeparatorBetweenViews(separatorType: .horizontal, primaryView: imageScrollView, secondaryView: ladderView, parentView: self.view)
+            separatorView = HorizontalSeparatorView.addSeparatorBetweenViews(primaryView: imageScrollView, secondaryView: ladderView, parentView: self.view)
             separatorView?.cursorViewDelegate = cursorView
         }
         self.ladderView.resetSize(setActiveRegion: setActiveRegion, width: imageView.frame.width)

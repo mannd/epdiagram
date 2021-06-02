@@ -14,6 +14,10 @@ final class DiagramDocument: UIDocument {
 
     var diagram = Diagram.blankDiagram()
 
+    deinit {
+        print("*****DiagramDocument deinited*****")
+    }
+
     func name() -> String {
         return fileURL.deletingPathExtension().lastPathComponent
     }

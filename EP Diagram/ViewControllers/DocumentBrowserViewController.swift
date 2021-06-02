@@ -42,7 +42,7 @@ class DocumentBrowserViewController: UIDocumentBrowserViewController {
             if let documentURL = info?[DiagramViewController.restorationDocumentURLKey] as? URL {
                 if let presentationHandler = browserDelegate.inportHandler {
                     presentationHandler(documentURL, nil)
-                openDocument(url: documentURL)
+                    openDocument(url: documentURL)
                 }
             }
         }
