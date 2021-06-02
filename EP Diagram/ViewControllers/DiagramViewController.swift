@@ -1586,7 +1586,6 @@ extension DiagramViewController {
     }
 
     func updateUndoRedoButtons() {
-        // DispatchQueue here forces UI to finish up its tasks before performing below on the main thread.
         DispatchQueue.main.async {
             self.undoButton.isEnabled = self.currentDocument?.undoManager?.canUndo ?? false
             self.redoButton.isEnabled = self.currentDocument?.undoManager?.canRedo ?? false

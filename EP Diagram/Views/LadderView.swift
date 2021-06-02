@@ -171,6 +171,7 @@ final class LadderView: ScaledView {
     // MARK: - init
 
     required init?(coder aDecoder: NSCoder) {
+        print("****LadderView init*****")
         os_log("init(coder:) - LadderView", log: .viewCycle, type: .info)
         super.init(coder: aDecoder)
         setupView()
