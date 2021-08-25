@@ -1022,7 +1022,7 @@ final class DiagramViewController: UIViewController {
     @objc func snapshotDiagram() {
         os_log("snapshotDiagram()", log: .action, type: .info)
         checkPhotoLibraryStatus()
-    }
+    }           
 
     func handleSnapshotDiagram() {
         let topRenderer = UIGraphicsImageRenderer(size: imageScrollView.bounds.size)
