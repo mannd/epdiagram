@@ -1566,6 +1566,7 @@ final class LadderView: ScaledView {
 
         drawPivots(forMark: mark, segment: Segment(proximal: p1, distal: p2), context: context)
         drawConductionTime(forMark: mark, segment: segment, context: context)
+        drawLabel(forMark: mark, segment: segment, context: context)
         drawIntervals(region: region, context: context)
 
         drawProxEnd(forMark: mark, segment: segment, context: context)
@@ -1903,7 +1904,7 @@ final class LadderView: ScaledView {
     func drawConductionTime(forMark mark: Mark, segment: Segment, context: CGContext) {
         guard let calibration = calibration, calibration.isCalibrated, showConductionTimes else { return }
         let normalizedSegment = mark.segment.normalized()
-            let segment = self.transformToScaledViewSegment(regionSegment: normalizedSegment, region: self.ladder.region(ofMark: mark))
+        let segment = self.transformToScaledViewSegment(regionSegment: normalizedSegment, region: self.ladder.region(ofMark: mark))
         let value = lround(conductionTime(fromSegment: segment))
         if hideZeroCT && value < 1 {
             return
@@ -1918,6 +1919,22 @@ final class LadderView: ScaledView {
         let size = text.size(withAttributes: measurementTextAttributes)
         // Center the origin.
         origin = CGPoint(x: origin.x + 10, y: origin.y - size.height / 2)
+        let textRect = CGRect(origin: origin, size: size)
+        if textRect.minX > leftMargin {
+            text.draw(in: textRect, withAttributes: measurementTextAttributes)
+            context.strokePath()
+        }
+    }
+
+    func drawLabel(forMark mark: Mark, segment: Segment, context: CGContext) {
+        // guard showLabels else { return }
+        let normalizedSegment = mark.segment.normalized()
+        let segment = self.transformToScaledViewSegment(regionSegment: normalizedSegment, region: self.ladder.region(ofMark: mark))
+        let text = mark.label
+        var origin = segment.midpoint
+        let size = text.size(withAttributes: measurementTextAttributes)
+        // Center the origin.
+        origin = CGPoint(x: origin.x - 10 - size.width, y: origin.y - size.height / 2)
         let textRect = CGRect(origin: origin, size: size)
         if textRect.minX > leftMargin {
             text.draw(in: textRect, withAttributes: measurementTextAttributes)
