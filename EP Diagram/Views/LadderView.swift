@@ -42,6 +42,8 @@ final class LadderView: ScaledView {
     let measurementTextFontSize: CGFloat = 14.0
     let labelTextFontSize: CGFloat = 18.0
     let descriptionTextFontSize: CGFloat = 12.0
+    /// Affects how far mark label and conduction time are away from the mark.
+    let labelOffset: CGFloat = 12.0
 
     lazy var measurementTextAttributes: [NSAttributedString.Key: Any] = {
         let textFont = UIFont.systemFont(ofSize: measurementTextFontSize, weight: UIFont.Weight.medium)
@@ -84,6 +86,7 @@ final class LadderView: ScaledView {
     var showArrows = false
     var showIntervals = true
     var showConductionTimes = true
+    var showMarkLabels = false
     var showMarkText = true
     var snapMarks = true
     var defaultMarkStyle = Mark.Style.solid {
@@ -1918,7 +1921,7 @@ final class LadderView: ScaledView {
         var origin = segment.midpoint
         let size = text.size(withAttributes: measurementTextAttributes)
         // Center the origin.
-        origin = CGPoint(x: origin.x + 10, y: origin.y - size.height / 2)
+        origin = CGPoint(x: origin.x + labelOffset, y: origin.y - size.height / 2)
         let textRect = CGRect(origin: origin, size: size)
         if textRect.minX > leftMargin {
             text.draw(in: textRect, withAttributes: measurementTextAttributes)
@@ -1927,14 +1930,14 @@ final class LadderView: ScaledView {
     }
 
     func drawLabel(forMark mark: Mark, segment: Segment, context: CGContext) {
-        // guard showLabels else { return }
+        guard showMarkLabels else { return }
         let normalizedSegment = mark.segment.normalized()
         let segment = self.transformToScaledViewSegment(regionSegment: normalizedSegment, region: self.ladder.region(ofMark: mark))
         let text = mark.label
         var origin = segment.midpoint
         let size = text.size(withAttributes: measurementTextAttributes)
         // Center the origin.
-        origin = CGPoint(x: origin.x - 10 - size.width, y: origin.y - size.height / 2)
+        origin = CGPoint(x: origin.x - labelOffset - size.width, y: origin.y - size.height / 2)
         let textRect = CGRect(origin: origin, size: size)
         if textRect.minX > leftMargin {
             text.draw(in: textRect, withAttributes: measurementTextAttributes)

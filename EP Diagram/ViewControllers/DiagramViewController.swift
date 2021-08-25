@@ -1624,6 +1624,7 @@ extension DiagramViewController {
         ladderView.showArrows = UserDefaults.standard.bool(forKey: Preferences.showArrowsKey)
         ladderView.showIntervals = UserDefaults.standard.bool(forKey: Preferences.showIntervalsKey)
         ladderView.showConductionTimes = UserDefaults.standard.bool(forKey: Preferences.showConductionTimesKey)
+        ladderView.showMarkLabels = UserDefaults.standard.bool(forKey: Preferences.showMarkLabelsKey)
         ladderView.snapMarks = UserDefaults.standard.bool(forKey: Preferences.snapMarksKey)
         ladderView.defaultMarkStyle = Mark.Style(rawValue: UserDefaults.standard.integer(forKey: Preferences.markStyleKey)) ?? .solid
         ladderView.showLabelDescription = TextVisibility(rawValue: UserDefaults.standard.integer(forKey: Preferences.labelDescriptionVisibilityKey)) ?? .invisible

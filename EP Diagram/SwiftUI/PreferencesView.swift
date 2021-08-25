@@ -16,6 +16,7 @@ struct PreferencesView: View {
     @AppStorage(Preferences.showIntervalsKey) var showIntervals: Bool = Preferences.showIntervals
     @AppStorage(Preferences.showArrowsKey) var showArrows: Bool = Preferences.showArrows
     @AppStorage(Preferences.showConductionTimesKey) var showConductionTimes: Bool = Preferences.showConductionTimes
+    @AppStorage(Preferences.showMarkLabelsKey) var showMarkLabels: Bool = Preferences.showMarkLabels
     @AppStorage(Preferences.snapMarksKey) var snapMarks: Bool = Preferences.snapMarks
     @AppStorage(Preferences.markStyleKey) var markStyle = Preferences.markStyle
     @AppStorage(Preferences.labelDescriptionVisibilityKey) var labelDescriptionVisibility = Preferences.labelDescriptionVisibility
@@ -94,6 +95,9 @@ struct PreferencesView: View {
                         }
                         Toggle(isOn: $hideZeroCT) {
                             Text("Hide conduction times if zero")
+                        }
+                        Toggle(isOn: $showMarkLabels) {
+                            Text("Show mark labels")
                         }
                         Toggle(isOn: $showMarkers) {
                             Text("Show markers")
