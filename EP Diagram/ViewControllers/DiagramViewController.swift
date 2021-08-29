@@ -252,6 +252,9 @@ final class DiagramViewController: UIViewController {
     lazy var dottedAction = UIAction(title: L("Dotted")) { action in
         self.ladderView.setSelectedMarksStyle(style: .dotted)
     }
+    lazy var labelMarkAction = UIAction(title: L("Edit label"), image: UIImage(systemName: "pencil")) { action in
+        self.ladderView.setSelectedMarksLabel()
+    }
     lazy var styleMenu = UIMenu(title: L("Style..."), image: UIImage(systemName: "scribble"), children: [self.solidAction, self.dashedAction, self.dottedAction])
 
     lazy var boldEmphasisAction = UIAction(title: L("Bold")) { action in
@@ -430,7 +433,7 @@ final class DiagramViewController: UIViewController {
         self.ladderView.removeRegion()
     }
 
-    lazy var markMenu = UIMenu(title: L("Mark Menu"), children: [self.styleMenu, self.emphasisMenu, self.impulseOriginMenu, self.blockMenu, self.straightenMenu, self.slantMenu, self.adjustYMenu, self.moveAction, self.adjustCLAction, self.rhythmAction, self.repeatCLMenu, self.copyMarksAction, self.repeatPatternAction, self.unlinkAction, self.snapAction, self.deleteAction])
+    lazy var markMenu = UIMenu(title: L("Mark Menu"), children: [self.styleMenu, self.emphasisMenu, self.impulseOriginMenu, self.blockMenu, self.labelMarkAction, self.straightenMenu, self.slantMenu, self.adjustYMenu, self.moveAction, self.adjustCLAction, self.rhythmAction, self.repeatCLMenu, self.copyMarksAction, self.repeatPatternAction, self.unlinkAction, self.snapAction, self.deleteAction])
 
     lazy var labelMenu = [self.regionStyleMenu, self.editLabelAction, self.addRegionMenu, self.removeRegionAction, self.regionHeightMenu, self.adjustLeftMarginAction]
 
@@ -1161,7 +1164,7 @@ final class DiagramViewController: UIViewController {
 
     func editLabel() {
         guard let selectedRegion = ladderView.selectedLabelRegion() else { return }
-        UserAlert.showEditLabelAlert(viewController: self, region: selectedRegion, handler: { newLabel, newDescription in
+        UserAlert.showEditRegionLabelAlert(viewController: self, region: selectedRegion, handler: { newLabel, newDescription in
             self.ladderView.undoablySetLabel(newLabel, description: newDescription, forRegion: selectedRegion)
         })
     }

@@ -77,7 +77,7 @@ enum UserAlert {
         vc.present(alert, animated: true)
     }
 
-    static func showEditLabelAlert(viewController vc: UIViewController, region: Region, handler: ((String, String) -> Void)?) {
+    static func showEditRegionLabelAlert(viewController vc: UIViewController, region: Region, handler: ((String, String) -> Void)?) {
         let alert = UIAlertController(title: L("Edit Region Label"), message: L("Give a name and optional description to this region"), preferredStyle: .alert)
         alert.addAction(UIAlertAction(title: L("Cancel"), style: .cancel, handler: nil))
         alert.addTextField { textField in
@@ -100,5 +100,27 @@ enum UserAlert {
         })
         vc.present(alert, animated: true)
     }
+
+    static func showEditMarkLabelAlert(viewController vc: UIViewController, defaultLabel: String, handler: ((String) -> Void)?) {
+        let alert = UIAlertController(title: L("Edit Mark Label(s)"), message: L("Give a name to the mark(s)."), preferredStyle: .alert)
+        alert.addAction(UIAlertAction(title: L("Cancel"), style: .cancel, handler: nil))
+        alert.addTextField { textField in
+            textField.placeholder = L("Mark name")
+            textField.text = defaultLabel
+            textField.clearButtonMode = .always
+        }
+        alert.addAction(UIAlertAction(title: L("Save"), style: .default) { action in
+            if let name = alert.textFields?.first?.text {
+                if let handler = handler {
+                    handler(name)
+                }
+                else {
+                    P("mark label name = \(name)")
+                }
+            }
+        })
+        vc.present(alert, animated: true)
+    }
+
 
 }

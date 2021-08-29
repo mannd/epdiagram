@@ -88,7 +88,7 @@ final class Mark: Codable {
 
     struct MarkLabel: DefaultCodableStrategy {
         typealias DefaultValue = String
-        static var defaultValue: DefaultValue { return "test1" }
+        static var defaultValue: DefaultValue { return "" }
     }
 
     /// Create a mark from a segment.

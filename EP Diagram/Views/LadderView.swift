@@ -1280,6 +1280,29 @@ final class LadderView: ScaledView {
         currentDocument?.undoManager.endUndoGrouping()
     }
 
+    func setSelectedMarksLabel() {
+        guard let vc = findViewController() as? DiagramViewController else { return }
+        let selectedMarks: [Mark] = ladder.allMarksWithMode(.selected)
+        let marklabels = selectedMarks.map { $0.label }
+        let dominantLabel = dominantStringOfStringArray(strings: marklabels) ?? ""
+        UserAlert.showEditMarkLabelAlert(viewController: vc, defaultLabel: dominantLabel) { [weak self]  label in
+            guard let self = self else { return }
+            self.currentDocument?.undoManager.beginUndoGrouping()
+            selectedMarks.forEach { mark in self.undoablySetMarkLabel(mark: mark, label: label) }
+            self.currentDocument?.undoManager.endUndoGrouping()
+            self.refresh()
+        }
+    }
+
+    func undoablySetMarkLabel(mark: Mark, label: String) {
+        let originalLabel = mark.label
+        currentDocument?.undoManager.registerUndo(withTarget: self) { target in
+            target.undoablySetMarkLabel(mark: mark, label: originalLabel)
+        }
+        NotificationCenter.default.post(name: .didUndoableAction, object: nil)
+        mark.label = label
+    }
+
     func setSelectedMarksBlockSetting(value: Mark.Endpoint) {
         let selectedMarks = ladder.allMarksWithMode(.selected)
         currentDocument?.undoManager.beginUndoGrouping()
@@ -1351,6 +1374,19 @@ final class LadderView: ScaledView {
         for value in Mark.Style.allCases {
             if regions.filter({ $0.style == value }).count == count {
                 return value
+            }
+        }
+        return nil
+    }
+
+    /// If a string array contains identical strings, returns that string, otherwise returns nil.
+    /// - Parameter strings: strings to be tested
+    /// - Returns: Either the "dominant" string or nil
+    func dominantStringOfStringArray(strings: [String]) -> String? {
+        let count = strings.count
+        for string in strings {
+            if strings.filter({ $0 == string }).count == count {
+                return string
             }
         }
         return nil
