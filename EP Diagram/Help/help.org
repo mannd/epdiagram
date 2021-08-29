@@ -230,6 +230,8 @@ Marks can have a normal or bold emphasis.  Bold emphasis thickens the line of th
 Impulse origin is normally automatically determined, but you can override this and place the impulse origin proximally or distally, or have no impulse origin annotated.
 *** Block
 Block is normally automatically determined, but you can also override this manually.
+*** Edit label
+You can add or edit a label for individual or groups of marks.  The label appears to the left of the mark.
 *** Straighten marks
 Makes selected marks vertical.
 *** Slant marks

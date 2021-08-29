@@ -42,6 +42,8 @@ final class LadderView: ScaledView {
     let measurementTextFontSize: CGFloat = 14.0
     let labelTextFontSize: CGFloat = 18.0
     let descriptionTextFontSize: CGFloat = 12.0
+    /// Affects how far mark label and conduction time are away from the mark.
+    let labelOffset: CGFloat = 12.0
 
     lazy var measurementTextAttributes: [NSAttributedString.Key: Any] = {
         let textFont = UIFont.systemFont(ofSize: measurementTextFontSize, weight: UIFont.Weight.medium)
@@ -84,6 +86,7 @@ final class LadderView: ScaledView {
     var showArrows = false
     var showIntervals = true
     var showConductionTimes = true
+    var showMarkLabels = false
     var showMarkText = true
     var snapMarks = true
     var defaultMarkStyle = Mark.Style.solid {
@@ -1277,6 +1280,29 @@ final class LadderView: ScaledView {
         currentDocument?.undoManager.endUndoGrouping()
     }
 
+    func setSelectedMarksLabel() {
+        guard let vc = findViewController() as? DiagramViewController else { return }
+        let selectedMarks: [Mark] = ladder.allMarksWithMode(.selected)
+        let marklabels = selectedMarks.map { $0.label }
+        let dominantLabel = dominantStringOfStringArray(strings: marklabels) ?? ""
+        UserAlert.showEditMarkLabelAlert(viewController: vc, defaultLabel: dominantLabel) { [weak self]  label in
+            guard let self = self else { return }
+            self.currentDocument?.undoManager.beginUndoGrouping()
+            selectedMarks.forEach { mark in self.undoablySetMarkLabel(mark: mark, label: label) }
+            self.currentDocument?.undoManager.endUndoGrouping()
+            self.refresh()
+        }
+    }
+
+    func undoablySetMarkLabel(mark: Mark, label: String) {
+        let originalLabel = mark.label
+        currentDocument?.undoManager.registerUndo(withTarget: self) { target in
+            target.undoablySetMarkLabel(mark: mark, label: originalLabel)
+        }
+        NotificationCenter.default.post(name: .didUndoableAction, object: nil)
+        mark.label = label
+    }
+
     func setSelectedMarksBlockSetting(value: Mark.Endpoint) {
         let selectedMarks = ladder.allMarksWithMode(.selected)
         currentDocument?.undoManager.beginUndoGrouping()
@@ -1348,6 +1374,19 @@ final class LadderView: ScaledView {
         for value in Mark.Style.allCases {
             if regions.filter({ $0.style == value }).count == count {
                 return value
+            }
+        }
+        return nil
+    }
+
+    /// If a string array contains identical strings, returns that string, otherwise returns nil.
+    /// - Parameter strings: strings to be tested
+    /// - Returns: Either the "dominant" string or nil
+    func dominantStringOfStringArray(strings: [String]) -> String? {
+        let count = strings.count
+        for string in strings {
+            if strings.filter({ $0 == string }).count == count {
+                return string
             }
         }
         return nil
@@ -1566,6 +1605,7 @@ final class LadderView: ScaledView {
 
         drawPivots(forMark: mark, segment: Segment(proximal: p1, distal: p2), context: context)
         drawConductionTime(forMark: mark, segment: segment, context: context)
+        drawLabel(forMark: mark, segment: segment, context: context)
         drawIntervals(region: region, context: context)
 
         drawProxEnd(forMark: mark, segment: segment, context: context)
@@ -1903,7 +1943,7 @@ final class LadderView: ScaledView {
     func drawConductionTime(forMark mark: Mark, segment: Segment, context: CGContext) {
         guard let calibration = calibration, calibration.isCalibrated, showConductionTimes else { return }
         let normalizedSegment = mark.segment.normalized()
-            let segment = self.transformToScaledViewSegment(regionSegment: normalizedSegment, region: self.ladder.region(ofMark: mark))
+        let segment = self.transformToScaledViewSegment(regionSegment: normalizedSegment, region: self.ladder.region(ofMark: mark))
         let value = lround(conductionTime(fromSegment: segment))
         if hideZeroCT && value < 1 {
             return
@@ -1917,7 +1957,23 @@ final class LadderView: ScaledView {
         var origin = segment.midpoint
         let size = text.size(withAttributes: measurementTextAttributes)
         // Center the origin.
-        origin = CGPoint(x: origin.x + 10, y: origin.y - size.height / 2)
+        origin = CGPoint(x: origin.x + labelOffset, y: origin.y - size.height / 2)
+        let textRect = CGRect(origin: origin, size: size)
+        if textRect.minX > leftMargin {
+            text.draw(in: textRect, withAttributes: measurementTextAttributes)
+            context.strokePath()
+        }
+    }
+
+    func drawLabel(forMark mark: Mark, segment: Segment, context: CGContext) {
+        guard showMarkLabels else { return }
+        let normalizedSegment = mark.segment.normalized()
+        let segment = self.transformToScaledViewSegment(regionSegment: normalizedSegment, region: self.ladder.region(ofMark: mark))
+        let text = mark.label
+        var origin = segment.midpoint
+        let size = text.size(withAttributes: measurementTextAttributes)
+        // Center the origin.
+        origin = CGPoint(x: origin.x - labelOffset - size.width, y: origin.y - size.height / 2)
         let textRect = CGRect(origin: origin, size: size)
         if textRect.minX > leftMargin {
             text.draw(in: textRect, withAttributes: measurementTextAttributes)

@@ -11,6 +11,7 @@
 // We import UIKit here and elsewhere to use CGFloat consistently and avoid conversions
 // of Double to CGFloat.
 import UIKit
+import BetterCodable
 import os.log
 
 // MARK: - typealiases
@@ -33,7 +34,6 @@ final class Mark: Codable {
     var blockSetting: Endpoint = .auto
     var impulseOriginSite: Endpoint = .none
     var impulseOriginSetting: Endpoint = .auto
-    var measurementText: String = ""
 
     // Ids of other marks that this mark is linked with.
     var linkedMarkIDs: LinkedMarkIDs = LinkedMarkIDs()
@@ -81,6 +81,14 @@ final class Mark: Codable {
             return .proximal
         }
         return .none
+    }
+
+    // MARK: - version 1.1.0 additions to MARK
+    @DefaultCodable<MarkLabel> var label: String = "test1"
+
+    struct MarkLabel: DefaultCodableStrategy {
+        typealias DefaultValue = String
+        static var defaultValue: DefaultValue { return "" }
     }
 
     /// Create a mark from a segment.

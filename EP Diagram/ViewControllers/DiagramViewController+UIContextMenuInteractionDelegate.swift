@@ -17,7 +17,7 @@ extension DiagramViewController: UIContextMenuInteractionDelegate {
     func contextMenuInteraction(_ interaction: UIContextMenuInteraction, configurationForMenuAtLocation location: CGPoint) -> UIContextMenuConfiguration? {
         os_log("contextMenuInteraction(_:configurationForMenuAtLocation:)", log: .action, type: .info)
         guard ladderView.mode == .select else { return nil }
-        // we crash from nexted undo groupings without these guards.
+        // we crash from nested undo groupings without these guards.
         guard !showingPDFToolbar else { return nil }
         guard !showingRotateToolbar else { return nil }
         guard !ladderView.isDragging else { return nil }

@@ -252,6 +252,9 @@ final class DiagramViewController: UIViewController {
     lazy var dottedAction = UIAction(title: L("Dotted")) { action in
         self.ladderView.setSelectedMarksStyle(style: .dotted)
     }
+    lazy var labelMarkAction = UIAction(title: L("Edit label"), image: UIImage(systemName: "pencil")) { action in
+        self.ladderView.setSelectedMarksLabel()
+    }
     lazy var styleMenu = UIMenu(title: L("Style..."), image: UIImage(systemName: "scribble"), children: [self.solidAction, self.dashedAction, self.dottedAction])
 
     lazy var boldEmphasisAction = UIAction(title: L("Bold")) { action in
@@ -430,7 +433,7 @@ final class DiagramViewController: UIViewController {
         self.ladderView.removeRegion()
     }
 
-    lazy var markMenu = UIMenu(title: L("Mark Menu"), children: [self.styleMenu, self.emphasisMenu, self.impulseOriginMenu, self.blockMenu, self.straightenMenu, self.slantMenu, self.adjustYMenu, self.moveAction, self.adjustCLAction, self.rhythmAction, self.repeatCLMenu, self.copyMarksAction, self.repeatPatternAction, self.unlinkAction, self.snapAction, self.deleteAction])
+    lazy var markMenu = UIMenu(title: L("Mark Menu"), children: [self.styleMenu, self.emphasisMenu, self.impulseOriginMenu, self.blockMenu, self.labelMarkAction, self.straightenMenu, self.slantMenu, self.adjustYMenu, self.moveAction, self.adjustCLAction, self.rhythmAction, self.repeatCLMenu, self.copyMarksAction, self.repeatPatternAction, self.unlinkAction, self.snapAction, self.deleteAction])
 
     lazy var labelMenu = [self.regionStyleMenu, self.editLabelAction, self.addRegionMenu, self.removeRegionAction, self.regionHeightMenu, self.adjustLeftMarginAction]
 
@@ -630,7 +633,7 @@ final class DiagramViewController: UIViewController {
     }
 
     override func updateUserActivityState(_ activity: NSUserActivity) {
-        os_log("debug: diagramViewController updateUserActivityState called", log: .debugging, type: .debug)
+//        os_log("debug: diagramViewController updateUserActivityState called", log: .debugging, type: .debug)
 
         super.updateUserActivityState(activity)
 
@@ -1161,7 +1164,7 @@ final class DiagramViewController: UIViewController {
 
     func editLabel() {
         guard let selectedRegion = ladderView.selectedLabelRegion() else { return }
-        UserAlert.showEditLabelAlert(viewController: self, region: selectedRegion, handler: { newLabel, newDescription in
+        UserAlert.showEditRegionLabelAlert(viewController: self, region: selectedRegion, handler: { newLabel, newDescription in
             self.ladderView.undoablySetLabel(newLabel, description: newDescription, forRegion: selectedRegion)
         })
     }
@@ -1624,6 +1627,7 @@ extension DiagramViewController {
         ladderView.showArrows = UserDefaults.standard.bool(forKey: Preferences.showArrowsKey)
         ladderView.showIntervals = UserDefaults.standard.bool(forKey: Preferences.showIntervalsKey)
         ladderView.showConductionTimes = UserDefaults.standard.bool(forKey: Preferences.showConductionTimesKey)
+        ladderView.showMarkLabels = UserDefaults.standard.bool(forKey: Preferences.showMarkLabelsKey)
         ladderView.snapMarks = UserDefaults.standard.bool(forKey: Preferences.snapMarksKey)
         ladderView.defaultMarkStyle = Mark.Style(rawValue: UserDefaults.standard.integer(forKey: Preferences.markStyleKey)) ?? .solid
         ladderView.showLabelDescription = TextVisibility(rawValue: UserDefaults.standard.integer(forKey: Preferences.labelDescriptionVisibilityKey)) ?? .invisible
@@ -1728,8 +1732,8 @@ extension DiagramViewController: UIDropInteractionDelegate {
 extension DiagramViewController: NSUserActivityDelegate {
     func userActivityWillSave(_ userActivity: NSUserActivity) {
 
-        let currentDocumentURL: String = currentDocument?.fileURL.lastPathComponent ?? ""
-        print("currentDocumentURL", currentDocumentURL)
+//        let currentDocumentURL: String = currentDocument?.fileURL.lastPathComponent ?? ""
+//        print("currentDocumentURL", currentDocumentURL)
         if documentIsClosing {
             // intercept and kill userInfo if we closed the document with the close button
             userActivity.userInfo = nil
