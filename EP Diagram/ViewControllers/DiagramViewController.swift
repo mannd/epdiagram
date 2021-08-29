@@ -633,7 +633,7 @@ final class DiagramViewController: UIViewController {
     }
 
     override func updateUserActivityState(_ activity: NSUserActivity) {
-        os_log("debug: diagramViewController updateUserActivityState called", log: .debugging, type: .debug)
+//        os_log("debug: diagramViewController updateUserActivityState called", log: .debugging, type: .debug)
 
         super.updateUserActivityState(activity)
 
@@ -1732,8 +1732,8 @@ extension DiagramViewController: UIDropInteractionDelegate {
 extension DiagramViewController: NSUserActivityDelegate {
     func userActivityWillSave(_ userActivity: NSUserActivity) {
 
-        let currentDocumentURL: String = currentDocument?.fileURL.lastPathComponent ?? ""
-        print("currentDocumentURL", currentDocumentURL)
+//        let currentDocumentURL: String = currentDocument?.fileURL.lastPathComponent ?? ""
+//        print("currentDocumentURL", currentDocumentURL)
         if documentIsClosing {
             // intercept and kill userInfo if we closed the document with the close button
             userActivity.userInfo = nil
