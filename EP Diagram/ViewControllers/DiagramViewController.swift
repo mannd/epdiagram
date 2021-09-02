@@ -252,10 +252,19 @@ final class DiagramViewController: UIViewController {
     lazy var dottedAction = UIAction(title: L("Dotted")) { action in
         self.ladderView.setSelectedMarksStyle(style: .dotted)
     }
-    lazy var labelMarkAction = UIAction(title: L("Edit label"), image: UIImage(systemName: "pencil")) { action in
-        self.ladderView.setSelectedMarksLabel()
-    }
     lazy var styleMenu = UIMenu(title: L("Style..."), image: UIImage(systemName: "scribble"), children: [self.solidAction, self.dashedAction, self.dottedAction])
+
+    // Mark labels
+    lazy var leftLabelMarkAction = UIAction(title: L("Left")) { action in
+        self.ladderView.setSelectedMarksLabel(labelPosition: .left)
+    }
+    lazy var proximalLabelMarkAction = UIAction(title: L("Proximal")) { action in
+        self.ladderView.setSelectedMarksLabel(labelPosition: .proximal)
+    }
+    lazy var distalLabelMarkAction = UIAction(title: L("Distal")) { action in
+        self.ladderView.setSelectedMarksLabel(labelPosition: .distal)
+    }
+    lazy var labelMarkMenu = UIMenu(title: L("Label..."), image: UIImage(systemName: "pencil"), children: [self.leftLabelMarkAction, self.proximalLabelMarkAction, self.distalLabelMarkAction])
 
     lazy var boldEmphasisAction = UIAction(title: L("Bold")) { action in
         self.ladderView.setSelectedMarksEmphasis(emphasis: .bold)
@@ -433,7 +442,7 @@ final class DiagramViewController: UIViewController {
         self.ladderView.removeRegion()
     }
 
-    lazy var markMenu = UIMenu(title: L("Mark Menu"), children: [self.styleMenu, self.emphasisMenu, self.impulseOriginMenu, self.blockMenu, self.labelMarkAction, self.straightenMenu, self.slantMenu, self.adjustYMenu, self.moveAction, self.adjustCLAction, self.rhythmAction, self.repeatCLMenu, self.copyMarksAction, self.repeatPatternAction, self.unlinkAction, self.snapAction, self.deleteAction])
+    lazy var markMenu = UIMenu(title: L("Mark Menu"), children: [self.styleMenu, self.emphasisMenu, self.impulseOriginMenu, self.blockMenu, self.labelMarkMenu, self.straightenMenu, self.slantMenu, self.adjustYMenu, self.moveAction, self.adjustCLAction, self.rhythmAction, self.repeatCLMenu, self.copyMarksAction, self.repeatPatternAction, self.unlinkAction, self.snapAction, self.deleteAction])
 
     lazy var labelMenu = [self.regionStyleMenu, self.editLabelAction, self.addRegionMenu, self.removeRegionAction, self.regionHeightMenu, self.adjustLeftMarginAction]
 

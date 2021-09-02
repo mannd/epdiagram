@@ -1280,27 +1280,50 @@ final class LadderView: ScaledView {
         currentDocument?.undoManager.endUndoGrouping()
     }
 
-    func setSelectedMarksLabel() {
+    func setSelectedMarksLabel(labelPosition: Mark.LabelPosition) {
         guard let vc = findViewController() as? DiagramViewController else { return }
         let selectedMarks: [Mark] = ladder.allMarksWithMode(.selected)
-        let marklabels = selectedMarks.map { $0.label }
-        let dominantLabel = dominantStringOfStringArray(strings: marklabels) ?? ""
+        let selectedMarksLabels: [String?]
+        switch labelPosition {
+        case .left:
+            selectedMarksLabels = selectedMarks.map { $0.leftLabel }
+        case .proximal:
+            selectedMarksLabels = selectedMarks.map { $0.proximalLabel }
+        case .distal:
+            selectedMarksLabels = selectedMarks.map { $0.distalLabel }
+        }
+        let dominantLabel = dominantStringOfStringArray(strings: selectedMarksLabels)
         UserAlert.showEditMarkLabelAlert(viewController: vc, defaultLabel: dominantLabel) { [weak self]  label in
             guard let self = self else { return }
             self.currentDocument?.undoManager.beginUndoGrouping()
-            selectedMarks.forEach { mark in self.undoablySetMarkLabel(mark: mark, label: label) }
+            selectedMarks.forEach { mark in self.undoablySetMarkLabel(mark: mark, label: label, labelPosition: labelPosition) }
             self.currentDocument?.undoManager.endUndoGrouping()
             self.refresh()
         }
     }
 
-    func undoablySetMarkLabel(mark: Mark, label: String) {
-        let originalLabel = mark.label
+    func undoablySetMarkLabel(mark: Mark, label: String?, labelPosition: Mark.LabelPosition) {
+        let originalLabel: String?
+        switch labelPosition {
+        case .left:
+            originalLabel = mark.leftLabel
+        case .proximal:
+            originalLabel = mark.proximalLabel
+        case .distal:
+            originalLabel = mark.distalLabel
+        }
         currentDocument?.undoManager.registerUndo(withTarget: self) { target in
-            target.undoablySetMarkLabel(mark: mark, label: originalLabel)
+            target.undoablySetMarkLabel(mark: mark, label: originalLabel, labelPosition: labelPosition)
         }
         NotificationCenter.default.post(name: .didUndoableAction, object: nil)
-        mark.label = label
+        switch labelPosition {
+        case .left:
+            mark.leftLabel = label
+        case .proximal:
+            mark.proximalLabel = label
+        case .distal:
+            mark.distalLabel = label
+        }
     }
 
     func setSelectedMarksBlockSetting(value: Mark.Endpoint) {
@@ -1380,9 +1403,9 @@ final class LadderView: ScaledView {
     }
 
     /// If a string array contains identical strings, returns that string, otherwise returns nil.
-    /// - Parameter strings: strings to be tested
+    /// - Parameter strings: strings to be tested, which can be nil
     /// - Returns: Either the "dominant" string or nil
-    func dominantStringOfStringArray(strings: [String]) -> String? {
+    func dominantStringOfStringArray(strings: [String?]) -> String? {
         let count = strings.count
         for string in strings {
             if strings.filter({ $0 == string }).count == count {
@@ -1605,11 +1628,11 @@ final class LadderView: ScaledView {
 
         drawPivots(forMark: mark, segment: Segment(proximal: p1, distal: p2), context: context)
         drawConductionTime(forMark: mark, segment: segment, context: context)
-        drawLabel(forMark: mark, segment: segment, context: context)
         drawIntervals(region: region, context: context)
 
         drawProxEnd(forMark: mark, segment: segment, context: context)
         drawEarliestPoint(forMark: mark, segment: segment, context: context)
+        drawLabels(forMark: mark, segment: segment, context: context)
 
         context.setStrokeColor(UIColor.label.cgColor)
     }
@@ -1893,6 +1916,7 @@ final class LadderView: ScaledView {
         drawFilledCircle(context: context, position: segment.proximal, radius: 10)
     }
 
+    // TODO: Don't draw earliest point if label in same location is not empty.
     func drawEarliestPoint(forMark mark: Mark, segment: Segment, context: CGContext) {
         guard showEarliestPoint else { return }
         if mark.earliestPoint == mark.segment.proximal {
@@ -1965,15 +1989,43 @@ final class LadderView: ScaledView {
         }
     }
 
-    func drawLabel(forMark mark: Mark, segment: Segment, context: CGContext) {
+    func drawLabels(forMark mark: Mark, segment: Segment, context: CGContext) {
+        // Don't draw over earliest point
         guard showMarkLabels else { return }
+        for labelPosition in Mark.LabelPosition.allCases {
+            drawLabel(forMark: mark, labelPosition: labelPosition, segment: segment, context: context)
+        }
+    }
+
+    func drawLabel(forMark mark: Mark, labelPosition: Mark.LabelPosition, segment: Segment, context: CGContext) {
+        print("drawLabel at position ", labelPosition)
+        let label: String?
+        switch labelPosition {
+        case .left:
+            label = mark.leftLabel
+        case .proximal:
+            label = mark.proximalLabel
+        case .distal:
+            label = mark.distalLabel
+        }
+        guard let label = label, !label.isEmpty else { return }
         let normalizedSegment = mark.segment.normalized()
         let segment = self.transformToScaledViewSegment(regionSegment: normalizedSegment, region: self.ladder.region(ofMark: mark))
-        let text = mark.label
-        var origin = segment.midpoint
+        let text = label
+        var origin: CGPoint
         let size = text.size(withAttributes: measurementTextAttributes)
         // Center the origin.
-        origin = CGPoint(x: origin.x - labelOffset - size.width, y: origin.y - size.height / 2)
+        switch labelPosition {
+        case .left:
+            origin = segment.midpoint
+            origin = CGPoint(x: origin.x - labelOffset - size.width, y: origin.y - size.height / 2)
+        case .proximal:
+            origin = segment.proximal
+            origin = CGPoint(x: origin.x - size.width / 2, y: origin.y - size.height - labelOffset)
+        case .distal:
+            origin = segment.distal
+            origin = CGPoint(x: origin.x - size.width / 2, y: origin.y + size.height - labelOffset)
+        }
         let textRect = CGRect(origin: origin, size: size)
         if textRect.minX > leftMargin {
             text.draw(in: textRect, withAttributes: measurementTextAttributes)

@@ -84,12 +84,22 @@ final class Mark: Codable {
     }
 
     // MARK: - version 1.1.0 additions to MARK
-    @DefaultCodable<MarkLabel> var label: String = "test1"
+    @DefaultCodable<MarkLabel> var leftLabel: String?  = nil
+    @DefaultCodable<MarkLabel> var proximalLabel: String?  = nil
+    @DefaultCodable<MarkLabel> var distalLabel: String?  = nil
 
     struct MarkLabel: DefaultCodableStrategy {
-        typealias DefaultValue = String
-        static var defaultValue: DefaultValue { return "" }
+        typealias DefaultValue = String?
+        static var defaultValue: DefaultValue { return nil }
     }
+
+    enum LabelPosition: Codable, CaseIterable {
+        case left
+        case proximal
+        case distal
+    }
+
+    // MARK: - Init
 
     /// Create a mark from a segment.
     init(segment: Segment) {
@@ -342,6 +352,18 @@ struct LinkedMarkIDs: Codable {
         distal.removeAll()
     }
 }
+
+//struct MarkLabel: Codable {
+//    var label: String?
+//    var position: LabelPosition = .left
+//
+//    enum LabelPosition: Int, Codable {
+//        case proximal
+//        case distal
+//        case left
+//        case right
+//    }
+//}
 
 // MARK: - extensions
 

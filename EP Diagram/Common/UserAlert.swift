@@ -101,7 +101,7 @@ enum UserAlert {
         vc.present(alert, animated: true)
     }
 
-    static func showEditMarkLabelAlert(viewController vc: UIViewController, defaultLabel: String, handler: ((String) -> Void)?) {
+    static func showEditMarkLabelAlert(viewController vc: UIViewController, defaultLabel: String?, handler: ((String) -> Void)?) {
         let alert = UIAlertController(title: L("Edit Mark Label(s)"), message: L("Give a name to the mark(s)."), preferredStyle: .alert)
         alert.addAction(UIAlertAction(title: L("Cancel"), style: .cancel, handler: nil))
         alert.addTextField { textField in
