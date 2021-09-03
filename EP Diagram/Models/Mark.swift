@@ -99,6 +99,8 @@ final class Mark: Codable {
         case distal
     }
 
+    @DefaultEmptyArray var periods: [Period] = []
+
     // MARK: - Init
 
     /// Create a mark from a segment.
@@ -107,6 +109,8 @@ final class Mark: Codable {
         self.id = UUID()
         linkedMarkIDs = LinkedMarkIDs()
         anchor = .middle
+        periods.append(Period(name: "test", duration: 300))
+        periods.append(Period(name: "test2", duration: 150))
     }
 
     /// Create a mark with a zero length segment.  Mostly used for testing.
