@@ -2038,26 +2038,23 @@ final class LadderView: ScaledView {
         guard mark.periods.count > 0 else { return }
         let calFactor = calibration.currentCalFactor
         let height = segment.distal.y - segment.proximal.y
-//        regionCL = regionValueFromCalibratedValue(rhythm.meanCL, usingCalFactor: calFactor)
         assert(mark.periods.count > 0)
-        var periodHeight = height / CGFloat(mark.periods.count)
+        let periodHeight = height / CGFloat(mark.periods.count)
         var startY = segment.proximal.y
-        print("height", height)
+        context.setAlpha(0.1)
         for period in mark.periods {
             drawPeriod(period: period, start: CGPoint(x: segment.proximal.x, y: startY), height: periodHeight, calFactor: calFactor, context: context)
             startY += periodHeight
         }
-        // TODO:
-        /*
-         origin point of rect, x value doesn't change, y value increases by height each time
-         */
+        context.setAlpha(1.0)
     }
 
     func drawPeriod(period: Period, start: CGPoint, height: CGFloat, calFactor: CGFloat, context: CGContext) {
         let width = regionValueFromCalibratedValue(CGFloat(period.duration), usingCalFactor: calFactor)
         let rect = CGRect(x: start.x, y: start.y, width: width, height: height)
         context.addRect(rect)
-        context.strokePath()
+        context.setFillColor(period.color.cgColor)
+        context.drawPath(using: .fillStroke)
     }
 
     func conductionTime(fromSegment segment: Segment) -> Double {
