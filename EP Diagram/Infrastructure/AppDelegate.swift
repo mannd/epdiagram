@@ -58,7 +58,6 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     }
 }
 
-
 #if targetEnvironment(macCatalyst)
 extension AppDelegate {
 

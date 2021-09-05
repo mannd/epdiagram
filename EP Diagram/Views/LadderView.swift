@@ -98,6 +98,7 @@ final class LadderView: ScaledView {
     var marksAreHidden: Bool = false
     var doubleLineBlockMarker: Bool = true
     var hideZeroCT: Bool = false
+    var showPeriods: Bool = false // Not used until Version 1.2
 
     // colors set by preferences
     var activeColor = Preferences.defaultActiveColor
@@ -2028,9 +2029,6 @@ final class LadderView: ScaledView {
             context.strokePath()
         }
     }
-
-    // TODO: Make a preference
-    var showPeriods = true
 
     func drawPeriods(forMark mark: Mark, segment: Segment, context: CGContext) {
         guard let calibration = calibration, calibration.isCalibrated else { return }

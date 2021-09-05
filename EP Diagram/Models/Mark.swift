@@ -93,7 +93,7 @@ final class Mark: Codable {
         static var defaultValue: DefaultValue { return nil }
     }
 
-    enum LabelPosition: Codable, CaseIterable {
+    enum LabelPosition: Int, Codable, CaseIterable {
         case left
         case proximal
         case distal
