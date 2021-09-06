@@ -93,11 +93,14 @@ final class Mark: Codable {
         static var defaultValue: DefaultValue { return nil }
     }
 
-    enum LabelPosition: Codable, CaseIterable {
+    enum LabelPosition: Int, Codable, CaseIterable {
         case left
         case proximal
         case distal
     }
+
+    @DefaultEmptyArray var periods: [Period] = []
+//    @DefaultFalse var isHidden: Bool = true
 
     // MARK: - Init
 
@@ -107,6 +110,8 @@ final class Mark: Codable {
         self.id = UUID()
         linkedMarkIDs = LinkedMarkIDs()
         anchor = .middle
+        periods.append(Period(name: "test", duration: 300))
+        periods.append(Period(name: "test2", duration: 150))
     }
 
     /// Create a mark with a zero length segment.  Mostly used for testing.

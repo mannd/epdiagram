@@ -8,6 +8,8 @@
 
 import SwiftUI
 
+// TODO: Add showPeriodsKey in Version 1.2
+
 struct PreferencesView: View {
     @AppStorage(Preferences.lineWidthKey) var markLineWidth = Preferences.markLineWidth
     @AppStorage(Preferences.cursorLineWidthKey) var cursorLineWidth = Preferences.cursorLineWidth
@@ -197,7 +199,8 @@ struct PreferencesView: View {
                                         }))
                     }
 
-                }.onAppear {
+                }
+               .onAppear {
                     activeColor = Color.convertColorName(activeColorName) ?? activeColor
                     linkedColor = Color.convertColorName(linkedColorName) ?? linkedColor
                     selectedColor = Color.convertColorName(selectedColorName) ?? selectedColor
@@ -210,6 +213,7 @@ struct PreferencesView: View {
             }
             .navigationBarTitle("Preferences", displayMode: .inline)
             .navigationBarHidden(isRunningOnMac() ? true : false)
+
         }
         .navigationViewStyle(StackNavigationViewStyle())
     }

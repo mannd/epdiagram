@@ -39,7 +39,7 @@ final class LadderView: ScaledView {
     private let minRepeatCLInterval: CGFloat = 20
     private let draggedMarkSnapToBoundaryMargin: CGFloat = 0.05
 
-    let measurementTextFontSize: CGFloat = 14.0
+    let measurementTextFontSize: CGFloat = 15.0
     let labelTextFontSize: CGFloat = 18.0
     let descriptionTextFontSize: CGFloat = 12.0
     /// Affects how far mark label and conduction time are away from the mark.
@@ -98,6 +98,7 @@ final class LadderView: ScaledView {
     var marksAreHidden: Bool = false
     var doubleLineBlockMarker: Bool = true
     var hideZeroCT: Bool = false
+    var showPeriods: Bool = false // Not used until Version 1.2
 
     // colors set by preferences
     var activeColor = Preferences.defaultActiveColor
@@ -1519,7 +1520,7 @@ final class LadderView: ScaledView {
         context.setAlpha(1.0)
     }
 
-    fileprivate func drawLabel(rect: CGRect, region: Region, context: CGContext) {
+    fileprivate func drawRegionLabel(rect: CGRect, region: Region, context: CGContext) {
         let stringRect = CGRect(x: 0, y: rect.origin.y, width: rect.origin.x, height: rect.height)
         labelTextAttributes[.foregroundColor] = region.mode == .active ? activeColor : selectedColor
         let text = region.name
@@ -1603,8 +1604,6 @@ final class LadderView: ScaledView {
             p2 = segment.proximal
         }
         context.setStrokeColor(getMarkColor(mark: mark))
-        // Do we need both stroke and fill?
-        context.setFillColor(getMarkColor(mark: mark))
         context.setLineWidth(mark.emphasis == .bold ? markLineWidth + 1 :  markLineWidth)
         context.move(to: p1)
         context.addLine(to: p2)
@@ -1622,18 +1621,24 @@ final class LadderView: ScaledView {
         context.strokePath()
         context.setLineDash(phase: 0, lengths: [])
 
+        #if DEBUG  // These are only used for debugging, don't include in release
+        drawPivots(forMark: mark, segment: Segment(proximal: p1, distal: p2), context: context)
+        drawProxEnd(segment: segment, context: context)
+        drawEarliestPoint(forMark: mark, segment: segment, context: context)
+        #endif
+
         drawBlock(context: context, mark: mark, segment: segment)
         drawImpulseOrigin(context: context, mark: mark, segment: segment)
         drawConductionDirection(forMark: mark, segment: segment, context: context)
 
-        drawPivots(forMark: mark, segment: Segment(proximal: p1, distal: p2), context: context)
         drawConductionTime(forMark: mark, segment: segment, context: context)
         drawIntervals(region: region, context: context)
 
-        drawProxEnd(forMark: mark, segment: segment, context: context)
-        drawEarliestPoint(forMark: mark, segment: segment, context: context)
-        drawLabels(forMark: mark, segment: segment, context: context)
 
+        drawLabels(forMark: mark, segment: segment, context: context)
+        drawPeriods(forMark: mark, segment: segment, context: context)
+
+        // reset line color to neutral label color
         context.setStrokeColor(UIColor.label.cgColor)
     }
 
@@ -1911,12 +1916,12 @@ final class LadderView: ScaledView {
         context.strokePath()
     }
 
-    func drawProxEnd(forMark mark: Mark, segment: Segment, context: CGContext) {
+    // For debugging only
+    func drawProxEnd(segment: Segment, context: CGContext) {
         guard showProxEnd else { return }
         drawFilledCircle(context: context, position: segment.proximal, radius: 10)
     }
 
-    // TODO: Don't draw earliest point if label in same location is not empty.
     func drawEarliestPoint(forMark mark: Mark, segment: Segment, context: CGContext) {
         guard showEarliestPoint else { return }
         if mark.earliestPoint == mark.segment.proximal {
@@ -1966,8 +1971,6 @@ final class LadderView: ScaledView {
 
     func drawConductionTime(forMark mark: Mark, segment: Segment, context: CGContext) {
         guard let calibration = calibration, calibration.isCalibrated, showConductionTimes else { return }
-        let normalizedSegment = mark.segment.normalized()
-        let segment = self.transformToScaledViewSegment(regionSegment: normalizedSegment, region: self.ladder.region(ofMark: mark))
         let value = lround(conductionTime(fromSegment: segment))
         if hideZeroCT && value < 1 {
             return
@@ -1998,7 +2001,6 @@ final class LadderView: ScaledView {
     }
 
     func drawLabel(forMark mark: Mark, labelPosition: Mark.LabelPosition, segment: Segment, context: CGContext) {
-        print("drawLabel at position ", labelPosition)
         let label: String?
         switch labelPosition {
         case .left:
@@ -2009,8 +2011,6 @@ final class LadderView: ScaledView {
             label = mark.distalLabel
         }
         guard let label = label, !label.isEmpty else { return }
-        let normalizedSegment = mark.segment.normalized()
-        let segment = self.transformToScaledViewSegment(regionSegment: normalizedSegment, region: self.ladder.region(ofMark: mark))
         let text = label
         var origin: CGPoint
         let size = text.size(withAttributes: measurementTextAttributes)
@@ -2031,6 +2031,31 @@ final class LadderView: ScaledView {
             text.draw(in: textRect, withAttributes: measurementTextAttributes)
             context.strokePath()
         }
+    }
+
+    func drawPeriods(forMark mark: Mark, segment: Segment, context: CGContext) {
+        guard let calibration = calibration, calibration.isCalibrated else { return }
+        guard showPeriods else { return }
+        guard mark.periods.count > 0 else { return }
+        let calFactor = calibration.currentCalFactor
+        let height = segment.distal.y - segment.proximal.y
+        assert(mark.periods.count > 0)
+        let periodHeight = height / CGFloat(mark.periods.count)
+        var startY = segment.proximal.y
+        context.setAlpha(0.1)
+        for period in mark.periods {
+            drawPeriod(period: period, start: CGPoint(x: segment.proximal.x, y: startY), height: periodHeight, calFactor: calFactor, context: context)
+            startY += periodHeight
+        }
+        context.setAlpha(1.0)
+    }
+
+    func drawPeriod(period: Period, start: CGPoint, height: CGFloat, calFactor: CGFloat, context: CGContext) {
+        let width = regionValueFromCalibratedValue(CGFloat(period.duration), usingCalFactor: calFactor)
+        let rect = CGRect(x: start.x, y: start.y, width: width, height: height)
+        context.addRect(rect)
+        context.setFillColor(period.color.cgColor)
+        context.drawPath(using: .fillStroke)
     }
 
     func conductionTime(fromSegment segment: Segment) -> Double {
@@ -2139,7 +2164,7 @@ final class LadderView: ScaledView {
     }
 
     func drawRegion(rect: CGRect, context: CGContext, region: Region, offset: CGFloat, scale: CGFloat, lastRegion: Bool) {
-        drawLabel(rect: rect, region: region, context: context)
+        drawRegionLabel(rect: rect, region: region, context: context)
         drawRegionArea(context: context, rect: rect, region: region)
         if !marksAreHidden {
             drawMarks(region: region, context: context, rect: rect)

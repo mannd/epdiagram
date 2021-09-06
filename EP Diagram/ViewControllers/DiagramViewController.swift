@@ -1646,6 +1646,7 @@ extension DiagramViewController {
         cursorView.showMarkers = UserDefaults.standard.bool(forKey: Preferences.showMarkersKey)
         ladderView.hideZeroCT = UserDefaults.standard.bool(forKey: Preferences.hideZeroCTKey)
         cursorView.markerLineWidth = CGFloat(UserDefaults.standard.integer(forKey: Preferences.markerLineWidthKey))
+        ladderView.showPeriods = UserDefaults.standard.bool(forKey: Preferences.showPeriodsKey)
 
         // Colors
         if let caliperColorName = UserDefaults.standard.string(forKey: Preferences.caliperColorNameKey) {
@@ -1674,6 +1675,7 @@ extension DiagramViewController {
         }
         ladderView.updateLadderIntervals()
         updateToolbarButtons()
+        setViewsNeedDisplay()
     }
 
     @objc func resolveFileConflicts() {
