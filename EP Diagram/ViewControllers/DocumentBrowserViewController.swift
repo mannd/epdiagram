@@ -110,10 +110,9 @@ class DocumentBrowserViewController: UIDocumentBrowserViewController, UIDocument
         }
     }
 
+    // See https://developer.apple.com/documentation/uikit/view_controllers/providing_access_to_directories
     func getIOSBookmark(url: URL) {
 #if !targetEnvironment(macCatalyst)
-        print("get Bookmark from directory")
-        // Create a document picker for directories.
         let documentPicker =
             UIDocumentPickerViewController(forOpeningContentTypes: [.folder])
         documentPicker.delegate = self
@@ -123,7 +122,6 @@ class DocumentBrowserViewController: UIDocumentBrowserViewController, UIDocument
 
         // Present the document picker.
         present(documentPicker, animated: true, completion: nil)
-
 #endif
 
     }
