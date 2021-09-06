@@ -608,6 +608,11 @@ final class DiagramViewController: UIViewController {
         if requestSandboxExpansion {
             addDirectoryToSandbox(self)
         }
+        #else
+        // FIXME: Temporary
+        if requestSandboxExpansion {
+            addIOSDirectoryToSandbox()
+        }
         #endif
 
         setTitle()
@@ -639,6 +644,10 @@ final class DiagramViewController: UIViewController {
     deinit {
 
         print("*****DiagramViewController deinit()******")
+    }
+
+    func addIOSDirectoryToSandbox() {
+        print("addIOSDirectoryToSandbox")
     }
 
     override func updateUserActivityState(_ activity: NSUserActivity) {

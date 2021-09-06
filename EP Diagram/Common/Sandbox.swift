@@ -15,6 +15,7 @@ enum Sandbox {
             return
         }
         #if targetEnvironment(macCatalyst)
+        // TODO: test add .minimalBookmark to both options
         let bookmarkOptions: URL.BookmarkCreationOptions = [.withSecurityScope]
         #else
         let bookmarkOptions: URL.BookmarkCreationOptions = []
@@ -58,6 +59,7 @@ enum Sandbox {
                 storeDirectoryBookmark(from: directory)
                 return nil
             } else {
+                print("directory urlForBookmark = ", urlForBookmark as Any)
                 return urlForBookmark
             }
         } else {
@@ -67,10 +69,15 @@ enum Sandbox {
     }
 
     static func getDirectoryBookmarkData(url: URL) -> Data? {
+        print("getDirectoryBookmarkData()")
         let directory = url.deletingLastPathComponent()
-        guard directory.hasDirectoryPath else { return nil }
+        guard directory.hasDirectoryPath else {
+            print("Is not a directory path")
+            return nil }
         let key = getAccessDirectoryKey(for: directory)
-        return UserDefaults.standard.value(forKey: key) as? Data
+        let value = UserDefaults.standard.value(forKey: key) as? Data
+        print("directory value is ", value as Any)
+        return value
     }
 
     private static func getAccessDirectoryKey(for url: URL) -> String {

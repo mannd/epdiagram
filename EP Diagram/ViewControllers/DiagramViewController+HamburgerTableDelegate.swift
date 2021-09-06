@@ -254,6 +254,12 @@ extension DiagramViewController: HamburgerTableDelegate, UIImagePickerController
     #if DEBUG
     func debug() {
         os_log("debug()", log: .debugging, type: .debug)
+        for key in UserDefaults.standard.dictionaryRepresentation().keys {
+            if key.starts(with: "AccessDirectory:") {
+                print(key)
+                UserDefaults.standard.removeObject(forKey: key)
+            }
+        }
     }
     #else
     func debug() {}

@@ -15,7 +15,7 @@ enum NavigationContext {
   case editing
 }
 
-class DocumentBrowserViewController: UIDocumentBrowserViewController {
+class DocumentBrowserViewController: UIDocumentBrowserViewController, UIDocumentPickerDelegate {
 
     var presentationContest: NavigationContext = .launched
     var currentDocument: DiagramDocument?
@@ -97,6 +97,7 @@ class DocumentBrowserViewController: UIDocumentBrowserViewController {
                 document.open { openSuccess in
                     guard openSuccess else {
                         print ("could not open \(url)")
+                        self.getIOSBookmark(url: url)
                         return
                     }
                     self.currentDocument = document
@@ -105,6 +106,69 @@ class DocumentBrowserViewController: UIDocumentBrowserViewController {
             } else {
                 print("could not get bookmark")
                 self.openDocumentURL(url)
+            }
+        }
+    }
+
+    func getIOSBookmark(url: URL) {
+#if !targetEnvironment(macCatalyst)
+        print("get Bookmark from directory")
+        // Create a document picker for directories.
+        let documentPicker =
+            UIDocumentPickerViewController(forOpeningContentTypes: [.folder])
+        documentPicker.delegate = self
+
+        // Set the initial directory.
+        documentPicker.directoryURL = url
+
+        // Present the document picker.
+        present(documentPicker, animated: true, completion: nil)
+
+#endif
+
+    }
+
+    func documentPickerWasCancelled(_ controller: UIDocumentPickerViewController) {
+        UserAlert.showMessage(viewController: self, title: "File can't be opened", message: "Cannot open file unless you agree to add this directory to the app sandbox.")
+        print("Cannot open file since directory is not sandboxed.")
+    }
+
+    func documentPicker(_ controller: UIDocumentPickerViewController, didPickDocumentAt url: URL) {
+        // Start accessing a security-scoped resource.
+        guard url.startAccessingSecurityScopedResource() else {
+            // Handle the failure here.
+            return
+        }
+
+        // Make sure you release the security-scoped resource when you finish.
+        defer { url.stopAccessingSecurityScopedResource() }
+
+        // Use file coordination for reading and writing any of the URL’s content.
+        var error: NSError? = nil
+        NSFileCoordinator().coordinate(readingItemAt: url, error: &error) { (url) in
+
+            let keys : [URLResourceKey] = [.nameKey, .isDirectoryKey]
+
+            // Get an enumerator for the directory's content.
+            guard let fileList =
+                FileManager.default.enumerator(at: url, includingPropertiesForKeys: keys) else {
+                Swift.debugPrint("*** Unable to access the contents of \(url.path) ***\n")
+                return
+            }
+
+            for case let file as URL in fileList {
+                // Start accessing the content's security-scoped URL.
+                guard url.startAccessingSecurityScopedResource() else {
+                    UserAlert.showMessage(viewController: self, title: "Access Not Granted", message: "Cannot access diagram files in this directory.")
+                    return
+                }
+
+                // Do something with the file here.
+                Swift.debugPrint("chosen file: \(file.lastPathComponent)")
+                Sandbox.storeDirectoryBookmark(from: url)
+                UserAlert.showMessage(viewController: self, title: "Access Granted", message: "Access has been granted to \(file.deletingLastPathComponent().lastPathComponent).  Select again a diagram file in this directory or select Create New Diagram.")
+                // Make sure you release the security-scoped resource when you finish.
+                url.stopAccessingSecurityScopedResource()
             }
         }
     }
