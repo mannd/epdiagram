@@ -100,6 +100,7 @@ final class Mark: Codable {
     }
 
     @DefaultEmptyArray var periods: [Period] = []
+//    @DefaultFalse var isHidden: Bool = true
 
     // MARK: - Init
 
