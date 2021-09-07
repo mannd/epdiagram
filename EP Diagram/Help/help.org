@@ -390,9 +390,6 @@ To create a snapshot and save it to the Photos app, simply tap the *Snapshot* bu
 * Next version plans
 We plan to include in the next version:
 - Refractory periods
-- Pacing spikes
-- Add notes to ladder
-- Mac support
 * References
 - Johnson NP, Denes P. The Ladder Diagram (A 100+ Year History). American Journal of Cardiology. 2008;101(12):1801-1804. doi:10.1016/j.amjcard.2008.02.085
 - Antiperovitch P, Luna AB de, Alencar JN de, et al. Old teaching tools should not be forgotten: The value of the Lewis ladder diagram in understanding bigeminal rhythms. Annals of Noninvasive Electrocardiology. 2019;24(5):e12685. doi:https://doi.org/10.1111/anec.12685
