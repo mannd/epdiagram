@@ -2771,7 +2771,7 @@ final class LadderView: ScaledView {
     }
 
     private func setSegment(segment: Segment, forMark mark: Mark) {
-        if segment.length < Segment.minLength { return }
+        // Don't test for minimum segment length here because then small segments can't be moved.
         let originalSegment = mark.segment
         currentDocument?.undoManager?.registerUndo(withTarget: self, handler: { target in
             target.setSegment(segment: originalSegment, forMark: mark)
@@ -3030,7 +3030,7 @@ extension LadderView: LadderViewDelegate {
 
 
     func highlightNearbyMarks(_ mark: Mark?) {
-        os_log("highlightNearbyMarks(mark:) - LadderView", log: .default, type: .default)
+//        os_log("highlightNearbyMarks(mark:) - LadderView", log: .default, type: .default)
 
         guard snapMarks else { return }
         guard let mark = mark else { return }
