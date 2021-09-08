@@ -11,6 +11,7 @@
 // We import UIKit here and elsewhere to use CGFloat consistently and avoid conversions
 // of Double to CGFloat.
 import UIKit
+import BetterCodable
 import os.log
 
 // MARK: - typealiases
@@ -33,7 +34,6 @@ final class Mark: Codable {
     var blockSetting: Endpoint = .auto
     var impulseOriginSite: Endpoint = .none
     var impulseOriginSetting: Endpoint = .auto
-    var measurementText: String = ""
 
     // Ids of other marks that this mark is linked with.
     var linkedMarkIDs: LinkedMarkIDs = LinkedMarkIDs()
@@ -83,12 +83,35 @@ final class Mark: Codable {
         return .none
     }
 
+    // MARK: - version 1.1.0 additions to MARK
+    @DefaultCodable<MarkLabel> var leftLabel: String?  = nil
+    @DefaultCodable<MarkLabel> var proximalLabel: String?  = nil
+    @DefaultCodable<MarkLabel> var distalLabel: String?  = nil
+
+    struct MarkLabel: DefaultCodableStrategy {
+        typealias DefaultValue = String?
+        static var defaultValue: DefaultValue { return nil }
+    }
+
+    enum LabelPosition: Int, Codable, CaseIterable {
+        case left
+        case proximal
+        case distal
+    }
+
+    @DefaultEmptyArray var periods: [Period] = []
+//    @DefaultFalse var isHidden: Bool = true
+
+    // MARK: - Init
+
     /// Create a mark from a segment.
     init(segment: Segment) {
         self.segment = segment
         self.id = UUID()
         linkedMarkIDs = LinkedMarkIDs()
         anchor = .middle
+        periods.append(Period(name: "test", duration: 300))
+        periods.append(Period(name: "test2", duration: 150))
     }
 
     /// Create a mark with a zero length segment.  Mostly used for testing.
@@ -334,6 +357,18 @@ struct LinkedMarkIDs: Codable {
         distal.removeAll()
     }
 }
+
+//struct MarkLabel: Codable {
+//    var label: String?
+//    var position: LabelPosition = .left
+//
+//    enum LabelPosition: Int, Codable {
+//        case proximal
+//        case distal
+//        case left
+//        case right
+//    }
+//}
 
 // MARK: - extensions
 

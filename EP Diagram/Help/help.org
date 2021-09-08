@@ -102,6 +102,12 @@ EP Diagram is a file based app, meaning the diagrams you create are stored on yo
 [[./img/epdiagram_files.png]]
 
 Tap *Create New Diagram* to create a diagram file, or tap on one of your previously created diagrams to open it.
+*** Dealing with the app sandbox
+Apps distributed on the Apple App Store are "sandboxed", meaning they have access only to the files in the container they run in, which is a private folder assigned to the app.  By default they can't read and write files in other file locations.  This policy is enforced by Apple to improve security, but it does result in some hoops that need to be jumped through.  To add a folder to the app sandbox, you must specifically select that folder using a special file dialog.  Once this is done the app will remember that the folder has been added to the sandbox whenever you use the app.  In other words, you should only have to do this once for each folder you want to add to the sandbox.  Select a folder as in the figure below.
+
+#+CAPTION: Add folder to sandbox
+[[./img/ios_sandbox.png]]
+
 *** Initial diagram screen
 
 #+CAPTION: New diagram
@@ -230,6 +236,8 @@ Marks can have a normal or bold emphasis.  Bold emphasis thickens the line of th
 Impulse origin is normally automatically determined, but you can override this and place the impulse origin proximally or distally, or have no impulse origin annotated.
 *** Block
 Block is normally automatically determined, but you can also override this manually.
+*** Label
+You can add or edit a label for individual or groups of marks.  Labels can be added to any of three positions: to the left of the mark, above the proximal end of the mark, or below the distal end of the mark.  Labels are useful for annotations such as "Slow Pathway" or pacemaker pace/sense events, such as "As" or "Vp".
 *** Straighten marks
 Makes selected marks vertical.
 *** Slant marks
@@ -382,9 +390,6 @@ To create a snapshot and save it to the Photos app, simply tap the *Snapshot* bu
 * Next version plans
 We plan to include in the next version:
 - Refractory periods
-- Pacing spikes
-- Add notes to ladder
-- Mac support
 * References
 - Johnson NP, Denes P. The Ladder Diagram (A 100+ Year History). American Journal of Cardiology. 2008;101(12):1801-1804. doi:10.1016/j.amjcard.2008.02.085
 - Antiperovitch P, Luna AB de, Alencar JN de, et al. Old teaching tools should not be forgotten: The value of the Lewis ladder diagram in understanding bigeminal rhythms. Annals of Noninvasive Electrocardiology. 2019;24(5):e12685. doi:https://doi.org/10.1111/anec.12685
@@ -401,4 +406,4 @@ We plan to include in the next version:
 
 - For questions, error reporting or suggestions contact mannd@epstudiossoftware.com
 
-- Website: https://www.epstudiossoftware.com
+- Website: https://www.epstudiossoftware.com/ep-diagram

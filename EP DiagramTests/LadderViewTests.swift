@@ -607,8 +607,21 @@ class LadderViewTests: XCTestCase {
         XCTAssertEqual(ladderView.ladder.latestPoint(of: ladderView.ladder.allMarks()), CGPoint(x: 300, y: 1.0))
         let _ = ladderView.addMarkToActiveRegion(regionPositionX: 1)
         XCTAssertEqual(ladderView.ladder.earliestPoint(of: ladderView.ladder.allMarks()), CGPoint(x: 1, y: 0))
+    }
 
-
+    func testDominantString() {
+        let strings1: [String] = []
+        XCTAssertNil(ladderView.dominantStringOfStringArray(strings: strings1))
+        let strings2 = ["test"]
+        XCTAssertEqual(ladderView.dominantStringOfStringArray(strings: strings2), "test")
+        let strings3 = ["test", "test"]
+        XCTAssertEqual(ladderView.dominantStringOfStringArray(strings: strings3), "test")
+        let strings4 = ["test", ""]
+        XCTAssertNil(ladderView.dominantStringOfStringArray(strings: strings4))
+        let strings5 = ["", "", ""]
+        XCTAssertEqual(ladderView.dominantStringOfStringArray(strings: strings5), "")
+        let strings6 = ["Test", "test"]
+        XCTAssertNil(ladderView.dominantStringOfStringArray(strings: strings6))
     }
 
 }

@@ -29,11 +29,11 @@ struct Diagram: Codable {
     }
 
     // Implement updates to Diagram using this sort of strategy and BetterCodable wrappers.
-    @DefaultCodable<FileVersion> var fileVersion: Int = 1
+    @DefaultCodable<FileVersion> var fileVersion: Int = 2
 
     struct FileVersion: DefaultCodableStrategy {
         typealias DefaultValue = Int
-        static var defaultValue: DefaultValue { return 1 }
+        static var defaultValue: DefaultValue { return 2 }
     }
 
     init(name: String?, description: String, image: UIImage?, ladder: Ladder) {

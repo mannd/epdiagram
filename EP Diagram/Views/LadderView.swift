@@ -39,9 +39,11 @@ final class LadderView: ScaledView {
     private let minRepeatCLInterval: CGFloat = 20
     private let draggedMarkSnapToBoundaryMargin: CGFloat = 0.05
 
-    let measurementTextFontSize: CGFloat = 14.0
+    let measurementTextFontSize: CGFloat = 15.0
     let labelTextFontSize: CGFloat = 18.0
     let descriptionTextFontSize: CGFloat = 12.0
+    /// Affects how far mark label and conduction time are away from the mark.
+    let labelOffset: CGFloat = 12.0
 
     lazy var measurementTextAttributes: [NSAttributedString.Key: Any] = {
         let textFont = UIFont.systemFont(ofSize: measurementTextFontSize, weight: UIFont.Weight.medium)
@@ -84,6 +86,7 @@ final class LadderView: ScaledView {
     var showArrows = false
     var showIntervals = true
     var showConductionTimes = true
+    var showMarkLabels = false
     var showMarkText = true
     var snapMarks = true
     var defaultMarkStyle = Mark.Style.solid {
@@ -95,6 +98,7 @@ final class LadderView: ScaledView {
     var marksAreHidden: Bool = false
     var doubleLineBlockMarker: Bool = true
     var hideZeroCT: Bool = false
+    var showPeriods: Bool = false // Not used until Version 1.2
 
     // colors set by preferences
     var activeColor = Preferences.defaultActiveColor
@@ -1277,6 +1281,52 @@ final class LadderView: ScaledView {
         currentDocument?.undoManager.endUndoGrouping()
     }
 
+    func setSelectedMarksLabel(labelPosition: Mark.LabelPosition) {
+        guard let vc = findViewController() as? DiagramViewController else { return }
+        let selectedMarks: [Mark] = ladder.allMarksWithMode(.selected)
+        let selectedMarksLabels: [String?]
+        switch labelPosition {
+        case .left:
+            selectedMarksLabels = selectedMarks.map { $0.leftLabel }
+        case .proximal:
+            selectedMarksLabels = selectedMarks.map { $0.proximalLabel }
+        case .distal:
+            selectedMarksLabels = selectedMarks.map { $0.distalLabel }
+        }
+        let dominantLabel = dominantStringOfStringArray(strings: selectedMarksLabels)
+        UserAlert.showEditMarkLabelAlert(viewController: vc, defaultLabel: dominantLabel) { [weak self]  label in
+            guard let self = self else { return }
+            self.currentDocument?.undoManager.beginUndoGrouping()
+            selectedMarks.forEach { mark in self.undoablySetMarkLabel(mark: mark, label: label, labelPosition: labelPosition) }
+            self.currentDocument?.undoManager.endUndoGrouping()
+            self.refresh()
+        }
+    }
+
+    func undoablySetMarkLabel(mark: Mark, label: String?, labelPosition: Mark.LabelPosition) {
+        let originalLabel: String?
+        switch labelPosition {
+        case .left:
+            originalLabel = mark.leftLabel
+        case .proximal:
+            originalLabel = mark.proximalLabel
+        case .distal:
+            originalLabel = mark.distalLabel
+        }
+        currentDocument?.undoManager.registerUndo(withTarget: self) { target in
+            target.undoablySetMarkLabel(mark: mark, label: originalLabel, labelPosition: labelPosition)
+        }
+        NotificationCenter.default.post(name: .didUndoableAction, object: nil)
+        switch labelPosition {
+        case .left:
+            mark.leftLabel = label
+        case .proximal:
+            mark.proximalLabel = label
+        case .distal:
+            mark.distalLabel = label
+        }
+    }
+
     func setSelectedMarksBlockSetting(value: Mark.Endpoint) {
         let selectedMarks = ladder.allMarksWithMode(.selected)
         currentDocument?.undoManager.beginUndoGrouping()
@@ -1348,6 +1398,19 @@ final class LadderView: ScaledView {
         for value in Mark.Style.allCases {
             if regions.filter({ $0.style == value }).count == count {
                 return value
+            }
+        }
+        return nil
+    }
+
+    /// If a string array contains identical strings, returns that string, otherwise returns nil.
+    /// - Parameter strings: strings to be tested, which can be nil
+    /// - Returns: Either the "dominant" string or nil
+    func dominantStringOfStringArray(strings: [String?]) -> String? {
+        let count = strings.count
+        for string in strings {
+            if strings.filter({ $0 == string }).count == count {
+                return string
             }
         }
         return nil
@@ -1457,7 +1520,7 @@ final class LadderView: ScaledView {
         context.setAlpha(1.0)
     }
 
-    fileprivate func drawLabel(rect: CGRect, region: Region, context: CGContext) {
+    fileprivate func drawRegionLabel(rect: CGRect, region: Region, context: CGContext) {
         let stringRect = CGRect(x: 0, y: rect.origin.y, width: rect.origin.x, height: rect.height)
         labelTextAttributes[.foregroundColor] = region.mode == .active ? activeColor : selectedColor
         let text = region.name
@@ -1541,7 +1604,7 @@ final class LadderView: ScaledView {
             p2 = segment.proximal
         }
         context.setStrokeColor(getMarkColor(mark: mark))
-        // Do we need both stroke and fill?
+        // Needed so impulse origin circles are filled in.
         context.setFillColor(getMarkColor(mark: mark))
         context.setLineWidth(mark.emphasis == .bold ? markLineWidth + 1 :  markLineWidth)
         context.move(to: p1)
@@ -1560,17 +1623,24 @@ final class LadderView: ScaledView {
         context.strokePath()
         context.setLineDash(phase: 0, lengths: [])
 
+        #if DEBUG  // These are only used for debugging, don't include in release
+        drawPivots(forMark: mark, segment: Segment(proximal: p1, distal: p2), context: context)
+        drawProxEnd(segment: segment, context: context)
+        drawEarliestPoint(forMark: mark, segment: segment, context: context)
+        #endif
+
         drawBlock(context: context, mark: mark, segment: segment)
         drawImpulseOrigin(context: context, mark: mark, segment: segment)
         drawConductionDirection(forMark: mark, segment: segment, context: context)
 
-        drawPivots(forMark: mark, segment: Segment(proximal: p1, distal: p2), context: context)
         drawConductionTime(forMark: mark, segment: segment, context: context)
         drawIntervals(region: region, context: context)
 
-        drawProxEnd(forMark: mark, segment: segment, context: context)
-        drawEarliestPoint(forMark: mark, segment: segment, context: context)
 
+        drawLabels(forMark: mark, segment: segment, context: context)
+        drawPeriods(forMark: mark, segment: segment, context: context)
+
+        // reset line color to neutral label color
         context.setStrokeColor(UIColor.label.cgColor)
     }
 
@@ -1848,7 +1918,8 @@ final class LadderView: ScaledView {
         context.strokePath()
     }
 
-    func drawProxEnd(forMark mark: Mark, segment: Segment, context: CGContext) {
+    // For debugging only
+    func drawProxEnd(segment: Segment, context: CGContext) {
         guard showProxEnd else { return }
         drawFilledCircle(context: context, position: segment.proximal, radius: 10)
     }
@@ -1902,8 +1973,6 @@ final class LadderView: ScaledView {
 
     func drawConductionTime(forMark mark: Mark, segment: Segment, context: CGContext) {
         guard let calibration = calibration, calibration.isCalibrated, showConductionTimes else { return }
-        let normalizedSegment = mark.segment.normalized()
-            let segment = self.transformToScaledViewSegment(regionSegment: normalizedSegment, region: self.ladder.region(ofMark: mark))
         let value = lround(conductionTime(fromSegment: segment))
         if hideZeroCT && value < 1 {
             return
@@ -1917,12 +1986,78 @@ final class LadderView: ScaledView {
         var origin = segment.midpoint
         let size = text.size(withAttributes: measurementTextAttributes)
         // Center the origin.
-        origin = CGPoint(x: origin.x + 10, y: origin.y - size.height / 2)
+        origin = CGPoint(x: origin.x + labelOffset, y: origin.y - size.height / 2)
         let textRect = CGRect(origin: origin, size: size)
         if textRect.minX > leftMargin {
             text.draw(in: textRect, withAttributes: measurementTextAttributes)
             context.strokePath()
         }
+    }
+
+    func drawLabels(forMark mark: Mark, segment: Segment, context: CGContext) {
+        // Don't draw over earliest point
+        guard showMarkLabels else { return }
+        for labelPosition in Mark.LabelPosition.allCases {
+            drawLabel(forMark: mark, labelPosition: labelPosition, segment: segment, context: context)
+        }
+    }
+
+    func drawLabel(forMark mark: Mark, labelPosition: Mark.LabelPosition, segment: Segment, context: CGContext) {
+        let label: String?
+        switch labelPosition {
+        case .left:
+            label = mark.leftLabel
+        case .proximal:
+            label = mark.proximalLabel
+        case .distal:
+            label = mark.distalLabel
+        }
+        guard let label = label, !label.isEmpty else { return }
+        let text = label
+        var origin: CGPoint
+        let size = text.size(withAttributes: measurementTextAttributes)
+        // Center the origin.
+        switch labelPosition {
+        case .left:
+            origin = segment.midpoint
+            origin = CGPoint(x: origin.x - labelOffset - size.width, y: origin.y - size.height / 2)
+        case .proximal:
+            origin = segment.proximal
+            origin = CGPoint(x: origin.x - size.width / 2, y: origin.y - size.height - labelOffset)
+        case .distal:
+            origin = segment.distal
+            origin = CGPoint(x: origin.x - size.width / 2, y: origin.y + size.height - labelOffset)
+        }
+        let textRect = CGRect(origin: origin, size: size)
+        if textRect.minX > leftMargin {
+            text.draw(in: textRect, withAttributes: measurementTextAttributes)
+            context.strokePath()
+        }
+    }
+
+    func drawPeriods(forMark mark: Mark, segment: Segment, context: CGContext) {
+        guard let calibration = calibration, calibration.isCalibrated else { return }
+        guard showPeriods else { return }
+        guard mark.periods.count > 0 else { return }
+        let calFactor = calibration.currentCalFactor
+        let height = segment.distal.y - segment.proximal.y
+        assert(mark.periods.count > 0)
+        let periodHeight = height / CGFloat(mark.periods.count)
+        var startY = segment.proximal.y
+        context.setAlpha(0.1)
+        for period in mark.periods {
+            drawPeriod(period: period, start: CGPoint(x: segment.proximal.x, y: startY), height: periodHeight, calFactor: calFactor, context: context)
+            startY += periodHeight
+        }
+        context.setAlpha(1.0)
+    }
+
+    func drawPeriod(period: Period, start: CGPoint, height: CGFloat, calFactor: CGFloat, context: CGContext) {
+        let width = regionValueFromCalibratedValue(CGFloat(period.duration), usingCalFactor: calFactor)
+        let rect = CGRect(x: start.x, y: start.y, width: width, height: height)
+        context.addRect(rect)
+        context.setFillColor(period.color.cgColor)
+        context.drawPath(using: .fillStroke)
     }
 
     func conductionTime(fromSegment segment: Segment) -> Double {
@@ -2031,7 +2166,7 @@ final class LadderView: ScaledView {
     }
 
     func drawRegion(rect: CGRect, context: CGContext, region: Region, offset: CGFloat, scale: CGFloat, lastRegion: Bool) {
-        drawLabel(rect: rect, region: region, context: context)
+        drawRegionLabel(rect: rect, region: region, context: context)
         drawRegionArea(context: context, rect: rect, region: region)
         if !marksAreHidden {
             drawMarks(region: region, context: context, rect: rect)
@@ -2636,7 +2771,7 @@ final class LadderView: ScaledView {
     }
 
     private func setSegment(segment: Segment, forMark mark: Mark) {
-        if segment.length < Segment.minLength { return }
+        // Don't test for minimum segment length here because then small segments can't be moved.
         let originalSegment = mark.segment
         currentDocument?.undoManager?.registerUndo(withTarget: self, handler: { target in
             target.setSegment(segment: originalSegment, forMark: mark)
@@ -2895,7 +3030,7 @@ extension LadderView: LadderViewDelegate {
 
 
     func highlightNearbyMarks(_ mark: Mark?) {
-        os_log("highlightNearbyMarks(mark:) - LadderView", log: .default, type: .default)
+//        os_log("highlightNearbyMarks(mark:) - LadderView", log: .default, type: .default)
 
         guard snapMarks else { return }
         guard let mark = mark else { return }

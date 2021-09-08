@@ -30,6 +30,8 @@ struct Preferences {
     static let showMarkersKey = "defaultShowMarkersKey"
     static let hideZeroCTKey = "defaultHideZeroCTKey"
     static let markerLineWidthKey = "defaultMarkerLineWidthKey"
+    static let showMarkLabelsKey = "defaultShowMarkLabelsKey"
+    static let showPeriodsKey = "defaultShowPeriodsKey"
 
     // keys not modifiable by user
     static let notFirstRunKey = "defaultNotFirstRunKey"
@@ -64,6 +66,8 @@ struct Preferences {
     static var showMarkers: Bool = false
     static var hideZeroCT: Bool = false
     static var markerLineWidth: Int = 2
+    static var showMarkLabels: Bool = true
+    static var showPeriods: Bool = false
 
     // default Colors
     static let defaultActiveColor = UIColor.systemRed
@@ -114,6 +118,8 @@ struct Preferences {
             Preferences.hideZeroCTKey: Preferences.hideZeroCT,
             Preferences.markerLineWidthKey: Preferences.markerLineWidth,
             Preferences.markerColorNameKey: Preferences.markerColorName,
+            Preferences.showMarkLabelsKey: Preferences.showMarkLabels,
+            Preferences.showPeriodsKey: Preferences.showPeriods,
         ]
         return defaultPreferences
     }

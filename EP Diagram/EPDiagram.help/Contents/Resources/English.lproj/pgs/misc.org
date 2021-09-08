@@ -38,4 +38,4 @@
 
 - For questions, error reporting or suggestions contact mannd@epstudiossoftware.com
 
-- Website: https://www.epstudiossoftware.com
+- Website: https://www.epstudiossoftware.com/ep-diagram

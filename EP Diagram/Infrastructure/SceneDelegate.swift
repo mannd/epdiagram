@@ -41,11 +41,22 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
             // populate toolbar
 
             #endif
-            // This appears to be necessary for double click to open diagram on Mac (and ? on iPad too).
-            // FIXME: don't we still need this at least for iOS???
-//            self.scene(scene, openURLContexts: connectionOptions.urlContexts)
+            // This doesn't appear needed on Mac or iOS.  openURLContexts is called automatically.
+            // self.scene(scene, openURLContexts: connectionOptions.urlContexts)
         } else if (window?.rootViewController as? MacPreferencesViewController) != nil  {
             scene.title = L("Preferences")
+            //            scene.userActivity = session.stateRestorationActivity ?? NSUserActivity(activityType: AppDelegate.mainActivityType)
+
+            // See https://stackoverflow.com/questions/68614784/how-to-set-a-default-preferred-window-size-for-a-mac-catalyst-app
+            // Default preferences window size is too big, so resize new window.
+            scene.sizeRestrictions?.minimumSize = CGSize(width: 500, height: 600)
+            // This will be the "preferred size" i.e. the default size
+            scene.sizeRestrictions?.maximumSize = CGSize(width: 600, height: 800)
+
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+                // This allows window to be resized after it appears.
+                scene.sizeRestrictions?.maximumSize = CGSize(width: 9000, height: 9000)
+            }
         } else {
             fatalError("Unknown scene")
         }
@@ -62,7 +73,7 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         for context in URLContexts {
             print("context path", context.url.path)
             let url = context.url
-            if url.isFileURL && UIApplication.shared.canOpenURL(url) {
+            if url.isFileURL {
                 documentBrowserViewController.openDocument(url: url)
             }
          }

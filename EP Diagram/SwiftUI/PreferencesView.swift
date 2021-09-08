@@ -8,6 +8,8 @@
 
 import SwiftUI
 
+// TODO: Add showPeriodsKey in Version 1.2
+
 struct PreferencesView: View {
     @AppStorage(Preferences.lineWidthKey) var markLineWidth = Preferences.markLineWidth
     @AppStorage(Preferences.cursorLineWidthKey) var cursorLineWidth = Preferences.cursorLineWidth
@@ -16,6 +18,7 @@ struct PreferencesView: View {
     @AppStorage(Preferences.showIntervalsKey) var showIntervals: Bool = Preferences.showIntervals
     @AppStorage(Preferences.showArrowsKey) var showArrows: Bool = Preferences.showArrows
     @AppStorage(Preferences.showConductionTimesKey) var showConductionTimes: Bool = Preferences.showConductionTimes
+    @AppStorage(Preferences.showMarkLabelsKey) var showMarkLabels: Bool = Preferences.showMarkLabels
     @AppStorage(Preferences.snapMarksKey) var snapMarks: Bool = Preferences.snapMarks
     @AppStorage(Preferences.markStyleKey) var markStyle = Preferences.markStyle
     @AppStorage(Preferences.labelDescriptionVisibilityKey) var labelDescriptionVisibility = Preferences.labelDescriptionVisibility
@@ -47,9 +50,6 @@ struct PreferencesView: View {
 
     @State var showAutoLinkWarning = false
 
-    // TODO: Do we need observed object here to force updates?
-    // Preferences automatically update, and are saved independently,
-    // but maybe we need this to force save diagram.
     @ObservedObject var diagramController: DiagramModelController
     @Environment(\.presentationMode) private var presentationMode: Binding<PresentationMode>
 
@@ -94,6 +94,9 @@ struct PreferencesView: View {
                         }
                         Toggle(isOn: $hideZeroCT) {
                             Text("Hide conduction times if zero")
+                        }
+                        Toggle(isOn: $showMarkLabels) {
+                            Text("Show mark labels")
                         }
                         Toggle(isOn: $showMarkers) {
                             Text("Show markers")
@@ -193,7 +196,8 @@ struct PreferencesView: View {
                                         }))
                     }
 
-                }.onAppear {
+                }
+               .onAppear {
                     activeColor = Color.convertColorName(activeColorName) ?? activeColor
                     linkedColor = Color.convertColorName(linkedColorName) ?? linkedColor
                     selectedColor = Color.convertColorName(selectedColorName) ?? selectedColor
@@ -206,6 +210,7 @@ struct PreferencesView: View {
             }
             .navigationBarTitle("Preferences", displayMode: .inline)
             .navigationBarHidden(isRunningOnMac() ? true : false)
+
         }
         .navigationViewStyle(StackNavigationViewStyle())
     }

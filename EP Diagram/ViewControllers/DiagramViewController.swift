@@ -254,6 +254,18 @@ final class DiagramViewController: UIViewController {
     }
     lazy var styleMenu = UIMenu(title: L("Style..."), image: UIImage(systemName: "scribble"), children: [self.solidAction, self.dashedAction, self.dottedAction])
 
+    // Mark labels
+    lazy var leftLabelMarkAction = UIAction(title: L("Left")) { action in
+        self.ladderView.setSelectedMarksLabel(labelPosition: .left)
+    }
+    lazy var proximalLabelMarkAction = UIAction(title: L("Proximal")) { action in
+        self.ladderView.setSelectedMarksLabel(labelPosition: .proximal)
+    }
+    lazy var distalLabelMarkAction = UIAction(title: L("Distal")) { action in
+        self.ladderView.setSelectedMarksLabel(labelPosition: .distal)
+    }
+    lazy var labelMarkMenu = UIMenu(title: L("Label..."), image: UIImage(systemName: "pencil"), children: [self.leftLabelMarkAction, self.proximalLabelMarkAction, self.distalLabelMarkAction])
+
     lazy var boldEmphasisAction = UIAction(title: L("Bold")) { action in
         self.ladderView.setSelectedMarksEmphasis(emphasis: .bold)
     }
@@ -430,7 +442,7 @@ final class DiagramViewController: UIViewController {
         self.ladderView.removeRegion()
     }
 
-    lazy var markMenu = UIMenu(title: L("Mark Menu"), children: [self.styleMenu, self.emphasisMenu, self.impulseOriginMenu, self.blockMenu, self.straightenMenu, self.slantMenu, self.adjustYMenu, self.moveAction, self.adjustCLAction, self.rhythmAction, self.repeatCLMenu, self.copyMarksAction, self.repeatPatternAction, self.unlinkAction, self.snapAction, self.deleteAction])
+    lazy var markMenu = UIMenu(title: L("Mark Menu"), children: [self.styleMenu, self.emphasisMenu, self.impulseOriginMenu, self.blockMenu, self.labelMarkMenu, self.straightenMenu, self.slantMenu, self.adjustYMenu, self.moveAction, self.adjustCLAction, self.rhythmAction, self.repeatCLMenu, self.copyMarksAction, self.repeatPatternAction, self.unlinkAction, self.snapAction, self.deleteAction])
 
     lazy var labelMenu = [self.regionStyleMenu, self.editLabelAction, self.addRegionMenu, self.removeRegionAction, self.regionHeightMenu, self.adjustLeftMarginAction]
 
@@ -596,6 +608,11 @@ final class DiagramViewController: UIViewController {
         if requestSandboxExpansion {
             addDirectoryToSandbox(self)
         }
+        #else
+        // FIXME: Temporary
+        if requestSandboxExpansion {
+            addIOSDirectoryToSandbox()
+        }
         #endif
 
         setTitle()
@@ -629,8 +646,12 @@ final class DiagramViewController: UIViewController {
         print("*****DiagramViewController deinit()******")
     }
 
+    func addIOSDirectoryToSandbox() {
+        print("addIOSDirectoryToSandbox")
+    }
+
     override func updateUserActivityState(_ activity: NSUserActivity) {
-        os_log("debug: diagramViewController updateUserActivityState called", log: .debugging, type: .debug)
+//        os_log("debug: diagramViewController updateUserActivityState called", log: .debugging, type: .debug)
 
         super.updateUserActivityState(activity)
 
@@ -1022,7 +1043,7 @@ final class DiagramViewController: UIViewController {
     @objc func snapshotDiagram() {
         os_log("snapshotDiagram()", log: .action, type: .info)
         checkPhotoLibraryStatus()
-    }
+    }           
 
     func handleSnapshotDiagram() {
         let topRenderer = UIGraphicsImageRenderer(size: imageScrollView.bounds.size)
@@ -1161,7 +1182,7 @@ final class DiagramViewController: UIViewController {
 
     func editLabel() {
         guard let selectedRegion = ladderView.selectedLabelRegion() else { return }
-        UserAlert.showEditLabelAlert(viewController: self, region: selectedRegion, handler: { newLabel, newDescription in
+        UserAlert.showEditRegionLabelAlert(viewController: self, region: selectedRegion, handler: { newLabel, newDescription in
             self.ladderView.undoablySetLabel(newLabel, description: newDescription, forRegion: selectedRegion)
         })
     }
@@ -1624,6 +1645,7 @@ extension DiagramViewController {
         ladderView.showArrows = UserDefaults.standard.bool(forKey: Preferences.showArrowsKey)
         ladderView.showIntervals = UserDefaults.standard.bool(forKey: Preferences.showIntervalsKey)
         ladderView.showConductionTimes = UserDefaults.standard.bool(forKey: Preferences.showConductionTimesKey)
+        ladderView.showMarkLabels = UserDefaults.standard.bool(forKey: Preferences.showMarkLabelsKey)
         ladderView.snapMarks = UserDefaults.standard.bool(forKey: Preferences.snapMarksKey)
         ladderView.defaultMarkStyle = Mark.Style(rawValue: UserDefaults.standard.integer(forKey: Preferences.markStyleKey)) ?? .solid
         ladderView.showLabelDescription = TextVisibility(rawValue: UserDefaults.standard.integer(forKey: Preferences.labelDescriptionVisibilityKey)) ?? .invisible
@@ -1633,6 +1655,7 @@ extension DiagramViewController {
         cursorView.showMarkers = UserDefaults.standard.bool(forKey: Preferences.showMarkersKey)
         ladderView.hideZeroCT = UserDefaults.standard.bool(forKey: Preferences.hideZeroCTKey)
         cursorView.markerLineWidth = CGFloat(UserDefaults.standard.integer(forKey: Preferences.markerLineWidthKey))
+        ladderView.showPeriods = UserDefaults.standard.bool(forKey: Preferences.showPeriodsKey)
 
         // Colors
         if let caliperColorName = UserDefaults.standard.string(forKey: Preferences.caliperColorNameKey) {
@@ -1660,7 +1683,13 @@ extension DiagramViewController {
             cursorView.markerColor = UIColor.convertColorName(markerColorName) ?? Preferences.defaultMarkerColor
         }
         ladderView.updateLadderIntervals()
-        updateToolbarButtons()
+        // updatePreferences() can be called in the background, so update the UI on the main thread.
+        DispatchQueue.main.async { [weak self] in
+            if let self = self {
+                self.updateToolbarButtons()
+                self.setViewsNeedDisplay()
+            }
+        }
     }
 
     @objc func resolveFileConflicts() {
@@ -1728,8 +1757,8 @@ extension DiagramViewController: UIDropInteractionDelegate {
 extension DiagramViewController: NSUserActivityDelegate {
     func userActivityWillSave(_ userActivity: NSUserActivity) {
 
-        let currentDocumentURL: String = currentDocument?.fileURL.lastPathComponent ?? ""
-        print("currentDocumentURL", currentDocumentURL)
+//        let currentDocumentURL: String = currentDocument?.fileURL.lastPathComponent ?? ""
+//        print("currentDocumentURL", currentDocumentURL)
         if documentIsClosing {
             // intercept and kill userInfo if we closed the document with the close button
             userActivity.userInfo = nil
