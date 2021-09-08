@@ -15,10 +15,9 @@ enum Sandbox {
             return
         }
         #if targetEnvironment(macCatalyst)
-        // TODO: test add .minimalBookmark to both options
-        let bookmarkOptions: URL.BookmarkCreationOptions = [.withSecurityScope]
+        let bookmarkOptions: URL.BookmarkCreationOptions = [.withSecurityScope, .minimalBookmark]
         #else
-        let bookmarkOptions: URL.BookmarkCreationOptions = []
+        let bookmarkOptions: URL.BookmarkCreationOptions = [.minimalBookmark]
         #endif
         let key = getAccessDirectoryKey(for: url)
         if let bookmark = try? url.bookmarkData(options: bookmarkOptions, includingResourceValuesForKeys: nil, relativeTo: nil) {

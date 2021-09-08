@@ -41,9 +41,8 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
             // populate toolbar
 
             #endif
-            // This appears to be necessary for double click to open diagram on Mac (and ? on iPad too).
-            // FIXME: don't we still need this at least for iOS???
-            //            self.scene(scene, openURLContexts: connectionOptions.urlContexts)
+            // This doesn't appear needed on Mac or iOS.  openURLContexts is called automatically.
+            // self.scene(scene, openURLContexts: connectionOptions.urlContexts)
         } else if (window?.rootViewController as? MacPreferencesViewController) != nil  {
             scene.title = L("Preferences")
             //            scene.userActivity = session.stateRestorationActivity ?? NSUserActivity(activityType: AppDelegate.mainActivityType)
@@ -74,7 +73,7 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         for context in URLContexts {
             print("context path", context.url.path)
             let url = context.url
-            if url.isFileURL && UIApplication.shared.canOpenURL(url) {
+            if url.isFileURL {
                 documentBrowserViewController.openDocument(url: url)
             }
          }
