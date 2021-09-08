@@ -1683,8 +1683,13 @@ extension DiagramViewController {
             cursorView.markerColor = UIColor.convertColorName(markerColorName) ?? Preferences.defaultMarkerColor
         }
         ladderView.updateLadderIntervals()
-        updateToolbarButtons()
-        setViewsNeedDisplay()
+        // updatePreferences() can be called in the background, so update the UI on the main thread.
+        DispatchQueue.main.async { [weak self] in
+            if let self = self {
+                self.updateToolbarButtons()
+                self.setViewsNeedDisplay()
+            }
+        }
     }
 
     @objc func resolveFileConflicts() {
