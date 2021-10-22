@@ -101,7 +101,6 @@ extension Region: Hashable {
     }
 }
 
-
 // MARK: - enums
 
 /// The two parts of a region.
@@ -110,7 +109,7 @@ enum RegionSection {
     case markSection
 }
 
-/// All regions are divided vertically into three parts...
+/// LIke Gaul, all regions are divided vertically into three parts...
 ///
 /// Used to determine what part of a region is tapped.
 enum RegionDivision {

@@ -60,7 +60,6 @@ struct Segment: Codable, Equatable {
         }
         return proximal
     }
-
 }
 
 

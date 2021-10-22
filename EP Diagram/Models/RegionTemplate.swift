@@ -8,6 +8,7 @@
 
 import UIKit
 
+/// A template from which a Region can be created (copied).
 struct RegionTemplate: Codable, Equatable, Hashable {
     var name: String = ""
     var description: String = ""

@@ -336,4 +336,44 @@ class MarkTests: XCTestCase {
         let linkedMarkIDs = LinkedMarkIDs()
         XCTAssertEqual(linkedMarkIDs.count, 0)
     }
+
+    func testMarkLabel() {
+        XCTAssertNil(Mark.MarkLabel.defaultValue)
+    }
+
+    func testSwapAnchors() {
+        let mark = Mark()
+        XCTAssertEqual(mark.anchor, .middle)
+        mark.swapAnchors()
+        // middle anchor doesn't get swapped
+        XCTAssertEqual(mark.anchor, .middle)
+        mark.anchor = .proximal
+        mark.swapAnchors()
+        XCTAssertEqual(mark.anchor, .distal)
+        mark.swapAnchors()
+        XCTAssertEqual(mark.anchor, .proximal)
+    }
+
+    func testGetAnchorPosition() {
+        let mark = Mark()
+        XCTAssertEqual(mark.getAnchorPosition(), mark.midpoint())
+        mark.anchor = .proximal
+        XCTAssertEqual(mark.getAnchorPosition(), mark.segment.distal.clampY())
+        mark.anchor = .distal
+        XCTAssertEqual(mark.getAnchorPosition(), mark.segment.proximal.clampY())
+    }
+
+    func testClampY() {
+        let point1 = CGPoint(x: 0, y: 1)
+        XCTAssertEqual(point1.clampY(), point1)
+        let point2 = CGPoint(x: 0, y: 0.5)
+        XCTAssertEqual(point2.clampY(), point2)
+        let point3 = CGPoint(x: 0.2, y: 0.5)
+        XCTAssertEqual(point3.clampY(), point3)
+        let point4 = CGPoint(x: 0, y: 1.5)
+        XCTAssertEqual(point4.clampY(), point1)
+        // Below will crash due to precondition failure.
+        // let point5 = CGPoint(x: 0, y: 1)
+        // XCTAssertEqual(point5.clampY(min: 1, max: 0), point5)
+    }
 }

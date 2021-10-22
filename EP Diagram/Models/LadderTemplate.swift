@@ -8,6 +8,7 @@
 
 import UIKit
 
+/// A template from which a Ladder can be created (copied).
 struct LadderTemplate: Codable, Equatable {
     private(set) var id = UUID()
 
