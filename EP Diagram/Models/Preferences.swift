@@ -16,6 +16,7 @@ struct Preferences {
     static let caliperLineWidthKey = "defaultCaliperLineWidthKey"
     static let showImpulseOriginKey = "defaultShowImpuseOriginKey"
     static let impulseOriginContiguousKey = "defaultImpulseOriginContiguousKey"
+    static let impulseOriginLargeKey = "defaultImpulseOriginLargeKey"
     static let showBlockKey = "defaultShowBlockKey"
     static let showIntervalsKey = "defaultShowIntervalsKey"
     static let showArrowsKey = "defaultShowArrowsKey"
@@ -53,6 +54,7 @@ struct Preferences {
     static var cursorLineWidth: Int = 1
     static var showImpulseOrigin = true
     static var impulseOriginContiguous = false
+    static var impulseOriginLarge = false
     static var showBlock = true
     static var showArrows = false
     static var showIntervals = true
@@ -123,6 +125,7 @@ struct Preferences {
             Preferences.showMarkLabelsKey: Preferences.showMarkLabels,
             Preferences.showPeriodsKey: Preferences.showPeriods,
             Preferences.impulseOriginContiguousKey: Preferences.impulseOriginContiguous,
+            Preferences.impulseOriginLargeKey: Preferences.impulseOriginLarge,
         ]
         return defaultPreferences
     }

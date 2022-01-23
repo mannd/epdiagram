@@ -83,6 +83,7 @@ final class LadderView: ScaledView {
     var markLineWidth: CGFloat = 2
     var showImpulseOrigin = true
     var impulseOriginContiguous = false
+    var impulseOriginLarge = false
     var showBlock = true
     var showArrows = false
     var showIntervals = true
@@ -2112,9 +2113,11 @@ final class LadderView: ScaledView {
 
     func drawImpulseOrigin(context: CGContext, mark: Mark, segment: Segment) {
         guard showImpulseOrigin else { return }
-        // TODO: have preference or larger impulse origin, ? 10 or 15 vs 5?
-        let radius: CGFloat = 5
-        var separation: CGFloat = 10
+        var radius: CGFloat = 5
+        if impulseOriginLarge {
+            radius = 10
+        }
+        var separation: CGFloat = 5 + radius
         if impulseOriginContiguous {
             separation = radius / 2.0
         }
