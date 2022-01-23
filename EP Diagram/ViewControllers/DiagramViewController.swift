@@ -1642,6 +1642,7 @@ extension DiagramViewController {
         cursorView.caliperLineWidth = CGFloat(UserDefaults.standard.integer(forKey: Preferences.caliperLineWidthKey))
         ladderView.showBlock = UserDefaults.standard.bool(forKey: Preferences.showBlockKey)
         ladderView.showImpulseOrigin = UserDefaults.standard.bool(forKey: Preferences.showImpulseOriginKey)
+        ladderView.impulseOriginContiguous = UserDefaults.standard.bool(forKey: Preferences.impulseOriginContiguousKey)
         ladderView.showArrows = UserDefaults.standard.bool(forKey: Preferences.showArrowsKey)
         ladderView.showIntervals = UserDefaults.standard.bool(forKey: Preferences.showIntervalsKey)
         ladderView.showConductionTimes = UserDefaults.standard.bool(forKey: Preferences.showConductionTimesKey)

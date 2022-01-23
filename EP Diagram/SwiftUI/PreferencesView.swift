@@ -16,6 +16,7 @@ struct PreferencesView: View {
     @AppStorage(Preferences.showImpulseOriginKey) var showImpulseOrigin: Bool = Preferences.showImpulseOrigin
     @AppStorage(Preferences.showBlockKey) var showBlock: Bool = Preferences.showBlock
     @AppStorage(Preferences.showIntervalsKey) var showIntervals: Bool = Preferences.showIntervals
+    @AppStorage(Preferences.impulseOriginContiguousKey) var impulseOriginContiguous: Bool = Preferences.impulseOriginContiguous
     @AppStorage(Preferences.showArrowsKey) var showArrows: Bool = Preferences.showArrows
     @AppStorage(Preferences.showConductionTimesKey) var showConductionTimes: Bool = Preferences.showConductionTimes
     @AppStorage(Preferences.showMarkLabelsKey) var showMarkLabels: Bool = Preferences.showMarkLabels
@@ -148,6 +149,10 @@ struct PreferencesView: View {
                             Toggle(isOn: $showImpulseOrigin) {
                                 Text("Show impulse origin")
                             }
+                            Toggle(isOn: $impulseOriginContiguous) {
+                                Text("Impulse origin contiguous with mark")
+                            }
+
                             Toggle(isOn: $showBlock) {
                                 Text("Show block")
                             }
