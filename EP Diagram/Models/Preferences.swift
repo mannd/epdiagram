@@ -28,7 +28,8 @@ struct Preferences {
     static let leftMarginKey = "defaultLeftMarginKey"
     static let playSoundsKey = "defaultPlaySoundsKey"
     static let hideMarksKey = "defaultHideMarksKey"
-    static let doubleLineBlockMarkerKey = "defaultDoubleLineBlockMarker"
+    static let doubleLineBlockMarkerKey = "defaultDoubleLineBlockMarkerKey"
+    static let rightAngleBlockMarkerKey = "defaultRightAngleBlockMarkerKey"
     static let showMarkersKey = "defaultShowMarkersKey"
     static let hideZeroCTKey = "defaultHideZeroCTKey"
     static let markerLineWidthKey = "defaultMarkerLineWidthKey"
@@ -67,6 +68,7 @@ struct Preferences {
     static var hideMarks: Bool = false
     static var caliperLineWidth: Int = 1
     static var doubleLineBlockMarker: Bool = true
+    static var rightAngleBlockMarker: Bool = false
     static var showMarkers: Bool = false
     static var hideZeroCT: Bool = false
     static var markerLineWidth: Int = 2
@@ -118,6 +120,7 @@ struct Preferences {
             Preferences.activeColorNameKey: Preferences.activeColorName,
             Preferences.showArrowsKey: Preferences.showArrows,
             Preferences.doubleLineBlockMarkerKey: Preferences.doubleLineBlockMarker,
+            Preferences.rightAngleBlockMarkerKey: Preferences.rightAngleBlockMarker,
             Preferences.showMarkersKey: Preferences.showMarkers,
             Preferences.hideZeroCTKey: Preferences.hideZeroCT,
             Preferences.markerLineWidthKey: Preferences.markerLineWidth,

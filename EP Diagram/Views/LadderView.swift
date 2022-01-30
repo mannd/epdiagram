@@ -99,6 +99,7 @@ final class LadderView: ScaledView {
     var showLabelDescription: TextVisibility = .invisible
     var marksAreHidden: Bool = false
     var doubleLineBlockMarker: Bool = true
+    var rightAngleBlockMarker: Bool = false
     var hideZeroCT: Bool = false
     var showPeriods: Bool = false // Not used until Version 1.2
 
@@ -1907,16 +1908,27 @@ final class LadderView: ScaledView {
         context.drawPath(using: .fillStroke)
     }
 
-    func drawArrowHead(context: CGContext, start: CGPoint, end: CGPoint, pointerLineLength: CGFloat, arrowAngle: CGFloat) {
-        context.move(to: end)
+    func drawArrowHead(context: CGContext, start: CGPoint, end: CGPoint, pointerLineLength: CGFloat, arrowAngle: CGFloat, offset: CGFloat = 0) {
+        var end = end
+        if offset > 0 {
+            end = getOffsetPoint(start: start, end: end, offset: offset)
+        }
         let startEndAngle = atan((end.y - start.y) / (end.x - start.x)) + ((end.x - start.x) < 0 ? CGFloat(Double.pi) : 0)
-        let arrowLine1 = CGPoint(x: end.x + pointerLineLength * cos(CGFloat(Double.pi) - startEndAngle + arrowAngle), y: end.y - pointerLineLength * sin(CGFloat(Double.pi) - startEndAngle + arrowAngle))
-        let arrowLine2 = CGPoint(x: end.x + pointerLineLength * cos(CGFloat(Double.pi) - startEndAngle - arrowAngle), y: end.y - pointerLineLength * sin(CGFloat(Double.pi) - startEndAngle - arrowAngle))
-
+        let arrowLine1 = normalizePoint(CGPoint(x: end.x + pointerLineLength * cos(CGFloat(Double.pi) - startEndAngle + arrowAngle), y: end.y - pointerLineLength * sin(CGFloat(Double.pi) - startEndAngle + arrowAngle)))
+        let arrowLine2 = normalizePoint(CGPoint(x: end.x + pointerLineLength * cos(CGFloat(Double.pi) - startEndAngle - arrowAngle), y: end.y - pointerLineLength * sin(CGFloat(Double.pi) - startEndAngle - arrowAngle)))
+        context.move(to: end)
         context.addLine(to: arrowLine1)
         context.move(to: end)
         context.addLine(to: arrowLine2)
         context.strokePath()
+    }
+
+    // see https://math.stackexchange.com/questions/175896/finding-a-point-along-a-line-a-certain-distance-away-from-another-point
+    private func getOffsetPoint(start: CGPoint, end: CGPoint, offset: CGFloat) -> CGPoint {
+        let distance = Segment(proximal: start, distal: end).length
+        let x = end.x - (offset * (start.x - end.x)) / distance
+        let y = end.y - (offset * (start.y - end.y)) / distance
+        return CGPoint(x: x, y: y)
     }
 
     // For debugging only
@@ -1937,13 +1949,10 @@ final class LadderView: ScaledView {
     func drawConductionDirection(forMark mark: Mark, segment: Segment, context: CGContext) {
         guard showArrows else { return }
         let arrowLineLength: CGFloat = 20
-        let halfArrowLineLength: CGFloat = 10 // make arrowLineLength / 2
         switch mark.lateEndpoint {
         case .distal:
-            if segment.distal.x < leftMargin + halfArrowLineLength { return }
             drawArrowHead(context: context, start: segment.proximal, end: segment.distal, pointerLineLength: arrowLineLength, arrowAngle: arrowHeadAngle)
         case .proximal:
-            if segment.proximal.x < leftMargin + halfArrowLineLength { return }
             drawArrowHead(context: context, start: segment.distal, end: segment.proximal, pointerLineLength: arrowLineLength, arrowAngle: arrowHeadAngle)
         case .none, .auto, .random:
             break // this is undecided unless manually set
@@ -2083,32 +2092,66 @@ final class LadderView: ScaledView {
 
     func drawBlock(context: CGContext, mark: Mark, segment: Segment) {
         guard showBlock else { return }
+        if rightAngleBlockMarker {
+            drawRightAngleBlock(context: context, mark: mark, segment: segment)
+            return
+        }
         let blockLength: CGFloat = 20
-        let halfBlockLength: CGFloat = 10  // make blockLength / 2
         let blockSeparation: CGFloat = 5
         switch mark.blockSite {
         case .none:
             return
         case .distal:
-            if segment.distal.x < leftMargin + halfBlockLength { return }
-            context.move(to: CGPoint(x: segment.distal.x - blockLength / 2, y: segment.distal.y))
+            context.move(to: normalizePoint(CGPoint(x: segment.distal.x - blockLength / 2, y: segment.distal.y)))
             context.addLine(to: CGPoint(x: segment.distal.x + blockLength / 2, y: segment.distal.y))
             if doubleLineBlockMarker {
-                context.move(to: CGPoint(x: segment.distal.x - blockLength / 2, y: segment.distal.y + blockSeparation))
+                context.move(to: normalizePoint(CGPoint(x: segment.distal.x - blockLength / 2, y: segment.distal.y + blockSeparation)))
                 context.addLine(to: CGPoint(x: segment.distal.x + blockLength / 2, y: segment.distal.y + blockSeparation))
             }
         case .proximal:
-            if segment.proximal.x < leftMargin + halfBlockLength { return }
-            context.move(to: CGPoint(x: segment.proximal.x - blockLength / 2, y: segment.proximal.y))
+            context.move(to: normalizePoint(CGPoint(x: segment.proximal.x - blockLength / 2, y: segment.proximal.y)))
             context.addLine(to: CGPoint(x: segment.proximal.x + blockLength / 2, y: segment.proximal.y))
             if doubleLineBlockMarker {
-                context.move(to: CGPoint(x: segment.proximal.x - blockLength / 2, y: segment.proximal.y - blockSeparation))
+                context.move(to: normalizePoint(CGPoint(x: segment.proximal.x - blockLength / 2, y: segment.proximal.y - blockSeparation)))
                 context.addLine(to: CGPoint(x: segment.proximal.x + blockLength / 2, y: segment.proximal.y - blockSeparation))
             }
         case .auto, .random:
             fatalError("Block site set to auto or random.")
         }
         context.strokePath()
+    }
+
+    func drawRightAngleBlock(context: CGContext, mark: Mark, segment: Segment) {
+        // By using drawArrowHead, this is equivalent to a 20 point normal block marker line.
+        let blockLength: CGFloat = 10
+        let blockSeparation: CGFloat = 5
+        let rightAngle = Double.pi / 2.0
+        var segmentStart: CGPoint
+        var segmentEnd: CGPoint
+        switch mark.blockSite {
+        case .none:
+            return
+        case .distal:
+            segmentStart = segment.proximal
+            segmentEnd = segment.distal
+        case .proximal:
+            segmentStart = segment.distal
+            segmentEnd = segment.proximal
+        case .auto, .random:
+            fatalError("Block site set to auto or random.")
+        }
+        drawArrowHead(context: context, start: segmentStart, end: segmentEnd, pointerLineLength: blockLength, arrowAngle: rightAngle)
+        if doubleLineBlockMarker {
+            drawArrowHead(context: context, start: segmentStart, end: segmentEnd, pointerLineLength: blockLength, arrowAngle: rightAngle, offset: blockSeparation)
+        }
+    }
+
+    private func normalizeX(_ x: CGFloat) -> CGFloat {
+        return max(leftMargin, x)
+    }
+
+    private func normalizePoint(_ p: CGPoint) -> CGPoint {
+        return CGPoint(x: max(leftMargin, p.x), y: p.y)
     }
 
     func drawImpulseOrigin(context: CGContext, mark: Mark, segment: Segment) {
