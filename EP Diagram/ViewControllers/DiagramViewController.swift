@@ -1654,6 +1654,7 @@ extension DiagramViewController {
         playSounds = UserDefaults.standard.bool(forKey: Preferences.playSoundsKey)
         marksAreHidden = UserDefaults.standard.bool(forKey: Preferences.hideMarksKey)
         ladderView.doubleLineBlockMarker = UserDefaults.standard.bool(forKey: Preferences.doubleLineBlockMarkerKey)
+        ladderView.rightAngleBlockMarker = UserDefaults.standard.bool(forKey: Preferences.rightAngleBlockMarkerKey)
         cursorView.showMarkers = UserDefaults.standard.bool(forKey: Preferences.showMarkersKey)
         ladderView.hideZeroCT = UserDefaults.standard.bool(forKey: Preferences.hideZeroCTKey)
         cursorView.markerLineWidth = CGFloat(UserDefaults.standard.integer(forKey: Preferences.markerLineWidthKey))

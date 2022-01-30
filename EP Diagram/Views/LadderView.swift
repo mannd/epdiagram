@@ -99,6 +99,7 @@ final class LadderView: ScaledView {
     var showLabelDescription: TextVisibility = .invisible
     var marksAreHidden: Bool = false
     var doubleLineBlockMarker: Bool = true
+    var rightAngleBlockMarker: Bool = false
     var hideZeroCT: Bool = false
     var showPeriods: Bool = false // Not used until Version 1.2
 
