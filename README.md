@@ -37,7 +37,7 @@ this app.
 
 ## Copyright
 
-Copyright © 2019-2021 [EP Studios, Inc.](http://www.epstudiossoftware.com)
+Copyright © 2019-2022 [EP Studios, Inc.](http://www.epstudiossoftware.com)
 
 ## Author
 
