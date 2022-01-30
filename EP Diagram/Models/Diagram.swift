@@ -10,6 +10,7 @@ import UIKit
 import BetterCodable
 import os.log
 
+/// A Diagram contains a Ladder and possibly an image.  It is the fundamental document of EP Diagram.
 struct Diagram: Codable {
     var name: String? // Not used except for samples.  document.name used instead.
     var longDescription: String // Not used except for samples.
@@ -29,7 +30,11 @@ struct Diagram: Codable {
     }
 
     // Implement updates to Diagram using this sort of strategy and BetterCodable wrappers.
-    @DefaultCodable<FileVersion> var fileVersion: Int = 2
+    // Note that app versions are backward compatible, i.e. will read all past file versions,
+    // but not forward compatible, i.e. an app version designed to read up to file version 2 won't
+    // be able to read file version 3.
+    // fileVersion 1 was for app versions 1 up to 1.1.0.
+    @DefaultCodable<FileVersion> var fileVersion: Int = 2 // For version 1.1.0 and above.
 
     struct FileVersion: DefaultCodableStrategy {
         typealias DefaultValue = Int
@@ -57,6 +62,7 @@ struct Diagram: Codable {
         return Diagram(name: L("Scrollable Blank Diagram"), description: L("Wide scrollable blank image"), image: UIImage.emptyImage(size: CGSize(width: 1, height: 1), color: UIColor.systemTeal), ladder: Ladder.defaultLadder())
     }
 
+    // Consider expanding this list, or adding sample diagrams with real ladders, not the defualt blank ladder.
     static func sampleDiagrams() -> [Diagram] {
         let sampleDiagrams: [Diagram] = [
             Diagram(name: L("Normal ECG"), description: L("Just a normal ECG"), image: UIImage(named: "SampleECG")!, ladder: Ladder.defaultLadder()),

@@ -8,7 +8,7 @@
 
 import UIKit
 
-/// A caliper that is used to calibrate a diagram.  It has move limited functionality than the
+/// A caliper that is used to calibrate a diagram.  It has more limited functionality than the
 /// calipers in **EP Calipers**, because its role is more limited.
 struct Caliper {
     enum Component {

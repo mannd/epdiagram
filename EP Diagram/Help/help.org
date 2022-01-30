@@ -191,7 +191,7 @@ To delete a mark, simply double tap it.  You can delete multiple marks, or all t
 *** Linked marks
 Once marks are linked, moving one linked mark will also move the marks it is linked to.  In order to unlink marks, you can use the *Undo* button, or delete and then re-add a linked mark, or use edit mode.
 *** Block and impulse origin
-In the course of adding, deleting, and moving marks, if the app preferences are set to /show impulse origin/ or /show block/, the app will try to determine automatically where the impulse origin is and where block is, depending on the direction of the marks and their linking, and will show this with symbols as seen below.  You can also manually set impulse origin and block using edit mode.
+In the course of adding, deleting, and moving marks, if the app preferences are set to /show impulse origin/ or /show block/, the app will try to determine automatically where the impulse origin is and where block is, depending on the direction of the marks and their linking, and will show this with symbols as seen below.  You can also manually set impulse origin and block using edit mode.  You can change the styling and positioning of the impulse origin and block symbols in app preferences.
 
 #+CAPTION: Impulse origin and block
 [[./img/impulse_origin_block.png]]

@@ -83,21 +83,25 @@ final class Mark: Codable {
         return .none
     }
 
-    // MARK: - version 1.1.0 additions to MARK
+    // MARK: - version 1.1.0 additions to Mark
     @DefaultCodable<MarkLabel> var leftLabel: String?  = nil
     @DefaultCodable<MarkLabel> var proximalLabel: String?  = nil
     @DefaultCodable<MarkLabel> var distalLabel: String?  = nil
 
+    /// A String label for Mark, located at a LabelPosition
     struct MarkLabel: DefaultCodableStrategy {
         typealias DefaultValue = String?
         static var defaultValue: DefaultValue { return nil }
     }
 
+    /// Where a MarkLabel is located in relation to a Mark
     enum LabelPosition: Int, Codable, CaseIterable {
         case left
         case proximal
         case distal
     }
+
+    // MARK: - version 1.2.0 additions to Mark
 
     @DefaultEmptyArray var periods: [Period] = []
 //    @DefaultFalse var isHidden: Bool = true
@@ -130,7 +134,7 @@ final class Mark: Codable {
         //os_log("Mark deinitied %s", log: OSLog.debugging, type: .debug, debugDescription)
     }
 
-    /// Returns midpoint of mark segment  as `CGPoint`.
+    /// Returns midpoint of mark segment  as CGPoint`.
     /// - Returns:  midpoint of the mark segment
     func midpoint() -> CGPoint {
         let segment = self.segment.normalized()
@@ -144,7 +148,6 @@ final class Mark: Codable {
     func midpointX() -> CGFloat {
         return (segment.distal.x - segment.proximal.x) / 2.0 + segment.proximal.x
     }
-
 
     /// Swaps the proximal and distal ends of the mark segment.
     func swapEnds() {
@@ -165,7 +168,7 @@ final class Mark: Codable {
     }
 
     /// Returns position of anchor in region coordinates.
-    /// - Returns:  Returns anchor position as `CGPoint`
+    /// - Returns:  Returns anchor position as CGPoint`
     func getAnchorPosition() -> CGPoint {
         let anchorPosition: CGPoint
         switch anchor {

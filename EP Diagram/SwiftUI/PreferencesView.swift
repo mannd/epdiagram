@@ -16,6 +16,8 @@ struct PreferencesView: View {
     @AppStorage(Preferences.showImpulseOriginKey) var showImpulseOrigin: Bool = Preferences.showImpulseOrigin
     @AppStorage(Preferences.showBlockKey) var showBlock: Bool = Preferences.showBlock
     @AppStorage(Preferences.showIntervalsKey) var showIntervals: Bool = Preferences.showIntervals
+    @AppStorage(Preferences.impulseOriginContiguousKey) var impulseOriginContiguous: Bool = Preferences.impulseOriginContiguous
+    @AppStorage(Preferences.impulseOriginLargeKey) var impulseOriginLarge: Bool = Preferences.impulseOriginLarge
     @AppStorage(Preferences.showArrowsKey) var showArrows: Bool = Preferences.showArrows
     @AppStorage(Preferences.showConductionTimesKey) var showConductionTimes: Bool = Preferences.showConductionTimes
     @AppStorage(Preferences.showMarkLabelsKey) var showMarkLabels: Bool = Preferences.showMarkLabels
@@ -26,6 +28,7 @@ struct PreferencesView: View {
     @AppStorage(Preferences.hideMarksKey) var hideMarks = Preferences.hideMarks
     @AppStorage(Preferences.caliperLineWidthKey) var caliperLineWidth = Preferences.caliperLineWidth
     @AppStorage(Preferences.doubleLineBlockMarkerKey) var doubleLineBlockerMarker = Preferences.doubleLineBlockMarker
+    @AppStorage(Preferences.rightAngleBlockMarkerKey) var rightAngleBlockMarker = Preferences.rightAngleBlockMarker
     @AppStorage(Preferences.showMarkersKey) var showMarkers = Preferences.showMarkers
     @AppStorage(Preferences.hideZeroCTKey) var hideZeroCT = Preferences.hideZeroCT
     @AppStorage(Preferences.markerLineWidthKey) var markerLineWidth = Preferences.markerLineWidth
@@ -148,6 +151,12 @@ struct PreferencesView: View {
                             Toggle(isOn: $showImpulseOrigin) {
                                 Text("Show impulse origin")
                             }
+                            Toggle(isOn: $impulseOriginContiguous) {
+                                Text("Impulse origin contiguous with mark")
+                            }
+                            Toggle(isOn: $impulseOriginLarge) {
+                                Text("Large impulse origin symbol")
+                            }
                             Toggle(isOn: $showBlock) {
                                 Text("Show block")
                             }
@@ -156,8 +165,11 @@ struct PreferencesView: View {
                                 Toggle(isOn: $doubleLineBlockerMarker) {
                                     Text("Double line block marker")
                                 }
+                                Toggle(isOn: $rightAngleBlockMarker) {
+                                    Text("Right angle block marker")
+                                }
                                 Toggle(isOn: $showArrows) {
-                                    Text("Show direction of conduction")
+                                    Text("Show direction of conduction arrows")
                                 }
 
                                 Toggle(isOn: $snapMarks) {
