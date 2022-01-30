@@ -204,11 +204,6 @@ final class LadderView: ScaledView {
         initializeRegions()
         removeConnectedMarks()
 
-        // Draw border around view.
-        layer.masksToBounds = true
-        layer.borderColor = UIColor.systemBlue.cgColor
-        layer.borderWidth = 2
-
         // Set up touches.
         let singleTapRecognizer = UITapGestureRecognizer(target: self, action: #selector(self.singleTap))
         singleTapRecognizer.numberOfTapsRequired = 1
