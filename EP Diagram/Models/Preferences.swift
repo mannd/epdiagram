@@ -35,6 +35,7 @@ struct Preferences {
     static let markerLineWidthKey = "defaultMarkerLineWidthKey"
     static let showMarkLabelsKey = "defaultShowMarkLabelsKey"
     static let showPeriodsKey = "defaultShowPeriodsKey"
+    static let imageViewHeightKey = "defaultImageViewHeight"
 
     // keys not modifiable by user
     static let notFirstRunKey = "defaultNotFirstRunKey"
@@ -74,6 +75,7 @@ struct Preferences {
     static var markerLineWidth: Int = 2
     static var showMarkLabels: Bool = true
     static var showPeriods: Bool = false
+    static var imageViewHeight: CGFloat = 0.5
 
     // default Colors
     static let defaultActiveColor = UIColor.systemRed
@@ -129,6 +131,7 @@ struct Preferences {
             Preferences.showPeriodsKey: Preferences.showPeriods,
             Preferences.impulseOriginContiguousKey: Preferences.impulseOriginContiguous,
             Preferences.impulseOriginLargeKey: Preferences.impulseOriginLarge,
+            Preferences.imageViewHeightKey: Preferences.imageViewHeight,
         ]
         return defaultPreferences
     }

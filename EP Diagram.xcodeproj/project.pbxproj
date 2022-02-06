@@ -29,6 +29,7 @@
 		8E33927B262E6DE6002A7447 /* Preferences.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 8E33927A262E6DE6002A7447 /* Preferences.storyboard */; platformFilter = maccatalyst; };
 		8E339280262E7655002A7447 /* MacPreferencesViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8E33927F262E7655002A7447 /* MacPreferencesViewController.swift */; };
 		8E35924924BE9B27001E23D5 /* DiagramIO.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8E35924824BE9B27001E23D5 /* DiagramIO.swift */; };
+		8E36B13627B054E900FFAFA6 /* Comparable+clamped.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8E36B13527B054E900FFAFA6 /* Comparable+clamped.swift */; };
 		8E3AD1372459CABF0085BDD4 /* LocationInLadder.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8E3AD1362459CABF0085BDD4 /* LocationInLadder.swift */; };
 		8E3C911E2602FA02001A14BA /* IntervalTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8E3C911D2602FA02001A14BA /* IntervalTests.swift */; };
 		8E4086E425F30383005F53CB /* RhythmView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8E4086E325F30383005F53CB /* RhythmView.swift */; };
@@ -67,6 +68,7 @@
 		8E8248DD23B53B55001A85F9 /* SeparatorView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8E8248DC23B53B55001A85F9 /* SeparatorView.swift */; };
 		8E856CF224EDC53D0064121F /* CGPoint+clampY.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8E856CF124EDC53D0064121F /* CGPoint+clampY.swift */; };
 		8E856CF424EDC5E10064121F /* Segment.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8E856CF324EDC5E10064121F /* Segment.swift */; };
+		8E92F5B227B01F8D00E8AF29 /* NSLayoutConstraint+setMultiplier.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8E92F5B127B01F8D00E8AF29 /* NSLayoutConstraint+setMultiplier.swift */; };
 		8E93CA7C25A00C0E00C74F1F /* UserAlert.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8E93CA7B25A00C0E00C74F1F /* UserAlert.swift */; };
 		8E93CA8D25A0157F00C74F1F /* Transform.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8E93CA8C25A0157F00C74F1F /* Transform.swift */; };
 		8E93CA9225A0227100C74F1F /* Global.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8E93CA9125A0227100C74F1F /* Global.swift */; };
@@ -178,6 +180,7 @@
 		8E33927A262E6DE6002A7447 /* Preferences.storyboard */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; path = Preferences.storyboard; sourceTree = "<group>"; };
 		8E33927F262E7655002A7447 /* MacPreferencesViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MacPreferencesViewController.swift; sourceTree = "<group>"; };
 		8E35924824BE9B27001E23D5 /* DiagramIO.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DiagramIO.swift; sourceTree = "<group>"; };
+		8E36B13527B054E900FFAFA6 /* Comparable+clamped.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Comparable+clamped.swift"; sourceTree = "<group>"; };
 		8E3AD1362459CABF0085BDD4 /* LocationInLadder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocationInLadder.swift; sourceTree = "<group>"; };
 		8E3C911D2602FA02001A14BA /* IntervalTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IntervalTests.swift; sourceTree = "<group>"; };
 		8E4086E325F30383005F53CB /* RhythmView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RhythmView.swift; sourceTree = "<group>"; };
@@ -223,6 +226,7 @@
 		8E8248DC23B53B55001A85F9 /* SeparatorView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SeparatorView.swift; sourceTree = "<group>"; };
 		8E856CF124EDC53D0064121F /* CGPoint+clampY.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "CGPoint+clampY.swift"; sourceTree = "<group>"; };
 		8E856CF324EDC5E10064121F /* Segment.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Segment.swift; sourceTree = "<group>"; };
+		8E92F5B127B01F8D00E8AF29 /* NSLayoutConstraint+setMultiplier.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "NSLayoutConstraint+setMultiplier.swift"; sourceTree = "<group>"; };
 		8E93CA7B25A00C0E00C74F1F /* UserAlert.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserAlert.swift; sourceTree = "<group>"; };
 		8E93CA8C25A0157F00C74F1F /* Transform.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Transform.swift; sourceTree = "<group>"; };
 		8E93CA9125A0227100C74F1F /* Global.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Global.swift; sourceTree = "<group>"; };
@@ -355,6 +359,8 @@
 				8EC5D28C256B154E00F49865 /* UIView+PinToInside.swift */,
 				8ED3651E261B66A900F2A2B6 /* UIView+findViewController.swift */,
 				8EF9CA25264F016C007AA24A /* UIWindow+nsWindow.swift */,
+				8E92F5B127B01F8D00E8AF29 /* NSLayoutConstraint+setMultiplier.swift */,
+				8E36B13527B054E900FFAFA6 /* Comparable+clamped.swift */,
 			);
 			path = Extensions;
 			sourceTree = "<group>";
@@ -774,6 +780,7 @@
 				8E856CF224EDC53D0064121F /* CGPoint+clampY.swift in Sources */,
 				8E973F9B24C4BF0800AB41C3 /* String+isBlank.swift in Sources */,
 				8EADC2A924D64E1200C5D3D8 /* SampleSelector.swift in Sources */,
+				8E36B13627B054E900FFAFA6 /* Comparable+clamped.swift in Sources */,
 				8E1276DF24D4734E00AC4B8F /* HelpViewController.swift in Sources */,
 				8E7D24C522779DBD005A1729 /* DiagramViewController.swift in Sources */,
 				8E9F0984253CF483009BC968 /* UINavigationController+gestureRecognizerShouldBegin.swift in Sources */,
@@ -803,6 +810,7 @@
 				8E253DD1244A86CB008CC56B /* DiagramViewController+HamburgerTableDelegate.swift in Sources */,
 				8E7CCC2B248C30A300018D2C /* Preferences.swift in Sources */,
 				8EE1411E261F9A5B00392100 /* Onboarding.swift in Sources */,
+				8E92F5B227B01F8D00E8AF29 /* NSLayoutConstraint+setMultiplier.swift in Sources */,
 				8E4ACA8024478A6E00575538 /* BlackView.swift in Sources */,
 				8EC5D28D256B154E00F49865 /* UIView+PinToInside.swift in Sources */,
 				8E339280262E7655002A7447 /* MacPreferencesViewController.swift in Sources */,
