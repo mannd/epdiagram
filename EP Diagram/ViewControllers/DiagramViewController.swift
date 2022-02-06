@@ -35,6 +35,7 @@ final class DiagramViewController: UIViewController {
     var hamburgerTableViewController: HamburgerTableViewController? // We get this view via its embed segue!
 
     var separatorView: SeparatorView?
+    @IBOutlet var imageHeightConstraint: NSLayoutConstraint!
 
     // Constants
     static let defaultLeftMargin: CGFloat = 50
@@ -487,6 +488,9 @@ final class DiagramViewController: UIViewController {
         imageScrollView.maximumZoomScale = maxZoom
         imageScrollView.minimumZoomScale = minZoom
         imageScrollView.diagramViewControllerDelegate = self
+
+        // FIXME: proof of concept
+        imageHeightConstraint = imageHeightConstraint.setMultiplier(multiplier: 0.6)
 
         mode = .normal
 

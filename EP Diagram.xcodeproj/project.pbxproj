@@ -67,6 +67,7 @@
 		8E8248DD23B53B55001A85F9 /* SeparatorView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8E8248DC23B53B55001A85F9 /* SeparatorView.swift */; };
 		8E856CF224EDC53D0064121F /* CGPoint+clampY.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8E856CF124EDC53D0064121F /* CGPoint+clampY.swift */; };
 		8E856CF424EDC5E10064121F /* Segment.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8E856CF324EDC5E10064121F /* Segment.swift */; };
+		8E92F5B227B01F8D00E8AF29 /* NSLayoutConstraint+setMultiplier.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8E92F5B127B01F8D00E8AF29 /* NSLayoutConstraint+setMultiplier.swift */; };
 		8E93CA7C25A00C0E00C74F1F /* UserAlert.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8E93CA7B25A00C0E00C74F1F /* UserAlert.swift */; };
 		8E93CA8D25A0157F00C74F1F /* Transform.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8E93CA8C25A0157F00C74F1F /* Transform.swift */; };
 		8E93CA9225A0227100C74F1F /* Global.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8E93CA9125A0227100C74F1F /* Global.swift */; };
@@ -223,6 +224,7 @@
 		8E8248DC23B53B55001A85F9 /* SeparatorView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SeparatorView.swift; sourceTree = "<group>"; };
 		8E856CF124EDC53D0064121F /* CGPoint+clampY.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "CGPoint+clampY.swift"; sourceTree = "<group>"; };
 		8E856CF324EDC5E10064121F /* Segment.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Segment.swift; sourceTree = "<group>"; };
+		8E92F5B127B01F8D00E8AF29 /* NSLayoutConstraint+setMultiplier.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "NSLayoutConstraint+setMultiplier.swift"; sourceTree = "<group>"; };
 		8E93CA7B25A00C0E00C74F1F /* UserAlert.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserAlert.swift; sourceTree = "<group>"; };
 		8E93CA8C25A0157F00C74F1F /* Transform.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Transform.swift; sourceTree = "<group>"; };
 		8E93CA9125A0227100C74F1F /* Global.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Global.swift; sourceTree = "<group>"; };
@@ -355,6 +357,7 @@
 				8EC5D28C256B154E00F49865 /* UIView+PinToInside.swift */,
 				8ED3651E261B66A900F2A2B6 /* UIView+findViewController.swift */,
 				8EF9CA25264F016C007AA24A /* UIWindow+nsWindow.swift */,
+				8E92F5B127B01F8D00E8AF29 /* NSLayoutConstraint+setMultiplier.swift */,
 			);
 			path = Extensions;
 			sourceTree = "<group>";
@@ -803,6 +806,7 @@
 				8E253DD1244A86CB008CC56B /* DiagramViewController+HamburgerTableDelegate.swift in Sources */,
 				8E7CCC2B248C30A300018D2C /* Preferences.swift in Sources */,
 				8EE1411E261F9A5B00392100 /* Onboarding.swift in Sources */,
+				8E92F5B227B01F8D00E8AF29 /* NSLayoutConstraint+setMultiplier.swift in Sources */,
 				8E4ACA8024478A6E00575538 /* BlackView.swift in Sources */,
 				8EC5D28D256B154E00F49865 /* UIView+PinToInside.swift in Sources */,
 				8E339280262E7655002A7447 /* MacPreferencesViewController.swift in Sources */,
