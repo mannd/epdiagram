@@ -35,6 +35,7 @@ final class DiagramViewController: UIViewController {
     var hamburgerTableViewController: HamburgerTableViewController? // We get this view via its embed segue!
 
     var separatorView: SeparatorView?
+    @IBOutlet var imageViewHeightConstraint: NSLayoutConstraint!
 
     // Constants
     static let defaultLeftMargin: CGFloat = 50
@@ -571,6 +572,7 @@ final class DiagramViewController: UIViewController {
     var didFirstWillLayout = false
     override func viewWillLayoutSubviews() {
         os_log("viewWillLayoutSubviews() - DiagramViewController", log: OSLog.viewCycle, type: .info)
+        getImageViewHeight()
         if didFirstWillLayout {
             super.viewWillLayoutSubviews()
             return
@@ -609,7 +611,7 @@ final class DiagramViewController: UIViewController {
             addDirectoryToSandbox(self)
         }
         #else
-        // FIXME: Temporary
+        // FIXME: Temporary -- why?
         if requestSandboxExpansion {
             addIOSDirectoryToSandbox()
         }
@@ -1598,6 +1600,7 @@ extension DiagramViewController {
         NotificationCenter.default.addObserver(self, selector: #selector(didDisconnect), name: UIScene.didDisconnectNotification, object: nil)
         NotificationCenter.default.addObserver(self, selector: #selector(willConnect), name: UIScene.willConnectNotification, object: nil)
         NotificationCenter.default.addObserver(self, selector: #selector(resolveFileConflicts), name: UIDocument.stateChangedNotification, object: nil)
+        NotificationCenter.default.addObserver(self, selector: #selector(saveImageViewHeight), name: .updatedSeparatorPosition, object: nil)
     }
 
     @objc func onDidUndoableAction(_ notification: Notification) {
@@ -1693,6 +1696,19 @@ extension DiagramViewController {
                 self.setViewsNeedDisplay()
             }
         }
+    }
+
+
+    /// Saves to UserDefaults the ratio of the imageScrollView height to overall view height.
+    @objc func saveImageViewHeight() {
+        let multiplier = imageScrollView.frame.height / self.view.frame.height
+        UserDefaults.standard.set(multiplier, forKey: Preferences.imageViewHeightKey)
+    }
+
+    /// Sets multiplier to saved ratio of imageScrollView height to overall view height.
+    func getImageViewHeight() {
+        let multiplier = CGFloat(UserDefaults.standard.float(forKey: Preferences.imageViewHeightKey)).clamped(to: 0.1...0.9)
+        imageViewHeightConstraint = imageViewHeightConstraint.setMultiplier(multiplier: multiplier)
     }
 
     @objc func resolveFileConflicts() {
