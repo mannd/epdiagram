@@ -30,6 +30,7 @@ struct PreferencesView: View {
     @AppStorage(Preferences.showMarkersKey) var showMarkers = Preferences.showMarkers
     @AppStorage(Preferences.hideZeroCTKey) var hideZeroCT = Preferences.hideZeroCT
     @AppStorage(Preferences.markerLineWidthKey) var markerLineWidth = Preferences.markerLineWidth
+    @AppStorage(Preferences.showPeriodsKey) var showPeriods = Preferences.showPeriods
 
     // Color preferences
     @AppStorage(Preferences.activeColorNameKey) var activeColorName = Preferences.activeColorName
@@ -165,6 +166,9 @@ struct PreferencesView: View {
                                 }
                                 Toggle(isOn: $rightAngleBlockMarker) {
                                     Text("Right angle block marker")
+                                }
+                                Toggle(isOn: $showPeriods) {
+                                    Text("Show periods")
                                 }
                                 Toggle(isOn: $showArrows) {
                                     Text("Show direction of conduction arrows")

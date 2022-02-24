@@ -2051,7 +2051,7 @@ final class LadderView: ScaledView {
         var startY = segment.proximal.y
         context.setAlpha(0.1)
         for period in mark.periods {
-            drawPeriod(period: period, start: CGPoint(x: segment.proximal.x, y: startY), height: periodHeight, calFactor: calFactor, context: context)
+            drawPeriod(period: period, start: CGPoint(x: segment.earliestPoint.x, y: startY), height: periodHeight, calFactor: calFactor, context: context)
             startY += periodHeight
         }
         context.setAlpha(1.0)
