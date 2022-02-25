@@ -1689,6 +1689,9 @@ extension DiagramViewController {
         if let markerColorName = UserDefaults.standard.string(forKey: Preferences.markerColorNameKey) {
             cursorView.markerColor = UIColor.convertColorName(markerColorName) ?? Preferences.defaultMarkerColor
         }
+        if let periodColorName = UserDefaults.standard.string(forKey: Preferences.periodColorNameKey) {
+            ladderView.periodColor = UIColor.convertColorName(periodColorName) ?? Preferences.defaultPeriodColor
+        }
         ladderView.updateLadderIntervals()
         // updatePreferences() can be called in the background, so update the UI on the main thread.
         DispatchQueue.main.async { [weak self] in

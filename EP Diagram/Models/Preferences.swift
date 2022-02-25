@@ -35,11 +35,11 @@ struct Preferences {
     static let markerLineWidthKey = "defaultMarkerLineWidthKey"
     static let showMarkLabelsKey = "defaultShowMarkLabelsKey"
     static let showPeriodsKey = "defaultShowPeriodsKey"
-    static let imageViewHeightKey = "defaultImageViewHeight"
 
     // keys not modifiable by user
     static let notFirstRunKey = "defaultNotFirstRunKey"
     static let versionKey = "defaultVersionKey"
+    static let imageViewHeightKey = "defaultImageViewHeight"
 
     // color keys
     static let caliperColorNameKey = "defaultCaliperColorNameKey"
@@ -50,6 +50,7 @@ struct Preferences {
     static let linkedColorNameKey = "defaultLinkedColorNameKey"
     static let activeColorNameKey = "defaultActiveColorNameKey"
     static let markerColorNameKey = "defaultMarkerColorNameKey"
+    static let periodColorNameKey = "defaultPeriodColorNameKey"
 
     // Stored as Int, converted to CGFloat when used.
     static var markLineWidth: Int = 2
@@ -86,6 +87,7 @@ struct Preferences {
     static let defaultSelectedColor = UIColor.systemBlue
     static let defaultLinkedColor = UIColor.systemPurple
     static let defaultMarkerColor = UIColor.systemBlue
+    static let defaultPeriodColor = UIColor.systemGreen
 
     // Color names
     static var caliperColorName: String = defaultCaliperColor.toString
@@ -96,6 +98,7 @@ struct Preferences {
     static var linkedColorName: String = defaultLinkedColor.toString
     static var activeColorName: String = defaultActiveColor.toString
     static var markerColorName: String = defaultMarkerColor.toString
+    static var periodColorName: String = defaultPeriodColor.toString
 
     /// Default preferences, set at app startup
     static func defaults() -> [String: Any] {
@@ -129,6 +132,7 @@ struct Preferences {
             Preferences.markerColorNameKey: Preferences.markerColorName,
             Preferences.showMarkLabelsKey: Preferences.showMarkLabels,
             Preferences.showPeriodsKey: Preferences.showPeriods,
+            Preferences.periodColorNameKey: Preferences.periodColorName,
             Preferences.impulseOriginContiguousKey: Preferences.impulseOriginContiguous,
             Preferences.impulseOriginLargeKey: Preferences.impulseOriginLarge,
             Preferences.imageViewHeightKey: Preferences.imageViewHeight,

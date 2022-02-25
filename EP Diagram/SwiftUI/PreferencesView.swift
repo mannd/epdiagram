@@ -49,6 +49,8 @@ struct PreferencesView: View {
     @State var caliperColor: Color = Color(Preferences.defaultCaliperColor)
     @AppStorage(Preferences.markerColorNameKey) var markerColorName = Preferences.markerColorName
     @State var markerColor: Color = Color(Preferences.defaultMarkerColor)
+    @AppStorage(Preferences.periodColorNameKey) var periodColorName = Preferences.periodColorName
+    @State var periodColor: Color = Color(Preferences.defaultPeriodColor)
 
     @State var showAutoLinkWarning = false
 
@@ -167,9 +169,6 @@ struct PreferencesView: View {
                                 Toggle(isOn: $rightAngleBlockMarker) {
                                     Text("Right angle block marker")
                                 }
-                                Toggle(isOn: $showPeriods) {
-                                    Text("Show periods")
-                                }
                                 Toggle(isOn: $showArrows) {
                                     Text("Show direction of conduction arrows")
                                 }
@@ -191,6 +190,17 @@ struct PreferencesView: View {
                             }
                         }
                     }
+                    Section(header: Text("Period")) {
+                        Toggle(isOn: $showPeriods) {
+                            Text("Show periods")
+                        }
+                        getColorPicker(title: "Default period color", selection: Binding(
+                            get: { periodColor },
+                                        set: { newValue in
+                                            periodColorName = newValue.toString
+                                            periodColor = newValue
+                                        }))
+                    }
                     Section(header: Text("Cursor")) {
                         Stepper("Cursor width = \(cursorLineWidth)", value: $cursorLineWidth, in: 1...6, step: 1)
                         getColorPicker(title: "Cursor color", selection: Binding(
@@ -211,7 +221,7 @@ struct PreferencesView: View {
                     }
 
                 }
-               .onAppear {
+                .onAppear {
                     activeColor = Color.convertColorName(activeColorName) ?? activeColor
                     linkedColor = Color.convertColorName(linkedColorName) ?? linkedColor
                     selectedColor = Color.convertColorName(selectedColorName) ?? selectedColor
@@ -220,7 +230,8 @@ struct PreferencesView: View {
                     cursorColor = Color.convertColorName(cursorColorName) ?? cursorColor
                     caliperColor = Color.convertColorName(caliperColorName) ?? caliperColor
                     markerColor = Color.convertColorName(markerColorName) ?? markerColor
-                }
+                    periodColor = Color.convertColorName(periodColorName) ?? periodColor
+               }
             }
             .navigationBarTitle("Preferences", displayMode: .inline)
             .navigationBarHidden(isRunningOnMac() ? true : false)

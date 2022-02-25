@@ -109,6 +109,7 @@ final class LadderView: ScaledView {
     var connectedColor = Preferences.defaultConnectedColor
     var selectedColor = Preferences.defaultSelectedColor
     var linkedColor = Preferences.defaultLinkedColor
+    var periodColor = Preferences.defaultPeriodColor
 
     var normalColor = UIColor.label  // normalColor is fixed
 
@@ -2061,7 +2062,7 @@ final class LadderView: ScaledView {
         let width = regionValueFromCalibratedValue(CGFloat(period.duration), usingCalFactor: calFactor)
         let rect = CGRect(x: start.x, y: start.y, width: width, height: height)
         context.addRect(rect)
-        context.setFillColor(period.color.cgColor)
+        context.setFillColor(periodColor.cgColor)
         context.drawPath(using: .fillStroke)
     }
 
