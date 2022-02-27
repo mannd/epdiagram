@@ -114,7 +114,7 @@ final class Mark: Codable {
         self.id = UUID()
         linkedMarkIDs = LinkedMarkIDs()
         anchor = .middle
-        periods.append(Period(name: "test", duration: 300))
+        periods.append(Period(name: "test", duration: 500))
         periods.append(Period(name: "test2", duration: 150))
     }
 

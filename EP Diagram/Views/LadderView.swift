@@ -2054,7 +2054,7 @@ final class LadderView: ScaledView {
         let periodHeight = height / CGFloat(mark.periods.count)
         var startY = segment.proximal.y
         // FIXME: Should be able to have solid colored periods.
-        context.setAlpha(0.2)
+//        context.setAlpha(0.2)
         for period in mark.periods {
             drawPeriod(period: period, start: CGPoint(x: segment.earliestPoint.x, y: startY), height: periodHeight, calFactor: calFactor, context: context)
             startY += periodHeight
@@ -2064,10 +2064,11 @@ final class LadderView: ScaledView {
 
     func drawPeriod(period: Period, start: CGPoint, height: CGFloat, calFactor: CGFloat, context: CGContext) {
         // TODO: need to make duration in msec and convert to region duration.
+        
         let beginning = transformToScaledViewPositionX(regionPositionX: start.x)
-        let end = transformToScaledViewPositionX(regionPositionX: start.x + period.duration)
+        let duration = regionValueFromCalibratedValue(period.duration, usingCalFactor:  calFactor)
+        let end = transformToScaledViewPositionX(regionPositionX: start.x + duration)
         var width = end - beginning
-        // TODO: Periods disappear when mark goes off left margin.  Maybe allow period to be seen, but truncate at left margin.  This is because mark drawing is totally annulled if off left margin.
         var adjustedStartX = start.x
         if leftMargin > start.x {
             adjustedStartX = max(start.x, leftMargin)
@@ -2076,10 +2077,21 @@ final class LadderView: ScaledView {
         if adjustedStartX + width < leftMargin {
             return
         }
+        // FIXME: overriding height as test
+        let height = 20.0
         let rect = CGRect(x: adjustedStartX, y: start.y, width: width, height: height)
         context.addRect(rect)
         context.setFillColor(periodColor.cgColor)
+        // Cludgy get rid of border.  Do we want to have a border?
+        context.setLineWidth(0)
+        context.setAlpha(0.8)
         context.drawPath(using: .fillStroke)
+        context.setLineWidth(1.0)
+        let text = period.name
+        // TODO: determine if text is bigger than rectangle width, and if so, draw text next to rectangle.
+        text.draw(in: rect, withAttributes: measurementTextAttributes)
+        context.setAlpha(1.0)
+        context.strokePath()
     }
 
     func conductionTime(fromSegment segment: Segment) -> Double {
