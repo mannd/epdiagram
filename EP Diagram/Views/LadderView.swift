@@ -1583,6 +1583,8 @@ final class LadderView: ScaledView {
         // Don't draw outside bounds of region, fix out of bounds segments at end of mark movement.
         let normalizedSegment = mark.segment.normalized()
         let segment = transformToScaledViewSegment(regionSegment: normalizedSegment, region: region)
+        // drawPeriods even if mark is off screen to the left.
+        drawPeriods(forMark: mark, segment: segment, context: context)
         // Don't bother drawing marks in margin.
         if segment.proximal.x <= leftMargin && segment.distal.x <= leftMargin {
             return
@@ -1635,9 +1637,7 @@ final class LadderView: ScaledView {
         drawConductionTime(forMark: mark, segment: segment, context: context)
         drawIntervals(region: region, context: context)
 
-
         drawLabels(forMark: mark, segment: segment, context: context)
-        drawPeriods(forMark: mark, segment: segment, context: context)
 
         // reset line color to neutral label color
         context.setStrokeColor(UIColor.label.cgColor)
@@ -1933,6 +1933,7 @@ final class LadderView: ScaledView {
         drawFilledCircle(context: context, position: segment.proximal, radius: 10)
     }
 
+    // For debugging only
     func drawEarliestPoint(forMark mark: Mark, segment: Segment, context: CGContext) {
         guard showEarliestPoint else { return }
         if mark.earliestPoint == mark.segment.proximal {
@@ -1942,19 +1943,7 @@ final class LadderView: ScaledView {
         }
     }
 
-    func drawConductionDirection(forMark mark: Mark, segment: Segment, context: CGContext) {
-        guard showArrows else { return }
-        let arrowLineLength: CGFloat = 20
-        switch mark.lateEndpoint {
-        case .distal:
-            drawArrowHead(context: context, start: segment.proximal, end: segment.distal, pointerLineLength: arrowLineLength, arrowAngle: arrowHeadAngle)
-        case .proximal:
-            drawArrowHead(context: context, start: segment.distal, end: segment.proximal, pointerLineLength: arrowLineLength, arrowAngle: arrowHeadAngle)
-        case .none, .auto, .random:
-            break // this is undecided unless manually set
-        }
-    }
-
+    // For debugging only
     func drawPivots(forMark mark: Mark, segment: Segment, context: CGContext) {
         guard showPivots else { return }
         // We only show pivots when cursor is attached.
@@ -1976,6 +1965,20 @@ final class LadderView: ScaledView {
             }
         }
     }
+
+    func drawConductionDirection(forMark mark: Mark, segment: Segment, context: CGContext) {
+        guard showArrows else { return }
+        let arrowLineLength: CGFloat = 20
+        switch mark.lateEndpoint {
+        case .distal:
+            drawArrowHead(context: context, start: segment.proximal, end: segment.distal, pointerLineLength: arrowLineLength, arrowAngle: arrowHeadAngle)
+        case .proximal:
+            drawArrowHead(context: context, start: segment.distal, end: segment.proximal, pointerLineLength: arrowLineLength, arrowAngle: arrowHeadAngle)
+        case .none, .auto, .random:
+            break // this is undecided unless manually set
+        }
+    }
+
 
     func drawConductionTime(forMark mark: Mark, segment: Segment, context: CGContext) {
         guard let calibration = calibration, calibration.isCalibrated, showConductionTimes else { return }
@@ -2050,7 +2053,8 @@ final class LadderView: ScaledView {
         assert(mark.periods.count > 0)
         let periodHeight = height / CGFloat(mark.periods.count)
         var startY = segment.proximal.y
-        context.setAlpha(0.1)
+        // FIXME: Should be able to have solid colored periods.
+        context.setAlpha(0.2)
         for period in mark.periods {
             drawPeriod(period: period, start: CGPoint(x: segment.earliestPoint.x, y: startY), height: periodHeight, calFactor: calFactor, context: context)
             startY += periodHeight
@@ -2059,8 +2063,20 @@ final class LadderView: ScaledView {
     }
 
     func drawPeriod(period: Period, start: CGPoint, height: CGFloat, calFactor: CGFloat, context: CGContext) {
-        let width = regionValueFromCalibratedValue(CGFloat(period.duration), usingCalFactor: calFactor)
-        let rect = CGRect(x: start.x, y: start.y, width: width, height: height)
+        // TODO: need to make duration in msec and convert to region duration.
+        let beginning = transformToScaledViewPositionX(regionPositionX: start.x)
+        let end = transformToScaledViewPositionX(regionPositionX: start.x + period.duration)
+        var width = end - beginning
+        // TODO: Periods disappear when mark goes off left margin.  Maybe allow period to be seen, but truncate at left margin.  This is because mark drawing is totally annulled if off left margin.
+        var adjustedStartX = start.x
+        if leftMargin > start.x {
+            adjustedStartX = max(start.x, leftMargin)
+            width = width - (leftMargin - start.x)
+        }
+        if adjustedStartX + width < leftMargin {
+            return
+        }
+        let rect = CGRect(x: adjustedStartX, y: start.y, width: width, height: height)
         context.addRect(rect)
         context.setFillColor(periodColor.cgColor)
         context.drawPath(using: .fillStroke)
