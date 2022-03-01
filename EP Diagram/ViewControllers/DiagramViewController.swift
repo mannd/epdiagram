@@ -661,7 +661,7 @@ final class DiagramViewController: UIViewController {
     }
 
     override func updateUserActivityState(_ activity: NSUserActivity) {
-//        os_log("debug: diagramViewController updateUserActivityState called", log: .debugging, type: .debug)
+        os_log("debug: diagramViewController updateUserActivityState called", log: .debugging, type: .debug)
 
         super.updateUserActivityState(activity)
 
