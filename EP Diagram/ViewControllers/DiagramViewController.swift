@@ -617,6 +617,13 @@ final class DiagramViewController: UIViewController {
         }
         #endif
 
+        #if !targetEnvironment(macCatalyst)
+        if let currentDocument = currentDocument {
+            let directoryURL = currentDocument.fileURL.deletingLastPathComponent()
+            Sandbox.storeDirectoryBookmark(from: directoryURL)
+        }
+        #endif
+
         setTitle()
 
         self.userActivity = self.view.window?.windowScene?.userActivity
@@ -666,13 +673,6 @@ final class DiagramViewController: UIViewController {
             Self.restorationDocumentURLKey: currentDocument?.fileURL ?? "",
         ]
         activity.addUserInfoEntries(from: info)
-        #if !targetEnvironment(macCatalyst)
-        if let currentDocument = currentDocument {
-            let directoryURL = currentDocument.fileURL.deletingLastPathComponent()
-            Sandbox.storeDirectoryBookmark(from: directoryURL)
-        }
-        #endif
-
     }
 
     func loadSampleDiagram(_ diagram: Diagram) {
