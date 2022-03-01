@@ -88,6 +88,8 @@
 		8E9B8045228347DE008873BB /* Region.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8E9B8044228347DE008873BB /* Region.swift */; };
 		8E9B804722834870008873BB /* Ladder.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8E9B804622834870008873BB /* Ladder.swift */; };
 		8E9F0984253CF483009BC968 /* UINavigationController+gestureRecognizerShouldBegin.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8E9F0983253CF483009BC968 /* UINavigationController+gestureRecognizerShouldBegin.swift */; };
+		8E9F334D27CEA0450047F6A7 /* PeriodEditor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8E9F334C27CEA0450047F6A7 /* PeriodEditor.swift */; };
+		8E9F334F27CEA0660047F6A7 /* PeriodListEditor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8E9F334E27CEA0660047F6A7 /* PeriodListEditor.swift */; };
 		8EA444C02476E471005B5452 /* LadderSelector.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8EA444BF2476E471005B5452 /* LadderSelector.swift */; };
 		8EACC27C259E47C500F0BF42 /* ImageScrollView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8EACC27B259E47C500F0BF42 /* ImageScrollView.swift */; };
 		8EADC2A924D64E1200C5D3D8 /* SampleSelector.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8EADC2A824D64E1200C5D3D8 /* SampleSelector.swift */; };
@@ -247,6 +249,8 @@
 		8E9B8044228347DE008873BB /* Region.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Region.swift; sourceTree = "<group>"; };
 		8E9B804622834870008873BB /* Ladder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Ladder.swift; sourceTree = "<group>"; };
 		8E9F0983253CF483009BC968 /* UINavigationController+gestureRecognizerShouldBegin.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "UINavigationController+gestureRecognizerShouldBegin.swift"; sourceTree = "<group>"; };
+		8E9F334C27CEA0450047F6A7 /* PeriodEditor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PeriodEditor.swift; sourceTree = "<group>"; };
+		8E9F334E27CEA0660047F6A7 /* PeriodListEditor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PeriodListEditor.swift; sourceTree = "<group>"; };
 		8EA444BF2476E471005B5452 /* LadderSelector.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LadderSelector.swift; sourceTree = "<group>"; };
 		8EACC27B259E47C500F0BF42 /* ImageScrollView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImageScrollView.swift; sourceTree = "<group>"; };
 		8EADC2A824D64E1200C5D3D8 /* SampleSelector.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SampleSelector.swift; sourceTree = "<group>"; };
@@ -557,6 +561,8 @@
 				8EADC2A824D64E1200C5D3D8 /* SampleSelector.swift */,
 				8E4086E325F30383005F53CB /* RhythmView.swift */,
 				8EE1411D261F9A5B00392100 /* Onboarding.swift */,
+				8E9F334C27CEA0450047F6A7 /* PeriodEditor.swift */,
+				8E9F334E27CEA0660047F6A7 /* PeriodListEditor.swift */,
 			);
 			path = SwiftUI;
 			sourceTree = "<group>";
@@ -779,6 +785,7 @@
 				8ED8CBD125D8B1FF00A6234F /* DiagramModelController.swift in Sources */,
 				8E856CF224EDC53D0064121F /* CGPoint+clampY.swift in Sources */,
 				8E973F9B24C4BF0800AB41C3 /* String+isBlank.swift in Sources */,
+				8E9F334D27CEA0450047F6A7 /* PeriodEditor.swift in Sources */,
 				8EADC2A924D64E1200C5D3D8 /* SampleSelector.swift in Sources */,
 				8E36B13627B054E900FFAFA6 /* Comparable+clamped.swift in Sources */,
 				8E1276DF24D4734E00AC4B8F /* HelpViewController.swift in Sources */,
@@ -840,6 +847,7 @@
 				8E35924924BE9B27001E23D5 /* DiagramIO.swift in Sources */,
 				8EFCC99E2655B4F000EEABBB /* Sandbox.swift in Sources */,
 				8E9A065125D9CDC700775531 /* LadderTemplatesModelController.swift in Sources */,
+				8E9F334F27CEA0660047F6A7 /* PeriodListEditor.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

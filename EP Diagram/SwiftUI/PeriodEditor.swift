@@ -8,9 +8,17 @@
 
 import SwiftUI
 
+
 struct PeriodEditor: View {
+    @State var period = Period(name: "Test", duration: 500, color: .blue)
+
     var body: some View {
-        Text(/*@START_MENU_TOKEN@*/"Hello, World!"/*@END_MENU_TOKEN@*/)
+        VStack {
+        Text("Name = \(period.name)")
+        Text("Duration = \(lround(Double(period.duration)))")
+            
+//        Text(period.color)
+        }
     }
 }
 

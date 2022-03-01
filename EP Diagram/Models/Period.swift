@@ -11,12 +11,12 @@ import BetterCodable
 import os.log
 
 struct Period {
-
     var name: String = ""
     var duration: CGFloat = 0
     var color: UIColor = UIColor.green
+    var resettable: Bool = false
 
-    // height depends on Region height and number of Periods in the region.
+    // height will be fixed
 }
 
 extension Period: Codable {
@@ -24,6 +24,7 @@ extension Period: Codable {
         case name
         case duration
         case color
+        case resettable
     }
 
     init(from decoder: Decoder) throws {
@@ -31,6 +32,7 @@ extension Period: Codable {
 
         name = try container.decode(String.self, forKey: .name)
         duration = try CGFloat(container.decode(Float.self, forKey: .duration))
+        resettable = try Bool(container.decode(Bool.self, forKey: .resettable))
 
         let colorData = try container.decode(Data.self, forKey: .color)
         color = try NSKeyedUnarchiver.unarchiveTopLevelObjectWithData(colorData) as? UIColor ?? UIColor.black
@@ -40,6 +42,7 @@ extension Period: Codable {
         var container = encoder.container(keyedBy: CodingKeys.self)
         try container.encode(name, forKey: .name)
         try container.encode(duration, forKey: .duration)
+        try container.encode(resettable, forKey: .resettable)
 
         let colorData = try NSKeyedArchiver.archivedData(withRootObject: color, requiringSecureCoding: false)
         try container.encode(colorData, forKey: .color)

@@ -22,6 +22,7 @@ enum Sandbox {
         let key = getAccessDirectoryKey(for: url)
         if let bookmark = try? url.bookmarkData(options: bookmarkOptions, includingResourceValuesForKeys: nil, relativeTo: nil) {
             UserDefaults.standard.setValue(bookmark, forKey: key)
+            print("seeting bookmark in UserDefaults")
         } else {
             print("Could not create directory bookmark.")
         }
