@@ -26,6 +26,7 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         os_log("scene(scene:willConnectTo:options:) - SceneDelegate", log: .lifeCycle, type: .info)
         guard let scene = (scene as? UIWindowScene) else { return }
         if let documentBrowserViewController = window?.rootViewController as? DocumentBrowserViewController {
+            print("rootController is documentBrowserViewController")
             scene.title = L("EP Diagram")
             scene.userActivity = session.stateRestorationActivity ?? NSUserActivity(activityType: AppDelegate.mainActivityType)
             documentBrowserViewController.restorationInfo = scene.userActivity?.userInfo
@@ -44,6 +45,7 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
             // This doesn't appear needed on Mac or iOS.  openURLContexts is called automatically.
             // self.scene(scene, openURLContexts: connectionOptions.urlContexts)
         } else if (window?.rootViewController as? MacPreferencesViewController) != nil  {
+            print("rootController is MacPreferencsViewController")
             scene.title = L("Preferences")
             //            scene.userActivity = session.stateRestorationActivity ?? NSUserActivity(activityType: AppDelegate.mainActivityType)
 
@@ -67,6 +69,7 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         return scene.userActivity
     }
 
+    // Used for opening external documents (from Finder or Open Recent menu).
     func scene(_ scene: UIScene, openURLContexts URLContexts: Set<UIOpenURLContext>) {
         os_log("scene(_:openURLContexts:) - SceneDelegate", log: .lifeCycle, type: .info)
         guard let documentBrowserViewController = self.window?.rootViewController as? DocumentBrowserViewController else { return }

@@ -49,17 +49,17 @@ class DocumentBrowserViewController: UIDocumentBrowserViewController, UIDocument
     }
 
     override func viewDidAppear(_ animated: Bool) {
-        os_log("viewDidAppear(_:) - DocumentBrowserViewController", log: .default, type: .default)
+        os_log("viewDidAppear(_:) - DocumentBrowserViewController", log: .viewCycle, type: .default)
         super.viewDidAppear(animated)
-
      }
 
     override func viewWillDisappear(_ animated: Bool) {
+        os_log("viewWillDisappear(_:) - DocumentBrowserViewController", log: .viewCycle, type: .default)
         super.viewWillDisappear(animated)
     }
 
     override func viewDidDisappear(_ animated: Bool) {
-        os_log("viewDidDisappear(_:) - DocumentBrowserViewController", log: .default, type: .default)
+        os_log("viewDidDisappear(_:) - DocumentBrowserViewController", log: .viewCycle, type: .default)
         super.viewDidDisappear(animated)
     }
 
@@ -393,10 +393,14 @@ extension DocumentBrowserViewController {
 
     override func canPerformAction(_ action: Selector, withSender sender: Any?) -> Bool {
          if action == #selector(undo(_:)) {
-            return diagramViewController?.imageScrollView.isActivated ?? false &&
+             // It appears this is a crashing bug on macOS.  When macOS restores windows left open,
+             // window can be blank, without an imageScrollView, and this func can be
+             // called in this situation.  Thus need to make imageScrollView optional even though
+             // it is defined as a forced unwrapped optional.
+            return diagramViewController?.imageScrollView?.isActivated ?? false &&
                 currentDocument?.undoManager?.canUndo ?? false
         } else if action == #selector(redo(_:)) {
-            return diagramViewController?.imageScrollView.isActivated ?? false &&
+            return diagramViewController?.imageScrollView?.isActivated ?? false &&
                 currentDocument?.undoManager?.canRedo ?? false
         } else {
             return super.canPerformAction(action, withSender: sender)
