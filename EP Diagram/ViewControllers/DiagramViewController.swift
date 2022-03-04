@@ -554,19 +554,20 @@ final class DiagramViewController: UIViewController {
     override func viewWillAppear(_ animated: Bool) {
         os_log("viewWillAppear() - ViewController", log: OSLog.viewCycle, type: .info)
         super.viewWillAppear(animated)
-        // Need to show toolbar before view appears, otherwise views don't layout correctly.
 
-        // Fixes view opening flush with left margin on Mac.
-        view.layoutIfNeeded()
-        
+        // Need to show toolbar before view appears, otherwise views don't layout correctly.
         #if targetEnvironment(macCatalyst)
         navigationController?.setNavigationBarHidden(true, animated: animated)
-        //        navigationController?.setToolbarHidden(true, animated: animated)
         #else
         navigationController?.setNavigationBarHidden(false, animated: animated)
-        //        navigationController?.setToolbarHidden(false, animated: animated)
         #endif
         navigationController?.setToolbarHidden(false, animated: animated)
+
+        // Fixes view opening flush with left margin on Mac.
+        // However, this triggers UITableViewAlertForLayoutOutsideViewHierarchy breakpoint
+        // for both macOS and iOS versions.
+        // Probably safe to ignore this.  Moving this statement elsewhere doesn't work.
+        self.view.layoutIfNeeded()
     }
 
     var didFirstWillLayout = false

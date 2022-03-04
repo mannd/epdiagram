@@ -38,16 +38,22 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         }
         #if targetEnvironment(macCatalyst)
         loadAppKitPlugin()
+
+        // Saving a million startup issues, force startup without restoring old windows.
+        // Yes, this really exists.
+        // See https://stackoverflow.com/questions/69552157/mac-catalyst-prevent-scene-creation-or-create-with-invisible-window
+        UserDefaults.standard.set(false, forKey: "NSQuitAlwaysKeepsWindows")
         #endif
 
         return true
     }
 
     // MARK: UISceneSession Lifecycle
+    // NB: This is only called the first time an application is launched.  If there are windows
+    // that are being restored by the operating system (macOS), this is skipped.
+    // See https://stackoverflow.com/questions/63520008/why-is-uiapplicationdelegate-method-application-configurationforconnectingop
     func application(_ application: UIApplication, configurationForConnecting connectingSceneSession: UISceneSession, options: UIScene.ConnectionOptions) -> UISceneConfiguration {
         os_log("application(_:configurationForConnecting:options:)", log: .lifeCycle, type: .info)
-        // Called when a new scene session is being created.
-        // Use this method to select a configuration to create the new scene with.
         if options.userActivities.first?.activityType == Self.preferencesActivityType {
             let sceneConfiguration = UISceneConfiguration(name: "Preferences Configuration", sessionRole: connectingSceneSession.role)
             return sceneConfiguration
