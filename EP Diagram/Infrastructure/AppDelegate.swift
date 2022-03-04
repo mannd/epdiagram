@@ -38,6 +38,11 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         }
         #if targetEnvironment(macCatalyst)
         loadAppKitPlugin()
+
+        // Saving a million startup issues, force startup without restoring old windows.
+        // Yes, this really exists.
+        // See https://stackoverflow.com/questions/69552157/mac-catalyst-prevent-scene-creation-or-create-with-invisible-window
+        UserDefaults.standard.set(false, forKey: "NSQuitAlwaysKeepsWindows")
         #endif
 
         return true
@@ -103,6 +108,16 @@ extension AppDelegate {
         builder.insertSibling(openPreferencesMenu, afterMenu: .about)
 
         // File menu
+
+
+        let openFileCommand = UIKeyCommand(
+            title: "Open...",
+            action: #selector(newScene(_:)),
+            input: "o",
+            modifierFlags: [.command]
+        )
+
+
         let saveScreenshotCommand = UIKeyCommand(
             title: "Save Screenshot",
             action: #selector(DiagramViewController.macSnapshotDiagram),

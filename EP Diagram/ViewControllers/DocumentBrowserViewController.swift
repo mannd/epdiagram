@@ -397,6 +397,8 @@ extension DocumentBrowserViewController {
              // window can be blank, without an imageScrollView, and this func can be
              // called in this situation.  Thus need to make imageScrollView optional even though
              // it is defined as a forced unwrapped optional.
+             // Essentially this means that due to window restoration on Mac, there can be a
+             // diagramViewController without an imageScollView.
             return diagramViewController?.imageScrollView?.isActivated ?? false &&
                 currentDocument?.undoManager?.canUndo ?? false
         } else if action == #selector(redo(_:)) {
