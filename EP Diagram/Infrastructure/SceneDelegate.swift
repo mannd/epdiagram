@@ -39,8 +39,6 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
             scene.titlebar?.toolbar = toolbar
             scene.titlebar?.toolbarStyle = .automatic
             scene.titlebar?.titleVisibility = .visible
-            // populate toolbar
-
             #endif
             // This doesn't appear needed on Mac or iOS.  openURLContexts is called automatically.
             // self.scene(scene, openURLContexts: connectionOptions.urlContexts)

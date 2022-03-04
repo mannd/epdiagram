@@ -8,8 +8,6 @@
 
 import SwiftUI
 
-// TODO: Add showPeriodsKey in Version 1.2
-
 struct PreferencesView: View {
     @AppStorage(Preferences.lineWidthKey) var markLineWidth = Preferences.markLineWidth
     @AppStorage(Preferences.cursorLineWidthKey) var cursorLineWidth = Preferences.cursorLineWidth

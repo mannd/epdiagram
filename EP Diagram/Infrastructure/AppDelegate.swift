@@ -108,16 +108,6 @@ extension AppDelegate {
         builder.insertSibling(openPreferencesMenu, afterMenu: .about)
 
         // File menu
-
-
-        let openFileCommand = UIKeyCommand(
-            title: "Open...",
-            action: #selector(newScene(_:)),
-            input: "o",
-            modifierFlags: [.command]
-        )
-
-
         let saveScreenshotCommand = UIKeyCommand(
             title: "Save Screenshot",
             action: #selector(DiagramViewController.macSnapshotDiagram),
