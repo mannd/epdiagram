@@ -80,7 +80,7 @@ class DocumentBrowserViewController: UIDocumentBrowserViewController, UIDocument
     func openDocument(url: URL) {
         os_log("openDocument(url:) %s", url.path)
         guard !isDocumentCurrentlyOpen(url: url) else {
-            print("document is not currently open")
+            print("openDocument(url:) - document is currently open")
             return
         }
         closeDiagramController { [weak self] in
@@ -213,23 +213,6 @@ class DocumentBrowserViewController: UIDocumentBrowserViewController, UIDocument
         restorationInfo = nil // don't need it any more
 
         controller.modalPresentationStyle = .fullScreen
-
-        // From Stackoverflow https://stackoverflow.com/questions/67459304/how-to-avoid-strange-behavior-when-scene-based-document-mac-catalyst-app-reopens/67815273#67815273 but doesn't seem necessary
-//        if(self.view.window != nil) {
-//               //This document browser's view is in the view hierarchy, so present as usual
-//               self.present(controller, animated: true)
-//           }
-//           else {
-//               //This document browser's view is not in the view hierarchy, find the view that is
-//               let topWindow = UIApplication.shared.connectedScenes.filter({$0.activationState == .foregroundActive})
-//                   .map({$0 as? UIWindowScene})
-//                   .compactMap({$0})
-//                   .first?.windows
-//                   .filter({$0.isKeyWindow}).first
-//               let rootController = topWindow?.rootViewController
-//               rootController?.present(controller, animated: true)
-//           }
-
 
         self.present(controller, animated: true)
         self.diagramViewController = diagramViewController
