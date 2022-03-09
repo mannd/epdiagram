@@ -1663,6 +1663,8 @@ extension DiagramViewController {
         ladderView.hideZeroCT = UserDefaults.standard.bool(forKey: Preferences.hideZeroCTKey)
         cursorView.markerLineWidth = CGFloat(UserDefaults.standard.integer(forKey: Preferences.markerLineWidthKey))
         ladderView.showPeriods = UserDefaults.standard.bool(forKey: Preferences.showPeriodsKey)
+        ladderView.periodPosition = PeriodPosition(rawValue: UserDefaults.standard.integer(forKey: Preferences.periodPositionKey)) ?? .bottom
+        ladderView.declutterIntervals = UserDefaults.standard.bool(forKey: Preferences.declutterIntervalsKey)
 
         // Colors
         if let caliperColorName = UserDefaults.standard.string(forKey: Preferences.caliperColorNameKey) {

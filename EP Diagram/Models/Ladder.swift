@@ -647,9 +647,29 @@ enum RegionRelation {
     case distant
 }
 
-/// Temporarlly before, after, or both before and after a position
+/// Before, after, or both before and after a position along the time axis
 enum TemporalRelation {
     case before
     case after
     case both
+}
+
+/// Determine where periods are shown in region.
+enum PeriodPosition: Int, Codable, CustomStringConvertible, CaseIterable, Identifiable {
+    case top
+    case bottom
+    case spread
+
+    var id: PeriodPosition { self }
+
+    var description: String {
+        switch self {
+        case .top:
+            return L("Top")
+        case .bottom:
+            return L("Bottom")
+        case .spread:
+            return L("Spread out")
+        }
+    }
 }

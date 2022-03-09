@@ -101,7 +101,10 @@ final class LadderView: ScaledView {
     var doubleLineBlockMarker: Bool = true
     var rightAngleBlockMarker: Bool = false
     var hideZeroCT: Bool = false
-    var showPeriods: Bool = false // Not used until Version 1.2
+    var showPeriods: Bool = false
+    var periodPosition: PeriodPosition = .bottom
+    // FIXME: change to preference
+    var declutterIntervals: Bool = true
 
     // colors set by preferences
     var activeColor = Preferences.defaultActiveColor
@@ -1648,6 +1651,7 @@ final class LadderView: ScaledView {
         guard region.marks.count < maxMarksForIntervals else { return }
         guard let calibration = calibration, calibration.isCalibrated else { return }
         if let index = ladder.index(ofRegion: region), let intervals = ladderIntervals[index] {
+            let isLastRegion = index == ladder.regions.count - 1 // TODO: refactor this to method or property
             for interval in intervals {
                 if let firstProximalX = interval.proximalBoundary?.first, let secondProximalX = interval.proximalBoundary?.second {
                     let scaledFirstX = transformToScaledViewPositionX(regionPositionX: firstProximalX)
@@ -1663,6 +1667,9 @@ final class LadderView: ScaledView {
                         drawIntervalText(origin: origin, size: size, text: text, context: context, attributes: measurementTextAttributes)
                     }
                 }
+
+                if !isLastRegion && declutterIntervals { continue }
+
                 if let firstDistalX = interval.distalBoundary?.first, let secondDistalX = interval.distalBoundary?.second {
                     let scaledFirstX = transformToScaledViewPositionX(regionPositionX: firstDistalX)
                     let scaledSecondX = transformToScaledViewPositionX(regionPositionX: secondDistalX)
@@ -1673,7 +1680,13 @@ final class LadderView: ScaledView {
                         // Center the origin
                         let halfwayPosition = (scaledFirstX + scaledSecondX) / 2.0
                         var origin = CGPoint(x: halfwayPosition, y: region.distalBoundaryY)
-                        origin = CGPoint(x: origin.x - size.width / 2, y: origin.y - size.height)
+                        // Draw last region interval below bottom ladder line when decluttering intervals.
+                        if isLastRegion && declutterIntervals {
+                            origin = CGPoint(x: origin.x - size.width / 2, y: origin.y)
+                        } else {
+                            // Normally without decluttering we draw all intervals within the ladder.
+                            origin = CGPoint(x: origin.x - size.width / 2, y: origin.y - size.height)
+                        }
                         drawIntervalText(origin: origin, size: size, text: text, context: context, attributes: measurementTextAttributes)
                     }
                 }

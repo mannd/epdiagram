@@ -35,6 +35,8 @@ struct Preferences {
     static let markerLineWidthKey = "defaultMarkerLineWidthKey"
     static let showMarkLabelsKey = "defaultShowMarkLabelsKey"
     static let showPeriodsKey = "defaultShowPeriodsKey"
+    static let periodPositionKey = "defaultPeriodPositionKey"
+    static let declutterIntervalsKey = "defaultDeclutterIntervalskey"
 
     // keys not modifiable by user
     static let notFirstRunKey = "defaultNotFirstRunKey"
@@ -76,6 +78,8 @@ struct Preferences {
     static var markerLineWidth: Int = 2
     static var showMarkLabels: Bool = true
     static var showPeriods: Bool = false
+    static var periodPosition = PeriodPosition.bottom.rawValue
+    static var declutterIntervals: Bool = false
     static var imageViewHeight: CGFloat = 0.5
 
     // default Colors
@@ -132,7 +136,9 @@ struct Preferences {
             Preferences.markerColorNameKey: Preferences.markerColorName,
             Preferences.showMarkLabelsKey: Preferences.showMarkLabels,
             Preferences.showPeriodsKey: Preferences.showPeriods,
+            Preferences.periodPositionKey: Preferences.periodPosition,
             Preferences.periodColorNameKey: Preferences.periodColorName,
+            Preferences.declutterIntervalsKey: Preferences.declutterIntervals,
             Preferences.impulseOriginContiguousKey: Preferences.impulseOriginContiguous,
             Preferences.impulseOriginLargeKey: Preferences.impulseOriginLarge,
             Preferences.imageViewHeightKey: Preferences.imageViewHeight,

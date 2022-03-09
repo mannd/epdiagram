@@ -31,6 +31,8 @@ struct PreferencesView: View {
     @AppStorage(Preferences.hideZeroCTKey) var hideZeroCT = Preferences.hideZeroCT
     @AppStorage(Preferences.markerLineWidthKey) var markerLineWidth = Preferences.markerLineWidth
     @AppStorage(Preferences.showPeriodsKey) var showPeriods = Preferences.showPeriods
+    @AppStorage(Preferences.periodPositionKey) var periodPosition = Preferences.periodPosition
+    @AppStorage(Preferences.declutterIntervalsKey) var declutterIntervals = Preferences.declutterIntervals
 
     // Color preferences
     @AppStorage(Preferences.activeColorNameKey) var activeColorName = Preferences.activeColorName
@@ -82,6 +84,8 @@ struct PreferencesView: View {
                     }
                     #endif
                     Section(header: Text("Ladder")) {
+                        // Grouped to avoid section with > 10 items.
+                        Group {
                         Picker(selection: $labelDescriptionVisibility, label: Text("Label description visibility"), content: {
                             Text("Visible").tag(TextVisibility.visibility.rawValue)
                             Text("Visible if fits").tag(TextVisibility.visibleIfFits.rawValue)
@@ -92,6 +96,10 @@ struct PreferencesView: View {
                         }
                         Toggle(isOn: $showIntervals) {
                             Text("Show intervals (after calibration)")
+                        }
+                        Toggle(isOn: $declutterIntervals) {
+                            Text("Declutter intervals")
+                        }
                         }
                         Toggle(isOn: $showConductionTimes) {
                             Text("Show conduction times (after calibration)")
@@ -194,6 +202,11 @@ struct PreferencesView: View {
                         Toggle(isOn: $showPeriods) {
                             Text("Show periods")
                         }
+                        Picker(selection: $periodPosition, label: Text("Position of periods in region"), content: {
+                            Text("Top").tag(PeriodPosition.top.rawValue)
+                            Text("Bottom").tag(PeriodPosition.bottom.rawValue)
+                            Text("Spread out").tag(PeriodPosition.spread.rawValue)
+                        })
                         getColorPicker(title: "Default period color", selection: Binding(
                             get: { periodColor },
                                         set: { newValue in
