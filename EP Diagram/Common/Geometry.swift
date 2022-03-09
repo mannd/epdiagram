@@ -8,7 +8,7 @@
 
 import UIKit
 
-/// Namespace for global static functions, variables.
+/// Namespace for global static math/geometry functions, variables.
 enum Geometry {
 
     // Measures shortest distance from a line defined by two points and a point.

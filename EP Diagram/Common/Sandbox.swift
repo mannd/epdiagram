@@ -8,6 +8,7 @@
 
 import Foundation
 
+/// Static functions relating to bookmarks and the app sandbox
 enum Sandbox {
     static func storeDirectoryBookmark(from url: URL) {
         guard url.hasDirectoryPath else {

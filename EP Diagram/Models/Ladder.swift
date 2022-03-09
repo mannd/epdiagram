@@ -639,7 +639,7 @@ final class Ladder: NSObject, Codable {
 
 // MARK: - enums
 
-// Is a mark in the region before, same region, region after, or farther away?
+/// Is a mark in the region before, same region, region after, or farther away?
 enum RegionRelation {
     case before
     case same
@@ -647,6 +647,7 @@ enum RegionRelation {
     case distant
 }
 
+/// Temporarlly before, after, or both before and after a position
 enum TemporalRelation {
     case before
     case after
