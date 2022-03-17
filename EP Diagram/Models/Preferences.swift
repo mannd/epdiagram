@@ -36,6 +36,7 @@ struct Preferences {
     static let showMarkLabelsKey = "defaultShowMarkLabelsKey"
     static let showPeriodsKey = "defaultShowPeriodsKey"
     static let periodPositionKey = "defaultPeriodPositionKey"
+    static let periodTransparencyKey = "defaultPeriodTransparencyKey"
     static let declutterIntervalsKey = "defaultDeclutterIntervalskey"
 
     // keys not modifiable by user
@@ -79,6 +80,7 @@ struct Preferences {
     static var showMarkLabels: Bool = true
     static var showPeriods: Bool = false
     static var periodPosition = PeriodPosition.bottom.rawValue
+    static var periodTransparency: CGFloat = 1.0
     static var declutterIntervals: Bool = false
     static var imageViewHeight: CGFloat = 0.5
 
@@ -138,6 +140,7 @@ struct Preferences {
             Preferences.showPeriodsKey: Preferences.showPeriods,
             Preferences.periodPositionKey: Preferences.periodPosition,
             Preferences.periodColorNameKey: Preferences.periodColorName,
+            Preferences.periodTransparencyKey: Preferences.periodTransparency,
             Preferences.declutterIntervalsKey: Preferences.declutterIntervals,
             Preferences.impulseOriginContiguousKey: Preferences.impulseOriginContiguous,
             Preferences.impulseOriginLargeKey: Preferences.impulseOriginLarge,

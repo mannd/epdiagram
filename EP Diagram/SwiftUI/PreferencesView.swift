@@ -32,6 +32,7 @@ struct PreferencesView: View {
     @AppStorage(Preferences.markerLineWidthKey) var markerLineWidth = Preferences.markerLineWidth
     @AppStorage(Preferences.showPeriodsKey) var showPeriods = Preferences.showPeriods
     @AppStorage(Preferences.periodPositionKey) var periodPosition = Preferences.periodPosition
+    @AppStorage(Preferences.periodTransparencyKey) var periodTransparency = Preferences.periodTransparency
     @AppStorage(Preferences.declutterIntervalsKey) var declutterIntervals = Preferences.declutterIntervals
 
     // Color preferences
@@ -213,6 +214,10 @@ struct PreferencesView: View {
                                             periodColorName = newValue.toString
                                             periodColor = newValue
                                         }))
+                        HStack {
+                            Text("Period transparency")
+                            Slider(value: $periodTransparency, in: 0.2...1.0)
+                        }
                     }
                     Section(header: Text("Cursor")) {
                         Stepper("Cursor width = \(cursorLineWidth)", value: $cursorLineWidth, in: 1...6, step: 1)

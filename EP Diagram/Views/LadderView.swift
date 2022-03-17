@@ -103,7 +103,7 @@ final class LadderView: ScaledView {
     var hideZeroCT: Bool = false
     var showPeriods: Bool = false
     var periodPosition: PeriodPosition = .bottom
-    // FIXME: change to preference
+    var periodTransparency: CGFloat = 1.0
     var declutterIntervals: Bool = true
 
     // colors set by preferences
@@ -2090,21 +2090,23 @@ final class LadderView: ScaledView {
         if adjustedStartX + width < leftMargin {
             return
         }
-        // FIXME: overriding height as test
+        // FIXME: overriding height as test.  Height should be a constant.
         let height = 20.0
         let rect = CGRect(x: adjustedStartX, y: start.y, width: width, height: height)
         context.addRect(rect)
         context.setFillColor(periodColor.cgColor)
         // Cludgy get rid of border.  Do we want to have a border?
         context.setLineWidth(0)
-        context.setAlpha(0.8)
+        context.setAlpha(periodTransparency)
         context.drawPath(using: .fillStroke)
         context.setLineWidth(1.0)
-        let text = period.name
-        // TODO: determine if text is bigger than rectangle width, and if so, draw text next to rectangle.
-        text.draw(in: rect, withAttributes: measurementTextAttributes)
-        context.setAlpha(1.0)
         context.strokePath()
+        let text = period.name
+        // FIXME: should save original alpha and restore it...
+        context.setAlpha(1.0)
+        // TODO: determine if text is bigger than rectangle width, and if so, draw text next to rectangle.
+        // Or, don't draw text...
+        text.draw(in: rect, withAttributes: measurementTextAttributes)
     }
 
     func conductionTime(fromSegment segment: Segment) -> Double {

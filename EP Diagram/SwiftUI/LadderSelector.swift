@@ -25,7 +25,7 @@ struct LadderSelector: View {
             Form {
                 Section(header: Text("Select ladder")) {
                     Picker(selection: $selectedIndex, label: Text("")) {
-                        ForEach(0 ..< ladderTemplates.count) {
+                        ForEach(0 ..< ladderTemplates.count, id: \.self) {
                             Text(self.ladderTemplates[$0].name)
                         }
                     }.pickerStyle(WheelPickerStyle()).padding()
