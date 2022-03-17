@@ -80,31 +80,30 @@ final class LadderView: ScaledView {
     }()
 
     // set by preferences
-    var markLineWidth: CGFloat = 2
-    var showImpulseOrigin = true
-    var impulseOriginContiguous = false
-    var impulseOriginLarge = false
-    var showBlock = true
-    var showArrows = false
-    var showIntervals = true
-    var showConductionTimes = true
-    var showMarkLabels = false
-    var showMarkText = true
-    var snapMarks = true
-    var defaultMarkStyle = Mark.Style.solid {
+    var markLineWidth: CGFloat = CGFloat(Preferences.markLineWidth)
+    var showImpulseOrigin = Preferences.showImpulseOrigin
+    var impulseOriginContiguous = Preferences.impulseOriginContiguous
+    var impulseOriginLarge = Preferences.impulseOriginLarge
+    var showBlock = Preferences.showBlock
+    var showArrows = Preferences.showArrows
+    var showIntervals = Preferences.showIntervals
+    var showConductionTimes = Preferences.showConductionTimes
+    var showMarkLabels = Preferences.showMarkLabels
+    var snapMarks = Preferences.snapMarks
+    var defaultMarkStyle = Mark.Style(rawValue: Preferences.markStyle)! {
         didSet {
             ladder.defaultMarkStyle = defaultMarkStyle
         }
     }
-    var showLabelDescription: TextVisibility = .invisible
-    var marksAreHidden: Bool = false
-    var doubleLineBlockMarker: Bool = true
-    var rightAngleBlockMarker: Bool = false
-    var hideZeroCT: Bool = false
-    var showPeriods: Bool = false
-    var periodPosition: PeriodPosition = .bottom
-    var periodTransparency: CGFloat = 1.0
-    var declutterIntervals: Bool = true
+    var labelDescriptionVisibility: TextVisibility = TextVisibility(rawValue: Preferences.labelDescriptionVisibility)!
+    var marksAreHidden: Bool = Preferences.hideMarks
+    var doubleLineBlockMarker: Bool = Preferences.doubleLineBlockMarker
+    var rightAngleBlockMarker: Bool = Preferences.rightAngleBlockMarker
+    var hideZeroCT: Bool = Preferences.hideZeroCT
+    var showPeriods: Bool = Preferences.showPeriods
+    var periodPosition: PeriodPosition = PeriodPosition(rawValue: Preferences.periodPosition)!
+    var periodTransparency: CGFloat = CGFloat(Preferences.periodTransparency)
+    var declutterIntervals: Bool = Preferences.declutterIntervals
 
     // colors set by preferences
     var activeColor = Preferences.defaultActiveColor
@@ -1543,12 +1542,12 @@ final class LadderView: ScaledView {
         context.setAlpha(1.0)
         labelText.draw(in: labelRect)
 
-        guard showLabelDescription != .invisible else { return }
+        guard labelDescriptionVisibility != .invisible else { return }
         descriptionTextAttributes[.foregroundColor] = region.mode == .active ? activeColor : selectedColor
         let descriptionText = NSAttributedString(string: region.longDescription, attributes: descriptionTextAttributes)
 
         let descriptionSize: CGSize = region.longDescription.size(withAttributes: descriptionTextAttributes)
-        if showLabelDescription == .visibility || (showLabelDescription == .visibleIfFits && descriptionSize.width < stringRect.width) {
+        if labelDescriptionVisibility == .visibility || (labelDescriptionVisibility == .visibleIfFits && descriptionSize.width < stringRect.width) {
             let descriptionRect = CGRect(x: 0, y: labelRect.minY + labelRect.height, width: rect.origin.x, height: stringRect.height - labelRect.height)
 
             descriptionText.draw(in: descriptionRect)
