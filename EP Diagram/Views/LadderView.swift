@@ -1586,9 +1586,6 @@ final class LadderView: ScaledView {
         let normalizedSegment = mark.segment.normalized()
         let segment = transformToScaledViewSegment(regionSegment: normalizedSegment, region: region)
 
-        // drawPeriods even if mark is off screen to the left.  Draw periods first so that mark isn't obscured by the period.  Alternative would be to start the period lineWidth after mark.
-        drawPeriods(forMark: mark, segment: segment, regionMarks: region.marks, context: context)
-
         // Don't bother drawing marks in margin.
         if segment.proximal.x <= leftMargin && segment.distal.x <= leftMargin {
             return
@@ -2055,59 +2052,50 @@ final class LadderView: ScaledView {
         }
     }
 
-    func drawPeriods(forMark mark: Mark, segment: Segment, regionMarks: [Mark], context: CGContext) {
+    func drawPeriods(region: Region, context: CGContext, rect: CGRect) {
         guard let calibration = calibration, calibration.isCalibrated else { return }
         guard showPeriods else { return }
-        guard mark.periods.count > 0 else { return }
-
-        let calFactor = calibration.currentCalFactor
-        let height = segment.distal.y - segment.proximal.y
-        let periodHeight = height / CGFloat(mark.periods.count)
-        var startY = segment.proximal.y
-        for period in mark.periods {
-            drawPeriod(period: period, start: CGPoint(x: segment.earliestPoint.x, y: startY), height: periodHeight, calFactor: calFactor, mark: mark, regionMarks: regionMarks, context: context)
-            startY += periodHeight
+        let periodHeight: CGFloat = 20.0
+        for mark in region.marks {
+            var startY = region.proximalBoundaryY
+            for period in mark.periods {
+                drawPeriod(period: period, forMark: mark, regionMarks: region.marks, startY: startY, context: context)
+                startY += periodHeight
+            }
         }
-        context.setAlpha(1.0)
     }
 
-    func drawPeriod(period: Period, start: CGPoint, height: CGFloat, calFactor: CGFloat, mark: Mark, regionMarks: [Mark], context: CGContext) {
-
-        let beginning = transformToScaledViewPositionX(regionPositionX: start.x)
+    func drawPeriod(period: Period, forMark mark: Mark, regionMarks: [Mark], startY: CGFloat, context: CGContext) {
+        let calFactor = calibration!.currentCalFactor
+        let start = mark.earliestPoint.x
         let duration = regionValueFromCalibratedValue(period.duration, usingCalFactor:  calFactor)
+        var periodEnd = start + duration
 
-        var periodEnd = start.x + duration
+        let resetPeriods = true
 
-        for m in regionMarks {
-            if m.earliestPoint.x > mark.earliestPoint.x && m.earliestPoint.x < periodEnd {
-                periodEnd = m.earliestPoint.x
+        if resetPeriods {
+            for m in regionMarks {
+                if m.earliestPoint.x > mark.earliestPoint.x && m.earliestPoint.x < periodEnd {
+                    periodEnd = m.earliestPoint.x
+                }
             }
         }
 
+        let beginning = transformToScaledViewPositionX(regionPositionX: start)
         let end = transformToScaledViewPositionX(regionPositionX: periodEnd)
 
-//        // Apply this just to resettable periods
-//        for m in regionMarks {
-//            if m.earliestPoint.x > mark.earliestPoint.x {
-//                let truncation = transformToScaledViewPositionX(regionPositionX: m.earliestPoint.x)
-//                if truncation + leftMargin < end  {
-//                    end = truncation + leftMargin
-//                }
-//            }
-//        }
-
         var width = end - beginning
-        var adjustedStartX = start.x
-        if leftMargin > start.x {
-            adjustedStartX = max(start.x, leftMargin)
-            width = width - (leftMargin - start.x)
+        var adjustedStartX = beginning + markLineWidth / 2.0 // make sure mark line is visible if it is vertical
+        if leftMargin > beginning {
+            adjustedStartX = max(beginning, leftMargin)
+            width = width - (leftMargin - beginning)
         }
         if adjustedStartX + width < leftMargin {
             return
         }
         // FIXME: overriding height as test.  Height should be a constant.
         let height = 20.0
-        let rect = CGRect(x: adjustedStartX, y: start.y, width: width, height: height)
+        let rect = CGRect(x: adjustedStartX, y: startY, width: width, height: height)
         context.addRect(rect)
         context.setFillColor(periodColor.cgColor)
         // Cludgy get rid of border.  Do we want to have a border?
@@ -2274,9 +2262,9 @@ final class LadderView: ScaledView {
         drawRegionArea(context: context, rect: rect, region: region)
         if !marksAreHidden {
             drawMarks(region: region, context: context, rect: rect)
+            drawIntervals(region: region, context: context)
+            drawPeriods(region: region, context: context, rect: rect)
         }
-        drawIntervals(region: region, context: context)
-//        drawPeriods()
         drawBottomLine(context: context, lastRegion: lastRegion, rect: rect)
     }
 
