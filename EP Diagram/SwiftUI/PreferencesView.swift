@@ -33,6 +33,8 @@ struct PreferencesView: View {
     @AppStorage(Preferences.showPeriodsKey) var showPeriods = Preferences.showPeriods
     @AppStorage(Preferences.periodPositionKey) var periodPosition = Preferences.periodPosition
     @AppStorage(Preferences.periodTransparencyKey) var periodTransparency = Preferences.periodTransparency
+    @AppStorage(Preferences.periodTextJustificationKey) var periodTextJustification = Preferences.periodTextJustification
+    @AppStorage(Preferences.periodOverlapMarkKey) var periodOverlapMark = Preferences.periodOverlapMark
     @AppStorage(Preferences.declutterIntervalsKey) var declutterIntervals = Preferences.declutterIntervals
 
     // Color preferences
@@ -208,6 +210,13 @@ struct PreferencesView: View {
                             Text("Bottom").tag(PeriodPosition.bottom.rawValue)
                             Text("Spread out").tag(PeriodPosition.spread.rawValue)
                         })
+                        Picker(selection: $periodTextJustification, label: Text("Period text justification"), content: {
+                            Text("Left").tag(TextJustification.left.rawValue)
+                            Text("Center").tag(TextJustification.center.rawValue)
+                        })
+                        Toggle(isOn: $periodOverlapMark) {
+                            Text("Periods overlap marks")
+                        }
                         getColorPicker(title: "Default period color", selection: Binding(
                             get: { periodColor },
                                         set: { newValue in
@@ -218,6 +227,7 @@ struct PreferencesView: View {
                             Text("Period transparency")
                             Slider(value: $periodTransparency, in: 0.2...1.0)
                         }
+
                     }
                     Section(header: Text("Cursor")) {
                         Stepper("Cursor width = \(cursorLineWidth)", value: $cursorLineWidth, in: 1...6, step: 1)

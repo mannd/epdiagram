@@ -1665,6 +1665,8 @@ extension DiagramViewController {
         ladderView.showPeriods = UserDefaults.standard.bool(forKey: Preferences.showPeriodsKey)
         ladderView.periodPosition = PeriodPosition(rawValue: UserDefaults.standard.integer(forKey: Preferences.periodPositionKey)) ?? .bottom
         ladderView.periodTransparency = CGFloat(UserDefaults.standard.float(forKey: Preferences.periodTransparencyKey))
+        ladderView.periodTextJustification = TextJustification(rawValue: UserDefaults.standard.integer(forKey: Preferences.periodTextJustificationKey)) ?? .left
+        ladderView.periodOverlapMark = UserDefaults.standard.bool(forKey: Preferences.periodOverlapMarkKey)
         ladderView.declutterIntervals = UserDefaults.standard.bool(forKey: Preferences.declutterIntervalsKey)
 
         // Colors

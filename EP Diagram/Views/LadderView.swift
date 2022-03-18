@@ -8,6 +8,7 @@
 
 import UIKit
 import OSLog
+import CoreMedia
 
 /// A view that manages and displays the ladder.
 final class LadderView: ScaledView {
@@ -57,6 +58,18 @@ final class LadderView: ScaledView {
         return attributes
     }()
 
+    lazy var leftJustifiedMeasurementTextAttributes: [NSAttributedString.Key: Any] = {
+        let textFont = UIFont.systemFont(ofSize: measurementTextFontSize, weight: UIFont.Weight.medium)
+        let paragraphStyle = NSMutableParagraphStyle()
+        paragraphStyle.alignment = .left
+        let attributes = [
+            NSAttributedString.Key.font: textFont,
+            NSAttributedString.Key.foregroundColor: UIColor.label,
+            NSAttributedString.Key.paragraphStyle: paragraphStyle,
+        ]
+        return attributes
+    }()
+
     lazy var labelTextAttributes: [NSAttributedString.Key: Any] = {
         let textFont = UIFont.systemFont(ofSize: labelTextFontSize, weight: UIFont.Weight.heavy)
         let paragraphStyle = NSMutableParagraphStyle()
@@ -95,7 +108,7 @@ final class LadderView: ScaledView {
             ladder.defaultMarkStyle = defaultMarkStyle
         }
     }
-    var labelDescriptionVisibility: TextVisibility = TextVisibility(rawValue: Preferences.labelDescriptionVisibility)!
+    var labelDescriptionVisibility = TextVisibility(rawValue: Preferences.labelDescriptionVisibility)!
     var marksAreHidden: Bool = Preferences.hideMarks
     var doubleLineBlockMarker: Bool = Preferences.doubleLineBlockMarker
     var rightAngleBlockMarker: Bool = Preferences.rightAngleBlockMarker
@@ -103,6 +116,8 @@ final class LadderView: ScaledView {
     var showPeriods: Bool = Preferences.showPeriods
     var periodPosition: PeriodPosition = PeriodPosition(rawValue: Preferences.periodPosition)!
     var periodTransparency: CGFloat = CGFloat(Preferences.periodTransparency)
+    var periodTextJustification = TextJustification(rawValue: Preferences.periodTextJustification)!
+    var periodOverlapMark: Bool = Preferences.periodOverlapMark
     var declutterIntervals: Bool = Preferences.declutterIntervals
 
     // colors set by preferences
@@ -2085,7 +2100,15 @@ final class LadderView: ScaledView {
         let end = transformToScaledViewPositionX(regionPositionX: periodEnd)
 
         var width = end - beginning
-        var adjustedStartX = beginning + markLineWidth / 2.0 // make sure mark line is visible if it is vertical
+        var adjustedStartX = beginning
+        // EXAMPLE: let impinging marks show through
+        // TODO: is this option worth it?  Maybe just never overlap marks
+        if !periodOverlapMark {
+            width = width - markLineWidth
+            // Lines straddle the path, so divide in half to make fully visible
+            adjustedStartX = adjustedStartX + markLineWidth / 2.0 // make sure mark line is visible if it is vertical
+        }
+
         if leftMargin > beginning {
             adjustedStartX = max(beginning, leftMargin)
             width = width - (leftMargin - beginning)
@@ -2093,7 +2116,7 @@ final class LadderView: ScaledView {
         if adjustedStartX + width < leftMargin {
             return
         }
-        // FIXME: overriding height as test.  Height should be a constant.
+        // FIXME: Height should be a constant.
         let height = 20.0
         let rect = CGRect(x: adjustedStartX, y: startY, width: width, height: height)
         context.addRect(rect)
@@ -2109,7 +2132,15 @@ final class LadderView: ScaledView {
         context.setAlpha(1.0)
         // TODO: determine if text is bigger than rectangle width, and if so, draw text next to rectangle.
         // Or, don't draw text...
-        text.draw(in: rect, withAttributes: measurementTextAttributes)
+        // TODO: preference for left vs center justification, below uses left
+        // Adjust rectangle so that text is not stuck against the left side of period rect.
+        switch periodTextJustification {
+        case .left:
+            let textRect = CGRect(x: adjustedStartX + 5, y: startY, width: width - 5, height: height)
+            text.draw(in: textRect, withAttributes: leftJustifiedMeasurementTextAttributes)
+        case .center:
+            text.draw(in: rect, withAttributes: measurementTextAttributes)
+        }
     }
 
     func conductionTime(fromSegment segment: Segment) -> Double {
@@ -3503,7 +3534,13 @@ enum TextVisibility: Int, Codable {
     case visibleIfFits
 }
 
+enum TextJustification: Int, Codable {
+    case left
+    case center
+}
+
 enum Adjustment {
     case adjust
     case trim
 }
+
