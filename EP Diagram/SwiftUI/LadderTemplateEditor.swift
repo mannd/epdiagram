@@ -19,7 +19,7 @@ struct LadderTemplateEditor: View {
     @Environment(\.presentationMode) var presentationMode: Binding<PresentationMode>
 
     var body: some View {
-        VStack {
+//        VStack {
             NavigationView {
                 Form {
                     Section(header: Text("Name")) {
@@ -44,7 +44,7 @@ struct LadderTemplateEditor: View {
                 .environment(\.editMode, $editMode)
             }
             .navigationViewStyle(StackNavigationViewStyle())
-        }
+//        }
     }
 
     private var addButton: some View {
