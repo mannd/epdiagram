@@ -2067,17 +2067,30 @@ final class LadderView: ScaledView {
         }
     }
 
-    func drawPeriods(region: Region, context: CGContext, rect: CGRect) {
+    func drawPeriods(region: Region, context: CGContext) {
         guard let calibration = calibration, calibration.isCalibrated else { return }
         guard showPeriods else { return }
         let periodHeight: CGFloat = 20.0
         for mark in region.marks {
-            var startY = region.proximalBoundaryY
-            for period in mark.periods {
-                drawPeriod(period: period, forMark: mark, regionMarks: region.marks, startY: startY, context: context)
+            let numPeriods = numPeriodsFit(forMark: mark, inRegion: region, withHeight: periodHeight)
+            var startY: CGFloat
+            switch periodPosition {
+            case .top:
+                startY = region.proximalBoundaryY
+            case .bottom:
+                startY = region.distalBoundaryY - CGFloat(numPeriods) * periodHeight
+            }
+            mark.periods[0..<numPeriods].forEach {
+                drawPeriod(period: $0, forMark: mark, regionMarks: region.marks, startY: startY, context: context)
                 startY += periodHeight
             }
         }
+    }
+
+    private func numPeriodsFit(forMark mark: Mark, inRegion region: Region, withHeight height: CGFloat) -> Int {
+        let regionHeight = region.height
+        let num = Int(regionHeight / height)
+        return min(num, mark.periods.count)
     }
 
     func drawPeriod(period: Period, forMark mark: Mark, regionMarks: [Mark], startY: CGFloat, context: CGContext) {
@@ -2294,7 +2307,7 @@ final class LadderView: ScaledView {
         if !marksAreHidden {
             drawMarks(region: region, context: context, rect: rect)
             drawIntervals(region: region, context: context)
-            drawPeriods(region: region, context: context, rect: rect)
+            drawPeriods(region: region, context: context)
         }
         drawBottomLine(context: context, lastRegion: lastRegion, rect: rect)
     }

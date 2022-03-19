@@ -658,7 +658,6 @@ enum TemporalRelation {
 enum PeriodPosition: Int, Codable, CustomStringConvertible, CaseIterable, Identifiable {
     case top
     case bottom
-    case spread
 
     var id: PeriodPosition { self }
 
@@ -668,8 +667,6 @@ enum PeriodPosition: Int, Codable, CustomStringConvertible, CaseIterable, Identi
             return L("Top")
         case .bottom:
             return L("Bottom")
-        case .spread:
-            return L("Spread out")
         }
     }
 }

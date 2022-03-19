@@ -208,7 +208,6 @@ struct PreferencesView: View {
                         Picker(selection: $periodPosition, label: Text("Position of periods in region"), content: {
                             Text("Top").tag(PeriodPosition.top.rawValue)
                             Text("Bottom").tag(PeriodPosition.bottom.rawValue)
-                            Text("Spread out").tag(PeriodPosition.spread.rawValue)
                         })
                         Picker(selection: $periodTextJustification, label: Text("Period text justification"), content: {
                             Text("Left").tag(TextJustification.left.rawValue)
