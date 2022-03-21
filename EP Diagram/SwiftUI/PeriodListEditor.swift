@@ -8,9 +8,23 @@
 
 import SwiftUI
 
+// TODO: dismiss doesn't work right
 struct PeriodListEditor: View {
+    var dismissAction: (([Period], Bool) -> Void)?
+    var periods: [Period] = []
     var body: some View {
-        Text(/*@START_MENU_TOKEN@*/"Hello, World!"/*@END_MENU_TOKEN@*/)
+        NavigationView {
+            Form {
+                Section(header: Text("Test")) {
+                Text(/*@START_MENU_TOKEN@*/"Hello, World!"/*@END_MENU_TOKEN@*/)
+                }
+            }
+            .navigationBarTitle(Text("Periods"), displayMode: .inline)
+//            .navigationBarItems(leading: EditButton(), trailing: addButton)
+//            .environment(\.editMode, $editMode)
+        }
+        // Force full screen for this view even on iPad
+        .navigationViewStyle(StackNavigationViewStyle())
     }
 }
 

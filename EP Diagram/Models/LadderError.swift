@@ -27,7 +27,7 @@ enum LadderError: Error {
     case didNotTapAMark
     case onlyOneSelectedMarkInRegion
     case markNotAtEitherEndOfSelection
-
+    case periodsDontMatch
 }
 
 extension LadderError: LocalizedError {
@@ -40,7 +40,7 @@ extension LadderError: LocalizedError {
         case .requireTwoMarks:
             return L("Exactly two marks must be selected.")
         case .marksInDifferentRegions:
-            return L("Selected marks are in different regions.  Marks must me in the same region..")
+            return L("Selected marks are in different regions.  Marks must be in the same region..")
         case .marksNotContiguous:
             return L("Marks are not contiguous.  Selected marks must be contiguous.")
         case .tooManyRegions:
@@ -67,6 +67,8 @@ extension LadderError: LocalizedError {
             return L("There is only one selected mark in this region.")
         case .markNotAtEitherEndOfSelection:
             return L("Mark not at either end of selection.")
+        case .periodsDontMatch:
+            return L("You can only edit periods of multiple marks if the periods are all the same.")
         }
     }
 }

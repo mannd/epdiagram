@@ -10,13 +10,11 @@ import UIKit
 import BetterCodable
 import os.log
 
-struct Period {
+struct Period: Equatable {
     var name: String = ""
     var duration: CGFloat = 0
     var color: UIColor = UIColor.green
     var resettable: Bool = false
-
-    // height will be fixed
 }
 
 extension Period: Codable {

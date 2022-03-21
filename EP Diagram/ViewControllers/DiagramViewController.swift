@@ -11,9 +11,6 @@ import SwiftUI
 import UniformTypeIdentifiers
 import Photos
 import os.log
-//#if targetEnvironment(macCatalyst)
-//import Dynamic
-//#endif
 
 final class DiagramViewController: UIViewController {
     // For debugging only
@@ -401,6 +398,16 @@ final class DiagramViewController: UIViewController {
         }
     }
 
+    // Period actions
+    lazy var editPeriodsAction = UIAction(title: L("Periods..."), image: UIImage(systemName: "rectangle.grid.1x2")) { _ in
+        do {
+            try self.ladderView.checkForPeriods()
+            self.performEditPeriodsSegue()
+        } catch {
+            self.showError(title: L("Error Editing Periods"), error: error)
+        }
+    }
+
     // Label actions
     lazy var editLabelAction = UIAction(title: L("Edit label"), image: UIImage(systemName: "pencil")) { action in
         self.editLabel()
@@ -443,7 +450,7 @@ final class DiagramViewController: UIViewController {
         self.ladderView.removeRegion()
     }
 
-    lazy var markMenu = UIMenu(title: L("Mark Menu"), children: [self.styleMenu, self.emphasisMenu, self.impulseOriginMenu, self.blockMenu, self.labelMarkMenu, self.straightenMenu, self.slantMenu, self.adjustYMenu, self.moveAction, self.adjustCLAction, self.rhythmAction, self.repeatCLMenu, self.copyMarksAction, self.repeatPatternAction, self.unlinkAction, self.snapAction, self.deleteAction])
+    lazy var markMenu = UIMenu(title: L("Mark Menu"), children: [self.styleMenu, self.emphasisMenu, self.impulseOriginMenu, self.blockMenu, self.labelMarkMenu, self.straightenMenu, self.slantMenu, self.adjustYMenu, self.moveAction, self.adjustCLAction, self.rhythmAction, self.repeatCLMenu, self.copyMarksAction, self.repeatPatternAction, self.unlinkAction, self.snapAction, self.editPeriodsAction, self.deleteAction])
 
     lazy var labelMenu = [self.regionStyleMenu, self.editLabelAction, self.addRegionMenu, self.removeRegionAction, self.regionHeightMenu, self.adjustLeftMarginAction]
 
@@ -1455,6 +1462,12 @@ final class DiagramViewController: UIViewController {
         return helpViewController
     }
 
+    @IBSegueAction func performEditPeriodsAction(_ coder: NSCoder) -> UIViewController? {
+        let periodsEditor = PeriodListEditor(dismissAction: applyPeriods, periods: [Period]())
+        let hostingController = UIHostingController(coder: coder, rootView: periodsEditor)
+        return hostingController
+    }
+
     @IBSegueAction func performRhythmSegueAction(_ coder: NSCoder) -> UIViewController? {
         // Have to provide dismiss action to SwiftUI modal view.  It won't dismiss itself.
         let rhythmView = RhythmView(dismissAction: applyRhythm(rhythm:cancel:))
@@ -1484,6 +1497,13 @@ final class DiagramViewController: UIViewController {
         self.dismiss(animated: true, completion: nil)
     }
 
+    func applyPeriods(periods: [Period], cancel: Bool) {
+        if !cancel {
+            // ladderView.applyPeriods(periods)
+        }
+        self.dismiss(animated: true, completion: nil)
+    }
+
     func performShowRhythmSegue() {
         performSegue(withIdentifier: "showRhythmSegue", sender: self)
     }
@@ -1492,9 +1512,9 @@ final class DiagramViewController: UIViewController {
         performSegue(withIdentifier: "selectLadderSegue", sender: self)
     }
 
-    //    func performEditLadderSegue() {
-    //        performSegue(withIdentifier: "EditLadderSegue", sender: self)
-    //    }
+    func performEditPeriodsSegue() {
+        performSegue(withIdentifier: "editPeriodsSegue", sender: self)
+    }
 
     func performShowSampleSelectorSegue() {
         performSegue(withIdentifier: "showSampleSelectorSegue", sender: self)

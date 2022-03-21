@@ -2537,6 +2537,33 @@ final class LadderView: ScaledView {
         }
     }
 
+    /// Check selected marks to see if periods are editable
+    ///
+    /// For periods to be editable, it is necessary that
+    ///  1. At least one mark is selected
+    ///  2. All marks are in the same region
+    ///  3. All marks have the same periods, or no periods.
+    ///  Throws specific error if any of the above conditions is true.
+    func checkForPeriods() throws {
+        let selectedMarks = ladder.allMarksWithMode(.selected)
+        guard selectedMarks.count != 1 else {
+            return // 1 mark can always be edited
+        }
+        if selectedMarks.count < 1 {
+            throw LadderError.noMarks
+        }
+        if ladder.marksAreInDifferentRegions(selectedMarks) {
+            throw LadderError.marksInDifferentRegions
+        }
+        // At this point, at least 1 mark is in selectedMarks.
+        let periods = selectedMarks[0].periods
+        for mark in selectedMarks {
+            if mark.periods != periods {
+                throw LadderError.periodsDontMatch
+            }
+        }
+    }
+
     /// Repeats CL and creates new marks.  If marks aren't parallel, uses minimum CL between prox and distal endpoints.
     ///
     /// Exactly two marks must be selected, both in the same region.  Marks don't have to be parallel, but if they are not,
