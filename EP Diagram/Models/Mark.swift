@@ -114,8 +114,6 @@ final class Mark: Codable {
         self.id = UUID()
         linkedMarkIDs = LinkedMarkIDs()
         anchor = .middle
-        periods.append(Period(name: "LRI", duration: 500))
-        periods.append(Period(name: "pAV", duration: 150))
     }
 
     /// Create a mark with a zero length segment.  Mostly used for testing.
@@ -360,18 +358,6 @@ struct LinkedMarkIDs: Codable {
         distal.removeAll()
     }
 }
-
-//struct MarkLabel: Codable {
-//    var label: String?
-//    var position: LabelPosition = .left
-//
-//    enum LabelPosition: Int, Codable {
-//        case proximal
-//        case distal
-//        case left
-//        case right
-//    }
-//}
 
 // MARK: - extensions
 

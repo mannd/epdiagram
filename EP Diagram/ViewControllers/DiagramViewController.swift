@@ -649,7 +649,6 @@ final class DiagramViewController: UIViewController {
         imageScrollView.contentInset = UIEdgeInsets(top: 0, left: leftMargin - offset.minX, bottom: 0, right: 0)
         updateToolbarButtons()
         updateUndoRedoButtons()
-        showMainToolbar()
         resetViews(setActiveRegion: false)
     }
 

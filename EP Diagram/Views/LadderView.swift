@@ -2134,7 +2134,7 @@ final class LadderView: ScaledView {
         let height = 20.0
         let rect = CGRect(x: adjustedStartX, y: startY, width: width, height: height)
         context.addRect(rect)
-        context.setFillColor(periodColor.cgColor)
+        context.setFillColor(period.color.cgColor)
         // Cludgy get rid of border.  Do we want to have a border?
         context.setLineWidth(0)
         context.setAlpha(periodTransparency)
@@ -2565,7 +2565,10 @@ final class LadderView: ScaledView {
         // At this point, at least 2 marks are in selectedMarks.
         let periods = selectedMarks[0].periods
         for mark in selectedMarks {
-            if mark.periods != periods {
+            if mark.periods.count == 0 { // allow mix of no periods and periods
+                continue
+            }
+            if mark.periods != periods { // but don't allow disimilar periods
                 throw LadderError.periodsDontMatch
             }
         }
@@ -2575,10 +2578,15 @@ final class LadderView: ScaledView {
 
     func applyPeriods(_ periods: [Period]) {
         let selectedMarks = ladder.allMarksWithMode(.selected)
-        for mark in selectedMarks {
+        applyPeriods(periods, toMarks: selectedMarks)
+    }
+
+    private func applyPeriods(_ periods: [Period], toMarks marks: [Mark]) {
+        for mark in marks {
             undoablySetMarkPeriods(mark: mark, periods: periods)
         }
         refresh()
+        // TODO: need to restore select toolbar
     }
 
     func undoablySetMarkPeriods(mark: Mark, periods: [Period]) {
@@ -2888,7 +2896,8 @@ final class LadderView: ScaledView {
             segment.distal.x -= diff
             let newMark = ladder.addMark(fromSegment: segment, toRegion: ladder.region(ofMark: mark))
             undoablySetMarkStyle(mark: newMark, style: mark.style)
-//            newMark.style = mark.style
+            // TODO: get periods if consistent periods in copied marks and copy periods
+            //            newMark.style = mark.style
             newMarks.append(newMark)
         }
         undoablyAddMarks(marks: newMarks)

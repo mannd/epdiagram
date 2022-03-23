@@ -10,6 +10,7 @@ import SwiftUI
 import os.log
 
 struct PeriodListEditor: View {
+    let backgroundAlpha = 0.6
     var dismissAction: (([Period], Bool) -> Void)?
     @State var periods: [Period] = []
     @State private var editMode = EditMode.inactive
@@ -20,11 +21,14 @@ struct PeriodListEditor: View {
                 Section(header: Text("Periods")) {
                     List() {
                         ForEach (periods, id: \.self.id) {
-                            period in NavigationLink(destination: PeriodEditor()) {
+                            period in NavigationLink(destination: PeriodEditor(period: self.selectedPeriod(id: period.id))) {
                                 VStack(alignment: .leading) {
-                                    Text(period.name)
+                                        Text("Period: \(period.name)")
+                                        Text("Duration: \(Int(period.duration)) msec")
+                                    Text("Resettable: \(period.resettable ? "Yes" : "No")")
                                 }
-                            }.background(Color(period.color))
+                                .padding()
+                            }.background(Color(period.color.withAlphaComponent(backgroundAlpha)))
                         }
                         .onDelete { indexSet in
                             self.periods.remove(atOffsets: indexSet)
@@ -59,9 +63,15 @@ struct PeriodListEditor: View {
 
     private func onAdd() {
         os_log("onAdd() - PeriodListEditor", log: OSLog.action, type: .info)
-//        let newRegionTemplate = RegionTemplate(name: "NEW", description: "New region", unitHeight: 1)
-//        let newLadderTemplate = LadderTemplate(name: "New Ladder", description: "New ladder", regionTemplates: [newRegionTemplate])
-//        ladderTemplatesController.ladderTemplates.append(newLadderTemplate)
+        let period = Period()
+        periods.append(period)
+    }
+
+    private func selectedPeriod(id: UUID) -> Binding<Period> {
+        guard let index = self.periods.firstIndex(where: { $0.id == id }) else {
+            fatalError("Period doesn't exist.")
+        }
+        return self.$periods[index]
     }
 }
 

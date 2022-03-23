@@ -23,7 +23,7 @@ fileprivate func getColorPicker(title: LocalizedStringKey, selection: Binding<Co
 var periodColorName = Preferences.periodColorName
 
 struct PeriodEditor: View {
-    @State var period = Period(name: "Test", duration: 500, color: .blue)
+    @Binding var period: Period
     @State var resettable = false
     @State var periodColor: Color = Color(Preferences.defaultPeriodColor)
 
@@ -39,14 +39,14 @@ struct PeriodEditor: View {
                 }
                 Section(header: Text("Color")) {
                     getColorPicker(title: "Color", selection: Binding(
-                        get: { periodColor },
+                        get: { Color(period.color) },
                         set: { newValue in
                             periodColorName = newValue.toString
-                            periodColor = newValue
+                            period.color = UIColor(newValue)
                         }))
                 }
                 Section(header: Text("Resettable")) {
-                    Toggle(isOn: $resettable) {
+                    Toggle(isOn: $period.resettable) {
                         Text("Resettable")
                     }
                 }
@@ -62,6 +62,6 @@ struct PeriodEditor: View {
 
 struct PeriodEditor_Previews: PreviewProvider {
     static var previews: some View {
-        PeriodEditor(period: Period(name: "LRI", duration: 200, color: .green, resettable: true))
+        PeriodEditor(period: .constant(Period(name: "LRI", duration: 200, color: .green, resettable: true)))
     }
 }

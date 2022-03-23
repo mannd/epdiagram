@@ -14,9 +14,9 @@ import os.log
 struct Period: Equatable {
     private(set) var id = UUID()
     
-    var name: String = ""
-    var duration: CGFloat = 0
-    var color: UIColor = UIColor.green
+    var name: String = "NEW PERIOD"
+    var duration: CGFloat = 500
+    var color: UIColor = Preferences.defaultPeriodColor
     var resettable: Bool = false
 }
 
