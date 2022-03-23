@@ -658,8 +658,7 @@ final class DiagramViewController: UIViewController {
     }
 
     deinit {
-
-        print("*****DiagramViewController deinit()******")
+        os_log("deinit - DiagramViewController", log: .debugging, type: .debug)
     }
 
     func addIOSDirectoryToSandbox() {
@@ -667,7 +666,7 @@ final class DiagramViewController: UIViewController {
     }
 
     override func updateUserActivityState(_ activity: NSUserActivity) {
-        os_log("debug: diagramViewController updateUserActivityState called", log: .debugging, type: .debug)
+        //os_log("debug: diagramViewController updateUserActivityState called", log: .debugging, type: .debug)
 
         super.updateUserActivityState(activity)
 
@@ -1462,7 +1461,7 @@ final class DiagramViewController: UIViewController {
     }
 
     @IBSegueAction func performEditPeriodsAction(_ coder: NSCoder) -> UIViewController? {
-        let periodsEditor = PeriodListEditor(dismissAction: applyPeriods, periods: ladderView.selectedMarksPeriods)
+        let periodsEditor = PeriodListEditor(dismissAction: applyPeriods, periodsModelController: ladderView.periodsModelController)
         let hostingController = UIHostingController(coder: coder, rootView: periodsEditor)
         return hostingController
     }

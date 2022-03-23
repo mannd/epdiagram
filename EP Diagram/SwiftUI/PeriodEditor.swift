@@ -23,6 +23,8 @@ fileprivate func getColorPicker(title: LocalizedStringKey, selection: Binding<Co
 var periodColorName = Preferences.periodColorName
 
 struct PeriodEditor: View {
+    @ObservedObject var periodsModelController: PeriodsModelController
+    var dismissAction: (([Period], Bool) -> Void)?
     @Binding var period: Period
     @State var resettable = false
     @State var periodColor: Color = Color(Preferences.defaultPeriodColor)
@@ -54,6 +56,11 @@ struct PeriodEditor: View {
             .onAppear {
                 periodColor = Color.convertColorName(periodColorName) ?? periodColor
             }
+            .onDisappear() {
+                if let dismissAction = dismissAction {
+                    dismissAction(periodsModelController.periods, false)
+                }
+            }
             .navigationBarTitle(Text("Edit Period"), displayMode: .inline)
         }
         .navigationViewStyle(StackNavigationViewStyle())
@@ -62,6 +69,6 @@ struct PeriodEditor: View {
 
 struct PeriodEditor_Previews: PreviewProvider {
     static var previews: some View {
-        PeriodEditor(period: .constant(Period(name: "LRI", duration: 200, color: .green, resettable: true)))
+        PeriodEditor(periodsModelController: PeriodsModelController(periods: []), period: .constant(Period(name: "LRI", duration: 200, color: .green, resettable: true)))
     }
 }

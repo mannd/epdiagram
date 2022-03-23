@@ -39,6 +39,7 @@ final class LadderView: ScaledView {
     private let maxMarksForIntervals = 200   // We may revisit this limit in the future.
     private let minRepeatCLInterval: CGFloat = 20
     private let draggedMarkSnapToBoundaryMargin: CGFloat = 0.05
+    private let periodHeight: CGFloat = 20.0
 
     let measurementTextFontSize: CGFloat = 15.0
     let labelTextFontSize: CGFloat = 18.0
@@ -161,6 +162,7 @@ final class LadderView: ScaledView {
     var copiedMarks: [Mark] = []
     var patternMarks: [Mark] = []
     var selectedMarksPeriods: [Period] = []
+    var periodsModelController = PeriodsModelController(periods: [])
 
     private var savedActiveRegion: Region?
     private var savedMode: Mode = .normal
@@ -2071,7 +2073,6 @@ final class LadderView: ScaledView {
     func drawPeriods(region: Region, context: CGContext) {
         guard let calibration = calibration, calibration.isCalibrated else { return }
         guard showPeriods else { return }
-        let periodHeight: CGFloat = 20.0
         for mark in region.marks {
             let numPeriods = numPeriodsFit(forMark: mark, inRegion: region, withHeight: periodHeight)
             var startY: CGFloat
@@ -2131,8 +2132,7 @@ final class LadderView: ScaledView {
             return
         }
         // FIXME: Height should be a constant.
-        let height = 20.0
-        let rect = CGRect(x: adjustedStartX, y: startY, width: width, height: height)
+        let rect = CGRect(x: adjustedStartX, y: startY, width: width, height: periodHeight)
         context.addRect(rect)
         context.setFillColor(period.color.cgColor)
         // Cludgy get rid of border.  Do we want to have a border?
@@ -2144,13 +2144,10 @@ final class LadderView: ScaledView {
         let text = period.name
         // FIXME: should save original alpha and restore it...
         context.setAlpha(1.0)
-        // TODO: determine if text is bigger than rectangle width, and if so, draw text next to rectangle.
-        // Or, don't draw text...
-        // TODO: preference for left vs center justification, below uses left
-        // Adjust rectangle so that text is not stuck against the left side of period rect.
+        // TODO: center text vertically
         switch periodTextJustification {
         case .left:
-            let textRect = CGRect(x: adjustedStartX + 5, y: startY, width: width - 5, height: height)
+            let textRect = CGRect(x: adjustedStartX + 5, y: startY, width: width - 5, height: periodHeight)
             text.draw(in: textRect, withAttributes: leftJustifiedMeasurementTextAttributes)
         case .center:
             text.draw(in: rect, withAttributes: measurementTextAttributes)
@@ -2553,7 +2550,7 @@ final class LadderView: ScaledView {
         let selectedMarks = ladder.allMarksWithMode(.selected)
         selectedMarksPeriods = []
         if selectedMarks.count == 1 { // 1 mark can always be edited
-            selectedMarksPeriods = selectedMarks[0].periods
+            periodsModelController.periods = selectedMarks[0].periods
             return
         }
         if selectedMarks.count < 1 {
@@ -2573,7 +2570,7 @@ final class LadderView: ScaledView {
             }
         }
         // If we reach here without throwing, all marks have the same periods (or none).  Thus...
-        selectedMarksPeriods = periods
+        periodsModelController.periods = periods
     }
 
     func applyPeriods(_ periods: [Period]) {
@@ -2586,7 +2583,6 @@ final class LadderView: ScaledView {
             undoablySetMarkPeriods(mark: mark, periods: periods)
         }
         refresh()
-        // TODO: need to restore select toolbar
     }
 
     func undoablySetMarkPeriods(mark: Mark, periods: [Period]) {

@@ -12,7 +12,7 @@ import os.log
 struct PeriodListEditor: View {
     let backgroundAlpha = 0.6
     var dismissAction: (([Period], Bool) -> Void)?
-    @State var periods: [Period] = []
+    @ObservedObject var periodsModelController: PeriodsModelController
     @State private var editMode = EditMode.inactive
     @Environment(\.presentationMode) var presentationMode: Binding<PresentationMode>
     var body: some View {
@@ -20,8 +20,8 @@ struct PeriodListEditor: View {
             Form {
                 Section(header: Text("Periods")) {
                     List() {
-                        ForEach (periods, id: \.self.id) {
-                            period in NavigationLink(destination: PeriodEditor(period: self.selectedPeriod(id: period.id))) {
+                        ForEach (periodsModelController.periods, id: \.self.id) {
+                            period in NavigationLink(destination: PeriodEditor(periodsModelController: periodsModelController, dismissAction: dismissAction, period: self.selectedPeriod(id: period.id))) {
                                 VStack(alignment: .leading) {
                                         Text("Period: \(period.name)")
                                         Text("Duration: \(Int(period.duration)) msec")
@@ -31,10 +31,10 @@ struct PeriodListEditor: View {
                             }.background(Color(period.color.withAlphaComponent(backgroundAlpha)))
                         }
                         .onDelete { indexSet in
-                            self.periods.remove(atOffsets: indexSet)
+                            self.periodsModelController.periods.remove(atOffsets: indexSet)
                         }
                         .onMove { indices, newOffset in
-                            self.periods.move(fromOffsets: indices, toOffset: newOffset)
+                            self.periodsModelController.periods.move(fromOffsets: indices, toOffset: newOffset)
                         }
                     }
                 }
@@ -44,7 +44,7 @@ struct PeriodListEditor: View {
             .environment(\.editMode, $editMode)
             .onDisappear() {
                 if let dismissAction = dismissAction {
-                    dismissAction(periods, false)
+                    dismissAction(periodsModelController.periods, false)
                 }
             }
         }
@@ -64,21 +64,21 @@ struct PeriodListEditor: View {
     private func onAdd() {
         os_log("onAdd() - PeriodListEditor", log: OSLog.action, type: .info)
         let period = Period()
-        periods.append(period)
+        periodsModelController.periods.append(period)
     }
 
     private func selectedPeriod(id: UUID) -> Binding<Period> {
-        guard let index = self.periods.firstIndex(where: { $0.id == id }) else {
+        guard let index = self.periodsModelController.periods.firstIndex(where: { $0.id == id }) else {
             fatalError("Period doesn't exist.")
         }
-        return self.$periods[index]
+        return self.$periodsModelController.periods[index]
     }
 }
 
-fileprivate let testData = [Period(name: "LRI", duration: 400, color: .green, resettable: true), Period(name: "AVD", duration: 200, color: .red, resettable: false)]
+fileprivate let testPeriods = [Period(name: "LRI", duration: 400, color: .green, resettable: true), Period(name: "AVD", duration: 200, color: .red, resettable: false)]
 
 struct PeriodListEditor_Previews: PreviewProvider {
     static var previews: some View {
-        PeriodListEditor(periods: testData)
+        PeriodListEditor(periodsModelController: PeriodsModelController(periods: testPeriods))
     }
 }

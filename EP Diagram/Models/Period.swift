@@ -49,3 +49,11 @@ extension Period: Codable {
         try container.encode(colorData, forKey: .color)
     }
 }
+
+final class PeriodsModelController: ObservableObject {
+    @Published var periods: [Period] = []
+
+    init(periods: [Period]) {
+        self.periods = periods
+    }
+}
