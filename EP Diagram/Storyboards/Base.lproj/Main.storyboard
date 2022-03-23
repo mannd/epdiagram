@@ -108,7 +108,7 @@
                         <segue destination="ggo-hf-FSM" kind="show" identifier="showSampleSelectorSegue" destinationCreationSelector="showSampleSelector:" id="ItN-ts-1CH"/>
                         <segue destination="BGd-dQ-vjR" kind="presentation" identifier="showRhythmSegue" destinationCreationSelector="performRhythmSegueAction:" id="vII-Nd-Rym"/>
                         <segue destination="M0c-tI-NTs" kind="show" identifier="showOnboardingSegue" destinationCreationSelector="performOnboardingSegueAction:" id="dER-Jc-QCi"/>
-                        <segue destination="Dh4-Zq-RMS" kind="presentation" identifier="editPeriodsSegue" destinationCreationSelector="performEditPeriodsAction:" id="sUg-jx-36L"/>
+                        <segue destination="Dh4-Zq-RMS" kind="show" identifier="editPeriodsSegue" destinationCreationSelector="performEditPeriodsAction:" id="sUg-jx-36L"/>
                     </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="dkx-z0-nzr" sceneMemberID="firstResponder"/>
@@ -306,7 +306,7 @@
         <image name="SampleECG" width="1411" height="676"/>
         <image name="camera" catalog="system" width="128" height="94"/>
         <systemColor name="systemBackgroundColor">
-            <color white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+            <color red="1" green="1" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
         </systemColor>
         <systemColor name="systemBlueColor">
             <color red="0.0" green="0.47843137254901963" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>

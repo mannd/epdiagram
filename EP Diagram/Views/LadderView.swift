@@ -160,6 +160,7 @@ final class LadderView: ScaledView {
 
     var copiedMarks: [Mark] = []
     var patternMarks: [Mark] = []
+    var selectedMarksPeriods: [Period] = []
 
     private var savedActiveRegion: Region?
     private var savedMode: Mode = .normal
@@ -2522,6 +2523,10 @@ final class LadderView: ScaledView {
         if regions.count > 1 {
             throw LadderError.tooManyRegions
         }
+        // TODO: test
+//        if !zone.isVisible && regions.count < 1 {
+//            throw LadderError.noRegionSelected
+//        }
     }
 
     func checkForRepeatCL() throws {
@@ -2546,8 +2551,10 @@ final class LadderView: ScaledView {
     ///  Throws specific error if any of the above conditions is true.
     func checkForPeriods() throws {
         let selectedMarks = ladder.allMarksWithMode(.selected)
-        guard selectedMarks.count != 1 else {
-            return // 1 mark can always be edited
+        selectedMarksPeriods = []
+        if selectedMarks.count == 1 { // 1 mark can always be edited
+            selectedMarksPeriods = selectedMarks[0].periods
+            return
         }
         if selectedMarks.count < 1 {
             throw LadderError.noMarks
@@ -2555,13 +2562,32 @@ final class LadderView: ScaledView {
         if ladder.marksAreInDifferentRegions(selectedMarks) {
             throw LadderError.marksInDifferentRegions
         }
-        // At this point, at least 1 mark is in selectedMarks.
+        // At this point, at least 2 marks are in selectedMarks.
         let periods = selectedMarks[0].periods
         for mark in selectedMarks {
             if mark.periods != periods {
                 throw LadderError.periodsDontMatch
             }
         }
+        // If we reach here without throwing, all marks have the same periods (or none).  Thus...
+        selectedMarksPeriods = periods
+    }
+
+    func applyPeriods(_ periods: [Period]) {
+        let selectedMarks = ladder.allMarksWithMode(.selected)
+        for mark in selectedMarks {
+            undoablySetMarkPeriods(mark: mark, periods: periods)
+        }
+        refresh()
+    }
+
+    func undoablySetMarkPeriods(mark: Mark, periods: [Period]) {
+        let originalPeriods = mark.periods
+        currentDocument?.undoManager.registerUndo(withTarget: self) { target in
+            target.undoablySetMarkPeriods(mark: mark, periods: originalPeriods)
+        }
+        NotificationCenter.default.post(name: .didUndoableAction, object: nil)
+        mark.periods = periods
     }
 
     /// Repeats CL and creates new marks.  If marks aren't parallel, uses minimum CL between prox and distal endpoints.

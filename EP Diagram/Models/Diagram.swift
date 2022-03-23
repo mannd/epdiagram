@@ -38,7 +38,7 @@ struct Diagram: Codable {
 
     struct FileVersion: DefaultCodableStrategy {
         typealias DefaultValue = Int
-        static var defaultValue: DefaultValue { return 2 }
+        static var defaultValue: DefaultValue { return 2 } // == fileVersion
     }
 
     init(name: String?, description: String, image: UIImage?, ladder: Ladder) {

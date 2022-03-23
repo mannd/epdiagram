@@ -1463,7 +1463,7 @@ final class DiagramViewController: UIViewController {
     }
 
     @IBSegueAction func performEditPeriodsAction(_ coder: NSCoder) -> UIViewController? {
-        let periodsEditor = PeriodListEditor(dismissAction: applyPeriods, periods: [Period]())
+        let periodsEditor = PeriodListEditor(dismissAction: applyPeriods, periods: ladderView.selectedMarksPeriods)
         let hostingController = UIHostingController(coder: coder, rootView: periodsEditor)
         return hostingController
     }
@@ -1499,9 +1499,8 @@ final class DiagramViewController: UIViewController {
 
     func applyPeriods(periods: [Period], cancel: Bool) {
         if !cancel {
-            // ladderView.applyPeriods(periods)
+             ladderView.applyPeriods(periods)
         }
-        self.dismiss(animated: true, completion: nil)
     }
 
     func performShowRhythmSegue() {

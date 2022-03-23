@@ -10,7 +10,10 @@ import UIKit
 import BetterCodable
 import os.log
 
+// FIXME: dilemma.  If each period has a separate id, we cannot detect identical periods.
 struct Period: Equatable {
+    private(set) var id = UUID()
+    
     var name: String = ""
     var duration: CGFloat = 0
     var color: UIColor = UIColor.green
