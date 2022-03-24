@@ -2529,9 +2529,9 @@ final class LadderView: ScaledView {
             throw LadderError.tooManyRegions
         }
         // TODO: test
-//        if !zone.isVisible && regions.count < 1 {
-//            throw LadderError.noRegionSelected
-//        }
+        if !zone.isVisible && regions.count < 1 {
+            throw LadderError.noRegionSelected
+        }
     }
 
     func checkForRepeatCL() throws {
@@ -2574,7 +2574,7 @@ final class LadderView: ScaledView {
                 continue
             }
             if !Period.periodsAreSimilar(mark.periods, periods) {
-                throw LadderError.periodsDontMatch
+                throw LadderError.periodsAreNotSimilar
             }
         }
         // If we reach here without throwing, all marks have the same periods (or none).  Thus...

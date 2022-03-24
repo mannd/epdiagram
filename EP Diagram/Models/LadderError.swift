@@ -27,7 +27,8 @@ enum LadderError: Error {
     case didNotTapAMark
     case onlyOneSelectedMarkInRegion
     case markNotAtEitherEndOfSelection
-    case periodsDontMatch
+    case periodsAreNotSimilar
+    case noRegionSelected
 }
 
 extension LadderError: LocalizedError {
@@ -67,8 +68,10 @@ extension LadderError: LocalizedError {
             return L("There is only one selected mark in this region.")
         case .markNotAtEitherEndOfSelection:
             return L("Mark not at either end of selection.")
-        case .periodsDontMatch:
+        case .periodsAreNotSimilar:
             return L("You can only edit periods of multiple marks if the periods are all the same.")
+        case .noRegionSelected:
+            return L("You must select a region or zone to add a rhythm.")
         }
     }
 }
