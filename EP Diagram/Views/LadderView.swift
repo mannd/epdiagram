@@ -2133,6 +2133,7 @@ final class LadderView: ScaledView {
         let rect = CGRect(x: adjustedStartX, y: startY, width: width, height: periodHeight)
         context.addRect(rect)
         context.setFillColor(period.color.cgColor)
+        context.setStrokeColor(UIColor.label.cgColor)
         let drawBorder = periodShowBorder
         context.setLineWidth(drawBorder ? 1.0 : 0)
         context.setAlpha(periodTransparency)
@@ -2899,8 +2900,7 @@ final class LadderView: ScaledView {
             segment.distal.x -= diff
             let newMark = ladder.addMark(fromSegment: segment, toRegion: ladder.region(ofMark: mark))
             undoablySetMarkStyle(mark: newMark, style: mark.style)
-            // TODO: get periods if consistent periods in copied marks and copy periods
-            //            newMark.style = mark.style
+            undoablySetMarkPeriods(mark: newMark, periods: mark.periods)
             newMarks.append(newMark)
         }
         undoablyAddMarks(marks: newMarks)
