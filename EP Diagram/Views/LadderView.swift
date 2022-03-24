@@ -39,7 +39,6 @@ final class LadderView: ScaledView {
     private let maxMarksForIntervals = 200   // We may revisit this limit in the future.
     private let minRepeatCLInterval: CGFloat = 20
     private let draggedMarkSnapToBoundaryMargin: CGFloat = 0.05
-    private let periodHeight: CGFloat = 30.0
 
     let measurementTextFontSize: CGFloat = 15.0
     let labelTextFontSize: CGFloat = 18.0
@@ -119,6 +118,8 @@ final class LadderView: ScaledView {
     var periodTransparency: CGFloat = CGFloat(Preferences.periodTransparency)
     var periodTextJustification = TextJustification(rawValue: Preferences.periodTextJustification)!
     var periodOverlapMark: Bool = Preferences.periodOverlapMark
+    var periodSize: PeriodSize = PeriodSize(rawValue: Preferences.periodSize)!
+    var periodShowBorder: Bool = Preferences.periodShowBorder
     var declutterIntervals: Bool = Preferences.declutterIntervals
 
     // colors set by preferences
@@ -2073,6 +2074,7 @@ final class LadderView: ScaledView {
     func drawPeriods(region: Region, context: CGContext) {
         guard let calibration = calibration, calibration.isCalibrated else { return }
         guard showPeriods else { return }
+        let periodHeight = periodSize.getHeight()
         for mark in region.marks {
             let numPeriods = numPeriodsFit(forMark: mark, inRegion: region, withHeight: periodHeight)
             var startY: CGFloat
@@ -2083,7 +2085,7 @@ final class LadderView: ScaledView {
                 startY = region.distalBoundaryY - CGFloat(numPeriods) * periodHeight
             }
             mark.periods[0..<numPeriods].forEach {
-                drawPeriod(period: $0, forMark: mark, regionMarks: region.marks, startY: startY, context: context)
+                drawPeriod(period: $0, forMark: mark, regionMarks: region.marks, startY: startY, periodHeight: periodHeight, context: context)
                 startY += periodHeight
             }
         }
@@ -2095,7 +2097,7 @@ final class LadderView: ScaledView {
         return min(num, mark.periods.count)
     }
 
-    func drawPeriod(period: Period, forMark mark: Mark, regionMarks: [Mark], startY: CGFloat, context: CGContext) {
+    func drawPeriod(period: Period, forMark mark: Mark, regionMarks: [Mark], startY: CGFloat, periodHeight: CGFloat, context: CGContext) {
         let calFactor = calibration!.currentCalFactor
         let start = mark.earliestPoint.x
         let duration = regionValueFromCalibratedValue(period.duration, usingCalFactor:  calFactor)
@@ -2131,7 +2133,7 @@ final class LadderView: ScaledView {
         let rect = CGRect(x: adjustedStartX, y: startY, width: width, height: periodHeight)
         context.addRect(rect)
         context.setFillColor(period.color.cgColor)
-        let drawBorder = true // TODO: change to preferences
+        let drawBorder = periodShowBorder
         context.setLineWidth(drawBorder ? 1.0 : 0)
         context.setAlpha(periodTransparency)
         context.drawPath(using: .fillStroke)
@@ -2139,7 +2141,6 @@ final class LadderView: ScaledView {
         context.strokePath()
         let text = period.name
         context.setAlpha(1.0)
-        // TODO: center text vertically
         var textAttributes: [NSAttributedString.Key: Any]
         switch periodTextJustification {
         case .left:
@@ -2150,14 +2151,14 @@ final class LadderView: ScaledView {
         let size = text.size(withAttributes: textAttributes)
         let textHeight = size.height
         let textOriginY = startY + (periodHeight - textHeight) / 2.0
+        var textRect: CGRect
         switch periodTextJustification {
         case .left:
-            let textRect = CGRect(x: adjustedStartX + 5, y: textOriginY, width: width - 5, height: textHeight)
-            text.draw(in: textRect, withAttributes: leftJustifiedMeasurementTextAttributes)
+            textRect = CGRect(x: adjustedStartX + 5, y: textOriginY, width: width - 5, height: textHeight)
         case .center:
-            let textRect = CGRect(x: rect.origin.x, y: textOriginY, width: rect.width, height: textHeight)
-            text.draw(in: textRect, withAttributes: measurementTextAttributes)
+            textRect = CGRect(x: rect.origin.x, y: textOriginY, width: rect.width, height: textHeight)
         }
+        text.draw(in: textRect, withAttributes: textAttributes)
     }
 
     func conductionTime(fromSegment segment: Segment) -> Double {
@@ -3614,6 +3615,20 @@ enum TextVisibility: Int, Codable {
 enum TextJustification: Int, Codable {
     case left
     case center
+}
+
+enum PeriodSize: Int, Codable {
+    case large
+    case small
+
+    func getHeight() -> CGFloat {
+        switch self {
+        case .large:
+            return 30.0
+        case .small:
+            return 20.0
+        }
+    }
 }
 
 enum Adjustment {

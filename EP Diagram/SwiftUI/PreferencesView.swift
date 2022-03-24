@@ -35,6 +35,8 @@ struct PreferencesView: View {
     @AppStorage(Preferences.periodTransparencyKey) var periodTransparency = Preferences.periodTransparency
     @AppStorage(Preferences.periodTextJustificationKey) var periodTextJustification = Preferences.periodTextJustification
     @AppStorage(Preferences.periodOverlapMarkKey) var periodOverlapMark = Preferences.periodOverlapMark
+    @AppStorage(Preferences.periodSizeKey) var periodSize = Preferences.periodSize
+    @AppStorage(Preferences.periodShowBorderKey) var periodShowBorder = Preferences.periodShowBorder
     @AppStorage(Preferences.declutterIntervalsKey) var declutterIntervals = Preferences.declutterIntervals
 
     // Color preferences
@@ -226,7 +228,13 @@ struct PreferencesView: View {
                             Text("Period transparency")
                             Slider(value: $periodTransparency, in: 0.2...1.0)
                         }
-
+                        Picker(selection: $periodSize, label: Text("Period size"), content: {
+                            Text("Large").tag(PeriodSize.large.rawValue)
+                            Text("Small").tag(PeriodSize.small.rawValue)
+                        })
+                        Toggle(isOn: $periodShowBorder) {
+                            Text("Show period border")
+                        }
                     }
                     Section(header: Text("Cursor")) {
                         Stepper("Cursor width = \(cursorLineWidth)", value: $cursorLineWidth, in: 1...6, step: 1)

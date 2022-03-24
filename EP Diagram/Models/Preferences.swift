@@ -39,6 +39,8 @@ struct Preferences {
     static let periodTransparencyKey = "defaultPeriodTransparencyKey"
     static let periodTextJustificationKey = "defaultPeriodTextJustificationKey"
     static let periodOverlapMarkKey = "defaultPeriodOverlapMarkKey"
+    static let periodSizeKey = "defaultPeriodSizeKey"
+    static let periodShowBorderKey = "defaultPeriodShowBorderKey"
     static let declutterIntervalsKey = "defaultDeclutterIntervalskey"
 
     // keys not modifiable by user
@@ -85,6 +87,8 @@ struct Preferences {
     static var periodTransparency: CGFloat = 1.0
     static var periodTextJustification = TextJustification.left.rawValue
     static var periodOverlapMark: Bool = false
+    static var periodSize = PeriodSize.small.rawValue
+    static var periodShowBorder: Bool = false
     static var declutterIntervals: Bool = false
     static var imageViewHeight: CGFloat = 0.5
 
@@ -147,6 +151,8 @@ struct Preferences {
             Preferences.periodTransparencyKey: Preferences.periodTransparency,
             Preferences.periodTextJustificationKey: Preferences.periodTextJustification,
             Preferences.periodOverlapMarkKey: Preferences.periodOverlapMark,
+            Preferences.periodSizeKey: Preferences.periodSize,
+            Preferences.periodShowBorderKey: Preferences.periodShowBorder,
             Preferences.declutterIntervalsKey: Preferences.declutterIntervals,
             Preferences.impulseOriginContiguousKey: Preferences.impulseOriginContiguous,
             Preferences.impulseOriginLargeKey: Preferences.impulseOriginLarge,
