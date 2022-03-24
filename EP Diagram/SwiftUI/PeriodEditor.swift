@@ -8,6 +8,7 @@
 
 import SwiftUI
 
+// TODO: redundant func also in PreferencesView
 fileprivate func getColorPicker(title: LocalizedStringKey, selection: Binding<Color>) -> some View {
 #if targetEnvironment(macCatalyst)
     return HStack {

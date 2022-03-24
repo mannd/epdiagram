@@ -26,6 +26,7 @@
 		8E25A9B122E5505200D62E18 /* LadderViewTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8E25A9B022E5505200D62E18 /* LadderViewTests.swift */; };
 		8E25A9B322E5515D00D62E18 /* LadderTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8E25A9B222E5515D00D62E18 /* LadderTests.swift */; };
 		8E2BA1D024A3BDD7002D997F /* PreferencesView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8E2BA1CF24A3BDD7002D997F /* PreferencesView.swift */; };
+		8E33574A27EC82C700D662C0 /* PeriodTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8E33574927EC82C700D662C0 /* PeriodTests.swift */; };
 		8E33927B262E6DE6002A7447 /* Preferences.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 8E33927A262E6DE6002A7447 /* Preferences.storyboard */; platformFilter = maccatalyst; };
 		8E339280262E7655002A7447 /* MacPreferencesViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8E33927F262E7655002A7447 /* MacPreferencesViewController.swift */; };
 		8E35924924BE9B27001E23D5 /* DiagramIO.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8E35924824BE9B27001E23D5 /* DiagramIO.swift */; };
@@ -179,6 +180,7 @@
 		8E25A9B022E5505200D62E18 /* LadderViewTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LadderViewTests.swift; sourceTree = "<group>"; };
 		8E25A9B222E5515D00D62E18 /* LadderTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LadderTests.swift; sourceTree = "<group>"; };
 		8E2BA1CF24A3BDD7002D997F /* PreferencesView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PreferencesView.swift; sourceTree = "<group>"; };
+		8E33574927EC82C700D662C0 /* PeriodTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PeriodTests.swift; sourceTree = "<group>"; };
 		8E33927A262E6DE6002A7447 /* Preferences.storyboard */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; path = Preferences.storyboard; sourceTree = "<group>"; };
 		8E33927F262E7655002A7447 /* MacPreferencesViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MacPreferencesViewController.swift; sourceTree = "<group>"; };
 		8E35924824BE9B27001E23D5 /* DiagramIO.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DiagramIO.swift; sourceTree = "<group>"; };
@@ -450,6 +452,7 @@
 				8EF8B5B62330739F00ADB77A /* ViewControllerTests.swift */,
 				8E487B7D25F9C55A002FFC1B /* CalibrationTests.swift */,
 				8E3C911D2602FA02001A14BA /* IntervalTests.swift */,
+				8E33574927EC82C700D662C0 /* PeriodTests.swift */,
 			);
 			path = "EP DiagramTests";
 			sourceTree = "<group>";
@@ -857,6 +860,7 @@
 			files = (
 				8EF8B5B72330739F00ADB77A /* ViewControllerTests.swift in Sources */,
 				8E6570FB24A99B8A001358F6 /* FileTests.swift in Sources */,
+				8E33574A27EC82C700D662C0 /* PeriodTests.swift in Sources */,
 				8E3C911E2602FA02001A14BA /* IntervalTests.swift in Sources */,
 				8E7214E022EB57FC0062C094 /* MarkTests.swift in Sources */,
 				8E25A9B122E5505200D62E18 /* LadderViewTests.swift in Sources */,

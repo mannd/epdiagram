@@ -2565,7 +2565,7 @@ final class LadderView: ScaledView {
             if mark.periods.count == 0 { // allow mix of no periods and periods
                 continue
             }
-            if mark.periods != periods { // but don't allow disimilar periods
+            if !Period.periodsAreSimilar(mark.periods, periods) {
                 throw LadderError.periodsDontMatch
             }
         }

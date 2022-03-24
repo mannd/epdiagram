@@ -20,6 +20,30 @@ struct Period: Equatable {
     var resettable: Bool = false
 }
 
+extension Period {
+    func isSimilarTo(period: Period) -> Bool {
+        return name == period.name
+                && duration == period.duration
+                && color == period.color
+                && resettable == period.resettable
+    }
+
+    static func periodsAreSimilar(_ p1: [Period], _ p2: [Period]) -> Bool {
+        guard p1.count == p2.count else { return false }
+        guard p1.count > 0 else { return false }
+        for i in 0..<p1.count {
+            if !p1[i].isSimilarTo(period: p2[i]) {
+                return false
+            }
+        }
+        return true
+    }
+}
+
+extension Period: Hashable {
+
+}
+
 extension Period: Codable {
     enum CodingKeys: String, CodingKey {
         case name
