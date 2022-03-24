@@ -39,7 +39,7 @@ final class LadderView: ScaledView {
     private let maxMarksForIntervals = 200   // We may revisit this limit in the future.
     private let minRepeatCLInterval: CGFloat = 20
     private let draggedMarkSnapToBoundaryMargin: CGFloat = 0.05
-    private let periodHeight: CGFloat = 20.0
+    private let periodHeight: CGFloat = 30.0
 
     let measurementTextFontSize: CGFloat = 15.0
     let labelTextFontSize: CGFloat = 18.0
@@ -2101,9 +2101,7 @@ final class LadderView: ScaledView {
         let duration = regionValueFromCalibratedValue(period.duration, usingCalFactor:  calFactor)
         var periodEnd = start + duration
 
-        let resetPeriods = true
-
-        if resetPeriods {
+        if period.resettable {
             for m in regionMarks {
                 if m.earliestPoint.x > mark.earliestPoint.x && m.earliestPoint.x < periodEnd {
                     periodEnd = m.earliestPoint.x
@@ -2116,7 +2114,6 @@ final class LadderView: ScaledView {
 
         var width = end - beginning
         var adjustedStartX = beginning
-        // EXAMPLE: let impinging marks show through
         // TODO: is this option worth it?  Maybe just never overlap marks
         if !periodOverlapMark {
             width = width - markLineWidth
@@ -2131,26 +2128,35 @@ final class LadderView: ScaledView {
         if adjustedStartX + width < leftMargin {
             return
         }
-        // FIXME: Height should be a constant.
         let rect = CGRect(x: adjustedStartX, y: startY, width: width, height: periodHeight)
         context.addRect(rect)
         context.setFillColor(period.color.cgColor)
-        // Cludgy get rid of border.  Do we want to have a border?
-        context.setLineWidth(0)
+        let drawBorder = true // TODO: change to preferences
+        context.setLineWidth(drawBorder ? 1.0 : 0)
         context.setAlpha(periodTransparency)
         context.drawPath(using: .fillStroke)
         context.setLineWidth(1.0)
         context.strokePath()
         let text = period.name
-        // FIXME: should save original alpha and restore it...
         context.setAlpha(1.0)
         // TODO: center text vertically
+        var textAttributes: [NSAttributedString.Key: Any]
         switch periodTextJustification {
         case .left:
-            let textRect = CGRect(x: adjustedStartX + 5, y: startY, width: width - 5, height: periodHeight)
+            textAttributes = leftJustifiedMeasurementTextAttributes
+        case .center:
+            textAttributes = measurementTextAttributes
+        }
+        let size = text.size(withAttributes: textAttributes)
+        let textHeight = size.height
+        let textOriginY = startY + (periodHeight - textHeight) / 2.0
+        switch periodTextJustification {
+        case .left:
+            let textRect = CGRect(x: adjustedStartX + 5, y: textOriginY, width: width - 5, height: textHeight)
             text.draw(in: textRect, withAttributes: leftJustifiedMeasurementTextAttributes)
         case .center:
-            text.draw(in: rect, withAttributes: measurementTextAttributes)
+            let textRect = CGRect(x: rect.origin.x, y: textOriginY, width: rect.width, height: textHeight)
+            text.draw(in: textRect, withAttributes: measurementTextAttributes)
         }
     }
 

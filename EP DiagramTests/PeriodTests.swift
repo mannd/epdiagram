@@ -51,6 +51,10 @@ class PeriodTests: XCTestCase {
         XCTAssertFalse(Period.periodsAreSimilar(periods3, periods8))
         let periods9 = [Period(color: UIColor.blue), Period()]
         XCTAssert(Period.periodsAreSimilar(periods8, periods9))
+        let periods10 = periods9
+        XCTAssert(Period.periodsAreSimilar(periods10, periods9))
+        let periods11 = periods4 // empty arrays are considered to be similar
+        XCTAssert(Period.periodsAreSimilar(periods11, periods4))
     }
 
 }

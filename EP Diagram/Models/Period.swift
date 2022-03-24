@@ -10,7 +10,6 @@ import UIKit
 import BetterCodable
 import os.log
 
-// FIXME: dilemma.  If each period has a separate id, we cannot detect identical periods.
 struct Period: Equatable {
     private(set) var id = UUID()
     
@@ -21,6 +20,9 @@ struct Period: Equatable {
 }
 
 extension Period {
+    /// Tests to see if a period is similar to another period, i.e. identical except for id.
+    /// - Parameter period: Period to be tested for similarity
+    /// - Returns: True if periods similar
     func isSimilarTo(period: Period) -> Bool {
         return name == period.name
                 && duration == period.duration
@@ -28,9 +30,15 @@ extension Period {
                 && resettable == period.resettable
     }
 
+    /// Tests to see if two arrays of Period are similar.
+    ///
+    /// Arrays with different counts are not similar.  Two empty arrays are similar.
+    /// - Parameters:
+    ///   - p1: First array of Period
+    ///   - p2: Second array of Period
+    /// - Returns: True if arrays are similar
     static func periodsAreSimilar(_ p1: [Period], _ p2: [Period]) -> Bool {
         guard p1.count == p2.count else { return false }
-        guard p1.count > 0 else { return false }
         for i in 0..<p1.count {
             if !p1[i].isSimilarTo(period: p2[i]) {
                 return false
