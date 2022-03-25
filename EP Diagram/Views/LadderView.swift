@@ -2098,44 +2098,66 @@ final class LadderView: ScaledView {
     }
 
     func drawPeriod(period: Period, forMark mark: Mark, regionMarks: [Mark], startY: CGFloat, periodHeight: CGFloat, context: CGContext) {
-        let calFactor = calibration!.currentCalFactor
-        let start = mark.earliestPoint.x
+        guard let calFactor = calibration?.currentCalFactor else { return }
+        let originX = mark.earliestPoint.x
         let duration = regionValueFromCalibratedValue(period.duration, usingCalFactor:  calFactor)
-        var periodEnd = start + duration
+        var maxX = originX + duration
+
+        let excludedMaxX = maxX
+        let scaledExcludedMaxX = transformToScaledViewPositionX(regionPositionX: excludedMaxX)
 
         if period.resettable {
             for m in regionMarks {
-                if m.earliestPoint.x > mark.earliestPoint.x && m.earliestPoint.x < periodEnd {
-                    periodEnd = m.earliestPoint.x
+                if m.earliestPoint.x > mark.earliestPoint.x && m.earliestPoint.x < maxX {
+                    maxX = m.earliestPoint.x
                 }
             }
         }
 
-        let beginning = transformToScaledViewPositionX(regionPositionX: start)
-        let end = transformToScaledViewPositionX(regionPositionX: periodEnd)
+        let scaledExcludedOriginX = transformToScaledViewPositionX(regionPositionX: maxX)
+        let excludedWidth = scaledExcludedMaxX - scaledExcludedOriginX
 
-        var width = end - beginning
-        var adjustedStartX = beginning
+        var scaledOriginX = transformToScaledViewPositionX(regionPositionX: originX)
+        let scaledMaxX = transformToScaledViewPositionX(regionPositionX: maxX)
+        var width = scaledMaxX - scaledOriginX
+
         // TODO: is this option worth it?  Maybe just never overlap marks
         if !periodOverlapMark {
             width = width - markLineWidth
             // Lines straddle the path, so divide in half to make fully visible
-            adjustedStartX = adjustedStartX + markLineWidth / 2.0 // make sure mark line is visible if it is vertical
+            scaledOriginX = scaledOriginX + markLineWidth / 2.0 // make sure mark line is visible if it is vertical
         }
 
-        if leftMargin > beginning {
-            adjustedStartX = max(beginning, leftMargin)
-            width = width - (leftMargin - beginning)
+        if leftMargin > scaledOriginX {
+            scaledOriginX = max(scaledOriginX, leftMargin)
+            width = width - (leftMargin - scaledOriginX)
         }
-        if adjustedStartX + width < leftMargin {
+        if scaledOriginX + width < leftMargin {
             return
         }
-        let rect = CGRect(x: adjustedStartX, y: startY, width: width, height: periodHeight)
+
+        // Potentially draw excluded part of period, at half transparency or crosshatched.
+        // TODO: dependent on preference
+        // if drawExcludedRect { ....
+        let excludedRect = CGRect(x: scaledExcludedOriginX, y: startY, width: excludedWidth, height: periodHeight)
+        context.addRect(excludedRect)
+        context.setFillColor(period.color.cgColor)
+        context.setStrokeColor(UIColor.label.cgColor)
+        context.setLineWidth(periodShowBorder ? 1.0 : 0)
+        context.setAlpha(periodTransparency / 2.0)
+        context.drawPath(using: .fillStroke)
+        context.setLineWidth(1.0)
+        context.strokePath()
+        // FIXME: experiment with crosshatching
+        //drawCrossHatch(rect: rect, context: context)
+        //return
+
+        // Draw period
+        let rect = CGRect(x: scaledOriginX, y: startY, width: width, height: periodHeight)
         context.addRect(rect)
         context.setFillColor(period.color.cgColor)
         context.setStrokeColor(UIColor.label.cgColor)
-        let drawBorder = periodShowBorder
-        context.setLineWidth(drawBorder ? 1.0 : 0)
+        context.setLineWidth(periodShowBorder ? 1.0 : 0)
         context.setAlpha(periodTransparency)
         context.drawPath(using: .fillStroke)
         context.setLineWidth(1.0)
@@ -2155,11 +2177,58 @@ final class LadderView: ScaledView {
         var textRect: CGRect
         switch periodTextJustification {
         case .left:
-            textRect = CGRect(x: adjustedStartX + 5, y: textOriginY, width: width - 5, height: textHeight)
+            textRect = CGRect(x: scaledOriginX + 5, y: textOriginY, width: width - 5, height: textHeight)
         case .center:
             textRect = CGRect(x: rect.origin.x, y: textOriginY, width: rect.width, height: textHeight)
         }
         text.draw(in: textRect, withAttributes: textAttributes)
+    }
+
+    // See https://developer.apple.com/forums/thread/48881
+
+    func drawCrossHatch(rect: CGRect, context: CGContext) {
+        let sides: CGFloat = 4.0
+        let path = UIBezierPath()
+
+//        let xCenter = rect.midX
+//        let yCenter = rect.midY
+//        var radius: CGFloat = 0
+//
+//        if rect.width > rect.height {
+//            radius = rect.height / 2.0
+//        } else {
+//            radius = rect.width / 2.0
+//        }
+//        let angleIncrement = 2.0 * Double.pi / sides
+//        let initialAngle = (Double.pi + (2.0 * Double.pi / sides)) / 2.0
+//
+//        for i in 0..<Int(sides) {
+//            let angle: CGFloat = initialAngle + CGFloat(i) * angleIncrement
+//            let x = xCenter + radius * cos(angle)
+//            let y = yCenter + radius * sin(angle)
+//            let point = CGPoint(x: x, y: y)
+//            if (i == 0) {
+//                path.move(to: point)
+//            } else {
+//                path.addLine(to: point)
+//            }
+//        }
+//        path.close()
+//        context.setFillColor(UIColor.cyan.cgColor)
+//        path.addClip()
+//
+        let pathBounds = rect
+
+//        path.removeAllPoints()
+        let p1 = pathBounds.origin
+        let p2 = CGPoint(x: pathBounds.maxX, y: pathBounds.maxY)
+        path.move(to: p1)
+        path.addLine(to: p2)
+        path.lineWidth = 400.0
+        let dashes: [CGFloat] = [2.0, 2.0]
+        path.setLineDash(dashes, count: 2, phase: 0.0)
+        context.setFillColor(UIColor.red.cgColor)
+        path.stroke()
     }
 
     func conductionTime(fromSegment segment: Segment) -> Double {

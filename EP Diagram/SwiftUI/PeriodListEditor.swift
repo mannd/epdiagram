@@ -18,7 +18,7 @@ struct PeriodListEditor: View {
     var body: some View {
         NavigationView {
             Form {
-                Section(header: Text("Periods")) {
+                Section(header: Text("Arrange periods in desired order")) {
                     List() {
                         ForEach (periodsModelController.periods, id: \.self.id) {
                             period in NavigationLink(destination: PeriodEditor(periodsModelController: periodsModelController, dismissAction: dismissAction, period: self.selectedPeriod(id: period.id))) {

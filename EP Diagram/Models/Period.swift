@@ -48,10 +48,6 @@ extension Period {
     }
 }
 
-extension Period: Hashable {
-
-}
-
 extension Period: Codable {
     enum CodingKeys: String, CodingKey {
         case name

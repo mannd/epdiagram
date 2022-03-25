@@ -10,14 +10,21 @@ import XCTest
 @testable import EP_Diagram
 
 class PeriodTests: XCTestCase {
+    private var ladderView: LadderView!
+    private var cursorView: CursorView!
 
-    override func setUpWithError() throws {
-        // Put setup code here. This method is called before the invocation of each test method in the class.
-
+    override func setUp() {
+        super.setUp()
+        ladderView = LadderView(frame: CGRect(origin: CGPoint(x: 0, y: 0), size: CGSize(width: 100, height: 100)))
+        cursorView = CursorView()
+        ladderView.cursorViewDelegate = cursorView
+        cursorView.ladderViewDelegate = ladderView
     }
 
-    override func tearDownWithError() throws {
-        // Put teardown code here. This method is called after the invocation of each test method in the class.
+    override func tearDown() {
+        ladderView = nil
+        cursorView = nil
+        super.tearDown()
     }
 
     func testIsSimilar() {
@@ -55,6 +62,14 @@ class PeriodTests: XCTestCase {
         XCTAssert(Period.periodsAreSimilar(periods10, periods9))
         let periods11 = periods4 // empty arrays are considered to be similar
         XCTAssert(Period.periodsAreSimilar(periods11, periods4))
+    }
+
+    func testDeletePeriods() {
+        let mark1 = Mark()
+        mark1.periods = [Period(), Period()]
+        XCTAssert(mark1.periods.count == 2)
+        ladderView.deletePeriods(ofMarks: [mark1])
+        XCTAssert(mark1.periods.count == 0)
     }
 
 }
