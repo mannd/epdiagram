@@ -399,7 +399,7 @@ final class DiagramViewController: UIViewController {
     }
 
     // Period actions
-    lazy var editPeriodsAction = UIAction(title: L("Periods..."), image: UIImage(systemName: "rectangle.grid.1x2")) { _ in
+    lazy var editPeriodsAction = UIAction(title: L("Add/edit periods..."), image: UIImage(systemName: "plus.rectangle.on.rectangle")) { _ in
         do {
             try self.ladderView.checkForPeriods()
             self.performEditPeriodsSegue()
@@ -407,6 +407,12 @@ final class DiagramViewController: UIViewController {
             self.showError(title: L("Error Editing Periods"), error: error)
         }
     }
+
+    lazy var deletePeriodsAction = UIAction(title: L("Delete periods"), image: UIImage(systemName: "rectangle.on.rectangle.slash"), attributes: .destructive) { _ in
+        self.ladderView.deletePeriods()
+    }
+
+    lazy var periodsMenu = UIMenu(title: L("Periods..."), image: UIImage(systemName: "rectangle.on.rectangle"), children: [self.editPeriodsAction, self.deletePeriodsAction])
 
     // Label actions
     lazy var editLabelAction = UIAction(title: L("Edit label"), image: UIImage(systemName: "pencil")) { action in
@@ -450,7 +456,8 @@ final class DiagramViewController: UIViewController {
         self.ladderView.removeRegion()
     }
 
-    lazy var markMenu = UIMenu(title: L("Mark Menu"), children: [self.styleMenu, self.emphasisMenu, self.impulseOriginMenu, self.blockMenu, self.labelMarkMenu, self.straightenMenu, self.slantMenu, self.adjustYMenu, self.moveAction, self.adjustCLAction, self.rhythmAction, self.repeatCLMenu, self.copyMarksAction, self.repeatPatternAction, self.unlinkAction, self.snapAction, self.editPeriodsAction, self.deleteAction])
+    // TODO: Periods... menu, with Add/Edit and Delete to save menu space
+    lazy var markMenu = UIMenu(title: L("Mark Menu"), children: [self.styleMenu, self.emphasisMenu, self.impulseOriginMenu, self.blockMenu, self.labelMarkMenu, self.straightenMenu, self.slantMenu, self.adjustYMenu, self.moveAction, self.adjustCLAction, self.rhythmAction, self.repeatCLMenu, self.copyMarksAction, self.repeatPatternAction, self.unlinkAction, self.snapAction, self.periodsMenu, self.deleteAction])
 
     lazy var labelMenu = [self.regionStyleMenu, self.editLabelAction, self.addRegionMenu, self.removeRegionAction, self.regionHeightMenu, self.adjustLeftMarginAction]
 

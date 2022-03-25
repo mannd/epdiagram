@@ -2528,7 +2528,6 @@ final class LadderView: ScaledView {
         if regions.count > 1 {
             throw LadderError.tooManyRegions
         }
-        // TODO: test
         if !zone.isVisible && regions.count < 1 {
             throw LadderError.noRegionSelected
         }
@@ -2591,6 +2590,17 @@ final class LadderView: ScaledView {
             undoablySetMarkPeriods(mark: mark, periods: periods)
         }
         refresh()
+    }
+
+    func deletePeriods() {
+        let selectedMarks = ladder.allMarksWithMode(.selected)
+        deletePeriods(ofMarks: selectedMarks)
+    }
+
+    func deletePeriods(ofMarks marks: [Mark]) {
+        for mark in marks {
+            undoablySetMarkPeriods(mark: mark, periods: [])
+        }
     }
 
     func undoablySetMarkPeriods(mark: Mark, periods: [Period]) {
