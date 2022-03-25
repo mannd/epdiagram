@@ -26,6 +26,7 @@ struct PeriodListEditor: View {
                                         Text("Period: \(period.name)")
                                         Text("Duration: \(Int(period.duration)) msec")
                                     Text("Resettable: \(period.resettable ? "Yes" : "No")")
+                                    Text("Offset: \(period.offset)")
                                 }
                                 .padding()
                             }.background(Color(period.color.withAlphaComponent(backgroundAlpha)))

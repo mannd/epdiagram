@@ -2071,6 +2071,7 @@ final class LadderView: ScaledView {
         }
     }
 
+    // FIXME: bottom periods overlap when there is an offset.  top periods work ok.
     func drawPeriods(region: Region, context: CGContext) {
         guard let calibration = calibration, calibration.isCalibrated else { return }
         guard showPeriods else { return }
@@ -2082,19 +2083,34 @@ final class LadderView: ScaledView {
             case .top:
                 startY = region.proximalBoundaryY
             case .bottom:
-                startY = region.distalBoundaryY - CGFloat(numPeriods) * periodHeight
+                startY = region.distalBoundaryY - CGFloat(numPeriods) * periodHeight - CGFloat(numOffsets(forMark: mark)) * periodHeight
             }
             mark.periods[0..<numPeriods].forEach {
+                if periodPosition == .top {
+                    startY += CGFloat($0.offset) * periodHeight
+                }
                 drawPeriod(period: $0, forMark: mark, regionMarks: region.marks, startY: startY, periodHeight: periodHeight, context: context)
                 startY += periodHeight
+                if periodPosition == .bottom {
+                    startY += CGFloat($0.offset) * periodHeight
+                }
             }
         }
     }
 
     private func numPeriodsFit(forMark mark: Mark, inRegion region: Region, withHeight height: CGFloat) -> Int {
         let regionHeight = region.height
-        let num = Int(regionHeight / height)
+        let offset = numOffsets(forMark: mark)
+        let num = Int((regionHeight - CGFloat(offset) * height) / height)
         return min(num, mark.periods.count)
+    }
+
+    private func numOffsets(forMark mark: Mark) -> Int {
+        var offset = 0
+        for period in mark.periods {
+            offset += period.offset
+        }
+        return offset
     }
 
     func drawPeriod(period: Period, forMark mark: Mark, regionMarks: [Mark], startY: CGFloat, periodHeight: CGFloat, context: CGContext) {
@@ -2129,8 +2145,8 @@ final class LadderView: ScaledView {
         }
 
         if leftMargin > scaledOriginX {
-            scaledOriginX = max(scaledOriginX, leftMargin)
             width = width - (leftMargin - scaledOriginX)
+            scaledOriginX = max(scaledOriginX, leftMargin)
         }
         if scaledOriginX + width < leftMargin {
             return
@@ -2149,8 +2165,7 @@ final class LadderView: ScaledView {
         context.setLineWidth(1.0)
         context.strokePath()
         // FIXME: experiment with crosshatching
-        //drawCrossHatch(rect: rect, context: context)
-        //return
+        //drawCrossHatch(rect: excludedRect, context: context)
 
         // Draw period
         let rect = CGRect(x: scaledOriginX, y: startY, width: width, height: periodHeight)

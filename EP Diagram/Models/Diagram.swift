@@ -34,11 +34,12 @@ struct Diagram: Codable {
     // but not forward compatible, i.e. an app version designed to read up to file version 2 won't
     // be able to read file version 3.
     // fileVersion 1 was for app versions 1 up to 1.1.0.
-    @DefaultCodable<FileVersion> var fileVersion: Int = 2 // For version 1.1.0 and above.
+    // fileVersion 2 was for app versions 1.1.0 up to 1.2.0.
+    @DefaultCodable<FileVersion> var fileVersion: Int = 3 // For version 1.2.0 and above.
 
     struct FileVersion: DefaultCodableStrategy {
         typealias DefaultValue = Int
-        static var defaultValue: DefaultValue { return 2 } // == fileVersion
+        static var defaultValue: DefaultValue { return 3 } // == fileVersion
     }
 
     init(name: String?, description: String, image: UIImage?, ladder: Ladder) {

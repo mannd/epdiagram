@@ -53,6 +53,13 @@ struct PeriodEditor: View {
                         Text("Resettable")
                     }
                 }
+                Section(header: Text("Offset")) {
+                        Stepper(value: $period.offset, in: 0...3, step: 1) {
+                            HStack {
+                                Text("\(period.offset) height units")
+                            }
+                        }
+                }
             }
             .onAppear {
                 periodColor = Color.convertColorName(periodColorName) ?? periodColor

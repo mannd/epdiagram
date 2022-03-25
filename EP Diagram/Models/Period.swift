@@ -17,6 +17,7 @@ struct Period: Equatable {
     var duration: CGFloat = 500
     var color: UIColor = Preferences.defaultPeriodColor
     var resettable: Bool = false
+    var offset: Int = 0
 }
 
 extension Period {
@@ -28,6 +29,7 @@ extension Period {
                 && duration == period.duration
                 && color == period.color
                 && resettable == period.resettable
+                && offset == period.offset
     }
 
     /// Tests to see if two arrays of Period are similar.
@@ -54,6 +56,7 @@ extension Period: Codable {
         case duration
         case color
         case resettable
+        case offset
     }
 
     init(from decoder: Decoder) throws {
@@ -62,6 +65,7 @@ extension Period: Codable {
         name = try container.decode(String.self, forKey: .name)
         duration = try CGFloat(container.decode(Float.self, forKey: .duration))
         resettable = try Bool(container.decode(Bool.self, forKey: .resettable))
+        offset = try container.decode(Int.self, forKey: .offset)
 
         let colorData = try container.decode(Data.self, forKey: .color)
         color = try NSKeyedUnarchiver.unarchiveTopLevelObjectWithData(colorData) as? UIColor ?? UIColor.black
@@ -72,6 +76,7 @@ extension Period: Codable {
         try container.encode(name, forKey: .name)
         try container.encode(duration, forKey: .duration)
         try container.encode(resettable, forKey: .resettable)
+        try container.encode(offset, forKey: .offset)
 
         let colorData = try NSKeyedArchiver.archivedData(withRootObject: color, requiringSecureCoding: false)
         try container.encode(colorData, forKey: .color)
