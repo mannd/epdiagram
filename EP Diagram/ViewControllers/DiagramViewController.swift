@@ -1693,6 +1693,7 @@ extension DiagramViewController {
         ladderView.periodOverlapMark = UserDefaults.standard.bool(forKey: Preferences.periodOverlapMarkKey)
         ladderView.periodSize = PeriodSize(rawValue: UserDefaults.standard.integer(forKey: Preferences.periodSizeKey)) ?? .small
         ladderView.periodShowBorder = UserDefaults.standard.bool(forKey: Preferences.periodShowBorderKey)
+        ladderView.periodResetMethod = PeriodResetMethod(rawValue: UserDefaults.standard.integer(forKey: Preferences.periodResetMethodKey)) ?? .shorten
         ladderView.declutterIntervals = UserDefaults.standard.bool(forKey: Preferences.declutterIntervalsKey)
 
         // Colors

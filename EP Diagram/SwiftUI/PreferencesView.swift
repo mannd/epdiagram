@@ -37,6 +37,7 @@ struct PreferencesView: View {
     @AppStorage(Preferences.periodOverlapMarkKey) var periodOverlapMark = Preferences.periodOverlapMark
     @AppStorage(Preferences.periodSizeKey) var periodSize = Preferences.periodSize
     @AppStorage(Preferences.periodShowBorderKey) var periodShowBorder = Preferences.periodShowBorder
+    @AppStorage(Preferences.periodResetMethodKey) var periodResetMethod = Preferences.periodResetMethod
     @AppStorage(Preferences.declutterIntervalsKey) var declutterIntervals = Preferences.declutterIntervals
 
     // Color preferences
@@ -235,6 +236,10 @@ struct PreferencesView: View {
                         Toggle(isOn: $periodShowBorder) {
                             Text("Show period border")
                         }
+                        Picker(selection: $periodResetMethod, label: Text("Reset method"), content: {
+                            Text("Shorten").tag(PeriodResetMethod.shorten.rawValue)
+                            Text("Interrupt").tag(PeriodResetMethod.interrupt.rawValue)
+                        })
                     }
                     Section(header: Text("Cursor")) {
                         Stepper("Cursor width = \(cursorLineWidth)", value: $cursorLineWidth, in: 1...6, step: 1)

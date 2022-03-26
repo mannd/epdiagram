@@ -120,6 +120,7 @@ final class LadderView: ScaledView {
     var periodOverlapMark: Bool = Preferences.periodOverlapMark
     var periodSize: PeriodSize = PeriodSize(rawValue: Preferences.periodSize)!
     var periodShowBorder: Bool = Preferences.periodShowBorder
+    var periodResetMethod: PeriodResetMethod = PeriodResetMethod(rawValue: Preferences.periodResetMethod)!
     var declutterIntervals: Bool = Preferences.declutterIntervals
 
     // colors set by preferences
@@ -2153,19 +2154,20 @@ final class LadderView: ScaledView {
         }
 
         // Potentially draw excluded part of period, at half transparency or crosshatched.
-        // TODO: dependent on preference
-        // if drawExcludedRect { ....
-        let excludedRect = CGRect(x: scaledExcludedOriginX, y: startY, width: excludedWidth, height: periodHeight)
-        context.addRect(excludedRect)
-        context.setFillColor(period.color.cgColor)
-        context.setStrokeColor(UIColor.label.cgColor)
-        context.setLineWidth(periodShowBorder ? 1.0 : 0)
-        context.setAlpha(periodTransparency / 2.0)
-        context.drawPath(using: .fillStroke)
-        context.setLineWidth(1.0)
-        context.strokePath()
-        // FIXME: experiment with crosshatching
-        //drawCrossHatch(rect: excludedRect, context: context)
+        if period.resettable && periodResetMethod == .interrupt {
+            let excludedRect = CGRect(x: scaledExcludedOriginX, y: startY, width: excludedWidth, height: periodHeight)
+            context.addRect(excludedRect)
+            context.setFillColor(period.color.cgColor)
+            context.setStrokeColor(UIColor.label.cgColor)
+            context.setLineWidth(periodShowBorder ? 1.0 : 0)
+            context.setAlpha(periodTransparency / 2.0)
+            context.drawPath(using: .fillStroke)
+            context.setLineWidth(1.0)
+            context.strokePath()
+        } else if period.resettable && periodResetMethod == .crosshatch {
+            // FIXME: experiment with crosshatching
+            //drawCrossHatch(rect: excludedRect, context: context)
+        }
 
         // Draw period
         let rect = CGRect(x: scaledOriginX, y: startY, width: width, height: periodHeight)
@@ -2202,7 +2204,7 @@ final class LadderView: ScaledView {
     // See https://developer.apple.com/forums/thread/48881
 
     func drawCrossHatch(rect: CGRect, context: CGContext) {
-        let sides: CGFloat = 4.0
+//        let sides: CGFloat = 4.0
         let path = UIBezierPath()
 
 //        let xCenter = rect.midX
@@ -3723,6 +3725,12 @@ enum PeriodSize: Int, Codable {
             return 20.0
         }
     }
+}
+
+enum PeriodResetMethod: Int, Codable {
+    case shorten
+    case interrupt
+    case crosshatch 
 }
 
 enum Adjustment {
