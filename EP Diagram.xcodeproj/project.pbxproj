@@ -31,6 +31,7 @@
 		8E339280262E7655002A7447 /* MacPreferencesViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8E33927F262E7655002A7447 /* MacPreferencesViewController.swift */; };
 		8E35924924BE9B27001E23D5 /* DiagramIO.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8E35924824BE9B27001E23D5 /* DiagramIO.swift */; };
 		8E36B13627B054E900FFAFA6 /* Comparable+clamped.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8E36B13527B054E900FFAFA6 /* Comparable+clamped.swift */; };
+		8E37FDED27F29E9F00A67EA0 /* PeriodSelector.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8E37FDEC27F29E9F00A67EA0 /* PeriodSelector.swift */; };
 		8E3AD1372459CABF0085BDD4 /* LocationInLadder.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8E3AD1362459CABF0085BDD4 /* LocationInLadder.swift */; };
 		8E3C911E2602FA02001A14BA /* IntervalTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8E3C911D2602FA02001A14BA /* IntervalTests.swift */; };
 		8E4086E425F30383005F53CB /* RhythmView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8E4086E325F30383005F53CB /* RhythmView.swift */; };
@@ -185,6 +186,7 @@
 		8E33927F262E7655002A7447 /* MacPreferencesViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MacPreferencesViewController.swift; sourceTree = "<group>"; };
 		8E35924824BE9B27001E23D5 /* DiagramIO.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DiagramIO.swift; sourceTree = "<group>"; };
 		8E36B13527B054E900FFAFA6 /* Comparable+clamped.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Comparable+clamped.swift"; sourceTree = "<group>"; };
+		8E37FDEC27F29E9F00A67EA0 /* PeriodSelector.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PeriodSelector.swift; sourceTree = "<group>"; };
 		8E3AD1362459CABF0085BDD4 /* LocationInLadder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocationInLadder.swift; sourceTree = "<group>"; };
 		8E3C911D2602FA02001A14BA /* IntervalTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IntervalTests.swift; sourceTree = "<group>"; };
 		8E4086E325F30383005F53CB /* RhythmView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RhythmView.swift; sourceTree = "<group>"; };
@@ -566,6 +568,7 @@
 				8EE1411D261F9A5B00392100 /* Onboarding.swift */,
 				8E9F334C27CEA0450047F6A7 /* PeriodEditor.swift */,
 				8E9F334E27CEA0660047F6A7 /* PeriodListEditor.swift */,
+				8E37FDEC27F29E9F00A67EA0 /* PeriodSelector.swift */,
 			);
 			path = SwiftUI;
 			sourceTree = "<group>";
@@ -826,6 +829,7 @@
 				8E339280262E7655002A7447 /* MacPreferencesViewController.swift in Sources */,
 				8ED3B1B62360DA0D00549381 /* Anchor.swift in Sources */,
 				8E4ACA842447905E00575538 /* HamburgerCell.swift in Sources */,
+				8E37FDED27F29E9F00A67EA0 /* PeriodSelector.swift in Sources */,
 				8E4ACA862447935600575538 /* HamburgerLayer.swift in Sources */,
 				8EF9166B227926BC00B51F17 /* LadderView.swift in Sources */,
 				8E2439F624B14F770044AEAB /* Interval.swift in Sources */,

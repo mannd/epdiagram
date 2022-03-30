@@ -10,7 +10,7 @@ import UIKit
 import BetterCodable
 import os.log
 
-struct Period: Equatable {
+struct Period: Equatable, Hashable {
     private(set) var id = UUID()
     
     var name: String = "NEW PERIOD"

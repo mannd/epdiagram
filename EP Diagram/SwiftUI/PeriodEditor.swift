@@ -38,7 +38,7 @@ struct PeriodEditor: View {
                 }
                 Section(header: Text("Duration")) {
                     Text("Duration = \(lround(Double( period.duration))) msec")
-                    Slider(value: $period.duration, in: 10...500)
+                    Slider(value: $period.duration, in: 10...2000)
                 }
                 Section(header: Text("Color")) {
                     getColorPicker(title: "Color", selection: Binding(

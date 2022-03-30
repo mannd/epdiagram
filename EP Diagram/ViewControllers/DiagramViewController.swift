@@ -408,11 +408,15 @@ final class DiagramViewController: UIViewController {
         }
     }
 
+    lazy var copyPeriodsAction = UIAction(title: "Copy periods", image: UIImage(systemName: "rectangle.stack")) { _ in
+        self.performSelectPeriodsSegue()
+    }
+
     lazy var deletePeriodsAction = UIAction(title: L("Delete periods"), image: UIImage(systemName: "rectangle.on.rectangle.slash"), attributes: .destructive) { _ in
         self.ladderView.deletePeriods()
     }
 
-    lazy var periodsMenu = UIMenu(title: L("Periods..."), image: UIImage(systemName: "rectangle.on.rectangle"), children: [self.editPeriodsAction, self.deletePeriodsAction])
+    lazy var periodsMenu = UIMenu(title: L("Periods..."), image: UIImage(systemName: "rectangle.on.rectangle"), children: [self.editPeriodsAction, self.copyPeriodsAction, self.deletePeriodsAction])
 
     // Label actions
     lazy var editLabelAction = UIAction(title: L("Edit label"), image: UIImage(systemName: "pencil")) { action in
@@ -456,7 +460,6 @@ final class DiagramViewController: UIViewController {
         self.ladderView.removeRegion()
     }
 
-    // TODO: Periods... menu, with Add/Edit and Delete to save menu space
     lazy var markMenu = UIMenu(title: L("Mark Menu"), children: [self.styleMenu, self.emphasisMenu, self.impulseOriginMenu, self.blockMenu, self.labelMarkMenu, self.straightenMenu, self.slantMenu, self.adjustYMenu, self.moveAction, self.adjustCLAction, self.rhythmAction, self.repeatCLMenu, self.copyMarksAction, self.repeatPatternAction, self.unlinkAction, self.snapAction, self.periodsMenu, self.deleteAction])
 
     lazy var labelMenu = [self.regionStyleMenu, self.editLabelAction, self.addRegionMenu, self.removeRegionAction, self.regionHeightMenu, self.adjustLeftMarginAction]
@@ -1467,6 +1470,12 @@ final class DiagramViewController: UIViewController {
         return helpViewController
     }
 
+    @IBSegueAction func performSelectPeriodsAction(_ coder: NSCoder) -> UIViewController? {
+        let periodSelector = PeriodSelector(dismissAction: ladderView.setPeriods, periods: .constant(ladderView.ladder.getUniqueLadderPeriods()))
+        let hostingController = UIHostingController(coder: coder, rootView: periodSelector)
+        return hostingController
+    }
+    
     @IBSegueAction func performEditPeriodsAction(_ coder: NSCoder) -> UIViewController? {
         let periodsEditor = PeriodListEditor(dismissAction: applyPeriods, periodsModelController: ladderView.periodsModelController)
         let hostingController = UIHostingController(coder: coder, rootView: periodsEditor)
@@ -1518,6 +1527,10 @@ final class DiagramViewController: UIViewController {
 
     func performEditPeriodsSegue() {
         performSegue(withIdentifier: "editPeriodsSegue", sender: self)
+    }
+
+    func performSelectPeriodsSegue() {
+        performSegue(withIdentifier: "selectPeriodsSegue", sender: self)
     }
 
     func performShowSampleSelectorSegue() {

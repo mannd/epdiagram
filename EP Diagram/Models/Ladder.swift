@@ -574,6 +574,28 @@ final class Ladder: NSObject, Codable {
         return Ladder(template: ladder.template )
     }
 
+    // MARK: - Periods
+
+    func getUniqueLadderPeriods() -> [Period] {
+        var periods: Set<Period> = []
+        for mark in allMarks() {
+            for period in mark.periods {
+                periods.insert(period)
+            }
+        }
+        return Array(periods)
+    }
+
+    func getPeriodsFromIDs(periodIDSet: Set<UUID>, periods: [Period]) -> [Period] {
+        var foundPeriods: [Period] = []
+        for id in periodIDSet {
+            if let found = periods.first(where: { $0.id == id }) {
+                foundPeriods.append(found)
+            }
+        }
+        return foundPeriods
+    }
+
     // MARK: - Debugging
     
     func debugGetRegistry() -> [UUID: Mark] {

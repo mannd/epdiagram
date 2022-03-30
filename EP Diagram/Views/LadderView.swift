@@ -2072,7 +2072,6 @@ final class LadderView: ScaledView {
         }
     }
 
-    // FIXME: bottom periods overlap when there is an offset.  top periods work ok.
     func drawPeriods(region: Region, context: CGContext) {
         guard let calibration = calibration, calibration.isCalibrated else { return }
         guard showPeriods else { return }
@@ -2084,7 +2083,7 @@ final class LadderView: ScaledView {
             case .top:
                 startY = region.proximalBoundaryY
             case .bottom:
-                startY = region.distalBoundaryY - CGFloat(numPeriods) * periodHeight - CGFloat(numOffsets(forMark: mark)) * periodHeight
+                startY = region.distalBoundaryY - CGFloat(numPeriods) * periodHeight - CGFloat(countOffsets(periods: mark.periods)) * periodHeight
             }
             mark.periods[0..<numPeriods].forEach {
                 if periodPosition == .top {
@@ -2099,16 +2098,23 @@ final class LadderView: ScaledView {
         }
     }
 
+    /// Maximum number of periods that can fit in a region, taking into account period offsets.
+    /// - Parameters:
+    ///   - mark: Mark to check
+    ///   - region: Region to check
+    ///   - height: height of Periods
+    /// - Returns: number of Periods that fit into region
     private func numPeriodsFit(forMark mark: Mark, inRegion region: Region, withHeight height: CGFloat) -> Int {
         let regionHeight = region.height
-        let offset = numOffsets(forMark: mark)
+        let periods = mark.periods
+        let offset = countOffsets(periods: periods)
         let num = Int((regionHeight - CGFloat(offset) * height) / height)
         return min(num, mark.periods.count)
     }
 
-    private func numOffsets(forMark mark: Mark) -> Int {
+    private func countOffsets(periods: [Period]) -> Int {
         var offset = 0
-        for period in mark.periods {
+        for period in periods {
             offset += period.offset
         }
         return offset
@@ -2170,8 +2176,8 @@ final class LadderView: ScaledView {
         }
 
         // Draw period
-        let rect = CGRect(x: scaledOriginX, y: startY, width: width, height: periodHeight)
-        context.addRect(rect)
+        let periodRect = CGRect(x: scaledOriginX, y: startY, width: width, height: periodHeight)
+        context.addRect(periodRect)
         context.setFillColor(period.color.cgColor)
         context.setStrokeColor(UIColor.label.cgColor)
         context.setLineWidth(periodShowBorder ? 1.0 : 0)
@@ -2196,7 +2202,7 @@ final class LadderView: ScaledView {
         case .left:
             textRect = CGRect(x: scaledOriginX + 5, y: textOriginY, width: width - 5, height: textHeight)
         case .center:
-            textRect = CGRect(x: rect.origin.x, y: textOriginY, width: rect.width, height: textHeight)
+            textRect = CGRect(x: periodRect.origin.x, y: textOriginY, width: periodRect.width, height: textHeight)
         }
         text.draw(in: textRect, withAttributes: textAttributes)
     }
@@ -2676,6 +2682,15 @@ final class LadderView: ScaledView {
             undoablySetMarkPeriods(mark: mark, periods: periods)
         }
         refresh()
+    }
+
+    func setPeriods(periodIDSet: Set<UUID>, cancel: Bool = false) {
+        guard !cancel else { return }
+        let periods = ladder.getPeriodsFromIDs(periodIDSet: periodIDSet, periods: ladder.getUniqueLadderPeriods())
+        let selectedMarks = ladder.allMarksWithMode(.selected)
+        for mark in selectedMarks {
+            undoablySetMarkPeriods(mark: mark, periods: periods)
+        }
     }
 
     func deletePeriods() {

@@ -109,6 +109,7 @@
                         <segue destination="BGd-dQ-vjR" kind="presentation" identifier="showRhythmSegue" destinationCreationSelector="performRhythmSegueAction:" id="vII-Nd-Rym"/>
                         <segue destination="M0c-tI-NTs" kind="show" identifier="showOnboardingSegue" destinationCreationSelector="performOnboardingSegueAction:" id="dER-Jc-QCi"/>
                         <segue destination="Dh4-Zq-RMS" kind="show" identifier="editPeriodsSegue" destinationCreationSelector="performEditPeriodsAction:" id="sUg-jx-36L"/>
+                        <segue destination="edz-RW-FnR" kind="show" identifier="selectPeriodsSegue" destinationCreationSelector="performSelectPeriodsAction:" id="Hc6-91-tRP"/>
                     </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="dkx-z0-nzr" sceneMemberID="firstResponder"/>
@@ -248,6 +249,16 @@
                 <placeholder placeholderIdentifier="IBFirstResponder" id="YFP-Ie-SPU" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
             </objects>
             <point key="canvasLocation" x="3542" y="1159"/>
+        </scene>
+        <!--Hosting Controller-->
+        <scene sceneID="HRd-Rm-Log">
+            <objects>
+                <hostingController id="edz-RW-FnR" sceneMemberID="viewController">
+                    <navigationItem key="navigationItem" id="9tj-T4-46s"/>
+                </hostingController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="j6F-el-Ds8" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="4193" y="1159"/>
         </scene>
         <!--Hosting Controller-->
         <scene sceneID="dWr-ZE-lZ6">

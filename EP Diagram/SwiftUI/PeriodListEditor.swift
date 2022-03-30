@@ -23,8 +23,8 @@ struct PeriodListEditor: View {
                         ForEach (periodsModelController.periods, id: \.self.id) {
                             period in NavigationLink(destination: PeriodEditor(periodsModelController: periodsModelController, dismissAction: dismissAction, period: self.selectedPeriod(id: period.id))) {
                                 VStack(alignment: .leading) {
-                                        Text("Period: \(period.name)")
-                                        Text("Duration: \(Int(period.duration)) msec")
+                                    Text("Period: \(period.name)")
+                                    Text("Duration: \(Int(period.duration)) msec")
                                     Text("Resettable: \(period.resettable ? "Yes" : "No")")
                                     Text("Offset: \(period.offset)")
                                 }
