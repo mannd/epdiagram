@@ -60,8 +60,10 @@ class PeriodTests: XCTestCase {
         XCTAssert(Period.periodsAreSimilar(periods8, periods9))
         let periods10 = periods9
         XCTAssert(Period.periodsAreSimilar(periods10, periods9))
-        let periods11 = periods4 // empty arrays are considered to be similar
+        let periods11 = periods4
         XCTAssert(Period.periodsAreSimilar(periods11, periods4))
+        // empty arrays no longer considered similar
+        XCTAssertFalse(Period.periodsAreSimilar(periods1, periods4))
     }
 
     func testDeletePeriods() {

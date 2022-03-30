@@ -2638,6 +2638,8 @@ final class LadderView: ScaledView {
         }
     }
 
+    // MARK: - Periods
+
     /// Check selected marks to see if periods are editable
     ///
     /// For periods to be editable, it is necessary that
@@ -2645,7 +2647,7 @@ final class LadderView: ScaledView {
     ///  2. All marks are in the same region
     ///  3. All marks have the same periods, or no periods.
     ///  Throws specific error if any of the above conditions is true.
-    func checkForPeriods() throws {
+    func checkForEditablePeriods() throws {
         let selectedMarks = ladder.allMarksWithMode(.selected)
         selectedMarksPeriods = []
         if selectedMarks.count == 1 { // 1 mark can always be edited
@@ -2661,15 +2663,26 @@ final class LadderView: ScaledView {
         // At this point, at least 2 marks are in selectedMarks.
         let periods = selectedMarks[0].periods
         for mark in selectedMarks {
-            if mark.periods.count == 0 { // allow mix of no periods and periods
-                continue
-            }
+//            if mark.periods.count == 0 { // allow mix of no periods and periods
+//                continue
+//            }
             if !Period.periodsAreSimilar(mark.periods, periods) {
                 throw LadderError.periodsAreNotSimilar
             }
         }
         // If we reach here without throwing, all marks have the same periods (or none).  Thus...
         periodsModelController.periods = periods
+    }
+
+    func checkForCopyablePeriods() throws {
+        let selectedMarks = ladder.allMarksWithMode(.selected)
+        if selectedMarks.count == 0 {
+            throw LadderError.noMarks
+        }
+        let ladderPeriods = ladder.getUniqueLadderPeriods()
+        if ladderPeriods.count == 0 {
+            throw LadderError.noPeriodsInLadder
+        }
     }
 
     func applyPeriods(_ periods: [Period]) {

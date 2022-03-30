@@ -29,6 +29,7 @@ enum LadderError: Error {
     case markNotAtEitherEndOfSelection
     case periodsAreNotSimilar
     case noRegionSelected
+    case noPeriodsInLadder
 }
 
 extension LadderError: LocalizedError {
@@ -41,7 +42,7 @@ extension LadderError: LocalizedError {
         case .requireTwoMarks:
             return L("Exactly two marks must be selected.")
         case .marksInDifferentRegions:
-            return L("Selected marks are in different regions.  Marks must be in the same region..")
+            return L("Selected marks are in different regions.  Marks must be in the same region.")
         case .marksNotContiguous:
             return L("Marks are not contiguous.  Selected marks must be contiguous.")
         case .tooManyRegions:
@@ -72,6 +73,8 @@ extension LadderError: LocalizedError {
             return L("You can only edit periods of multiple marks if the periods are all the same.")
         case .noRegionSelected:
             return L("You must select a region or zone to add a rhythm.")
+        case .noPeriodsInLadder:
+            return L("This ladder has no periods yet that can be copied.  Add at least one period to a mark first.")
         }
     }
 }

@@ -34,7 +34,6 @@ struct PeriodSelector: View {
                 }
             }
             .navigationBarTitle(Text("Select Periods"), displayMode: .inline)
-            .navigationBarItems(trailing: Button(action: { self.doNothing() }, label: { Text("Apply")}))
             .environment(\.editMode, .constant(EditMode.active))
             .onDisappear() {
                 if let dismissAction = dismissAction {
@@ -44,18 +43,7 @@ struct PeriodSelector: View {
         }
         .navigationViewStyle(StackNavigationViewStyle())
     }
-
-                                func doNothing() {
-                                    print(selection)
-
-            }
 }
-//            .padding()
-//            .background(Color(period.color.withAlphaComponent(backgroundAlpha)))
-            //            }
-//            .navigationBarTitle(Text("Periods"), displayMode: .inline)
-//            .navigationBarItems(leading: EditButton(), trailing: addButton)
-//            .environment(\.editMode, $editMode)
 
 struct PeriodSelector_Previews: PreviewProvider {
     static var testPeriods: [Period] = [Period(), Period(color: .red)]

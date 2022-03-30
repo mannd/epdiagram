@@ -401,7 +401,7 @@ final class DiagramViewController: UIViewController {
     // Period actions
     lazy var editPeriodsAction = UIAction(title: L("Add/edit periods..."), image: UIImage(systemName: "plus.rectangle.on.rectangle")) { _ in
         do {
-            try self.ladderView.checkForPeriods()
+            try self.ladderView.checkForEditablePeriods()
             self.performEditPeriodsSegue()
         } catch {
             self.showError(title: L("Error Editing Periods"), error: error)
@@ -409,7 +409,12 @@ final class DiagramViewController: UIViewController {
     }
 
     lazy var copyPeriodsAction = UIAction(title: "Copy periods", image: UIImage(systemName: "rectangle.stack")) { _ in
-        self.performSelectPeriodsSegue()
+        do {
+            try self.ladderView.checkForCopyablePeriods()
+            self.performSelectPeriodsSegue()
+        } catch {
+            self.showError(title: L("Error Copying Periods"), error: error)
+        }
     }
 
     lazy var deletePeriodsAction = UIAction(title: L("Delete periods"), image: UIImage(systemName: "rectangle.on.rectangle.slash"), attributes: .destructive) { _ in
