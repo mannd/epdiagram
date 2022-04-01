@@ -1712,7 +1712,7 @@ extension DiagramViewController {
         ladderView.periodSize = PeriodSize(rawValue: UserDefaults.standard.integer(forKey: Preferences.periodSizeKey)) ?? .small
         ladderView.periodShowBorder = UserDefaults.standard.bool(forKey: Preferences.periodShowBorderKey)
         ladderView.periodResetMethod = PeriodResetMethod(rawValue: UserDefaults.standard.integer(forKey: Preferences.periodResetMethodKey)) ?? .shorten
-        ladderView.declutterIntervals = UserDefaults.standard.bool(forKey: Preferences.declutterIntervalsKey)
+        ladderView.intervalGrouping = IntervalGrouping(rawValue: UserDefaults.standard.integer(forKey: Preferences.intervalGroupingKey)) ?? .fullInterior
 
         // Colors
         if let caliperColorName = UserDefaults.standard.string(forKey: Preferences.caliperColorNameKey) {

@@ -42,7 +42,7 @@ struct Preferences {
     static let periodSizeKey = "defaultPeriodSizeKey"
     static let periodShowBorderKey = "defaultPeriodShowBorderKey"
     static let periodResetMethodKey = "defaultPeriodResetMethodKey"
-    static let declutterIntervalsKey = "defaultDeclutterIntervalskey"
+    static let intervalGroupingKey = "defaultIntervalGroupingKey"
 
     // keys not modifiable by user
     static let notFirstRunKey = "defaultNotFirstRunKey"
@@ -91,7 +91,7 @@ struct Preferences {
     static var periodSize = PeriodSize.small.rawValue
     static var periodShowBorder: Bool = false
     static var periodResetMethod = PeriodResetMethod.shorten.rawValue
-    static var declutterIntervals: Bool = false
+    static var intervalGrouping = IntervalGrouping.fullInterior.rawValue
     static var imageViewHeight: CGFloat = 0.5
 
     // default Colors
@@ -156,7 +156,7 @@ struct Preferences {
             Preferences.periodSizeKey: Preferences.periodSize,
             Preferences.periodShowBorderKey: Preferences.periodShowBorder,
             Preferences.periodResetMethodKey: Preferences.periodResetMethod,
-            Preferences.declutterIntervalsKey: Preferences.declutterIntervals,
+            Preferences.intervalGroupingKey: Preferences.intervalGrouping,
             Preferences.impulseOriginContiguousKey: Preferences.impulseOriginContiguous,
             Preferences.impulseOriginLargeKey: Preferences.impulseOriginLarge,
             Preferences.imageViewHeightKey: Preferences.imageViewHeight,

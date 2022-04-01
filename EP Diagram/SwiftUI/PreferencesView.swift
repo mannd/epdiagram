@@ -38,7 +38,7 @@ struct PreferencesView: View {
     @AppStorage(Preferences.periodSizeKey) var periodSize = Preferences.periodSize
     @AppStorage(Preferences.periodShowBorderKey) var periodShowBorder = Preferences.periodShowBorder
     @AppStorage(Preferences.periodResetMethodKey) var periodResetMethod = Preferences.periodResetMethod
-    @AppStorage(Preferences.declutterIntervalsKey) var declutterIntervals = Preferences.declutterIntervals
+    @AppStorage(Preferences.intervalGroupingKey) var intervalGrouping = Preferences.intervalGrouping
 
     // Color preferences
     @AppStorage(Preferences.activeColorNameKey) var activeColorName = Preferences.activeColorName
@@ -103,9 +103,12 @@ struct PreferencesView: View {
                         Toggle(isOn: $showIntervals) {
                             Text("Show intervals (after calibration)")
                         }
-                        Toggle(isOn: $declutterIntervals) {
-                            Text("Declutter intervals")
-                        }
+                        Picker(selection: $intervalGrouping, label: Text("Interval grouping"), content: {
+                            Text("Full interior").tag(IntervalGrouping.fullInterior.rawValue)
+                            Text("Full exterior").tag(IntervalGrouping.fullExterior.rawValue)
+                            Text("Partial above").tag(IntervalGrouping.partialAbove.rawValue)
+                            Text("Partial below").tag(IntervalGrouping.partialBelow.rawValue)
+                        })
                         }
                         Toggle(isOn: $showConductionTimes) {
                             Text("Show conduction times (after calibration)")

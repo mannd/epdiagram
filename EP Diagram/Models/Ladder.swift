@@ -50,6 +50,16 @@ final class Ladder: NSObject, Codable {
     override var debugDescription: String { "Ladder ID " + id.debugDescription }
     private var registry: [UUID: Mark] = [:] // marks are registered for quick lookup
 
+    var lastRegion: Region? {
+        guard regions.count > 0 else { return nil }
+        return regions[regions.count - 1]
+    }
+
+    var firstRegion: Region? {
+        guard regions.count > 0 else { return nil }
+        return regions[0]
+    }
+
     init(template: LadderTemplate) {
         print("*****Ladder init*****")
         os_log("init ladder from template", log: .action, type: .info)

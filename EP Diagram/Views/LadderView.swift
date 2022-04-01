@@ -121,7 +121,7 @@ final class LadderView: ScaledView {
     var periodSize: PeriodSize = PeriodSize(rawValue: Preferences.periodSize)!
     var periodShowBorder: Bool = Preferences.periodShowBorder
     var periodResetMethod: PeriodResetMethod = PeriodResetMethod(rawValue: Preferences.periodResetMethod)!
-    var declutterIntervals: Bool = Preferences.declutterIntervals
+    var intervalGrouping: IntervalGrouping = IntervalGrouping(rawValue: Preferences.intervalGrouping)!
 
     // colors set by preferences
     var activeColor = Preferences.defaultActiveColor
@@ -1666,7 +1666,6 @@ final class LadderView: ScaledView {
         guard region.marks.count < maxMarksForIntervals else { return }
         guard let calibration = calibration, calibration.isCalibrated else { return }
         if let index = ladder.index(ofRegion: region), let intervals = ladderIntervals[index] {
-            let isLastRegion = index == ladder.regions.count - 1 // TODO: refactor this to method or property
             for interval in intervals {
                 if let firstProximalX = interval.proximalBoundary?.first, let secondProximalX = interval.proximalBoundary?.second {
                     let scaledFirstX = transformToScaledViewPositionX(regionPositionX: firstProximalX)
@@ -1675,16 +1674,17 @@ final class LadderView: ScaledView {
                     let text = "\(formatValue(value, usingCalFactor: calibration.currentCalFactor))"
                     let size = text.size(withAttributes: measurementTextAttributes)
                     if size.width + intervalMargin < value { // don't crowd measurements
-                        // Center the origin.
-                        let halfwayPosition = (scaledFirstX + scaledSecondX) / 2.0
-                        var origin = CGPoint(x: halfwayPosition, y: region.proximalBoundaryY)
-                        origin = CGPoint(x: origin.x - size.width / 2, y: origin.y)
+                        let intervalLocation = getIntervalLocation(intervalGrouping: intervalGrouping, boundaryLocation: .proximal, region: region)
+                        if intervalLocation == .nowhere { continue }
+                        let origin = getIntervalOrigin(
+                            intervalLocation: intervalLocation,
+                            firstX: scaledFirstX,
+                            secondX: scaledSecondX,
+                            boundaryY: region.proximalBoundaryY,
+                            size: size)
                         drawIntervalText(origin: origin, size: size, text: text, context: context, attributes: measurementTextAttributes)
                     }
                 }
-
-                if !isLastRegion && declutterIntervals { continue }
-
                 if let firstDistalX = interval.distalBoundary?.first, let secondDistalX = interval.distalBoundary?.second {
                     let scaledFirstX = transformToScaledViewPositionX(regionPositionX: firstDistalX)
                     let scaledSecondX = transformToScaledViewPositionX(regionPositionX: secondDistalX)
@@ -1692,20 +1692,77 @@ final class LadderView: ScaledView {
                     let text = "\(formatValue(value, usingCalFactor: calibration.currentCalFactor))"
                     let size = text.size(withAttributes: measurementTextAttributes)
                     if size.width + intervalMargin < value {
-                        // Center the origin
-                        let halfwayPosition = (scaledFirstX + scaledSecondX) / 2.0
-                        var origin = CGPoint(x: halfwayPosition, y: region.distalBoundaryY)
-                        // Draw last region interval below bottom ladder line when decluttering intervals.
-                        if isLastRegion && declutterIntervals {
-                            origin = CGPoint(x: origin.x - size.width / 2, y: origin.y)
-                        } else {
-                            // Normally without decluttering we draw all intervals within the ladder.
-                            origin = CGPoint(x: origin.x - size.width / 2, y: origin.y - size.height)
-                        }
+                        let origin: CGPoint
+                        let intervalLocation = getIntervalLocation(intervalGrouping: intervalGrouping, boundaryLocation: .distal, region: region)
+                        if intervalLocation == .nowhere { continue }
+                        origin = getIntervalOrigin(
+                                intervalLocation: intervalLocation,
+                                firstX: scaledFirstX,
+                                secondX: scaledSecondX,
+                                boundaryY: region.distalBoundaryY,
+                                size: size)
+//                        }
                         drawIntervalText(origin: origin, size: size, text: text, context: context, attributes: measurementTextAttributes)
                     }
                 }
             }
+        }
+    }
+
+    func getIntervalOrigin(intervalLocation: IntervalLocation, firstX: CGFloat, secondX: CGFloat, boundaryY: CGFloat, size: CGSize) -> CGPoint {
+        let origin: CGPoint
+        let halfwayPosition = (firstX + secondX) / 2.0
+        switch intervalLocation {
+        case .aboveBoundary:
+            origin = CGPoint(x: halfwayPosition - size.width / 2, y: boundaryY - size.height)
+        case .belowBoundary:
+            origin = CGPoint(x: halfwayPosition - size.width / 2, y: boundaryY)
+        case .nowhere:
+            origin = CGPoint.zero
+            assertionFailure() // shouldn't happen
+        }
+        return origin
+    }
+
+    // TODO: interval grouping logic
+    // fullInterior: prox draw below, distal draw above
+    // fullExterior: above, except first region draw above, last region draw below
+    // partialAbove: always draw above, but internal prox boundaries aren't drawn
+    // parialBelow: always draw below, but internal dist boundaries aren't drawn
+    func getIntervalLocation(intervalGrouping: IntervalGrouping, boundaryLocation: BoundaryLocation, region: Region) -> IntervalLocation {
+        let isFirstRegion = (region == ladder.firstRegion)
+        let isLastRegion = (region == ladder.lastRegion)
+        switch intervalGrouping {
+        case .fullInterior:
+            if boundaryLocation == .proximal {
+                return .belowBoundary
+            } else { // .distal
+                return .aboveBoundary
+            }
+        case .fullExterior:
+            if boundaryLocation == .proximal {
+                return isFirstRegion ? .aboveBoundary : .belowBoundary
+            } else { // .distal
+                return isLastRegion ? .belowBoundary : .aboveBoundary
+            }
+            case .partialAbove:
+            if boundaryLocation == .proximal {
+                 if isFirstRegion {
+                     return .aboveBoundary
+                 } else {
+                     return .nowhere
+                 }
+            }
+            return .aboveBoundary
+        case .partialBelow:
+            if boundaryLocation == .distal {
+                 if isLastRegion {
+                     return .belowBoundary
+                 } else {
+                     return .nowhere
+                 }
+            }
+            return .belowBoundary
         }
     }
 
@@ -1784,7 +1841,6 @@ final class LadderView: ScaledView {
             }
         }
     }
-
 
     func assessBlockAndImpulseOrigin(mark: Mark?) {
         if let mark = mark {
@@ -2646,7 +2702,7 @@ final class LadderView: ScaledView {
     ///  1. At least one mark is selected
     ///  2. All marks are in the same region
     ///  3. All marks have the same periods, or no periods.
-    ///  Throws specific error if any of the above conditions is true.
+    ///  Throws specific error if any of the above conditions is false.
     func checkForEditablePeriods() throws {
         let selectedMarks = ladder.allMarksWithMode(.selected)
         selectedMarksPeriods = []
@@ -2663,9 +2719,6 @@ final class LadderView: ScaledView {
         // At this point, at least 2 marks are in selectedMarks.
         let periods = selectedMarks[0].periods
         for mark in selectedMarks {
-//            if mark.periods.count == 0 { // allow mix of no periods and periods
-//                continue
-//            }
             if !Period.periodsAreSimilar(mark.periods, periods) {
                 throw LadderError.periodsAreNotSimilar
             }
@@ -3764,5 +3817,23 @@ enum PeriodResetMethod: Int, Codable {
 enum Adjustment {
     case adjust
     case trim
+}
+
+enum IntervalLocation {
+    case aboveBoundary
+    case belowBoundary
+    case nowhere
+}
+
+enum IntervalGrouping: Int {
+    case fullInterior // draw all intervals, within ladder boundaries
+    case fullExterior // draw all intervals, first and last regions above and below ladder boundaries
+    case partialAbove // draw only intervals above boundaries
+    case partialBelow // draw only intervals below boundaries
+}
+
+enum BoundaryLocation {
+    case proximal
+    case distal
 }
 
