@@ -8,17 +8,8 @@
 
 import SwiftUI
 
-// TODO: redundant func also in PreferencesView
 fileprivate func getColorPicker(title: LocalizedStringKey, selection: Binding<Color>) -> some View {
-#if targetEnvironment(macCatalyst)
-    return HStack {
-        Text(title)
-        Spacer()
-        ColorPicker("", selection: selection).frame(maxWidth: 100)
-    }
-#else
-    return ColorPicker(title, selection: selection)
-#endif
+    return Color.getColorPicker(title: title, selection: selection)
 }
 
 var periodColorName = Preferences.periodColorName

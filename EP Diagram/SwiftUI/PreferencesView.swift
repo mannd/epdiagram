@@ -65,16 +65,9 @@ struct PreferencesView: View {
     @ObservedObject var diagramController: DiagramModelController
     @Environment(\.presentationMode) private var presentationMode: Binding<PresentationMode>
 
+
     fileprivate func getColorPicker(title: LocalizedStringKey, selection: Binding<Color>) -> some View {
-        #if targetEnvironment(macCatalyst)
-        return HStack {
-            Text(title)
-            Spacer()
-            ColorPicker("", selection: selection).frame(maxWidth: 100)
-        }
-        #else
-        return ColorPicker(title, selection: selection)
-        #endif
+        return Color.getColorPicker(title: title, selection: selection)
     }
 
     // Note: At most 10 views in a Section.  Wrap views in Group{} if more than 10 views.  See https://stackoverflow.com/questions/61178868/swiftui-random-extra-argument-in-call-error.
