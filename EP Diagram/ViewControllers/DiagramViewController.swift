@@ -1708,10 +1708,10 @@ extension DiagramViewController {
         ladderView.periodPosition = PeriodPosition(rawValue: UserDefaults.standard.integer(forKey: Preferences.periodPositionKey)) ?? .bottom
         ladderView.periodTransparency = CGFloat(UserDefaults.standard.float(forKey: Preferences.periodTransparencyKey))
         ladderView.periodTextJustification = TextJustification(rawValue: UserDefaults.standard.integer(forKey: Preferences.periodTextJustificationKey)) ?? .left
-        ladderView.periodOverlapMark = UserDefaults.standard.bool(forKey: Preferences.periodOverlapMarkKey)
+        ladderView.periodsOverlapMarks = UserDefaults.standard.bool(forKey: Preferences.periodsOverlapMarksKey)
         ladderView.periodSize = PeriodSize(rawValue: UserDefaults.standard.integer(forKey: Preferences.periodSizeKey)) ?? .small
         ladderView.periodShowBorder = UserDefaults.standard.bool(forKey: Preferences.periodShowBorderKey)
-        ladderView.periodResetMethod = PeriodResetMethod(rawValue: UserDefaults.standard.integer(forKey: Preferences.periodResetMethodKey)) ?? .shorten
+        ladderView.periodResetMethod = PeriodResetMethod(rawValue: UserDefaults.standard.integer(forKey: Preferences.periodResetMethodKey)) ?? .clip
         ladderView.intervalGrouping = IntervalGrouping(rawValue: UserDefaults.standard.integer(forKey: Preferences.intervalGroupingKey)) ?? .fullInterior
 
         // Colors

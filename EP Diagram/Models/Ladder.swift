@@ -580,6 +580,7 @@ final class Ladder: NSObject, Codable {
         return Ladder(template: LadderTemplate.defaultTemplate())
     }
 
+
     static func freshLadder(fromLadder ladder: Ladder) -> Ladder {
         return Ladder(template: ladder.template )
     }

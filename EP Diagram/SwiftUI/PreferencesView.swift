@@ -34,7 +34,7 @@ struct PreferencesView: View {
     @AppStorage(Preferences.periodPositionKey) var periodPosition = Preferences.periodPosition
     @AppStorage(Preferences.periodTransparencyKey) var periodTransparency = Preferences.periodTransparency
     @AppStorage(Preferences.periodTextJustificationKey) var periodTextJustification = Preferences.periodTextJustification
-    @AppStorage(Preferences.periodOverlapMarkKey) var periodOverlapMark = Preferences.periodOverlapMark
+    @AppStorage(Preferences.periodsOverlapMarksKey) var periodOverlapMark = Preferences.periodsOverlapMarks
     @AppStorage(Preferences.periodSizeKey) var periodSize = Preferences.periodSize
     @AppStorage(Preferences.periodShowBorderKey) var periodShowBorder = Preferences.periodShowBorder
     @AppStorage(Preferences.periodResetMethodKey) var periodResetMethod = Preferences.periodResetMethod
@@ -233,7 +233,7 @@ struct PreferencesView: View {
                             Text("Show period border")
                         }
                         Picker(selection: $periodResetMethod, label: Text("Reset method"), content: {
-                            Text("Shorten").tag(PeriodResetMethod.shorten.rawValue)
+                            Text("Clip").tag(PeriodResetMethod.clip.rawValue)
                             Text("Interrupt").tag(PeriodResetMethod.interrupt.rawValue)
                         })
                     }

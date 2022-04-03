@@ -69,7 +69,8 @@ struct Diagram: Codable {
             Diagram(name: L("Normal ECG"), description: L("Just a normal ECG"), image: UIImage(named: "SampleECG")!, ladder: Ladder.defaultLadder()),
             Diagram(name: L("AV Block"), description: L("High grade AV block"), image: UIImage(named: "AVBlock")!, ladder: Ladder.defaultLadder()),
             Diagram(name: L("Wenckebach"), description: L("Mobitz I 2nd degree AV block"), image: UIImage(named: "Wenckebach")!, ladder: Ladder.defaultLadder()),
-            Diagram(name: L("AVNRT"), description: L("AV nodal reentrant tachycardia"), image: UIImage(named: "AVNRT")!, ladder: Ladder.defaultLadder())
+            Diagram(name: L("AVNRT"), description: L("AV nodal reentrant tachycardia"), image: UIImage(named: "AVNRT")!, ladder: Ladder.defaultLadder()),
+            Diagram(name: L("DDD Pacemaker"), description: L("Upper rate behavior"), image: UIImage(named: "DDD")!, ladder: Ladder(template: LadderTemplate.defaultTemplate_A_V())),
         ]
         return sampleDiagrams
     }

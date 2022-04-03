@@ -39,7 +39,6 @@ extension Color {
         return ("\(red),\(green),\(blue),\(alpha)")
     }
 
-    // TODO: redundant func also in PreferencesView
     static func getColorPicker(title: LocalizedStringKey, selection: Binding<Color>) -> some View {
     #if targetEnvironment(macCatalyst)
         return HStack {

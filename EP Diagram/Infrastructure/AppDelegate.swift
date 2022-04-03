@@ -224,7 +224,7 @@ extension AppDelegate {
         )
 
         let editLadderCommand = UICommand(
-            title: L("Edit Ladder"),
+            title: L("Edit Ladders"),
             action: #selector(DiagramViewController.editLadder(_:))
         )
         let selectLadderCommand = UICommand(

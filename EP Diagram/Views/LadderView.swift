@@ -117,7 +117,7 @@ final class LadderView: ScaledView {
     var periodPosition: PeriodPosition = PeriodPosition(rawValue: Preferences.periodPosition)!
     var periodTransparency: CGFloat = CGFloat(Preferences.periodTransparency)
     var periodTextJustification = TextJustification(rawValue: Preferences.periodTextJustification)!
-    var periodOverlapMark: Bool = Preferences.periodOverlapMark
+    var periodsOverlapMarks: Bool = Preferences.periodsOverlapMarks
     var periodSize: PeriodSize = PeriodSize(rawValue: Preferences.periodSize)!
     var periodShowBorder: Bool = Preferences.periodShowBorder
     var periodResetMethod: PeriodResetMethod = PeriodResetMethod(rawValue: Preferences.periodResetMethod)!
@@ -1724,11 +1724,6 @@ final class LadderView: ScaledView {
         return origin
     }
 
-    // TODO: interval grouping logic
-    // fullInterior: prox draw below, distal draw above
-    // fullExterior: above, except first region draw above, last region draw below
-    // partialAbove: always draw above, but internal prox boundaries aren't drawn
-    // parialBelow: always draw below, but internal dist boundaries aren't drawn
     func getIntervalLocation(intervalGrouping: IntervalGrouping, boundaryLocation: BoundaryLocation, region: Region) -> IntervalLocation {
         let isFirstRegion = (region == ladder.firstRegion)
         let isLastRegion = (region == ladder.lastRegion)
@@ -2200,12 +2195,9 @@ final class LadderView: ScaledView {
         let scaledMaxX = transformToScaledViewPositionX(regionPositionX: maxX)
         var width = scaledMaxX - scaledOriginX
 
-        // TODO: is this option worth it?  Maybe just never overlap marks
-        if !periodOverlapMark {
-            width = width - markLineWidth
-            // Lines straddle the path, so divide in half to make fully visible
-            scaledOriginX = scaledOriginX + markLineWidth / 2.0 // make sure mark line is visible if it is vertical
-        }
+        // FIXME: This will completely cover a mark, but worth doing?
+        //width += markLineWidth / 2.0
+        //scaledOriginX -= markLineWidth / 2.0 // make sure mark line is visible if it is vertical
 
         if leftMargin > scaledOriginX {
             width = width - (leftMargin - scaledOriginX)
@@ -2459,9 +2451,12 @@ final class LadderView: ScaledView {
         drawRegionLabel(rect: rect, region: region, context: context)
         drawRegionArea(context: context, rect: rect, region: region)
         if !marksAreHidden {
+            // draw Periods before Marks if marks overlap periods
+            if !periodsOverlapMarks { drawPeriods(region: region, context: context) }
             drawMarks(region: region, context: context, rect: rect)
+            // draw Marks before periods if periods overlap marks
+            if periodsOverlapMarks { drawPeriods(region: region, context: context) }
             drawIntervals(region: region, context: context)
-            drawPeriods(region: region, context: context)
         }
         drawBottomLine(context: context, lastRegion: lastRegion, rect: rect)
     }
@@ -3809,7 +3804,7 @@ enum PeriodSize: Int, Codable {
 }
 
 enum PeriodResetMethod: Int, Codable {
-    case shorten
+    case clip
     case interrupt
     case crosshatch 
 }
