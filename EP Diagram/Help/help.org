@@ -21,7 +21,7 @@
 #+CAPTION: Early ladder diagram (Sir Thomas Lewis, 1920)
 [[./img/early_ladder.png]]
 
-- *EP Diagram* creates /ladder diagrams/, a classic form of ECG analysis that depicts the path of the cardiac impulse through anatomic regions of the heart.  Ladder diagrams are useful to understand cardiac arrhythmias such as heart block, reentrant tachycardias, and premature complexes.  Traditionally ladder diagrams are roughly sketched on paper, but with *EP Diagram* you can draw them on your iPad, and, unlike a paper sketch, these diagrams can scroll and zoom, can measure intervals and conduction times automatically, and can be saved as publication quality images.
+- *EP Diagram* creates /ladder diagrams/, a classic form of ECG analysis that depicts the path of the cardiac impulse through anatomic regions of the heart.  Ladder diagrams are useful to understand cardiac arrhythmias such as heart block, reentrant tachycardias, and premature complexes.  They also can be used to draw the timing intervals, blanking periods, and refractory periods used by electronic pacemakers.  Traditionally ladder diagrams are roughly sketched on paper, but with *EP Diagram* you can draw them on your iPad, and, unlike a paper sketch, these diagrams can scroll and zoom, can measure intervals and conduction times automatically, and can be saved as publication quality images.
 
 - *EP Diagram* has a lot of built-in features that simplify the creation of ladder diagrams, and these features are described in this help manual.  The next section, [[*Quick start][Quick start]], contains some tips on how to get started.  However a good way to learn the program is to create some sample ladder diagrams, then use your finger to tap, double-tap, and drag on the ladder to see what happens.  Try out the various buttons.  Experiment!  Most of the functions are intuitive, and if you want more in-depth instruction, have a look at the rest of this help manual.  
 * Quick start
@@ -30,7 +30,7 @@
 ** Load an ECG image
 - Use the "hamburger" menu icon at the top left to open the /side menu/.  You can select an ECG image from your photos or files and it will appear on the top half of the screen.
 ** Create marks
-- Tap on the image or the ladder grid to create /marks/, which are the lines that are drawn on the ladder.  Use the /cursor/ (the vertical line extending from the mark to the top of the screen) to align marks with the ECG waveforms.  Tap away from the cursor to hide the cursor.  Tap on a mark to bring back the cursor and each tap changes the /anchor/ point of the mark from middle to proximal to distal.
+- Tap on the image or the ladder grid to create /marks/, which are the lines that are drawn on the ladder.  Use the /cursor/ (the vertical line extending from the mark to the top of the screen) to align marks with the ECG waveforms.  Tap away from the cursor to hide the cursor.  Tap on a mark to bring back the cursor.  Each tap on the cursor changes the /anchor/ point of the cursor to the mark, from middle to proximal to distal.
 - Double tap on a mark to delete it.  Double tap anywhere else to create a mark.  Double tapping is a fast way to create marks.
 - Marks appear in the /active region/, shown by a tinted background.  If you tap on a different region the marks will appear in that region which will become the new active region.  Tapping on the label of a region will also activate or deactivate it.
 - Dragging with your finger in a region will also create a mark.
@@ -47,15 +47,16 @@
 - After tapping the *Connect* button, tap pairs of marks separated by a region to connect the marks with a new mark.
 - Tap from a mark to an adjacent region to draw a mark that blocks in that region.
 ** Edit the diagram
-- Tap the *Edit* button to unlock techniques for sprucing up your diagram.
+- Tap the *Edit* button to unlock techniques for fine-tuning your diagram.
 - Tap to select and deselect marks or regions, or drag to select zones.
-- Long press the ladder after selecting marks or regions to show a menu that can be used to customize the appearance of the marks, including their style, emphasis, block, impulse origin, etc.  You can also add groups of marks and even periods of regular rhythm or fibrillation to zones and regions using this menu.  
+- Long press the ladder after selecting marks or regions to show a menu that can be used to customize the appearance of the marks, including their style, emphasis, block, impulse origin, etc.  You can also add groups of marks and even periods of regular rhythm or fibrillation to zones and regions using this menu.  This menu also allows you to add [[*Periods][periods]] to your diagram. 
 ** Undo/Redo
 - Practically anything you do can be undone or redone and these changes are automatically saved.
 ** Other features are located on the side menu
 - Change to a different ladder
 - Edit or create ladders
 - Load sample diagrams
+- Lock the image or ladder into a fixed position
 ** Take screenshots
 - Take screenshots using the *Screenshot* button at the upper right of the screen, next to the *Close* button.
 ** Preferences
@@ -87,13 +88,14 @@ Ladder diagram terminology is not standardized.  Here is a glossary of the terms
 | Link                 | a connection between marks causing them to move together          |
 | Impulse origin       | where conduction starts, indicated by a symbol                    |
 | Block                | where conduction blocks, indicated by a symbol                    |
-| Interval             | time in msec between adjacent marks
+| Interval             | time in msec between adjacent marks                               |
 | Conduction time      | time in msec between earliest and latest points of a mark         |
 | Caliper              | used to calibrate the diagram to allow measurements               |
 | Conduction direction | optional arrow symbol indicating direction of electrical flow     |
 | Markers              | optional lines on image aligned with marks                        |
 | Mark pattern         | a grouping of marks that form a repeating pattern                 |
 | Joining mark         | mark used to join together mark patterns                          |
+| Period               | time period, such as a refractory period             |
 ** Diagrams
 *** Creating and opening diagrams
 EP Diagram is a file based app, meaning the diagrams you create are stored on your device or on iCloud, and can be processed by the Files app on your device, meaning you can copy them, rename them, or delete them outside of the *EP Diagram* app.  The diagram files you create have a file extension of /diagram/ and a specific icon and file format.  When you open the app, a screen shows your diagram files and a create file icon.
@@ -223,6 +225,8 @@ If you are aiming for publication quality diagrams, it's important that marks al
 *** Making selections in edit mode
 Tap the *Edit* button to enter edit mode.  In this mode a single tap on one or more marks will select these marks.  A single tap on a region (including the region label) will select the region and all the marks in the region.  Dragging on an area of the ladder will select a zone and the marks within the zone.  A tap on a selected mark, region, or zone will toggle the selection.
 
+Note that in diagrams with periods, you must tap on the mark the period is attached to, not the period itself.
+
 You can also use the *Select All* and *Clear Selection* buttons on the toolbar to quickly select the whole ladder or clear your selection.  Once selected, a long press will bring up a context menu.  After editing, select *Done* to return to normal mode.
 
 #+CAPTION: Context menu in edit mode
@@ -270,6 +274,34 @@ Unlink the selected marks.
 
 *** Snap to nearby marks
 Move the endpoints of nearby marks together and link the marks.
+*** Periods
+**** What are periods?
+In addition to showing paths of conduction, ladder diagrams are useful for indicating the state of cardiac tissue, such as the duration of refractoriness after cells are depolarized, or, similarly, the timing cycles of an electronic pacemaker, such as the lower rate interval.  These various time periods are traditionally indicated as rectangular areas on a ladder diagram, as shown below.
+
+[Fig showing VVI pacer, LRI]
+**** Adding/editing periods
+**** Copying periods
+**** Deleting periods
+**** Detailed period preferences
+***** Show periods
+Switch on to make periods visible.  Note that even with this setting on, periods will only be visible if the diagram is calibrated.
+***** Position of periods in region
+Choose whether periods are shown at the top or the bottom of a region.
+***** Period text justification
+Left justify or center the period name in the period rectangle.
+***** Periods overlap marks
+Choose whether marks are visible where they cross periods.  Note that periods with transparency will still show the underlying marks even if this is switched on.
+***** Default period color
+The default color for new periods.  Each period's color can be changed individually when adding or editing periods as described [[*Adding/editing periods][above]].
+***** Period transparency
+Transparency of the period background color.  This can be adjusted to make the period text stand out or just for esthetics.  Note that this affects all periods, but individual period also be adjusted when selecting colors while [[*Adding/editing periods][adding or editing periods]].
+***** Period size
+Choose between a large or small rectangle size.
+***** Show period border
+Switch on to draw a thin border around the period rectangle.
+***** Reset method
+Select whether a resettable period is clipped or interrupted.  A clipped period is shortened when a following mark impinges on it.  An interrupted period is still fully shown, but the part of the rectangle after to the resetting mark is drawn with increased transparency.
+
 *** Delete mark(s)
 Delete the selected marks.
 ** Side menu items
@@ -373,11 +405,13 @@ Show arrows pointing in the direction of conduction.
 *** Default mark line style
 The style of new marks added to the ladder.  This can be overridden by the region and mark context menus.
 *** Label description visibility
-Set this to show the label description under the name of the label.
+Set this to show the label descriptions under the names of the region labels.
+*** Period preferences
+The appearance of [[*Periods][periods]] can be fine-tuned, and these preferences are described in detail [[*Detailed period preferences][in this section]].
 *** Hide all marks
 For teaching purposes, it may be useful to hide the ladder marks and just show the ECG image.
 *** Play sounds
-Play the lock sounds when the image or ladder is locked.
+Play lock sounds when the image or ladder is locked.
 *** Auto-link marks
 It is recommended to leave this on, so that marks are automatically linked together and "snap" into position.  If it is turned off, all mark alignment will need to be performed manually.  In addition, impulse origin and block may need to be set manually as they cannot be ascertained automatically.
 ** Diagram snapshots
@@ -387,12 +421,11 @@ To create a snapshot and save it to the Photos app, simply tap the *Snapshot* bu
 - Drag and drop works for image files (e.g. JPG files) but not for PDF or diagram files.  This will be addressed in a future release.
 - Calibration is not saved if there is no image file loaded.
 - Complexly linked marks in the same region may not always track with the moving mark.  We can't decide if this is a bug or feature. 
-* Next version plans
-We plan to include in the next version:
-- Refractory periods
 * References
-- Johnson NP, Denes P. The Ladder Diagram (A 100+ Year History). American Journal of Cardiology. 2008;101(12):1801-1804. doi:10.1016/j.amjcard.2008.02.085
+- Johnson NP, Denes P. The Ladder Diagram (A 100+ Year History). American Journal of Cardiology. 2008;101(12):1801-1804. doi:https://doi.org/10.1016/j.amjcard.2008.02.085
 - Antiperovitch P, Luna AB de, Alencar JN de, et al. Old teaching tools should not be forgotten: The value of the Lewis ladder diagram in understanding bigeminal rhythms. Annals of Noninvasive Electrocardiology. 2019;24(5):e12685. doi:https://doi.org/10.1111/anec.12685
+- [[https://www.epstudiossoftware.com/introducing-ep-diagram/][Blog post on EP Diagram]]
+- [[https://youtu.be/EyVYrOHzPjQ][Basic EP Diagram tutorial on YouTube]]
 * Acknowledgments
 - This app was inspired by a user who complained that the *EP Calipers* app didn't have the ability to draw ladder diagrams, so it was hardly worth $1.99.  As it turns out, implementing a ladder diagram app is a non-trivial operation.  Nevertheless, thanks to this reviewer for giving me the idea.
 
