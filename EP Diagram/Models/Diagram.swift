@@ -35,6 +35,7 @@ struct Diagram: Codable {
     // be able to read file version 3.
     // fileVersion 1 was for app versions 1 up to 1.1.0.
     // fileVersion 2 was for app versions 1.1.0 up to 1.2.0.
+    // fileVerions 3 for files created with app version of at least 1.2.0
     @DefaultCodable<FileVersion> var fileVersion: Int = 3 // For version 1.2.0 and above.
 
     struct FileVersion: DefaultCodableStrategy {

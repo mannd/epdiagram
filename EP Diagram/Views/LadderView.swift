@@ -2172,14 +2172,19 @@ final class LadderView: ScaledView {
     }
 
     func drawPeriod(period: Period, forMark mark: Mark, regionMarks: [Mark], startY: CGFloat, periodHeight: CGFloat, context: CGContext) {
+
         guard let calFactor = calibration?.currentCalFactor else { return }
         let originX = mark.earliestPoint.x
         let duration = regionValueFromCalibratedValue(period.duration, usingCalFactor:  calFactor)
         var maxX = originX + duration
 
-        let excludedMaxX = maxX
-        let scaledExcludedMaxX = transformToScaledViewPositionX(regionPositionX: excludedMaxX)
+        // Need to save original scaled maxX in case we need to draw the excluded part
+        // of a resettable Period.
+        let scaledExcludedMaxX = transformToScaledViewPositionX(regionPositionX: maxX)
 
+        // This will clip a resettable period to the next mark.
+        // If the PeriodResetMethod is .interrupt or .crosshatch,
+        // the remainder of the period is added back in later.
         if period.resettable {
             for m in regionMarks {
                 if m.earliestPoint.x > mark.earliestPoint.x && m.earliestPoint.x < maxX {
@@ -2188,14 +2193,11 @@ final class LadderView: ScaledView {
             }
         }
 
-        let scaledExcludedOriginX = transformToScaledViewPositionX(regionPositionX: maxX)
-        let excludedWidth = scaledExcludedMaxX - scaledExcludedOriginX
-
         var scaledOriginX = transformToScaledViewPositionX(regionPositionX: originX)
         let scaledMaxX = transformToScaledViewPositionX(regionPositionX: maxX)
         var width = scaledMaxX - scaledOriginX
 
-        // FIXME: This will completely cover a mark, but worth doing?
+        // This will more completely cover a mark, but worth doing?
         //width += markLineWidth / 2.0
         //scaledOriginX -= markLineWidth / 2.0 // make sure mark line is visible if it is vertical
 
@@ -2207,20 +2209,35 @@ final class LadderView: ScaledView {
             return
         }
 
-        // Potentially draw excluded part of period, at half transparency or crosshatched.
-        if period.resettable && periodResetMethod == .interrupt {
-            let excludedRect = CGRect(x: scaledExcludedOriginX, y: startY, width: excludedWidth, height: periodHeight)
-            context.addRect(excludedRect)
-            context.setFillColor(period.color.cgColor)
-            context.setStrokeColor(UIColor.label.cgColor)
-            context.setLineWidth(periodShowBorder ? 1.0 : 0)
-            context.setAlpha(periodTransparency / 2.0)
-            context.drawPath(using: .fillStroke)
-            context.setLineWidth(1.0)
-            context.strokePath()
-        } else if period.resettable && periodResetMethod == .crosshatch {
-            // FIXME: experiment with crosshatching
-            //drawCrossHatch(rect: excludedRect, context: context)
+        // Draw excluded part of period, at half transparency or crosshatched.
+        if period.resettable {
+            let scaledExcludedOriginX = transformToScaledViewPositionX(regionPositionX: maxX)
+            let excludedWidth = scaledExcludedMaxX - scaledExcludedOriginX
+
+            func drawExcludedInterruptedPeriod() {
+                let excludedRect = CGRect(x: scaledExcludedOriginX, y: startY, width: excludedWidth, height: periodHeight)
+                context.addRect(excludedRect)
+                context.setFillColor(period.color.cgColor)
+                context.setStrokeColor(UIColor.label.cgColor)
+                context.setLineWidth(periodShowBorder ? 1.0 : 0)
+                context.setAlpha(periodTransparency / 2.0)
+                context.drawPath(using: .fillStroke)
+                context.setLineWidth(1.0)
+                context.strokePath()
+            }
+
+            func drawExcludedCrosshatchedPeriod() {
+                // TODO: add crosshatching
+            }
+
+            switch periodResetMethod {
+            case .clip:
+                break
+            case .interrupt:
+                drawExcludedInterruptedPeriod()
+            case .crosshatch:
+                drawExcludedCrosshatchedPeriod()
+            }
         }
 
         // Draw period
