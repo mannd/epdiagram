@@ -2172,6 +2172,9 @@ final class LadderView: ScaledView {
     }
 
     func drawPeriod(period: Period, forMark mark: Mark, regionMarks: [Mark], startY: CGFloat, periodHeight: CGFloat, context: CGContext) {
+        let textOffset: CGFloat = 5.0
+        let excludedTransparencyFactor: CGFloat = 2.0
+        let borderLineWidth: CGFloat = 1.0
 
         guard let calFactor = calibration?.currentCalFactor else { return }
         let originX = mark.earliestPoint.x
@@ -2195,17 +2198,17 @@ final class LadderView: ScaledView {
 
         var scaledOriginX = transformToScaledViewPositionX(regionPositionX: originX)
         let scaledMaxX = transformToScaledViewPositionX(regionPositionX: maxX)
-        var width = scaledMaxX - scaledOriginX
+        var scaledWidth = scaledMaxX - scaledOriginX
 
         // This will more completely cover a mark, but worth doing?
         //width += markLineWidth / 2.0
         //scaledOriginX -= markLineWidth / 2.0 // make sure mark line is visible if it is vertical
 
-        if leftMargin > scaledOriginX {
-            width = width - (leftMargin - scaledOriginX)
-            scaledOriginX = max(scaledOriginX, leftMargin)
+        if textOffset > scaledOriginX {
+            scaledWidth = scaledWidth - (textOffset - scaledOriginX)
+            scaledOriginX = max(scaledOriginX, textOffset)
         }
-        if scaledOriginX + width < leftMargin {
+        if scaledOriginX + scaledWidth < textOffset {
             return
         }
 
@@ -2219,8 +2222,8 @@ final class LadderView: ScaledView {
                 context.addRect(excludedRect)
                 context.setFillColor(period.color.cgColor)
                 context.setStrokeColor(UIColor.label.cgColor)
-                context.setLineWidth(periodShowBorder ? 1.0 : 0)
-                context.setAlpha(periodTransparency / 2.0)
+                context.setLineWidth(periodShowBorder ? borderLineWidth : 0)
+                context.setAlpha(periodTransparency / excludedTransparencyFactor)
                 context.drawPath(using: .fillStroke)
                 context.setLineWidth(1.0)
                 context.strokePath()
@@ -2241,11 +2244,11 @@ final class LadderView: ScaledView {
         }
 
         // Draw period
-        let periodRect = CGRect(x: scaledOriginX, y: startY, width: width, height: periodHeight)
+        let periodRect = CGRect(x: scaledOriginX, y: startY, width: scaledWidth, height: periodHeight)
         context.addRect(periodRect)
         context.setFillColor(period.color.cgColor)
         context.setStrokeColor(UIColor.label.cgColor)
-        context.setLineWidth(periodShowBorder ? 1.0 : 0)
+        context.setLineWidth(periodShowBorder ? borderLineWidth : 0)
         context.setAlpha(periodTransparency)
         context.drawPath(using: .fillStroke)
         context.setLineWidth(1.0)
@@ -2263,11 +2266,16 @@ final class LadderView: ScaledView {
         let textHeight = size.height
         let textOriginY = startY + (periodHeight - textHeight) / 2.0
         var textRect: CGRect
-        switch periodTextJustification {
-        case .left:
-            textRect = CGRect(x: scaledOriginX + 5, y: textOriginY, width: width - 5, height: textHeight)
-        case .center:
-            textRect = CGRect(x: periodRect.origin.x, y: textOriginY, width: periodRect.width, height: textHeight)
+        let textWidth = size.width
+        if !period.resettable && textWidth > periodRect.width - textOffset {
+            textRect = CGRect(x: periodRect.origin.x + periodRect.width + textOffset, y: textOriginY, width: textWidth, height: textHeight)
+        } else {
+            switch periodTextJustification {
+            case .left:
+                textRect = CGRect(x: scaledOriginX + textOffset, y: textOriginY, width: textWidth, height: textHeight)
+            case .center:
+                textRect = CGRect(x: periodRect.origin.x, y: textOriginY, width: periodRect.width, height: textHeight)
+            }
         }
         text.draw(in: textRect, withAttributes: textAttributes)
     }
