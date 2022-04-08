@@ -502,13 +502,13 @@
 				8E3AD1362459CABF0085BDD4 /* LocationInLadder.swift */,
 				8E9B8042228345B5008873BB /* Mark.swift */,
 				8E15013624F2C7CF000CF90E /* Mode.swift */,
+				8E08CB1726E1A1AE008B730D /* Period.swift */,
 				8E7CCC2A248C30A300018D2C /* Preferences.swift */,
 				8E9B8044228347DE008873BB /* Region.swift */,
 				8ECA9FB42470A07B0016D939 /* RegionTemplate.swift */,
 				8E4086E825F325C4005F53CB /* Rhythm.swift */,
 				8E856CF324EDC5E10064121F /* Segment.swift */,
 				8E982F9224EAF8B500E94F71 /* Zone.swift */,
-				8E08CB1726E1A1AE008B730D /* Period.swift */,
 			);
 			path = Models;
 			sourceTree = "<group>";

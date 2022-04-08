@@ -587,6 +587,7 @@ final class Ladder: NSObject, Codable {
 
     // MARK: - Periods
 
+    // FIXME: avoid duplicate periods where only ids are different.
     func getUniqueLadderPeriods() -> [Period] {
         var periods: Set<Period> = []
         for mark in allMarks() {

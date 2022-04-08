@@ -47,7 +47,7 @@ struct PeriodEditor: View {
                 Section(header: Text("Offset")) {
                         Stepper(value: $period.offset, in: 0...3, step: 1) {
                             HStack {
-                                Text("\(period.offset) height units")
+                                Text("Offset = \(period.offset) height units")
                             }
                         }
                 }

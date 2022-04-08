@@ -9,6 +9,10 @@
 import SwiftUI
 
 struct PeriodSelector: View {
+    // Show debugging info in selector
+    // Will be ignored in release versions
+    let debug = false
+
     let backgroundAlpha = 0.6
     var dismissAction: ((Set<UUID>, Bool) -> Void)?
     @Binding var periods: [Period]
@@ -26,6 +30,10 @@ struct PeriodSelector: View {
                         Text("Duration: \(Int(period.duration)) msec")
                         Text("Resettable: \(period.resettable ? "Yes" : "No")")
                         Text("Offset: \(period.offset)")
+                        #if DEBUG
+                        debug ? Text("\(period.id)") : nil
+                        #endif
+
                     }
                     .frame(maxWidth: .infinity, alignment: .leading)
                     .padding()
@@ -37,7 +45,8 @@ struct PeriodSelector: View {
             .environment(\.editMode, .constant(EditMode.active))
             .onDisappear() {
                 if let dismissAction = dismissAction {
-                    dismissAction(selection, false)
+                    // if not selection, leave periods alone
+                    dismissAction(selection, selection.isEmpty)
                 }
             }
         }
