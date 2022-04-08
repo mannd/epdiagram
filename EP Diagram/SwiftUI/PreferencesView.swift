@@ -227,6 +227,7 @@ struct PreferencesView: View {
                         }
                         Picker(selection: $periodSize, label: Text("Period size"), content: {
                             Text("Large").tag(PeriodSize.large.rawValue)
+                            Text("Medium").tag(PeriodSize.medium.rawValue)
                             Text("Small").tag(PeriodSize.small.rawValue)
                         })
                         Toggle(isOn: $periodShowBorder) {

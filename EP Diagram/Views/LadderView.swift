@@ -3816,11 +3816,14 @@ enum TextJustification: Int, Codable {
 
 enum PeriodSize: Int, Codable {
     case large
+    case medium
     case small
 
     func getHeight() -> CGFloat {
         switch self {
         case .large:
+            return 40.0
+        case .medium:
             return 30.0
         case .small:
             return 20.0

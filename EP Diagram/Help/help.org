@@ -437,7 +437,7 @@ The default color for new periods.  Each period's color can be changed individua
 **** Period transparency
 Transparency of the period background color.  This can be adjusted to make the period text stand out or just for esthetics.  Note that this affects all periods, but individual period also be adjusted when selecting colors while [[*Adding/editing periods][adding or editing periods]].
 **** Period size
-Choose between a large or small rectangle size.
+Choose between a small, medium, or large rectangle size.
 **** Show period border
 Switch on to draw a thin border around the period rectangle.
 **** Reset method

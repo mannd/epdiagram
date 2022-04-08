@@ -88,7 +88,7 @@ struct Preferences {
     static var periodTransparency: CGFloat = 1.0
     static var periodTextJustification = TextJustification.left.rawValue
     static var periodsOverlapMarks: Bool = false
-    static var periodSize = PeriodSize.small.rawValue
+    static var periodSize = PeriodSize.medium.rawValue
     static var periodShowBorder: Bool = false
     static var periodResetMethod = PeriodResetMethod.clip.rawValue
     static var intervalGrouping = IntervalGrouping.fullInterior.rawValue
