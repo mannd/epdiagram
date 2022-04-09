@@ -66,7 +66,7 @@ Ladder diagram terminology is not standardized.  Here is a glossary of the terms
 | ⌘Q  | Quit app                |
 ** Diagrams
 *** Creating and opening diagrams
-EP Diagram is a file based app, meaning the diagrams you create are stored on your Mac or on iCloud, and you can copy them, rename them, or delete them outside of the *EP Diagram* app.  The diagram files you create have a file extension of /diagram/ and a specific icon and file format.  When you open the app, the initial screen is a file browser that allows you to create a new diagram or open a previously created diagram.  Use the *File | New* menu item to bring up this file selection screen at any time.  Using this it is possible to have multiple diagram windows open at once.
+EP Diagram is a file based app, meaning the diagrams you create are stored on your Mac or on iCloud, and you can copy them, rename them, or delete them outside of the *EP Diagram* app.  The diagram files you create have a file extension of ~diagram~ and a specific icon and file format.  When you open the app, the initial screen is a file browser that allows you to create a new diagram or open a previously created diagram.  Use the *File | New* menu item to bring up this file selection screen at any time.  Using this it is possible to have multiple diagram windows open at once.
 
 #+CAPTION: File dialog
 [[../gfx/epdiagram_files.png]]
@@ -95,7 +95,7 @@ There is no need to specifically save changes you make to a diagram.  Every chan
 ** Images
 *** Adding an image
 **** Image types
-*EP Diagram* supports most image formats, such as jpg and png, and it also can load PDF files. 
+*EP Diagram* supports most image formats, such as ~jpg~ and ~png~, and it also can load PDF files. 
 **** Selecting images
 Use the *Diagram | Import Image* menu item or toolbar button to import an image from the Photos app or from your files.  You can also drag and drop images files (except for PDF files) on the diagram window.  If a dialog appears asking for permission to access your files Photos app, go ahead and grant permission.  *EP Diagram* does not alter the image in your Photos app or the original image file in any way.  After selecting an image, it will appear in the top half of the diagram.
 

@@ -26,12 +26,11 @@
 * Known issues/bugs/limitations
 - If you are used to the iPad version of *EP Diagram*, there are some differences and limitations relating to porting the app to the Mac.  These include:
   - Locking and unlocking of the image and ladder are not implemented on the Mac.
-  - It is necessary to grant permission to access folders in the Mac due to sandboxing.
+  - It is necessary to grant permission to access folders in the Mac due to sandboxing.  The iPad version also uses sandboxing, but it is handled more intuitively on the iPad.
 - The red close window button is disabled on the Mac.  It is necessary to use the *Close* toolbar button or *Close Diagram* menu command to close the diagram window.  This is a limitation due to a bug in the implementation of document-based apps on the Mac using Mac Catalyst.
 - Drag and drop works for image files (e.g. JPG files) but not for PDF or diagram files.  This will be addressed in a future release.
 - Complexly linked marks in the same region may not always track with the moving mark.  We can't decide if this is a bug or feature.
-- Sandboxing, which is required by Apple for a Mac App Store app, can sometimes result in blank windows when reopening the app, and other strange effects.  These are issues with the Apple Mac Catalyst system that we hope will be fixed in later versions.
-- Clicking a document window in the dock does not work.
-- If you quit the app with a window open, the app will restore that window when reopening (if the general System Preferences option "Close windows when quitting an app" is not selected).  However opening new windows using *File | New* will open diagram files in the already opened window instead of creating an new window.  It is necessary to close the first window and then open a new window for multiple windows to be used.  This again appears to be a limitation of Mac Catalyst that we hope will be fixed in a later version of Mac Catalyst.
+- Attempting to switch diagrams by two-finger clicking on the app icon in the doc and selecting another diagram doesn't work.  This is problem with Mac Catalyst which we hope will be fixed in a later version of macOS.
+  
 
 
