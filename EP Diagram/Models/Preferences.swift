@@ -35,11 +35,19 @@ struct Preferences {
     static let markerLineWidthKey = "defaultMarkerLineWidthKey"
     static let showMarkLabelsKey = "defaultShowMarkLabelsKey"
     static let showPeriodsKey = "defaultShowPeriodsKey"
-    static let imageViewHeightKey = "defaultImageViewHeight"
+    static let periodPositionKey = "defaultPeriodPositionKey"
+    static let periodTransparencyKey = "defaultPeriodTransparencyKey"
+    static let periodTextJustificationKey = "defaultPeriodTextJustificationKey"
+    static let periodsOverlapMarksKey = "defaultPeriodsOverlapMarksKey"
+    static let periodSizeKey = "defaultPeriodSizeKey"
+    static let periodShowBorderKey = "defaultPeriodShowBorderKey"
+    static let periodResetMethodKey = "defaultPeriodResetMethodKey"
+    static let intervalGroupingKey = "defaultIntervalGroupingKey"
 
     // keys not modifiable by user
     static let notFirstRunKey = "defaultNotFirstRunKey"
     static let versionKey = "defaultVersionKey"
+    static let imageViewHeightKey = "defaultImageViewHeight"
 
     // color keys
     static let caliperColorNameKey = "defaultCaliperColorNameKey"
@@ -50,6 +58,7 @@ struct Preferences {
     static let linkedColorNameKey = "defaultLinkedColorNameKey"
     static let activeColorNameKey = "defaultActiveColorNameKey"
     static let markerColorNameKey = "defaultMarkerColorNameKey"
+    static let periodColorNameKey = "defaultPeriodColorNameKey"
 
     // Stored as Int, converted to CGFloat when used.
     static var markLineWidth: Int = 2
@@ -74,7 +83,15 @@ struct Preferences {
     static var hideZeroCT: Bool = false
     static var markerLineWidth: Int = 2
     static var showMarkLabels: Bool = true
-    static var showPeriods: Bool = false
+    static var showPeriods: Bool = true
+    static var periodPosition = PeriodPosition.bottom.rawValue
+    static var periodTransparency: CGFloat = 1.0
+    static var periodTextJustification = TextJustification.left.rawValue
+    static var periodsOverlapMarks: Bool = false
+    static var periodSize = PeriodSize.medium.rawValue
+    static var periodShowBorder: Bool = false
+    static var periodResetMethod = PeriodResetMethod.clip.rawValue
+    static var intervalGrouping = IntervalGrouping.fullInterior.rawValue
     static var imageViewHeight: CGFloat = 0.5
 
     // default Colors
@@ -86,6 +103,7 @@ struct Preferences {
     static let defaultSelectedColor = UIColor.systemBlue
     static let defaultLinkedColor = UIColor.systemPurple
     static let defaultMarkerColor = UIColor.systemBlue
+    static let defaultPeriodColor = UIColor.systemGreen
 
     // Color names
     static var caliperColorName: String = defaultCaliperColor.toString
@@ -96,6 +114,7 @@ struct Preferences {
     static var linkedColorName: String = defaultLinkedColor.toString
     static var activeColorName: String = defaultActiveColor.toString
     static var markerColorName: String = defaultMarkerColor.toString
+    static var periodColorName: String = defaultPeriodColor.toString
 
     /// Default preferences, set at app startup
     static func defaults() -> [String: Any] {
@@ -129,6 +148,15 @@ struct Preferences {
             Preferences.markerColorNameKey: Preferences.markerColorName,
             Preferences.showMarkLabelsKey: Preferences.showMarkLabels,
             Preferences.showPeriodsKey: Preferences.showPeriods,
+            Preferences.periodPositionKey: Preferences.periodPosition,
+            Preferences.periodColorNameKey: Preferences.periodColorName,
+            Preferences.periodTransparencyKey: Preferences.periodTransparency,
+            Preferences.periodTextJustificationKey: Preferences.periodTextJustification,
+            Preferences.periodsOverlapMarksKey: Preferences.periodsOverlapMarks,
+            Preferences.periodSizeKey: Preferences.periodSize,
+            Preferences.periodShowBorderKey: Preferences.periodShowBorder,
+            Preferences.periodResetMethodKey: Preferences.periodResetMethod,
+            Preferences.intervalGroupingKey: Preferences.intervalGrouping,
             Preferences.impulseOriginContiguousKey: Preferences.impulseOriginContiguous,
             Preferences.impulseOriginLargeKey: Preferences.impulseOriginLarge,
             Preferences.imageViewHeightKey: Preferences.imageViewHeight,

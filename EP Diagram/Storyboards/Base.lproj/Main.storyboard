@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="19529" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES" initialViewController="en3-9x-pbF">
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="20037" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES" initialViewController="en3-9x-pbF">
     <device id="mac" appearance="light"/>
     <dependencies>
         <deployment identifier="iOS"/>
-        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="19519"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="20020"/>
         <capability name="Safe area layout guides" minToolsVersion="9.0"/>
         <capability name="System colors in document resources" minToolsVersion="11.0"/>
         <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
@@ -108,6 +108,8 @@
                         <segue destination="ggo-hf-FSM" kind="show" identifier="showSampleSelectorSegue" destinationCreationSelector="showSampleSelector:" id="ItN-ts-1CH"/>
                         <segue destination="BGd-dQ-vjR" kind="presentation" identifier="showRhythmSegue" destinationCreationSelector="performRhythmSegueAction:" id="vII-Nd-Rym"/>
                         <segue destination="M0c-tI-NTs" kind="show" identifier="showOnboardingSegue" destinationCreationSelector="performOnboardingSegueAction:" id="dER-Jc-QCi"/>
+                        <segue destination="Dh4-Zq-RMS" kind="show" identifier="editPeriodsSegue" destinationCreationSelector="performEditPeriodsAction:" id="sUg-jx-36L"/>
+                        <segue destination="edz-RW-FnR" kind="show" identifier="selectPeriodsSegue" destinationCreationSelector="performSelectPeriodsAction:" id="Hc6-91-tRP"/>
                     </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="dkx-z0-nzr" sceneMemberID="firstResponder"/>
@@ -174,7 +176,7 @@
                 </hostingController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="SXR-j0-LQJ" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="1052" y="1160"/>
+            <point key="canvasLocation" x="900" y="1159"/>
         </scene>
         <!--Help View Controller-->
         <scene sceneID="s9a-hu-d0H">
@@ -218,7 +220,7 @@
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="VRI-RL-nE8" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="1703" y="479"/>
+            <point key="canvasLocation" x="1248" y="1858"/>
         </scene>
         <!--Hosting Controller-->
         <scene sceneID="0AI-gK-xkd">
@@ -236,7 +238,27 @@
                 <hostingController id="BGd-dQ-vjR" sceneMemberID="viewController"/>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="4fZ-i0-wQL" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="3662" y="1163"/>
+            <point key="canvasLocation" x="2883" y="1159"/>
+        </scene>
+        <!--Hosting Controller-->
+        <scene sceneID="AFO-pK-dIN">
+            <objects>
+                <hostingController id="Dh4-Zq-RMS" sceneMemberID="viewController">
+                    <navigationItem key="navigationItem" id="Ix6-VE-Zoy"/>
+                </hostingController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="YFP-Ie-SPU" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="3542" y="1159"/>
+        </scene>
+        <!--Hosting Controller-->
+        <scene sceneID="HRd-Rm-Log">
+            <objects>
+                <hostingController id="edz-RW-FnR" sceneMemberID="viewController">
+                    <navigationItem key="navigationItem" id="9tj-T4-46s"/>
+                </hostingController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="j6F-el-Ds8" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="4193" y="1159"/>
         </scene>
         <!--Hosting Controller-->
         <scene sceneID="dWr-ZE-lZ6">
@@ -246,7 +268,7 @@
                 </hostingController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="PLw-dA-uEH" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="1910" y="1163"/>
+            <point key="canvasLocation" x="1549" y="1159"/>
         </scene>
         <!--Hosting Controller-->
         <scene sceneID="eah-A4-Jzh">
@@ -256,7 +278,7 @@
                 </hostingController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="fbD-f9-Y3a" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="2703" y="1163"/>
+            <point key="canvasLocation" x="2219" y="1159"/>
         </scene>
         <!--Hosting Controller-->
         <scene sceneID="KIe-xf-6Pi">
@@ -266,7 +288,7 @@
                 </hostingController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="LlP-FI-RPV" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="374" y="1160"/>
+            <point key="canvasLocation" x="259" y="1159"/>
         </scene>
         <!--Navigation Controller-->
         <scene sceneID="krg-YB-oDF">

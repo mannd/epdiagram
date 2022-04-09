@@ -47,12 +47,21 @@ struct LadderTemplate: Codable, Equatable {
         return ladderTemplate
     }
 
+    // Good for pacing diagrams
+    static func defaultTemplate_A_V() -> LadderTemplate {
+        var ladderTemplate = LadderTemplate(name: "A-V Ladder", description: "Ladder useful for pacing diagrams")
+        let aRegionTemplate = RegionTemplate(name: "A", description: "Atrium", unitHeight: 1)
+        let vRegionTemplate = RegionTemplate(name: "V", description: "Ventricular", unitHeight: 1)
+        ladderTemplate.regionTemplates.append(contentsOf: [aRegionTemplate, vRegionTemplate])
+        return ladderTemplate
+    }
+
     static func defaultTemplate() -> LadderTemplate {
         return templates()[0]
     }
 
     static func defaultTemplates() -> [LadderTemplate] {
-        return [defaultTemplate_A_AV_V(), defaultTemplate_SA_A_AVN_V(), defaultTemplate_A_AVN_H_V()]
+        return [defaultTemplate_A_AV_V(), defaultTemplate_SA_A_AVN_V(), defaultTemplate_A_AVN_H_V(), defaultTemplate_A_V()]
     }
 
     static func templates() -> [LadderTemplate] {

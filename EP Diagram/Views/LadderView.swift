@@ -8,6 +8,7 @@
 
 import UIKit
 import OSLog
+import CoreMedia
 
 /// A view that manages and displays the ladder.
 final class LadderView: ScaledView {
@@ -57,6 +58,18 @@ final class LadderView: ScaledView {
         return attributes
     }()
 
+    lazy var leftJustifiedMeasurementTextAttributes: [NSAttributedString.Key: Any] = {
+        let textFont = UIFont.systemFont(ofSize: measurementTextFontSize, weight: UIFont.Weight.medium)
+        let paragraphStyle = NSMutableParagraphStyle()
+        paragraphStyle.alignment = .left
+        let attributes = [
+            NSAttributedString.Key.font: textFont,
+            NSAttributedString.Key.foregroundColor: UIColor.label,
+            NSAttributedString.Key.paragraphStyle: paragraphStyle,
+        ]
+        return attributes
+    }()
+
     lazy var labelTextAttributes: [NSAttributedString.Key: Any] = {
         let textFont = UIFont.systemFont(ofSize: labelTextFontSize, weight: UIFont.Weight.heavy)
         let paragraphStyle = NSMutableParagraphStyle()
@@ -80,28 +93,35 @@ final class LadderView: ScaledView {
     }()
 
     // set by preferences
-    var markLineWidth: CGFloat = 2
-    var showImpulseOrigin = true
-    var impulseOriginContiguous = false
-    var impulseOriginLarge = false
-    var showBlock = true
-    var showArrows = false
-    var showIntervals = true
-    var showConductionTimes = true
-    var showMarkLabels = false
-    var showMarkText = true
-    var snapMarks = true
-    var defaultMarkStyle = Mark.Style.solid {
+    var markLineWidth: CGFloat = CGFloat(Preferences.markLineWidth)
+    var showImpulseOrigin = Preferences.showImpulseOrigin
+    var impulseOriginContiguous = Preferences.impulseOriginContiguous
+    var impulseOriginLarge = Preferences.impulseOriginLarge
+    var showBlock = Preferences.showBlock
+    var showArrows = Preferences.showArrows
+    var showIntervals = Preferences.showIntervals
+    var showConductionTimes = Preferences.showConductionTimes
+    var showMarkLabels = Preferences.showMarkLabels
+    var snapMarks = Preferences.snapMarks
+    var defaultMarkStyle = Mark.Style(rawValue: Preferences.markStyle)! {
         didSet {
             ladder.defaultMarkStyle = defaultMarkStyle
         }
     }
-    var showLabelDescription: TextVisibility = .invisible
-    var marksAreHidden: Bool = false
-    var doubleLineBlockMarker: Bool = true
-    var rightAngleBlockMarker: Bool = false
-    var hideZeroCT: Bool = false
-    var showPeriods: Bool = false // Not used until Version 1.2
+    var labelDescriptionVisibility = TextVisibility(rawValue: Preferences.labelDescriptionVisibility)!
+    var marksAreHidden: Bool = Preferences.hideMarks
+    var doubleLineBlockMarker: Bool = Preferences.doubleLineBlockMarker
+    var rightAngleBlockMarker: Bool = Preferences.rightAngleBlockMarker
+    var hideZeroCT: Bool = Preferences.hideZeroCT
+    var showPeriods: Bool = Preferences.showPeriods
+    var periodPosition: PeriodPosition = PeriodPosition(rawValue: Preferences.periodPosition)!
+    var periodTransparency: CGFloat = CGFloat(Preferences.periodTransparency)
+    var periodTextJustification = TextJustification(rawValue: Preferences.periodTextJustification)!
+    var periodsOverlapMarks: Bool = Preferences.periodsOverlapMarks
+    var periodSize: PeriodSize = PeriodSize(rawValue: Preferences.periodSize)!
+    var periodShowBorder: Bool = Preferences.periodShowBorder
+    var periodResetMethod: PeriodResetMethod = PeriodResetMethod(rawValue: Preferences.periodResetMethod)!
+    var intervalGrouping: IntervalGrouping = IntervalGrouping(rawValue: Preferences.intervalGrouping)!
 
     // colors set by preferences
     var activeColor = Preferences.defaultActiveColor
@@ -109,6 +129,7 @@ final class LadderView: ScaledView {
     var connectedColor = Preferences.defaultConnectedColor
     var selectedColor = Preferences.defaultSelectedColor
     var linkedColor = Preferences.defaultLinkedColor
+    var periodColor = Preferences.defaultPeriodColor
 
     var normalColor = UIColor.label  // normalColor is fixed
 
@@ -142,6 +163,8 @@ final class LadderView: ScaledView {
 
     var copiedMarks: [Mark] = []
     var patternMarks: [Mark] = []
+    var selectedMarksPeriods: [Period] = []
+    var periodsModelController = PeriodsModelController(periods: [])
 
     private var savedActiveRegion: Region?
     private var savedMode: Mode = .normal
@@ -1539,12 +1562,12 @@ final class LadderView: ScaledView {
         context.setAlpha(1.0)
         labelText.draw(in: labelRect)
 
-        guard showLabelDescription != .invisible else { return }
+        guard labelDescriptionVisibility != .invisible else { return }
         descriptionTextAttributes[.foregroundColor] = region.mode == .active ? activeColor : selectedColor
         let descriptionText = NSAttributedString(string: region.longDescription, attributes: descriptionTextAttributes)
 
         let descriptionSize: CGSize = region.longDescription.size(withAttributes: descriptionTextAttributes)
-        if showLabelDescription == .visibility || (showLabelDescription == .visibleIfFits && descriptionSize.width < stringRect.width) {
+        if labelDescriptionVisibility == .visibility || (labelDescriptionVisibility == .visibleIfFits && descriptionSize.width < stringRect.width) {
             let descriptionRect = CGRect(x: 0, y: labelRect.minY + labelRect.height, width: rect.origin.x, height: stringRect.height - labelRect.height)
 
             descriptionText.draw(in: descriptionRect)
@@ -1582,6 +1605,7 @@ final class LadderView: ScaledView {
         // Don't draw outside bounds of region, fix out of bounds segments at end of mark movement.
         let normalizedSegment = mark.segment.normalized()
         let segment = transformToScaledViewSegment(regionSegment: normalizedSegment, region: region)
+
         // Don't bother drawing marks in margin.
         if segment.proximal.x <= leftMargin && segment.distal.x <= leftMargin {
             return
@@ -1630,13 +1654,8 @@ final class LadderView: ScaledView {
         drawBlock(context: context, mark: mark, segment: segment)
         drawImpulseOrigin(context: context, mark: mark, segment: segment)
         drawConductionDirection(forMark: mark, segment: segment, context: context)
-
         drawConductionTime(forMark: mark, segment: segment, context: context)
-        drawIntervals(region: region, context: context)
-
-
         drawLabels(forMark: mark, segment: segment, context: context)
-        drawPeriods(forMark: mark, segment: segment, context: context)
 
         // reset line color to neutral label color
         context.setStrokeColor(UIColor.label.cgColor)
@@ -1655,10 +1674,14 @@ final class LadderView: ScaledView {
                     let text = "\(formatValue(value, usingCalFactor: calibration.currentCalFactor))"
                     let size = text.size(withAttributes: measurementTextAttributes)
                     if size.width + intervalMargin < value { // don't crowd measurements
-                        // Center the origin.
-                        let halfwayPosition = (scaledFirstX + scaledSecondX) / 2.0
-                        var origin = CGPoint(x: halfwayPosition, y: region.proximalBoundaryY)
-                        origin = CGPoint(x: origin.x - size.width / 2, y: origin.y)
+                        let intervalLocation = getIntervalLocation(intervalGrouping: intervalGrouping, boundaryLocation: .proximal, region: region)
+                        if intervalLocation == .nowhere { continue }
+                        let origin = getIntervalOrigin(
+                            intervalLocation: intervalLocation,
+                            firstX: scaledFirstX,
+                            secondX: scaledSecondX,
+                            boundaryY: region.proximalBoundaryY,
+                            size: size)
                         drawIntervalText(origin: origin, size: size, text: text, context: context, attributes: measurementTextAttributes)
                     }
                 }
@@ -1669,14 +1692,72 @@ final class LadderView: ScaledView {
                     let text = "\(formatValue(value, usingCalFactor: calibration.currentCalFactor))"
                     let size = text.size(withAttributes: measurementTextAttributes)
                     if size.width + intervalMargin < value {
-                        // Center the origin
-                        let halfwayPosition = (scaledFirstX + scaledSecondX) / 2.0
-                        var origin = CGPoint(x: halfwayPosition, y: region.distalBoundaryY)
-                        origin = CGPoint(x: origin.x - size.width / 2, y: origin.y - size.height)
+                        let origin: CGPoint
+                        let intervalLocation = getIntervalLocation(intervalGrouping: intervalGrouping, boundaryLocation: .distal, region: region)
+                        if intervalLocation == .nowhere { continue }
+                        origin = getIntervalOrigin(
+                                intervalLocation: intervalLocation,
+                                firstX: scaledFirstX,
+                                secondX: scaledSecondX,
+                                boundaryY: region.distalBoundaryY,
+                                size: size)
+//                        }
                         drawIntervalText(origin: origin, size: size, text: text, context: context, attributes: measurementTextAttributes)
                     }
                 }
             }
+        }
+    }
+
+    func getIntervalOrigin(intervalLocation: IntervalLocation, firstX: CGFloat, secondX: CGFloat, boundaryY: CGFloat, size: CGSize) -> CGPoint {
+        let origin: CGPoint
+        let halfwayPosition = (firstX + secondX) / 2.0
+        switch intervalLocation {
+        case .aboveBoundary:
+            origin = CGPoint(x: halfwayPosition - size.width / 2, y: boundaryY - size.height)
+        case .belowBoundary:
+            origin = CGPoint(x: halfwayPosition - size.width / 2, y: boundaryY)
+        case .nowhere:
+            origin = CGPoint.zero
+            assertionFailure() // shouldn't happen
+        }
+        return origin
+    }
+
+    func getIntervalLocation(intervalGrouping: IntervalGrouping, boundaryLocation: BoundaryLocation, region: Region) -> IntervalLocation {
+        let isFirstRegion = (region == ladder.firstRegion)
+        let isLastRegion = (region == ladder.lastRegion)
+        switch intervalGrouping {
+        case .fullInterior:
+            if boundaryLocation == .proximal {
+                return .belowBoundary
+            } else { // .distal
+                return .aboveBoundary
+            }
+        case .fullExterior:
+            if boundaryLocation == .proximal {
+                return isFirstRegion ? .aboveBoundary : .belowBoundary
+            } else { // .distal
+                return isLastRegion ? .belowBoundary : .aboveBoundary
+            }
+            case .partialAbove:
+            if boundaryLocation == .proximal {
+                 if isFirstRegion {
+                     return .aboveBoundary
+                 } else {
+                     return .nowhere
+                 }
+            }
+            return .aboveBoundary
+        case .partialBelow:
+            if boundaryLocation == .distal {
+                 if isLastRegion {
+                     return .belowBoundary
+                 } else {
+                     return .nowhere
+                 }
+            }
+            return .belowBoundary
         }
     }
 
@@ -1755,7 +1836,6 @@ final class LadderView: ScaledView {
             }
         }
     }
-
 
     func assessBlockAndImpulseOrigin(mark: Mark?) {
         if let mark = mark {
@@ -1932,6 +2012,7 @@ final class LadderView: ScaledView {
         drawFilledCircle(context: context, position: segment.proximal, radius: 10)
     }
 
+    // For debugging only
     func drawEarliestPoint(forMark mark: Mark, segment: Segment, context: CGContext) {
         guard showEarliestPoint else { return }
         if mark.earliestPoint == mark.segment.proximal {
@@ -1941,19 +2022,7 @@ final class LadderView: ScaledView {
         }
     }
 
-    func drawConductionDirection(forMark mark: Mark, segment: Segment, context: CGContext) {
-        guard showArrows else { return }
-        let arrowLineLength: CGFloat = 20
-        switch mark.lateEndpoint {
-        case .distal:
-            drawArrowHead(context: context, start: segment.proximal, end: segment.distal, pointerLineLength: arrowLineLength, arrowAngle: arrowHeadAngle)
-        case .proximal:
-            drawArrowHead(context: context, start: segment.distal, end: segment.proximal, pointerLineLength: arrowLineLength, arrowAngle: arrowHeadAngle)
-        case .none, .auto, .random:
-            break // this is undecided unless manually set
-        }
-    }
-
+    // For debugging only
     func drawPivots(forMark mark: Mark, segment: Segment, context: CGContext) {
         guard showPivots else { return }
         // We only show pivots when cursor is attached.
@@ -1975,6 +2044,20 @@ final class LadderView: ScaledView {
             }
         }
     }
+
+    func drawConductionDirection(forMark mark: Mark, segment: Segment, context: CGContext) {
+        guard showArrows else { return }
+        let arrowLineLength: CGFloat = 20
+        switch mark.lateEndpoint {
+        case .distal:
+            drawArrowHead(context: context, start: segment.proximal, end: segment.distal, pointerLineLength: arrowLineLength, arrowAngle: arrowHeadAngle)
+        case .proximal:
+            drawArrowHead(context: context, start: segment.distal, end: segment.proximal, pointerLineLength: arrowLineLength, arrowAngle: arrowHeadAngle)
+        case .none, .auto, .random:
+            break // this is undecided unless manually set
+        }
+    }
+
 
     func drawConductionTime(forMark mark: Mark, segment: Segment, context: CGContext) {
         guard let calibration = calibration, calibration.isCalibrated, showConductionTimes else { return }
@@ -2040,29 +2123,208 @@ final class LadderView: ScaledView {
         }
     }
 
-    func drawPeriods(forMark mark: Mark, segment: Segment, context: CGContext) {
+    func drawPeriods(region: Region, context: CGContext) {
         guard let calibration = calibration, calibration.isCalibrated else { return }
         guard showPeriods else { return }
-        guard mark.periods.count > 0 else { return }
-        let calFactor = calibration.currentCalFactor
-        let height = segment.distal.y - segment.proximal.y
-        assert(mark.periods.count > 0)
-        let periodHeight = height / CGFloat(mark.periods.count)
-        var startY = segment.proximal.y
-        context.setAlpha(0.1)
-        for period in mark.periods {
-            drawPeriod(period: period, start: CGPoint(x: segment.proximal.x, y: startY), height: periodHeight, calFactor: calFactor, context: context)
-            startY += periodHeight
+        let periodHeight = periodSize.getHeight()
+        for mark in region.marks {
+            let numPeriods = numPeriodsFit(forMark: mark, inRegion: region, withHeight: periodHeight)
+            var startY: CGFloat
+            switch periodPosition {
+            case .top:
+                startY = region.proximalBoundaryY
+            case .bottom:
+                startY = region.distalBoundaryY - CGFloat(numPeriods) * periodHeight - CGFloat(countOffsets(periods: mark.periods)) * periodHeight
+            }
+            mark.periods[0..<numPeriods].forEach {
+                if periodPosition == .top {
+                    startY += CGFloat($0.offset) * periodHeight
+                }
+                drawPeriod(period: $0, forMark: mark, regionMarks: region.marks, startY: startY, periodHeight: periodHeight, context: context)
+                startY += periodHeight
+                if periodPosition == .bottom {
+                    startY += CGFloat($0.offset) * periodHeight
+                }
+            }
         }
-        context.setAlpha(1.0)
     }
 
-    func drawPeriod(period: Period, start: CGPoint, height: CGFloat, calFactor: CGFloat, context: CGContext) {
-        let width = regionValueFromCalibratedValue(CGFloat(period.duration), usingCalFactor: calFactor)
-        let rect = CGRect(x: start.x, y: start.y, width: width, height: height)
-        context.addRect(rect)
+    /// Maximum number of periods that can fit in a region, taking into account period offsets.
+    /// - Parameters:
+    ///   - mark: Mark to check
+    ///   - region: Region to check
+    ///   - height: height of Periods
+    /// - Returns: number of Periods that fit into region
+    private func numPeriodsFit(forMark mark: Mark, inRegion region: Region, withHeight height: CGFloat) -> Int {
+        let regionHeight = region.height
+        let periods = mark.periods
+        let offset = countOffsets(periods: periods)
+        let num = Int((regionHeight - CGFloat(offset) * height) / height)
+        return min(num, mark.periods.count)
+    }
+
+    private func countOffsets(periods: [Period]) -> Int {
+        var offset = 0
+        for period in periods {
+            offset += period.offset
+        }
+        return offset
+    }
+
+    func drawPeriod(period: Period, forMark mark: Mark, regionMarks: [Mark], startY: CGFloat, periodHeight: CGFloat, context: CGContext) {
+        let textOffset: CGFloat = 5.0
+        let excludedTransparencyFactor: CGFloat = 2.0
+        let borderLineWidth: CGFloat = 1.0
+
+        guard let calFactor = calibration?.currentCalFactor else { return }
+        let originX = mark.earliestPoint.x
+        let duration = regionValueFromCalibratedValue(period.duration, usingCalFactor:  calFactor)
+        var maxX = originX + duration
+
+        // Need to save original scaled maxX in case we need to draw the excluded part
+        // of a resettable Period.
+        let scaledExcludedMaxX = transformToScaledViewPositionX(regionPositionX: maxX)
+
+        // This will clip a resettable period to the next mark.
+        // If the PeriodResetMethod is .interrupt or .crosshatch,
+        // the remainder of the period is added back in later.
+        if period.resettable {
+            for m in regionMarks {
+                if m.earliestPoint.x > mark.earliestPoint.x && m.earliestPoint.x < maxX {
+                    maxX = m.earliestPoint.x
+                }
+            }
+        }
+
+        var scaledOriginX = transformToScaledViewPositionX(regionPositionX: originX)
+        let scaledMaxX = transformToScaledViewPositionX(regionPositionX: maxX)
+        var scaledWidth = scaledMaxX - scaledOriginX
+
+        // This will more completely cover a mark, but worth doing?
+        //width += markLineWidth / 2.0
+        //scaledOriginX -= markLineWidth / 2.0 // make sure mark line is visible if it is vertical
+
+        if textOffset > scaledOriginX {
+            scaledWidth = scaledWidth - (textOffset - scaledOriginX)
+            scaledOriginX = max(scaledOriginX, textOffset)
+        }
+        if scaledOriginX + scaledWidth < textOffset {
+            return
+        }
+
+        // Draw excluded part of period, at half transparency or crosshatched.
+        if period.resettable {
+            let scaledExcludedOriginX = transformToScaledViewPositionX(regionPositionX: maxX)
+            let excludedWidth = scaledExcludedMaxX - scaledExcludedOriginX
+
+            func drawExcludedInterruptedPeriod() {
+                let excludedRect = CGRect(x: scaledExcludedOriginX, y: startY, width: excludedWidth, height: periodHeight)
+                context.addRect(excludedRect)
+                context.setFillColor(period.color.cgColor)
+                context.setStrokeColor(UIColor.label.cgColor)
+                context.setLineWidth(periodShowBorder ? borderLineWidth : 0)
+                context.setAlpha(periodTransparency / excludedTransparencyFactor)
+                context.drawPath(using: .fillStroke)
+                context.setLineWidth(1.0)
+                context.strokePath()
+            }
+
+            func drawExcludedCrosshatchedPeriod() {
+                // TODO: add crosshatching
+            }
+
+            switch periodResetMethod {
+            case .clip:
+                break
+            case .interrupt:
+                drawExcludedInterruptedPeriod()
+            case .crosshatch:
+                drawExcludedCrosshatchedPeriod()
+            }
+        }
+
+        // Draw period
+        let periodRect = CGRect(x: scaledOriginX, y: startY, width: scaledWidth, height: periodHeight)
+        context.addRect(periodRect)
         context.setFillColor(period.color.cgColor)
+        context.setStrokeColor(UIColor.label.cgColor)
+        context.setLineWidth(periodShowBorder ? borderLineWidth : 0)
+        context.setAlpha(periodTransparency)
         context.drawPath(using: .fillStroke)
+        context.setLineWidth(1.0)
+        context.strokePath()
+        let text = period.name
+        context.setAlpha(1.0)
+        var textAttributes: [NSAttributedString.Key: Any]
+        switch periodTextJustification {
+        case .left:
+            textAttributes = leftJustifiedMeasurementTextAttributes
+        case .center:
+            textAttributes = measurementTextAttributes
+        }
+        let size = text.size(withAttributes: textAttributes)
+        let textHeight = size.height
+        let textOriginY = startY + (periodHeight - textHeight) / 2.0
+        var textRect: CGRect
+        let textWidth = size.width
+        if !period.resettable && textWidth > periodRect.width - textOffset {
+            textRect = CGRect(x: periodRect.origin.x + periodRect.width + textOffset, y: textOriginY, width: textWidth, height: textHeight)
+        } else {
+            switch periodTextJustification {
+            case .left:
+                textRect = CGRect(x: scaledOriginX + textOffset, y: textOriginY, width: periodRect.width - textOffset, height: textHeight)
+            case .center:
+                textRect = CGRect(x: periodRect.origin.x, y: textOriginY, width: periodRect.width, height: textHeight)
+            }
+        }
+        text.draw(in: textRect, withAttributes: textAttributes)
+    }
+
+    // See https://developer.apple.com/forums/thread/48881
+
+    func drawCrossHatch(rect: CGRect, context: CGContext) {
+//        let sides: CGFloat = 4.0
+        let path = UIBezierPath()
+
+//        let xCenter = rect.midX
+//        let yCenter = rect.midY
+//        var radius: CGFloat = 0
+//
+//        if rect.width > rect.height {
+//            radius = rect.height / 2.0
+//        } else {
+//            radius = rect.width / 2.0
+//        }
+//        let angleIncrement = 2.0 * Double.pi / sides
+//        let initialAngle = (Double.pi + (2.0 * Double.pi / sides)) / 2.0
+//
+//        for i in 0..<Int(sides) {
+//            let angle: CGFloat = initialAngle + CGFloat(i) * angleIncrement
+//            let x = xCenter + radius * cos(angle)
+//            let y = yCenter + radius * sin(angle)
+//            let point = CGPoint(x: x, y: y)
+//            if (i == 0) {
+//                path.move(to: point)
+//            } else {
+//                path.addLine(to: point)
+//            }
+//        }
+//        path.close()
+//        context.setFillColor(UIColor.cyan.cgColor)
+//        path.addClip()
+//
+        let pathBounds = rect
+
+//        path.removeAllPoints()
+        let p1 = pathBounds.origin
+        let p2 = CGPoint(x: pathBounds.maxX, y: pathBounds.maxY)
+        path.move(to: p1)
+        path.addLine(to: p2)
+        path.lineWidth = 400.0
+        let dashes: [CGFloat] = [2.0, 2.0]
+        path.setLineDash(dashes, count: 2, phase: 0.0)
+        context.setFillColor(UIColor.red.cgColor)
+        path.stroke()
     }
 
     func conductionTime(fromSegment segment: Segment) -> Double {
@@ -2214,7 +2476,12 @@ final class LadderView: ScaledView {
         drawRegionLabel(rect: rect, region: region, context: context)
         drawRegionArea(context: context, rect: rect, region: region)
         if !marksAreHidden {
+            // draw Periods before Marks if marks overlap periods
+            if !periodsOverlapMarks { drawPeriods(region: region, context: context) }
             drawMarks(region: region, context: context, rect: rect)
+            // draw Marks before periods if periods overlap marks
+            if periodsOverlapMarks { drawPeriods(region: region, context: context) }
+            drawIntervals(region: region, context: context)
         }
         drawBottomLine(context: context, lastRegion: lastRegion, rect: rect)
     }
@@ -2429,6 +2696,9 @@ final class LadderView: ScaledView {
         if regions.count > 1 {
             throw LadderError.tooManyRegions
         }
+        if !zone.isVisible && regions.count < 1 {
+            throw LadderError.noRegionSelected
+        }
     }
 
     func checkForRepeatCL() throws {
@@ -2442,6 +2712,91 @@ final class LadderView: ScaledView {
         if ladder.difference(selectedMarks[0], selectedMarks[1]) < minRepeatCLInterval {
             throw LadderError.intervalTooShort
         }
+    }
+
+    // MARK: - Periods
+
+    /// Check selected marks to see if periods are editable
+    ///
+    /// For periods to be editable, it is necessary that
+    ///  1. At least one mark is selected
+    ///  2. All marks are in the same region
+    ///  3. All marks have the same periods, or no periods.
+    ///  Throws specific error if any of the above conditions is false.
+    func checkForEditablePeriods() throws {
+        let selectedMarks = ladder.allMarksWithMode(.selected)
+        selectedMarksPeriods = []
+        if selectedMarks.count == 1 { // 1 mark can always be edited
+            periodsModelController.periods = selectedMarks[0].periods
+            return
+        }
+        if selectedMarks.count < 1 {
+            throw LadderError.noMarks
+        }
+        if ladder.marksAreInDifferentRegions(selectedMarks) {
+            throw LadderError.marksInDifferentRegions
+        }
+        // At this point, at least 2 marks are in selectedMarks.
+        let periods = selectedMarks[0].periods
+        for mark in selectedMarks {
+            if !Period.periodsAreSimilar(mark.periods, periods) {
+                throw LadderError.periodsAreNotSimilar
+            }
+        }
+        // If we reach here without throwing, all marks have the same periods (or none).  Thus...
+        periodsModelController.periods = periods
+    }
+
+    func checkForCopyablePeriods() throws {
+        let selectedMarks = ladder.allMarksWithMode(.selected)
+        if selectedMarks.count == 0 {
+            throw LadderError.noMarks
+        }
+        let ladderPeriods = ladder.getUniqueLadderPeriods()
+        if ladderPeriods.count == 0 {
+            throw LadderError.noPeriodsInLadder
+        }
+    }
+
+    func applyPeriods(_ periods: [Period]) {
+        let selectedMarks = ladder.allMarksWithMode(.selected)
+        applyPeriods(periods, toMarks: selectedMarks)
+    }
+
+    private func applyPeriods(_ periods: [Period], toMarks marks: [Mark]) {
+        for mark in marks {
+            undoablySetMarkPeriods(mark: mark, periods: periods)
+        }
+        refresh()
+    }
+
+    func setPeriods(periodIDSet: Set<UUID>, cancel: Bool = false) {
+        guard !cancel else { return }
+        let periods = ladder.getPeriodsFromIDs(periodIDSet: periodIDSet, periods: ladder.getUniqueLadderPeriods())
+        let selectedMarks = ladder.allMarksWithMode(.selected)
+        for mark in selectedMarks {
+            undoablySetMarkPeriods(mark: mark, periods: periods)
+        }
+    }
+
+    func deletePeriods() {
+        let selectedMarks = ladder.allMarksWithMode(.selected)
+        deletePeriods(ofMarks: selectedMarks)
+    }
+
+    func deletePeriods(ofMarks marks: [Mark]) {
+        for mark in marks {
+            undoablySetMarkPeriods(mark: mark, periods: [])
+        }
+    }
+
+    func undoablySetMarkPeriods(mark: Mark, periods: [Period]) {
+        let originalPeriods = mark.periods
+        currentDocument?.undoManager.registerUndo(withTarget: self) { target in
+            target.undoablySetMarkPeriods(mark: mark, periods: originalPeriods)
+        }
+        NotificationCenter.default.post(name: .didUndoableAction, object: nil)
+        mark.periods = periods
     }
 
     /// Repeats CL and creates new marks.  If marks aren't parallel, uses minimum CL between prox and distal endpoints.
@@ -2742,7 +3097,7 @@ final class LadderView: ScaledView {
             segment.distal.x -= diff
             let newMark = ladder.addMark(fromSegment: segment, toRegion: ladder.region(ofMark: mark))
             undoablySetMarkStyle(mark: newMark, style: mark.style)
-//            newMark.style = mark.style
+            undoablySetMarkPeriods(mark: newMark, periods: mark.periods)
             newMarks.append(newMark)
         }
         undoablyAddMarks(marks: newMarks)
@@ -3454,7 +3809,54 @@ enum TextVisibility: Int, Codable {
     case visibleIfFits
 }
 
+enum TextJustification: Int, Codable {
+    case left
+    case center
+}
+
+enum PeriodSize: Int, Codable {
+    case large
+    case medium
+    case small
+
+    func getHeight() -> CGFloat {
+        switch self {
+        case .large:
+            return 40.0
+        case .medium:
+            return 30.0
+        case .small:
+            return 20.0
+        }
+    }
+}
+
+enum PeriodResetMethod: Int, Codable {
+    case clip
+    case interrupt
+    case crosshatch 
+}
+
 enum Adjustment {
     case adjust
     case trim
 }
+
+enum IntervalLocation {
+    case aboveBoundary
+    case belowBoundary
+    case nowhere
+}
+
+enum IntervalGrouping: Int {
+    case fullInterior // draw all intervals, within ladder boundaries
+    case fullExterior // draw all intervals, first and last regions above and below ladder boundaries
+    case partialAbove // draw only intervals above boundaries
+    case partialBelow // draw only intervals below boundaries
+}
+
+enum BoundaryLocation {
+    case proximal
+    case distal
+}
+

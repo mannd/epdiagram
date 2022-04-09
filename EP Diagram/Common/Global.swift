@@ -8,9 +8,7 @@
 
 import UIKit
 
-// MARK: - Global namespace functions
-
-// A few macro-like functions in the global namespace.
+// A few macro-like functions in the global namespace
 
 /// Language localization "macro."
 /// - Parameters:
@@ -27,6 +25,8 @@ enum PrintFlags {
 }
 
 /// Print only while in debug mode and when 'printMessages' = true.
+///
+///  Note that this has largely been supplanted by log statements.
 /// - Parameter s: logging message to print
 func P(_ s: String) {
     if PrintFlags.printMessages {
@@ -37,6 +37,7 @@ func P(_ s: String) {
 func P(_ s: String) {}
 #endif
 
+// Determine specific platforms
 func isRunningOnMac() -> Bool {
     #if targetEnvironment(macCatalyst)
     return true

@@ -30,6 +30,15 @@ struct PreferencesView: View {
     @AppStorage(Preferences.showMarkersKey) var showMarkers = Preferences.showMarkers
     @AppStorage(Preferences.hideZeroCTKey) var hideZeroCT = Preferences.hideZeroCT
     @AppStorage(Preferences.markerLineWidthKey) var markerLineWidth = Preferences.markerLineWidth
+    @AppStorage(Preferences.showPeriodsKey) var showPeriods = Preferences.showPeriods
+    @AppStorage(Preferences.periodPositionKey) var periodPosition = Preferences.periodPosition
+    @AppStorage(Preferences.periodTransparencyKey) var periodTransparency = Preferences.periodTransparency
+    @AppStorage(Preferences.periodTextJustificationKey) var periodTextJustification = Preferences.periodTextJustification
+    @AppStorage(Preferences.periodsOverlapMarksKey) var periodOverlapMark = Preferences.periodsOverlapMarks
+    @AppStorage(Preferences.periodSizeKey) var periodSize = Preferences.periodSize
+    @AppStorage(Preferences.periodShowBorderKey) var periodShowBorder = Preferences.periodShowBorder
+    @AppStorage(Preferences.periodResetMethodKey) var periodResetMethod = Preferences.periodResetMethod
+    @AppStorage(Preferences.intervalGroupingKey) var intervalGrouping = Preferences.intervalGrouping
 
     // Color preferences
     @AppStorage(Preferences.activeColorNameKey) var activeColorName = Preferences.activeColorName
@@ -48,22 +57,17 @@ struct PreferencesView: View {
     @State var caliperColor: Color = Color(Preferences.defaultCaliperColor)
     @AppStorage(Preferences.markerColorNameKey) var markerColorName = Preferences.markerColorName
     @State var markerColor: Color = Color(Preferences.defaultMarkerColor)
+    @AppStorage(Preferences.periodColorNameKey) var periodColorName = Preferences.periodColorName
+    @State var periodColor: Color = Color(Preferences.defaultPeriodColor)
 
     @State var showAutoLinkWarning = false
 
     @ObservedObject var diagramController: DiagramModelController
     @Environment(\.presentationMode) private var presentationMode: Binding<PresentationMode>
 
+
     fileprivate func getColorPicker(title: LocalizedStringKey, selection: Binding<Color>) -> some View {
-        #if targetEnvironment(macCatalyst)
-        return HStack {
-            Text(title)
-            Spacer()
-            ColorPicker("", selection: selection).frame(maxWidth: 100)
-        }
-        #else
-        return ColorPicker(title, selection: selection)
-        #endif
+        return Color.getColorPicker(title: title, selection: selection)
     }
 
     // Note: At most 10 views in a Section.  Wrap views in Group{} if more than 10 views.  See https://stackoverflow.com/questions/61178868/swiftui-random-extra-argument-in-call-error.
@@ -79,6 +83,8 @@ struct PreferencesView: View {
                     }
                     #endif
                     Section(header: Text("Ladder")) {
+                        // Grouped to avoid section with > 10 items.
+                        Group {
                         Picker(selection: $labelDescriptionVisibility, label: Text("Label description visibility"), content: {
                             Text("Visible").tag(TextVisibility.visibility.rawValue)
                             Text("Visible if fits").tag(TextVisibility.visibleIfFits.rawValue)
@@ -89,6 +95,13 @@ struct PreferencesView: View {
                         }
                         Toggle(isOn: $showIntervals) {
                             Text("Show intervals (after calibration)")
+                        }
+                        Picker(selection: $intervalGrouping, label: Text("Interval grouping"), content: {
+                            Text("Full interior").tag(IntervalGrouping.fullInterior.rawValue)
+                            Text("Full exterior").tag(IntervalGrouping.fullExterior.rawValue)
+                            Text("Partial above").tag(IntervalGrouping.partialAbove.rawValue)
+                            Text("Partial below").tag(IntervalGrouping.partialBelow.rawValue)
+                        })
                         }
                         Toggle(isOn: $showConductionTimes) {
                             Text("Show conduction times (after calibration)")
@@ -187,6 +200,44 @@ struct PreferencesView: View {
                             }
                         }
                     }
+                    Section(header: Text("Period")) {
+                        Toggle(isOn: $showPeriods) {
+                            Text("Show periods")
+                        }
+                        Picker(selection: $periodPosition, label: Text("Position of periods in region"), content: {
+                            Text("Top").tag(PeriodPosition.top.rawValue)
+                            Text("Bottom").tag(PeriodPosition.bottom.rawValue)
+                        })
+                        Picker(selection: $periodTextJustification, label: Text("Period text justification"), content: {
+                            Text("Left").tag(TextJustification.left.rawValue)
+                            Text("Center").tag(TextJustification.center.rawValue)
+                        })
+                        Toggle(isOn: $periodOverlapMark) {
+                            Text("Periods overlap marks")
+                        }
+                        getColorPicker(title: "Default period color", selection: Binding(
+                            get: { periodColor },
+                                        set: { newValue in
+                                            periodColorName = newValue.toString
+                                            periodColor = newValue
+                                        }))
+                        HStack {
+                            Text("Period transparency")
+                            Slider(value: $periodTransparency, in: 0.2...1.0)
+                        }
+                        Picker(selection: $periodSize, label: Text("Period size"), content: {
+                            Text("Large").tag(PeriodSize.large.rawValue)
+                            Text("Medium").tag(PeriodSize.medium.rawValue)
+                            Text("Small").tag(PeriodSize.small.rawValue)
+                        })
+                        Toggle(isOn: $periodShowBorder) {
+                            Text("Show period border")
+                        }
+                        Picker(selection: $periodResetMethod, label: Text("Reset method"), content: {
+                            Text("Clip").tag(PeriodResetMethod.clip.rawValue)
+                            Text("Interrupt").tag(PeriodResetMethod.interrupt.rawValue)
+                        })
+                    }
                     Section(header: Text("Cursor")) {
                         Stepper("Cursor width = \(cursorLineWidth)", value: $cursorLineWidth, in: 1...6, step: 1)
                         getColorPicker(title: "Cursor color", selection: Binding(
@@ -207,7 +258,7 @@ struct PreferencesView: View {
                     }
 
                 }
-               .onAppear {
+                .onAppear {
                     activeColor = Color.convertColorName(activeColorName) ?? activeColor
                     linkedColor = Color.convertColorName(linkedColorName) ?? linkedColor
                     selectedColor = Color.convertColorName(selectedColorName) ?? selectedColor
@@ -216,7 +267,8 @@ struct PreferencesView: View {
                     cursorColor = Color.convertColorName(cursorColorName) ?? cursorColor
                     caliperColor = Color.convertColorName(caliperColorName) ?? caliperColor
                     markerColor = Color.convertColorName(markerColorName) ?? markerColor
-                }
+                    periodColor = Color.convertColorName(periodColorName) ?? periodColor
+               }
             }
             .navigationBarTitle("Preferences", displayMode: .inline)
             .navigationBarHidden(isRunningOnMac() ? true : false)

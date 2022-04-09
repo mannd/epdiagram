@@ -11,9 +11,6 @@ import SwiftUI
 import UniformTypeIdentifiers
 import Photos
 import os.log
-//#if targetEnvironment(macCatalyst)
-//import Dynamic
-//#endif
 
 final class DiagramViewController: UIViewController {
     // For debugging only
@@ -401,6 +398,31 @@ final class DiagramViewController: UIViewController {
         }
     }
 
+    // Period actions
+    lazy var editPeriodsAction = UIAction(title: L("Add/edit periods..."), image: UIImage(systemName: "plus.rectangle.on.rectangle")) { _ in
+        do {
+            try self.ladderView.checkForEditablePeriods()
+            self.performEditPeriodsSegue()
+        } catch {
+            self.showError(title: L("Error Editing Periods"), error: error)
+        }
+    }
+
+    lazy var copyPeriodsAction = UIAction(title: "Copy periods", image: UIImage(systemName: "rectangle.stack")) { _ in
+        do {
+            try self.ladderView.checkForCopyablePeriods()
+            self.performSelectPeriodsSegue()
+        } catch {
+            self.showError(title: L("Error Copying Periods"), error: error)
+        }
+    }
+
+    lazy var deletePeriodsAction = UIAction(title: L("Delete periods"), image: UIImage(systemName: "rectangle.on.rectangle.slash"), attributes: .destructive) { _ in
+        self.ladderView.deletePeriods()
+    }
+
+    lazy var periodsMenu = UIMenu(title: L("Periods..."), image: UIImage(systemName: "rectangle.on.rectangle"), children: [self.editPeriodsAction, self.copyPeriodsAction, self.deletePeriodsAction])
+
     // Label actions
     lazy var editLabelAction = UIAction(title: L("Edit label"), image: UIImage(systemName: "pencil")) { action in
         self.editLabel()
@@ -443,7 +465,7 @@ final class DiagramViewController: UIViewController {
         self.ladderView.removeRegion()
     }
 
-    lazy var markMenu = UIMenu(title: L("Mark Menu"), children: [self.styleMenu, self.emphasisMenu, self.impulseOriginMenu, self.blockMenu, self.labelMarkMenu, self.straightenMenu, self.slantMenu, self.adjustYMenu, self.moveAction, self.adjustCLAction, self.rhythmAction, self.repeatCLMenu, self.copyMarksAction, self.repeatPatternAction, self.unlinkAction, self.snapAction, self.deleteAction])
+    lazy var markMenu = UIMenu(title: L("Mark Menu"), children: [self.styleMenu, self.emphasisMenu, self.impulseOriginMenu, self.blockMenu, self.labelMarkMenu, self.straightenMenu, self.slantMenu, self.adjustYMenu, self.moveAction, self.adjustCLAction, self.rhythmAction, self.repeatCLMenu, self.copyMarksAction, self.repeatPatternAction, self.unlinkAction, self.snapAction, self.periodsMenu, self.deleteAction])
 
     lazy var labelMenu = [self.regionStyleMenu, self.editLabelAction, self.addRegionMenu, self.removeRegionAction, self.regionHeightMenu, self.adjustLeftMarginAction]
 
@@ -642,7 +664,6 @@ final class DiagramViewController: UIViewController {
         imageScrollView.contentInset = UIEdgeInsets(top: 0, left: leftMargin - offset.minX, bottom: 0, right: 0)
         updateToolbarButtons()
         updateUndoRedoButtons()
-        showMainToolbar()
         resetViews(setActiveRegion: false)
     }
 
@@ -652,8 +673,7 @@ final class DiagramViewController: UIViewController {
     }
 
     deinit {
-
-        print("*****DiagramViewController deinit()******")
+        os_log("deinit - DiagramViewController", log: .debugging, type: .debug)
     }
 
     func addIOSDirectoryToSandbox() {
@@ -661,7 +681,7 @@ final class DiagramViewController: UIViewController {
     }
 
     override func updateUserActivityState(_ activity: NSUserActivity) {
-//        os_log("debug: diagramViewController updateUserActivityState called", log: .debugging, type: .debug)
+        //os_log("debug: diagramViewController updateUserActivityState called", log: .debugging, type: .debug)
 
         super.updateUserActivityState(activity)
 
@@ -1455,6 +1475,18 @@ final class DiagramViewController: UIViewController {
         return helpViewController
     }
 
+    @IBSegueAction func performSelectPeriodsAction(_ coder: NSCoder) -> UIViewController? {
+        let periodSelector = PeriodSelector(dismissAction: ladderView.setPeriods, periods: .constant(ladderView.ladder.getUniqueLadderPeriods()))
+        let hostingController = UIHostingController(coder: coder, rootView: periodSelector)
+        return hostingController
+    }
+    
+    @IBSegueAction func performEditPeriodsAction(_ coder: NSCoder) -> UIViewController? {
+        let periodsEditor = PeriodListEditor(dismissAction: applyPeriods, periodsModelController: ladderView.periodsModelController)
+        let hostingController = UIHostingController(coder: coder, rootView: periodsEditor)
+        return hostingController
+    }
+
     @IBSegueAction func performRhythmSegueAction(_ coder: NSCoder) -> UIViewController? {
         // Have to provide dismiss action to SwiftUI modal view.  It won't dismiss itself.
         let rhythmView = RhythmView(dismissAction: applyRhythm(rhythm:cancel:))
@@ -1484,6 +1516,12 @@ final class DiagramViewController: UIViewController {
         self.dismiss(animated: true, completion: nil)
     }
 
+    func applyPeriods(periods: [Period], cancel: Bool) {
+        if !cancel {
+             ladderView.applyPeriods(periods)
+        }
+    }
+
     func performShowRhythmSegue() {
         performSegue(withIdentifier: "showRhythmSegue", sender: self)
     }
@@ -1492,9 +1530,13 @@ final class DiagramViewController: UIViewController {
         performSegue(withIdentifier: "selectLadderSegue", sender: self)
     }
 
-    //    func performEditLadderSegue() {
-    //        performSegue(withIdentifier: "EditLadderSegue", sender: self)
-    //    }
+    func performEditPeriodsSegue() {
+        performSegue(withIdentifier: "editPeriodsSegue", sender: self)
+    }
+
+    func performSelectPeriodsSegue() {
+        performSegue(withIdentifier: "selectPeriodsSegue", sender: self)
+    }
 
     func performShowSampleSelectorSegue() {
         performSegue(withIdentifier: "showSampleSelectorSegue", sender: self)
@@ -1654,7 +1696,7 @@ extension DiagramViewController {
         ladderView.showMarkLabels = UserDefaults.standard.bool(forKey: Preferences.showMarkLabelsKey)
         ladderView.snapMarks = UserDefaults.standard.bool(forKey: Preferences.snapMarksKey)
         ladderView.defaultMarkStyle = Mark.Style(rawValue: UserDefaults.standard.integer(forKey: Preferences.markStyleKey)) ?? .solid
-        ladderView.showLabelDescription = TextVisibility(rawValue: UserDefaults.standard.integer(forKey: Preferences.labelDescriptionVisibilityKey)) ?? .invisible
+        ladderView.labelDescriptionVisibility = TextVisibility(rawValue: UserDefaults.standard.integer(forKey: Preferences.labelDescriptionVisibilityKey)) ?? .invisible
         playSounds = UserDefaults.standard.bool(forKey: Preferences.playSoundsKey)
         marksAreHidden = UserDefaults.standard.bool(forKey: Preferences.hideMarksKey)
         ladderView.doubleLineBlockMarker = UserDefaults.standard.bool(forKey: Preferences.doubleLineBlockMarkerKey)
@@ -1663,6 +1705,14 @@ extension DiagramViewController {
         ladderView.hideZeroCT = UserDefaults.standard.bool(forKey: Preferences.hideZeroCTKey)
         cursorView.markerLineWidth = CGFloat(UserDefaults.standard.integer(forKey: Preferences.markerLineWidthKey))
         ladderView.showPeriods = UserDefaults.standard.bool(forKey: Preferences.showPeriodsKey)
+        ladderView.periodPosition = PeriodPosition(rawValue: UserDefaults.standard.integer(forKey: Preferences.periodPositionKey)) ?? .bottom
+        ladderView.periodTransparency = CGFloat(UserDefaults.standard.float(forKey: Preferences.periodTransparencyKey))
+        ladderView.periodTextJustification = TextJustification(rawValue: UserDefaults.standard.integer(forKey: Preferences.periodTextJustificationKey)) ?? .left
+        ladderView.periodsOverlapMarks = UserDefaults.standard.bool(forKey: Preferences.periodsOverlapMarksKey)
+        ladderView.periodSize = PeriodSize(rawValue: UserDefaults.standard.integer(forKey: Preferences.periodSizeKey)) ?? .small
+        ladderView.periodShowBorder = UserDefaults.standard.bool(forKey: Preferences.periodShowBorderKey)
+        ladderView.periodResetMethod = PeriodResetMethod(rawValue: UserDefaults.standard.integer(forKey: Preferences.periodResetMethodKey)) ?? .clip
+        ladderView.intervalGrouping = IntervalGrouping(rawValue: UserDefaults.standard.integer(forKey: Preferences.intervalGroupingKey)) ?? .fullInterior
 
         // Colors
         if let caliperColorName = UserDefaults.standard.string(forKey: Preferences.caliperColorNameKey) {
@@ -1688,6 +1738,9 @@ extension DiagramViewController {
         }
         if let markerColorName = UserDefaults.standard.string(forKey: Preferences.markerColorNameKey) {
             cursorView.markerColor = UIColor.convertColorName(markerColorName) ?? Preferences.defaultMarkerColor
+        }
+        if let periodColorName = UserDefaults.standard.string(forKey: Preferences.periodColorNameKey) {
+            ladderView.periodColor = UIColor.convertColorName(periodColorName) ?? Preferences.defaultPeriodColor
         }
         ladderView.updateLadderIntervals()
         // updatePreferences() can be called in the background, so update the UI on the main thread.
