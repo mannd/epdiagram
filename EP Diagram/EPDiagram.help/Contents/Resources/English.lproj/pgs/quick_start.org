@@ -43,7 +43,7 @@
 - Marks that are placed end to end will automatically link up and move together the next time you move one of them.
 ** Calibrate the diagram
 - Optionally, click the *Calibrate* button to show a caliper that can be used to calibrate the diagram to a standard interval of 1000 msec.
-- After calibration, measurements will appear on the diagram, provided the *Show intervals* and *Show conduction times* app preferences are turned on.
+- After calibration, measurements and periods will appear on the diagram, provided the *Show intervals* and *Show conduction times* app preferences are turned on.
 ** Connect marks
 - You can draw and move marks to connect them, but it is easier to use the *Connect* button.
 - After clicking the *Connect* button, click pairs of marks separated by a region to connect the marks with a new mark.

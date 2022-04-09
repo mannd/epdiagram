@@ -83,7 +83,7 @@ struct Preferences {
     static var hideZeroCT: Bool = false
     static var markerLineWidth: Int = 2
     static var showMarkLabels: Bool = true
-    static var showPeriods: Bool = false
+    static var showPeriods: Bool = true
     static var periodPosition = PeriodPosition.bottom.rawValue
     static var periodTransparency: CGFloat = 1.0
     static var periodTextJustification = TextJustification.left.rawValue

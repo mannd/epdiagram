@@ -73,11 +73,7 @@ EP Diagram is a file based app, meaning the diagrams you create are stored on yo
 
 Click *New Document* to create a diagram file, or select on one of your previously created diagrams.
 *** Dealing with the app sandbox
-Apps distributed on the Apple App Store are "sandboxed", meaning they have access only to the files in the container they run in, which is a private folder assigned to the app.  By default they can't read and write files in normal file locations like the Documents folder.  This policy is enforced by Apple to improve security, but it does result in some hoops that need to be jumped through.
-
-To add a folder such as the Documents folder to the app sandbox, you must specifically select that folder using a special file dialog.  Once this is done the app will remember that the Documents folder has been added to the sandbox whenever you use the app.
-
-You can add folders to the app sandbox using the *File | Add Folder to Sandbox* menu item.  You can also reset the sandbox using the *File | Reset Sandbox* menu item.  However in general it is not necessary to use these menu items.  The app will display a dialog box requesting that you add a folder to the sandbox whenever you create a new diagram in a folder that is not already part of the sandbox.  You select a folder as in the figure below.
+Apps distributed on the Apple App Store are "sandboxed", meaning they have access only to the files in the container they run in, which is a private folder assigned to the app.  By default they can't read and write files in normal file locations like the Documents folder.  This policy is enforced by Apple to improve security, but it does result in some hoops that need to be jumped through.  To add a folder such as the Documents folder to the app sandbox, you must specifically select that folder using a special file dialog.  Once this is done the app will remember that the Documents folder has been added to the sandbox whenever you use the app.  You can add folders to the app sandbox using the *File | Add Folder to Sandbox* menu item.  You can also reset the sandbox using the *File | Reset Sandbox* menu item.  However in general it is not necessary to use these menu items.  The app will display a dialog box requesting that you add a folder to the sandbox whenever you create a new diagram in a folder that is not already part of the sandbox.  You select a folder as in the figure below.
 
 #+CAPTION: Add folder to sandbox, in this case the Diagrams folder
 [[../gfx/sandbox.png]]
@@ -140,22 +136,16 @@ As described later, it is easy using connect mode to connect the marks we have d
 [[../gfx/drag_in_AV.png]]
 
 *** Repositioning marks
-Nobody's perfect, and it's likely the marks you create will not be perfectly aligned with the image or with each other.  It's often necessary to reposition marks you have already created.
-
-In order to move a mark, it must have a cursor attached to it.  By default when you first click on a mark it has a cursor anchored to the middle of the mark.  Dragging the cursor left or right will keep the mark vertical and move it horizontally.  You can move just one endpoint of the mark or the other by changing the /anchor/ point of the mark.
+Nobody's perfect, and it's likely the marks you create will not be perfectly aligned with the image or with each other.  It's often necessary to reposition marks you have already created.  In order to move a mark, it must have a cursor attached to it.  By default when you first click on a mark it has a cursor anchored to the middle of the mark.  Dragging the cursor left or right will keep the mark vertical and move it horizontally.  You can move just one endpoint of the mark or the other by changing the /anchor/ point of the mark.
 
 *** Mark anchors
-Once a mark has a cursor, we can change the anchor point by single-clicking on the mark or the cursor.  Marks have at most three anchor points, proximal, middle, and distal, though some marks have only two if they are linked to other marks (i.e. their freedom of movement is restricted).  When we drag the cursor of the mark, the anchor is what moves.
-
-To demonstrate this, single click the highlighted mark or its cursor.  The anchor will move from the middle to the proximal end of the mark.  Click again and it will move the to distal end.  Finally it will cycle back to the middle if you click again.  In the next figure we see a mark with a proximal anchor in the AV region that has been dragged so it slants.
+Once a mark has a cursor, we can change the anchor point by single-clicking on the mark or the cursor.  Marks have at most three anchor points, proximal, middle, and distal, though some marks have only two if they are linked to other marks (i.e. their freedom of movement is restricted).  When we drag the cursor of the mark, the anchor is what moves.  To demonstrate this, single click the highlighted mark or its cursor.  The anchor will move from the middle to the proximal end of the mark.  Click again and it will move the to distal end.  Finally it will cycle back to the middle if you click again.  In the next figure we see a mark with a proximal anchor in the AV region that has been dragged so it slants.
 
 #+CAPTION: Proximal anchor
 [[../gfx/proximal_anchor.png]]
 
 *** Moving marks in all directions
-So far we have used the cursor to move marks purely in a horizontal direction.  But we can also move marks in unlimited directions.  To do this we have to change our cursor to an /omnidirectional/ cursor.
-
-Click a mark to cause the cursor to appear.  Then click and hold on the cursor.  A circle will appear, indicating the cursor is now omnidirectional.  You can now drag the mark in any direction, depending on the anchor point.  Another click and hold on the cursor will change it back to a normal horizontally moving cursor.
+So far we have used the cursor to move marks purely in a horizontal direction.  But we can also move marks in unlimited directions.  To do this we have to change our cursor to an /omnidirectional/ cursor.  Click a mark to cause the cursor to appear.  Then click and hold on the cursor.  A circle will appear, indicating the cursor is now omnidirectional.  You can now drag the mark in any direction, depending on the anchor point.  Another click and hold on the cursor will change it back to a normal horizontally moving cursor.
 
 #+CAPTION: Omnidirectional cursor
 [[../gfx/omnidirectional_movement.png]]
@@ -182,21 +172,13 @@ After calibration, if preferences are set to show intervals and show conduction 
 [[../gfx/measurements.png]]
 
 ** Connecting marks
-Connect mode is useful to connect marks in different regions rapidly.  Click the *Connect* button to enter this mode.  Then click on pairs of marks, separated by a region of conduction to connect them.
-
-You can also quickly create a blocked mark in connect mode.  Click on a mark in the A region, then click in the AV region.  A new mark will be created with block in the AV region.
-
-Click the *Done* button to resume normal mode.
+Connect mode is useful to connect marks in different regions rapidly.  Click the *Connect* button to enter this mode.  Then click on pairs of marks, separated by a region of conduction to connect them.  You can also quickly create a blocked mark in connect mode.  Click on a mark in the A region, then click in the AV region.  A new mark will be created with block in the AV region.  Click the *Done* button to resume normal mode.
 
 ** Editing marks
 *** Fine-tuning your diagrams
 If you are aiming to create publication quality diagrams, it's important that marks all slope the same, that block is always at the same level in a region, and that you can change the appearance of marks, such as having marks with dashed instead of a solid lines.  Edit mode is for making these changes.  This mode allows you to select one or more marks or to select zones or regions and then apply changes to the selection.  Editing multiple marks at once allows them all to assume the same appearance, e.g. have the same slant, level of block, etc.
 *** Making selections in edit mode
-Click the *Edit* button to enter edit mode.  In this mode a single-click on one or more marks will select these marks.  A single-click on a region (including the region label) will select the region and all the marks in the region.  Clicking and dragging on an area of the ladder will select a zone and the marks within the zone.  A click on a selected mark, region, or zone will toggle the selection.
-
-Note that in diagrams with periods, you must click on the mark the period is attached to, not the period itself.
-
-You can also use the *Select All* and *Clear Selection* buttons on the toolbar to quickly select the whole ladder or clear your selection.  Once selected, a Control-click will bring up a context menu.  After editing, select *Done* to return to normal mode.
+Click the *Edit* button to enter edit mode.  In this mode a single-click on one or more marks will select these marks.  A single-click on a region (including the region label) will select the region and all the marks in the region.  Clicking and dragging on an area of the ladder will select a zone and the marks within the zone.  A click on a selected mark, region, or zone will toggle the selection. Note that in diagrams with periods, you must click on the mark the period is attached to, not the period itself.  You can also use the *Select All* and *Clear Selection* buttons on the toolbar to quickly select the whole ladder or clear your selection.  Once selected, a Control-click will bring up a context menu.  After editing, select *Done* to return to normal mode.
 
 #+CAPTION: Context menu in edit mode
 [[../gfx/context_menu.png]]
@@ -218,7 +200,7 @@ Applies a slant to selected marks.
 *** Adjust mark ends
 Fine tune where either endpoint of a mark ends in a region.
 *** Move marks
-Move the selected marks as a group by dragging them horizontally after selecting this menu option.
+Move the selected marks as a group by dragging them horizontally.
 *** Adjust CL
 Lengthen or shorten the cycle length of a group of marks.  This option forces all the selected marks to have the same cycle length.
 *** Rhythm
@@ -231,7 +213,7 @@ You can choose a regular rhythm or fibrillation.  With fibrillation you will hav
 *** Repeat CL
 Repeat the cycle length of a pair of marks forward, backward, or bidirectionally.  This is useful in copying a repeating pattern.
 *** Copy and paste
-Select marks and then with this menu item click on the ladder to copy them to the point of the click.  Use [[*Move marks][Move marks]] to fine tune the position of the pasted marks if necessary.
+Select marks and then click on the ladder to copy the selected marks to the point of the click.  Use [[*Move marks][Move marks]] to fine tune the position of the pasted marks if necessary.
 *** Repeat pattern
 This option will take a selected group of marks and repeat them, with one mark acting as a /joining mark/.  This allows the repetition of complex patterns.  You single-click on the joining mark to duplicate the pattern once.  A double-click on the joining mark will duplicate the pattern until the end or begining of the ECG.  A picture is worth a lot of description.
 
@@ -257,7 +239,7 @@ Use this screen to add, delete, edit, or reorder the periods for selected marks.
 #+CAPTION: Add/edit periods
 [[../gfx/add_edit_periods.png]]
 
-Click the plus button to add a new period.  Click the period in the list to edit it.  Swipe left to delete a period.  Click the Edit button to reorder or delete periods.  The order of periods in the list is the same order that periods will appear in on the ladder.
+Click the *+* button to add a new period.  Click the period in the list to edit it.  Swipe left to delete a period.  Click the *Edit* button to reorder or delete periods.  The order of periods in the list is the same order that periods will appear in on the ladder.
 
 **** Edit a period
 If you click on a period in the list of periods, the screen below appears.
@@ -289,11 +271,7 @@ Select one or more marks and then select /Delete periods/ to delete the periods 
 Delete the selected marks.
 
 ** Selecting, editing and creating ladders
-Use the *Diagram | Ladder | Select Ladder* menu item to select from a list of ladders.   Note that when you select a ladder, it will clear any marks already present, though you can always use the *Undo* button to go back to the previous ladder with its marks.
-
-You are not limited to the default ladders that come with the app.  You can create your own ladders, change ladders, or delete those that you don't use. There are two ways to edit ladders. 
-
-If in edit mode you two finger press or right click on a label of the current ladder, a menu appears that allows you to make changes to the regions and the ladder.
+Use the *Diagram | Ladder | Select Ladder* menu item to select from a list of ladders.   Note that when you select a ladder, it will clear any marks already present, though you can always use the *Undo* button to go back to the previous ladder with its marks.  You are not limited to the default ladders that come with the app.  You can create your own ladders, change ladders, or delete those that you don't use. There are two ways to edit ladders.  If in edit mode you two finger press or right click on a label of the current ladder, a menu appears that allows you to make changes to the regions and the ladder.
 
 #+CAPTION: Region menu
 [[../gfx/region_menu.png]]
@@ -316,9 +294,7 @@ To change or add to the templates that your ladders are based on, use the *Diagr
 #+CAPTION: The ladder editor
 [[../gfx/ladder_editor.png]]
 
-Click *Edit* to delete ladders, or to change the order of ladders on the list.  Note: The first ladder on the list is the default ladder used when you create a new diagram.
-
-Use the *+* button to add a new ladder.  Click on a ladder to go to the next screen, which is used to edit the ladder itself.
+Click *Edit* to delete ladders, or to change the order of ladders on the list.  Note: The first ladder on the list is the default ladder used when you create a new diagram.  Use the *+* button to add a new ladder.  Click on a ladder to go to the next screen, which is used to edit the ladder itself.
 
 #+CAPTION: Edit ladder screen
 [[../gfx/edit_ladder.png]]
@@ -363,11 +339,11 @@ Choose whether periods are shown at the top or the bottom of a region.
 **** Period text justification
 Left justify or center the period name in the period rectangle.
 **** Periods overlap marks
-Choose whether marks are visible where they cross periods.  Note that periods with transparency will still show the underlying marks even if this is switched on.
+Choose whether marks are visible where they intersect periods.  Note that periods with transparency will still show the underlying marks even if this is switched on.
 **** Default period color
 The default color for new periods.  Each period's color can be changed individually when adding or editing periods as described [[*Adding/editing periods][above]].
 **** Period transparency
-Transparency of the period background color.  This can be adjusted to make the period text stand out or just for esthetics.  Note that this affects all periods, but individual period also be adjusted when selecting colors while [[*Adding/editing periods][adding or editing periods]].
+This slider adjusts the transparency of the period background color.  Transparency can be adjusted to make the period text stand out or just for esthetics.  Note that this affects all periods, but the transparency of the colors of individual periods can also be adjusted while [[*Adding/editing periods][adding or editing periods]].
 **** Period size
 Choose between a small, medium, or large rectangle size.
 **** Show period border

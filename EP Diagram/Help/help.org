@@ -6,7 +6,7 @@
 #+KEYWORDS:
 #+LANGUAGE:  en
 #+OPTIONS:   H:3 num:nil toc:t \n:nil ::t |:t ^:t -:t f:t *:t <:t
-#+OPTIONS:   d:nil todo:t pri:nil tags:not-in-toc
+#+OPTIONS:   d:nil todo:t pri:nil tags:not-in-toc 
 #+INFOJS_OPT: view:nil tgc:nil ltoc:t mouse:underline buttons:0 path:http://orgmode.org/org-info.js
 #+EXPORT_SELECT_TAGS: export
 #+EXPORT_EXCLUDE_TAGS: noexport
@@ -23,7 +23,9 @@
 
 - *EP Diagram* creates /ladder diagrams/, a classic form of ECG analysis that depicts the path of the cardiac impulse through anatomic regions of the heart.  Ladder diagrams are useful to understand cardiac arrhythmias such as heart block, reentrant tachycardias, and premature complexes.  They also can be used to draw the timing intervals, blanking periods, and refractory periods used by electronic pacemakers.  Traditionally ladder diagrams are roughly sketched on paper, but with *EP Diagram* you can draw them on your iPad, and, unlike a paper sketch, these diagrams can scroll and zoom, can measure intervals and conduction times automatically, and can be saved as publication quality images.
 
-- *EP Diagram* has a lot of built-in features that simplify the creation of ladder diagrams, and these features are described in this help manual.  The next section, [[*Quick start][Quick start]], contains some tips on how to get started.  However a good way to learn the program is to create some sample ladder diagrams, then use your finger to tap, double-tap, and drag on the ladder to see what happens.  Try out the various buttons.  Experiment!  Most of the functions are intuitive, and if you want more in-depth instruction, have a look at the rest of this help manual.  
+- *EP Diagram* has a lot of built-in features that simplify the creation of ladder diagrams, and these features are described in this help manual.  The next section, [[*Quick start][Quick start]], contains some tips on how to get started.  However a good way to learn the program is to create some sample ladder diagrams, then use your finger or Apple pencil to tap, double-tap, and drag on the ladder to see what happens.  Try out the various buttons.  Experiment!  Most of the functions are intuitive, and if you want more in-depth instruction, have a look at the detailed *EP Diagram* [[*EP Diagram manual][manual]].
+
+- *EP Diagram* is optimized for use on an iPad.  It can be used on a phone, but due to the small size of a phone, it may be more difficult to draw ladder diagrams.
 * Quick start
 ** Files screen
 - On the opening files screen, tap *Create New Diagram* to create a blank ladder diagram.
@@ -33,7 +35,7 @@
 - Tap on the image or the ladder grid to create /marks/, which are the lines that are drawn on the ladder.  Use the /cursor/ (the vertical line extending from the mark to the top of the screen) to align marks with the ECG waveforms.  Tap away from the cursor to hide the cursor.  Tap on a mark to bring back the cursor.  Each tap on the cursor changes the /anchor/ point of the cursor to the mark, from middle to proximal to distal.
 - Double tap on a mark to delete it.  Double tap anywhere else to create a mark.  Double tapping is a fast way to create marks.
 - Marks appear in the /active region/, shown by a tinted background.  If you tap on a different region the marks will appear in that region which will become the new active region.  Tapping on the label of a region will also activate or deactivate it.
-- Dragging with your finger in a region will also create a mark.
+- Dragging with your finger or Apple pencil in a region will also create a mark.
 ** Move marks
 - Dragging on a mark with a cursor (you can drag either the mark itself or its cursor) will move the mark horizontally.
 - The anchor point will determine how the mark moves.  A middle anchor will move the whole mark, but an anchor at an endpoint of a mark will just move that endpoint, while the other endpoint stays fixed.  This will slant the mark.
@@ -41,7 +43,7 @@
 - Marks that are placed end to end will automatically link up and move together the next time you move one of them.
 ** Calibrate the diagram
 - Tap the *Calibrate* button to show a caliper that can be used to calibrate the diagram to a standard interval of 1000 msec.
-- After calibration, measurements will appear on the diagram.
+- After calibration, measurements and periods will appear on the diagram.
 ** Connect marks
 - You can draw and move marks to connect them, but it is easier to use the *Connect* button.
 - After tapping the *Connect* button, tap pairs of marks separated by a region to connect the marks with a new mark.
@@ -62,14 +64,13 @@
 ** Preferences
 - Change the overall appearance or behavior of the app.  Many aspects are customizable.
 ** Close the diagram
-Use the *Close* button at the upper right of the screen to close the diagram and return to the files screen.  Diagrams are automatically saved as you work with them.
+- Use the *Close* button at the upper right of the screen to close the diagram and return to the files screen.  Diagrams are automatically saved as you work with them.
 ** Those are the basics
-If you want more detail, read the next section, which is a detailed manual for the app.
+- If you want more detail, read the next section, which is a detailed manual for the app.
 * EP Diagram manual
 ** Introduction
 Ladder diagrams date back at least a century and have been used to analyze arrhythmias and as teaching tools for almost as long as there has been electrocardiography.  For a history and examples of ladder diagrams, see the [[*References][references]].  *EP Diagram* is a full-featured, interactive ladder drawing program.  It allows you not only to draw ladders, but also to customize their appearance to a fine degree.  As such it is a complex program and it can take a while to learn all its features.  However, it has an extensive undo/redo facility, so feel free to experiment.
 
-*EP Diagram* is optimized for use on an iPad.  It can be used on a phone, but due to the small size of a phone, it may be more difficult to draw ladder diagrams.
 ** Don't panic! (Undo, Redo, and Autosave)
 Practically any change you make while using this app can be reversed by tapping the *Undo* button at the bottom of the screen.  If you change your mind you can revert the undo action by tapping the *Redo* button.  Every change you make is automatically saved.  There is no need to explicity save your diagram files; the app does this in the background.
 ** Terminology
@@ -125,7 +126,7 @@ There is no need to specifically save changes you make to a diagram.  Every chan
 **** Image types
 *EP Diagram* supports most image formats, such as ~jpg~ and ~png~, and it also can load PDF files.  In addition you can take a photo with your device's camera and directly import it into the app.
 **** Selecting images
-Open the /side menu/ and tap *Take photo* to use your camera to create an image, or tap *Select image* and choose *Photos* or *Files* as the image source.  If a dialog appears asking for permission to access the camera or your Photos app, go ahead and grant permission.  If you don't, you will need to grant this permission in the Settings app of your device in order to import images.  After selecting an image, it will appear in the top half of the diagram.
+Open the [[*Side menu items][side menu]] and tap *Take photo* to use your camera to create an image, or tap *Select image* and choose *Photos* or *Files* as the image source.  If a dialog appears asking for permission to access the camera or your Photos app, go ahead and grant permission.  If you don't, you will need to grant this permission in the Settings app of your device in order to import images.  After selecting an image, it will appear in the top half of the diagram.
 
 #+Caption: Diagram with image added
 [[./img/diagram_with_image.png]]
@@ -162,28 +163,22 @@ It's a bit tiresome to tap to create a mark, and then tap again just to make the
 [[./img/adding_V_marks.png]]
 
 *** Dragging to create marks
-As described later, it is easy using connect mode to connect the marks we have drawn, but we'll stay in normal mode for now and accomplish the same feat.  Using your finger, drag from the first mark in the A region to the first mark in the V region.  A new mark will be created, and when it is close to the other two marks, they will be highlighted in a purple color, meaning they are close enough to the new mark to be linked.  When you finish the drag through the AV region and lift your finger, the new mark (if it is close enough) will snap into the correct position, linking the two regions with conduction through the AV region.
+As described later, it is easy using connect mode to connect the marks we have drawn, but we'll stay in normal mode for now and accomplish the same feat.  Using your finger or Apple pencil, drag from the first mark in the A region to the first mark in the V region.  A new mark will be created, and when it is close to the other two marks, they will be highlighted in a purple color, meaning they are close enough to the new mark to be linked.  When you finish the drag through the AV region and lift your finger or pencil, the new mark (if it is close enough) will snap into the correct position, linking the two regions with conduction through the AV region.
 
 #+CAPTION: Dragging to create a mark in the AV region
 [[./img/drag_in_AV.png]]
 
 *** Repositioning marks
-Nobody's perfect, and it's likely the marks you create will not be perfectly aligned with the image or with each other.  It's often necessary to reposition marks you have already created.
-
-In order to move a mark, it must have a cursor attached to it.  By default when you first tap a mark it has a cursor anchored to the middle of the mark.  Dragging the cursor left or right will keep the mark vertical and move it horizontally.  You can move just one endpoint of the mark or the other by changing the /anchor/ point of the mark.
+Nobody's perfect, and it's likely the marks you create will not be perfectly aligned with the image or with each other.  It's often necessary to reposition marks you have already created.  In order to move a mark, it must have a cursor attached to it.  By default when you first tap a mark it has a cursor anchored to the middle of the mark.  Dragging the cursor left or right will keep the mark vertical and move it horizontally.  You can move just one endpoint of the mark or the other by changing the /anchor/ point of the mark.
 
 *** Mark anchors
-Once a mark has a cursor, we can change the anchor point by single-tapping on the mark or the cursor.  Marks have at most three anchor points, proximal, middle, and distal, though some marks have only two if they are linked to other marks (i.e. their freedom of movement is restricted).  When we drag the cursor of the mark, the anchor is what moves.
-
-To demonstrate this, single tap on the highlighted mark or its cursor.  The anchor will move from the middle to the proximal end of the mark.  Tap again and it will move the to distal end.  Finally it will cycle back to the middle if you tap again.  In the next figure we see a mark with a proximal anchor in the AV region that has been dragged so it slants.
+Once a mark has a cursor, we can change the anchor point by single-tapping on the mark or the cursor.  Marks have at most three anchor points, proximal, middle, and distal, though some marks have only two if they are linked to other marks (i.e. their freedom of movement is restricted).  When we drag the cursor of the mark, the anchor is what moves.  To demonstrate this, single tap on the highlighted mark or its cursor.  The anchor will move from the middle to the proximal end of the mark.  Tap again and it will move the to distal end.  Finally it will cycle back to the middle if you tap again.  In the next figure we see a mark with a proximal anchor in the AV region that has been dragged so it slants.
 
 #+CAPTION: Proximal anchor
 [[./img/proximal_anchor.png]]
 
 *** Moving marks in all directions
-So far we have used the cursor to move marks purely in a horizontal direction.  But we can also move marks in unlimited directions.  To do this we have to change our cursor to an /omnidirectional/ cursor.
-
-Tap a mark to cause the cursor to appear.  Then do a long press on the cursor.  A circle will appear, indicating the cursor is now omnidirectional.  You can now drag the mark in any direction, depending on the anchor point.  Another long press on the cursor will change it back to a normal horizontally moving cursor.
+So far we have used the cursor to move marks purely in a horizontal direction.  But we can also move marks in unlimited directions.  To do this we have to change our cursor to an /omnidirectional/ cursor.  Tap a mark to cause the cursor to appear.  Then do a long press on the cursor.  A circle will appear, indicating the cursor is now omnidirectional.  You can now drag the mark in any direction, depending on the anchor point.  Another long press on the cursor will change it back to a normal horizontally moving cursor.
 
 #+CAPTION: Omnidirectional cursor
 [[./img/omnidirectional_movement.png]]
@@ -213,21 +208,13 @@ After calibration, if preferences are set to [[*Measurements][show intervals]] a
 [[./img/measurements.png]]
 
 ** Connecting marks
-Connect mode is useful to connect marks in different regions rapidly.  Tap the *Connect* button to enter this mode.  Then tap on pairs of marks, separated by a region of conduction to connect them.
-
-You can also quickly create a blocked mark in connect mode.  Tap on a mark in the A region, then tap in the AV region.  A new mark will be created with block in the AV region.
-
-Tap the *Done* button to resume normal mode.
+Connect mode is useful to connect marks in different regions rapidly.  Tap the *Connect* button to enter this mode.  Then tap on pairs of marks, separated by a region of conduction to connect them.  You can also quickly create a blocked mark in connect mode.  Tap on a mark in the A region, then tap in the AV region.  A new mark will be created with block in the AV region.  Tap the *Done* button to resume normal mode.
 
 ** Editing marks
 *** Fine-tuning your diagrams
 If you are aiming for publication quality diagrams, it's important that marks all slope the same, that block is always at the same level in a region, and that you can change the appearance of marks, such as having marks with dashed instead of a solid lines.  Edit mode is for making these changes.  This mode allows you to select one or more marks or to select zones or regions and then apply changes to the selection.  Editing multiple marks at once allows them all to assume the same appearance, e.g. have the same slant, level of block, etc.
 *** Making selections in edit mode
-Tap the *Edit* button to enter edit mode.  In this mode a single tap on one or more marks will select these marks.  A single tap on a region (including the region label) will select the region and all the marks in the region.  Dragging on an area of the ladder will select a zone and the marks within the zone.  A tap on a selected mark, region, or zone will toggle the selection.
-
-Note that in diagrams with periods, you must tap on the mark the period is attached to, not the period itself.
-
-You can also use the *Select All* and *Clear Selection* buttons on the toolbar to quickly select the whole ladder or clear your selection.  Once selected, a long press will bring up a context menu.  After editing, select *Done* to return to normal mode.
+Tap the *Edit* button to enter edit mode.  In this mode a single tap on one or more marks will select these marks.  A single tap on a region (including the region label) will select the region and all the marks in the region.  Dragging on an area of the ladder will select a zone and the marks within the zone.  A tap on a selected mark, region, or zone will toggle the selection.  Note that in diagrams with periods, you must tap on the mark the period is attached to, not the period itself.  You can also use the *Select All* and *Clear Selection* buttons on the toolbar to quickly select the whole ladder or clear your selection.  Once selected, a long press will bring up a context menu.  After editing, select *Done* to return to normal mode.
 
 #+CAPTION: Context menu in edit mode
 [[./img/context_menu.png]]
@@ -249,7 +236,7 @@ Applies a slant to selected marks.
 *** Adjust mark ends
 Fine tune where either endpoint of a mark ends in a region.
 *** Move marks
-Move the selected marks as a group by dragging them horizontally after selecting this menu option.
+Move the selected marks as a group by dragging them horizontally.
 *** Adjust CL
 Lengthen or shorten the cycle length of a group of marks.  This option forces all the selected marks to have the same cycle length.
 *** Rhythm
@@ -262,7 +249,7 @@ You can choose a regular rhythm or fibrillation.  With fibrillation you will hav
 *** Repeat CL
 Repeat the cycle length of a pair of marks forward, backward, or bidirectionally.  This is useful in copying a repeating pattern.
 *** Copy and paste
-Select marks and then with this menu item tap on the ladder to copy them to the point of the tap.  Use [[*Move marks][Move marks]] to fine tune the position of the pasted marks if necessary.
+Select marks and then tap on the ladder to copy the selected marks to the point of the tap.  Use [[*Move marks][Move marks]] to fine tune the position of the pasted marks if necessary.
 *** Repeat pattern
 This option will take a selected group of marks and repeat them, with one mark acting as a /joining mark/.  This allows the repetition of complex patterns.  You single tap on the joining mark to duplicate the pattern once.  A double tap on the joining mark will duplicate the pattern until the end or begining of the ECG.  A picture is worth a lot of description.
 
@@ -289,7 +276,7 @@ Use this screen to add, delete, edit, or reorder the periods for selected marks.
 #+CAPTION: Add/edit periods
 [[./img/add_edit_periods.png]]
 
-Tap the plus button to add a new period.  Tap the period in the list to edit it.  Swipe left to delete a period.  Tap the Edit button to reorder or delete periods.  The order of periods in the list is the same order that periods will appear in on the ladder.
+Tap the *+* button to add a new period.  Tap the period in the list to edit it.  Swipe left to delete a period.  Tap the *Edit* button to reorder or delete periods.  The order of periods in the list is the same order that periods will appear in on the ladder.
 
 **** Edit a period
 If you tap on a period in the list of periods, the screen below appears.
@@ -309,19 +296,19 @@ Normally a period will not be affected by other marks that occur during it.  An 
 ***** Offset
 Normally periods are stacked either at the top or bottom of a region, depending on [[*Period preferences][period preferences]].  However you can add an offset so that there is a gap either above or below a period.  You may want to offset a period which is overlapping another period, to show each period more clearly.  Use the counter to offset periods by height units, which are equal to the height of a period.
 **** Copying periods
-You can copy any already created period to selected marks.  First select the marks you want to copy the periods to in Edit mode, then select /Copy periods/ from the /Periods menu/.  Select the periods you want to copy to the selected marks as in the screen image below.
+You can copy any already created period to selected marks.  First select the marks you want to copy the periods to in Edit mode, then select *Copy periods* from the /Periods menu/.  Select the periods you want to copy to the selected marks as in the screen image below.
 
 #+CAPTION: Copy periods
 [[./img/copy_periods.png]]
 
 **** Delete periods
-Select one or more marks and then select /Delete periods/ to delete the periods associated with these marks.  This action can be undone using the /Undo/ button.
+Select one or more marks and then select *Delete periods* to delete the periods associated with these marks.  This action can be undone using the *Undo* button.
 
 *** Delete mark(s)
 Delete the selected marks.
 ** Side menu items
 *** Opening the side menu
-Use the "hamburger" icon at the upper left of the screen to open the side menu.
+Use the "hamburger" icon at the upper left of the screen to open the /side menu/.
 
 #+CAPTION: Side menu
 [[./img/side_menu.png]]
@@ -359,9 +346,7 @@ View this help file.
 *** About
 View a dialog with copyright and version information about the app.
 ** Editing and creating ladders
-You are not limited to the default ladders that come with the app.  You can create your own ladders, change ladders, or delete those that you don't use. There are two ways to edit ladders. 
-
-If in edit mode you long press on a label of the current ladder, a menu appears that allows you to make changes to the regions and the ladder.
+You are not limited to the default ladders that come with the app.  You can create your own ladders, change ladders, or delete those that you don't use. There are two ways to edit ladders.  If in edit mode you long press on a label of the current ladder, a menu appears that allows you to make changes to the regions and the ladder.
 
 #+CAPTION: Region menu
 [[./img/region_menu.png]]
@@ -379,14 +364,12 @@ Change the height of a region.
 *** Adjust left margin
 Change the left margin.
 *** The ladder editor
-To change or add to the templates that your ladders are based on, use the *Ladder editor* from the side menu.  The ladder editor will not affect diagrams that you have already created.  Instead it affects the templates that new ladders are based on. 
+To change or add to the templates that your ladders are based on, use the *Ladder editor* from the [[*Side menu items][side menu]].  The ladder editor will not affect diagrams that you have already created.  Instead it affects the templates that new ladders are based on. 
 
 #+CAPTION: The ladder editor
 [[./img/ladder_editor.png]]
 
-Tap *Edit* to delete ladders, or to change the order of ladders on the list.  Note: The first ladder on the list is the default ladder used when you create a new diagram.
-
-Use the *+* button to add a new ladder.  Tap on a ladder to go to the next screen, which is used to edit the ladder itself.
+Tap *Edit* to delete ladders, or to change the order of ladders on the list.  Note: The first ladder on the list is the default ladder used when you create a new diagram.  Use the *+* button to add a new ladder.  Tap on a ladder to go to the next screen, which is used to edit the ladder itself.
 
 #+CAPTION: Edit ladder screen
 [[./img/edit_ladder.png]]
@@ -396,9 +379,7 @@ On this screen you can change the name and description of the ladder, the left m
 #+CAPTION: Region editor
 [[./img/region_editor.png]]
 
-Here you can change the name, description, height, and default mark line style of the region.  The height is a relative height, i.e. a region with a height of 2 will be twice a height twice as much as a region of height 1.  This is why the AV region in the diagrams shown in this help file is twice as tall as the A and V regions.
-
-After making changes, hit the back button at the top left to return to your diagram.
+Here you can change the name, description, height, and default mark line style of the region.  The height is a relative height, i.e. a region with a height of 2 will be twice a height twice as much as a region of height 1.  This is why the AV region in the diagrams shown in this help file is twice as tall as the A and V regions.  After making changes, hit the back button at the top left to return to your diagram.
 
 ** Preferences
 There are multiple app preferences that you can set, as shown below.  
@@ -431,11 +412,11 @@ Choose whether periods are shown at the top or the bottom of a region.
 **** Period text justification
 Left justify or center the period name in the period rectangle.
 **** Periods overlap marks
-Choose whether marks are visible where they cross periods.  Note that periods with transparency will still show the underlying marks even if this is switched on.
+Choose whether marks are visible where they intersect periods.  Note that periods with transparency will still show the underlying marks even if this is switched on.
 **** Default period color
 The default color for new periods.  Each period's color can be changed individually when adding or editing periods as described [[*Adding/editing periods][above]].
 **** Period transparency
-Transparency of the period background color.  This can be adjusted to make the period text stand out or just for esthetics.  Note that this affects all periods, but individual period also be adjusted when selecting colors while [[*Adding/editing periods][adding or editing periods]].
+Transparency of the period background color.  This can be adjusted to make the period text stand out or just for esthetics.  Note that this seting affects all periods, but the transparency of the colors of individual periods can also be adjusted while [[*Adding/editing periods][adding or editing periods]].
 **** Period size
 Choose between a small, medium, or large rectangle size.
 **** Show period border
