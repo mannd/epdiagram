@@ -2272,7 +2272,7 @@ final class LadderView: ScaledView {
         } else {
             switch periodTextJustification {
             case .left:
-                textRect = CGRect(x: scaledOriginX + textOffset, y: textOriginY, width: textWidth, height: textHeight)
+                textRect = CGRect(x: scaledOriginX + textOffset, y: textOriginY, width: periodRect.width - textOffset, height: textHeight)
             case .center:
                 textRect = CGRect(x: periodRect.origin.x, y: textOriginY, width: periodRect.width, height: textHeight)
             }
