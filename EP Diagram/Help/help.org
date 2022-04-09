@@ -309,13 +309,13 @@ Normally a period will not be affected by other marks that occur during it.  An 
 ***** Offset
 Normally periods are stacked either at the top or bottom of a region, depending on [[*Period preferences][period preferences]].  However you can add an offset so that there is a gap either above or below a period.  You may want to offset a period which is overlapping another period, to show each period more clearly.  Use the counter to offset periods by height units, which are equal to the height of a period.
 **** Copying periods
-You can copy any already created period to selected marks.  First select the marks you want to copy the periods to in Edit mode, then select Periods | Copy periods from the Periods menu.  Select the periods you want to copy to the selected marks as in the screen image below.
+You can copy any already created period to selected marks.  First select the marks you want to copy the periods to in Edit mode, then select /Copy periods/ from the /Periods menu/.  Select the periods you want to copy to the selected marks as in the screen image below.
 
 #+CAPTION: Copy periods
 [[./img/copy_periods.png]]
 
-**** Deleting periods
-Select one or more marks and then select /Delete periods/ to delete them.  This action can be undone using the /Undo/ button.
+**** Delete periods
+Select one or more marks and then select /Delete periods/ to delete the periods associated with these marks.  This action can be undone using the /Undo/ button.
 
 *** Delete mark(s)
 Delete the selected marks.

@@ -43,13 +43,14 @@ Ladder diagram terminology is not standardized.  Here is a glossary of the terms
 | Link                 | a connection between marks causing them to move together          |
 | Impulse origin       | where conduction starts, indicated by a symbol                    |
 | Block                | where conduction blocks, indicated by a symbol                    |
-| Interval             | time in msec between adjacent marks
+| Interval             | time in msec between adjacent marks                               |
 | Conduction time      | time in msec between earliest and latest points of a mark         |
 | Caliper              | used to calibrate the diagram to allow measurements               |
 | Conduction direction | optional arrow symbol indicating direction of electrical flow     |
 | Markers              | optional lines on image aligned with marks                        |
 | Mark pattern         | a grouping of marks that form a repeating pattern                 |
 | Joining mark         | mark used to join together mark patterns                          |
+| Period               | time period, such as a refractory period                         |
 ** Keyboard shortcuts
 | Key | Function                |
 |-----+-------------------------|
@@ -193,6 +194,8 @@ If you are aiming to create publication quality diagrams, it's important that ma
 *** Making selections in edit mode
 Click the *Edit* button to enter edit mode.  In this mode a single-click on one or more marks will select these marks.  A single-click on a region (including the region label) will select the region and all the marks in the region.  Clicking and dragging on an area of the ladder will select a zone and the marks within the zone.  A click on a selected mark, region, or zone will toggle the selection.
 
+Note that in diagrams with periods, you must click on the mark the period is attached to, not the period itself.
+
 You can also use the *Select All* and *Clear Selection* buttons on the toolbar to quickly select the whole ladder or clear your selection.  Once selected, a Control-click will bring up a context menu.  After editing, select *Done* to return to normal mode.
 
 #+CAPTION: Context menu in edit mode
@@ -239,6 +242,49 @@ This option will take a selected group of marks and repeat them, with one mark a
 Unlink the selected marks.
 *** Snap to nearby marks
 Move the endpoints of nearby marks together and link the marks.
+*** Periods
+**** What are periods?
+In addition to showing paths of conduction, ladder diagrams are useful for indicating the state of cardiac tissue, such as the duration of refractoriness after cells are depolarized, or the timing cycles of an electronic pacemaker, such as the lower rate interval.  These various time /periods/ are traditionally indicated as rectangular areas on a ladder diagram, as shown below.
+
+#+CAPTION: VVI pacemaker periods
+[[../gfx/VVI_pacer_periods.png]]
+
+NB: In order for periods to appear in your diagram, /Show periods/ must be turned on in [[*Period preferences][period preferences]], and the diagram must be calibrated.  
+
+**** Adding/editing periods
+Use this screen to add, delete, edit, or reorder the periods for selected marks.
+
+#+CAPTION: Add/edit periods
+[[../gfx/add_edit_periods.png]]
+
+Click the plus button to add a new period.  Click the period in the list to edit it.  Swipe left to delete a period.  Click the Edit button to reorder or delete periods.  The order of periods in the list is the same order that periods will appear in on the ladder.
+
+**** Edit a period
+If you click on a period in the list of periods, the screen below appears.
+
+#+CAPTION: Edit a period
+[[../gfx/edit_period.png]]
+
+There are several characteristics of a period that can be changed here.
+***** Name
+Give a name to a periods, such as LRI, pAV, PVARP, VERP, etc.
+***** Duration
+The duration in msec of the period.
+***** Color
+Choose a different color for each type of period to help distinguish the periods on the ladder.
+***** Resettable
+Normally a period will not be affected by other marks that occur during it.  An example would be the ventricular blanking period, during which signals on the ventricular channel are ignored.  This would be a non-resettable period.  An example of a resettable period would be the lower rate interval of a pacemaker, where the interval is reset every time there is a sensed event.  If an interval is resettable, [[*Period preferences][period preferences]] will determine what happens on screen.  The two options at present are for the period to be /clipped/, which means shortened so that it ends at the resetting mark, or /interrupted/, which means the remainder of the period after the resetting mark is shown with increased translucency.
+***** Offset
+Normally periods are stacked either at the top or bottom of a region, depending on [[*Period preferences][period preferences]].  However you can add an offset so that there is a gap either above or below a period.  You may want to offset a period which is overlapping another period, to show each period more clearly.  Use the counter to offset periods by height units, which are equal to the height of a period.
+**** Copying periods
+You can copy any already created period to selected marks.  First select the marks you want to copy the periods to in Edit mode, then select /Copy periods/ from the /Periods menu/.  Select the periods you want to copy to the selected marks as in the screen image below.
+
+#+CAPTION: Copy periods
+[[../gfx/copy_periods.png]]
+
+**** Delete periods
+Select one or more marks and then select /Delete periods/ to delete the periods associated with these marks.  This action can be undone using the /Undo/ button.
+
 *** Delete mark(s)
 Delete the selected marks.
 
@@ -309,6 +355,26 @@ Show arrows pointing in the direction of conduction.
 The style of new marks added to the ladder.  This can be overridden by the region and mark context menus.
 *** Label description visibility
 Set this to show the label description under the name of the label.
+*** Period preferences
+**** Show periods
+Switch on to make periods visible.  Note that even with this setting on, periods will only be visible if the diagram is calibrated.
+**** Position of periods in region
+Choose whether periods are shown at the top or the bottom of a region.
+**** Period text justification
+Left justify or center the period name in the period rectangle.
+**** Periods overlap marks
+Choose whether marks are visible where they cross periods.  Note that periods with transparency will still show the underlying marks even if this is switched on.
+**** Default period color
+The default color for new periods.  Each period's color can be changed individually when adding or editing periods as described [[*Adding/editing periods][above]].
+**** Period transparency
+Transparency of the period background color.  This can be adjusted to make the period text stand out or just for esthetics.  Note that this affects all periods, but individual period also be adjusted when selecting colors while [[*Adding/editing periods][adding or editing periods]].
+**** Period size
+Choose between a small, medium, or large rectangle size.
+**** Show period border
+Switch on to draw a thin border around the period rectangle.
+**** Reset method
+Select whether a resettable period is /clipped/ or /interrupted/.  A clipped period is shortened when a following mark impinges on it.  An interrupted period is still fully shown, but the part of the rectangle after to the resetting mark is drawn with increased transparency.
+
 *** Hide all marks
 For teaching purposes, it may be useful to hide the ladder marks and just show the ECG image.
 *** Auto-link marks
