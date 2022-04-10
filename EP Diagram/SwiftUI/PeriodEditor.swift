@@ -36,7 +36,7 @@ struct PeriodEditor: View {
                 }
                 Section(header: Text("Duration (msec)")) {
                     HStack {
-                        TextField("Value", value: $period.duration, formatter: Self.numberFormatter)
+                        TextField("Value in msec", value: $period.duration, formatter: Self.numberFormatter)
                             .keyboardType(.numberPad)
                         Stepper("", value: $period.duration, in: 10...2000, step: 1).labelsHidden()
                     }
