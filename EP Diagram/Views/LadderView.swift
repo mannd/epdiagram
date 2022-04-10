@@ -2204,11 +2204,11 @@ final class LadderView: ScaledView {
         //width += markLineWidth / 2.0
         //scaledOriginX -= markLineWidth / 2.0 // make sure mark line is visible if it is vertical
 
-        if textOffset > scaledOriginX {
-            scaledWidth = scaledWidth - (textOffset - scaledOriginX)
-            scaledOriginX = max(scaledOriginX, textOffset)
+        if leftMargin > scaledOriginX {
+            scaledWidth = scaledWidth - (leftMargin - scaledOriginX)
+            scaledOriginX = max(scaledOriginX, leftMargin)
         }
-        if scaledOriginX + scaledWidth < textOffset {
+        if scaledOriginX + scaledWidth < leftMargin {
             return
         }
 
