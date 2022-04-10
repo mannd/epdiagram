@@ -21,15 +21,25 @@ struct PeriodEditor: View {
     @State var resettable = false
     @State var periodColor: Color = Color(Preferences.defaultPeriodColor)
 
+    static var numberFormatter: NumberFormatter = {
+        let formatter = NumberFormatter()
+        formatter.minimum = 10
+        formatter.maximum = 2000
+        return formatter
+    }()
+
     var body: some View {
         NavigationView {
             Form {
                 Section(header: Text("Name")) {
                     TextField(period.name, text: $period.name)
                 }
-                Section(header: Text("Duration")) {
-                    Text("Duration = \(lround(Double( period.duration))) msec")
-                    Slider(value: $period.duration, in: 10...2000)
+                Section(header: Text("Duration (msec)")) {
+                    HStack {
+                        TextField("Value", value: $period.duration, formatter: Self.numberFormatter)
+                            .keyboardType(.numberPad)
+                        Stepper("", value: $period.duration, in: 10...2000, step: 1).labelsHidden()
+                    }
                 }
                 Section(header: Text("Color")) {
                     getColorPicker(title: "Color", selection: Binding(
@@ -47,7 +57,7 @@ struct PeriodEditor: View {
                 Section(header: Text("Offset")) {
                         Stepper(value: $period.offset, in: 0...3, step: 1) {
                             HStack {
-                                Text("Offset = \(period.offset) height units")
+                                Text("\(period.offset) height units")
                             }
                         }
                 }
