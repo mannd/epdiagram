@@ -26,9 +26,9 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         os_log("scene(scene:willConnectTo:options:) - SceneDelegate", log: .lifeCycle, type: .info)
         guard let scene = (scene as? UIWindowScene) else { return }
         if let documentBrowserViewController = window?.rootViewController as? DocumentBrowserViewController {
-            print("rootController is documentBrowserViewController")
             scene.title = L("EP Diagram")
             scene.userActivity = session.stateRestorationActivity ?? NSUserActivity(activityType: AppDelegate.mainActivityType)
+
             documentBrowserViewController.restorationInfo = scene.userActivity?.userInfo
 
             #if targetEnvironment(macCatalyst)
@@ -40,10 +40,10 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
             scene.titlebar?.toolbarStyle = .automatic
             scene.titlebar?.titleVisibility = .visible
             #endif
-            // This doesn't appear needed on Mac or iOS.  openURLContexts is called automatically.
-            // self.scene(scene, openURLContexts: connectionOptions.urlContexts)
+
+        // This doesn't appear needed on Mac or iOS.  openURLContexts is called automatically.
+        // self.scene(scene, openURLContexts: connectionOptions.urlContexts)
         } else if (window?.rootViewController as? MacPreferencesViewController) != nil  {
-            print("rootController is MacPreferencsViewController")
             scene.title = L("Preferences")
             //            scene.userActivity = session.stateRestorationActivity ?? NSUserActivity(activityType: AppDelegate.mainActivityType)
 

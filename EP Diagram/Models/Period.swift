@@ -10,13 +10,44 @@ import UIKit
 import BetterCodable
 import os.log
 
-struct Period {
+struct Period: Equatable, Hashable {
+    private(set) var id = UUID()
+    
+    var name: String = "NEW PERIOD"
+    var duration: CGFloat = 500
+    var color: UIColor = Preferences.defaultPeriodColor
+    var resettable: Bool = false
+    var offset: Int = 0
+}
 
-    var name: String = ""
-    var duration: CGFloat = 0
-    var color: UIColor = UIColor.green
+extension Period {
+    /// Tests to see if a period is similar to another period, i.e. identical except for id.
+    /// - Parameter period: Period to be tested for similarity
+    /// - Returns: True if periods similar
+    func isSimilarTo(period: Period) -> Bool {
+        return name == period.name
+                && duration == period.duration
+                && color == period.color
+                && resettable == period.resettable
+                && offset == period.offset
+    }
 
-    // height depends on Region height and number of Periods in the region.
+    /// Tests to see if two arrays of Period are similar.
+    ///
+    /// Arrays with different counts are not similar.  Two empty arrays are similar.
+    /// - Parameters:
+    ///   - p1: First array of Period
+    ///   - p2: Second array of Period
+    /// - Returns: True if arrays are similar
+    static func periodsAreSimilar(_ p1: [Period], _ p2: [Period]) -> Bool {
+        guard p1.count == p2.count else { return false }
+        for i in 0..<p1.count {
+            if !p1[i].isSimilarTo(period: p2[i]) {
+                return false
+            }
+        }
+        return true
+    }
 }
 
 extension Period: Codable {
@@ -24,6 +55,8 @@ extension Period: Codable {
         case name
         case duration
         case color
+        case resettable
+        case offset
     }
 
     init(from decoder: Decoder) throws {
@@ -31,6 +64,8 @@ extension Period: Codable {
 
         name = try container.decode(String.self, forKey: .name)
         duration = try CGFloat(container.decode(Float.self, forKey: .duration))
+        resettable = try Bool(container.decode(Bool.self, forKey: .resettable))
+        offset = try container.decode(Int.self, forKey: .offset)
 
         let colorData = try container.decode(Data.self, forKey: .color)
         color = try NSKeyedUnarchiver.unarchiveTopLevelObjectWithData(colorData) as? UIColor ?? UIColor.black
@@ -40,8 +75,18 @@ extension Period: Codable {
         var container = encoder.container(keyedBy: CodingKeys.self)
         try container.encode(name, forKey: .name)
         try container.encode(duration, forKey: .duration)
+        try container.encode(resettable, forKey: .resettable)
+        try container.encode(offset, forKey: .offset)
 
         let colorData = try NSKeyedArchiver.archivedData(withRootObject: color, requiringSecureCoding: false)
         try container.encode(colorData, forKey: .color)
+    }
+}
+
+final class PeriodsModelController: ObservableObject {
+    @Published var periods: [Period] = []
+
+    init(periods: [Period]) {
+        self.periods = periods
     }
 }

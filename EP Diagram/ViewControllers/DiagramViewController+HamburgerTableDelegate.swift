@@ -254,11 +254,9 @@ extension DiagramViewController: HamburgerTableDelegate, UIImagePickerController
     #if DEBUG
     func debug() {
         os_log("debug()", log: .debugging, type: .debug)
-        for key in UserDefaults.standard.dictionaryRepresentation().keys {
-            if key.starts(with: "AccessDirectory:") {
-                print(key)
-                UserDefaults.standard.removeObject(forKey: key)
-            }
+        let periods = ladderView.ladder.getUniqueLadderPeriods()
+        for period in periods {
+            print(period)
         }
     }
     #else

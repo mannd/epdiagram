@@ -16,7 +16,7 @@ final class CursorView: ScaledView {
 
     var calibration: Calibration?
 
-    var lineWidth: CGFloat = 1
+    var lineWidth: CGFloat = CGFloat(Preferences.cursorLineWidth)
     var caliperLineWidth: CGFloat {
         get { caliper.lineWidth }
         set { caliper.lineWidth = newValue }

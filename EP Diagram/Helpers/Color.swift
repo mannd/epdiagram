@@ -37,7 +37,18 @@ extension Color {
 
         uiColor.getRed(&red, green: &green, blue: &blue, alpha: &alpha)
         return ("\(red),\(green),\(blue),\(alpha)")
+    }
 
+    static func getColorPicker(title: LocalizedStringKey, selection: Binding<Color>) -> some View {
+    #if targetEnvironment(macCatalyst)
+        return HStack {
+            Text(title)
+            Spacer()
+            ColorPicker("", selection: selection).frame(maxWidth: 100)
+        }
+    #else
+        return ColorPicker(title, selection: selection)
+    #endif
     }
 }
 

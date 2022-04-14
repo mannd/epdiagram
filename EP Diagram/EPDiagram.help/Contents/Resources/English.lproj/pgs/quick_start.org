@@ -32,7 +32,7 @@
 - Click the *Import image* toolbar button, or select the *Diagram | Import Image* main menu item to import an image from the Photos app or from your files.  You can also drag and drop an image onto the window.
 - Use gestures to pan and zoom the image, or click on the zoom toolbar buttons.
 ** Create marks
-- Click on the image or the ladder grid to create /marks/, which are the lines that are drawn on the ladder.  Use the /cursor/ (the vertical line extending from the mark to the top of the screen) to align marks with the ECG waveforms.  Click away from the cursor to hide the cursor.  Click on a mark to bring back the cursor and each click changes the /anchor/ point of the mark from middle to proximal to distal.
+- Click on the image or the ladder grid to create /marks/, which are the lines that are drawn on the ladder.  Use the /cursor/ (the vertical line extending from the mark to the top of the screen) to align marks with the ECG waveforms.  Click away from the cursor to hide the cursor.  Click on a mark to bring back the cursor.  Each click changes the /anchor/ point of the mark from middle to proximal to distal.
 - Double-click on a mark to delete it.  Double-click anywhere else to create a mark.  Double-clicking is a fast way to create marks.
 - Marks appear in the /active region/, shown by a tinted background.  If you click on a different region the marks will appear in that region which will become the new active region.  Clicking on the label of a region will also activate or deactivate it.
 - A click and drag in a region will also create a mark.
@@ -43,15 +43,15 @@
 - Marks that are placed end to end will automatically link up and move together the next time you move one of them.
 ** Calibrate the diagram
 - Optionally, click the *Calibrate* button to show a caliper that can be used to calibrate the diagram to a standard interval of 1000 msec.
-- After calibration, measurements will appear on the diagram, provided the *Show intervals* and *Show conduction times* app preferences are turned on.
+- After calibration, measurements and periods will appear on the diagram, provided the *Show intervals* and *Show conduction times* app preferences are turned on.
 ** Connect marks
 - You can draw and move marks to connect them, but it is easier to use the *Connect* button.
 - After clicking the *Connect* button, click pairs of marks separated by a region to connect the marks with a new mark.
 - Click from a mark to an adjacent region to draw a mark that blocks in that region.
 ** Edit the diagram
-- Click the *Edit* button to unlock techniques for sprucing up your diagram.
+- Click the *Edit* button to unlock techniques for fine-tuning your diagram.
 - Click to select and deselect marks or regions, or click and drag to select zones.
-- Control-click on the ladder after selecting marks or regions to show a menu that can be used to customize the appearance of the marks, including their style, emphasis, block, impulse origin, etc.  You can also add groups of marks and even periods of regular rhythm or fibrillation to zones and regions using this menu.  
+- Control-click on the ladder after selecting marks or regions to show a menu that can be used to customize the appearance of the marks, including their style, emphasis, block, impulse origin, etc.  You can also add groups of marks and even periods of regular rhythm or fibrillation to zones and regions using this menu.  This menu also allows you to add periods to your diagram.
 ** Undo/Redo
 - Practically anything you do can be undone or redone and these changes are automatically saved.  You /do not/ need to save your diagram.  All changes are saved automatically.
 ** Other features are available in the main menu

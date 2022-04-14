@@ -11,9 +11,6 @@ import SwiftUI
 import UniformTypeIdentifiers
 import Photos
 import os.log
-//#if targetEnvironment(macCatalyst)
-//import Dynamic
-//#endif
 
 final class DiagramViewController: UIViewController {
     // For debugging only
@@ -224,7 +221,7 @@ final class DiagramViewController: UIViewController {
     lazy var blockAutoAction = UIAction(title: L("Auto block")) { action in
         self.ladderView.setSelectedMarksBlockSetting(value: .auto)
     }
-    lazy var blockMenu = UIMenu(title: L("Block..."), image: UIImage(systemName: "hand.raised"), children: [self.blockProximalAction, self.blockDistalAction, self.blockNoneAction, self.blockAutoAction])
+    lazy var blockMenu = UIMenu(title: addEllipsisIfNeeded(L("Block")), image: UIImage(systemName: "hand.raised"), children: [self.blockProximalAction, self.blockDistalAction, self.blockNoneAction, self.blockAutoAction])
 
     lazy var impulseOriginProximalAction = UIAction(title: L("Proximal impulse origin")) { _ in
         self.ladderView.setSelectedMarksImpulseOriginSetting(value: .proximal)
@@ -241,7 +238,7 @@ final class DiagramViewController: UIViewController {
     lazy var impulseOriginAutoAction = UIAction(title: L("Auto impulse origin")) { _ in
         self.ladderView.setSelectedMarksImpulseOriginSetting(value: .auto)
     }
-    lazy var impulseOriginMenu = UIMenu(title: L("Impulse origin..."), image: UIImage(systemName: "asterisk.circle"), children: [self.impulseOriginProximalAction, self.impulseOriginDistalAction, self.impulseOriginNoneAction, self.impulseOriginAutoAction])
+    lazy var impulseOriginMenu = UIMenu(title: addEllipsisIfNeeded(L("Impulse origin")), image: UIImage(systemName: "asterisk.circle"), children: [self.impulseOriginProximalAction, self.impulseOriginDistalAction, self.impulseOriginNoneAction, self.impulseOriginAutoAction])
 
     // Mark style
     lazy var solidAction = UIAction(title: L("Solid")) { action in
@@ -253,7 +250,7 @@ final class DiagramViewController: UIViewController {
     lazy var dottedAction = UIAction(title: L("Dotted")) { action in
         self.ladderView.setSelectedMarksStyle(style: .dotted)
     }
-    lazy var styleMenu = UIMenu(title: L("Style..."), image: UIImage(systemName: "scribble"), children: [self.solidAction, self.dashedAction, self.dottedAction])
+    lazy var styleMenu = UIMenu(title: addEllipsisIfNeeded(L("Style")), image: UIImage(systemName: "scribble"), children: [self.solidAction, self.dashedAction, self.dottedAction])
 
     // Mark labels
     lazy var leftLabelMarkAction = UIAction(title: L("Left")) { action in
@@ -265,7 +262,7 @@ final class DiagramViewController: UIViewController {
     lazy var distalLabelMarkAction = UIAction(title: L("Distal")) { action in
         self.ladderView.setSelectedMarksLabel(labelPosition: .distal)
     }
-    lazy var labelMarkMenu = UIMenu(title: L("Label..."), image: UIImage(systemName: "pencil"), children: [self.leftLabelMarkAction, self.proximalLabelMarkAction, self.distalLabelMarkAction])
+    lazy var labelMarkMenu = UIMenu(title: L("Label"), image: UIImage(systemName: "pencil"), children: [self.leftLabelMarkAction, self.proximalLabelMarkAction, self.distalLabelMarkAction])
 
     lazy var boldEmphasisAction = UIAction(title: L("Bold")) { action in
         self.ladderView.setSelectedMarksEmphasis(emphasis: .bold)
@@ -273,7 +270,7 @@ final class DiagramViewController: UIViewController {
     lazy var normalEmphasisAction = UIAction(title: L("Normal")) { action in
         self.ladderView.setSelectedMarksEmphasis(emphasis: .normal)
     }
-    lazy var emphasisMenu = UIMenu(title: L("Emphasis..."), image: UIImage(systemName: "bold"), children: [self.normalEmphasisAction, self.boldEmphasisAction])
+    lazy var emphasisMenu = UIMenu(title: addEllipsisIfNeeded(L("Emphasis")), image: UIImage(systemName: "bold"), children: [self.normalEmphasisAction, self.boldEmphasisAction])
 
     // Region style
     lazy var regionSolidStyleAction = UIAction(title: L("Solid")) { action in
@@ -288,7 +285,7 @@ final class DiagramViewController: UIViewController {
     lazy var regionInheritedStyleAction = UIAction(title: L("Default")) { action in
         self.ladderView.setSelectedRegionsStyle(style: .inherited)
     }
-    lazy var regionStyleMenu = UIMenu(title: L("New mark style..."), image: UIImage(systemName: "scribble"), children: [self.regionSolidStyleAction, self.regionDashedStyleAction, self.regionDottedStyleAction, self.regionInheritedStyleAction])
+    lazy var regionStyleMenu = UIMenu(title: L("New mark style"), image: UIImage(systemName: "scribble"), children: [self.regionSolidStyleAction, self.regionDashedStyleAction, self.regionDottedStyleAction, self.regionInheritedStyleAction])
 
     // Manipulate marks
     lazy var slantProximalPivotAction = UIAction(title: L("Slant proximal pivot point")) { action in
@@ -299,7 +296,7 @@ final class DiagramViewController: UIViewController {
         self.activeEndpoint = .distal
         self.showSlantToolbar()
     }
-    lazy var slantMenu = UIMenu(title: L("Slant mark(s)..."), image: UIImage(systemName: "line.diagonal"), children: [self.slantProximalPivotAction, self.slantDistalPivotAction])
+    lazy var slantMenu = UIMenu(title: addEllipsisIfNeeded(L("Slant mark(s)")), image: UIImage(systemName: "line.diagonal"), children: [self.slantProximalPivotAction, self.slantDistalPivotAction])
 
     lazy var adjustProximalYAction = UIAction(title: L("Adjust proximal mark end(s)")) { action in
         self.activeEndpoint = .proximal
@@ -321,7 +318,7 @@ final class DiagramViewController: UIViewController {
         self.adjustment = .trim
         self.showAdjustYToolbar()
     }
-    lazy var adjustYMenu = UIMenu(title: L("Adjust mark ends..."), image: UIImage(systemName: "scissors"), children: [adjustProximalYAction, adjustDistalYAction, trimProximalYAction, trimDistalYAction])
+    lazy var adjustYMenu = UIMenu(title: L("Adjust mark ends"), image: UIImage(systemName: "scissors"), children: [adjustProximalYAction, adjustDistalYAction, trimProximalYAction, trimDistalYAction])
 
 
     lazy var straightenToProximalAction = UIAction(title: L("Straighten mark to proximal endpoint")) { action in
@@ -330,10 +327,10 @@ final class DiagramViewController: UIViewController {
     lazy var straightenToDistalAction = UIAction(title: L("Straighten mark to distal endpoint")) { action in
         self.ladderView.straightenToEndpoint(.distal)
     }
-    lazy var straightenMenu = UIMenu(title: L("Straighten mark(s)..."), image: UIImage(systemName: "arrow.up.arrow.down"), children: [self.straightenToProximalAction, self.straightenToDistalAction])
+    lazy var straightenMenu = UIMenu(title: addEllipsisIfNeeded(L("Straighten mark(s)")), image: UIImage(systemName: "arrow.up.arrow.down"), children: [self.straightenToProximalAction, self.straightenToDistalAction])
 
     // Rhythm
-    lazy var rhythmAction = UIAction(title: L("Rhythm..."), image: UIImage(systemName: "waveform.path.ecg")) { action in
+    lazy var rhythmAction = UIAction(title: L("Rhythm"), image: UIImage(systemName: "waveform.path.ecg")) { action in
         do {
             try self.ladderView.checkForRhythm()
             self.performShowRhythmSegue()
@@ -342,7 +339,7 @@ final class DiagramViewController: UIViewController {
         }
     }
 
-    lazy var repeatCLMenu = UIMenu(title: L("Repeat CL..."), image: UIImage(systemName: "arrowtriangle.left.and.line.vertical.and.arrowtriangle.right"), children: [self.repeatCLBeforeAction, self.repeatCLAfterAction, self.repeatCLBothAction])
+    lazy var repeatCLMenu = UIMenu(title: L("Repeat CL"), image: UIImage(systemName: "arrowtriangle.left.and.line.vertical.and.arrowtriangle.right"), children: [self.repeatCLBeforeAction, self.repeatCLAfterAction, self.repeatCLBothAction])
 
     lazy var repeatCLAfterAction = UIAction(title: L("Repeat CL after")) { _ in
         self.repeatCL(time: .after)
@@ -372,6 +369,18 @@ final class DiagramViewController: UIViewController {
         self.repeatPattern()
     }
 
+    /// Add an ellipsis to a menu title for iOS version < 15
+    ///
+    /// iOS 15 and mac catalyst add a ">" character to submenu titles, so an ellipsis is redundant.
+    /// - Parameter string: String to modify
+    /// - Returns: String with added ellipsis if needed
+    private func addEllipsisIfNeeded(_ string: String) -> String {
+        if #unavailable(iOS 15) {
+            return string + "..."
+        }
+        return string
+    }
+
     private func repeatPattern() {
         do {
             self.ladderView.setPatternMarks()
@@ -383,7 +392,7 @@ final class DiagramViewController: UIViewController {
         }
     }
 
-    lazy var adjustCLAction = UIAction(title: L("Adjust CL..."), image: UIImage(systemName: "slider.horizontal.below.rectangle")) { _  in
+    lazy var adjustCLAction = UIAction(title: L("Adjust CL"), image: UIImage(systemName: "slider.horizontal.below.rectangle")) { _  in
         do {
             let meanCL = try self.ladderView.meanCL() 
             self.showAdjustCLToolbar(rawValue: meanCL)
@@ -392,7 +401,7 @@ final class DiagramViewController: UIViewController {
         }
     }
 
-    lazy var moveAction = UIAction(title: L("Move marks..."), image: UIImage(systemName: "arrow.right.arrow.left")) { _ in
+    lazy var moveAction = UIAction(title: L("Move marks"), image: UIImage(systemName: "arrow.right.arrow.left")) { _ in
         do {
             try self.ladderView.checkForMovement()
             self.showMoveMarksToolbar()
@@ -400,6 +409,31 @@ final class DiagramViewController: UIViewController {
             self.showError(title: L("Error Moving Marks"), error: error)
         }
     }
+
+    // Period actions
+    lazy var editPeriodsAction = UIAction(title: L("Add/edit periods"), image: UIImage(systemName: "plus.rectangle.on.rectangle")) { _ in
+        do {
+            try self.ladderView.checkForEditablePeriods()
+            self.performEditPeriodsSegue()
+        } catch {
+            self.showError(title: L("Error Editing Periods"), error: error)
+        }
+    }
+
+    lazy var copyPeriodsAction = UIAction(title: "Copy periods", image: UIImage(systemName: "rectangle.stack")) { _ in
+        do {
+            try self.ladderView.checkForCopyablePeriods()
+            self.performSelectPeriodsSegue()
+        } catch {
+            self.showError(title: L("Error Copying Periods"), error: error)
+        }
+    }
+
+    lazy var deletePeriodsAction = UIAction(title: L("Delete period(s)"), image: UIImage(systemName: "rectangle.on.rectangle.slash"), attributes: .destructive) { _ in
+        self.ladderView.deletePeriods()
+    }
+
+    lazy var periodsMenu = UIMenu(title: addEllipsisIfNeeded(L("Periods")), image: UIImage(systemName: "rectangle.on.rectangle"), children: [self.editPeriodsAction, self.copyPeriodsAction, self.deletePeriodsAction])
 
     // Label actions
     lazy var editLabelAction = UIAction(title: L("Edit label"), image: UIImage(systemName: "pencil")) { action in
@@ -428,7 +462,7 @@ final class DiagramViewController: UIViewController {
         guard let selectedRegion = self.ladderView.selectedLabelRegion() else { return }
         self.ladderView.setRegionHeight(4, forRegion: selectedRegion)
     }
-    lazy var regionHeightMenu = UIMenu(title: L("Region height..."), image: UIImage(systemName: "arrow.up.arrow.down.square"), children: [self.oneRegionHeightAction, self.twoRegionHeightAction, self.threeRegionHeightAction, self.fourRegionHeightAction])
+    lazy var regionHeightMenu = UIMenu(title: L("Region height"), image: UIImage(systemName: "arrow.up.arrow.down.square"), children: [self.oneRegionHeightAction, self.twoRegionHeightAction, self.threeRegionHeightAction, self.fourRegionHeightAction])
 
     // Delete or add region
     lazy var addRegionAboveAction = UIAction(title: L("Add region above")) { action in
@@ -437,13 +471,13 @@ final class DiagramViewController: UIViewController {
     lazy var addRegionBelowAction = UIAction(title: L("Add region below")) { action in
         self.ladderView.addRegion(relation: .after)
     }
-    lazy var addRegionMenu = UIMenu(title: L("Add Region..."), image: UIImage(systemName: "plus"), children: [self.addRegionAboveAction, self.addRegionBelowAction])
+    lazy var addRegionMenu = UIMenu(title: addEllipsisIfNeeded(L("Add Region")), image: UIImage(systemName: "plus"), children: [self.addRegionAboveAction, self.addRegionBelowAction])
 
     lazy var removeRegionAction = UIAction(title: L("Remove region"), image: UIImage(systemName: "minus")) { action in
         self.ladderView.removeRegion()
     }
 
-    lazy var markMenu = UIMenu(title: L("Mark Menu"), children: [self.styleMenu, self.emphasisMenu, self.impulseOriginMenu, self.blockMenu, self.labelMarkMenu, self.straightenMenu, self.slantMenu, self.adjustYMenu, self.moveAction, self.adjustCLAction, self.rhythmAction, self.repeatCLMenu, self.copyMarksAction, self.repeatPatternAction, self.unlinkAction, self.snapAction, self.deleteAction])
+    lazy var markMenu = UIMenu(title: L("Mark Menu"), children: [self.styleMenu, self.emphasisMenu, self.impulseOriginMenu, self.blockMenu, self.labelMarkMenu, self.straightenMenu, self.slantMenu, self.adjustYMenu, self.moveAction, self.adjustCLAction, self.rhythmAction, self.repeatCLMenu, self.copyMarksAction, self.repeatPatternAction, self.unlinkAction, self.snapAction, self.periodsMenu, self.deleteAction])
 
     lazy var labelMenu = [self.regionStyleMenu, self.editLabelAction, self.addRegionMenu, self.removeRegionAction, self.regionHeightMenu, self.adjustLeftMarginAction]
 
@@ -642,7 +676,6 @@ final class DiagramViewController: UIViewController {
         imageScrollView.contentInset = UIEdgeInsets(top: 0, left: leftMargin - offset.minX, bottom: 0, right: 0)
         updateToolbarButtons()
         updateUndoRedoButtons()
-        showMainToolbar()
         resetViews(setActiveRegion: false)
     }
 
@@ -652,8 +685,7 @@ final class DiagramViewController: UIViewController {
     }
 
     deinit {
-
-        print("*****DiagramViewController deinit()******")
+        os_log("deinit - DiagramViewController", log: .debugging, type: .debug)
     }
 
     func addIOSDirectoryToSandbox() {
@@ -661,7 +693,7 @@ final class DiagramViewController: UIViewController {
     }
 
     override func updateUserActivityState(_ activity: NSUserActivity) {
-//        os_log("debug: diagramViewController updateUserActivityState called", log: .debugging, type: .debug)
+        //os_log("debug: diagramViewController updateUserActivityState called", log: .debugging, type: .debug)
 
         super.updateUserActivityState(activity)
 
@@ -1455,6 +1487,18 @@ final class DiagramViewController: UIViewController {
         return helpViewController
     }
 
+    @IBSegueAction func performSelectPeriodsAction(_ coder: NSCoder) -> UIViewController? {
+        let periodSelector = PeriodSelector(dismissAction: ladderView.setPeriods, periods: .constant(ladderView.ladder.getUniqueLadderPeriods()))
+        let hostingController = UIHostingController(coder: coder, rootView: periodSelector)
+        return hostingController
+    }
+    
+    @IBSegueAction func performEditPeriodsAction(_ coder: NSCoder) -> UIViewController? {
+        let periodsEditor = PeriodListEditor(dismissAction: applyPeriods, periodsModelController: ladderView.periodsModelController)
+        let hostingController = UIHostingController(coder: coder, rootView: periodsEditor)
+        return hostingController
+    }
+
     @IBSegueAction func performRhythmSegueAction(_ coder: NSCoder) -> UIViewController? {
         // Have to provide dismiss action to SwiftUI modal view.  It won't dismiss itself.
         let rhythmView = RhythmView(dismissAction: applyRhythm(rhythm:cancel:))
@@ -1484,6 +1528,12 @@ final class DiagramViewController: UIViewController {
         self.dismiss(animated: true, completion: nil)
     }
 
+    func applyPeriods(periods: [Period], cancel: Bool) {
+        if !cancel {
+             ladderView.applyPeriods(periods)
+        }
+    }
+
     func performShowRhythmSegue() {
         performSegue(withIdentifier: "showRhythmSegue", sender: self)
     }
@@ -1492,9 +1542,13 @@ final class DiagramViewController: UIViewController {
         performSegue(withIdentifier: "selectLadderSegue", sender: self)
     }
 
-    //    func performEditLadderSegue() {
-    //        performSegue(withIdentifier: "EditLadderSegue", sender: self)
-    //    }
+    func performEditPeriodsSegue() {
+        performSegue(withIdentifier: "editPeriodsSegue", sender: self)
+    }
+
+    func performSelectPeriodsSegue() {
+        performSegue(withIdentifier: "selectPeriodsSegue", sender: self)
+    }
 
     func performShowSampleSelectorSegue() {
         performSegue(withIdentifier: "showSampleSelectorSegue", sender: self)
@@ -1654,7 +1708,7 @@ extension DiagramViewController {
         ladderView.showMarkLabels = UserDefaults.standard.bool(forKey: Preferences.showMarkLabelsKey)
         ladderView.snapMarks = UserDefaults.standard.bool(forKey: Preferences.snapMarksKey)
         ladderView.defaultMarkStyle = Mark.Style(rawValue: UserDefaults.standard.integer(forKey: Preferences.markStyleKey)) ?? .solid
-        ladderView.showLabelDescription = TextVisibility(rawValue: UserDefaults.standard.integer(forKey: Preferences.labelDescriptionVisibilityKey)) ?? .invisible
+        ladderView.labelDescriptionVisibility = TextVisibility(rawValue: UserDefaults.standard.integer(forKey: Preferences.labelDescriptionVisibilityKey)) ?? .invisible
         playSounds = UserDefaults.standard.bool(forKey: Preferences.playSoundsKey)
         marksAreHidden = UserDefaults.standard.bool(forKey: Preferences.hideMarksKey)
         ladderView.doubleLineBlockMarker = UserDefaults.standard.bool(forKey: Preferences.doubleLineBlockMarkerKey)
@@ -1663,6 +1717,14 @@ extension DiagramViewController {
         ladderView.hideZeroCT = UserDefaults.standard.bool(forKey: Preferences.hideZeroCTKey)
         cursorView.markerLineWidth = CGFloat(UserDefaults.standard.integer(forKey: Preferences.markerLineWidthKey))
         ladderView.showPeriods = UserDefaults.standard.bool(forKey: Preferences.showPeriodsKey)
+        ladderView.periodPosition = PeriodPosition(rawValue: UserDefaults.standard.integer(forKey: Preferences.periodPositionKey)) ?? .bottom
+        ladderView.periodTransparency = CGFloat(UserDefaults.standard.float(forKey: Preferences.periodTransparencyKey))
+        ladderView.periodTextJustification = TextJustification(rawValue: UserDefaults.standard.integer(forKey: Preferences.periodTextJustificationKey)) ?? .left
+        ladderView.periodsOverlapMarks = UserDefaults.standard.bool(forKey: Preferences.periodsOverlapMarksKey)
+        ladderView.periodSize = PeriodSize(rawValue: UserDefaults.standard.integer(forKey: Preferences.periodSizeKey)) ?? .small
+        ladderView.periodShowBorder = UserDefaults.standard.bool(forKey: Preferences.periodShowBorderKey)
+        ladderView.periodResetMethod = PeriodResetMethod(rawValue: UserDefaults.standard.integer(forKey: Preferences.periodResetMethodKey)) ?? .clip
+        ladderView.intervalGrouping = IntervalGrouping(rawValue: UserDefaults.standard.integer(forKey: Preferences.intervalGroupingKey)) ?? .fullInterior
 
         // Colors
         if let caliperColorName = UserDefaults.standard.string(forKey: Preferences.caliperColorNameKey) {
@@ -1688,6 +1750,9 @@ extension DiagramViewController {
         }
         if let markerColorName = UserDefaults.standard.string(forKey: Preferences.markerColorNameKey) {
             cursorView.markerColor = UIColor.convertColorName(markerColorName) ?? Preferences.defaultMarkerColor
+        }
+        if let periodColorName = UserDefaults.standard.string(forKey: Preferences.periodColorNameKey) {
+            ladderView.periodColor = UIColor.convertColorName(periodColorName) ?? Preferences.defaultPeriodColor
         }
         ladderView.updateLadderIntervals()
         // updatePreferences() can be called in the background, so update the UI on the main thread.

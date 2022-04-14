@@ -50,6 +50,16 @@ final class Ladder: NSObject, Codable {
     override var debugDescription: String { "Ladder ID " + id.debugDescription }
     private var registry: [UUID: Mark] = [:] // marks are registered for quick lookup
 
+    var lastRegion: Region? {
+        guard regions.count > 0 else { return nil }
+        return regions[regions.count - 1]
+    }
+
+    var firstRegion: Region? {
+        guard regions.count > 0 else { return nil }
+        return regions[0]
+    }
+
     init(template: LadderTemplate) {
         print("*****Ladder init*****")
         os_log("init ladder from template", log: .action, type: .info)
@@ -570,8 +580,32 @@ final class Ladder: NSObject, Codable {
         return Ladder(template: LadderTemplate.defaultTemplate())
     }
 
+
     static func freshLadder(fromLadder ladder: Ladder) -> Ladder {
         return Ladder(template: ladder.template )
+    }
+
+    // MARK: - Periods
+
+    // FIXME: avoid duplicate periods where only ids are different.
+    func getUniqueLadderPeriods() -> [Period] {
+        var periods: Set<Period> = []
+        for mark in allMarks() {
+            for period in mark.periods {
+                periods.insert(period)
+            }
+        }
+        return Array(periods)
+    }
+
+    func getPeriodsFromIDs(periodIDSet: Set<UUID>, periods: [Period]) -> [Period] {
+        var foundPeriods: [Period] = []
+        for id in periodIDSet {
+            if let found = periods.first(where: { $0.id == id }) {
+                foundPeriods.append(found)
+            }
+        }
+        return foundPeriods
     }
 
     // MARK: - Debugging
@@ -639,7 +673,7 @@ final class Ladder: NSObject, Codable {
 
 // MARK: - enums
 
-// Is a mark in the region before, same region, region after, or farther away?
+/// Is a mark in the region before, same region, region after, or farther away?
 enum RegionRelation {
     case before
     case same
@@ -647,8 +681,26 @@ enum RegionRelation {
     case distant
 }
 
+/// Before, after, or both before and after a position along the time axis
 enum TemporalRelation {
     case before
     case after
     case both
+}
+
+/// Determine where periods are shown in region.
+enum PeriodPosition: Int, Codable, CustomStringConvertible, CaseIterable, Identifiable {
+    case top
+    case bottom
+
+    var id: PeriodPosition { self }
+
+    var description: String {
+        switch self {
+        case .top:
+            return L("Top")
+        case .bottom:
+            return L("Bottom")
+        }
+    }
 }

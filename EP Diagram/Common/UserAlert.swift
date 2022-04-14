@@ -9,6 +9,7 @@
 import UIKit
 import OSLog
 
+/// Static dialog functions
 enum UserAlert {
     // UI alerts
     static func showMessage(viewController: UIViewController, title: String, message: String) {

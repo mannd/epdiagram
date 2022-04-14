@@ -26,10 +26,12 @@
 		8E25A9B122E5505200D62E18 /* LadderViewTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8E25A9B022E5505200D62E18 /* LadderViewTests.swift */; };
 		8E25A9B322E5515D00D62E18 /* LadderTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8E25A9B222E5515D00D62E18 /* LadderTests.swift */; };
 		8E2BA1D024A3BDD7002D997F /* PreferencesView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8E2BA1CF24A3BDD7002D997F /* PreferencesView.swift */; };
+		8E33574A27EC82C700D662C0 /* PeriodTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8E33574927EC82C700D662C0 /* PeriodTests.swift */; };
 		8E33927B262E6DE6002A7447 /* Preferences.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 8E33927A262E6DE6002A7447 /* Preferences.storyboard */; platformFilter = maccatalyst; };
 		8E339280262E7655002A7447 /* MacPreferencesViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8E33927F262E7655002A7447 /* MacPreferencesViewController.swift */; };
 		8E35924924BE9B27001E23D5 /* DiagramIO.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8E35924824BE9B27001E23D5 /* DiagramIO.swift */; };
 		8E36B13627B054E900FFAFA6 /* Comparable+clamped.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8E36B13527B054E900FFAFA6 /* Comparable+clamped.swift */; };
+		8E37FDED27F29E9F00A67EA0 /* PeriodSelector.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8E37FDEC27F29E9F00A67EA0 /* PeriodSelector.swift */; };
 		8E3AD1372459CABF0085BDD4 /* LocationInLadder.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8E3AD1362459CABF0085BDD4 /* LocationInLadder.swift */; };
 		8E3C911E2602FA02001A14BA /* IntervalTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8E3C911D2602FA02001A14BA /* IntervalTests.swift */; };
 		8E4086E425F30383005F53CB /* RhythmView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8E4086E325F30383005F53CB /* RhythmView.swift */; };
@@ -88,6 +90,8 @@
 		8E9B8045228347DE008873BB /* Region.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8E9B8044228347DE008873BB /* Region.swift */; };
 		8E9B804722834870008873BB /* Ladder.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8E9B804622834870008873BB /* Ladder.swift */; };
 		8E9F0984253CF483009BC968 /* UINavigationController+gestureRecognizerShouldBegin.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8E9F0983253CF483009BC968 /* UINavigationController+gestureRecognizerShouldBegin.swift */; };
+		8E9F334D27CEA0450047F6A7 /* PeriodEditor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8E9F334C27CEA0450047F6A7 /* PeriodEditor.swift */; };
+		8E9F334F27CEA0660047F6A7 /* PeriodListEditor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8E9F334E27CEA0660047F6A7 /* PeriodListEditor.swift */; };
 		8EA444C02476E471005B5452 /* LadderSelector.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8EA444BF2476E471005B5452 /* LadderSelector.swift */; };
 		8EACC27C259E47C500F0BF42 /* ImageScrollView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8EACC27B259E47C500F0BF42 /* ImageScrollView.swift */; };
 		8EADC2A924D64E1200C5D3D8 /* SampleSelector.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8EADC2A824D64E1200C5D3D8 /* SampleSelector.swift */; };
@@ -177,10 +181,12 @@
 		8E25A9B022E5505200D62E18 /* LadderViewTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LadderViewTests.swift; sourceTree = "<group>"; };
 		8E25A9B222E5515D00D62E18 /* LadderTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LadderTests.swift; sourceTree = "<group>"; };
 		8E2BA1CF24A3BDD7002D997F /* PreferencesView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PreferencesView.swift; sourceTree = "<group>"; };
+		8E33574927EC82C700D662C0 /* PeriodTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PeriodTests.swift; sourceTree = "<group>"; };
 		8E33927A262E6DE6002A7447 /* Preferences.storyboard */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; path = Preferences.storyboard; sourceTree = "<group>"; };
 		8E33927F262E7655002A7447 /* MacPreferencesViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MacPreferencesViewController.swift; sourceTree = "<group>"; };
 		8E35924824BE9B27001E23D5 /* DiagramIO.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DiagramIO.swift; sourceTree = "<group>"; };
 		8E36B13527B054E900FFAFA6 /* Comparable+clamped.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Comparable+clamped.swift"; sourceTree = "<group>"; };
+		8E37FDEC27F29E9F00A67EA0 /* PeriodSelector.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PeriodSelector.swift; sourceTree = "<group>"; };
 		8E3AD1362459CABF0085BDD4 /* LocationInLadder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocationInLadder.swift; sourceTree = "<group>"; };
 		8E3C911D2602FA02001A14BA /* IntervalTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IntervalTests.swift; sourceTree = "<group>"; };
 		8E4086E325F30383005F53CB /* RhythmView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RhythmView.swift; sourceTree = "<group>"; };
@@ -247,6 +253,8 @@
 		8E9B8044228347DE008873BB /* Region.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Region.swift; sourceTree = "<group>"; };
 		8E9B804622834870008873BB /* Ladder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Ladder.swift; sourceTree = "<group>"; };
 		8E9F0983253CF483009BC968 /* UINavigationController+gestureRecognizerShouldBegin.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "UINavigationController+gestureRecognizerShouldBegin.swift"; sourceTree = "<group>"; };
+		8E9F334C27CEA0450047F6A7 /* PeriodEditor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PeriodEditor.swift; sourceTree = "<group>"; };
+		8E9F334E27CEA0660047F6A7 /* PeriodListEditor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PeriodListEditor.swift; sourceTree = "<group>"; };
 		8EA444BF2476E471005B5452 /* LadderSelector.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LadderSelector.swift; sourceTree = "<group>"; };
 		8EACC27B259E47C500F0BF42 /* ImageScrollView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImageScrollView.swift; sourceTree = "<group>"; };
 		8EADC2A824D64E1200C5D3D8 /* SampleSelector.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SampleSelector.swift; sourceTree = "<group>"; };
@@ -446,6 +454,7 @@
 				8EF8B5B62330739F00ADB77A /* ViewControllerTests.swift */,
 				8E487B7D25F9C55A002FFC1B /* CalibrationTests.swift */,
 				8E3C911D2602FA02001A14BA /* IntervalTests.swift */,
+				8E33574927EC82C700D662C0 /* PeriodTests.swift */,
 			);
 			path = "EP DiagramTests";
 			sourceTree = "<group>";
@@ -493,13 +502,13 @@
 				8E3AD1362459CABF0085BDD4 /* LocationInLadder.swift */,
 				8E9B8042228345B5008873BB /* Mark.swift */,
 				8E15013624F2C7CF000CF90E /* Mode.swift */,
+				8E08CB1726E1A1AE008B730D /* Period.swift */,
 				8E7CCC2A248C30A300018D2C /* Preferences.swift */,
 				8E9B8044228347DE008873BB /* Region.swift */,
 				8ECA9FB42470A07B0016D939 /* RegionTemplate.swift */,
 				8E4086E825F325C4005F53CB /* Rhythm.swift */,
 				8E856CF324EDC5E10064121F /* Segment.swift */,
 				8E982F9224EAF8B500E94F71 /* Zone.swift */,
-				8E08CB1726E1A1AE008B730D /* Period.swift */,
 			);
 			path = Models;
 			sourceTree = "<group>";
@@ -557,6 +566,9 @@
 				8EADC2A824D64E1200C5D3D8 /* SampleSelector.swift */,
 				8E4086E325F30383005F53CB /* RhythmView.swift */,
 				8EE1411D261F9A5B00392100 /* Onboarding.swift */,
+				8E9F334C27CEA0450047F6A7 /* PeriodEditor.swift */,
+				8E9F334E27CEA0660047F6A7 /* PeriodListEditor.swift */,
+				8E37FDEC27F29E9F00A67EA0 /* PeriodSelector.swift */,
 			);
 			path = SwiftUI;
 			sourceTree = "<group>";
@@ -779,6 +791,7 @@
 				8ED8CBD125D8B1FF00A6234F /* DiagramModelController.swift in Sources */,
 				8E856CF224EDC53D0064121F /* CGPoint+clampY.swift in Sources */,
 				8E973F9B24C4BF0800AB41C3 /* String+isBlank.swift in Sources */,
+				8E9F334D27CEA0450047F6A7 /* PeriodEditor.swift in Sources */,
 				8EADC2A924D64E1200C5D3D8 /* SampleSelector.swift in Sources */,
 				8E36B13627B054E900FFAFA6 /* Comparable+clamped.swift in Sources */,
 				8E1276DF24D4734E00AC4B8F /* HelpViewController.swift in Sources */,
@@ -816,6 +829,7 @@
 				8E339280262E7655002A7447 /* MacPreferencesViewController.swift in Sources */,
 				8ED3B1B62360DA0D00549381 /* Anchor.swift in Sources */,
 				8E4ACA842447905E00575538 /* HamburgerCell.swift in Sources */,
+				8E37FDED27F29E9F00A67EA0 /* PeriodSelector.swift in Sources */,
 				8E4ACA862447935600575538 /* HamburgerLayer.swift in Sources */,
 				8EF9166B227926BC00B51F17 /* LadderView.swift in Sources */,
 				8E2439F624B14F770044AEAB /* Interval.swift in Sources */,
@@ -840,6 +854,7 @@
 				8E35924924BE9B27001E23D5 /* DiagramIO.swift in Sources */,
 				8EFCC99E2655B4F000EEABBB /* Sandbox.swift in Sources */,
 				8E9A065125D9CDC700775531 /* LadderTemplatesModelController.swift in Sources */,
+				8E9F334F27CEA0660047F6A7 /* PeriodListEditor.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -849,6 +864,7 @@
 			files = (
 				8EF8B5B72330739F00ADB77A /* ViewControllerTests.swift in Sources */,
 				8E6570FB24A99B8A001358F6 /* FileTests.swift in Sources */,
+				8E33574A27EC82C700D662C0 /* PeriodTests.swift in Sources */,
 				8E3C911E2602FA02001A14BA /* IntervalTests.swift in Sources */,
 				8E7214E022EB57FC0062C094 /* MarkTests.swift in Sources */,
 				8E25A9B122E5505200D62E18 /* LadderViewTests.swift in Sources */,
@@ -1047,9 +1063,10 @@
 				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_ENTITLEMENTS = "EP Diagram/EP Diagram.entitlements";
+				CODE_SIGN_IDENTITY = "Apple Development";
 				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 28;
+				CURRENT_PROJECT_VERSION = 33;
 				DERIVE_MACCATALYST_PRODUCT_BUNDLE_IDENTIFIER = NO;
 				DEVELOPMENT_TEAM = W74NPJXYEG;
 				"ENABLE_HARDENED_RUNTIME[sdk=macosx*]" = YES;
@@ -1059,9 +1076,11 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 1.1.4;
+				MARKETING_VERSION = 1.2.0;
 				PRODUCT_BUNDLE_IDENTIFIER = "org.epstudios.EP-Diagram";
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				PROVISIONING_PROFILE_SPECIFIER = "";
+				"PROVISIONING_PROFILE_SPECIFIER[sdk=macosx*]" = "";
 				SUPPORTS_MACCATALYST = YES;
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
@@ -1074,9 +1093,10 @@
 				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_ENTITLEMENTS = "EP Diagram/EP Diagram.entitlements";
+				CODE_SIGN_IDENTITY = "Apple Development";
 				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 28;
+				CURRENT_PROJECT_VERSION = 33;
 				DERIVE_MACCATALYST_PRODUCT_BUNDLE_IDENTIFIER = NO;
 				DEVELOPMENT_TEAM = W74NPJXYEG;
 				"ENABLE_HARDENED_RUNTIME[sdk=macosx*]" = YES;
@@ -1086,9 +1106,11 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 1.1.4;
+				MARKETING_VERSION = 1.2.0;
 				PRODUCT_BUNDLE_IDENTIFIER = "org.epstudios.EP-Diagram";
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				PROVISIONING_PROFILE_SPECIFIER = "";
+				"PROVISIONING_PROFILE_SPECIFIER[sdk=macosx*]" = "";
 				SUPPORTS_MACCATALYST = YES;
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";

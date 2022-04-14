@@ -212,7 +212,7 @@ extension DiagramViewController: DiagramViewControllerDelegate {
 
     @objc func previousPage(_ sender: AnyObject) {
         pageNumber -= 1
-        pageNumber = pageNumber < 0 ? 0 : pageNumber
+        pageNumber = pageNumber < 1 ? 1 : pageNumber
         if let pdf = pdfRef {
             openPDFPage(pdf, atPage: pageNumber)
         }

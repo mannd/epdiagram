@@ -8,6 +8,7 @@
 
 import UIKit
 
+/// Extend Codable to store images
 struct ImageWrapper: Codable {
     let image: UIImage?
 
