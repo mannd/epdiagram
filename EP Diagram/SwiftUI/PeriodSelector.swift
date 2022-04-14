@@ -26,7 +26,7 @@ struct PeriodSelector: View {
                 Section(header: Text("Select periods to copy to selected marks")) {
                 ForEach(periods, id: \.self.id) { period in
                     VStack(alignment: .leading) {
-                        Text("Period: \(period.name)")
+                        Text("Name: \(period.name)")
                         Text("Duration: \(Int(period.duration)) msec")
                         Text("Resettable: \(period.resettable ? "Yes" : "No")")
                         Text("Offset: \(period.offset)")

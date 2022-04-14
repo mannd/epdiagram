@@ -70,8 +70,8 @@ struct LadderTemplatesEditor: View {
 
     private func onAdd() {
         os_log("onAdd() - LadderEditor", log: OSLog.action, type: .info)
-        let newRegionTemplate = RegionTemplate(name: "NEW", description: "New region", unitHeight: 1)
-        let newLadderTemplate = LadderTemplate(name: "New Ladder", description: "New ladder", regionTemplates: [newRegionTemplate])
+        let newRegionTemplate = RegionTemplate(name: "NEW REGION", description: "New region", unitHeight: 1)
+        let newLadderTemplate = LadderTemplate(name: "NEW LADDER", description: "New ladder", regionTemplates: [newRegionTemplate])
         ladderTemplatesController.ladderTemplates.append(newLadderTemplate)
     }
 }

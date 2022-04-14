@@ -25,7 +25,7 @@ struct RhythmView: View {
                     .pickerStyle(SegmentedPickerStyle())
                 }
                 Section(header: Text("Regular Rhythm Cycle Length")) {
-                    Text("Cycle length = \(lround(Double( rhythm.meanCL)))")
+                    Text("Cycle length = \(lround(Double( rhythm.meanCL))) msec")
                     Slider(value: $rhythm.meanCL, in: Rhythm.minimumCL...Rhythm.maximumCL)
                         // See https://stackoverflow.com/questions/64756306/using-a-toggle-to-disable-a-slider-in-swiftui-results-in-styling-problems for why we need to change the id to force update the slider being disabled.
                         .disabled(rhythm.regularity == .fibrillation)
@@ -33,12 +33,12 @@ struct RhythmView: View {
 
                 }
                 Section(header: Text("Fibrillation Parameters")) {
-                    Text("Fibrillation minimum cycle length = \(lround(Double(rhythm.minCL)))")
+                    Text("Fibrillation minimum cycle length = \(lround(Double(rhythm.minCL))) msec")
                     Slider(value: $rhythm.minCL, in: Rhythm.minimumFibCL...(rhythm.maxCL - 10))
                         .disabled(rhythm.regularity == .regular)
                         .id(rhythm.regularity == .fibrillation)
 
-                    Text("Fibrillation maximum cycle length = \(lround(Double(rhythm.maxCL)))")
+                    Text("Fibrillation maximum cycle length = \(lround(Double(rhythm.maxCL))) msec")
                     Slider(value: $rhythm.maxCL, in: (rhythm.minCL + 10)...Rhythm.maximumFibCL)
                         .disabled(rhythm.regularity == .regular)
                         .id(rhythm.regularity == .fibrillation)

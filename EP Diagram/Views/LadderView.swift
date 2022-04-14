@@ -44,7 +44,7 @@ final class LadderView: ScaledView {
     let labelTextFontSize: CGFloat = 18.0
     let descriptionTextFontSize: CGFloat = 12.0
     /// Affects how far mark label and conduction time are away from the mark.
-    let labelOffset: CGFloat = 12.0
+    let labelOffset: CGFloat = 13.0
 
     lazy var measurementTextAttributes: [NSAttributedString.Key: Any] = {
         let textFont = UIFont.systemFont(ofSize: measurementTextFontSize, weight: UIFont.Weight.medium)
@@ -2114,7 +2114,7 @@ final class LadderView: ScaledView {
             origin = CGPoint(x: origin.x - size.width / 2, y: origin.y - size.height - labelOffset)
         case .distal:
             origin = segment.distal
-            origin = CGPoint(x: origin.x - size.width / 2, y: origin.y + size.height - labelOffset)
+            origin = CGPoint(x: origin.x - size.width / 2, y: origin.y + labelOffset)
         }
         let textRect = CGRect(origin: origin, size: size)
         if textRect.minX > leftMargin {
@@ -2204,11 +2204,11 @@ final class LadderView: ScaledView {
         //width += markLineWidth / 2.0
         //scaledOriginX -= markLineWidth / 2.0 // make sure mark line is visible if it is vertical
 
-        if textOffset > scaledOriginX {
-            scaledWidth = scaledWidth - (textOffset - scaledOriginX)
-            scaledOriginX = max(scaledOriginX, textOffset)
+        if leftMargin > scaledOriginX {
+            scaledWidth = scaledWidth - (leftMargin - scaledOriginX)
+            scaledOriginX = max(scaledOriginX, leftMargin)
         }
-        if scaledOriginX + scaledWidth < textOffset {
+        if scaledOriginX + scaledWidth < leftMargin {
             return
         }
 
@@ -2413,11 +2413,9 @@ final class LadderView: ScaledView {
 
     func drawImpulseOrigin(context: CGContext, mark: Mark, segment: Segment) {
         guard showImpulseOrigin else { return }
-        var radius: CGFloat = 5
-        if impulseOriginLarge {
-            radius = 10
-        }
-        var separation: CGFloat = 5 + radius
+        // Note some tweaking here to prevent large impulse symbol from overwriting labels
+        let radius: CGFloat = impulseOriginLarge ? 8 : 5
+        var separation: CGFloat =  impulseOriginLarge ? 4 + radius : 5 + radius
         if impulseOriginContiguous {
             separation = radius / 2.0
         }
