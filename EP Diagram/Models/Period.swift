@@ -68,7 +68,7 @@ extension Period: Codable {
         offset = try container.decode(Int.self, forKey: .offset)
 
         let colorData = try container.decode(Data.self, forKey: .color)
-        color = try NSKeyedUnarchiver.unarchiveTopLevelObjectWithData(colorData) as? UIColor ?? UIColor.black
+        color = try NSKeyedUnarchiver.unarchivedObject(ofClass: UIColor.self, from: colorData) ?? UIColor.black
     }
 
     func encode(to encoder: Encoder) throws {

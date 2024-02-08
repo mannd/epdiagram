@@ -3786,6 +3786,9 @@ extension LadderView: LadderViewDelegate {
 
     func restoreState() {
         os_log("restoreState() - LadderView", log: .default, type: .default)
+        guard let savedActiveRegion = savedActiveRegion else { return }
+        guard let index = ladder.index(ofRegion: savedActiveRegion) else { return }
+        guard index >= 0 && index < ladder.regionCount else { return }
         activeRegion = savedActiveRegion
     }
 
