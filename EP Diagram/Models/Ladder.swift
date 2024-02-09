@@ -429,7 +429,6 @@ final class Ladder: NSObject, Codable {
     func removeRegion(_ region: Region) {
         regions.removeAll(where: { $0 == region })
         reindexMarks()
-        // relink marks
     }
 
     func hideZone() {

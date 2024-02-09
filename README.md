@@ -1,5 +1,4 @@
-EP Diagram
-==========
+EP Diagram ==========
 
 ## Create electrocardiographic ladder diagrams
 
@@ -21,9 +20,12 @@ and is copyright 2019 by Mark Sands.  EP Diagram also uses the
 of Mhd Hejaz.  No license or copyright information available.
 
 Some public domain clipart used in the figures was obtained from
-(https://www.clipartmax.com).
-The mouse cursor icon was created by iconpacks from the Noun Project and
-is licensed under a Creative Commons license.  See [here](https://thenounproject.com/term/mouse-cursor/2280971/).
+[clipartmax.com](https://www.clipartmax.com).  The
+[mouse cursor icon](https://thenounproject.com/term/mouse-cursor/2280971/)
+was created by iconpacks from the Noun Project and is licensed under a
+Creative Commons license.  The ladder icon is from
+[here](https://www.svgrepo.com/svg/160860/ladder) and is licensed
+under the [CC0 license](https://www.svgrepo.com/page/licensing).
 
 Some sample ECGs are licensed by
 [CC BY 3](https://creativecommons.org/licenses/by/3.0/) and
@@ -37,7 +39,8 @@ this app.
 
 ## Copyright
 
-Copyright © 2019-2022 [EP Studios, Inc.](http://www.epstudiossoftware.com)
+Copyright © 2019-2022
+[EP Studios, Inc.](http://www.epstudiossoftware.com)
 
 ## Author
 
