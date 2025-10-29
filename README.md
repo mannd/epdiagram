@@ -1,4 +1,4 @@
-EP Diagram ==========
+# EP Diagram
 
 ## Create electrocardiographic ladder diagrams
 
