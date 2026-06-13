@@ -642,14 +642,14 @@ final class DiagramViewController: UIViewController {
             }
         }
 
-        if requestSandboxExpansion {
-            addDirectoryToSandbox(self)
-        }
-        #else
-        // FIXME: Temporary -- why?
-        if requestSandboxExpansion {
-            addIOSDirectoryToSandbox()
-        }
+//        if requestSandboxExpansion {
+//            addDirectoryToSandbox(self)
+//        }
+//        #else
+//        // FIXME: Temporary -- why?
+//        if requestSandboxExpansion {
+//            addIOSDirectoryToSandbox()
+//        }
         #endif
 
         #if !targetEnvironment(macCatalyst)
@@ -1860,57 +1860,146 @@ extension DiagramViewController {
         return controller
     }
 
-    func renameDocument(oldURL: URL, newURL: URL) {
+    func renameDocument(oldURL: URL, newURL: URL, completion: ((Result<URL, Error>) -> Void)? = nil) {
         os_log("renameDocument", log: .action, type: .info)
-        guard oldURL != newURL else { return }
+        guard oldURL != newURL else {
+            completion?(.success(oldURL))
+            return
+        }
 
-        DispatchQueue.global(qos: .background).async {
-            self.currentDocument?.close { success in
-                if success {
-                    if let resolvedDirectoryURL = Sandbox.getPersistentDirectoryURL(forFileURL: oldURL) {
-                        let startAccessing = resolvedDirectoryURL.startAccessingSecurityScopedResource()
-                        defer {
-                            if startAccessing {
-                                resolvedDirectoryURL.stopAccessingSecurityScopedResource()
+        currentDocument?.diagram = diagram
+        currentDocument?.close { [weak self] success in
+            guard let self = self else { return }
+            guard success else {
+                completion?(.failure(DocumentRenameError.closeFailed))
+                return
+            }
+
+            DispatchQueue.global(qos: .userInitiated).async {
+                let result = self.performCoordinatedRename(oldURL: oldURL, newURL: newURL)
+
+                DispatchQueue.main.async {
+                    switch result {
+                    case .success(let renamedURL):
+                        let renamedDocument = DiagramDocument(fileURL: renamedURL)
+                        renamedDocument.open { openSuccess in
+                            guard openSuccess else {
+                                completion?(.failure(DocumentRenameError.reopenFailed))
+                                return
                             }
+
+                            renamedDocument.diagram = self.diagram
+                            self.currentDocument = renamedDocument
+                            self.setTitle()
+                            renamedDocument.updateChangeCount(.done)
+                            completion?(.success(renamedURL))
                         }
-
-                        let error: NSError? = nil
-                        let fileCoordinator = NSFileCoordinator()
-                        var moveError = error
-                        fileCoordinator.coordinate(writingItemAt: oldURL, options: .forMoving, writingItemAt: newURL, options: .forReplacing, error: &moveError, byAccessor: { newURL1, newURL2 in
-                            let fileManager = FileManager.default
-                            // Below gives sandbox error on mac
-                            //fileCoordinator.item(at: oldURL, willMoveTo: newURL)
-                            if (try? fileManager.moveItem(at: newURL1, to: newURL2)) != nil {
-                                fileCoordinator.item(at: oldURL, didMoveTo: newURL)
-                                DispatchQueue.main.async {
-                                    self.currentDocument = DiagramDocument(fileURL: newURL)
-                                    self.currentDocument?.open { openSuccess in
-                                        guard openSuccess else {
-                                            print ("could not open \(newURL)")
-                                            return
-                                        }
-                                        self.currentDocument?.diagram = self.diagram
-                                        self.setTitle()
-                                        self.currentDocument?.updateChangeCount(.done)
-                                        // Try to delete old document, ignore errors.
-                                        DispatchQueue.global(qos: .background).async {
-                                            if fileManager.isDeletableFile(atPath: oldURL.path) {
-                                                try? fileManager.removeItem(atPath: oldURL.path)
-                                            }
-                                        }
-                                    }
-                                }
-                            }
-                            if let error = error {
-                                print("error = \(error.localizedDescription)")
-                            }
-                        })
+                    case .failure(let error):
+                        let originalDocument = DiagramDocument(fileURL: oldURL)
+                        self.currentDocument = originalDocument
+                        originalDocument.open { _ in
+                            originalDocument.diagram = self.diagram
+                            self.setTitle()
+                            completion?(.failure(error))
+                        }
                     }
                 }
             }
         }
+    }
+
+    private func performCoordinatedRename(oldURL: URL, newURL: URL) -> Result<URL, Error> {
+        let accessDirectoryURL = Sandbox.getPersistentDirectoryURL(forFileURL: oldURL)
+        let sourceURL: URL
+        let destinationURL: URL
+
+        if let accessDirectoryURL = accessDirectoryURL {
+            sourceURL = accessDirectoryURL.appendingPathComponent(oldURL.lastPathComponent)
+            destinationURL = accessDirectoryURL.appendingPathComponent(newURL.lastPathComponent)
+        } else {
+            sourceURL = oldURL
+            destinationURL = newURL
+        }
+
+        let didStartAccessing = accessDirectoryURL?.startAccessingSecurityScopedResource() ?? false
+        defer {
+            if didStartAccessing {
+                accessDirectoryURL?.stopAccessingSecurityScopedResource()
+            }
+        }
+
+        var coordinationError: NSError?
+        var moveResult: Result<URL, Error> = .failure(DocumentRenameError.moveFailed)
+        let fileCoordinator = NSFileCoordinator()
+
+        fileCoordinator.coordinate(
+            writingItemAt: sourceURL,
+            options: .forMoving,
+            writingItemAt: destinationURL,
+            options: .forReplacing,
+            error: &coordinationError
+        ) { coordinatedSourceURL, coordinatedDestinationURL in
+            do {
+                try FileManager.default.moveItem(at: coordinatedSourceURL, to: coordinatedDestinationURL)
+                fileCoordinator.item(at: sourceURL, didMoveTo: destinationURL)
+                moveResult = .success(destinationURL)
+            } catch {
+                moveResult = .failure(error)
+            }
+        }
+
+        if let coordinationError = coordinationError {
+            return .failure(coordinationError)
+        }
+
+        return moveResult
+    }
+
+    private enum DocumentRenameError: LocalizedError {
+        case closeFailed
+        case moveFailed
+        case reopenFailed
+
+        var errorDescription: String? {
+            switch self {
+            case .closeFailed:
+                return L("The diagram could not be closed before renaming.")
+            case .moveFailed:
+                return L("The diagram file could not be renamed.")
+            case .reopenFailed:
+                return L("The renamed diagram could not be reopened.")
+            }
+        }
+    }
+
+    func requestRenameDirectoryAccess(for fileURL: URL, completion: @escaping (Bool) -> Void) {
+#if targetEnvironment(macCatalyst)
+        guard let appDelegate = UIApplication.shared.delegate as? AppDelegate,
+              let plugin = appDelegate.appKitPlugin,
+              let nsWindow = view.window?.nsWindow else {
+            completion(false)
+            return
+        }
+
+        let directoryURL = fileURL.deletingLastPathComponent().standardizedFileURL
+        plugin.getDirectory(nsWindow: nsWindow, startingURL: directoryURL) { [weak self] selectedURL in
+            guard let self = self else {
+                completion(false)
+                return
+            }
+
+            let selectedDirectoryURL = selectedURL.standardizedFileURL
+            guard selectedDirectoryURL == directoryURL else {
+                completion(false)
+                return
+            }
+
+            self.storeDirectoryBookmark(from: selectedDirectoryURL)
+            completion(true)
+        }
+#else
+        completion(false)
+#endif
     }
 }
 

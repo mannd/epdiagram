@@ -142,17 +142,54 @@ extension DiagramViewController: HamburgerTableDelegate, UIImagePickerController
         alert.addTextField { textField in
             textField.placeholder = L("New diagram name")
         }
-        alert.addAction(UIAlertAction(title: L("Rename"), style: .default) { [self] action in
-            if let newName = alert.textFields?.first?.text {
-                if let currentFileURL = currentDocument?.fileURL {
-                    let newFileURL = currentFileURL.deletingLastPathComponent()
-                        .appendingPathComponent(newName)
-                        .appendingPathExtension(DiagramDocument.extensionName)
-                    renameDocument(oldURL: currentFileURL, newURL: newFileURL)
-                    diagram.name = newName
-                    diagramEditorDelegate?.diagramEditorDidUpdateContent(self, diagram: diagram)
-                    setTitle()
+        alert.addAction(UIAlertAction(title: L("Rename"), style: .default) { [weak self] action in
+            guard let self = self,
+                  let newName = alert.textFields?.first?.text,
+                  let currentFileURL = self.currentDocument?.fileURL else { return }
+
+            let oldName = self.diagram.name
+            let newFileURL = currentFileURL.deletingLastPathComponent()
+                .appendingPathComponent(newName)
+                .appendingPathExtension(DiagramDocument.extensionName)
+
+            func fail(with error: Error) {
+                self.diagram.name = oldName
+                self.diagramEditorDelegate?.diagramEditorDidUpdateContent(self, diagram: self.diagram)
+                UserAlert.showMessage(
+                    viewController: self,
+                    title: L("Rename Failed"),
+                    message: error.localizedDescription
+                )
+            }
+
+            func handleRenameResult(_ result: Result<URL, Error>, shouldRequestAccess: Bool) {
+                switch result {
+                case .success:
+                    self.setTitle()
+                case .failure(let error):
+                    guard shouldRequestAccess,
+                          Sandbox.getPersistentDirectoryURL(forFileURL: currentFileURL) == nil else {
+                        fail(with: error)
+                        return
+                    }
+
+                    self.requestRenameDirectoryAccess(for: currentFileURL) { granted in
+                        guard granted else {
+                            fail(with: error)
+                            return
+                        }
+
+                        self.renameDocument(oldURL: currentFileURL, newURL: newFileURL) { retryResult in
+                            handleRenameResult(retryResult, shouldRequestAccess: false)
+                        }
+                    }
                 }
+            }
+
+            self.diagram.name = newName
+            self.diagramEditorDelegate?.diagramEditorDidUpdateContent(self, diagram: self.diagram)
+            self.renameDocument(oldURL: currentFileURL, newURL: newFileURL) { result in
+                handleRenameResult(result, shouldRequestAccess: true)
             }
         })
         present(alert, animated: true)
