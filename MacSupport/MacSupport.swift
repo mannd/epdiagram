@@ -7,6 +7,7 @@
 //
 
 import AppKit
+import UniformTypeIdentifiers
 
 class MacSupport: NSObject, SharedAppKitProtocol {
     required override init() {}
@@ -72,7 +73,7 @@ class MacSupport: NSObject, SharedAppKitProtocol {
             panel.message = "Please select a folder to add to the App Sandbox"
         }
         panel.canChooseFiles = false
-        panel.allowedFileTypes = ["N/A"]
+        panel.allowedContentTypes = [.folder]
         panel.allowsOtherFileTypes = false
         panel.allowsMultipleSelection = false
         panel.canChooseDirectories = true
