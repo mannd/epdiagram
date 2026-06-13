@@ -85,27 +85,15 @@ class DocumentBrowserViewController: UIDocumentBrowserViewController, UIDocument
         }
         closeDiagramController { [weak self] in
             guard let self = self else { return }
-            if var persistentDirectoryURL = Sandbox.getPersistentDirectoryURL(forFileURL: url) {
-                let didStartAccessing = persistentDirectoryURL.startAccessingSecurityScopedResource()
-                defer {
-                    if didStartAccessing {
-                        persistentDirectoryURL.stopAccessingSecurityScopedResource()
-                    }
+            let document = DiagramDocument(fileURL: url)
+            document.open { openSuccess in
+                guard openSuccess else {
+                    print ("could not open \(url)")
+                    self.getIOSBookmark(url: url)
+                    return
                 }
-                persistentDirectoryURL = persistentDirectoryURL.appendingPathComponent(url.lastPathComponent)
-                let document = DiagramDocument(fileURL: persistentDirectoryURL)
-                document.open { openSuccess in
-                    guard openSuccess else {
-                        print ("could not open \(url)")
-                        self.getIOSBookmark(url: url)
-                        return
-                    }
-                    self.currentDocument = document
-                    self.displayDiagramController()
-                }
-            } else {
-                print("could not get bookmark")
-                self.openDocumentURL(url)
+                self.currentDocument = document
+                self.displayDiagramController()
             }
         }
     }
