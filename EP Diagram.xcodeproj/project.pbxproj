@@ -91,7 +91,6 @@
 		8E9B8043228345B5008873BB /* Mark.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8E9B8042228345B5008873BB /* Mark.swift */; };
 		8E9B8045228347DE008873BB /* Region.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8E9B8044228347DE008873BB /* Region.swift */; };
 		8E9B804722834870008873BB /* Ladder.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8E9B804622834870008873BB /* Ladder.swift */; };
-		8E9F0984253CF483009BC968 /* UINavigationController+gestureRecognizerShouldBegin.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8E9F0983253CF483009BC968 /* UINavigationController+gestureRecognizerShouldBegin.swift */; };
 		8E9F334D27CEA0450047F6A7 /* PeriodEditor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8E9F334C27CEA0450047F6A7 /* PeriodEditor.swift */; };
 		8E9F334F27CEA0660047F6A7 /* PeriodListEditor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8E9F334E27CEA0660047F6A7 /* PeriodListEditor.swift */; };
 		8EA444C02476E471005B5452 /* LadderSelector.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8EA444BF2476E471005B5452 /* LadderSelector.swift */; };
@@ -104,6 +103,7 @@
 		8EC5D28D256B154E00F49865 /* UIView+PinToInside.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8EC5D28C256B154E00F49865 /* UIView+PinToInside.swift */; };
 		8ECA9FB52470A07B0016D939 /* RegionTemplate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8ECA9FB42470A07B0016D939 /* RegionTemplate.swift */; };
 		8ECA9FB72470A1020016D939 /* LadderTemplate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8ECA9FB62470A1020016D939 /* LadderTemplate.swift */; };
+		8ECFA0402FDE218200696BDC /* GestureNavigationController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8ECFA03F2FDE218200696BDC /* GestureNavigationController.swift */; };
 		8ED3651A261B664D00F2A2B6 /* LadderError.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8ED36519261B664D00F2A2B6 /* LadderError.swift */; };
 		8ED3651F261B66A900F2A2B6 /* UIView+findViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8ED3651E261B66A900F2A2B6 /* UIView+findViewController.swift */; };
 		8ED3B1B62360DA0D00549381 /* Anchor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8ED3B1B52360DA0D00549381 /* Anchor.swift */; };
@@ -256,7 +256,6 @@
 		8E9B8042228345B5008873BB /* Mark.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Mark.swift; sourceTree = "<group>"; };
 		8E9B8044228347DE008873BB /* Region.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Region.swift; sourceTree = "<group>"; };
 		8E9B804622834870008873BB /* Ladder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Ladder.swift; sourceTree = "<group>"; };
-		8E9F0983253CF483009BC968 /* UINavigationController+gestureRecognizerShouldBegin.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "UINavigationController+gestureRecognizerShouldBegin.swift"; sourceTree = "<group>"; };
 		8E9F334C27CEA0450047F6A7 /* PeriodEditor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PeriodEditor.swift; sourceTree = "<group>"; };
 		8E9F334E27CEA0660047F6A7 /* PeriodListEditor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PeriodListEditor.swift; sourceTree = "<group>"; };
 		8EA444BF2476E471005B5452 /* LadderSelector.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LadderSelector.swift; sourceTree = "<group>"; };
@@ -270,6 +269,7 @@
 		8EC8768725B5112000F3D5C2 /* Photos.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Photos.framework; path = Platforms/MacOSX.platform/Developer/SDKs/MacOSX11.1.sdk/System/Library/Frameworks/Photos.framework; sourceTree = DEVELOPER_DIR; };
 		8ECA9FB42470A07B0016D939 /* RegionTemplate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RegionTemplate.swift; sourceTree = "<group>"; };
 		8ECA9FB62470A1020016D939 /* LadderTemplate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LadderTemplate.swift; sourceTree = "<group>"; };
+		8ECFA03F2FDE218200696BDC /* GestureNavigationController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GestureNavigationController.swift; sourceTree = "<group>"; };
 		8ED36519261B664D00F2A2B6 /* LadderError.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LadderError.swift; sourceTree = "<group>"; };
 		8ED3651E261B66A900F2A2B6 /* UIView+findViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "UIView+findViewController.swift"; sourceTree = "<group>"; };
 		8ED3B1B52360DA0D00549381 /* Anchor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Anchor.swift; sourceTree = "<group>"; };
@@ -338,6 +338,7 @@
 			children = (
 				8E04C5FB256A0AD600946348 /* ImageWrapper.swift */,
 				8EDCE17E25EC0C7400B9C7B8 /* Color.swift */,
+				8ECFA03F2FDE218200696BDC /* GestureNavigationController.swift */,
 			);
 			path = Helpers;
 			sourceTree = "<group>";
@@ -367,7 +368,6 @@
 				8E6EB6BF2484778E00E5F883 /* Notification+didUndoableAction.swift */,
 				8E973F9A24C4BF0800AB41C3 /* String+isBlank.swift */,
 				8EBC824024E5E04800B5CA29 /* UIImage+emptyImage.swift */,
-				8E9F0983253CF483009BC968 /* UINavigationController+gestureRecognizerShouldBegin.swift */,
 				8EC5D28C256B154E00F49865 /* UIView+PinToInside.swift */,
 				8ED3651E261B66A900F2A2B6 /* UIView+findViewController.swift */,
 				8EF9CA25264F016C007AA24A /* UIWindow+nsWindow.swift */,
@@ -805,7 +805,6 @@
 				8E36B13627B054E900FFAFA6 /* Comparable+clamped.swift in Sources */,
 				8E1276DF24D4734E00AC4B8F /* HelpViewController.swift in Sources */,
 				8E7D24C522779DBD005A1729 /* DiagramViewController.swift in Sources */,
-				8E9F0984253CF483009BC968 /* UINavigationController+gestureRecognizerShouldBegin.swift in Sources */,
 				8E3AD1372459CABF0085BDD4 /* LocationInLadder.swift in Sources */,
 				8E15013724F2C7CF000CF90E /* Mode.swift in Sources */,
 				8E93CA7C25A00C0E00C74F1F /* UserAlert.swift in Sources */,
@@ -816,6 +815,7 @@
 				8E6A0298246DFB3700A10C9F /* LadderTemplateEditor.swift in Sources */,
 				8E2BA1D024A3BDD7002D997F /* PreferencesView.swift in Sources */,
 				8E04C5D5256995E000946348 /* DocumentBrowserViewController.swift in Sources */,
+				8ECFA0402FDE218200696BDC /* GestureNavigationController.swift in Sources */,
 				8E04C5DB256996E400946348 /* DiagramDocument.swift in Sources */,
 				8E1B6CB8240CAE5300EA88A6 /* ScaledView.swift in Sources */,
 				8E8248DD23B53B55001A85F9 /* SeparatorView.swift in Sources */,

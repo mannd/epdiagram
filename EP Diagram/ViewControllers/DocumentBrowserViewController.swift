@@ -29,11 +29,11 @@ class DocumentBrowserViewController: UIDocumentBrowserViewController, UIDocument
         os_log("viewDidLoad() - DocumentBrowserViewController", log: .default, type: .default)
 
         super.viewDidLoad()
+        delegate = browserDelegate
         allowsDocumentCreation = true
         allowsPickingMultipleItems = false
         localizedCreateDocumentActionTitle = L("Create New Diagram")
         browserUserInterfaceStyle = .light
-        delegate = browserDelegate
         view.tintColor = .systemBlue
         installInportHandler()
 
