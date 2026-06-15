@@ -12,8 +12,6 @@ import UniformTypeIdentifiers
 class MacSupport: NSObject, SharedAppKitProtocol {
     required override init() {}
 
-    var openPanel: NSPanel?
-
 
     func setupNotifications() {
         NotificationCenter.default.addObserver(self, selector: #selector(windowClosing), name: NSWindow.willCloseNotification, object: nil)
@@ -42,20 +40,6 @@ class MacSupport: NSObject, SharedAppKitProtocol {
             }
         }
         NSDocumentController.shared.value(forKey: "_installOpenRecentMenus")
-    }
-
-    @objc
-    func closeWindows(_ sender: Any) {
-        for window in NSApplication.shared.windows {
-            window.standardWindowButton(.closeButton)?.isHidden = true
-        }
-    }
-
-    @objc
-    func disableCloseButton(nsWindow: AnyObject) {
-        if let nsWindow = nsWindow as? NSWindow {
-            nsWindow.standardWindowButton(.closeButton)?.isHidden = true
-        }
     }
 
     @objc

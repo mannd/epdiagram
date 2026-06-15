@@ -634,14 +634,6 @@ final class DiagramViewController: UIViewController {
         super.viewDidAppear(animated)
 
         #if targetEnvironment(macCatalyst)
-        if let appDelegate = UIApplication.shared.delegate as? AppDelegate {
-            if let plugin = appDelegate.appKitPlugin {
-                if let nsWindow = view.window?.nsWindow {
-                    plugin.disableCloseButton(nsWindow: nsWindow)
-                }
-            }
-        }
-
 //        if requestSandboxExpansion {
 //            addDirectoryToSandbox(self)
 //        }
@@ -2029,6 +2021,18 @@ extension DiagramViewController: UITextFieldDelegate {
 extension DiagramViewController {
     @IBAction func macCloseDocument(_ sender: Any) {
         closeDocument()
+    }
+
+    @IBAction func closeWindow(_ sender: Any) {
+        if let documentBrowserViewController = diagramEditorDelegate as? DocumentBrowserViewController {
+            documentBrowserViewController.closeWindow(sender)
+        }
+    }
+
+    @IBAction func openDiagramFromMenu(_ sender: Any) {
+        if let documentBrowserViewController = diagramEditorDelegate as? DocumentBrowserViewController {
+            documentBrowserViewController.openDiagramFromMenu(sender)
+        }
     }
 
     @IBAction func macSnapshotDiagram(_ sender: Any) {

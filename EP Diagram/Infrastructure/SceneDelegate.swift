@@ -27,7 +27,7 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         guard let scene = (scene as? UIWindowScene) else { return }
         if let documentBrowserViewController = window?.rootViewController as? DocumentBrowserViewController {
             scene.title = L("EP Diagram")
-            scene.userActivity = session.stateRestorationActivity ?? NSUserActivity(activityType: AppDelegate.mainActivityType)
+            scene.userActivity = connectionOptions.userActivities.first ?? session.stateRestorationActivity ?? NSUserActivity(activityType: AppDelegate.mainActivityType)
 
             documentBrowserViewController.restorationInfo = scene.userActivity?.userInfo
 
@@ -39,10 +39,14 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
             scene.titlebar?.toolbar = toolbar
             scene.titlebar?.toolbarStyle = .automatic
             scene.titlebar?.titleVisibility = .visible
+            scene.windowingBehaviors?.isClosable = true
             #endif
 
-        // This doesn't appear needed on Mac or iOS.  openURLContexts is called automatically.
-        // self.scene(scene, openURLContexts: connectionOptions.urlContexts)
+            if let documentURL = documentURL(from: scene.userActivity) {
+                documentBrowserViewController.openDocument(url: documentURL)
+            } else if !connectionOptions.urlContexts.isEmpty {
+                self.scene(scene, openURLContexts: connectionOptions.urlContexts)
+            }
         } else if (window?.rootViewController as? MacPreferencesViewController) != nil  {
             scene.title = L("Preferences")
             //            scene.userActivity = session.stateRestorationActivity ?? NSUserActivity(activityType: AppDelegate.mainActivityType)
@@ -67,6 +71,17 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         return scene.userActivity
     }
 
+    private func documentURL(from userActivity: NSUserActivity?) -> URL? {
+        guard let value = userActivity?.userInfo?[AppDelegate.openDocumentURLKey] else { return nil }
+        if let url = value as? URL {
+            return url
+        }
+        if let urlString = value as? String {
+            return URL(string: urlString)
+        }
+        return nil
+    }
+
     // Used for opening external documents (from Finder or Open Recent menu).
     func scene(_ scene: UIScene, openURLContexts URLContexts: Set<UIOpenURLContext>) {
         os_log("scene(_:openURLContexts:) - SceneDelegate", log: .lifeCycle, type: .info)
@@ -75,9 +90,21 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
             print("context path", context.url.path)
             let url = context.url
             if url.isFileURL {
-                documentBrowserViewController.openDocument(url: url)
+                if documentBrowserViewController.isEditingDocument {
+                    openDocumentInNewScene(url: url)
+                } else {
+                    documentBrowserViewController.openDocument(url: url)
+                }
             }
          }
+    }
+
+    private func openDocumentInNewScene(url: URL) {
+        let activity = NSUserActivity(activityType: AppDelegate.mainActivityType)
+        activity.addUserInfoEntries(from: [AppDelegate.openDocumentURLKey: url])
+        UIApplication.shared.requestSceneSessionActivation(nil, userActivity: activity, options: nil) { error in
+            print("Error opening document in new window", error.localizedDescription)
+        }
     }
 
     func scene(_ scene: UIScene, continue userActivity: NSUserActivity) {
@@ -89,6 +116,8 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
 
     func sceneDidDisconnect(_ scene: UIScene) {
         os_log("sceneDidDisconnect(_:) - SceneDelegate, %s", log: .lifeCycle, type: .info, scene.session.persistentIdentifier)
+        guard let documentBrowserViewController = self.window?.rootViewController as? DocumentBrowserViewController else { return }
+        documentBrowserViewController.closeCurrentDocument()
     }
 
     func sceneWillResignActive(_ scene: UIScene) {
@@ -115,9 +144,9 @@ extension SceneDelegate: NSToolbarDelegate {
     func toolbar(_ toolbar: NSToolbar, itemForItemIdentifier itemIdentifier: NSToolbarItem.Identifier, willBeInsertedIntoToolbar flag: Bool) -> NSToolbarItem? {
         switch itemIdentifier {
         case closeToolbarButton:
-            let barButtonItem = UIBarButtonItem(title: L("Close"), style: .done, target: nil, action: #selector(DiagramViewController.macCloseDocument(_:)))
+            let barButtonItem = UIBarButtonItem(title: L("Close"), style: .done, target: nil, action: #selector(DocumentBrowserViewController.closeWindow(_:)))
             let button = NSToolbarItem(itemIdentifier: itemIdentifier, barButtonItem: barButtonItem)
-            button.toolTip = L("Close diagram")
+            button.toolTip = L("Close window")
             return button
         case zoomInToolbarButton:
             let barButtonItem = UIBarButtonItem(image: UIImage(systemName: "plus.magnifyingglass"), style: .plain, target: nil, action:  #selector(DiagramViewController.doZoom(_:)))

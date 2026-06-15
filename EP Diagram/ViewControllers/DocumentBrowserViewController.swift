@@ -25,6 +25,10 @@ class DocumentBrowserViewController: UIDocumentBrowserViewController, UIDocument
 
     weak var diagramViewController: DiagramViewController?
 
+    var isEditingDocument: Bool {
+        editingDocument
+    }
+
     override func viewDidLoad() {
         os_log("viewDidLoad() - DocumentBrowserViewController", log: .default, type: .default)
 
@@ -209,9 +213,8 @@ class DocumentBrowserViewController: UIDocumentBrowserViewController, UIDocument
     func closeDiagramController(completion: (()->Void)? = nil) {
         let compositeClosure = { [weak self] in
             guard let self = self else { return }
-            self.closeCurrentDocument()
+            self.closeCurrentDocument(completion: completion)
             self.editingDocument = false
-            completion?()
         }
         if editingDocument {
             self.dismiss(animated: true) {
@@ -222,15 +225,19 @@ class DocumentBrowserViewController: UIDocumentBrowserViewController, UIDocument
         }
     }
 
-    private func closeCurrentDocument() {
+    func closeCurrentDocument(completion: (()->Void)? = nil) {
         guard currentDocument != nil else {
-            print("current document is nil!"); return
+            print("current document is nil!")
+            completion?()
+            return
         }
         currentDocument?.close() { success in
             guard success else {
                 print("failed to close document")
+                completion?()
                 return
             }
+            completion?()
         }
         currentDocument = nil
     }
@@ -326,8 +333,56 @@ extension DocumentBrowserViewController {
     }
 
     @IBAction func macCloseDocument(_ sender: Any) {
+        closeDiagramController()
+    }
+
+    @IBAction func closeWindow(_ sender: Any) {
+        closeDiagramController { [weak self] in
+            self?.destroyCurrentScene()
+        }
+    }
+
+    @IBAction func openDiagramFromMenu(_ sender: Any) {
+        if editingDocument {
+            closeDocumentAndOpenBrowserScene()
+        } else {
+            activateDocumentBrowserScene()
+        }
+    }
+
+    private func closeDocumentAndOpenBrowserScene() {
         if let diagramViewController = diagramViewController {
-            diagramViewController.macCloseDocument(sender)
+            currentDocument?.diagram = diagramViewController.diagram
+        }
+        closeCurrentDocument { [weak self] in
+            guard let self = self else { return }
+            self.requestNewDocumentBrowserScene()
+            self.destroyCurrentScene()
+        }
+    }
+
+    private func activateDocumentBrowserScene() {
+        guard let sceneSession = view.window?.windowScene?.session else {
+            requestNewDocumentBrowserScene()
+            return
+        }
+        UIApplication.shared.requestSceneSessionActivation(sceneSession, userActivity: nil, options: nil) { error in
+            print("Error showing open browser", error.localizedDescription)
+        }
+    }
+
+    private func requestNewDocumentBrowserScene() {
+        let activity = NSUserActivity(activityType: AppDelegate.mainActivityType)
+        UIApplication.shared.requestSceneSessionActivation(nil, userActivity: activity, options: nil) { error in
+            print("Error showing open browser", error.localizedDescription)
+        }
+    }
+
+    private func destroyCurrentScene() {
+        guard let sceneSession = view.window?.windowScene?.session else { return }
+        let options = UIWindowSceneDestructionRequestOptions()
+        UIApplication.shared.requestSceneSessionDestruction(sceneSession, options: options) { error in
+            print("Error closing diagram window", error.localizedDescription)
         }
     }
 

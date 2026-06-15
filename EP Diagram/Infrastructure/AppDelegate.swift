@@ -21,6 +21,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 
     static let mainActivityType = "org.epstudios.epdiagram.mainActivity"
     static let preferencesActivityType = "org.epstudios.epdiagram.preferencesActivity"
+    static let openDocumentURLKey = "org.epstudios.epdiagram.openDocumentURL"
 
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
         os_log("application(_:didFinishLaunchingWithOptions:) - AppDelegate", log: .lifeCycle, type: .info)
@@ -108,6 +109,53 @@ extension AppDelegate {
         builder.insertSibling(openPreferencesMenu, afterMenu: .about)
 
         // File menu
+        let newDiagramCommand = UIKeyCommand(
+            title: L("New"),
+            action: #selector(newDiagramWindow(_:)),
+            input: "n",
+            modifierFlags: [.command]
+        )
+        let openDiagramCommand = UIKeyCommand(
+            title: L("Open..."),
+            action: #selector(openDiagramFromMenu(_:)),
+            input: "o",
+            modifierFlags: [.command]
+        )
+        let newOpenMenu = UIMenu(
+            title: "",
+            identifier: UIMenu.Identifier("newOpenMenu"),
+            options: .displayInline,
+            children: [newDiagramCommand, openDiagramCommand]
+        )
+        builder.replaceChildren(ofMenu: .file) { oldChildren in
+            func isDuplicateNewOrOpenCommand(_ element: UIMenuElement) -> Bool {
+                guard let keyCommand = element as? UIKeyCommand,
+                      keyCommand.modifierFlags.contains(.command),
+                      let input = keyCommand.input?.lowercased() else { return false }
+                return input == "n" || input == "o"
+            }
+
+            func removingDuplicateNewAndOpenCommands(from elements: [UIMenuElement]) -> [UIMenuElement] {
+                elements.compactMap { element in
+                    if isDuplicateNewOrOpenCommand(element) {
+                        return nil
+                    }
+                    if let menu = element as? UIMenu {
+                        if menu.identifier == UIMenu.Identifier("newOpenMenu") {
+                            return nil
+                        }
+                        let children = removingDuplicateNewAndOpenCommands(from: menu.children)
+                        return menu.replacingChildren(children)
+                    }
+                    return element
+                }
+            }
+
+            var newChildren = removingDuplicateNewAndOpenCommands(from: oldChildren)
+            newChildren.insert(newOpenMenu, at: 0)
+            return newChildren
+        }
+
         let saveScreenshotCommand = UIKeyCommand(
             title: "Save Screenshot",
             action: #selector(DiagramViewController.macSnapshotDiagram),
@@ -143,9 +191,9 @@ extension AppDelegate {
             modifierFlags: [.command]
         )
 
-        let closeDiagramCommand = UIKeyCommand(
-            title: L("Close Diagram"),
-            action: #selector(DiagramViewController.macCloseDocument(_:)),
+        let closeWindowCommand = UIKeyCommand(
+            title: L("Close Window"),
+            action: #selector(DocumentBrowserViewController.closeWindow(_:)),
             input: "w",
             modifierFlags: [.command]
         )
@@ -153,7 +201,7 @@ extension AppDelegate {
             title: "",
             identifier: UIMenu.Identifier("closeDiagramMenu"),
             options: .displayInline,
-            children: [renameCommand, closeDiagramCommand]
+            children: [renameCommand, closeWindowCommand]
         )
         builder.replace(menu: .close, with: closeDiagramMenu)
         builder.insertSibling(saveScreenshotMenu, beforeMenu: UIMenu.Identifier("closeDiagramMenu"))
@@ -248,6 +296,47 @@ extension AppDelegate {
         )
         builder.insertSibling(diagramMenu, afterMenu: .view)
 
+    }
+
+    @IBAction func newDiagramWindow(_ sender: Any) {
+        requestMainDocumentBrowserScene(errorMessage: "Error showing new diagram window")
+    }
+
+    @IBAction func openDiagramFromMenu(_ sender: Any) {
+        if let documentBrowserViewController = activeDocumentBrowserViewController() {
+            documentBrowserViewController.openDiagramFromMenu(sender)
+        } else {
+            requestMainDocumentBrowserScene(errorMessage: "Error showing open browser")
+        }
+    }
+
+    private func requestMainDocumentBrowserScene(errorMessage: String) {
+        let activity = NSUserActivity(activityType: Self.mainActivityType)
+        UIApplication.shared.requestSceneSessionActivation(nil, userActivity: activity, options: nil) { error in
+            print(errorMessage, error.localizedDescription)
+        }
+    }
+
+    private func activeDocumentBrowserViewController() -> DocumentBrowserViewController? {
+        let windowScenes = UIApplication.shared.connectedScenes.compactMap { $0 as? UIWindowScene }
+        let activeScenes = windowScenes.filter { $0.activationState == .foregroundActive }
+        let inactiveScenes = windowScenes.filter { $0.activationState == .foregroundInactive }
+        let candidateScenes = activeScenes + inactiveScenes + windowScenes.filter { $0.activationState != .foregroundActive && $0.activationState != .foregroundInactive }
+
+        for scene in candidateScenes {
+            if let window = scene.windows.first(where: { $0.isKeyWindow }),
+               let documentBrowserViewController = window.rootViewController as? DocumentBrowserViewController {
+                return documentBrowserViewController
+            }
+        }
+
+        for scene in candidateScenes {
+            if let documentBrowserViewController = scene.windows.first?.rootViewController as? DocumentBrowserViewController {
+                return documentBrowserViewController
+            }
+        }
+
+        return nil
     }
 
     // See https://stackoverflow.com/questions/58882047/open-a-new-window-in-mac-catalyst
