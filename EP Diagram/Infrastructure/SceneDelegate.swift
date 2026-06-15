@@ -15,7 +15,6 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
     private let zoomInToolbarButton = NSToolbarItem.Identifier(rawValue: "macZoomInButton")
     private let zoomOutToolbarButton = NSToolbarItem.Identifier(rawValue: "macZoomOutButton")
     private let zoomResetToolbarButton = NSToolbarItem.Identifier(rawValue: "macZoomResetButton")
-    private let closeToolbarButton = NSToolbarItem.Identifier(rawValue: "macCloseButton")
     private let undoToolbarButton = NSToolbarItem.Identifier(rawValue: "macUndoButton")
     private let redoToolbarButton = NSToolbarItem.Identifier(rawValue: "macRedoButton")
     private let snapshotToolbarButton = NSToolbarItem.Identifier(rawValue: "macSnapshotButton")
@@ -42,7 +41,10 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
             scene.windowingBehaviors?.isClosable = true
             #endif
 
-            if let documentURL = documentURL(from: scene.userActivity) {
+            if shouldCreateNewDocument(from: scene.userActivity) {
+                scene.userActivity = NSUserActivity(activityType: AppDelegate.mainActivityType)
+                documentBrowserViewController.createNewDocument()
+            } else if let documentURL = documentURL(from: scene.userActivity) {
                 documentBrowserViewController.openDocument(url: documentURL)
             } else if !connectionOptions.urlContexts.isEmpty {
                 self.scene(scene, openURLContexts: connectionOptions.urlContexts)
@@ -69,6 +71,10 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
     func stateRestorationActivity(for scene: UIScene) -> NSUserActivity? {
         os_log("stateRestorationActivity(scene:) - SceneDelegate", log: .lifeCycle, type: .info)
         return scene.userActivity
+    }
+
+    private func shouldCreateNewDocument(from userActivity: NSUserActivity?) -> Bool {
+        return userActivity?.userInfo?[AppDelegate.createNewDocumentKey] as? Bool ?? false
     }
 
     private func documentURL(from userActivity: NSUserActivity?) -> URL? {
@@ -134,7 +140,7 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
 extension SceneDelegate: NSToolbarDelegate {
     func toolbarDefaultItemIdentifiers(_ toolbar: NSToolbar) -> [NSToolbarItem.Identifier] {
         let space = NSToolbarItem.Identifier.space
-        return [NSToolbarItem.Identifier.flexibleSpace, importImageToolbarButton, space,  undoToolbarButton, redoToolbarButton, space, zoomInToolbarButton, zoomOutToolbarButton, zoomResetToolbarButton, space, snapshotToolbarButton, space, closeToolbarButton]
+        return [NSToolbarItem.Identifier.flexibleSpace, importImageToolbarButton, space,  undoToolbarButton, redoToolbarButton, space, zoomInToolbarButton, zoomOutToolbarButton, zoomResetToolbarButton, space, snapshotToolbarButton]
     }
 
     func toolbarAllowedItemIdentifiers(_ toolbar: NSToolbar) -> [NSToolbarItem.Identifier] {
@@ -143,11 +149,6 @@ extension SceneDelegate: NSToolbarDelegate {
 
     func toolbar(_ toolbar: NSToolbar, itemForItemIdentifier itemIdentifier: NSToolbarItem.Identifier, willBeInsertedIntoToolbar flag: Bool) -> NSToolbarItem? {
         switch itemIdentifier {
-        case closeToolbarButton:
-            let barButtonItem = UIBarButtonItem(title: L("Close"), style: .done, target: nil, action: #selector(DocumentBrowserViewController.closeWindow(_:)))
-            let button = NSToolbarItem(itemIdentifier: itemIdentifier, barButtonItem: barButtonItem)
-            button.toolTip = L("Close window")
-            return button
         case zoomInToolbarButton:
             let barButtonItem = UIBarButtonItem(image: UIImage(systemName: "plus.magnifyingglass"), style: .plain, target: nil, action:  #selector(DiagramViewController.doZoom(_:)))
             let button = NSToolbarItem(itemIdentifier: itemIdentifier, barButtonItem: barButtonItem)

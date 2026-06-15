@@ -186,6 +186,22 @@ class DocumentBrowserViewController: UIDocumentBrowserViewController, UIDocument
         return false
     }
 
+    func createNewDocument() {
+        closeDiagramController { [weak self] in
+            guard let self = self else { return }
+            let directoryURL = FileIO.getDocumentsURL() ?? FileIO.getCacheURL()
+            let documentURL = self.browserDelegate.createNewDocumentURL(in: directoryURL)
+            self.browserDelegate.createBlankDocument(at: documentURL) { [weak self] newDocumentURL in
+                guard let self = self else { return }
+                guard let newDocumentURL = newDocumentURL else {
+                    UserAlert.showMessage(viewController: self, title: L("Error Creating Diagram"), message: L("A new diagram could not be created."))
+                    return
+                }
+                self.openDocument(url: newDocumentURL)
+            }
+        }
+    }
+
     @objc func displayDiagramController(requestSandboxExpansion: Bool = false) {
         os_log("displayDiagramController()", log: .default, type: .default)
         guard !editingDocument else { return }
@@ -330,10 +346,6 @@ extension DocumentBrowserViewController {
         if let diagramViewController = diagramViewController {
             diagramViewController.sampleDiagrams(sender)
         }
-    }
-
-    @IBAction func macCloseDocument(_ sender: Any) {
-        closeDiagramController()
     }
 
     @IBAction func closeWindow(_ sender: Any) {

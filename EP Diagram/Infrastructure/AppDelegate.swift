@@ -22,6 +22,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     static let mainActivityType = "org.epstudios.epdiagram.mainActivity"
     static let preferencesActivityType = "org.epstudios.epdiagram.preferencesActivity"
     static let openDocumentURLKey = "org.epstudios.epdiagram.openDocumentURL"
+    static let createNewDocumentKey = "org.epstudios.epdiagram.createNewDocument"
 
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
         os_log("application(_:didFinishLaunchingWithOptions:) - AppDelegate", log: .lifeCycle, type: .info)
@@ -299,7 +300,7 @@ extension AppDelegate {
     }
 
     @IBAction func newDiagramWindow(_ sender: Any) {
-        requestMainDocumentBrowserScene(errorMessage: "Error showing new diagram window")
+        requestNewDiagramScene()
     }
 
     @IBAction func openDiagramFromMenu(_ sender: Any) {
@@ -307,6 +308,14 @@ extension AppDelegate {
             documentBrowserViewController.openDiagramFromMenu(sender)
         } else {
             requestMainDocumentBrowserScene(errorMessage: "Error showing open browser")
+        }
+    }
+
+    private func requestNewDiagramScene() {
+        let activity = NSUserActivity(activityType: Self.mainActivityType)
+        activity.addUserInfoEntries(from: [Self.createNewDocumentKey: true])
+        UIApplication.shared.requestSceneSessionActivation(nil, userActivity: activity, options: nil) { error in
+            print("Error creating new diagram window", error.localizedDescription)
         }
     }
 

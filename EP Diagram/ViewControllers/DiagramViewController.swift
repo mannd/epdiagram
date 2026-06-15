@@ -2019,10 +2019,6 @@ extension DiagramViewController: UITextFieldDelegate {
 // Mac catalyst specific functions
 #if targetEnvironment(macCatalyst)
 extension DiagramViewController {
-    @IBAction func macCloseDocument(_ sender: Any) {
-        closeDocument()
-    }
-
     @IBAction func closeWindow(_ sender: Any) {
         if let documentBrowserViewController = diagramEditorDelegate as? DocumentBrowserViewController {
             documentBrowserViewController.closeWindow(sender)

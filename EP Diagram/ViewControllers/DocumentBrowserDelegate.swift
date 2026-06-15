@@ -12,22 +12,12 @@ class DocumentBrowserDelegate: NSObject, UIDocumentBrowserViewControllerDelegate
     var inportHandler: ((URL?, Error?) -> Void)?
 
     func documentBrowser(_ controller: UIDocumentBrowserViewController, didRequestDocumentCreationWithHandler importHandler: @escaping (URL?, UIDocumentBrowserViewController.ImportMode) -> Void) {
-
-        let documentName = getDocumentName()
-        let cacheDocumentURL = self.createNewDocumentURL(name: documentName)
-        let newDocument = DiagramDocument(fileURL: cacheDocumentURL)
-        newDocument.save(to: cacheDocumentURL, for: .forCreating) { saveSuccess in
-            guard saveSuccess else {
+        createBlankDocument { documentURL in
+            guard let documentURL = documentURL else {
                 importHandler(nil, .none)
                 return
             }
-            newDocument.close { closeSuccess in
-                guard closeSuccess else {
-                    importHandler(nil, .none)
-                    return
-                }
-                importHandler(cacheDocumentURL, .move)
-            }
+            importHandler(documentURL, .move)
         }
     }
 
@@ -48,30 +38,56 @@ class DocumentBrowserDelegate: NSObject, UIDocumentBrowserViewControllerDelegate
 extension DocumentBrowserDelegate {
     static let newDocumentNumberKey = "newDocumentNumberKey"
 
-    private func getDocumentName() -> String {
-        let newDocNumber = UserDefaults.standard.integer(forKey: DocumentBrowserDelegate.newDocumentNumberKey)
-        return "Untitled \(newDocNumber)"
+    private func documentName(for number: Int) -> String {
+        return "Untitled \(number)"
     }
 
-    private func incrementNameCount() {
-        var newDocNumber = UserDefaults.standard.integer(forKey: DocumentBrowserDelegate.newDocumentNumberKey) + 1
-        // This is really paranoid
-        if newDocNumber >= Int.max {
-            newDocNumber = 1
-        }
-        UserDefaults.standard.set(newDocNumber, forKey: DocumentBrowserDelegate.newDocumentNumberKey)
+    private func nextDocumentNumber(after number: Int) -> Int {
+        let newDocNumber = number + 1
+        return newDocNumber >= Int.max ? 1 : newDocNumber
     }
 
-    func createNewDocumentURL(name: String? = nil) -> URL {
-        guard let cachePath = FileIO.getCacheURL() else {
+    func createNewDocumentURL(in directory: URL? = nil, name: String? = nil) -> URL {
+        guard let baseURL = directory ?? FileIO.getCacheURL() else {
             fatalError()
         }
-        let newName = name ?? getDocumentName()
-        let tempURL = cachePath
-            .appendingPathComponent(newName)
-            .appendingPathExtension(DiagramDocument.extensionName)
-        incrementNameCount()
-        return tempURL
+
+        if let name = name {
+            UserDefaults.standard.set(nextDocumentNumber(after: UserDefaults.standard.integer(forKey: DocumentBrowserDelegate.newDocumentNumberKey)), forKey: DocumentBrowserDelegate.newDocumentNumberKey)
+            return baseURL
+                .appendingPathComponent(name)
+                .appendingPathExtension(DiagramDocument.extensionName)
+        }
+
+        var documentNumber = UserDefaults.standard.integer(forKey: DocumentBrowserDelegate.newDocumentNumberKey)
+        var documentURL: URL
+        repeat {
+            documentURL = baseURL
+                .appendingPathComponent(documentName(for: documentNumber))
+                .appendingPathExtension(DiagramDocument.extensionName)
+            documentNumber = nextDocumentNumber(after: documentNumber)
+        } while FileManager.default.fileExists(atPath: documentURL.path)
+
+        UserDefaults.standard.set(documentNumber, forKey: DocumentBrowserDelegate.newDocumentNumberKey)
+        return documentURL
+    }
+
+    func createBlankDocument(at documentURL: URL? = nil, completion: @escaping (URL?) -> Void) {
+        let newDocumentURL = documentURL ?? createNewDocumentURL()
+        let newDocument = DiagramDocument(fileURL: newDocumentURL)
+        newDocument.save(to: newDocumentURL, for: .forCreating) { saveSuccess in
+            guard saveSuccess else {
+                completion(nil)
+                return
+            }
+            newDocument.close { closeSuccess in
+                guard closeSuccess else {
+                    completion(nil)
+                    return
+                }
+                completion(newDocumentURL)
+            }
+        }
     }
 }
 
