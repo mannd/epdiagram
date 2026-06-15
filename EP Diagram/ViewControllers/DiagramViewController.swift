@@ -560,7 +560,7 @@ final class DiagramViewController: UIViewController {
         ladderView.addInteraction(interaction)
 
         #if targetEnvironment(macCatalyst) // context menu works better on Mac here
-        let imageInteraction = UIContextMenuInteraction(delegate: imageScrollView)
+        let imageInteraction = UIEditMenuInteraction(delegate: imageScrollView)
         imageScrollView.addInteraction(imageInteraction)
         #else
         // We use a long press menu for the image, to avoid the view jumping around during normal scrolling, zooming.
@@ -1882,7 +1882,7 @@ extension DiagramViewController {
                     switch result {
                     case .success(let renamedURL):
                         let renamedDocument = DiagramDocument(fileURL: renamedURL)
-                        renamedDocument.open { openSuccess in
+                        self.openRenamedDocument(renamedDocument) { openSuccess in
                             guard openSuccess else {
                                 completion?(.failure(DocumentRenameError.reopenFailed))
                                 return
@@ -1890,6 +1890,7 @@ extension DiagramViewController {
 
                             renamedDocument.diagram = self.diagram
                             self.currentDocument = renamedDocument
+                            self.diagramEditorDelegate?.diagramEditor(self, didRenameDocumentTo: renamedDocument)
                             self.setTitle()
                             renamedDocument.updateChangeCount(.done)
                             completion?(.success(renamedURL))
@@ -1905,6 +1906,18 @@ extension DiagramViewController {
                     }
                 }
             }
+        }
+    }
+
+    private func openRenamedDocument(_ document: DiagramDocument, completion: @escaping (Bool) -> Void) {
+        let accessDirectoryURL = Sandbox.getPersistentDirectoryURL(forFileURL: document.fileURL)
+        let didStartAccessing = accessDirectoryURL?.startAccessingSecurityScopedResource() ?? false
+
+        document.open { openSuccess in
+            if didStartAccessing {
+                accessDirectoryURL?.stopAccessingSecurityScopedResource()
+            }
+            completion(openSuccess)
         }
     }
 

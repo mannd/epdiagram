@@ -240,6 +240,7 @@ class DocumentBrowserViewController: UIDocumentBrowserViewController, UIDocument
 protocol DiagramEditorDelegate: AnyObject {
     func diagramEditorDidFinishEditing(_ controller: DiagramViewController, diagram: Diagram)
     func diagramEditorDidUpdateContent(_ controller: DiagramViewController, diagram: Diagram)
+    func diagramEditor(_ controller: DiagramViewController, didRenameDocumentTo document: DiagramDocument)
 }
 
 extension DocumentBrowserViewController: DiagramEditorDelegate {
@@ -252,6 +253,10 @@ extension DocumentBrowserViewController: DiagramEditorDelegate {
     func diagramEditorDidUpdateContent(_ controller: DiagramViewController, diagram: Diagram) {
         os_log("diagramEditorDidUpdateContent(_:diagram:) - DocumentBrowserViewController", log: .default, type: .default)
         currentDocument?.diagram = diagram
+    }
+
+    func diagramEditor(_ controller: DiagramViewController, didRenameDocumentTo document: DiagramDocument) {
+        currentDocument = document
     }
 }
 
