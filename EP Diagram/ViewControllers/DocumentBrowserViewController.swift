@@ -44,10 +44,7 @@ class DocumentBrowserViewController: UIDocumentBrowserViewController, UIDocument
         let info = self.restorationInfo
         if info?[DiagramViewController.restorationDoRestorationKey] as? Bool ?? false {
             if let documentURL = info?[DiagramViewController.restorationDocumentURLKey] as? URL {
-                if let presentationHandler = browserDelegate.inportHandler {
-                    presentationHandler(documentURL, nil)
-                    openDocument(url: documentURL)
-                }
+                openDocument(url: documentURL)
             }
         }
     }
@@ -206,8 +203,26 @@ class DocumentBrowserViewController: UIDocumentBrowserViewController, UIDocument
         os_log("displayDiagramController()", log: .default, type: .default)
         guard !editingDocument else { return }
         guard let document = currentDocument else { return }
-
-        editingDocument = true
+        guard view.window != nil else {
+            os_log("Retrying diagram presentation after DocumentBrowserViewController enters the window hierarchy", log: .default, type: .default)
+            DispatchQueue.main.async { [weak self] in
+                guard let self = self else { return }
+                guard self.view.window != nil else {
+                    os_log("Cancelling diagram presentation because DocumentBrowserViewController is not in the window hierarchy", log: .default, type: .default)
+                    self.closeCurrentDocument()
+                    return
+                }
+                self.displayDiagramController(requestSandboxExpansion: requestSandboxExpansion)
+            }
+            return
+        }
+        guard presentedViewController == nil else {
+            os_log("Retrying diagram presentation after current presentation finishes", log: .default, type: .default)
+            DispatchQueue.main.async { [weak self] in
+                self?.displayDiagramController(requestSandboxExpansion: requestSandboxExpansion)
+            }
+            return
+        }
 
         let controller = DiagramViewController.navigationControllerFactory()
 
@@ -222,6 +237,7 @@ class DocumentBrowserViewController: UIDocumentBrowserViewController, UIDocument
 
         controller.modalPresentationStyle = .fullScreen
 
+        editingDocument = true
         self.present(controller, animated: true)
         self.diagramViewController = diagramViewController
     }
@@ -385,6 +401,7 @@ extension DocumentBrowserViewController {
 
     private func requestNewDocumentBrowserScene() {
         let activity = NSUserActivity(activityType: AppDelegate.mainActivityType)
+        activity.addUserInfoEntries(from: [AppDelegate.openBrowserKey: true])
         UIApplication.shared.requestSceneSessionActivation(nil, userActivity: activity, options: nil) { error in
             print("Error showing open browser", error.localizedDescription)
         }
@@ -453,5 +470,3 @@ extension DocumentBrowserViewController {
     }
 }
 #endif
-
-

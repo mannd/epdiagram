@@ -33,6 +33,7 @@ final class DiagramViewController: UIViewController {
 
     var separatorView: SeparatorView?
     @IBOutlet var imageViewHeightConstraint: NSLayoutConstraint!
+    private var didReplaceMacSafeAreaConstraints = false
 
     // Constants
     static let defaultLeftMargin: CGFloat = 50
@@ -490,6 +491,7 @@ final class DiagramViewController: UIViewController {
         super.viewDidLoad()
 
         //print("userInfo", restorationInfo as Any)
+        replaceMacCatalystSafeAreaConstraintsIfNeeded()
 
         // Setup cursor, ladder and image scroll views.
         // These 2 views are guaranteed to exist, so the delegates are implicitly unwrapped optionals.
@@ -601,7 +603,7 @@ final class DiagramViewController: UIViewController {
         // However, this triggers UITableViewAlertForLayoutOutsideViewHierarchy breakpoint
         // for both macOS and iOS versions.
         // Probably safe to ignore this.  Moving this statement elsewhere doesn't work.
-        self.view.layoutIfNeeded()
+        //self.view.layoutIfNeeded()
     }
 
     var didFirstWillLayout = false
@@ -633,16 +635,6 @@ final class DiagramViewController: UIViewController {
         os_log("viewDidAppear() - ViewController", log: OSLog.viewCycle, type: .info)
         super.viewDidAppear(animated)
 
-        #if targetEnvironment(macCatalyst)
-//        if requestSandboxExpansion {
-//            addDirectoryToSandbox(self)
-//        }
-//        #else
-//        // FIXME: Temporary -- why?
-//        if requestSandboxExpansion {
-//            addIOSDirectoryToSandbox()
-//        }
-        #endif
 
         #if !targetEnvironment(macCatalyst)
         if let currentDocument = currentDocument {
@@ -677,8 +669,78 @@ final class DiagramViewController: UIViewController {
     }
 
     deinit {
+        NotificationCenter.default.removeObserver(self)
         os_log("deinit - DiagramViewController", log: .debugging, type: .debug)
     }
+
+    #if targetEnvironment(macCatalyst)
+    private func replaceMacCatalystSafeAreaConstraintsIfNeeded() {
+        guard !didReplaceMacSafeAreaConstraints else { return }
+        guard let imageScrollView = imageScrollView,
+              let ladderView = ladderView,
+              let cursorView = cursorView,
+              let blackView = blackView,
+              let hamburgerView = _constraintHamburgerWidth.firstItem as? UIView else { return }
+
+        didReplaceMacSafeAreaConstraints = true
+
+        let diagramViews: [UIView] = [
+            imageScrollView,
+            ladderView,
+            cursorView,
+            blackView,
+            hamburgerView
+        ]
+        let safeArea = view.safeAreaLayoutGuide
+        let safeAreaConstraints = view.constraints.filter {
+            constraint($0, connects: safeArea, toOneOf: diagramViews)
+        }
+        NSLayoutConstraint.deactivate(safeAreaConstraints)
+
+        NSLayoutConstraint.activate([
+            imageScrollView.topAnchor.constraint(equalTo: view.topAnchor),
+            imageScrollView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
+            imageScrollView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
+
+            ladderView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
+            ladderView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
+            ladderView.bottomAnchor.constraint(equalTo: view.bottomAnchor),
+
+            cursorView.topAnchor.constraint(equalTo: view.topAnchor),
+            cursorView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
+            cursorView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
+            cursorView.bottomAnchor.constraint(equalTo: view.bottomAnchor),
+
+            blackView.topAnchor.constraint(equalTo: view.topAnchor),
+            blackView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
+            blackView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
+            blackView.bottomAnchor.constraint(equalTo: view.bottomAnchor),
+
+            hamburgerView.topAnchor.constraint(equalTo: view.topAnchor),
+            hamburgerView.bottomAnchor.constraint(equalTo: view.bottomAnchor)
+        ])
+    }
+
+    private func constraint(
+        _ constraint: NSLayoutConstraint,
+        connects safeArea: UILayoutGuide,
+        toOneOf views: [UIView]
+    ) -> Bool {
+        if let firstGuide = constraint.firstItem as? UILayoutGuide,
+           firstGuide === safeArea,
+           let secondView = constraint.secondItem as? UIView {
+            return views.contains { $0 === secondView }
+        }
+        if let secondGuide = constraint.secondItem as? UILayoutGuide,
+           secondGuide === safeArea,
+           let firstView = constraint.firstItem as? UIView {
+            return views.contains { $0 === firstView }
+        }
+        return false
+    }
+    #else
+    private func replaceMacCatalystSafeAreaConstraintsIfNeeded() {}
+    #endif
 
     func addIOSDirectoryToSandbox() {
         print("addIOSDirectoryToSandbox")

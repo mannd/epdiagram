@@ -23,6 +23,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     static let preferencesActivityType = "org.epstudios.epdiagram.preferencesActivity"
     static let openDocumentURLKey = "org.epstudios.epdiagram.openDocumentURL"
     static let createNewDocumentKey = "org.epstudios.epdiagram.createNewDocument"
+    static let openBrowserKey = "org.epstudios.epdiagram.openBrowser"
 
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
         os_log("application(_:didFinishLaunchingWithOptions:) - AppDelegate", log: .lifeCycle, type: .info)
@@ -321,6 +322,7 @@ extension AppDelegate {
 
     private func requestMainDocumentBrowserScene(errorMessage: String) {
         let activity = NSUserActivity(activityType: Self.mainActivityType)
+        activity.addUserInfoEntries(from: [Self.openBrowserKey: true])
         UIApplication.shared.requestSceneSessionActivation(nil, userActivity: activity, options: nil) { error in
             print(errorMessage, error.localizedDescription)
         }
@@ -330,17 +332,19 @@ extension AppDelegate {
         let windowScenes = UIApplication.shared.connectedScenes.compactMap { $0 as? UIWindowScene }
         let activeScenes = windowScenes.filter { $0.activationState == .foregroundActive }
         let inactiveScenes = windowScenes.filter { $0.activationState == .foregroundInactive }
-        let candidateScenes = activeScenes + inactiveScenes + windowScenes.filter { $0.activationState != .foregroundActive && $0.activationState != .foregroundInactive }
+        let candidateScenes = activeScenes + inactiveScenes
 
         for scene in candidateScenes {
             if let window = scene.windows.first(where: { $0.isKeyWindow }),
+               !window.isHidden,
                let documentBrowserViewController = window.rootViewController as? DocumentBrowserViewController {
                 return documentBrowserViewController
             }
         }
 
         for scene in candidateScenes {
-            if let documentBrowserViewController = scene.windows.first?.rootViewController as? DocumentBrowserViewController {
+            if let window = scene.windows.first(where: { !$0.isHidden }),
+               let documentBrowserViewController = window.rootViewController as? DocumentBrowserViewController {
                 return documentBrowserViewController
             }
         }

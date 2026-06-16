@@ -41,7 +41,10 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
             scene.windowingBehaviors?.isClosable = true
             #endif
 
-            if shouldCreateNewDocument(from: scene.userActivity) {
+            if shouldOpenBrowser(from: scene.userActivity) {
+                scene.userActivity = NSUserActivity(activityType: AppDelegate.mainActivityType)
+                documentBrowserViewController.restorationInfo = nil
+            } else if shouldCreateNewDocument(from: scene.userActivity) {
                 scene.userActivity = NSUserActivity(activityType: AppDelegate.mainActivityType)
                 documentBrowserViewController.createNewDocument()
             } else if let documentURL = documentURL(from: scene.userActivity) {
@@ -75,6 +78,10 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
 
     private func shouldCreateNewDocument(from userActivity: NSUserActivity?) -> Bool {
         return userActivity?.userInfo?[AppDelegate.createNewDocumentKey] as? Bool ?? false
+    }
+
+    private func shouldOpenBrowser(from userActivity: NSUserActivity?) -> Bool {
+        return userActivity?.userInfo?[AppDelegate.openBrowserKey] as? Bool ?? false
     }
 
     private func documentURL(from userActivity: NSUserActivity?) -> URL? {
