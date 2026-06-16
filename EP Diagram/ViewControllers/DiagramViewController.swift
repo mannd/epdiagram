@@ -561,10 +561,7 @@ final class DiagramViewController: UIViewController {
         let interaction = UIContextMenuInteraction(delegate: self)
         ladderView.addInteraction(interaction)
 
-        #if targetEnvironment(macCatalyst) // context menu works better on Mac here
-        let imageInteraction = UIEditMenuInteraction(delegate: imageScrollView)
-        imageScrollView.addInteraction(imageInteraction)
-        #else
+        #if !targetEnvironment(macCatalyst)
         // We use a long press menu for the image, to avoid the view jumping around during normal scrolling, zooming.
         // Yes, we tried using UIContextMenuInteraction, but it was unusable for iOS.
         let longPressRecognizer = UILongPressGestureRecognizer(target: self.imageScrollView, action: #selector(imageScrollView.showImageMenu))
