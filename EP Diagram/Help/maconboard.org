@@ -35,7 +35,7 @@
 - After calibration, intervals and conduction times will appear on your diagram.
 
 * Autosave and the /Undo/ and /Redo/ buttons
-- All changes are automatically saved.  Click the /Undo/ and /Redo/ toolbar buttons to revert and restore your changes.  Click the /Close Diagram/ button at the top right of the toolbar to close your diagram.
+- All changes are automatically saved.  Click the /Undo/ and /Redo/ toolbar buttons to revert and restore your changes.  Use the /Open/, /Close Window/, and /New/ menu items in the /File/ menu to open a previously saved diagram or create a new one, close a diagram, or create a new diagram in a new window.
 
 * Play around and experiment
 - There are a lot of features to explore.  Use the /EP Diagram Help/ menu item to learn new features.

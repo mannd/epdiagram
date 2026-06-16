@@ -115,6 +115,7 @@
 		8EEE3C7D264B798A0084D968 /* SharedAppKitProtocol.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8EEE3C7C264B798A0084D968 /* SharedAppKitProtocol.swift */; };
 		8EEE3C7E264B799A0084D968 /* SharedAppKitProtocol.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8EEE3C7C264B798A0084D968 /* SharedAppKitProtocol.swift */; };
 		8EEE3C80264B7A5B0084D968 /* MacSupport.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8EEE3C7F264B7A5B0084D968 /* MacSupport.swift */; };
+		8EF6BC902FE1C6CD0058214F /* Localizable.xcstrings in Resources */ = {isa = PBXBuildFile; fileRef = 8EF6BC8F2FE1C6CD0058214F /* Localizable.xcstrings */; };
 		8EF8B5B72330739F00ADB77A /* ViewControllerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8EF8B5B62330739F00ADB77A /* ViewControllerTests.swift */; };
 		8EF9166B227926BC00B51F17 /* LadderView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8EF9166A227926BC00B51F17 /* LadderView.swift */; };
 		8EF9CA24264F0138007AA24A /* Dynamic in Frameworks */ = {isa = PBXBuildFile; platformFilter = maccatalyst; productRef = 8EF9CA23264F0138007AA24A /* Dynamic */; };
@@ -286,6 +287,7 @@
 		8EEE3C7F264B7A5B0084D968 /* MacSupport.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MacSupport.swift; sourceTree = "<group>"; };
 		8EF6B0F925A8CA7800DCA91C /* MobileCoreServices.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = MobileCoreServices.framework; path = Platforms/MacOSX.platform/Developer/SDKs/MacOSX11.1.sdk/System/iOSSupport/System/Library/Frameworks/MobileCoreServices.framework; sourceTree = DEVELOPER_DIR; };
 		8EF6B10125A8CAA600DCA91C /* CoreServices.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreServices.framework; path = Platforms/MacOSX.platform/Developer/SDKs/MacOSX11.1.sdk/System/Library/Frameworks/CoreServices.framework; sourceTree = DEVELOPER_DIR; };
+		8EF6BC8F2FE1C6CD0058214F /* Localizable.xcstrings */ = {isa = PBXFileReference; lastKnownFileType = text.json.xcstrings; path = Localizable.xcstrings; sourceTree = "<group>"; };
 		8EF8B5B62330739F00ADB77A /* ViewControllerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ViewControllerTests.swift; sourceTree = "<group>"; };
 		8EF9166A227926BC00B51F17 /* LadderView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LadderView.swift; sourceTree = "<group>"; };
 		8EF9CA25264F016C007AA24A /* UIWindow+nsWindow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "UIWindow+nsWindow.swift"; sourceTree = "<group>"; };
@@ -349,6 +351,7 @@
 				8E7D24C222779DBD005A1729 /* AppDelegate.swift */,
 				8E0FDE822543A01D00865CBC /* SceneDelegate.swift */,
 				8E7D24C922779DBF005A1729 /* Assets.xcassets */,
+				8EF6BC8F2FE1C6CD0058214F /* Localizable.xcstrings */,
 			);
 			path = Infrastructure;
 			sourceTree = "<group>";
@@ -753,6 +756,7 @@
 				8E05ADE22FDCEBB1001329F8 /* epdiagram-smaller.icon in Resources */,
 				8EE141232620EED500392100 /* onboard.html in Resources */,
 				8E7D24CD22779DBF005A1729 /* LaunchScreen.storyboard in Resources */,
+				8EF6BC902FE1C6CD0058214F /* Localizable.xcstrings in Resources */,
 				8E7D24CA22779DBF005A1729 /* Assets.xcassets in Resources */,
 				8E7D24C822779DBD005A1729 /* Main.storyboard in Resources */,
 				8E61C3D725A6260D0064ADC1 /* Startup2.storyboard in Resources */,
@@ -1010,6 +1014,7 @@
 				SDKROOT = iphoneos;
 				STRING_CATALOG_GENERATE_SYMBOLS = YES;
 				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
+				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 			};
 			name = Debug;
@@ -1069,6 +1074,7 @@
 				SDKROOT = iphoneos;
 				STRING_CATALOG_GENERATE_SYMBOLS = YES;
 				SWIFT_COMPILATION_MODE = wholemodule;
+				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_OPTIMIZATION_LEVEL = "-O";
 				VALIDATE_PRODUCT = YES;
 			};

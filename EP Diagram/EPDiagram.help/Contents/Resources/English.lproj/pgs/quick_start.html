@@ -3,7 +3,7 @@
 "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
 <head>
-<!-- 2025-10-18 Sat 15:25 -->
+<!-- 2026-06-16 Tue 12:18 -->
 <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>&lrm;</title>
@@ -59,6 +59,7 @@
   pre.src-asymptote:before { content: 'Asymptote'; }
   pre.src-awk:before { content: 'Awk'; }
   pre.src-authinfo::before { content: 'Authinfo'; }
+  pre.src-c:before { content: 'C'; }
   pre.src-C:before { content: 'C'; }
   /* pre.src-C++ doesn't work in CSS */
   pre.src-clojure:before { content: 'Clojure'; }
@@ -73,7 +74,7 @@
   pre.src-haskell:before { content: 'Haskell'; }
   pre.src-hledger:before { content: 'hledger'; }
   pre.src-java:before { content: 'Java'; }
-  pre.src-js:before { content: 'Javascript'; }
+  pre.src-js:before { content: 'JavaScript'; }
   pre.src-latex:before { content: 'LaTeX'; }
   pre.src-ledger:before { content: 'Ledger'; }
   pre.src-lisp:before { content: 'Lisp'; }
@@ -204,29 +205,29 @@
 <body>
 <div id="content" class="content">
 <a name="Quick start"></a>
-<div id="outline-container-org8caab89" class="outline-2">
-<h2 id="org8caab89"><img src="../../shrd/64.png" alt="64.png" /> Quick start</h2>
-<div class="outline-text-2" id="text-org8caab89">
+<div id="outline-container-orgd50dca5" class="outline-2">
+<h2 id="orgd50dca5"><img src="../../shrd/64.png" alt="64.png" /> Quick start</h2>
+<div class="outline-text-2" id="text-orgd50dca5">
 </div>
-<div id="outline-container-org0d77cdb" class="outline-3">
-<h3 id="org0d77cdb">Create a diagram file</h3>
-<div class="outline-text-3" id="text-org0d77cdb">
+<div id="outline-container-orgd235092" class="outline-3">
+<h3 id="orgd235092">Create a diagram file</h3>
+<div class="outline-text-3" id="text-orgd235092">
 <ul class="org-ul">
-<li>On starting the app, a file selection screen should appear.  You can get to this screen anytime by selecting <b>File | New</b> from the main menu, or typing <b>Command-N</b>.  To create a diagram file, click the <b>New Document</b> button at the lower left corner of the window.</li>
+<li>On starting the app, a file selection screen should appear.  You can get to this screen anytime by selecting <b>File | Open</b> from the main menu, or typing <b>Command-O</b>.  To create a new diagram file, click the <b>New Document</b> button at the lower left corner of the window.</li>
 </ul>
 </div>
 </div>
-<div id="outline-container-org3c66d08" class="outline-3">
-<h3 id="org3c66d08">Deal with the Mac sandbox</h3>
-<div class="outline-text-3" id="text-org3c66d08">
+<div id="outline-container-orge4308c1" class="outline-3">
+<h3 id="orge4308c1">Deal with the Mac sandbox</h3>
+<div class="outline-text-3" id="text-orge4308c1">
 <ul class="org-ul">
 <li>The Mac sandbox is a requirement of apps sold on the Mac App Store.  The sandbox is the group of folders where the user is permitted to open and save files.  The user must grant permission to access folders (such as Documents or Downloads) outside of the storage assigned to the app itself.  The bottom line is that the first time you create a new document in a folder, the app will ask you to confirm this by asking you to select the folder from a list of folders.  Once this is done, the app shouldn't ever need to bother you about this again, at least for that particular folder.  So follow the prompts in the dialog that appears, and move on to the next step.</li>
 </ul>
 </div>
 </div>
-<div id="outline-container-org8595a1e" class="outline-3">
-<h3 id="org8595a1e">Load an ECG image</h3>
-<div class="outline-text-3" id="text-org8595a1e">
+<div id="outline-container-orgca1321a" class="outline-3">
+<h3 id="orgca1321a">Load an ECG image</h3>
+<div class="outline-text-3" id="text-orgca1321a">
 <ul class="org-ul">
 <li>You should at this point have a nice blank ladder diagram on your screen, with a blank space above.  This is where the ECG image goes.</li>
 <li>Click the <b>Import image</b> toolbar button, or select the <b>Diagram | Import Image</b> main menu item to import an image from the Photos app or from your files.  You can also drag and drop an image onto the window.</li>
@@ -234,9 +235,9 @@
 </ul>
 </div>
 </div>
-<div id="outline-container-org808607f" class="outline-3">
-<h3 id="org808607f">Create marks</h3>
-<div class="outline-text-3" id="text-org808607f">
+<div id="outline-container-org57dd742" class="outline-3">
+<h3 id="org57dd742">Create marks</h3>
+<div class="outline-text-3" id="text-org57dd742">
 <ul class="org-ul">
 <li>Click on the image or the ladder grid to create <i>marks</i>, which are the lines that are drawn on the ladder.  Use the <i>cursor</i> (the vertical line extending from the mark to the top of the screen) to align marks with the ECG waveforms.  Click away from the cursor to hide the cursor.  Click on a mark to bring back the cursor.  Each click changes the <i>anchor</i> point of the mark from middle to proximal to distal.</li>
 <li>Double-click on a mark to delete it.  Double-click anywhere else to create a mark.  Double-clicking is a fast way to create marks.</li>
@@ -245,9 +246,9 @@
 </ul>
 </div>
 </div>
-<div id="outline-container-org7d5e22a" class="outline-3">
-<h3 id="org7d5e22a">Move marks</h3>
-<div class="outline-text-3" id="text-org7d5e22a">
+<div id="outline-container-orgbd5232d" class="outline-3">
+<h3 id="orgbd5232d">Move marks</h3>
+<div class="outline-text-3" id="text-orgbd5232d">
 <ul class="org-ul">
 <li>A click and drag on a mark with a cursor (you can drag either the mark itself or its cursor) will move the mark horizontally.</li>
 <li>The anchor point will determine how the mark moves.  A middle anchor will move the whole mark, but an anchor at an endpoint of a mark will just move that endpoint, while the other endpoint stays fixed.  This will slant the mark.</li>
@@ -256,18 +257,18 @@
 </ul>
 </div>
 </div>
-<div id="outline-container-org396d6fb" class="outline-3">
-<h3 id="org396d6fb">Calibrate the diagram</h3>
-<div class="outline-text-3" id="text-org396d6fb">
+<div id="outline-container-orgf192e9a" class="outline-3">
+<h3 id="orgf192e9a">Calibrate the diagram</h3>
+<div class="outline-text-3" id="text-orgf192e9a">
 <ul class="org-ul">
 <li>Optionally, click the <b>Calibrate</b> button to show a caliper that can be used to calibrate the diagram to a standard interval of 1000 msec.</li>
-<li>After calibration, measurements and periods will appear on the diagram, provided the <b>Show intervals</b> and <b>Show conduction times</b> app preferences are turned on.</li>
+<li>After calibration, measurements and periods will appear on the diagram, provided the <b>Show intervals</b> and <b>Show conduction times</b> app settings are turned on.</li>
 </ul>
 </div>
 </div>
-<div id="outline-container-orgd02a479" class="outline-3">
-<h3 id="orgd02a479">Connect marks</h3>
-<div class="outline-text-3" id="text-orgd02a479">
+<div id="outline-container-org901327f" class="outline-3">
+<h3 id="org901327f">Connect marks</h3>
+<div class="outline-text-3" id="text-org901327f">
 <ul class="org-ul">
 <li>You can draw and move marks to connect them, but it is easier to use the <b>Connect</b> button.</li>
 <li>After clicking the <b>Connect</b> button, click pairs of marks separated by a region to connect the marks with a new mark.</li>
@@ -275,9 +276,9 @@
 </ul>
 </div>
 </div>
-<div id="outline-container-org163700d" class="outline-3">
-<h3 id="org163700d">Edit the diagram</h3>
-<div class="outline-text-3" id="text-org163700d">
+<div id="outline-container-orgd6ff390" class="outline-3">
+<h3 id="orgd6ff390">Edit the diagram</h3>
+<div class="outline-text-3" id="text-orgd6ff390">
 <ul class="org-ul">
 <li>Click the <b>Edit</b> button to unlock techniques for fine-tuning your diagram.</li>
 <li>Click to select and deselect marks or regions, or click and drag to select zones.</li>
@@ -285,17 +286,17 @@
 </ul>
 </div>
 </div>
-<div id="outline-container-orgf3001ee" class="outline-3">
-<h3 id="orgf3001ee">Undo/Redo</h3>
-<div class="outline-text-3" id="text-orgf3001ee">
+<div id="outline-container-orgecfa512" class="outline-3">
+<h3 id="orgecfa512">Undo/Redo</h3>
+<div class="outline-text-3" id="text-orgecfa512">
 <ul class="org-ul">
 <li>Practically anything you do can be undone or redone and these changes are automatically saved.  You <i>do not</i> need to save your diagram.  All changes are saved automatically.</li>
 </ul>
 </div>
 </div>
-<div id="outline-container-org6fa76e5" class="outline-3">
-<h3 id="org6fa76e5">Other features are available in the main menu</h3>
-<div class="outline-text-3" id="text-org6fa76e5">
+<div id="outline-container-org80bcc36" class="outline-3">
+<h3 id="org80bcc36">Other features are available in the main menu</h3>
+<div class="outline-text-3" id="text-org80bcc36">
 <ul class="org-ul">
 <li>Change to a different ladder (<b>Diagram | Ladder | Select Ladder</b>)</li>
 <li>Edit or create ladders (<b>Diagram | Ladder | Edit Ladder</b>)</li>
@@ -303,33 +304,33 @@
 </ul>
 </div>
 </div>
-<div id="outline-container-org45514f3" class="outline-3">
-<h3 id="org45514f3">Take screenshots</h3>
-<div class="outline-text-3" id="text-org45514f3">
+<div id="outline-container-org1d00e2c" class="outline-3">
+<h3 id="org1d00e2c">Take screenshots</h3>
+<div class="outline-text-3" id="text-org1d00e2c">
 <ul class="org-ul">
 <li>Take screenshots using the <b>Screenshot</b> button at the upper right of the screen, next to the <b>Close</b> button.</li>
 </ul>
 </div>
 </div>
-<div id="outline-container-org70697a1" class="outline-3">
-<h3 id="org70697a1">Preferences</h3>
-<div class="outline-text-3" id="text-org70697a1">
+<div id="outline-container-org9065765" class="outline-3">
+<h3 id="org9065765">Settings</h3>
+<div class="outline-text-3" id="text-org9065765">
 <ul class="org-ul">
-<li>Use the <b>EP Diagram | Preferences</b> menu item, or type <b>Command-,</b> to open the preferences window and change the overall appearance or behavior of the app.  Many aspects are customizable.</li>
+<li>Use the <b>EP Diagram | Settings</b> menu item, or type <b>Command-,</b> to open the settings window and change the overall appearance or behavior of the app.  Many aspects are customizable.</li>
 </ul>
 </div>
 </div>
-<div id="outline-container-org6a8b5d1" class="outline-3">
-<h3 id="org6a8b5d1">Close the diagram</h3>
-<div class="outline-text-3" id="text-org6a8b5d1">
+<div id="outline-container-org290dd02" class="outline-3">
+<h3 id="org290dd02">Close the diagram</h3>
+<div class="outline-text-3" id="text-org290dd02">
 <ul class="org-ul">
 <li>Click the <b>Close</b> button at the upper right of the screen to close the diagram and return to the <b>Files</b> screen.  Diagrams are automatically saved as you work with them.</li>
 </ul>
 </div>
 </div>
-<div id="outline-container-orga13c8c0" class="outline-3">
-<h3 id="orga13c8c0">Those are the basics</h3>
-<div class="outline-text-3" id="text-orga13c8c0">
+<div id="outline-container-org6d35c3f" class="outline-3">
+<h3 id="org6d35c3f">Those are the basics</h3>
+<div class="outline-text-3" id="text-org6d35c3f">
 <ul class="org-ul">
 <li>If you want more detail, read the <a href="./manual.html">EP Diagram manual</a>.</li>
 </ul>

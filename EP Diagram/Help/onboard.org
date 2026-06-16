@@ -20,7 +20,7 @@
 
 
 * Tap the "hamburger" icon to open the /side menu/
-- Use it to load images for analysis, change preferences, and get help!
+- Use it to load images for analysis, change settings, and get help!
 
 * Scroll and zoom the image
 - The ladder will scroll and zoom as well.
@@ -32,7 +32,7 @@
 - Tap or drag to select regions and marks.  Then long press on the ladder to open a menu with options to style marks, copy and paste, generate rhythms, and much more.  Also try a long press on the ladder labels and image while in Edit mode.
 
 * Use the /Calibrate/ button to calibrate your diagram
-- Afterwards intervals and conduction times will appear on your diagram (make sure these are set to show up in /Preferences/.
+- Afterwards intervals and conduction times will appear on your diagram (make sure these are set to show up in /Settings/).
 
 * Autosave and the /Undo/ and /Redo/ buttons are your friends
 - All changes are automatically saved.  Use the /Undo/ and /Redo/ buttons to revert and restore your changes.  Tap the /X/ at the top right to close your diagram.

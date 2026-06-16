@@ -54,7 +54,7 @@ class MacSupport: NSObject, SharedAppKitProtocol {
         if let startingURL = startingURL  {
             panel.message = "EP Diagram needs permission to access the \(startingURL.lastPathComponent) folder.  It should be already selected and all you need to do is click the Select button."
         } else {
-            panel.message = "Please select a folder to add to the App Sandbox"
+            panel.message = "Please select a folder that you would like EP Diagram to have access to."
         }
         panel.canChooseFiles = false
         panel.allowedContentTypes = [.folder]

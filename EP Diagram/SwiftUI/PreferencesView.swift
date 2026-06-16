@@ -270,7 +270,7 @@ struct PreferencesView: View {
                     periodColor = Color.convertColorName(periodColorName) ?? periodColor
                }
             }
-            .navigationBarTitle("Preferences", displayMode: .inline)
+            .navigationBarTitle(L("Preferences"), displayMode: .inline)
             .navigationBarHidden(isRunningOnMac() ? true : false)
 
         }

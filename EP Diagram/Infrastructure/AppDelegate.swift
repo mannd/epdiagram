@@ -94,9 +94,9 @@ extension AppDelegate {
         // Remove unwanted menus
         builder.remove(menu: .format)
 
-        // Preferences menu
+        // Settings menu
         let preferencesCommand = UIKeyCommand(
-            title: L("Preferences..."),
+            title: NSLocalizedString("Settings...", comment: "Menu item title that opens the app settings window."),
             action: #selector(showMacPreferences(_:)),
             input: ",",
             modifierFlags: [.command]
@@ -172,11 +172,11 @@ extension AppDelegate {
         )
 
         let addDirectoryToSandboxCommand = UICommand(
-            title: L("Add Folder to Sandbox"),
+            title: L("Grant Folder Access..."),
             action: #selector(DiagramViewController.addDirectoryToSandbox(_:))
         )
         let clearSandbox = UICommand(
-            title: L("Reset Sandbox"),
+            title: L("Clear Saved Folder Access"),
             action: #selector(DiagramViewController.clearSandbox(_:))
         )
         let sandboxMenu = UIMenu(
