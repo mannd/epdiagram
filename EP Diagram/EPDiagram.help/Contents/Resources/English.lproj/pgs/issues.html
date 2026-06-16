@@ -3,17 +3,16 @@
 "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
 <head>
-<!-- 2022-04-08 Fri 22:22 -->
+<!-- 2026-06-16 Tue 13:02 -->
 <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>EP Diagram Help</title>
-<meta name="generator" content="Org mode" />
 <meta name="author" content="David Mann" />
-<meta name="description" content="Issues, bugs, limitations"
- />
+<meta name="description" content="Issues, bugs, limitations" />
 <meta name="keywords" content="ladder diagrams, EP Diagram index, bugs, issues, limitations" />
+<meta name="generator" content="Org Mode" />
 <style type="text/css">
- <!--/*--><![CDATA[/*><!--*/
+  #content { max-width: 60em; margin: auto; }
   .title  { text-align: center;
              margin-bottom: .2em; }
   .subtitle { text-align: center;
@@ -34,8 +33,9 @@
   #postamble p, #preamble p { font-size: 90%; margin: .2em; }
   p.verse { margin-left: 3%; }
   pre {
-    border: 1px solid #ccc;
-    box-shadow: 3px 3px 3px #eee;
+    border: 1px solid #e6e6e6;
+    border-radius: 3px;
+    background-color: #f2f2f2;
     padding: 8pt;
     font-family: monospace;
     overflow: auto;
@@ -44,21 +44,22 @@
   pre.src {
     position: relative;
     overflow: auto;
-    padding-top: 1.2em;
   }
   pre.src:before {
     display: none;
     position: absolute;
-    background-color: white;
-    top: -10px;
-    right: 10px;
+    top: -8px;
+    right: 12px;
     padding: 3px;
-    border: 1px solid black;
+    color: #555;
+    background-color: #f2f2f299;
   }
   pre.src:hover:before { display: inline; margin-top: 14px;}
   /* Languages per Org manual */
   pre.src-asymptote:before { content: 'Asymptote'; }
   pre.src-awk:before { content: 'Awk'; }
+  pre.src-authinfo::before { content: 'Authinfo'; }
+  pre.src-c:before { content: 'C'; }
   pre.src-C:before { content: 'C'; }
   /* pre.src-C++ doesn't work in CSS */
   pre.src-clojure:before { content: 'Clojure'; }
@@ -73,7 +74,7 @@
   pre.src-haskell:before { content: 'Haskell'; }
   pre.src-hledger:before { content: 'hledger'; }
   pre.src-java:before { content: 'Java'; }
-  pre.src-js:before { content: 'Javascript'; }
+  pre.src-js:before { content: 'JavaScript'; }
   pre.src-latex:before { content: 'LaTeX'; }
   pre.src-ledger:before { content: 'Ledger'; }
   pre.src-lisp:before { content: 'Lisp'; }
@@ -193,57 +194,32 @@
     { font-size: 10px; font-weight: bold; white-space: nowrap; }
   .org-info-js_search-highlight
     { background-color: #ffff00; color: #000000; font-weight: bold; }
-  .org-svg { width: 90%; }
-  /*]]>*/-->
+  .org-svg { }
 </style>
 <style media="screen" type="text/css"> img {max-width: 100%; height: auto;} </style>
 <style  type="text/css">:root { color-scheme: light dark; }</style>
 <link rel="stylesheet" type="text/css" href="../../shrd/org.css"/>
 <meta name="robots" content="anchors" />
 <meta name="robots" content="keywords" />
-<script type="text/javascript">
-// @license magnet:?xt=urn:btih:e95b018ef3580986a04669f1b5879592219e2a7a&dn=public-domain.txt Public Domain
-<!--/*--><![CDATA[/*><!--*/
-     function CodeHighlightOn(elem, id)
-     {
-       var target = document.getElementById(id);
-       if(null != target) {
-         elem.classList.add("code-highlighted");
-         target.classList.add("code-highlighted");
-       }
-     }
-     function CodeHighlightOff(elem, id)
-     {
-       var target = document.getElementById(id);
-       if(null != target) {
-         elem.classList.remove("code-highlighted");
-         target.classList.remove("code-highlighted");
-       }
-     }
-    /*]]>*///-->
-// @license-end
-</script>
 </head>
 <body>
-<div id="content">
+<div id="content" class="content">
 <h1 class="title">EP Diagram Help</h1>
-<div id="outline-container-org574fa73" class="outline-2">
-<h2 id="org574fa73"><img src="../../shrd/64.png" alt="64.png" /> Issues</h2>
-<div class="outline-text-2" id="text-org574fa73">
+<div id="outline-container-org9dfcc79" class="outline-2">
+<h2 id="org9dfcc79"><img src="../../shrd/64.png" alt="64.png" /> Issues</h2>
+<div class="outline-text-2" id="text-org9dfcc79">
 <a name="issues"></a>
 </div>
 </div>
-
-<div id="outline-container-orgbfe21fb" class="outline-2">
-<h2 id="orgbfe21fb">Known issues/bugs/limitations</h2>
-<div class="outline-text-2" id="text-orgbfe21fb">
+<div id="outline-container-org32b34bc" class="outline-2">
+<h2 id="org32b34bc">Known issues/bugs/limitations</h2>
+<div class="outline-text-2" id="text-org32b34bc">
 <ul class="org-ul">
 <li>If you are used to the iPad version of <b>EP Diagram</b>, there are some differences and limitations relating to porting the app to the Mac.  These include:
 <ul class="org-ul">
 <li>Locking and unlocking of the image and ladder are not implemented on the Mac.</li>
-<li>It is necessary to grant permission to access folders in the Mac due to sandboxing.  The iPad version also uses sandboxing, but it is handled more intuitively on the iPad.</li>
+<li>It is sometimes necessary to grant permission to access folders in the Mac.  If so, an open folder dialog will appear requesting the permission.</li>
 </ul></li>
-<li>The red close window button is disabled on the Mac.  It is necessary to use the <b>Close</b> toolbar button or <b>Close Diagram</b> menu command to close the diagram window.  This is a limitation due to a bug in the implementation of document-based apps on the Mac using Mac Catalyst.</li>
 <li>Drag and drop works for image files (e.g. JPG files) but not for PDF or diagram files.  This will be addressed in a future release.</li>
 <li>Complexly linked marks in the same region may not always track with the moving mark.  We can't decide if this is a bug or feature.</li>
 <li>Attempting to switch diagrams by two-finger clicking on the app icon in the doc and selecting another diagram doesn't work.  This is problem with Mac Catalyst which we hope will be fixed in a later version of macOS.</li>
