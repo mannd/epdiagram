@@ -75,4 +75,24 @@ class MacSupport: NSObject, SharedAppKitProtocol {
             }
         })
     }
+
+    @objc func getDiagram(nsWindow: AnyObject, startingURL: URL?, completion: ((URL)->Void)?) {
+        guard let nsWindow = nsWindow as? NSWindow else { return }
+        let panel = NSOpenPanel()
+        panel.prompt = "Open"
+        panel.message = "Select an EP Diagram file."
+        panel.canChooseFiles = true
+        panel.canChooseDirectories = false
+        panel.allowedContentTypes = [UTType(exportedAs: "org.epstudios.diagram")]
+        panel.allowsOtherFileTypes = false
+        panel.allowsMultipleSelection = false
+        if let startingURL = startingURL {
+            panel.directoryURL = startingURL
+        }
+
+        panel.beginSheetModal(for: nsWindow) { response in
+            guard response == .OK, let url = panel.urls.first else { return }
+            completion?(url)
+        }
+    }
 }

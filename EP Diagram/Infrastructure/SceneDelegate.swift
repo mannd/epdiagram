@@ -26,9 +26,13 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         guard let scene = (scene as? UIWindowScene) else { return }
         if let documentBrowserViewController = window?.rootViewController as? DocumentBrowserViewController {
             scene.title = L("EP Diagram")
-            scene.userActivity = connectionOptions.userActivities.first ?? session.stateRestorationActivity ?? NSUserActivity(activityType: AppDelegate.mainActivityType)
-
-            documentBrowserViewController.restorationInfo = scene.userActivity?.userInfo
+            if connectionOptions.userActivities.isEmpty && !connectionOptions.urlContexts.isEmpty {
+                scene.userActivity = NSUserActivity(activityType: AppDelegate.mainActivityType)
+                documentBrowserViewController.restorationInfo = nil
+            } else {
+                scene.userActivity = connectionOptions.userActivities.first ?? session.stateRestorationActivity ?? NSUserActivity(activityType: AppDelegate.mainActivityType)
+                documentBrowserViewController.restorationInfo = scene.userActivity?.userInfo
+            }
 
             #if targetEnvironment(macCatalyst)
             let toolbar = NSToolbar(identifier: "EP Diagram Mac Toolbar")
@@ -41,7 +45,11 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
             scene.windowingBehaviors?.isClosable = true
             #endif
 
-            if shouldOpenBrowser(from: scene.userActivity) {
+            if !connectionOptions.urlContexts.isEmpty {
+                scene.userActivity = NSUserActivity(activityType: AppDelegate.mainActivityType)
+                documentBrowserViewController.restorationInfo = nil
+                self.scene(scene, openURLContexts: connectionOptions.urlContexts)
+            } else if shouldOpenBrowser(from: scene.userActivity) {
                 scene.userActivity = NSUserActivity(activityType: AppDelegate.mainActivityType)
                 documentBrowserViewController.restorationInfo = nil
             } else if shouldCreateNewDocument(from: scene.userActivity) {
@@ -49,8 +57,6 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
                 documentBrowserViewController.createNewDocument()
             } else if let documentURL = documentURL(from: scene.userActivity) {
                 documentBrowserViewController.openDocument(url: documentURL)
-            } else if !connectionOptions.urlContexts.isEmpty {
-                self.scene(scene, openURLContexts: connectionOptions.urlContexts)
             }
         } else if (window?.rootViewController as? MacPreferencesViewController) != nil  {
             scene.title = L("Preferences")
@@ -73,7 +79,10 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
 
     func stateRestorationActivity(for scene: UIScene) -> NSUserActivity? {
         os_log("stateRestorationActivity(scene:) - SceneDelegate", log: .lifeCycle, type: .info)
-        return scene.userActivity
+        guard let documentBrowserViewController = self.window?.rootViewController as? DocumentBrowserViewController else {
+            return scene.userActivity
+        }
+        return documentBrowserViewController.stateRestorationActivity
     }
 
     private func shouldCreateNewDocument(from userActivity: NSUserActivity?) -> Bool {
@@ -103,7 +112,9 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
             print("context path", context.url.path)
             let url = context.url
             if url.isFileURL {
-                if documentBrowserViewController.isEditingDocument {
+                if documentBrowserViewController.isDocumentCurrentlyOpen(url: url) {
+                    os_log("Ignoring duplicate open request for already-open document: %s", log: .lifeCycle, type: .info, url.path)
+                } else if documentBrowserViewController.isEditingDocument {
                     openDocumentInNewScene(url: url)
                 } else {
                     documentBrowserViewController.openDocument(url: url)
@@ -114,7 +125,7 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
 
     private func openDocumentInNewScene(url: URL) {
         let activity = NSUserActivity(activityType: AppDelegate.mainActivityType)
-        activity.addUserInfoEntries(from: [AppDelegate.openDocumentURLKey: url])
+        activity.addUserInfoEntries(from: [AppDelegate.openDocumentURLKey: url.absoluteString])
         UIApplication.shared.requestSceneSessionActivation(nil, userActivity: activity, options: nil) { error in
             print("Error opening document in new window", error.localizedDescription)
         }

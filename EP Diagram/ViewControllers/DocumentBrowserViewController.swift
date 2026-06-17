@@ -29,6 +29,13 @@ class DocumentBrowserViewController: UIDocumentBrowserViewController, UIDocument
         editingDocument
     }
 
+    var stateRestorationActivity: NSUserActivity {
+        guard editingDocument, currentDocument != nil else {
+            return NSUserActivity(activityType: AppDelegate.mainActivityType)
+        }
+        return view.window?.windowScene?.userActivity ?? NSUserActivity(activityType: AppDelegate.mainActivityType)
+    }
+
     override func viewDidLoad() {
         os_log("viewDidLoad() - DocumentBrowserViewController", log: .default, type: .default)
 
@@ -52,6 +59,7 @@ class DocumentBrowserViewController: UIDocumentBrowserViewController, UIDocument
     override func viewDidAppear(_ animated: Bool) {
         os_log("viewDidAppear(_:) - DocumentBrowserViewController", log: .viewCycle, type: .default)
         super.viewDidAppear(animated)
+        displayDiagramController()
      }
 
     override func viewWillDisappear(_ animated: Bool) {
@@ -174,13 +182,9 @@ class DocumentBrowserViewController: UIDocumentBrowserViewController, UIDocument
         }
     }
 
-    private func isDocumentCurrentlyOpen(url: URL) -> Bool {
-        if let document = currentDocument {
-            if document.fileURL == url && document.documentState != .closed {
-                return true
-            }
-        }
-        return false
+    func isDocumentCurrentlyOpen(url: URL) -> Bool {
+        guard let document = currentDocument else { return false }
+        return document.fileURL.standardizedFileURL == url.standardizedFileURL && document.documentState != .closed
     }
 
     func createNewDocument() {
@@ -204,16 +208,7 @@ class DocumentBrowserViewController: UIDocumentBrowserViewController, UIDocument
         guard !editingDocument else { return }
         guard let document = currentDocument else { return }
         guard view.window != nil else {
-            os_log("Retrying diagram presentation after DocumentBrowserViewController enters the window hierarchy", log: .default, type: .default)
-            DispatchQueue.main.async { [weak self] in
-                guard let self = self else { return }
-                guard self.view.window != nil else {
-                    os_log("Cancelling diagram presentation because DocumentBrowserViewController is not in the window hierarchy", log: .default, type: .default)
-                    self.closeCurrentDocument()
-                    return
-                }
-                self.displayDiagramController(requestSandboxExpansion: requestSandboxExpansion)
-            }
+            os_log("Deferring diagram presentation until DocumentBrowserViewController enters the window hierarchy", log: .default, type: .default)
             return
         }
         guard presentedViewController == nil else {
@@ -247,14 +242,22 @@ class DocumentBrowserViewController: UIDocumentBrowserViewController, UIDocument
             guard let self = self else { return }
             self.closeCurrentDocument(completion: completion)
             self.editingDocument = false
+            self.diagramViewController = nil
         }
         if editingDocument {
+            prepareForDocumentClose()
             self.dismiss(animated: true) {
                 compositeClosure()
             }
         } else {
             compositeClosure()
         }
+    }
+
+    private func prepareForDocumentClose() {
+        diagramViewController?.documentIsClosing = true
+        view.window?.windowScene?.userActivity = NSUserActivity(activityType: AppDelegate.mainActivityType)
+        restorationInfo = nil
     }
 
     func closeCurrentDocument(completion: (()->Void)? = nil) {
@@ -382,7 +385,7 @@ extension DocumentBrowserViewController {
         if let diagramViewController = diagramViewController {
             currentDocument?.diagram = diagramViewController.diagram
         }
-        closeCurrentDocument { [weak self] in
+        closeDiagramController { [weak self] in
             guard let self = self else { return }
             self.requestNewDocumentBrowserScene()
             self.destroyCurrentScene()

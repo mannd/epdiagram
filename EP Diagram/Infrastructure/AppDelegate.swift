@@ -305,10 +305,16 @@ extension AppDelegate {
     }
 
     @IBAction func openDiagramFromMenu(_ sender: Any) {
-        if let documentBrowserViewController = activeDocumentBrowserViewController() {
-            documentBrowserViewController.openDiagramFromMenu(sender)
-        } else {
+        guard let documentBrowserViewController = activeDocumentBrowserViewController(),
+              let nsWindow = documentBrowserViewController.view.window?.nsWindow,
+              let plugin = appKitPlugin else {
             requestMainDocumentBrowserScene(errorMessage: "Error showing open browser")
+            return
+        }
+
+        let startingURL = documentBrowserViewController.currentDocument?.fileURL.deletingLastPathComponent()
+        plugin.getDiagram(nsWindow: nsWindow, startingURL: startingURL) { [weak self] url in
+            self?.requestOpenDocumentScene(url: url)
         }
     }
 
@@ -325,6 +331,14 @@ extension AppDelegate {
         activity.addUserInfoEntries(from: [Self.openBrowserKey: true])
         UIApplication.shared.requestSceneSessionActivation(nil, userActivity: activity, options: nil) { error in
             print(errorMessage, error.localizedDescription)
+        }
+    }
+
+    private func requestOpenDocumentScene(url: URL) {
+        let activity = NSUserActivity(activityType: Self.mainActivityType)
+        activity.addUserInfoEntries(from: [Self.openDocumentURLKey: url.absoluteString])
+        UIApplication.shared.requestSceneSessionActivation(nil, userActivity: activity, options: nil) { error in
+            print("Error opening diagram", error.localizedDescription)
         }
     }
 
