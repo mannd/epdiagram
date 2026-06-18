@@ -24,6 +24,9 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     static let openDocumentURLKey = "org.epstudios.epdiagram.openDocumentURL"
     static let createNewDocumentKey = "org.epstudios.epdiagram.createNewDocument"
     static let openBrowserKey = "org.epstudios.epdiagram.openBrowser"
+    #if targetEnvironment(macCatalyst)
+    private static var shouldDiscardNextUncommandedBrowserScene = false
+    #endif
 
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
         os_log("application(_:didFinishLaunchingWithOptions:) - AppDelegate", log: .lifeCycle, type: .info)
@@ -74,6 +77,18 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 
 #if targetEnvironment(macCatalyst)
 extension AppDelegate {
+
+    static func discardNextUncommandedBrowserScene() {
+        shouldDiscardNextUncommandedBrowserScene = true
+        os_log("discardNextUncommandedBrowserScene() - AppDelegate", log: .lifeCycle, type: .info)
+    }
+
+    static func consumeShouldDiscardNextUncommandedBrowserScene() -> Bool {
+        guard shouldDiscardNextUncommandedBrowserScene else { return false }
+        shouldDiscardNextUncommandedBrowserScene = false
+        os_log("consumeShouldDiscardNextUncommandedBrowserScene() - AppDelegate", log: .lifeCycle, type: .info)
+        return true
+    }
 
     // MARK: - Mac support app kit plugin
 
@@ -322,6 +337,7 @@ extension AppDelegate {
         let startingURL = documentBrowserViewController?.currentDocument?.fileURL.deletingLastPathComponent()
         if nsWindow == nil {
             os_log("openDiagramFromMenu showing app-modal open panel because no active NSWindow is available", log: .lifeCycle, type: .info)
+            Self.discardNextUncommandedBrowserScene()
         }
         os_log("openDiagramFromMenu showing AppKit open panel startingURL=%s", log: .lifeCycle, type: .info, startingURL?.path ?? "nil")
         plugin.getDiagram(nsWindow: nsWindow, startingURL: startingURL) { [weak self] url in

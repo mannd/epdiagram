@@ -65,6 +65,12 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
                 documentBrowserViewController.openDocument(url: documentURL)
             } else {
                 os_log("willConnect routing idle browser/restoration scene", log: .lifeCycle, type: .info)
+                #if targetEnvironment(macCatalyst)
+                if AppDelegate.consumeShouldDiscardNextUncommandedBrowserScene() {
+                    os_log("willConnect destroying uncommanded idle browser scene", log: .lifeCycle, type: .info)
+                    destroySceneWhenConnected(scene)
+                }
+                #endif
             }
         } else if (window?.rootViewController as? MacPreferencesViewController) != nil  {
             scene.title = L("Preferences")
@@ -114,6 +120,17 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         }
         return nil
     }
+
+    #if targetEnvironment(macCatalyst)
+    private func destroySceneWhenConnected(_ scene: UIWindowScene) {
+        DispatchQueue.main.async {
+            let options = UIWindowSceneDestructionRequestOptions()
+            UIApplication.shared.requestSceneSessionDestruction(scene.session, options: options) { error in
+                print("Error closing uncommanded browser window", error.localizedDescription)
+            }
+        }
+    }
+    #endif
 
     // Used for opening external documents (from Finder or Open Recent menu).
     func scene(_ scene: UIScene, openURLContexts URLContexts: Set<UIOpenURLContext>) {
