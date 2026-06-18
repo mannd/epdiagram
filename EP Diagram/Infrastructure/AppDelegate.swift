@@ -56,11 +56,16 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     // that are being restored by the operating system (macOS), this is skipped.
     // See https://stackoverflow.com/questions/63520008/why-is-uiapplicationdelegate-method-application-configurationforconnectingop
     func application(_ application: UIApplication, configurationForConnecting connectingSceneSession: UISceneSession, options: UIScene.ConnectionOptions) -> UISceneConfiguration {
-        os_log("application(_:configurationForConnecting:options:)", log: .lifeCycle, type: .info)
+        os_log("application(_:configurationForConnecting:options:) session=%s userActivities=%d urlContexts=%d", log: .lifeCycle, type: .info, connectingSceneSession.persistentIdentifier, options.userActivities.count, options.urlContexts.count)
+        if let userActivity = options.userActivities.first {
+            os_log("configuration userActivity type=%s userInfo=%s", log: .lifeCycle, type: .info, userActivity.activityType, String(describing: userActivity.userInfo))
+        }
         if options.userActivities.first?.activityType == Self.preferencesActivityType {
+            os_log("configuration returning Preferences Configuration", log: .lifeCycle, type: .info)
             let sceneConfiguration = UISceneConfiguration(name: "Preferences Configuration", sessionRole: connectingSceneSession.role)
             return sceneConfiguration
         } else { //if options.userActivities.first?.activityType == Self.mainActivityType {
+            os_log("configuration returning Default Configuration", log: .lifeCycle, type: .info)
             let sceneConfiguration = UISceneConfiguration(name: "Default Configuration", sessionRole: connectingSceneSession.role)
             return sceneConfiguration
         }
@@ -305,20 +310,28 @@ extension AppDelegate {
     }
 
     @IBAction func openDiagramFromMenu(_ sender: Any) {
-        guard let documentBrowserViewController = activeDocumentBrowserViewController(),
-              let nsWindow = documentBrowserViewController.view.window?.nsWindow,
-              let plugin = appKitPlugin else {
+        os_log("openDiagramFromMenu(_:) - AppDelegate", log: .lifeCycle, type: .info)
+        guard let plugin = appKitPlugin else {
+            os_log("openDiagramFromMenu fallback: AppKit plugin is nil", log: .lifeCycle, type: .info)
             requestMainDocumentBrowserScene(errorMessage: "Error showing open browser")
             return
         }
 
-        let startingURL = documentBrowserViewController.currentDocument?.fileURL.deletingLastPathComponent()
+        let documentBrowserViewController = activeDocumentBrowserViewController()
+        let nsWindow = documentBrowserViewController?.view.window?.nsWindow
+        let startingURL = documentBrowserViewController?.currentDocument?.fileURL.deletingLastPathComponent()
+        if nsWindow == nil {
+            os_log("openDiagramFromMenu showing app-modal open panel because no active NSWindow is available", log: .lifeCycle, type: .info)
+        }
+        os_log("openDiagramFromMenu showing AppKit open panel startingURL=%s", log: .lifeCycle, type: .info, startingURL?.path ?? "nil")
         plugin.getDiagram(nsWindow: nsWindow, startingURL: startingURL) { [weak self] url in
+            os_log("openDiagramFromMenu selected URL=%s", log: .lifeCycle, type: .info, url.path)
             self?.requestOpenDocumentScene(url: url)
         }
     }
 
     private func requestNewDiagramScene() {
+        os_log("requestNewDiagramScene() - AppDelegate", log: .lifeCycle, type: .info)
         let activity = NSUserActivity(activityType: Self.mainActivityType)
         activity.addUserInfoEntries(from: [Self.createNewDocumentKey: true])
         UIApplication.shared.requestSceneSessionActivation(nil, userActivity: activity, options: nil) { error in
@@ -327,6 +340,7 @@ extension AppDelegate {
     }
 
     private func requestMainDocumentBrowserScene(errorMessage: String) {
+        os_log("requestMainDocumentBrowserScene() - AppDelegate errorMessage=%s", log: .lifeCycle, type: .info, errorMessage)
         let activity = NSUserActivity(activityType: Self.mainActivityType)
         activity.addUserInfoEntries(from: [Self.openBrowserKey: true])
         UIApplication.shared.requestSceneSessionActivation(nil, userActivity: activity, options: nil) { error in
@@ -335,6 +349,7 @@ extension AppDelegate {
     }
 
     private func requestOpenDocumentScene(url: URL) {
+        os_log("requestOpenDocumentScene(url:) - AppDelegate url=%s", log: .lifeCycle, type: .info, url.path)
         let activity = NSUserActivity(activityType: Self.mainActivityType)
         activity.addUserInfoEntries(from: [Self.openDocumentURLKey: url.absoluteString])
         UIApplication.shared.requestSceneSessionActivation(nil, userActivity: activity, options: nil) { error in
@@ -347,11 +362,13 @@ extension AppDelegate {
         let activeScenes = windowScenes.filter { $0.activationState == .foregroundActive }
         let inactiveScenes = windowScenes.filter { $0.activationState == .foregroundInactive }
         let candidateScenes = activeScenes + inactiveScenes
+        os_log("activeDocumentBrowserViewController() windowScenes=%d active=%d inactive=%d", log: .lifeCycle, type: .info, windowScenes.count, activeScenes.count, inactiveScenes.count)
 
         for scene in candidateScenes {
             if let window = scene.windows.first(where: { $0.isKeyWindow }),
                !window.isHidden,
                let documentBrowserViewController = window.rootViewController as? DocumentBrowserViewController {
+                os_log("activeDocumentBrowserViewController returning key scene=%s", log: .lifeCycle, type: .info, scene.session.persistentIdentifier)
                 return documentBrowserViewController
             }
         }
@@ -359,10 +376,12 @@ extension AppDelegate {
         for scene in candidateScenes {
             if let window = scene.windows.first(where: { !$0.isHidden }),
                let documentBrowserViewController = window.rootViewController as? DocumentBrowserViewController {
+                os_log("activeDocumentBrowserViewController returning visible scene=%s", log: .lifeCycle, type: .info, scene.session.persistentIdentifier)
                 return documentBrowserViewController
             }
         }
 
+        os_log("activeDocumentBrowserViewController returning nil", log: .lifeCycle, type: .info)
         return nil
     }
 

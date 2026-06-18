@@ -30,10 +30,17 @@ class DocumentBrowserViewController: UIDocumentBrowserViewController, UIDocument
     }
 
     var stateRestorationActivity: NSUserActivity {
-        guard editingDocument, currentDocument != nil else {
+        guard editingDocument else {
+            os_log("DocumentBrowserViewController.stateRestorationActivity returning clean activity: not editing", log: .lifeCycle, type: .info)
             return NSUserActivity(activityType: AppDelegate.mainActivityType)
         }
-        return view.window?.windowScene?.userActivity ?? NSUserActivity(activityType: AppDelegate.mainActivityType)
+        guard currentDocument != nil else {
+            os_log("DocumentBrowserViewController.stateRestorationActivity returning clean activity: no currentDocument", log: .lifeCycle, type: .info)
+            return NSUserActivity(activityType: AppDelegate.mainActivityType)
+        }
+        let activity = view.window?.windowScene?.userActivity ?? NSUserActivity(activityType: AppDelegate.mainActivityType)
+        os_log("DocumentBrowserViewController.stateRestorationActivity returning scene activity userInfo=%s", log: .lifeCycle, type: .info, String(describing: activity.userInfo))
+        return activity
     }
 
     override func viewDidLoad() {
@@ -49,15 +56,19 @@ class DocumentBrowserViewController: UIDocumentBrowserViewController, UIDocument
         installInportHandler()
 
         let info = self.restorationInfo
+        os_log("viewDidLoad restorationInfo=%s", log: .lifeCycle, type: .info, String(describing: info))
         if info?[DiagramViewController.restorationDoRestorationKey] as? Bool ?? false {
             if let documentURL = info?[DiagramViewController.restorationDocumentURLKey] as? URL {
+                os_log("viewDidLoad restoring document URL=%s", log: .lifeCycle, type: .info, documentURL.path)
                 openDocument(url: documentURL)
+            } else {
+                os_log("viewDidLoad restoration requested but no document URL", log: .lifeCycle, type: .info)
             }
         }
     }
 
     override func viewDidAppear(_ animated: Bool) {
-        os_log("viewDidAppear(_:) - DocumentBrowserViewController", log: .viewCycle, type: .default)
+        os_log("viewDidAppear(_:) - DocumentBrowserViewController editing=%s hasDocument=%s", log: .viewCycle, type: .default, editingDocument ? "true" : "false", currentDocument == nil ? "false" : "true")
         super.viewDidAppear(animated)
         displayDiagramController()
      }
@@ -87,20 +98,24 @@ class DocumentBrowserViewController: UIDocumentBrowserViewController, UIDocument
     }
 
     func openDocument(url: URL) {
-        os_log("openDocument(url:) %s", url.path)
+        os_log("openDocument(url:) %s editing=%s hasDocument=%s", log: .lifeCycle, type: .info, url.path, editingDocument ? "true" : "false", currentDocument == nil ? "false" : "true")
         guard !isDocumentCurrentlyOpen(url: url) else {
+            os_log("openDocument ignored already-open document: %s", log: .lifeCycle, type: .info, url.path)
             print("openDocument(url:) - document is currently open")
             return
         }
         closeDiagramController { [weak self] in
             guard let self = self else { return }
+            os_log("openDocument creating DiagramDocument for %s", log: .lifeCycle, type: .info, url.path)
             let document = DiagramDocument(fileURL: url)
             document.open { openSuccess in
                 guard openSuccess else {
+                    os_log("openDocument failed to open %s", log: .lifeCycle, type: .info, url.path)
                     print ("could not open \(url)")
                     self.getIOSBookmark(url: url)
                     return
                 }
+                os_log("openDocument succeeded %s", log: .lifeCycle, type: .info, url.path)
                 self.currentDocument = document
                 self.displayDiagramController()
             }
@@ -188,10 +203,12 @@ class DocumentBrowserViewController: UIDocumentBrowserViewController, UIDocument
     }
 
     func createNewDocument() {
+        os_log("createNewDocument() - DocumentBrowserViewController", log: .lifeCycle, type: .info)
         closeDiagramController { [weak self] in
             guard let self = self else { return }
             let directoryURL = FileIO.getDocumentsURL() ?? FileIO.getCacheURL()
             let documentURL = self.browserDelegate.createNewDocumentURL(in: directoryURL)
+            os_log("createNewDocument creating blank document at %s", log: .lifeCycle, type: .info, documentURL.path)
             self.browserDelegate.createBlankDocument(at: documentURL) { [weak self] newDocumentURL in
                 guard let self = self else { return }
                 guard let newDocumentURL = newDocumentURL else {
@@ -204,15 +221,21 @@ class DocumentBrowserViewController: UIDocumentBrowserViewController, UIDocument
     }
 
     @objc func displayDiagramController(requestSandboxExpansion: Bool = false) {
-        os_log("displayDiagramController()", log: .default, type: .default)
-        guard !editingDocument else { return }
-        guard let document = currentDocument else { return }
+        os_log("displayDiagramController() editing=%s hasDocument=%s hasWindow=%s presented=%s", log: .lifeCycle, type: .info, editingDocument ? "true" : "false", currentDocument == nil ? "false" : "true", view.window == nil ? "false" : "true", presentedViewController == nil ? "false" : "true")
+        guard !editingDocument else {
+            os_log("displayDiagramController skipped: already editing", log: .lifeCycle, type: .info)
+            return
+        }
+        guard let document = currentDocument else {
+            os_log("displayDiagramController skipped: no currentDocument", log: .lifeCycle, type: .info)
+            return
+        }
         guard view.window != nil else {
-            os_log("Deferring diagram presentation until DocumentBrowserViewController enters the window hierarchy", log: .default, type: .default)
+            os_log("Deferring diagram presentation until DocumentBrowserViewController enters the window hierarchy", log: .lifeCycle, type: .info)
             return
         }
         guard presentedViewController == nil else {
-            os_log("Retrying diagram presentation after current presentation finishes", log: .default, type: .default)
+            os_log("Retrying diagram presentation after current presentation finishes", log: .lifeCycle, type: .info)
             DispatchQueue.main.async { [weak self] in
                 self?.displayDiagramController(requestSandboxExpansion: requestSandboxExpansion)
             }
@@ -233,45 +256,55 @@ class DocumentBrowserViewController: UIDocumentBrowserViewController, UIDocument
         controller.modalPresentationStyle = .fullScreen
 
         editingDocument = true
+        os_log("displayDiagramController presenting document=%s", log: .lifeCycle, type: .info, document.fileURL.path)
         self.present(controller, animated: true)
         self.diagramViewController = diagramViewController
     }
 
     func closeDiagramController(completion: (()->Void)? = nil) {
+        os_log("closeDiagramController() editing=%s hasDocument=%s", log: .lifeCycle, type: .info, editingDocument ? "true" : "false", currentDocument == nil ? "false" : "true")
         let compositeClosure = { [weak self] in
             guard let self = self else { return }
+            os_log("closeDiagramController compositeClosure", log: .lifeCycle, type: .info)
             self.closeCurrentDocument(completion: completion)
             self.editingDocument = false
             self.diagramViewController = nil
         }
         if editingDocument {
+            os_log("closeDiagramController dismissing presented diagram controller", log: .lifeCycle, type: .info)
             prepareForDocumentClose()
             self.dismiss(animated: true) {
                 compositeClosure()
             }
         } else {
+            os_log("closeDiagramController no presented diagram controller to dismiss", log: .lifeCycle, type: .info)
             compositeClosure()
         }
     }
 
     private func prepareForDocumentClose() {
+        os_log("prepareForDocumentClose() clearing scene userActivity and restorationInfo", log: .lifeCycle, type: .info)
         diagramViewController?.documentIsClosing = true
         view.window?.windowScene?.userActivity = NSUserActivity(activityType: AppDelegate.mainActivityType)
         restorationInfo = nil
     }
 
     func closeCurrentDocument(completion: (()->Void)? = nil) {
-        guard currentDocument != nil else {
+        guard let document = currentDocument else {
+            os_log("closeCurrentDocument skipped: currentDocument is nil", log: .lifeCycle, type: .info)
             print("current document is nil!")
             completion?()
             return
         }
+        os_log("closeCurrentDocument closing %s", log: .lifeCycle, type: .info, document.fileURL.path)
         currentDocument?.close() { success in
             guard success else {
+                os_log("closeCurrentDocument failed", log: .lifeCycle, type: .info)
                 print("failed to close document")
                 completion?()
                 return
             }
+            os_log("closeCurrentDocument succeeded", log: .lifeCycle, type: .info)
             completion?()
         }
         currentDocument = nil
@@ -368,25 +401,26 @@ extension DocumentBrowserViewController {
     }
 
     @IBAction func closeWindow(_ sender: Any) {
+        os_log("closeWindow(_:) - DocumentBrowserViewController", log: .lifeCycle, type: .info)
         closeDiagramController { [weak self] in
             self?.destroyCurrentScene()
         }
     }
 
     @IBAction func openDiagramFromMenu(_ sender: Any) {
-        if editingDocument {
-            closeDocumentAndOpenBrowserScene()
-        } else {
-            activateDocumentBrowserScene()
-        }
+        os_log("openDiagramFromMenu(_:) - DocumentBrowserViewController editing=%s", log: .lifeCycle, type: .info, editingDocument ? "true" : "false")
+        guard let appDelegate = UIApplication.shared.delegate as? AppDelegate else { return }
+        appDelegate.openDiagramFromMenu(sender)
     }
 
     private func closeDocumentAndOpenBrowserScene() {
+        os_log("closeDocumentAndOpenBrowserScene()", log: .lifeCycle, type: .info)
         if let diagramViewController = diagramViewController {
             currentDocument?.diagram = diagramViewController.diagram
         }
         closeDiagramController { [weak self] in
             guard let self = self else { return }
+            os_log("closeDocumentAndOpenBrowserScene requesting browser scene then destroying current scene", log: .lifeCycle, type: .info)
             self.requestNewDocumentBrowserScene()
             self.destroyCurrentScene()
         }
@@ -394,15 +428,18 @@ extension DocumentBrowserViewController {
 
     private func activateDocumentBrowserScene() {
         guard let sceneSession = view.window?.windowScene?.session else {
+            os_log("activateDocumentBrowserScene fallback: no current scene session", log: .lifeCycle, type: .info)
             requestNewDocumentBrowserScene()
             return
         }
+        os_log("activateDocumentBrowserScene activating current session=%s", log: .lifeCycle, type: .info, sceneSession.persistentIdentifier)
         UIApplication.shared.requestSceneSessionActivation(sceneSession, userActivity: nil, options: nil) { error in
             print("Error showing open browser", error.localizedDescription)
         }
     }
 
     private func requestNewDocumentBrowserScene() {
+        os_log("requestNewDocumentBrowserScene() - DocumentBrowserViewController", log: .lifeCycle, type: .info)
         let activity = NSUserActivity(activityType: AppDelegate.mainActivityType)
         activity.addUserInfoEntries(from: [AppDelegate.openBrowserKey: true])
         UIApplication.shared.requestSceneSessionActivation(nil, userActivity: activity, options: nil) { error in
@@ -411,7 +448,11 @@ extension DocumentBrowserViewController {
     }
 
     private func destroyCurrentScene() {
-        guard let sceneSession = view.window?.windowScene?.session else { return }
+        guard let sceneSession = view.window?.windowScene?.session else {
+            os_log("destroyCurrentScene skipped: no current scene session", log: .lifeCycle, type: .info)
+            return
+        }
+        os_log("destroyCurrentScene() session=%s", log: .lifeCycle, type: .info, sceneSession.persistentIdentifier)
         let options = UIWindowSceneDestructionRequestOptions()
         UIApplication.shared.requestSceneSessionDestruction(sceneSession, options: options) { error in
             print("Error closing diagram window", error.localizedDescription)

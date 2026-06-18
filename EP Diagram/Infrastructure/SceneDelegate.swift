@@ -22,16 +22,18 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
     #endif
 
     func scene(_ scene: UIScene, willConnectTo session: UISceneSession, options connectionOptions: UIScene.ConnectionOptions) {
-        os_log("scene(scene:willConnectTo:options:) - SceneDelegate", log: .lifeCycle, type: .info)
+        os_log("scene(scene:willConnectTo:options:) - SceneDelegate session=%s userActivities=%d urlContexts=%d", log: .lifeCycle, type: .info, session.persistentIdentifier, connectionOptions.userActivities.count, connectionOptions.urlContexts.count)
         guard let scene = (scene as? UIWindowScene) else { return }
         if let documentBrowserViewController = window?.rootViewController as? DocumentBrowserViewController {
             scene.title = L("EP Diagram")
             if connectionOptions.userActivities.isEmpty && !connectionOptions.urlContexts.isEmpty {
+                os_log("willConnect using URL contexts and clearing restoration info", log: .lifeCycle, type: .info)
                 scene.userActivity = NSUserActivity(activityType: AppDelegate.mainActivityType)
                 documentBrowserViewController.restorationInfo = nil
             } else {
                 scene.userActivity = connectionOptions.userActivities.first ?? session.stateRestorationActivity ?? NSUserActivity(activityType: AppDelegate.mainActivityType)
                 documentBrowserViewController.restorationInfo = scene.userActivity?.userInfo
+                os_log("willConnect selected userActivity type=%s userInfo=%s", log: .lifeCycle, type: .info, scene.userActivity?.activityType ?? "nil", String(describing: scene.userActivity?.userInfo))
             }
 
             #if targetEnvironment(macCatalyst)
@@ -46,17 +48,23 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
             #endif
 
             if !connectionOptions.urlContexts.isEmpty {
+                os_log("willConnect routing URL contexts", log: .lifeCycle, type: .info)
                 scene.userActivity = NSUserActivity(activityType: AppDelegate.mainActivityType)
                 documentBrowserViewController.restorationInfo = nil
                 self.scene(scene, openURLContexts: connectionOptions.urlContexts)
             } else if shouldOpenBrowser(from: scene.userActivity) {
+                os_log("willConnect routing open browser activity", log: .lifeCycle, type: .info)
                 scene.userActivity = NSUserActivity(activityType: AppDelegate.mainActivityType)
                 documentBrowserViewController.restorationInfo = nil
             } else if shouldCreateNewDocument(from: scene.userActivity) {
+                os_log("willConnect routing create new document activity", log: .lifeCycle, type: .info)
                 scene.userActivity = NSUserActivity(activityType: AppDelegate.mainActivityType)
                 documentBrowserViewController.createNewDocument()
             } else if let documentURL = documentURL(from: scene.userActivity) {
+                os_log("willConnect routing open document activity url=%s", log: .lifeCycle, type: .info, documentURL.path)
                 documentBrowserViewController.openDocument(url: documentURL)
+            } else {
+                os_log("willConnect routing idle browser/restoration scene", log: .lifeCycle, type: .info)
             }
         } else if (window?.rootViewController as? MacPreferencesViewController) != nil  {
             scene.title = L("Preferences")
@@ -78,11 +86,14 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
     }
 
     func stateRestorationActivity(for scene: UIScene) -> NSUserActivity? {
-        os_log("stateRestorationActivity(scene:) - SceneDelegate", log: .lifeCycle, type: .info)
+        os_log("stateRestorationActivity(scene:) - SceneDelegate session=%s", log: .lifeCycle, type: .info, scene.session.persistentIdentifier)
         guard let documentBrowserViewController = self.window?.rootViewController as? DocumentBrowserViewController else {
+            os_log("stateRestorationActivity returning scene.userActivity because root is not DocumentBrowserViewController", log: .lifeCycle, type: .info)
             return scene.userActivity
         }
-        return documentBrowserViewController.stateRestorationActivity
+        let activity = documentBrowserViewController.stateRestorationActivity
+        os_log("stateRestorationActivity returning type=%s userInfo=%s", log: .lifeCycle, type: .info, activity.activityType, String(describing: activity.userInfo))
+        return activity
     }
 
     private func shouldCreateNewDocument(from userActivity: NSUserActivity?) -> Bool {
@@ -106,24 +117,32 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
 
     // Used for opening external documents (from Finder or Open Recent menu).
     func scene(_ scene: UIScene, openURLContexts URLContexts: Set<UIOpenURLContext>) {
-        os_log("scene(_:openURLContexts:) - SceneDelegate", log: .lifeCycle, type: .info)
-        guard let documentBrowserViewController = self.window?.rootViewController as? DocumentBrowserViewController else { return }
+        os_log("scene(_:openURLContexts:) - SceneDelegate session=%s count=%d", log: .lifeCycle, type: .info, scene.session.persistentIdentifier, URLContexts.count)
+        guard let documentBrowserViewController = self.window?.rootViewController as? DocumentBrowserViewController else {
+            os_log("openURLContexts ignored: root is not DocumentBrowserViewController", log: .lifeCycle, type: .info)
+            return
+        }
         for context in URLContexts {
             print("context path", context.url.path)
             let url = context.url
             if url.isFileURL {
                 if documentBrowserViewController.isDocumentCurrentlyOpen(url: url) {
-                    os_log("Ignoring duplicate open request for already-open document: %s", log: .lifeCycle, type: .info, url.path)
+                    os_log("openURLContexts ignored duplicate already-open document: %s", log: .lifeCycle, type: .info, url.path)
                 } else if documentBrowserViewController.isEditingDocument {
+                    os_log("openURLContexts routing to new scene because current browser is editing: %s", log: .lifeCycle, type: .info, url.path)
                     openDocumentInNewScene(url: url)
                 } else {
+                    os_log("openURLContexts routing to current scene: %s", log: .lifeCycle, type: .info, url.path)
                     documentBrowserViewController.openDocument(url: url)
                 }
+            } else {
+                os_log("openURLContexts ignored non-file URL: %s", log: .lifeCycle, type: .info, url.absoluteString)
             }
          }
     }
 
     private func openDocumentInNewScene(url: URL) {
+        os_log("openDocumentInNewScene(url:) - SceneDelegate url=%s", log: .lifeCycle, type: .info, url.path)
         let activity = NSUserActivity(activityType: AppDelegate.mainActivityType)
         activity.addUserInfoEntries(from: [AppDelegate.openDocumentURLKey: url.absoluteString])
         UIApplication.shared.requestSceneSessionActivation(nil, userActivity: activity, options: nil) { error in

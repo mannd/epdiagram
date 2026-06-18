@@ -76,8 +76,8 @@ class MacSupport: NSObject, SharedAppKitProtocol {
         })
     }
 
-    @objc func getDiagram(nsWindow: AnyObject, startingURL: URL?, completion: ((URL)->Void)?) {
-        guard let nsWindow = nsWindow as? NSWindow else { return }
+    @objc func getDiagram(nsWindow: AnyObject?, startingURL: URL?, completion: ((URL)->Void)?) {
+        print("getDiagram - MacSupport startingURL", startingURL?.path ?? "nil")
         let panel = NSOpenPanel()
         panel.prompt = "Open"
         panel.message = "Select an EP Diagram file."
@@ -90,9 +90,21 @@ class MacSupport: NSObject, SharedAppKitProtocol {
             panel.directoryURL = startingURL
         }
 
-        panel.beginSheetModal(for: nsWindow) { response in
-            guard response == .OK, let url = panel.urls.first else { return }
+        let handleResponse: (NSApplication.ModalResponse) -> Void = { response in
+            print("getDiagram - MacSupport response", response.rawValue)
+            guard response == .OK, let url = panel.urls.first else {
+                print("getDiagram - MacSupport cancelled or no URL")
+                return
+            }
+            print("getDiagram - MacSupport selected URL", url.path)
             completion?(url)
+        }
+
+        if let nsWindow = nsWindow as? NSWindow {
+            panel.beginSheetModal(for: nsWindow, completionHandler: handleResponse)
+        } else {
+            print("getDiagram - MacSupport using app-modal open panel")
+            handleResponse(panel.runModal())
         }
     }
 }
