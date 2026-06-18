@@ -1928,39 +1928,73 @@ extension DiagramViewController {
                 return
             }
 
+#if targetEnvironment(macCatalyst)
             DispatchQueue.global(qos: .userInitiated).async {
                 let result = self.performCoordinatedRename(oldURL: oldURL, newURL: newURL)
 
                 DispatchQueue.main.async {
-                    switch result {
-                    case .success(let renamedURL):
-                        let renamedDocument = DiagramDocument(fileURL: renamedURL)
-                        self.openRenamedDocument(renamedDocument) { openSuccess in
-                            guard openSuccess else {
-                                completion?(.failure(DocumentRenameError.reopenFailed))
-                                return
-                            }
-
-                            renamedDocument.diagram = self.diagram
-                            self.currentDocument = renamedDocument
-                            self.diagramEditorDelegate?.diagramEditor(self, didRenameDocumentTo: renamedDocument)
-                            self.setTitle()
-                            renamedDocument.updateChangeCount(.done)
-                            completion?(.success(renamedURL))
-                        }
-                    case .failure(let error):
-                        let originalDocument = DiagramDocument(fileURL: oldURL)
-                        self.currentDocument = originalDocument
-                        originalDocument.open { _ in
-                            originalDocument.diagram = self.diagram
-                            self.setTitle()
-                            completion?(.failure(error))
-                        }
-                    }
+                    self.handleRenameResult(result, oldURL: oldURL, completion: completion)
                 }
+            }
+#else
+            self.performDocumentBrowserRename(oldURL: oldURL, newURL: newURL) { result in
+                self.handleRenameResult(result, oldURL: oldURL, completion: completion)
+            }
+#endif
+        }
+    }
+
+    private func handleRenameResult(_ result: Result<URL, Error>, oldURL: URL, completion: ((Result<URL, Error>) -> Void)?) {
+        switch result {
+        case .success(let renamedURL):
+            let renamedDocument = DiagramDocument(fileURL: renamedURL)
+            openRenamedDocument(renamedDocument) { openSuccess in
+                guard openSuccess else {
+                    completion?(.failure(DocumentRenameError.reopenFailed))
+                    return
+                }
+
+                renamedDocument.diagram = self.diagram
+                self.currentDocument = renamedDocument
+                self.diagramEditorDelegate?.diagramEditor(self, didRenameDocumentTo: renamedDocument)
+                self.setTitle()
+                renamedDocument.updateChangeCount(.done)
+                completion?(.success(renamedURL))
+            }
+        case .failure(let error):
+            let originalDocument = DiagramDocument(fileURL: oldURL)
+            currentDocument = originalDocument
+            originalDocument.open { _ in
+                originalDocument.diagram = self.diagram
+                self.setTitle()
+                completion?(.failure(error))
             }
         }
     }
+
+#if !targetEnvironment(macCatalyst)
+    private func performDocumentBrowserRename(oldURL: URL, newURL: URL, completion: @escaping (Result<URL, Error>) -> Void) {
+        guard let documentBrowserViewController = diagramEditorDelegate as? DocumentBrowserViewController else {
+            completion(.failure(DocumentRenameError.moveFailed))
+            return
+        }
+
+        let proposedName = newURL.deletingPathExtension().lastPathComponent
+        documentBrowserViewController.renameDocument(at: oldURL, proposedName: proposedName) { finalURL, error in
+            if let error = error {
+                completion(.failure(error))
+                return
+            }
+
+            guard let finalURL = finalURL else {
+                completion(.failure(DocumentRenameError.moveFailed))
+                return
+            }
+
+            completion(.success(finalURL))
+        }
+    }
+#endif
 
     private func openRenamedDocument(_ document: DiagramDocument, completion: @escaping (Bool) -> Void) {
         let accessDirectoryURL = Sandbox.getPersistentDirectoryURL(forFileURL: document.fileURL)
