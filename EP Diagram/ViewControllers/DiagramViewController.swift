@@ -117,7 +117,9 @@ final class DiagramViewController: UIViewController {
     }
 
     // Buttons, toolbars
-    let spacer = UIBarButtonItem(barButtonSystemItem: .flexibleSpace, target: nil, action: nil)
+    var spacer: UIBarButtonItem {
+        UIBarButtonItem(barButtonSystemItem: .flexibleSpace, target: nil, action: nil)
+    }
     private var undoButton: UIBarButtonItem = UIBarButtonItem()
     private var redoButton: UIBarButtonItem = UIBarButtonItem()
     private var calibrateButton: UIBarButtonItem = UIBarButtonItem()
