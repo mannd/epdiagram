@@ -24,9 +24,7 @@
 #+END_EXPORT
 * [[../../shrd/64.png]] Quick start
 ** Create a diagram file
-- On starting the app, a file selection screen should appear.  You can get to this screen anytime by selecting *File | Open* from the main menu, or typing *Command-O*.  To create a new diagram file, click the *New Document* button at the lower left corner of the window. 
-** Deal with the Mac sandbox
-- The Mac sandbox is a requirement of apps sold on the Mac App Store.  The sandbox is the group of folders where the user is permitted to open and save files.  The user must grant permission to access folders (such as Documents or Downloads) outside of the storage assigned to the app itself.  The bottom line is that the first time you create a new document in a folder, the app will ask you to confirm this by asking you to select the folder from a list of folders.  Once this is done, the app shouldn't ever need to bother you about this again, at least for that particular folder.  So follow the prompts in the dialog that appears, and move on to the next step.  
+- On starting the app, a file selection screen should appear.  To create a new diagram file, click the *New Document* button at the lower left corner of the window.
 ** Load an ECG image
 - You should at this point have a nice blank ladder diagram on your screen, with a blank space above.  This is where the ECG image goes.
 - Click the *Import image* toolbar button, or select the *Diagram | Import Image* main menu item to import an image from the Photos app or from your files.  You can also drag and drop an image onto the window.
@@ -58,11 +56,12 @@
 - Change to a different ladder (*Diagram | Ladder | Select Ladder*)
 - Edit or create ladders (*Diagram | Ladder | Edit Ladder*)
 - Load sample diagrams (*Diagram | Samples*)
+- Rename the diagram (*File | Rename*)
 ** Take screenshots
 - Take screenshots using the *Screenshot* button at the upper right of the screen, next to the *Close* button.
 ** Settings
 - Use the *EP Diagram | Settings* menu item, or type *Command-,* to open the settings window and change the overall appearance or behavior of the app.  Many aspects are customizable.
-** Close the diagram
-- Click the *Close* button at the upper right of the screen to close the diagram and return to the *Files* screen.  Diagrams are automatically saved as you work with them.
+** File management
+- Use the *Open...*, *New*, and *Close Window* menu items in the *File* menu to open a previously created diagram, create a new diagram, or close a diagram window.
 ** Those are the basics
 - If you want more detail, read the [[./manual.html][EP Diagram manual]].
