@@ -134,66 +134,88 @@ extension DiagramViewController: HamburgerTableDelegate, UIImagePickerController
     }
 
     @objc func renameDiagram() {
-          os_log("renameDiagram()", log: .action, type: .info)
-          // Just fail gracefully if name is nil, renameDiagram should not be available if name is nil.
-        guard let diagramName = currentDocument?.name(), !diagramName.isBlank else { return }
+        os_log("renameDiagram()", log: .action, type: .info)
+        // Just fail gracefully if name is nil, renameDiagram should not be available if name is nil.
+        guard let diagramName = currentDocument?.name(), !diagramName.isBlank,
+              let currentFileURL = currentDocument?.fileURL else { return }
+
+        #if targetEnvironment(macCatalyst)
+        presentMacRenameDiagramAlert(diagramName: diagramName, currentFileURL: currentFileURL)
+        #else
+        let renameController = RenameDiagramViewController(diagramName: diagramName) { [weak self] newName in
+            self?.performRenameDiagram(to: newName, currentFileURL: currentFileURL)
+        }
+        renameController.modalPresentationStyle = .overFullScreen
+        renameController.modalTransitionStyle = .crossDissolve
+        present(renameController, animated: true)
+        #endif
+    }
+
+    #if targetEnvironment(macCatalyst)
+    private func presentMacRenameDiagramAlert(diagramName: String, currentFileURL: URL) {
         let alert = UIAlertController(title: L("Rename Diagram"), message: L("Enter a new name for diagram \(diagramName)"), preferredStyle: .alert)
         alert.addAction(UIAlertAction(title: L("Cancel"), style: .cancel, handler: nil))
         alert.addTextField { textField in
             textField.placeholder = L("New diagram name")
+            textField.text = diagramName
+            textField.clearButtonMode = .whileEditing
         }
-        alert.addAction(UIAlertAction(title: L("Rename"), style: .default) { [weak self] action in
-            guard let self = self,
-                  let newName = alert.textFields?.first?.text,
-                  let currentFileURL = self.currentDocument?.fileURL else { return }
+        alert.addAction(UIAlertAction(title: L("Rename"), style: .default) { [weak self, weak alert] _ in
+            guard let newName = alert?.textFields?.first?.text?.trimmingCharacters(in: .whitespacesAndNewlines),
+                  !newName.isBlank else { return }
 
-            let oldName = self.diagram.name
-            let newFileURL = currentFileURL.deletingLastPathComponent()
-                .appendingPathComponent(newName)
-                .appendingPathExtension(DiagramDocument.extensionName)
+            self?.performRenameDiagram(to: newName, currentFileURL: currentFileURL)
+        })
+        present(alert, animated: true)
+    }
+    #endif
 
-            func fail(with error: Error) {
-                self.diagram.name = oldName
-                self.diagramEditorDelegate?.diagramEditorDidUpdateContent(self, diagram: self.diagram)
-                UserAlert.showMessage(
-                    viewController: self,
-                    title: L("Rename Failed"),
-                    message: error.localizedDescription
-                )
-            }
+    private func performRenameDiagram(to newName: String, currentFileURL: URL) {
+        let oldName = diagram.name
+        let newFileURL = currentFileURL.deletingLastPathComponent()
+            .appendingPathComponent(newName)
+            .appendingPathExtension(DiagramDocument.extensionName)
 
-            func handleRenameResult(_ result: Result<URL, Error>, shouldRequestAccess: Bool) {
-                switch result {
-                case .success:
-                    self.setTitle()
-                case .failure(let error):
-                    guard shouldRequestAccess,
-                          Sandbox.getPersistentDirectoryURL(forFileURL: currentFileURL) == nil else {
+        func fail(with error: Error) {
+            diagram.name = oldName
+            diagramEditorDelegate?.diagramEditorDidUpdateContent(self, diagram: diagram)
+            UserAlert.showMessage(
+                viewController: self,
+                title: L("Rename Failed"),
+                message: error.localizedDescription
+            )
+        }
+
+        func handleRenameResult(_ result: Result<URL, Error>, shouldRequestAccess: Bool) {
+            switch result {
+            case .success:
+                setTitle()
+            case .failure(let error):
+                guard shouldRequestAccess,
+                      Sandbox.getPersistentDirectoryURL(forFileURL: currentFileURL) == nil else {
+                    fail(with: error)
+                    return
+                }
+
+                requestRenameDirectoryAccess(for: currentFileURL) { granted in
+                    guard granted else {
                         fail(with: error)
                         return
                     }
 
-                    self.requestRenameDirectoryAccess(for: currentFileURL) { granted in
-                        guard granted else {
-                            fail(with: error)
-                            return
-                        }
-
-                        self.renameDocument(oldURL: currentFileURL, newURL: newFileURL) { retryResult in
-                            handleRenameResult(retryResult, shouldRequestAccess: false)
-                        }
+                    self.renameDocument(oldURL: currentFileURL, newURL: newFileURL) { retryResult in
+                        handleRenameResult(retryResult, shouldRequestAccess: false)
                     }
                 }
             }
+        }
 
-            self.diagram.name = newName
-            self.diagramEditorDelegate?.diagramEditorDidUpdateContent(self, diagram: self.diagram)
-            self.renameDocument(oldURL: currentFileURL, newURL: newFileURL) { result in
-                handleRenameResult(result, shouldRequestAccess: true)
-            }
-        })
-        present(alert, animated: true)
-      }
+        diagram.name = newName
+        diagramEditorDelegate?.diagramEditorDidUpdateContent(self, diagram: diagram)
+        renameDocument(oldURL: currentFileURL, newURL: newFileURL) { result in
+            handleRenameResult(result, shouldRequestAccess: true)
+        }
+    }
 
     @IBAction func getDiagramInfo() {
         os_log("getDiagramInfo()", log: .action, type: .info)
@@ -532,3 +554,131 @@ extension DiagramViewController: PHPickerViewControllerDelegate {
         present(picker, animated: true)
     }
 }
+
+#if !targetEnvironment(macCatalyst)
+private final class RenameDiagramViewController: UIViewController, UITextFieldDelegate {
+    private let diagramName: String
+    private let onRename: (String) -> Void
+    private let textField = UITextField()
+    private let renameButton = UIButton(type: .system)
+
+    init(diagramName: String, onRename: @escaping (String) -> Void) {
+        self.diagramName = diagramName
+        self.onRename = onRename
+        super.init(nibName: nil, bundle: nil)
+    }
+
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
+
+    override func viewDidLoad() {
+        super.viewDidLoad()
+
+        view.backgroundColor = UIColor.black.withAlphaComponent(0.35)
+
+        let containerView = UIView()
+        containerView.translatesAutoresizingMaskIntoConstraints = false
+        containerView.backgroundColor = .systemBackground
+        containerView.layer.cornerRadius = 14
+        containerView.layer.cornerCurve = .continuous
+        view.addSubview(containerView)
+
+        let titleLabel = UILabel()
+        titleLabel.text = L("Rename Diagram")
+        titleLabel.font = .preferredFont(forTextStyle: .headline)
+        titleLabel.adjustsFontForContentSizeCategory = true
+        titleLabel.textAlignment = .center
+
+        let messageLabel = UILabel()
+        messageLabel.text = L("Enter a new name for diagram \(diagramName)")
+        messageLabel.font = .preferredFont(forTextStyle: .subheadline)
+        messageLabel.adjustsFontForContentSizeCategory = true
+        messageLabel.textAlignment = .center
+        messageLabel.numberOfLines = 0
+
+        textField.borderStyle = .roundedRect
+        textField.text = diagramName
+        textField.placeholder = L("New diagram name")
+        textField.clearButtonMode = .whileEditing
+        textField.autocorrectionType = .no
+        textField.autocapitalizationType = .none
+        textField.spellCheckingType = .no
+        textField.smartDashesType = .no
+        textField.smartQuotesType = .no
+        textField.smartInsertDeleteType = .no
+        textField.textContentType = nil
+        textField.returnKeyType = .done
+        textField.delegate = self
+        textField.addTarget(self, action: #selector(textFieldTextDidChange), for: .editingChanged)
+
+        let cancelButton = UIButton(type: .system)
+        cancelButton.setTitle(L("Cancel"), for: .normal)
+        cancelButton.addTarget(self, action: #selector(cancelRename), for: .touchUpInside)
+
+        renameButton.setTitle(L("Rename"), for: .normal)
+        renameButton.titleLabel?.font = .preferredFont(forTextStyle: .headline)
+        renameButton.addTarget(self, action: #selector(confirmRename), for: .touchUpInside)
+
+        let buttonStackView = UIStackView(arrangedSubviews: [cancelButton, renameButton])
+        buttonStackView.axis = .horizontal
+        buttonStackView.distribution = .fillEqually
+        buttonStackView.spacing = 12
+
+        let stackView = UIStackView(arrangedSubviews: [titleLabel, messageLabel, textField, buttonStackView])
+        stackView.translatesAutoresizingMaskIntoConstraints = false
+        stackView.axis = .vertical
+        stackView.spacing = 16
+        containerView.addSubview(stackView)
+
+        NSLayoutConstraint.activate([
+            containerView.centerXAnchor.constraint(equalTo: view.safeAreaLayoutGuide.centerXAnchor),
+            containerView.centerYAnchor.constraint(equalTo: view.safeAreaLayoutGuide.centerYAnchor),
+            containerView.leadingAnchor.constraint(greaterThanOrEqualTo: view.safeAreaLayoutGuide.leadingAnchor, constant: 24),
+            containerView.trailingAnchor.constraint(lessThanOrEqualTo: view.safeAreaLayoutGuide.trailingAnchor, constant: -24),
+            containerView.widthAnchor.constraint(lessThanOrEqualToConstant: 360),
+
+            stackView.leadingAnchor.constraint(equalTo: containerView.leadingAnchor, constant: 20),
+            stackView.trailingAnchor.constraint(equalTo: containerView.trailingAnchor, constant: -20),
+            stackView.topAnchor.constraint(equalTo: containerView.topAnchor, constant: 20),
+            stackView.bottomAnchor.constraint(equalTo: containerView.bottomAnchor, constant: -16),
+
+            cancelButton.heightAnchor.constraint(greaterThanOrEqualToConstant: 44),
+            renameButton.heightAnchor.constraint(greaterThanOrEqualToConstant: 44)
+        ])
+
+        textFieldTextDidChange()
+    }
+
+    override func viewDidAppear(_ animated: Bool) {
+        super.viewDidAppear(animated)
+        textField.becomeFirstResponder()
+        textField.selectAll(nil)
+    }
+
+    func textFieldShouldReturn(_ textField: UITextField) -> Bool {
+        confirmRename()
+        return true
+    }
+
+    @objc private func textFieldTextDidChange() {
+        let newName = textField.text?.trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
+        renameButton.isEnabled = !newName.isBlank
+    }
+
+    @objc private func cancelRename() {
+        dismiss(animated: true)
+    }
+
+    @objc private func confirmRename() {
+        let newName = textField.text?.trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
+        guard !newName.isBlank else { return }
+
+        textField.resignFirstResponder()
+        dismiss(animated: true) { [onRename] in
+            onRename(newName)
+        }
+    }
+}
+#endif
+
