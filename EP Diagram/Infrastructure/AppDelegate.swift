@@ -21,6 +21,12 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 
     static let mainActivityType = "org.epstudios.epdiagram.mainActivity"
     static let preferencesActivityType = "org.epstudios.epdiagram.preferencesActivity"
+    static let openDocumentURLKey = "org.epstudios.epdiagram.openDocumentURL"
+    static let createNewDocumentKey = "org.epstudios.epdiagram.createNewDocument"
+    static let openBrowserKey = "org.epstudios.epdiagram.openBrowser"
+    #if targetEnvironment(macCatalyst)
+    private static var shouldDiscardNextUncommandedBrowserScene = false
+    #endif
 
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
         os_log("application(_:didFinishLaunchingWithOptions:) - AppDelegate", log: .lifeCycle, type: .info)
@@ -53,11 +59,16 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     // that are being restored by the operating system (macOS), this is skipped.
     // See https://stackoverflow.com/questions/63520008/why-is-uiapplicationdelegate-method-application-configurationforconnectingop
     func application(_ application: UIApplication, configurationForConnecting connectingSceneSession: UISceneSession, options: UIScene.ConnectionOptions) -> UISceneConfiguration {
-        os_log("application(_:configurationForConnecting:options:)", log: .lifeCycle, type: .info)
+        os_log("application(_:configurationForConnecting:options:) session=%s userActivities=%d urlContexts=%d", log: .lifeCycle, type: .info, connectingSceneSession.persistentIdentifier, options.userActivities.count, options.urlContexts.count)
+        if let userActivity = options.userActivities.first {
+            os_log("configuration userActivity type=%s userInfo=%s", log: .lifeCycle, type: .info, userActivity.activityType, String(describing: userActivity.userInfo))
+        }
         if options.userActivities.first?.activityType == Self.preferencesActivityType {
+            os_log("configuration returning Preferences Configuration", log: .lifeCycle, type: .info)
             let sceneConfiguration = UISceneConfiguration(name: "Preferences Configuration", sessionRole: connectingSceneSession.role)
             return sceneConfiguration
         } else { //if options.userActivities.first?.activityType == Self.mainActivityType {
+            os_log("configuration returning Default Configuration", log: .lifeCycle, type: .info)
             let sceneConfiguration = UISceneConfiguration(name: "Default Configuration", sessionRole: connectingSceneSession.role)
             return sceneConfiguration
         }
@@ -66,6 +77,18 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 
 #if targetEnvironment(macCatalyst)
 extension AppDelegate {
+
+    static func discardNextUncommandedBrowserScene() {
+        shouldDiscardNextUncommandedBrowserScene = true
+        os_log("discardNextUncommandedBrowserScene() - AppDelegate", log: .lifeCycle, type: .info)
+    }
+
+    static func consumeShouldDiscardNextUncommandedBrowserScene() -> Bool {
+        guard shouldDiscardNextUncommandedBrowserScene else { return false }
+        shouldDiscardNextUncommandedBrowserScene = false
+        os_log("consumeShouldDiscardNextUncommandedBrowserScene() - AppDelegate", log: .lifeCycle, type: .info)
+        return true
+    }
 
     // MARK: - Mac support app kit plugin
 
@@ -91,9 +114,9 @@ extension AppDelegate {
         // Remove unwanted menus
         builder.remove(menu: .format)
 
-        // Preferences menu
+        // Settings menu
         let preferencesCommand = UIKeyCommand(
-            title: L("Preferences..."),
+            title: NSLocalizedString("Settings...", comment: "Menu item title that opens the app settings window."),
             action: #selector(showMacPreferences(_:)),
             input: ",",
             modifierFlags: [.command]
@@ -108,6 +131,53 @@ extension AppDelegate {
         builder.insertSibling(openPreferencesMenu, afterMenu: .about)
 
         // File menu
+        let newDiagramCommand = UIKeyCommand(
+            title: L("New"),
+            action: #selector(newDiagramWindow(_:)),
+            input: "n",
+            modifierFlags: [.command]
+        )
+        let openDiagramCommand = UIKeyCommand(
+            title: L("Open..."),
+            action: #selector(openDiagramFromMenu(_:)),
+            input: "o",
+            modifierFlags: [.command]
+        )
+        let newOpenMenu = UIMenu(
+            title: "",
+            identifier: UIMenu.Identifier("newOpenMenu"),
+            options: .displayInline,
+            children: [newDiagramCommand, openDiagramCommand]
+        )
+        builder.replaceChildren(ofMenu: .file) { oldChildren in
+            func isDuplicateNewOrOpenCommand(_ element: UIMenuElement) -> Bool {
+                guard let keyCommand = element as? UIKeyCommand,
+                      keyCommand.modifierFlags.contains(.command),
+                      let input = keyCommand.input?.lowercased() else { return false }
+                return input == "n" || input == "o"
+            }
+
+            func removingDuplicateNewAndOpenCommands(from elements: [UIMenuElement]) -> [UIMenuElement] {
+                elements.compactMap { element in
+                    if isDuplicateNewOrOpenCommand(element) {
+                        return nil
+                    }
+                    if let menu = element as? UIMenu {
+                        if menu.identifier == UIMenu.Identifier("newOpenMenu") {
+                            return nil
+                        }
+                        let children = removingDuplicateNewAndOpenCommands(from: menu.children)
+                        return menu.replacingChildren(children)
+                    }
+                    return element
+                }
+            }
+
+            var newChildren = removingDuplicateNewAndOpenCommands(from: oldChildren)
+            newChildren.insert(newOpenMenu, at: 0)
+            return newChildren
+        }
+
         let saveScreenshotCommand = UIKeyCommand(
             title: "Save Screenshot",
             action: #selector(DiagramViewController.macSnapshotDiagram),
@@ -122,11 +192,11 @@ extension AppDelegate {
         )
 
         let addDirectoryToSandboxCommand = UICommand(
-            title: L("Add Folder to Sandbox"),
+            title: L("Grant Folder Access..."),
             action: #selector(DiagramViewController.addDirectoryToSandbox(_:))
         )
         let clearSandbox = UICommand(
-            title: L("Reset Sandbox"),
+            title: L("Clear Saved Folder Access"),
             action: #selector(DiagramViewController.clearSandbox(_:))
         )
         let sandboxMenu = UIMenu(
@@ -143,9 +213,9 @@ extension AppDelegate {
             modifierFlags: [.command]
         )
 
-        let closeDiagramCommand = UIKeyCommand(
-            title: L("Close Diagram"),
-            action: #selector(DiagramViewController.macCloseDocument(_:)),
+        let closeWindowCommand = UIKeyCommand(
+            title: L("Close Window"),
+            action: #selector(DocumentBrowserViewController.closeWindow(_:)),
             input: "w",
             modifierFlags: [.command]
         )
@@ -153,7 +223,7 @@ extension AppDelegate {
             title: "",
             identifier: UIMenu.Identifier("closeDiagramMenu"),
             options: .displayInline,
-            children: [renameCommand, closeDiagramCommand]
+            children: [renameCommand, closeWindowCommand]
         )
         builder.replace(menu: .close, with: closeDiagramMenu)
         builder.insertSibling(saveScreenshotMenu, beforeMenu: UIMenu.Identifier("closeDiagramMenu"))
@@ -248,6 +318,87 @@ extension AppDelegate {
         )
         builder.insertSibling(diagramMenu, afterMenu: .view)
 
+    }
+
+    @IBAction func newDiagramWindow(_ sender: Any) {
+        requestNewDiagramScene()
+    }
+
+    @IBAction func openDiagramFromMenu(_ sender: Any) {
+        os_log("openDiagramFromMenu(_:) - AppDelegate", log: .lifeCycle, type: .info)
+        guard let plugin = appKitPlugin else {
+            os_log("openDiagramFromMenu fallback: AppKit plugin is nil", log: .lifeCycle, type: .info)
+            requestMainDocumentBrowserScene(errorMessage: "Error showing open browser")
+            return
+        }
+
+        let documentBrowserViewController = activeDocumentBrowserViewController()
+        let nsWindow = documentBrowserViewController?.view.window?.nsWindow
+        let startingURL = documentBrowserViewController?.currentDocument?.fileURL.deletingLastPathComponent()
+        if nsWindow == nil {
+            os_log("openDiagramFromMenu showing app-modal open panel because no active NSWindow is available", log: .lifeCycle, type: .info)
+            Self.discardNextUncommandedBrowserScene()
+        }
+        os_log("openDiagramFromMenu showing AppKit open panel startingURL=%s", log: .lifeCycle, type: .info, startingURL?.path ?? "nil")
+        plugin.getDiagram(nsWindow: nsWindow, startingURL: startingURL) { [weak self] url in
+            os_log("openDiagramFromMenu selected URL=%s", log: .lifeCycle, type: .info, url.path)
+            self?.requestOpenDocumentScene(url: url)
+        }
+    }
+
+    private func requestNewDiagramScene() {
+        os_log("requestNewDiagramScene() - AppDelegate", log: .lifeCycle, type: .info)
+        let activity = NSUserActivity(activityType: Self.mainActivityType)
+        activity.addUserInfoEntries(from: [Self.createNewDocumentKey: true])
+        UIApplication.shared.requestSceneSessionActivation(nil, userActivity: activity, options: nil) { error in
+            print("Error creating new diagram window", error.localizedDescription)
+        }
+    }
+
+    private func requestMainDocumentBrowserScene(errorMessage: String) {
+        os_log("requestMainDocumentBrowserScene() - AppDelegate errorMessage=%s", log: .lifeCycle, type: .info, errorMessage)
+        let activity = NSUserActivity(activityType: Self.mainActivityType)
+        activity.addUserInfoEntries(from: [Self.openBrowserKey: true])
+        UIApplication.shared.requestSceneSessionActivation(nil, userActivity: activity, options: nil) { error in
+            print(errorMessage, error.localizedDescription)
+        }
+    }
+
+    private func requestOpenDocumentScene(url: URL) {
+        os_log("requestOpenDocumentScene(url:) - AppDelegate url=%s", log: .lifeCycle, type: .info, url.path)
+        let activity = NSUserActivity(activityType: Self.mainActivityType)
+        activity.addUserInfoEntries(from: [Self.openDocumentURLKey: url.absoluteString])
+        UIApplication.shared.requestSceneSessionActivation(nil, userActivity: activity, options: nil) { error in
+            print("Error opening diagram", error.localizedDescription)
+        }
+    }
+
+    private func activeDocumentBrowserViewController() -> DocumentBrowserViewController? {
+        let windowScenes = UIApplication.shared.connectedScenes.compactMap { $0 as? UIWindowScene }
+        let activeScenes = windowScenes.filter { $0.activationState == .foregroundActive }
+        let inactiveScenes = windowScenes.filter { $0.activationState == .foregroundInactive }
+        let candidateScenes = activeScenes + inactiveScenes
+        os_log("activeDocumentBrowserViewController() windowScenes=%d active=%d inactive=%d", log: .lifeCycle, type: .info, windowScenes.count, activeScenes.count, inactiveScenes.count)
+
+        for scene in candidateScenes {
+            if let window = scene.windows.first(where: { $0.isKeyWindow }),
+               !window.isHidden,
+               let documentBrowserViewController = window.rootViewController as? DocumentBrowserViewController {
+                os_log("activeDocumentBrowserViewController returning key scene=%s", log: .lifeCycle, type: .info, scene.session.persistentIdentifier)
+                return documentBrowserViewController
+            }
+        }
+
+        for scene in candidateScenes {
+            if let window = scene.windows.first(where: { !$0.isHidden }),
+               let documentBrowserViewController = window.rootViewController as? DocumentBrowserViewController {
+                os_log("activeDocumentBrowserViewController returning visible scene=%s", log: .lifeCycle, type: .info, scene.session.persistentIdentifier)
+                return documentBrowserViewController
+            }
+        }
+
+        os_log("activeDocumentBrowserViewController returning nil", log: .lifeCycle, type: .info)
+        return nil
     }
 
     // See https://stackoverflow.com/questions/58882047/open-a-new-window-in-mac-catalyst

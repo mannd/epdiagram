@@ -186,9 +186,9 @@ struct PreferencesView: View {
                                 Toggle(isOn: $snapMarks) {
                                     Text("Auto-link marks")
                                 }
-                                .onChange(of: snapMarks, perform: { value in
-                                    showAutoLinkWarning = !value
-                                })
+                                .onChange(of: snapMarks) {
+                                    showAutoLinkWarning = !snapMarks
+                                }
                                 .alert(isPresented: $showAutoLinkWarning) {
                                     Alert(title: Text("Warning: No Auto-Linking"), message: Text("Auto-linking is used to link marks together and to automatically determine block and impulse origin.  If you turn it off, you will need to manually align marks and annotate block and impulse origin."))
                                 }
@@ -270,7 +270,7 @@ struct PreferencesView: View {
                     periodColor = Color.convertColorName(periodColorName) ?? periodColor
                }
             }
-            .navigationBarTitle("Preferences", displayMode: .inline)
+            .navigationBarTitle(L("Preferences"), displayMode: .inline)
             .navigationBarHidden(isRunningOnMac() ? true : false)
 
         }

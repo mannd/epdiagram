@@ -15,7 +15,6 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
     private let zoomInToolbarButton = NSToolbarItem.Identifier(rawValue: "macZoomInButton")
     private let zoomOutToolbarButton = NSToolbarItem.Identifier(rawValue: "macZoomOutButton")
     private let zoomResetToolbarButton = NSToolbarItem.Identifier(rawValue: "macZoomResetButton")
-    private let closeToolbarButton = NSToolbarItem.Identifier(rawValue: "macCloseButton")
     private let undoToolbarButton = NSToolbarItem.Identifier(rawValue: "macUndoButton")
     private let redoToolbarButton = NSToolbarItem.Identifier(rawValue: "macRedoButton")
     private let snapshotToolbarButton = NSToolbarItem.Identifier(rawValue: "macSnapshotButton")
@@ -23,13 +22,19 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
     #endif
 
     func scene(_ scene: UIScene, willConnectTo session: UISceneSession, options connectionOptions: UIScene.ConnectionOptions) {
-        os_log("scene(scene:willConnectTo:options:) - SceneDelegate", log: .lifeCycle, type: .info)
+        os_log("scene(scene:willConnectTo:options:) - SceneDelegate session=%s userActivities=%d urlContexts=%d", log: .lifeCycle, type: .info, session.persistentIdentifier, connectionOptions.userActivities.count, connectionOptions.urlContexts.count)
         guard let scene = (scene as? UIWindowScene) else { return }
         if let documentBrowserViewController = window?.rootViewController as? DocumentBrowserViewController {
             scene.title = L("EP Diagram")
-            scene.userActivity = session.stateRestorationActivity ?? NSUserActivity(activityType: AppDelegate.mainActivityType)
-
-            documentBrowserViewController.restorationInfo = scene.userActivity?.userInfo
+            if connectionOptions.userActivities.isEmpty && !connectionOptions.urlContexts.isEmpty {
+                os_log("willConnect using URL contexts and clearing restoration info", log: .lifeCycle, type: .info)
+                scene.userActivity = NSUserActivity(activityType: AppDelegate.mainActivityType)
+                documentBrowserViewController.restorationInfo = nil
+            } else {
+                scene.userActivity = connectionOptions.userActivities.first ?? session.stateRestorationActivity ?? NSUserActivity(activityType: AppDelegate.mainActivityType)
+                documentBrowserViewController.restorationInfo = scene.userActivity?.userInfo
+                os_log("willConnect selected userActivity type=%s userInfo=%s", log: .lifeCycle, type: .info, scene.userActivity?.activityType ?? "nil", String(describing: scene.userActivity?.userInfo))
+            }
 
             #if targetEnvironment(macCatalyst)
             let toolbar = NSToolbar(identifier: "EP Diagram Mac Toolbar")
@@ -39,10 +44,34 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
             scene.titlebar?.toolbar = toolbar
             scene.titlebar?.toolbarStyle = .automatic
             scene.titlebar?.titleVisibility = .visible
+            scene.windowingBehaviors?.isClosable = true
             #endif
 
-        // This doesn't appear needed on Mac or iOS.  openURLContexts is called automatically.
-        // self.scene(scene, openURLContexts: connectionOptions.urlContexts)
+            if !connectionOptions.urlContexts.isEmpty {
+                os_log("willConnect routing URL contexts", log: .lifeCycle, type: .info)
+                scene.userActivity = NSUserActivity(activityType: AppDelegate.mainActivityType)
+                documentBrowserViewController.restorationInfo = nil
+                self.scene(scene, openURLContexts: connectionOptions.urlContexts)
+            } else if shouldOpenBrowser(from: scene.userActivity) {
+                os_log("willConnect routing open browser activity", log: .lifeCycle, type: .info)
+                scene.userActivity = NSUserActivity(activityType: AppDelegate.mainActivityType)
+                documentBrowserViewController.restorationInfo = nil
+            } else if shouldCreateNewDocument(from: scene.userActivity) {
+                os_log("willConnect routing create new document activity", log: .lifeCycle, type: .info)
+                scene.userActivity = NSUserActivity(activityType: AppDelegate.mainActivityType)
+                documentBrowserViewController.createNewDocument()
+            } else if let documentURL = documentURL(from: scene.userActivity) {
+                os_log("willConnect routing open document activity url=%s", log: .lifeCycle, type: .info, documentURL.path)
+                documentBrowserViewController.openDocument(url: documentURL)
+            } else {
+                os_log("willConnect routing idle browser/restoration scene", log: .lifeCycle, type: .info)
+                #if targetEnvironment(macCatalyst)
+                if AppDelegate.consumeShouldDiscardNextUncommandedBrowserScene() {
+                    os_log("willConnect destroying uncommanded idle browser scene", log: .lifeCycle, type: .info)
+                    destroySceneWhenConnected(scene)
+                }
+                #endif
+            }
         } else if (window?.rootViewController as? MacPreferencesViewController) != nil  {
             scene.title = L("Preferences")
             //            scene.userActivity = session.stateRestorationActivity ?? NSUserActivity(activityType: AppDelegate.mainActivityType)
@@ -63,21 +92,79 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
     }
 
     func stateRestorationActivity(for scene: UIScene) -> NSUserActivity? {
-        os_log("stateRestorationActivity(scene:) - SceneDelegate", log: .lifeCycle, type: .info)
-        return scene.userActivity
+        os_log("stateRestorationActivity(scene:) - SceneDelegate session=%s", log: .lifeCycle, type: .info, scene.session.persistentIdentifier)
+        guard let documentBrowserViewController = self.window?.rootViewController as? DocumentBrowserViewController else {
+            os_log("stateRestorationActivity returning scene.userActivity because root is not DocumentBrowserViewController", log: .lifeCycle, type: .info)
+            return scene.userActivity
+        }
+        let activity = documentBrowserViewController.stateRestorationActivity
+        os_log("stateRestorationActivity returning type=%s userInfo=%s", log: .lifeCycle, type: .info, activity.activityType, String(describing: activity.userInfo))
+        return activity
     }
+
+    private func shouldCreateNewDocument(from userActivity: NSUserActivity?) -> Bool {
+        return userActivity?.userInfo?[AppDelegate.createNewDocumentKey] as? Bool ?? false
+    }
+
+    private func shouldOpenBrowser(from userActivity: NSUserActivity?) -> Bool {
+        return userActivity?.userInfo?[AppDelegate.openBrowserKey] as? Bool ?? false
+    }
+
+    private func documentURL(from userActivity: NSUserActivity?) -> URL? {
+        guard let value = userActivity?.userInfo?[AppDelegate.openDocumentURLKey] else { return nil }
+        if let url = value as? URL {
+            return url
+        }
+        if let urlString = value as? String {
+            return URL(string: urlString)
+        }
+        return nil
+    }
+
+    #if targetEnvironment(macCatalyst)
+    private func destroySceneWhenConnected(_ scene: UIWindowScene) {
+        DispatchQueue.main.async {
+            let options = UIWindowSceneDestructionRequestOptions()
+            UIApplication.shared.requestSceneSessionDestruction(scene.session, options: options) { error in
+                print("Error closing uncommanded browser window", error.localizedDescription)
+            }
+        }
+    }
+    #endif
 
     // Used for opening external documents (from Finder or Open Recent menu).
     func scene(_ scene: UIScene, openURLContexts URLContexts: Set<UIOpenURLContext>) {
-        os_log("scene(_:openURLContexts:) - SceneDelegate", log: .lifeCycle, type: .info)
-        guard let documentBrowserViewController = self.window?.rootViewController as? DocumentBrowserViewController else { return }
+        os_log("scene(_:openURLContexts:) - SceneDelegate session=%s count=%d", log: .lifeCycle, type: .info, scene.session.persistentIdentifier, URLContexts.count)
+        guard let documentBrowserViewController = self.window?.rootViewController as? DocumentBrowserViewController else {
+            os_log("openURLContexts ignored: root is not DocumentBrowserViewController", log: .lifeCycle, type: .info)
+            return
+        }
         for context in URLContexts {
             print("context path", context.url.path)
             let url = context.url
             if url.isFileURL {
-                documentBrowserViewController.openDocument(url: url)
+                if documentBrowserViewController.isDocumentCurrentlyOpen(url: url) {
+                    os_log("openURLContexts ignored duplicate already-open document: %s", log: .lifeCycle, type: .info, url.path)
+                } else if documentBrowserViewController.isEditingDocument {
+                    os_log("openURLContexts routing to new scene because current browser is editing: %s", log: .lifeCycle, type: .info, url.path)
+                    openDocumentInNewScene(url: url)
+                } else {
+                    os_log("openURLContexts routing to current scene: %s", log: .lifeCycle, type: .info, url.path)
+                    documentBrowserViewController.openDocument(url: url)
+                }
+            } else {
+                os_log("openURLContexts ignored non-file URL: %s", log: .lifeCycle, type: .info, url.absoluteString)
             }
          }
+    }
+
+    private func openDocumentInNewScene(url: URL) {
+        os_log("openDocumentInNewScene(url:) - SceneDelegate url=%s", log: .lifeCycle, type: .info, url.path)
+        let activity = NSUserActivity(activityType: AppDelegate.mainActivityType)
+        activity.addUserInfoEntries(from: [AppDelegate.openDocumentURLKey: url.absoluteString])
+        UIApplication.shared.requestSceneSessionActivation(nil, userActivity: activity, options: nil) { error in
+            print("Error opening document in new window", error.localizedDescription)
+        }
     }
 
     func scene(_ scene: UIScene, continue userActivity: NSUserActivity) {
@@ -89,6 +176,8 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
 
     func sceneDidDisconnect(_ scene: UIScene) {
         os_log("sceneDidDisconnect(_:) - SceneDelegate, %s", log: .lifeCycle, type: .info, scene.session.persistentIdentifier)
+        guard let documentBrowserViewController = self.window?.rootViewController as? DocumentBrowserViewController else { return }
+        documentBrowserViewController.closeCurrentDocument()
     }
 
     func sceneWillResignActive(_ scene: UIScene) {
@@ -105,7 +194,7 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
 extension SceneDelegate: NSToolbarDelegate {
     func toolbarDefaultItemIdentifiers(_ toolbar: NSToolbar) -> [NSToolbarItem.Identifier] {
         let space = NSToolbarItem.Identifier.space
-        return [NSToolbarItem.Identifier.flexibleSpace, importImageToolbarButton, space,  undoToolbarButton, redoToolbarButton, space, zoomInToolbarButton, zoomOutToolbarButton, zoomResetToolbarButton, space, snapshotToolbarButton, space, closeToolbarButton]
+        return [NSToolbarItem.Identifier.flexibleSpace, importImageToolbarButton, space,  undoToolbarButton, redoToolbarButton, space, zoomInToolbarButton, zoomOutToolbarButton, zoomResetToolbarButton, space, snapshotToolbarButton]
     }
 
     func toolbarAllowedItemIdentifiers(_ toolbar: NSToolbar) -> [NSToolbarItem.Identifier] {
@@ -114,11 +203,6 @@ extension SceneDelegate: NSToolbarDelegate {
 
     func toolbar(_ toolbar: NSToolbar, itemForItemIdentifier itemIdentifier: NSToolbarItem.Identifier, willBeInsertedIntoToolbar flag: Bool) -> NSToolbarItem? {
         switch itemIdentifier {
-        case closeToolbarButton:
-            let barButtonItem = UIBarButtonItem(title: L("Close"), style: .done, target: nil, action: #selector(DiagramViewController.macCloseDocument(_:)))
-            let button = NSToolbarItem(itemIdentifier: itemIdentifier, barButtonItem: barButtonItem)
-            button.toolTip = L("Close diagram")
-            return button
         case zoomInToolbarButton:
             let barButtonItem = UIBarButtonItem(image: UIImage(systemName: "plus.magnifyingglass"), style: .plain, target: nil, action:  #selector(DiagramViewController.doZoom(_:)))
             let button = NSToolbarItem(itemIdentifier: itemIdentifier, barButtonItem: barButtonItem)

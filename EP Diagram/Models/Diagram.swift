@@ -64,7 +64,7 @@ struct Diagram: Codable {
         return Diagram(name: L("Scrollable Blank Diagram"), description: L("Wide scrollable blank image"), image: UIImage.emptyImage(size: CGSize(width: 1, height: 1), color: UIColor.systemTeal), ladder: Ladder.defaultLadder())
     }
 
-    // Consider expanding this list, or adding sample diagrams with real ladders, not the defualt blank ladder.
+    // Consider expanding this list, or adding sample diagrams with real ladders, not the default blank ladder.
     static func sampleDiagrams() -> [Diagram] {
         let sampleDiagrams: [Diagram] = [
             Diagram(name: L("Normal ECG"), description: L("Just a normal ECG"), image: UIImage(named: "SampleECG")!, ladder: Ladder.defaultLadder()),

@@ -33,6 +33,7 @@ final class DiagramViewController: UIViewController {
 
     var separatorView: SeparatorView?
     @IBOutlet var imageViewHeightConstraint: NSLayoutConstraint!
+    private var didReplaceMacSafeAreaConstraints = false
 
     // Constants
     static let defaultLeftMargin: CGFloat = 50
@@ -490,6 +491,7 @@ final class DiagramViewController: UIViewController {
         super.viewDidLoad()
 
         //print("userInfo", restorationInfo as Any)
+        replaceMacCatalystSafeAreaConstraintsIfNeeded()
 
         // Setup cursor, ladder and image scroll views.
         // These 2 views are guaranteed to exist, so the delegates are implicitly unwrapped optionals.
@@ -559,10 +561,7 @@ final class DiagramViewController: UIViewController {
         let interaction = UIContextMenuInteraction(delegate: self)
         ladderView.addInteraction(interaction)
 
-        #if targetEnvironment(macCatalyst) // context menu works better on Mac here
-        let imageInteraction = UIContextMenuInteraction(delegate: imageScrollView)
-        imageScrollView.addInteraction(imageInteraction)
-        #else
+        #if !targetEnvironment(macCatalyst)
         // We use a long press menu for the image, to avoid the view jumping around during normal scrolling, zooming.
         // Yes, we tried using UIContextMenuInteraction, but it was unusable for iOS.
         let longPressRecognizer = UILongPressGestureRecognizer(target: self.imageScrollView, action: #selector(imageScrollView.showImageMenu))
@@ -601,7 +600,7 @@ final class DiagramViewController: UIViewController {
         // However, this triggers UITableViewAlertForLayoutOutsideViewHierarchy breakpoint
         // for both macOS and iOS versions.
         // Probably safe to ignore this.  Moving this statement elsewhere doesn't work.
-        self.view.layoutIfNeeded()
+        //self.view.layoutIfNeeded()
     }
 
     var didFirstWillLayout = false
@@ -633,24 +632,6 @@ final class DiagramViewController: UIViewController {
         os_log("viewDidAppear() - ViewController", log: OSLog.viewCycle, type: .info)
         super.viewDidAppear(animated)
 
-        #if targetEnvironment(macCatalyst)
-        if let appDelegate = UIApplication.shared.delegate as? AppDelegate {
-            if let plugin = appDelegate.appKitPlugin {
-                if let nsWindow = view.window?.nsWindow {
-                    plugin.disableCloseButton(nsWindow: nsWindow)
-                }
-            }
-        }
-
-        if requestSandboxExpansion {
-            addDirectoryToSandbox(self)
-        }
-        #else
-        // FIXME: Temporary -- why?
-        if requestSandboxExpansion {
-            addIOSDirectoryToSandbox()
-        }
-        #endif
 
         #if !targetEnvironment(macCatalyst)
         if let currentDocument = currentDocument {
@@ -685,8 +666,78 @@ final class DiagramViewController: UIViewController {
     }
 
     deinit {
+        NotificationCenter.default.removeObserver(self)
         os_log("deinit - DiagramViewController", log: .debugging, type: .debug)
     }
+
+    #if targetEnvironment(macCatalyst)
+    private func replaceMacCatalystSafeAreaConstraintsIfNeeded() {
+        guard !didReplaceMacSafeAreaConstraints else { return }
+        guard let imageScrollView = imageScrollView,
+              let ladderView = ladderView,
+              let cursorView = cursorView,
+              let blackView = blackView,
+              let hamburgerView = _constraintHamburgerWidth.firstItem as? UIView else { return }
+
+        didReplaceMacSafeAreaConstraints = true
+
+        let diagramViews: [UIView] = [
+            imageScrollView,
+            ladderView,
+            cursorView,
+            blackView,
+            hamburgerView
+        ]
+        let safeArea = view.safeAreaLayoutGuide
+        let safeAreaConstraints = view.constraints.filter {
+            constraint($0, connects: safeArea, toOneOf: diagramViews)
+        }
+        NSLayoutConstraint.deactivate(safeAreaConstraints)
+
+        NSLayoutConstraint.activate([
+            imageScrollView.topAnchor.constraint(equalTo: view.topAnchor),
+            imageScrollView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
+            imageScrollView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
+
+            ladderView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
+            ladderView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
+            ladderView.bottomAnchor.constraint(equalTo: view.bottomAnchor),
+
+            cursorView.topAnchor.constraint(equalTo: view.topAnchor),
+            cursorView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
+            cursorView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
+            cursorView.bottomAnchor.constraint(equalTo: view.bottomAnchor),
+
+            blackView.topAnchor.constraint(equalTo: view.topAnchor),
+            blackView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
+            blackView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
+            blackView.bottomAnchor.constraint(equalTo: view.bottomAnchor),
+
+            hamburgerView.topAnchor.constraint(equalTo: view.topAnchor),
+            hamburgerView.bottomAnchor.constraint(equalTo: view.bottomAnchor)
+        ])
+    }
+
+    private func constraint(
+        _ constraint: NSLayoutConstraint,
+        connects safeArea: UILayoutGuide,
+        toOneOf views: [UIView]
+    ) -> Bool {
+        if let firstGuide = constraint.firstItem as? UILayoutGuide,
+           firstGuide === safeArea,
+           let secondView = constraint.secondItem as? UIView {
+            return views.contains { $0 === secondView }
+        }
+        if let secondGuide = constraint.secondItem as? UILayoutGuide,
+           secondGuide === safeArea,
+           let firstView = constraint.firstItem as? UIView {
+            return views.contains { $0 === firstView }
+        }
+        return false
+    }
+    #else
+    private func replaceMacCatalystSafeAreaConstraintsIfNeeded() {}
+    #endif
 
     func addIOSDirectoryToSandbox() {
         print("addIOSDirectoryToSandbox")
@@ -1860,57 +1911,159 @@ extension DiagramViewController {
         return controller
     }
 
-    func renameDocument(oldURL: URL, newURL: URL) {
+    func renameDocument(oldURL: URL, newURL: URL, completion: ((Result<URL, Error>) -> Void)? = nil) {
         os_log("renameDocument", log: .action, type: .info)
-        guard oldURL != newURL else { return }
+        guard oldURL != newURL else {
+            completion?(.success(oldURL))
+            return
+        }
 
-        DispatchQueue.global(qos: .background).async {
-            self.currentDocument?.close { success in
-                if success {
-                    if let resolvedDirectoryURL = Sandbox.getPersistentDirectoryURL(forFileURL: oldURL) {
-                        let startAccessing = resolvedDirectoryURL.startAccessingSecurityScopedResource()
-                        defer {
-                            if startAccessing {
-                                resolvedDirectoryURL.stopAccessingSecurityScopedResource()
+        currentDocument?.diagram = diagram
+        currentDocument?.close { [weak self] success in
+            guard let self = self else { return }
+            guard success else {
+                completion?(.failure(DocumentRenameError.closeFailed))
+                return
+            }
+
+            DispatchQueue.global(qos: .userInitiated).async {
+                let result = self.performCoordinatedRename(oldURL: oldURL, newURL: newURL)
+
+                DispatchQueue.main.async {
+                    switch result {
+                    case .success(let renamedURL):
+                        let renamedDocument = DiagramDocument(fileURL: renamedURL)
+                        self.openRenamedDocument(renamedDocument) { openSuccess in
+                            guard openSuccess else {
+                                completion?(.failure(DocumentRenameError.reopenFailed))
+                                return
                             }
+
+                            renamedDocument.diagram = self.diagram
+                            self.currentDocument = renamedDocument
+                            self.diagramEditorDelegate?.diagramEditor(self, didRenameDocumentTo: renamedDocument)
+                            self.setTitle()
+                            renamedDocument.updateChangeCount(.done)
+                            completion?(.success(renamedURL))
                         }
-
-                        let error: NSError? = nil
-                        let fileCoordinator = NSFileCoordinator()
-                        var moveError = error
-                        fileCoordinator.coordinate(writingItemAt: oldURL, options: .forMoving, writingItemAt: newURL, options: .forReplacing, error: &moveError, byAccessor: { newURL1, newURL2 in
-                            let fileManager = FileManager.default
-                            // Below gives sandbox error on mac
-                            //fileCoordinator.item(at: oldURL, willMoveTo: newURL)
-                            if (try? fileManager.moveItem(at: newURL1, to: newURL2)) != nil {
-                                fileCoordinator.item(at: oldURL, didMoveTo: newURL)
-                                DispatchQueue.main.async {
-                                    self.currentDocument = DiagramDocument(fileURL: newURL)
-                                    self.currentDocument?.open { openSuccess in
-                                        guard openSuccess else {
-                                            print ("could not open \(newURL)")
-                                            return
-                                        }
-                                        self.currentDocument?.diagram = self.diagram
-                                        self.setTitle()
-                                        self.currentDocument?.updateChangeCount(.done)
-                                        // Try to delete old document, ignore errors.
-                                        DispatchQueue.global(qos: .background).async {
-                                            if fileManager.isDeletableFile(atPath: oldURL.path) {
-                                                try? fileManager.removeItem(atPath: oldURL.path)
-                                            }
-                                        }
-                                    }
-                                }
-                            }
-                            if let error = error {
-                                print("error = \(error.localizedDescription)")
-                            }
-                        })
+                    case .failure(let error):
+                        let originalDocument = DiagramDocument(fileURL: oldURL)
+                        self.currentDocument = originalDocument
+                        originalDocument.open { _ in
+                            originalDocument.diagram = self.diagram
+                            self.setTitle()
+                            completion?(.failure(error))
+                        }
                     }
                 }
             }
         }
+    }
+
+    private func openRenamedDocument(_ document: DiagramDocument, completion: @escaping (Bool) -> Void) {
+        let accessDirectoryURL = Sandbox.getPersistentDirectoryURL(forFileURL: document.fileURL)
+        let didStartAccessing = accessDirectoryURL?.startAccessingSecurityScopedResource() ?? false
+
+        document.open { openSuccess in
+            if didStartAccessing {
+                accessDirectoryURL?.stopAccessingSecurityScopedResource()
+            }
+            completion(openSuccess)
+        }
+    }
+
+    private func performCoordinatedRename(oldURL: URL, newURL: URL) -> Result<URL, Error> {
+        let accessDirectoryURL = Sandbox.getPersistentDirectoryURL(forFileURL: oldURL)
+        let sourceURL: URL
+        let destinationURL: URL
+
+        if let accessDirectoryURL = accessDirectoryURL {
+            sourceURL = accessDirectoryURL.appendingPathComponent(oldURL.lastPathComponent)
+            destinationURL = accessDirectoryURL.appendingPathComponent(newURL.lastPathComponent)
+        } else {
+            sourceURL = oldURL
+            destinationURL = newURL
+        }
+
+        let didStartAccessing = accessDirectoryURL?.startAccessingSecurityScopedResource() ?? false
+        defer {
+            if didStartAccessing {
+                accessDirectoryURL?.stopAccessingSecurityScopedResource()
+            }
+        }
+
+        var coordinationError: NSError?
+        var moveResult: Result<URL, Error> = .failure(DocumentRenameError.moveFailed)
+        let fileCoordinator = NSFileCoordinator()
+
+        fileCoordinator.coordinate(
+            writingItemAt: sourceURL,
+            options: .forMoving,
+            writingItemAt: destinationURL,
+            options: .forReplacing,
+            error: &coordinationError
+        ) { coordinatedSourceURL, coordinatedDestinationURL in
+            do {
+                try FileManager.default.moveItem(at: coordinatedSourceURL, to: coordinatedDestinationURL)
+                fileCoordinator.item(at: sourceURL, didMoveTo: destinationURL)
+                moveResult = .success(destinationURL)
+            } catch {
+                moveResult = .failure(error)
+            }
+        }
+
+        if let coordinationError = coordinationError {
+            return .failure(coordinationError)
+        }
+
+        return moveResult
+    }
+
+    private enum DocumentRenameError: LocalizedError {
+        case closeFailed
+        case moveFailed
+        case reopenFailed
+
+        var errorDescription: String? {
+            switch self {
+            case .closeFailed:
+                return L("The diagram could not be closed before renaming.")
+            case .moveFailed:
+                return L("The diagram file could not be renamed.")
+            case .reopenFailed:
+                return L("The renamed diagram could not be reopened.")
+            }
+        }
+    }
+
+    func requestRenameDirectoryAccess(for fileURL: URL, completion: @escaping (Bool) -> Void) {
+#if targetEnvironment(macCatalyst)
+        guard let appDelegate = UIApplication.shared.delegate as? AppDelegate,
+              let plugin = appDelegate.appKitPlugin,
+              let nsWindow = view.window?.nsWindow else {
+            completion(false)
+            return
+        }
+
+        let directoryURL = fileURL.deletingLastPathComponent().standardizedFileURL
+        plugin.getDirectory(nsWindow: nsWindow, startingURL: directoryURL) { [weak self] selectedURL in
+            guard let self = self else {
+                completion(false)
+                return
+            }
+
+            let selectedDirectoryURL = selectedURL.standardizedFileURL
+            guard selectedDirectoryURL == directoryURL else {
+                completion(false)
+                return
+            }
+
+            self.storeDirectoryBookmark(from: selectedDirectoryURL)
+            completion(true)
+        }
+#else
+        completion(false)
+#endif
     }
 }
 
@@ -1925,8 +2078,16 @@ extension DiagramViewController: UITextFieldDelegate {
 // Mac catalyst specific functions
 #if targetEnvironment(macCatalyst)
 extension DiagramViewController {
-    @IBAction func macCloseDocument(_ sender: Any) {
-        closeDocument()
+    @IBAction func closeWindow(_ sender: Any) {
+        if let documentBrowserViewController = diagramEditorDelegate as? DocumentBrowserViewController {
+            documentBrowserViewController.closeWindow(sender)
+        }
+    }
+
+    @IBAction func openDiagramFromMenu(_ sender: Any) {
+        if let documentBrowserViewController = diagramEditorDelegate as? DocumentBrowserViewController {
+            documentBrowserViewController.openDiagramFromMenu(sender)
+        }
     }
 
     @IBAction func macSnapshotDiagram(_ sender: Any) {
