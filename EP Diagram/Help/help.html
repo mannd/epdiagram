@@ -3,16 +3,15 @@
 "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
 <head>
-<!-- 2022-04-09 Sat 14:54 -->
+<!-- 2026-06-16 Tue 12:17 -->
 <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>&lrm;</title>
-<meta name="generator" content="Org mode" />
 <meta name="author" content="David Mann" />
-<meta name="description" content="EP Diagram Help"
- />
+<meta name="description" content="EP Diagram Help" />
+<meta name="generator" content="Org Mode" />
 <style type="text/css">
- <!--/*--><![CDATA[/*><!--*/
+  #content { max-width: 60em; margin: auto; }
   .title  { text-align: center;
              margin-bottom: .2em; }
   .subtitle { text-align: center;
@@ -33,8 +32,9 @@
   #postamble p, #preamble p { font-size: 90%; margin: .2em; }
   p.verse { margin-left: 3%; }
   pre {
-    border: 1px solid #ccc;
-    box-shadow: 3px 3px 3px #eee;
+    border: 1px solid #e6e6e6;
+    border-radius: 3px;
+    background-color: #f2f2f2;
     padding: 8pt;
     font-family: monospace;
     overflow: auto;
@@ -43,21 +43,22 @@
   pre.src {
     position: relative;
     overflow: auto;
-    padding-top: 1.2em;
   }
   pre.src:before {
     display: none;
     position: absolute;
-    background-color: white;
-    top: -10px;
-    right: 10px;
+    top: -8px;
+    right: 12px;
     padding: 3px;
-    border: 1px solid black;
+    color: #555;
+    background-color: #f2f2f299;
   }
   pre.src:hover:before { display: inline; margin-top: 14px;}
   /* Languages per Org manual */
   pre.src-asymptote:before { content: 'Asymptote'; }
   pre.src-awk:before { content: 'Awk'; }
+  pre.src-authinfo::before { content: 'Authinfo'; }
+  pre.src-c:before { content: 'C'; }
   pre.src-C:before { content: 'C'; }
   /* pre.src-C++ doesn't work in CSS */
   pre.src-clojure:before { content: 'Clojure'; }
@@ -72,7 +73,7 @@
   pre.src-haskell:before { content: 'Haskell'; }
   pre.src-hledger:before { content: 'hledger'; }
   pre.src-java:before { content: 'Java'; }
-  pre.src-js:before { content: 'Javascript'; }
+  pre.src-js:before { content: 'JavaScript'; }
   pre.src-latex:before { content: 'LaTeX'; }
   pre.src-ledger:before { content: 'Ledger'; }
   pre.src-lisp:before { content: 'Lisp'; }
@@ -192,189 +193,166 @@
     { font-size: 10px; font-weight: bold; white-space: nowrap; }
   .org-info-js_search-highlight
     { background-color: #ffff00; color: #000000; font-weight: bold; }
-  .org-svg { width: 90%; }
-  /*]]>*/-->
+  .org-svg { }
 </style>
 <style media="screen" type="text/css"> img {max-width: 100%; height: auto;} </style>
 <style  type="text/css">:root { color-scheme: light dark; }</style>
 <link rel="stylesheet" type="text/css" href="./org.css"/>
-<script type="text/javascript">
-// @license magnet:?xt=urn:btih:e95b018ef3580986a04669f1b5879592219e2a7a&dn=public-domain.txt Public Domain
-<!--/*--><![CDATA[/*><!--*/
-     function CodeHighlightOn(elem, id)
-     {
-       var target = document.getElementById(id);
-       if(null != target) {
-         elem.classList.add("code-highlighted");
-         target.classList.add("code-highlighted");
-       }
-     }
-     function CodeHighlightOff(elem, id)
-     {
-       var target = document.getElementById(id);
-       if(null != target) {
-         elem.classList.remove("code-highlighted");
-         target.classList.remove("code-highlighted");
-       }
-     }
-    /*]]>*///-->
-// @license-end
-</script>
 </head>
 <body>
-<div id="content">
-<div id="table-of-contents">
+<div id="content" class="content">
+<div id="table-of-contents" role="doc-toc">
 <h2>Table of Contents</h2>
-<div id="text-table-of-contents">
+<div id="text-table-of-contents" role="doc-toc">
 <ul>
-<li><a href="#orgabeab29">Overview</a></li>
-<li><a href="#org6ee317a">Quick start</a>
+<li><a href="#org57be75b">Overview</a></li>
+<li><a href="#org68c580d">Quick start</a>
 <ul>
-<li><a href="#orgc074501">Files screen</a></li>
-<li><a href="#org39655e6">Load an ECG image</a></li>
-<li><a href="#org94f25c8">Create marks</a></li>
-<li><a href="#orge03d2fe">Move marks</a></li>
-<li><a href="#org4967418">Calibrate the diagram</a></li>
-<li><a href="#org156e7c8">Connect marks</a></li>
-<li><a href="#org27280c5">Edit the diagram</a></li>
-<li><a href="#org9506aad">Undo/Redo</a></li>
-<li><a href="#org69f3cef">Other features are located on the side menu</a></li>
-<li><a href="#orgb1badab">Take screenshots</a></li>
-<li><a href="#org9d214ab">Preferences</a></li>
-<li><a href="#org41eeedd">Close the diagram</a></li>
-<li><a href="#org91964b3">Those are the basics</a></li>
+<li><a href="#orgb64867d">Files screen</a></li>
+<li><a href="#org474d8bf">Load an ECG image</a></li>
+<li><a href="#orga3b94dc">Create marks</a></li>
+<li><a href="#orgac3127c">Move marks</a></li>
+<li><a href="#org094e69b">Calibrate the diagram</a></li>
+<li><a href="#org3c5e443">Connect marks</a></li>
+<li><a href="#orgcf7f9da">Edit the diagram</a></li>
+<li><a href="#org382d4e4">Undo/Redo</a></li>
+<li><a href="#org94ccc23">Other features are located on the side menu</a></li>
+<li><a href="#orge803306">Take screenshots</a></li>
+<li><a href="#orgbbf04f1">Settings</a></li>
+<li><a href="#org95d5479">Close the diagram</a></li>
+<li><a href="#orgd43deed">Those are the basics</a></li>
 </ul>
 </li>
-<li><a href="#org5aa83e9">EP Diagram manual</a>
+<li><a href="#org896bbf1">EP Diagram manual</a>
 <ul>
-<li><a href="#org45d0220">Introduction</a></li>
-<li><a href="#orgccc4ec0">Don't panic! (Undo, Redo, and Autosave)</a></li>
-<li><a href="#org691f3a2">Terminology</a></li>
-<li><a href="#org7ff760b">Diagrams</a>
+<li><a href="#org46b1690">Introduction</a></li>
+<li><a href="#orgb952a34">Don't panic! (Undo, Redo, and Autosave)</a></li>
+<li><a href="#org580e043">Terminology</a></li>
+<li><a href="#orgcf95a12">Diagrams</a>
 <ul>
-<li><a href="#org8d2fb80">Creating and opening diagrams</a></li>
-<li><a href="#orgaa76405">Dealing with the app sandbox</a></li>
-<li><a href="#orgd15607b">Initial diagram screen</a></li>
-<li><a href="#orgb4c17f1">Renaming a diagram</a></li>
-<li><a href="#orgf5a0a20">Closing a diagram</a></li>
+<li><a href="#org6fade01">Creating and opening diagrams</a></li>
+<li><a href="#orgc40857b">Dealing with the app sandbox</a></li>
+<li><a href="#orga717901">Initial diagram screen</a></li>
+<li><a href="#orgbac736a">Renaming a diagram</a></li>
+<li><a href="#org9ceb27c">Closing a diagram</a></li>
 </ul>
 </li>
-<li><a href="#orge188a06">Images</a>
+<li><a href="#org587f11f">Images</a>
 <ul>
-<li><a href="#orgec1bfb9">Adding an image</a></li>
-<li><a href="#orga48ecb1">Manipulating the image</a></li>
-<li><a href="#orgee34af6">PDF files</a></li>
+<li><a href="#org758b8fe">Adding an image</a></li>
+<li><a href="#org99913cf">Manipulating the image</a></li>
+<li><a href="#org0b2910b">PDF files</a></li>
 </ul>
 </li>
-<li><a href="#orgb01ec19">Ladders</a>
+<li><a href="#org8fdcd5d">Ladders</a>
 <ul>
-<li><a href="#orgb4ec9ff">Default ladder</a></li>
-<li><a href="#org386460e">Modes</a></li>
-<li><a href="#orgd785496">Active region</a></li>
+<li><a href="#orgc939f18">Default ladder</a></li>
+<li><a href="#orgb37cde6">Modes</a></li>
+<li><a href="#orgcd9b25e">Active region</a></li>
 </ul>
 </li>
-<li><a href="#orgbe0fdf5">Marks</a>
+<li><a href="#org0fc65aa">Marks</a>
 <ul>
-<li><a href="#orgba23c3e">Creating marks</a></li>
-<li><a href="#orgead27e2">Double tap shortcut for creating and deleting marks</a></li>
-<li><a href="#org88fe76d">Dragging to create marks</a></li>
-<li><a href="#orged491cd">Repositioning marks</a></li>
-<li><a href="#orgdd817cc">Mark anchors</a></li>
-<li><a href="#orgba46592">Moving marks in all directions</a></li>
-<li><a href="#orgfc3b044">Deleting marks</a></li>
-<li><a href="#org39a672a">Linked marks</a></li>
-<li><a href="#org9a52e78">Block and impulse origin</a></li>
+<li><a href="#org3a35977">Creating marks</a></li>
+<li><a href="#org18b847f">Double tap shortcut for creating and deleting marks</a></li>
+<li><a href="#org5e36223">Dragging to create marks</a></li>
+<li><a href="#orgf9ad62e">Repositioning marks</a></li>
+<li><a href="#org8fc53bb">Mark anchors</a></li>
+<li><a href="#org6db900e">Moving marks in all directions</a></li>
+<li><a href="#org1c85328">Deleting marks</a></li>
+<li><a href="#org13afbf8">Linked marks</a></li>
+<li><a href="#orgaf19c0c">Block and impulse origin</a></li>
 </ul>
 </li>
-<li><a href="#orgc312ec1">Calibration and measurements</a>
+<li><a href="#org28b8688">Calibration and measurements</a>
 <ul>
-<li><a href="#orge87adbe">Calibrating the diagram</a></li>
-<li><a href="#org4e67c87">Intervals and conduction times</a></li>
+<li><a href="#orgdfa45b6">Calibrating the diagram</a></li>
+<li><a href="#orgb6d492a">Intervals and conduction times</a></li>
 </ul>
 </li>
-<li><a href="#orgf7ef6e4">Connecting marks</a></li>
-<li><a href="#orgc4c217d">Editing marks</a>
+<li><a href="#org831db85">Connecting marks</a></li>
+<li><a href="#orge31eaa8">Editing marks</a>
 <ul>
-<li><a href="#orgd5be1e7">Fine-tuning your diagrams</a></li>
-<li><a href="#orgc74ff91">Making selections in edit mode</a></li>
-<li><a href="#org564323e">Style</a></li>
-<li><a href="#org9e46160">Emphasis</a></li>
-<li><a href="#org278c0c6">Impulse origin</a></li>
-<li><a href="#orgc54495f">Block</a></li>
-<li><a href="#orge595d3f">Label</a></li>
-<li><a href="#org91fbf95">Straighten marks</a></li>
-<li><a href="#org45322ab">Slant marks</a></li>
-<li><a href="#orgdf036b0">Adjust mark ends</a></li>
-<li><a href="#orgfa34ea3">Move marks</a></li>
-<li><a href="#org2742c95">Adjust CL</a></li>
-<li><a href="#org0a0be07">Rhythm</a></li>
-<li><a href="#orgeb28b82">Repeat CL</a></li>
-<li><a href="#org2c35796">Copy and paste</a></li>
-<li><a href="#orgdb9bfc9">Repeat pattern</a></li>
-<li><a href="#org657e60b">Unlink</a></li>
-<li><a href="#org5e03f9f">Snap to nearby marks</a></li>
-<li><a href="#orge82768d">Periods</a></li>
-<li><a href="#orgd38f241">Delete mark(s)</a></li>
+<li><a href="#orgd524d4d">Fine-tuning your diagrams</a></li>
+<li><a href="#org5a12035">Making selections in edit mode</a></li>
+<li><a href="#orge7c755f">Style</a></li>
+<li><a href="#orgf3195b9">Emphasis</a></li>
+<li><a href="#org76910e7">Impulse origin</a></li>
+<li><a href="#org550a8ee">Block</a></li>
+<li><a href="#org4eb1331">Label</a></li>
+<li><a href="#org63dfc88">Straighten marks</a></li>
+<li><a href="#orgd2e19c5">Slant marks</a></li>
+<li><a href="#org8a2cff7">Adjust mark ends</a></li>
+<li><a href="#orgb13b487">Move marks</a></li>
+<li><a href="#orgb1bcdb3">Adjust CL</a></li>
+<li><a href="#org03deaf2">Rhythm</a></li>
+<li><a href="#orge9f464b">Repeat CL</a></li>
+<li><a href="#orgc048b0c">Copy and paste</a></li>
+<li><a href="#org2936244">Repeat pattern</a></li>
+<li><a href="#org15249a9">Unlink</a></li>
+<li><a href="#orgadc067b">Snap to nearby marks</a></li>
+<li><a href="#orgb7f8847">Periods</a></li>
+<li><a href="#orgb01822b">Delete mark(s)</a></li>
 </ul>
 </li>
-<li><a href="#org9e5cec0">Side menu items</a>
+<li><a href="#org1de486f">Side menu items</a>
 <ul>
-<li><a href="#org2926e37">Opening the side menu</a></li>
-<li><a href="#org91e7d59">Take photo</a></li>
-<li><a href="#orgfcb6cda">Select image</a></li>
-<li><a href="#org0510194">Select ladder</a></li>
-<li><a href="#orgcad1806">Rename diagram</a></li>
-<li><a href="#orgfd0f018">Diagram info</a></li>
-<li><a href="#orgbcdcb96">Sample diagrams</a></li>
-<li><a href="#org47daad1">Lock image</a></li>
-<li><a href="#org12eed6a">Lock ladder</a></li>
-<li><a href="#org1ddf460">Ladder editor</a></li>
-<li><a href="#orgd4cad59">Preferences</a></li>
-<li><a href="#org9a75c2f">Help</a></li>
-<li><a href="#orgb1c17d0">About</a></li>
+<li><a href="#org4b5854e">Opening the side menu</a></li>
+<li><a href="#org5542a75">Take photo</a></li>
+<li><a href="#org0b8ac69">Select image</a></li>
+<li><a href="#org8808c11">Select ladder</a></li>
+<li><a href="#org43bbb63">Rename diagram</a></li>
+<li><a href="#org7631777">Diagram info</a></li>
+<li><a href="#org7d4e066">Sample diagrams</a></li>
+<li><a href="#org455e1af">Lock image</a></li>
+<li><a href="#orgeb174e8">Lock ladder</a></li>
+<li><a href="#orgfac6e52">Ladder editor</a></li>
+<li><a href="#org95f0b95">Settings</a></li>
+<li><a href="#orgbbfca37">Help</a></li>
+<li><a href="#org84e76d8">About</a></li>
 </ul>
 </li>
-<li><a href="#org11524b3">Editing and creating ladders</a>
+<li><a href="#org7aff49b">Editing and creating ladders</a>
 <ul>
-<li><a href="#orgd5933de">New mark style</a></li>
-<li><a href="#orgb72d744">Edit label</a></li>
-<li><a href="#orgeb16e7d">Add region</a></li>
-<li><a href="#orgf3a1189">Remove region</a></li>
-<li><a href="#org1814095">Region height</a></li>
-<li><a href="#org84d2fba">Adjust left margin</a></li>
-<li><a href="#org1fce573">The ladder editor</a></li>
+<li><a href="#org3dae3c0">New mark style</a></li>
+<li><a href="#org427f4dc">Edit label</a></li>
+<li><a href="#orgd57fc65">Add region</a></li>
+<li><a href="#orge235116">Remove region</a></li>
+<li><a href="#orgac55625">Region height</a></li>
+<li><a href="#orgfc39a7d">Adjust left margin</a></li>
+<li><a href="#orgdd48233">The ladder editor</a></li>
 </ul>
 </li>
-<li><a href="#org8584250">Preferences</a>
+<li><a href="#orgdf3fce6">Settings</a>
 <ul>
-<li><a href="#org016ef37">Colors</a></li>
-<li><a href="#org8e22333">Line width</a></li>
-<li><a href="#org28958ce">Show impulse origin and block</a></li>
-<li><a href="#orgb7678a1">Measurements</a></li>
-<li><a href="#orgb262cf8">Markers</a></li>
-<li><a href="#org468ae89">Conduction direction</a></li>
-<li><a href="#org4e8450d">Default mark line style</a></li>
-<li><a href="#org1f2a79c">Label description visibility</a></li>
-<li><a href="#orgb3d695e">Period preferences</a></li>
-<li><a href="#orgf7ff713">Hide all marks</a></li>
-<li><a href="#orgb026f90">Play sounds</a></li>
-<li><a href="#org9857dd7">Auto-link marks</a></li>
+<li><a href="#org66433f3">Colors</a></li>
+<li><a href="#orgab04f71">Line width</a></li>
+<li><a href="#org12461f3">Show impulse origin and block</a></li>
+<li><a href="#org0e627c9">Measurements</a></li>
+<li><a href="#orgc9a550b">Markers</a></li>
+<li><a href="#orgc2f1fd1">Conduction direction</a></li>
+<li><a href="#orgf23c2b7">Default mark line style</a></li>
+<li><a href="#org85511ed">Label description visibility</a></li>
+<li><a href="#orge524b7d">Period settings</a></li>
+<li><a href="#org01c7e97">Hide all marks</a></li>
+<li><a href="#org991ad0b">Play sounds</a></li>
+<li><a href="#org4252416">Auto-link marks</a></li>
 </ul>
 </li>
-<li><a href="#org0969ef9">Diagram snapshots</a></li>
+<li><a href="#orgc9b6a7b">Diagram snapshots</a></li>
 </ul>
 </li>
-<li><a href="#org08b3875">Known issues/bugs/limitations</a></li>
-<li><a href="#orgde8d788">References</a></li>
-<li><a href="#orga26e3a9">Acknowledgments</a></li>
+<li><a href="#orgf15977f">Known issues/bugs/limitations</a></li>
+<li><a href="#orgb996f09">References</a></li>
+<li><a href="#org609f26c">Acknowledgments</a></li>
 </ul>
 </div>
 </div>
-<div id="outline-container-orgabeab29" class="outline-2">
-<h2 id="orgabeab29">Overview</h2>
-<div class="outline-text-2" id="text-orgabeab29">
+<div id="outline-container-org57be75b" class="outline-2">
+<h2 id="org57be75b">Overview</h2>
+<div class="outline-text-2" id="text-org57be75b">
 
-<div id="orgc3f1a0a" class="figure">
+<div id="org8768c1a" class="figure">
 <p><img src="./img/early_ladder.png" alt="early_ladder.png" />
 </p>
 <p><span class="figure-number">Figure 1: </span>Early ladder diagram (Sir Thomas Lewis, 1920)</p>
@@ -383,35 +361,35 @@
 <ul class="org-ul">
 <li><b>EP Diagram</b> creates <i>ladder diagrams</i>, a classic form of ECG analysis that depicts the path of the cardiac impulse through anatomic regions of the heart.  Ladder diagrams are useful to understand cardiac arrhythmias such as heart block, reentrant tachycardias, and premature complexes.  They also can be used to draw the timing intervals, blanking periods, and refractory periods used by electronic pacemakers.  Traditionally ladder diagrams are roughly sketched on paper, but with <b>EP Diagram</b> you can draw them on your iPad, and, unlike a paper sketch, these diagrams can scroll and zoom, can measure intervals and conduction times automatically, and can be saved as publication quality images.</li>
 
-<li><b>EP Diagram</b> has a lot of built-in features that simplify the creation of ladder diagrams, and these features are described in this help manual.  The next section, <a href="#org6ee317a">Quick start</a>, contains some tips on how to get started.  However a good way to learn the program is to create some sample ladder diagrams, then use your finger or Apple pencil to tap, double-tap, and drag on the ladder to see what happens.  Try out the various buttons.  Experiment!  Most of the functions are intuitive, and if you want more in-depth instruction, have a look at the detailed <b>EP Diagram</b> <a href="#org5aa83e9">manual</a>.</li>
+<li><b>EP Diagram</b> has a lot of built-in features that simplify the creation of ladder diagrams, and these features are described in this help manual.  The next section, <a href="#org68c580d">Quick start</a>, contains some tips on how to get started.  However a good way to learn the program is to create some sample ladder diagrams, then use your finger or Apple pencil to tap, double-tap, and drag on the ladder to see what happens.  Try out the various buttons.  Experiment!  Most of the functions are intuitive, and if you want more in-depth instruction, have a look at the detailed <b>EP Diagram</b> <a href="#org896bbf1">manual</a>.</li>
 
 <li><b>EP Diagram</b> is optimized for use on an iPad.  It can be used on a phone, but due to the small size of a phone, it may be more difficult to draw ladder diagrams.</li>
 </ul>
 </div>
 </div>
-<div id="outline-container-org6ee317a" class="outline-2">
-<h2 id="org6ee317a">Quick start</h2>
-<div class="outline-text-2" id="text-org6ee317a">
+<div id="outline-container-org68c580d" class="outline-2">
+<h2 id="org68c580d">Quick start</h2>
+<div class="outline-text-2" id="text-org68c580d">
 </div>
-<div id="outline-container-orgc074501" class="outline-3">
-<h3 id="orgc074501">Files screen</h3>
-<div class="outline-text-3" id="text-orgc074501">
+<div id="outline-container-orgb64867d" class="outline-3">
+<h3 id="orgb64867d">Files screen</h3>
+<div class="outline-text-3" id="text-orgb64867d">
 <ul class="org-ul">
 <li>On the opening files screen, tap <b>Create New Diagram</b> to create a blank ladder diagram.</li>
 </ul>
 </div>
 </div>
-<div id="outline-container-org39655e6" class="outline-3">
-<h3 id="org39655e6">Load an ECG image</h3>
-<div class="outline-text-3" id="text-org39655e6">
+<div id="outline-container-org474d8bf" class="outline-3">
+<h3 id="org474d8bf">Load an ECG image</h3>
+<div class="outline-text-3" id="text-org474d8bf">
 <ul class="org-ul">
 <li>Use the "hamburger" menu icon at the top left to open the <i>side menu</i>.  You can select an ECG image from your photos or files and it will appear on the top half of the screen.</li>
 </ul>
 </div>
 </div>
-<div id="outline-container-org94f25c8" class="outline-3">
-<h3 id="org94f25c8">Create marks</h3>
-<div class="outline-text-3" id="text-org94f25c8">
+<div id="outline-container-orga3b94dc" class="outline-3">
+<h3 id="orga3b94dc">Create marks</h3>
+<div class="outline-text-3" id="text-orga3b94dc">
 <ul class="org-ul">
 <li>Tap on the image or the ladder grid to create <i>marks</i>, which are the lines that are drawn on the ladder.  Use the <i>cursor</i> (the vertical line extending from the mark to the top of the screen) to align marks with the ECG waveforms.  Tap away from the cursor to hide the cursor.  Tap on a mark to bring back the cursor.  Each tap on the cursor changes the <i>anchor</i> point of the cursor to the mark, from middle to proximal to distal.</li>
 <li>Double tap on a mark to delete it.  Double tap anywhere else to create a mark.  Double tapping is a fast way to create marks.</li>
@@ -420,9 +398,9 @@
 </ul>
 </div>
 </div>
-<div id="outline-container-orge03d2fe" class="outline-3">
-<h3 id="orge03d2fe">Move marks</h3>
-<div class="outline-text-3" id="text-orge03d2fe">
+<div id="outline-container-orgac3127c" class="outline-3">
+<h3 id="orgac3127c">Move marks</h3>
+<div class="outline-text-3" id="text-orgac3127c">
 <ul class="org-ul">
 <li>Dragging on a mark with a cursor (you can drag either the mark itself or its cursor) will move the mark horizontally.</li>
 <li>The anchor point will determine how the mark moves.  A middle anchor will move the whole mark, but an anchor at an endpoint of a mark will just move that endpoint, while the other endpoint stays fixed.  This will slant the mark.</li>
@@ -431,18 +409,18 @@
 </ul>
 </div>
 </div>
-<div id="outline-container-org4967418" class="outline-3">
-<h3 id="org4967418">Calibrate the diagram</h3>
-<div class="outline-text-3" id="text-org4967418">
+<div id="outline-container-org094e69b" class="outline-3">
+<h3 id="org094e69b">Calibrate the diagram</h3>
+<div class="outline-text-3" id="text-org094e69b">
 <ul class="org-ul">
 <li>Tap the <b>Calibrate</b> button to show a caliper that can be used to calibrate the diagram to a standard interval of 1000 msec.</li>
 <li>After calibration, measurements and periods will appear on the diagram.</li>
 </ul>
 </div>
 </div>
-<div id="outline-container-org156e7c8" class="outline-3">
-<h3 id="org156e7c8">Connect marks</h3>
-<div class="outline-text-3" id="text-org156e7c8">
+<div id="outline-container-org3c5e443" class="outline-3">
+<h3 id="org3c5e443">Connect marks</h3>
+<div class="outline-text-3" id="text-org3c5e443">
 <ul class="org-ul">
 <li>You can draw and move marks to connect them, but it is easier to use the <b>Connect</b> button.</li>
 <li>After tapping the <b>Connect</b> button, tap pairs of marks separated by a region to connect the marks with a new mark.</li>
@@ -450,27 +428,27 @@
 </ul>
 </div>
 </div>
-<div id="outline-container-org27280c5" class="outline-3">
-<h3 id="org27280c5">Edit the diagram</h3>
-<div class="outline-text-3" id="text-org27280c5">
+<div id="outline-container-orgcf7f9da" class="outline-3">
+<h3 id="orgcf7f9da">Edit the diagram</h3>
+<div class="outline-text-3" id="text-orgcf7f9da">
 <ul class="org-ul">
 <li>Tap the <b>Edit</b> button to fine-tune your diagram.</li>
 <li>Tap to select and deselect marks or regions, or drag to select zones.</li>
-<li>Long press the ladder after selecting marks or regions to show a menu that can be used to customize the appearance of the marks, including their style, emphasis, block, impulse origin, etc.  You can also add groups of marks and even periods of regular rhythm or fibrillation to zones and regions using this menu.  This menu also allows you to add <a href="#orge82768d">periods</a> to your diagram.</li>
+<li>Long press the ladder after selecting marks or regions to show a menu that can be used to customize the appearance of the marks, including their style, emphasis, block, impulse origin, etc.  You can also add groups of marks and even periods of regular rhythm or fibrillation to zones and regions using this menu.  This menu also allows you to add <a href="#orgb7f8847">periods</a> to your diagram.</li>
 </ul>
 </div>
 </div>
-<div id="outline-container-org9506aad" class="outline-3">
-<h3 id="org9506aad">Undo/Redo</h3>
-<div class="outline-text-3" id="text-org9506aad">
+<div id="outline-container-org382d4e4" class="outline-3">
+<h3 id="org382d4e4">Undo/Redo</h3>
+<div class="outline-text-3" id="text-org382d4e4">
 <ul class="org-ul">
 <li>Practically anything you do can be undone or redone and these changes are automatically saved.</li>
 </ul>
 </div>
 </div>
-<div id="outline-container-org69f3cef" class="outline-3">
-<h3 id="org69f3cef">Other features are located on the side menu</h3>
-<div class="outline-text-3" id="text-org69f3cef">
+<div id="outline-container-org94ccc23" class="outline-3">
+<h3 id="org94ccc23">Other features are located on the side menu</h3>
+<div class="outline-text-3" id="text-org94ccc23">
 <ul class="org-ul">
 <li>Change to a different ladder</li>
 <li>Edit or create ladders</li>
@@ -479,63 +457,62 @@
 </ul>
 </div>
 </div>
-<div id="outline-container-orgb1badab" class="outline-3">
-<h3 id="orgb1badab">Take screenshots</h3>
-<div class="outline-text-3" id="text-orgb1badab">
+<div id="outline-container-orge803306" class="outline-3">
+<h3 id="orge803306">Take screenshots</h3>
+<div class="outline-text-3" id="text-orge803306">
 <ul class="org-ul">
 <li>Take screenshots using the <b>Screenshot</b> button at the upper right of the screen, next to the <b>Close</b> button.</li>
 </ul>
 </div>
 </div>
-<div id="outline-container-org9d214ab" class="outline-3">
-<h3 id="org9d214ab">Preferences</h3>
-<div class="outline-text-3" id="text-org9d214ab">
+<div id="outline-container-orgbbf04f1" class="outline-3">
+<h3 id="orgbbf04f1">Settings</h3>
+<div class="outline-text-3" id="text-orgbbf04f1">
 <ul class="org-ul">
 <li>Change the overall appearance or behavior of the app.  Many aspects are customizable.</li>
 </ul>
 </div>
 </div>
-<div id="outline-container-org41eeedd" class="outline-3">
-<h3 id="org41eeedd">Close the diagram</h3>
-<div class="outline-text-3" id="text-org41eeedd">
+<div id="outline-container-org95d5479" class="outline-3">
+<h3 id="org95d5479">Close the diagram</h3>
+<div class="outline-text-3" id="text-org95d5479">
 <ul class="org-ul">
 <li>Use the <b>Close</b> button at the upper right of the screen to close the diagram and return to the files screen.  Diagrams are automatically saved as you work with them.</li>
 </ul>
 </div>
 </div>
-<div id="outline-container-org91964b3" class="outline-3">
-<h3 id="org91964b3">Those are the basics</h3>
-<div class="outline-text-3" id="text-org91964b3">
+<div id="outline-container-orgd43deed" class="outline-3">
+<h3 id="orgd43deed">Those are the basics</h3>
+<div class="outline-text-3" id="text-orgd43deed">
 <ul class="org-ul">
 <li>If you want more detail, read the next section, which is a detailed manual for the app.</li>
 </ul>
 </div>
 </div>
 </div>
-<div id="outline-container-org5aa83e9" class="outline-2">
-<h2 id="org5aa83e9">EP Diagram manual</h2>
-<div class="outline-text-2" id="text-org5aa83e9">
+<div id="outline-container-org896bbf1" class="outline-2">
+<h2 id="org896bbf1">EP Diagram manual</h2>
+<div class="outline-text-2" id="text-org896bbf1">
 </div>
-<div id="outline-container-org45d0220" class="outline-3">
-<h3 id="org45d0220">Introduction</h3>
-<div class="outline-text-3" id="text-org45d0220">
+<div id="outline-container-org46b1690" class="outline-3">
+<h3 id="org46b1690">Introduction</h3>
+<div class="outline-text-3" id="text-org46b1690">
 <p>
-Ladder diagrams date back at least a century and have been used to analyze arrhythmias and as teaching tools for almost as long as there has been electrocardiography.  For a history and examples of ladder diagrams, see the <a href="#orgde8d788">references</a>.  <b>EP Diagram</b> is a full-featured, interactive ladder drawing program.  It allows you not only to draw ladders, but also to customize their appearance to a fine degree.  As such it is a complex program and it can take a while to learn all its features.  However, it has an extensive undo/redo facility, so feel free to experiment.
+Ladder diagrams date back at least a century and have been used to analyze arrhythmias and as teaching tools for almost as long as there has been electrocardiography.  For a history and examples of ladder diagrams, see the <a href="#orgb996f09">references</a>.  <b>EP Diagram</b> is a full-featured, interactive ladder drawing program.  It allows you not only to draw ladders, but also to customize their appearance to a fine degree.  As such it is a complex program and it can take a while to learn all its features.  However, it has an extensive undo/redo facility, so feel free to experiment.
 </p>
 </div>
 </div>
-
-<div id="outline-container-orgccc4ec0" class="outline-3">
-<h3 id="orgccc4ec0">Don't panic! (Undo, Redo, and Autosave)</h3>
-<div class="outline-text-3" id="text-orgccc4ec0">
+<div id="outline-container-orgb952a34" class="outline-3">
+<h3 id="orgb952a34">Don't panic! (Undo, Redo, and Autosave)</h3>
+<div class="outline-text-3" id="text-orgb952a34">
 <p>
 Practically any change you make while using this app can be reversed by tapping the <b>Undo</b> button at the bottom of the screen.  If you change your mind you can revert the undo action by tapping the <b>Redo</b> button.  Every change you make is automatically saved.  There is no need to explicity save your diagram files; the app does this in the background.
 </p>
 </div>
 </div>
-<div id="outline-container-org691f3a2" class="outline-3">
-<h3 id="org691f3a2">Terminology</h3>
-<div class="outline-text-3" id="text-org691f3a2">
+<div id="outline-container-org580e043" class="outline-3">
+<h3 id="org580e043">Terminology</h3>
+<div class="outline-text-3" id="text-org580e043">
 <p>
 Ladder diagram terminology is not standardized.  Here is a glossary of the terms used in this manual.
 </p>
@@ -652,19 +629,19 @@ Ladder diagram terminology is not standardized.  Here is a glossary of the terms
 </table>
 </div>
 </div>
-<div id="outline-container-org7ff760b" class="outline-3">
-<h3 id="org7ff760b">Diagrams</h3>
-<div class="outline-text-3" id="text-org7ff760b">
+<div id="outline-container-orgcf95a12" class="outline-3">
+<h3 id="orgcf95a12">Diagrams</h3>
+<div class="outline-text-3" id="text-orgcf95a12">
 </div>
-<div id="outline-container-org8d2fb80" class="outline-4">
-<h4 id="org8d2fb80">Creating and opening diagrams</h4>
-<div class="outline-text-4" id="text-org8d2fb80">
+<div id="outline-container-org6fade01" class="outline-4">
+<h4 id="org6fade01">Creating and opening diagrams</h4>
+<div class="outline-text-4" id="text-org6fade01">
 <p>
 EP Diagram is a file based app, meaning the diagrams you create are stored on your device or on iCloud, and can be processed by the Files app on your device, meaning you can copy them, rename them, or delete them outside of the <b>EP Diagram</b> app.  The diagram files you create have a file extension of <code>diagram</code> and a specific icon and file format.  When you open the app, a screen shows your diagram files and a create file icon.
 </p>
 
 
-<div id="orga47b01c" class="figure">
+<div id="orgfa88fdd" class="figure">
 <p><img src="./img/epdiagram_files.png" alt="epdiagram_files.png" />
 </p>
 <p><span class="figure-number">Figure 2: </span>EP Diagram files</p>
@@ -675,27 +652,26 @@ Tap <b>Create New Diagram</b> to create a diagram file, or tap on one of your pr
 </p>
 </div>
 </div>
-<div id="outline-container-orgaa76405" class="outline-4">
-<h4 id="orgaa76405">Dealing with the app sandbox</h4>
-<div class="outline-text-4" id="text-orgaa76405">
+<div id="outline-container-orgc40857b" class="outline-4">
+<h4 id="orgc40857b">Dealing with the app sandbox</h4>
+<div class="outline-text-4" id="text-orgc40857b">
 <p>
 Apps distributed on the Apple App Store are <i>sandboxed</i>, meaning they have access only to the files in the container they run in, which is a private folder assigned to the app.  By default they can't read and write files in other file locations.  This policy is enforced by Apple to improve security, but it does result in some hoops that need to be jumped through.  To add a folder to the app sandbox, you must specifically select that folder using a special file dialog.  Once this is done the app will remember that the folder has been added to the sandbox whenever you use the app.  In other words, you should only have to do this once for each folder you want to add to the sandbox.  Select a folder as in the figure below.
 </p>
 
 
-<div id="orga152a4e" class="figure">
+<div id="org5e76208" class="figure">
 <p><img src="./img/ios_sandbox.png" alt="ios_sandbox.png" />
 </p>
 <p><span class="figure-number">Figure 3: </span>Add folder to sandbox</p>
 </div>
 </div>
 </div>
+<div id="outline-container-orga717901" class="outline-4">
+<h4 id="orga717901">Initial diagram screen</h4>
+<div class="outline-text-4" id="text-orga717901">
 
-<div id="outline-container-orgd15607b" class="outline-4">
-<h4 id="orgd15607b">Initial diagram screen</h4>
-<div class="outline-text-4" id="text-orgd15607b">
-
-<div id="orgb4df32b" class="figure">
+<div id="org7d04f1e" class="figure">
 <p><img src="./img/new_diagram.png" alt="new_diagram.png" />
 </p>
 <p><span class="figure-number">Figure 4: </span>New diagram</p>
@@ -706,47 +682,47 @@ A blank diagram has no ECG image and has a default ladder without marks.  You wi
 </p>
 </div>
 </div>
-<div id="outline-container-orgb4c17f1" class="outline-4">
-<h4 id="orgb4c17f1">Renaming a diagram</h4>
-<div class="outline-text-4" id="text-orgb4c17f1">
+<div id="outline-container-orgbac736a" class="outline-4">
+<h4 id="orgbac736a">Renaming a diagram</h4>
+<div class="outline-text-4" id="text-orgbac736a">
 <p>
-New diagrams have a generic file name.  You can rename the diagram in the Files app, or rename it using the <a href="#org9e5cec0">side menu</a> and then choosing <b>Rename diagram</b>.
+New diagrams have a generic file name.  You can rename the diagram in the Files app, or rename it using the <a href="#org1de486f">side menu</a> and then choosing <b>Rename diagram</b>.
 </p>
 </div>
 </div>
-<div id="outline-container-orgf5a0a20" class="outline-4">
-<h4 id="orgf5a0a20">Closing a diagram</h4>
-<div class="outline-text-4" id="text-orgf5a0a20">
+<div id="outline-container-org9ceb27c" class="outline-4">
+<h4 id="org9ceb27c">Closing a diagram</h4>
+<div class="outline-text-4" id="text-org9ceb27c">
 <p>
 There is no need to specifically save changes you make to a diagram.  Every change you make is automatically saved.  You close a diagram by simply tapping the <b>X</b> at the upper right hand corner of the screen.  Note however that undo and redo information is <i>not</i> restored when you close and reopen a diagram.  Undo information can also be reset by the operating system if memory resources are low.  Thus if you have a diagram that you want to "play around with" but don't want to lose its original form, it might be best to duplicate that diagram using the Files app, and work on a copy.  
 </p>
 </div>
 </div>
 </div>
-<div id="outline-container-orge188a06" class="outline-3">
-<h3 id="orge188a06">Images</h3>
-<div class="outline-text-3" id="text-orge188a06">
+<div id="outline-container-org587f11f" class="outline-3">
+<h3 id="org587f11f">Images</h3>
+<div class="outline-text-3" id="text-org587f11f">
 </div>
-<div id="outline-container-orgec1bfb9" class="outline-4">
-<h4 id="orgec1bfb9">Adding an image</h4>
-<div class="outline-text-4" id="text-orgec1bfb9">
+<div id="outline-container-org758b8fe" class="outline-4">
+<h4 id="org758b8fe">Adding an image</h4>
+<div class="outline-text-4" id="text-org758b8fe">
 </div>
 <ul class="org-ul">
-<li><a id="orgeba34c8"></a>Image types<br />
-<div class="outline-text-5" id="text-orgeba34c8">
+<li><a id="orgcc2c444"></a>Image types<br />
+<div class="outline-text-5" id="text-orgcc2c444">
 <p>
 <b>EP Diagram</b> supports most image formats, such as <code>jpg</code> and <code>png</code>, and it also can load PDF files.  In addition you can take a photo with your device's camera and directly import it into the app.
 </p>
 </div>
 </li>
-<li><a id="orgf6de453"></a>Selecting images<br />
-<div class="outline-text-5" id="text-orgf6de453">
+<li><a id="orgd0a7a15"></a>Selecting images<br />
+<div class="outline-text-5" id="text-orgd0a7a15">
 <p>
-Open the <a href="#org9e5cec0">side menu</a> and tap <b>Take photo</b> to use your camera to create an image, or tap <b>Select image</b> and choose <b>Photos</b> or <b>Files</b> as the image source.  If a dialog appears asking for permission to access the camera or your Photos app, go ahead and grant permission.  If you don't, you will need to grant this permission in the Settings app of your device in order to import images.  After selecting an image, it will appear in the top half of the diagram.
+Open the <a href="#org1de486f">side menu</a> and tap <b>Take photo</b> to use your camera to create an image, or tap <b>Select image</b> and choose <b>Photos</b> or <b>Files</b> as the image source.  If a dialog appears asking for permission to access the camera or your Photos app, go ahead and grant permission.  If you don't, you will need to grant this permission in the Settings app of your device in order to import images.  After selecting an image, it will appear in the top half of the diagram.
 </p>
 
 
-<div id="orgcb94016" class="figure">
+<div id="org0429d7b" class="figure">
 <p><img src="./img/diagram_with_image.png" alt="diagram_with_image.png" />
 </p>
 <p><span class="figure-number">Figure 5: </span>Diagram with image added</p>
@@ -755,28 +731,27 @@ Open the <a href="#org9e5cec0">side menu</a> and tap <b>Take photo</b> to use yo
 </li>
 </ul>
 </div>
-
-<div id="outline-container-orga48ecb1" class="outline-4">
-<h4 id="orga48ecb1">Manipulating the image</h4>
-<div class="outline-text-4" id="text-orga48ecb1">
+<div id="outline-container-org99913cf" class="outline-4">
+<h4 id="org99913cf">Manipulating the image</h4>
+<div class="outline-text-4" id="text-org99913cf">
 </div>
 <ul class="org-ul">
-<li><a id="orga6cf051"></a>Scrolling and zooming<br />
-<div class="outline-text-5" id="text-orga6cf051">
+<li><a id="orgb4ce816"></a>Scrolling and zooming<br />
+<div class="outline-text-5" id="text-orgb4ce816">
 <p>
 You can pinch to zoom and use your finger to scroll the image.  If you have created a ladder, you will see the ladder will zoom and scroll appropriately at the same time.  In <b>EP Diagram</b> all zooming and scrolling is done via the image, not via the ladder.
 </p>
 </div>
 </li>
-<li><a id="orge178a9a"></a>Rotating the image<br />
-<div class="outline-text-5" id="text-orge178a9a">
+<li><a id="orgacc334b"></a>Rotating the image<br />
+<div class="outline-text-5" id="text-orgacc334b">
 <p>
 If the image is out of kilter (this may happen with photos you take), long press on the image and select the <b>Rotate</b> menu.  Use the buttons at the bottom of the screen to rotate the image.  Tap <b>Reset</b> to bring the image back to its original orientation.
 </p>
 </div>
 </li>
-<li><a id="orgd610076"></a>Adjust the size of the image versus the ladder<br />
-<div class="outline-text-5" id="text-orgd610076">
+<li><a id="org47747f2"></a>Adjust the size of the image versus the ladder<br />
+<div class="outline-text-5" id="text-org47747f2">
 <p>
 There is a small red horizontal bar between the image and the ladder.  Move this up or down to adjust the relative proportions of the image and the ladder on the screen.
 </p>
@@ -784,164 +759,156 @@ There is a small red horizontal bar between the image and the ladder.  Move this
 </li>
 </ul>
 </div>
-
-<div id="outline-container-orgee34af6" class="outline-4">
-<h4 id="orgee34af6">PDF files</h4>
-<div class="outline-text-4" id="text-orgee34af6">
+<div id="outline-container-org0b2910b" class="outline-4">
+<h4 id="org0b2910b">PDF files</h4>
+<div class="outline-text-4" id="text-org0b2910b">
 <p>
 Load PDF files like any other image file.  However, some PDF files contain multiple pages.  You can change the page by performing a long press on the image and selecting the <b>PDF</b> menu item.  A toolbar will appear at the bottom which allows you to change pages.  Note that once a multipage PDF diagram is closed, only the page shown when the diagram is closed will be saved with the diagram.  This is because <b>EP Diagram</b> only saves one image at a time.  In order to change pages after reopening a diagram based on a multipage PDF file, it will be necessary to reload the PDF file.
 </p>
 </div>
 </div>
 </div>
-
-<div id="outline-container-orgb01ec19" class="outline-3">
-<h3 id="orgb01ec19">Ladders</h3>
-<div class="outline-text-3" id="text-orgb01ec19">
+<div id="outline-container-org8fdcd5d" class="outline-3">
+<h3 id="org8fdcd5d">Ladders</h3>
+<div class="outline-text-3" id="text-org8fdcd5d">
 </div>
-<div id="outline-container-orgb4ec9ff" class="outline-4">
-<h4 id="orgb4ec9ff">Default ladder</h4>
-<div class="outline-text-4" id="text-orgb4ec9ff">
+<div id="outline-container-orgc939f18" class="outline-4">
+<h4 id="orgc939f18">Default ladder</h4>
+<div class="outline-text-4" id="text-orgc939f18">
 <p>
-When you create a new diagram, a default ladder is presented initially.  You can <a href="#org11524b3">change the default ladder, select a different ladder, or create a new ladder from scratch</a>.  The default ladder has three regions: A (atrial), AV (atrioventricular), and V (ventricular). 
+When you create a new diagram, a default ladder is presented initially.  You can <a href="#org7aff49b">change the default ladder, select a different ladder, or create a new ladder from scratch</a>.  The default ladder has three regions: A (atrial), AV (atrioventricular), and V (ventricular). 
 </p>
 </div>
 </div>
-<div id="outline-container-org386460e" class="outline-4">
-<h4 id="org386460e">Modes</h4>
-<div class="outline-text-4" id="text-org386460e">
+<div id="outline-container-orgb37cde6" class="outline-4">
+<h4 id="orgb37cde6">Modes</h4>
+<div class="outline-text-4" id="text-orgb37cde6">
 <p>
 Most of the time you will be working with the ladder in <i>normal</i> mode.  This is the default mode of operation.  This mode allows you to add and delete marks, move marks, link marks together, and in general draw your ladder.  The toolbar menu at the bottom of the screen in normal mode shows the three other modes: <i>calibrate</i>, <i>connect</i> and <i>edit</i>.  Those modes are used to calibrate the diagram to allow measurements to be made, to quickly connect pairs of marks, and to edit the ladder's appearance.  These modes will be discussed in detail later.
 </p>
 </div>
 </div>
-<div id="outline-container-orgd785496" class="outline-4">
-<h4 id="orgd785496">Active region</h4>
-<div class="outline-text-4" id="text-orgd785496">
+<div id="outline-container-orgcd9b25e" class="outline-4">
+<h4 id="orgcd9b25e">Active region</h4>
+<div class="outline-text-4" id="text-orgcd9b25e">
 <p>
 In normal mode one of the ladder regions is usually highlighted, as seen in the prior figure.  This is the <i>active region</i>.  You can change the active region by tapping the label of another region, or toggle the active region on and off by tapping the label of the active region.  The active region determines into which region a mark will be drawn.  Thus if you are tapping on P waves you would want the A region to be active, and you would have the V region active when tapping on QRS complexes.
 </p>
 </div>
 </div>
 </div>
-<div id="outline-container-orgbe0fdf5" class="outline-3">
-<h3 id="orgbe0fdf5">Marks</h3>
-<div class="outline-text-3" id="text-orgbe0fdf5">
+<div id="outline-container-org0fc65aa" class="outline-3">
+<h3 id="org0fc65aa">Marks</h3>
+<div class="outline-text-3" id="text-org0fc65aa">
 </div>
-<div id="outline-container-orgba23c3e" class="outline-4">
-<h4 id="orgba23c3e">Creating marks</h4>
-<div class="outline-text-4" id="text-orgba23c3e">
+<div id="outline-container-org3a35977" class="outline-4">
+<h4 id="org3a35977">Creating marks</h4>
+<div class="outline-text-4" id="text-org3a35977">
 <p>
 If you tap once on the image, a vertical mark with an attached cursor will be drawn in the active region.  If there is no active region, the first region in the ladder will become the active region.  If instead of tapping on the image you tap on the ladder, whatever region you tap on will become the active region, and the mark will appear in that region.  Once the mark appears with the cursor, if you do a single tap elsewhere, the cursor will disappear.  Tap again elsewhere on the image to create another mark.  In the figure below we are adding marks in the A region, corresponding to P waves, by tapping on P waves in the image.  
 </p>
 
 
-<div id="org938a4a1" class="figure">
+<div id="org5bcfd59" class="figure">
 <p><img src="./img/adding_marks.png" alt="adding_marks.png" />
 </p>
 <p><span class="figure-number">Figure 6: </span>Adding marks to the A region</p>
 </div>
 </div>
 </div>
-
-<div id="outline-container-orgead27e2" class="outline-4">
-<h4 id="orgead27e2">Double tap shortcut for creating and deleting marks</h4>
-<div class="outline-text-4" id="text-orgead27e2">
+<div id="outline-container-org18b847f" class="outline-4">
+<h4 id="org18b847f">Double tap shortcut for creating and deleting marks</h4>
+<div class="outline-text-4" id="text-org18b847f">
 <p>
 It's a bit tiresome to tap to create a mark, and then tap again just to make the cursor disappear, and then tap a third time to create the next mark.  So, to make things easier, you can just double tap at each new location to create a new mark.  Here, we first tapped on the label of the V region to make it the active region, and we are double tapping on QRS complexes to make marks in the V region.  If a mark is malpositioned, it is very easy to double tap it again to make it disappear.
 </p>
 
 
-<div id="orgff45370" class="figure">
+<div id="orgb51f575" class="figure">
 <p><img src="./img/adding_V_marks.png" alt="adding_V_marks.png" />
 </p>
 <p><span class="figure-number">Figure 7: </span>Adding marks in the V region</p>
 </div>
 </div>
 </div>
-
-<div id="outline-container-org88fe76d" class="outline-4">
-<h4 id="org88fe76d">Dragging to create marks</h4>
-<div class="outline-text-4" id="text-org88fe76d">
+<div id="outline-container-org5e36223" class="outline-4">
+<h4 id="org5e36223">Dragging to create marks</h4>
+<div class="outline-text-4" id="text-org5e36223">
 <p>
 As described later, it is easy using connect mode to connect the marks we have drawn, but we'll stay in normal mode for now and accomplish the same feat.  Using your finger or Apple pencil, drag from the first mark in the A region to the first mark in the V region.  A new mark will be created, and when it is close to the other two marks, they will be highlighted in a purple color, meaning they are close enough to the new mark to be linked.  When you finish the drag through the AV region and lift your finger or pencil, the new mark (if it is close enough) will snap into the correct position, linking the two regions with conduction through the AV region.
 </p>
 
 
-<div id="orgfc082b4" class="figure">
+<div id="org5657f7c" class="figure">
 <p><img src="./img/drag_in_AV.png" alt="drag_in_AV.png" />
 </p>
 <p><span class="figure-number">Figure 8: </span>Dragging to create a mark in the AV region</p>
 </div>
 </div>
 </div>
-
-<div id="outline-container-orged491cd" class="outline-4">
-<h4 id="orged491cd">Repositioning marks</h4>
-<div class="outline-text-4" id="text-orged491cd">
+<div id="outline-container-orgf9ad62e" class="outline-4">
+<h4 id="orgf9ad62e">Repositioning marks</h4>
+<div class="outline-text-4" id="text-orgf9ad62e">
 <p>
 Nobody's perfect, and it's likely the marks you create will not be perfectly aligned with the image or with each other.  It's often necessary to reposition marks you have already created.  In order to move a mark, it must have a cursor attached to it.  By default when you first tap a mark it has a cursor anchored to the middle of the mark.  Dragging the cursor left or right will keep the mark vertical and move it horizontally.  You can move just one endpoint of the mark or the other by changing the <i>anchor</i> point of the mark.
 </p>
 </div>
 </div>
-
-<div id="outline-container-orgdd817cc" class="outline-4">
-<h4 id="orgdd817cc">Mark anchors</h4>
-<div class="outline-text-4" id="text-orgdd817cc">
+<div id="outline-container-org8fc53bb" class="outline-4">
+<h4 id="org8fc53bb">Mark anchors</h4>
+<div class="outline-text-4" id="text-org8fc53bb">
 <p>
 Once a mark has a cursor, we can change the anchor point by single-tapping on the mark or the cursor.  Marks have at most three anchor points, proximal, middle, and distal, though some marks have only two if they are linked to other marks (i.e. their freedom of movement is restricted).  When we drag the cursor of the mark, the anchor is what moves.  To demonstrate this, single tap on the highlighted mark or its cursor.  The anchor will move from the middle to the proximal end of the mark.  Tap again and it will move the to distal end.  Finally it will cycle back to the middle if you tap again.  In the next figure we see a mark with a proximal anchor in the AV region that has been dragged so it slants.
 </p>
 
 
-<div id="org9ed6e28" class="figure">
+<div id="org75c9be5" class="figure">
 <p><img src="./img/proximal_anchor.png" alt="proximal_anchor.png" />
 </p>
 <p><span class="figure-number">Figure 9: </span>Proximal anchor</p>
 </div>
 </div>
 </div>
-
-<div id="outline-container-orgba46592" class="outline-4">
-<h4 id="orgba46592">Moving marks in all directions</h4>
-<div class="outline-text-4" id="text-orgba46592">
+<div id="outline-container-org6db900e" class="outline-4">
+<h4 id="org6db900e">Moving marks in all directions</h4>
+<div class="outline-text-4" id="text-org6db900e">
 <p>
 So far we have used the cursor to move marks purely in a horizontal direction.  But we can also move marks in unlimited directions.  To do this we have to change our cursor to an <i>omnidirectional</i> cursor.  Tap a mark to cause the cursor to appear.  Then do a long press on the cursor.  A circle will appear, indicating the cursor is now omnidirectional.  You can now drag the mark in any direction, depending on the anchor point.  Another long press on the cursor will change it back to a normal horizontally moving cursor.
 </p>
 
 
-<div id="org0ca2cfd" class="figure">
+<div id="orgf486c2e" class="figure">
 <p><img src="./img/omnidirectional_movement.png" alt="omnidirectional_movement.png" />
 </p>
 <p><span class="figure-number">Figure 10: </span>Omnidirectional cursor</p>
 </div>
 </div>
 </div>
-
-<div id="outline-container-orgfc3b044" class="outline-4">
-<h4 id="orgfc3b044">Deleting marks</h4>
-<div class="outline-text-4" id="text-orgfc3b044">
+<div id="outline-container-org1c85328" class="outline-4">
+<h4 id="org1c85328">Deleting marks</h4>
+<div class="outline-text-4" id="text-org1c85328">
 <p>
-To delete a mark, simply double tap it.  You can delete multiple marks, or all the marks in a region or in the ladder using <a href="#orgc4c217d">edit mode</a>, as describe later.
+To delete a mark, simply double tap it.  You can delete multiple marks, or all the marks in a region or in the ladder using <a href="#orge31eaa8">edit mode</a>, as describe later.
 </p>
 </div>
 </div>
-<div id="outline-container-org39a672a" class="outline-4">
-<h4 id="org39a672a">Linked marks</h4>
-<div class="outline-text-4" id="text-org39a672a">
+<div id="outline-container-org13afbf8" class="outline-4">
+<h4 id="org13afbf8">Linked marks</h4>
+<div class="outline-text-4" id="text-org13afbf8">
 <p>
-Once marks are linked, moving one linked mark will also move the marks it is linked to.  In order to unlink marks, you can use the <b>Undo</b> button, or delete and then re-add a linked mark, or use <a href="#org657e60b">edit mode</a>.
+Once marks are linked, moving one linked mark will also move the marks it is linked to.  In order to unlink marks, you can use the <b>Undo</b> button, or delete and then re-add a linked mark, or use <a href="#org15249a9">edit mode</a>.
 </p>
 </div>
 </div>
-<div id="outline-container-org9a52e78" class="outline-4">
-<h4 id="org9a52e78">Block and impulse origin</h4>
-<div class="outline-text-4" id="text-org9a52e78">
+<div id="outline-container-orgaf19c0c" class="outline-4">
+<h4 id="orgaf19c0c">Block and impulse origin</h4>
+<div class="outline-text-4" id="text-orgaf19c0c">
 <p>
-In the course of adding, deleting, and moving marks, if the app preferences are set to <a href="#org28958ce">show impulse origin</a> or <a href="#org28958ce">show block</a>, the app will try to determine automatically where the impulse origin is and where block is, depending on the direction of the marks and their linking, and will show this with symbols as seen below.  You can also manually set impulse origin and block using edit mode.  You can change the styling and positioning of the impulse origin and block symbols in app preferences.
+In the course of adding, deleting, and moving marks, if the app settings are set to <a href="#org12461f3">show impulse origin</a> or <a href="#org12461f3">show block</a>, the app will try to determine automatically where the impulse origin is and where block is, depending on the direction of the marks and their linking, and will show this with symbols as seen below.  You can also manually set impulse origin and block using edit mode.  You can change the styling and positioning of the impulse origin and block symbols in app settings.
 </p>
 
 
-<div id="org1b4bdc7" class="figure">
+<div id="orgde5ba0c" class="figure">
 <p><img src="./img/impulse_origin_block.png" alt="impulse_origin_block.png" />
 </p>
 <p><span class="figure-number">Figure 11: </span>Impulse origin and block</p>
@@ -949,20 +916,19 @@ In the course of adding, deleting, and moving marks, if the app preferences are 
 </div>
 </div>
 </div>
-
-<div id="outline-container-orgc312ec1" class="outline-3">
-<h3 id="orgc312ec1">Calibration and measurements</h3>
-<div class="outline-text-3" id="text-orgc312ec1">
+<div id="outline-container-org28b8688" class="outline-3">
+<h3 id="org28b8688">Calibration and measurements</h3>
+<div class="outline-text-3" id="text-org28b8688">
 </div>
-<div id="outline-container-orge87adbe" class="outline-4">
-<h4 id="orge87adbe">Calibrating the diagram</h4>
-<div class="outline-text-4" id="text-orge87adbe">
+<div id="outline-container-orgdfa45b6" class="outline-4">
+<h4 id="orgdfa45b6">Calibrating the diagram</h4>
+<div class="outline-text-4" id="text-orgdfa45b6">
 <p>
 While ladder diagrams are nice, even nicer is the ability to use the ladder to make measurements.  In order to do this, you must <i>calibrate</i> the diagram.  Tap the <b>Calibration</b> button to enter calibration mode.  A single caliper will appear on the image.  If you use the app <b>EP Calipers</b> this will look familiar.  This caliper though is only for setting calibration.  It is not for making measurements.  Your ladder will do that, once it is calibrated.
 </p>
 
 
-<div id="org89ec6c4" class="figure">
+<div id="org82d7430" class="figure">
 <p><img src="./img/calibration_mode.png" alt="calibration_mode.png" />
 </p>
 <p><span class="figure-number">Figure 12: </span>Calibration mode</p>
@@ -973,15 +939,15 @@ Note that this caliper is always set to a measurement of 1000 msec.  In order to
 </p>
 </div>
 </div>
-<div id="outline-container-org4e67c87" class="outline-4">
-<h4 id="org4e67c87">Intervals and conduction times</h4>
-<div class="outline-text-4" id="text-org4e67c87">
+<div id="outline-container-orgb6d492a" class="outline-4">
+<h4 id="orgb6d492a">Intervals and conduction times</h4>
+<div class="outline-text-4" id="text-orgb6d492a">
 <p>
-After calibration, if preferences are set to <a href="#orgb7678a1">show intervals</a> and <a href="#orgb7678a1">show conduction times</a>, you will now see measurements on the ladder.  These will change "on the fly" as you modify the ladder.  They will remain accurate even when zooming and scrolling the image, or if you rotate the screen.
+After calibration, if settings are set to <a href="#org0e627c9">show intervals</a> and <a href="#org0e627c9">show conduction times</a>, you will now see measurements on the ladder.  These will change "on the fly" as you modify the ladder.  They will remain accurate even when zooming and scrolling the image, or if you rotate the screen.
 </p>
 
 
-<div id="orgd5e0d10" class="figure">
+<div id="orgf2825a0" class="figure">
 <p><img src="./img/measurements.png" alt="measurements.png" />
 </p>
 <p><span class="figure-number">Figure 13: </span>Measurements</p>
@@ -989,133 +955,130 @@ After calibration, if preferences are set to <a href="#orgb7678a1">show interval
 </div>
 </div>
 </div>
-
-<div id="outline-container-orgf7ef6e4" class="outline-3">
-<h3 id="orgf7ef6e4">Connecting marks</h3>
-<div class="outline-text-3" id="text-orgf7ef6e4">
+<div id="outline-container-org831db85" class="outline-3">
+<h3 id="org831db85">Connecting marks</h3>
+<div class="outline-text-3" id="text-org831db85">
 <p>
 Connect mode is useful to connect marks in different regions rapidly.  Tap the <b>Connect</b> button to enter this mode.  Then tap on pairs of marks, separated by a region of conduction to connect them.  You can also quickly create a blocked mark in connect mode.  Tap on a mark in the A region, then tap in the AV region.  A new mark will be created with block in the AV region.  Tap the <b>Done</b> button to resume normal mode.
 </p>
 </div>
 </div>
-
-<div id="outline-container-orgc4c217d" class="outline-3">
-<h3 id="orgc4c217d">Editing marks</h3>
-<div class="outline-text-3" id="text-orgc4c217d">
+<div id="outline-container-orge31eaa8" class="outline-3">
+<h3 id="orge31eaa8">Editing marks</h3>
+<div class="outline-text-3" id="text-orge31eaa8">
 </div>
-<div id="outline-container-orgd5be1e7" class="outline-4">
-<h4 id="orgd5be1e7">Fine-tuning your diagrams</h4>
-<div class="outline-text-4" id="text-orgd5be1e7">
+<div id="outline-container-orgd524d4d" class="outline-4">
+<h4 id="orgd524d4d">Fine-tuning your diagrams</h4>
+<div class="outline-text-4" id="text-orgd524d4d">
 <p>
 If you are aiming for publication quality diagrams, it's important that marks all slope the same, that block is always at the same level in a region, and that you can change the appearance of marks, such as having marks with dashed instead of a solid lines.  Edit mode is for making these changes.  This mode allows you to select one or more marks or to select zones or regions and then apply changes to the selection.  Editing multiple marks at once allows them all to assume the same appearance, e.g. have the same slant, level of block, etc.
 </p>
 </div>
 </div>
-<div id="outline-container-orgc74ff91" class="outline-4">
-<h4 id="orgc74ff91">Making selections in edit mode</h4>
-<div class="outline-text-4" id="text-orgc74ff91">
+<div id="outline-container-org5a12035" class="outline-4">
+<h4 id="org5a12035">Making selections in edit mode</h4>
+<div class="outline-text-4" id="text-org5a12035">
 <p>
 Tap the <b>Edit</b> button to enter edit mode.  In this mode a single tap on one or more marks will select these marks.  A single tap on a region (including the region label) will select the region and all the marks in the region.  Dragging on an area of the ladder will select a zone and the marks within the zone.  A tap on a selected mark, region, or zone will toggle the selection.  Note that in diagrams with periods, you must tap on the mark the period is attached to, not the period itself.  You can also use the <b>Select All</b> and <b>Clear Selection</b> buttons on the toolbar to quickly select the whole ladder or clear your selection.  Once selected, a long press will bring up a context menu.  After editing, select <b>Done</b> to return to normal mode.
 </p>
 
 
-<div id="orga9210d8" class="figure">
+<div id="orga6f33bc" class="figure">
 <p><img src="./img/context_menu.png" alt="context_menu.png" />
 </p>
 <p><span class="figure-number">Figure 14: </span>Context menu in edit mode</p>
 </div>
 </div>
 </div>
-
-<div id="outline-container-org564323e" class="outline-4">
-<h4 id="org564323e">Style</h4>
-<div class="outline-text-4" id="text-org564323e">
+<div id="outline-container-orge7c755f" class="outline-4">
+<h4 id="orge7c755f">Style</h4>
+<div class="outline-text-4" id="text-orge7c755f">
 <p>
 Choose between a solid, dashed, or dotted mark line style.
 </p>
 </div>
 </div>
-<div id="outline-container-org9e46160" class="outline-4">
-<h4 id="org9e46160">Emphasis</h4>
-<div class="outline-text-4" id="text-org9e46160">
+<div id="outline-container-orgf3195b9" class="outline-4">
+<h4 id="orgf3195b9">Emphasis</h4>
+<div class="outline-text-4" id="text-orgf3195b9">
 <p>
 Marks can have a normal or bold emphasis.  Bold emphasis thickens the line of the mark.
 </p>
 </div>
 </div>
-<div id="outline-container-org278c0c6" class="outline-4">
-<h4 id="org278c0c6">Impulse origin</h4>
-<div class="outline-text-4" id="text-org278c0c6">
+<div id="outline-container-org76910e7" class="outline-4">
+<h4 id="org76910e7">Impulse origin</h4>
+<div class="outline-text-4" id="text-org76910e7">
 <p>
 Impulse origin is normally automatically determined, but you can override this and place the impulse origin proximally or distally, or have no impulse origin annotated.
 </p>
 </div>
 </div>
-<div id="outline-container-orgc54495f" class="outline-4">
-<h4 id="orgc54495f">Block</h4>
-<div class="outline-text-4" id="text-orgc54495f">
+<div id="outline-container-org550a8ee" class="outline-4">
+<h4 id="org550a8ee">Block</h4>
+<div class="outline-text-4" id="text-org550a8ee">
 <p>
 Block is normally automatically determined, but you can also override this manually.
 </p>
 </div>
 </div>
-<div id="outline-container-orge595d3f" class="outline-4">
-<h4 id="orge595d3f">Label</h4>
-<div class="outline-text-4" id="text-orge595d3f">
+<div id="outline-container-org4eb1331" class="outline-4">
+<h4 id="org4eb1331">Label</h4>
+<div class="outline-text-4" id="text-org4eb1331">
 <p>
 You can add or edit a label for individual or groups of marks.  Labels can be added to any of three positions: to the left of the mark, above the proximal end of the mark, or below the distal end of the mark.  Labels are useful for annotations such as "Slow Pathway" or pacemaker pace/sense events, such as "As" or "Vp".
 </p>
 </div>
 </div>
-<div id="outline-container-org91fbf95" class="outline-4">
-<h4 id="org91fbf95">Straighten marks</h4>
-<div class="outline-text-4" id="text-org91fbf95">
+<div id="outline-container-org63dfc88" class="outline-4">
+<h4 id="org63dfc88">Straighten marks</h4>
+<div class="outline-text-4" id="text-org63dfc88">
 <p>
 Makes selected marks vertical.
 </p>
 </div>
 </div>
-<div id="outline-container-org45322ab" class="outline-4">
-<h4 id="org45322ab">Slant marks</h4>
-<div class="outline-text-4" id="text-org45322ab">
+<div id="outline-container-orgd2e19c5" class="outline-4">
+<h4 id="orgd2e19c5">Slant marks</h4>
+<div class="outline-text-4" id="text-orgd2e19c5">
 <p>
 Applies a slant to selected marks.
 </p>
 </div>
 </div>
-<div id="outline-container-orgdf036b0" class="outline-4">
-<h4 id="orgdf036b0">Adjust mark ends</h4>
-<div class="outline-text-4" id="text-orgdf036b0">
+<div id="outline-container-org8a2cff7" class="outline-4">
+<h4 id="org8a2cff7">Adjust mark ends</h4>
+<div class="outline-text-4" id="text-org8a2cff7">
 <p>
 Fine tune where either endpoint of a mark ends in a region.
 </p>
 </div>
 </div>
-<div id="outline-container-orgfa34ea3" class="outline-4">
-<h4 id="orgfa34ea3">Move marks</h4>
-<div class="outline-text-4" id="text-orgfa34ea3">
+<div id="outline-container-orgb13b487" class="outline-4">
+<h4 id="orgb13b487">Move marks</h4>
+<div class="outline-text-4" id="text-orgb13b487">
 <p>
 Move the selected marks as a group by dragging them horizontally.
 </p>
 </div>
 </div>
-<div id="outline-container-org2742c95" class="outline-4">
-<h4 id="org2742c95">Adjust CL</h4>
-<div class="outline-text-4" id="text-org2742c95">
+<div id="outline-container-orgb1bcdb3" class="outline-4">
+<h4 id="orgb1bcdb3">Adjust CL</h4>
+<div class="outline-text-4" id="text-orgb1bcdb3">
 <p>
 Lengthen or shorten the cycle length of a group of marks.  This option forces all the selected marks to have the same cycle length.
 </p>
 </div>
 </div>
-<div id="outline-container-org0a0be07" class="outline-4">
-<h4 id="org0a0be07">Rhythm</h4>
-<div class="outline-text-4" id="text-org0a0be07">
+<div id="outline-container-org03deaf2" class="outline-4">
+<h4 id="org03deaf2">Rhythm</h4>
+<div class="outline-text-4" id="text-org03deaf2">
 <p>
 If you select a zone or region, and then bring up the context menu with a long press, you can select the <b>Rhythm</b> item to display a screen that allows you to fill the region or zone with a rhythm.
 </p>
 
 
-<div id="orgeac76dc" class="figure">
+<div id="orgff64c86" class="figure">
 <p><img src="./img/rhythm.png" alt="rhythm.png" />
 </p>
 <p><span class="figure-number">Figure 15: </span>Rhythm selection</p>
@@ -1126,87 +1089,84 @@ You can choose a regular rhythm or fibrillation.  With fibrillation you will hav
 </p>
 </div>
 </div>
-<div id="outline-container-orgeb28b82" class="outline-4">
-<h4 id="orgeb28b82">Repeat CL</h4>
-<div class="outline-text-4" id="text-orgeb28b82">
+<div id="outline-container-orge9f464b" class="outline-4">
+<h4 id="orge9f464b">Repeat CL</h4>
+<div class="outline-text-4" id="text-orge9f464b">
 <p>
 Repeat the cycle length of a pair of marks forward, backward, or bidirectionally.  This is useful in copying a repeating pattern.
 </p>
 </div>
 </div>
-<div id="outline-container-org2c35796" class="outline-4">
-<h4 id="org2c35796">Copy and paste</h4>
-<div class="outline-text-4" id="text-org2c35796">
+<div id="outline-container-orgc048b0c" class="outline-4">
+<h4 id="orgc048b0c">Copy and paste</h4>
+<div class="outline-text-4" id="text-orgc048b0c">
 <p>
-Select marks and then tap on the ladder to copy the selected marks to the point of the tap.  Use <a href="#orge03d2fe">Move marks</a> to fine tune the position of the pasted marks if necessary.
+Select marks and then tap on the ladder to copy the selected marks to the point of the tap.  Use <a href="#orgb13b487">Move marks</a> to fine tune the position of the pasted marks if necessary.
 </p>
 </div>
 </div>
-<div id="outline-container-orgdb9bfc9" class="outline-4">
-<h4 id="orgdb9bfc9">Repeat pattern</h4>
-<div class="outline-text-4" id="text-orgdb9bfc9">
+<div id="outline-container-org2936244" class="outline-4">
+<h4 id="org2936244">Repeat pattern</h4>
+<div class="outline-text-4" id="text-org2936244">
 <p>
 This option will take a selected group of marks and repeat them, with one mark acting as a <i>joining mark</i>.  This allows the repetition of complex patterns.  You single tap on the joining mark to duplicate the pattern once.  A double tap on the joining mark will duplicate the pattern until the end or begining of the ECG.  A picture is worth a lot of description.
 </p>
 
 
-<div id="org5d0a380" class="figure">
+<div id="org9f11a7b" class="figure">
 <p><img src="./img/pattern_repeat.png" alt="pattern_repeat.png" />
 </p>
 <p><span class="figure-number">Figure 16: </span>Using pattern repeat.  The top panel shows before, and the bottom after the repeat.  The joining mark is indicated by the the green arrow.  A single tap on the joining mark resulted in a duplication of the pattern.</p>
 </div>
 </div>
 </div>
-
-<div id="outline-container-org657e60b" class="outline-4">
-<h4 id="org657e60b">Unlink</h4>
-<div class="outline-text-4" id="text-org657e60b">
+<div id="outline-container-org15249a9" class="outline-4">
+<h4 id="org15249a9">Unlink</h4>
+<div class="outline-text-4" id="text-org15249a9">
 <p>
 Unlink the selected marks.
 </p>
 </div>
 </div>
-
-<div id="outline-container-org5e03f9f" class="outline-4">
-<h4 id="org5e03f9f">Snap to nearby marks</h4>
-<div class="outline-text-4" id="text-org5e03f9f">
+<div id="outline-container-orgadc067b" class="outline-4">
+<h4 id="orgadc067b">Snap to nearby marks</h4>
+<div class="outline-text-4" id="text-orgadc067b">
 <p>
 Move the endpoints of nearby marks together and link the marks.
 </p>
 </div>
 </div>
-<div id="outline-container-orge82768d" class="outline-4">
-<h4 id="orge82768d">Periods</h4>
-<div class="outline-text-4" id="text-orge82768d">
+<div id="outline-container-orgb7f8847" class="outline-4">
+<h4 id="orgb7f8847">Periods</h4>
+<div class="outline-text-4" id="text-orgb7f8847">
 </div>
 <ul class="org-ul">
-<li><a id="orgf35dac8"></a>What are periods?<br />
-<div class="outline-text-5" id="text-orgf35dac8">
+<li><a id="org08c9e03"></a>What are periods?<br />
+<div class="outline-text-5" id="text-org08c9e03">
 <p>
 In addition to showing paths of conduction, ladder diagrams are useful for indicating the state of cardiac tissue, such as the duration of refractoriness after cells are depolarized, or the timing cycles of an electronic pacemaker, such as the lower rate interval.  These various time <i>periods</i> are traditionally indicated as rectangular areas on a ladder diagram, as shown below.
 </p>
 
 
-<div id="orgc71b42e" class="figure">
+<div id="org7d59138" class="figure">
 <p><img src="./img/VVI_pacer_periods.png" alt="VVI_pacer_periods.png" />
 </p>
 <p><span class="figure-number">Figure 17: </span>VVI pacemaker periods</p>
 </div>
 
 <p>
-NB: In order for periods to appear in your diagram, <i>Show periods</i> must be turned on in <a href="#orgb3d695e">period preferences</a>, and the diagram must be calibrated.  
+NB: In order for periods to appear in your diagram, <i>Show periods</i> must be turned on in <a href="#orge524b7d">period settings</a>, and the diagram must be calibrated.  
 </p>
 </div>
 </li>
-
-<li><a id="orga5f88e3"></a>Adding/editing periods<br />
-<div class="outline-text-5" id="text-orga5f88e3">
+<li><a id="orga16ccaa"></a>Adding/editing periods<br />
+<div class="outline-text-5" id="text-orga16ccaa">
 <p>
 Use this screen to add, delete, edit, or reorder the periods for selected marks.
 </p>
 
 
-<div id="org9ebd1fa" class="figure">
+<div id="org137e5d3" class="figure">
 <p><img src="./img/add_edit_periods.png" alt="add_edit_periods.png" />
 </p>
 <p><span class="figure-number">Figure 18: </span>Add/edit periods</p>
@@ -1217,15 +1177,14 @@ Tap the <b>+</b> button to add a new period.  Tap the period in the list to edit
 </p>
 </div>
 </li>
-
-<li><a id="orga3bc549"></a>Edit a period<br />
-<div class="outline-text-5" id="text-orga3bc549">
+<li><a id="orgba05800"></a>Edit a period<br />
+<div class="outline-text-5" id="text-orgba05800">
 <p>
 If you tap on a period in the list of periods, the screen below appears.
 </p>
 
 
-<div id="org98c488b" class="figure">
+<div id="orge4fa99d" class="figure">
 <p><img src="./img/edit_period.png" alt="edit_period.png" />
 </p>
 <p><span class="figure-number">Figure 19: </span>Edit a period</p>
@@ -1236,60 +1195,59 @@ There are several characteristics of a period that can be changed here.
 </p>
 </div>
 <ul class="org-ul">
-<li><a id="org2de4875"></a>Name<br />
-<div class="outline-text-6" id="text-org2de4875">
+<li><a id="org5e3d6d8"></a>Name<br />
+<div class="outline-text-6" id="text-org5e3d6d8">
 <p>
 Give a name to a periods, such as LRI, pAV, PVARP, VERP, etc.
 </p>
 </div>
 </li>
-<li><a id="org3efebc5"></a>Duration<br />
-<div class="outline-text-6" id="text-org3efebc5">
+<li><a id="org34089fd"></a>Duration<br />
+<div class="outline-text-6" id="text-org34089fd">
 <p>
 The duration in msec of the period.
 </p>
 </div>
 </li>
-<li><a id="orgbf2e89f"></a>Color<br />
-<div class="outline-text-6" id="text-orgbf2e89f">
+<li><a id="orgab37525"></a>Color<br />
+<div class="outline-text-6" id="text-orgab37525">
 <p>
 Choose a different color for each type of period to help distinguish the periods on the ladder.
 </p>
 </div>
 </li>
-<li><a id="org0f3a5bb"></a>Resettable<br />
-<div class="outline-text-6" id="text-org0f3a5bb">
+<li><a id="org10b2a4f"></a>Resettable<br />
+<div class="outline-text-6" id="text-org10b2a4f">
 <p>
-Normally a period will not be affected by other marks that occur during it.  An example would be the ventricular blanking period, during which signals on the ventricular channel are ignored.  This would be a non-resettable period.  An example of a resettable period would be the lower rate interval of a pacemaker, where the interval is reset every time there is a sensed event.  If an interval is resettable, <a href="#orgb3d695e">period preferences</a> will determine what happens on screen.  The two options at present are for the period to be <i>clipped</i>, which means shortened so that it ends at the resetting mark, or <i>interrupted</i>, which means the remainder of the period after the resetting mark is shown with increased translucency.
+Normally a period will not be affected by other marks that occur during it.  An example would be the ventricular blanking period, during which signals on the ventricular channel are ignored.  This would be a non-resettable period.  An example of a resettable period would be the lower rate interval of a pacemaker, where the interval is reset every time there is a sensed event.  If an interval is resettable, <a href="#orge524b7d">period settings</a> will determine what happens on screen.  The two options at present are for the period to be <i>clipped</i>, which means shortened so that it ends at the resetting mark, or <i>interrupted</i>, which means the remainder of the period after the resetting mark is shown with increased translucency.
 </p>
 </div>
 </li>
-<li><a id="orgff5763b"></a>Offset<br />
-<div class="outline-text-6" id="text-orgff5763b">
+<li><a id="org8bce007"></a>Offset<br />
+<div class="outline-text-6" id="text-org8bce007">
 <p>
-Normally periods are stacked either at the top or bottom of a region, depending on <a href="#orgb3d695e">period preferences</a>.  However you can add an offset so that there is a gap either above or below a period.  You may want to offset a period which is overlapping another period, to show each period more clearly.  Use the counter to offset periods by height units, which are equal to the height of a period.
+Normally periods are stacked either at the top or bottom of a region, depending on <a href="#orge524b7d">period settings</a>.  However you can add an offset so that there is a gap either above or below a period.  You may want to offset a period which is overlapping another period, to show each period more clearly.  Use the counter to offset periods by height units, which are equal to the height of a period.
 </p>
 </div>
 </li>
 </ul>
 </li>
-<li><a id="orgad866dd"></a>Copying periods<br />
-<div class="outline-text-5" id="text-orgad866dd">
+<li><a id="org6a511cc"></a>Copying periods<br />
+<div class="outline-text-5" id="text-org6a511cc">
 <p>
 You can copy any already created period to selected marks.  First select the marks you want to copy the periods to in Edit mode, then select <b>Copy periods</b> from the <i>Periods menu</i>.  Select the periods you want to copy to the selected marks as in the screen image below.
 </p>
 
 
-<div id="org305ec12" class="figure">
+<div id="orgd5ad17d" class="figure">
 <p><img src="./img/copy_periods.png" alt="copy_periods.png" />
 </p>
 <p><span class="figure-number">Figure 20: </span>Copy periods</p>
 </div>
 </div>
 </li>
-
-<li><a id="orge182d03"></a>Delete periods<br />
-<div class="outline-text-5" id="text-orge182d03">
+<li><a id="orga5b4aec"></a>Delete periods<br />
+<div class="outline-text-5" id="text-orga5b4aec">
 <p>
 Select one or more marks and then select <b>Delete periods</b> to delete the periods associated with these marks.  This action can be undone using the <b>Undo</b> button.
 </p>
@@ -1297,221 +1255,216 @@ Select one or more marks and then select <b>Delete periods</b> to delete the per
 </li>
 </ul>
 </div>
-
-<div id="outline-container-orgd38f241" class="outline-4">
-<h4 id="orgd38f241">Delete mark(s)</h4>
-<div class="outline-text-4" id="text-orgd38f241">
+<div id="outline-container-orgb01822b" class="outline-4">
+<h4 id="orgb01822b">Delete mark(s)</h4>
+<div class="outline-text-4" id="text-orgb01822b">
 <p>
 Delete the selected marks.
 </p>
 </div>
 </div>
 </div>
-<div id="outline-container-org9e5cec0" class="outline-3">
-<h3 id="org9e5cec0">Side menu items</h3>
-<div class="outline-text-3" id="text-org9e5cec0">
+<div id="outline-container-org1de486f" class="outline-3">
+<h3 id="org1de486f">Side menu items</h3>
+<div class="outline-text-3" id="text-org1de486f">
 </div>
-<div id="outline-container-org2926e37" class="outline-4">
-<h4 id="org2926e37">Opening the side menu</h4>
-<div class="outline-text-4" id="text-org2926e37">
+<div id="outline-container-org4b5854e" class="outline-4">
+<h4 id="org4b5854e">Opening the side menu</h4>
+<div class="outline-text-4" id="text-org4b5854e">
 <p>
 Use the "hamburger" icon at the upper left of the screen to open the <i>side menu</i>.
 </p>
 
 
-<div id="org28002ca" class="figure">
+<div id="org4840c3e" class="figure">
 <p><img src="./img/side_menu.png" alt="side_menu.png" />
 </p>
 <p><span class="figure-number">Figure 21: </span>Side menu</p>
 </div>
 </div>
 </div>
-
-<div id="outline-container-org91e7d59" class="outline-4">
-<h4 id="org91e7d59">Take photo</h4>
-<div class="outline-text-4" id="text-org91e7d59">
+<div id="outline-container-org5542a75" class="outline-4">
+<h4 id="org5542a75">Take photo</h4>
+<div class="outline-text-4" id="text-org5542a75">
 <p>
 Use your camera to photograph an ECG image that will be directly imported into the diagram.  Adding a new image will blank the ladder, though you can always undo back to the previous app state.  You will need to grant permission to the app to use the camera when doing this the first time.
 </p>
 </div>
 </div>
-<div id="outline-container-orgfcb6cda" class="outline-4">
-<h4 id="orgfcb6cda">Select image</h4>
-<div class="outline-text-4" id="text-orgfcb6cda">
+<div id="outline-container-org0b8ac69" class="outline-4">
+<h4 id="org0b8ac69">Select image</h4>
+<div class="outline-text-4" id="text-org0b8ac69">
 <p>
 Select an image from the Photos app or from your local or iCloud files.  The ladder will be cleared when adding a new image.  You will need to grant access to your photos when selecting an image for the first time.
 </p>
 </div>
 </div>
-<div id="outline-container-org0510194" class="outline-4">
-<h4 id="org0510194">Select ladder</h4>
-<div class="outline-text-4" id="text-org0510194">
+<div id="outline-container-org8808c11" class="outline-4">
+<h4 id="org8808c11">Select ladder</h4>
+<div class="outline-text-4" id="text-org8808c11">
 <p>
 Use <b>Select ladder</b> to choose a ladder.  Note that when you select a ladder, it will be blank (without marks), though you can always use the <b>Undo</b> button to go back to the previous ladder.
 </p>
 
 
-<div id="org9defe14" class="figure">
+<div id="orgb54cbff" class="figure">
 <p><img src="./img/select_ladder.png" alt="select_ladder.png" />
 </p>
 <p><span class="figure-number">Figure 22: </span>Select ladder</p>
 </div>
 </div>
 </div>
-
-<div id="outline-container-orgcad1806" class="outline-4">
-<h4 id="orgcad1806">Rename diagram</h4>
-<div class="outline-text-4" id="text-orgcad1806">
+<div id="outline-container-org43bbb63" class="outline-4">
+<h4 id="org43bbb63">Rename diagram</h4>
+<div class="outline-text-4" id="text-org43bbb63">
 <p>
 Change the name of your diagram file.
 </p>
 </div>
 </div>
-<div id="outline-container-orgfd0f018" class="outline-4">
-<h4 id="orgfd0f018">Diagram info</h4>
-<div class="outline-text-4" id="text-orgfd0f018">
+<div id="outline-container-org7631777" class="outline-4">
+<h4 id="org7631777">Diagram info</h4>
+<div class="outline-text-4" id="text-org7631777">
 <p>
 Displays a dialog box with information about the current diagram.
 </p>
 </div>
 </div>
-<div id="outline-container-orgbcdcb96" class="outline-4">
-<h4 id="orgbcdcb96">Sample diagrams</h4>
-<div class="outline-text-4" id="text-orgbcdcb96">
+<div id="outline-container-org7d4e066" class="outline-4">
+<h4 id="org7d4e066">Sample diagrams</h4>
+<div class="outline-text-4" id="text-org7d4e066">
 <p>
 Select a sample diagram.
 </p>
 
 
-<div id="org61bbd0a" class="figure">
+<div id="org8b8ad5f" class="figure">
 <p><img src="./img/sample_diagrams.png" alt="sample_diagrams.png" />
 </p>
 <p><span class="figure-number">Figure 23: </span>Sample diagrams</p>
 </div>
 </div>
 </div>
-
-<div id="outline-container-org47daad1" class="outline-4">
-<h4 id="org47daad1">Lock image</h4>
-<div class="outline-text-4" id="text-org47daad1">
+<div id="outline-container-org455e1af" class="outline-4">
+<h4 id="org455e1af">Lock image</h4>
+<div class="outline-text-4" id="text-org455e1af">
 <p>
 Prevent the image from scrolling or zooming.  The same button, titled <b>Unlock image</b> is used to unlock the image.
 </p>
 </div>
 </div>
-<div id="outline-container-org12eed6a" class="outline-4">
-<h4 id="org12eed6a">Lock ladder</h4>
-<div class="outline-text-4" id="text-org12eed6a">
+<div id="outline-container-orgeb174e8" class="outline-4">
+<h4 id="orgeb174e8">Lock ladder</h4>
+<div class="outline-text-4" id="text-orgeb174e8">
 <p>
 Prevent changes to the ladder (although the <b>Undo</b> and <b>Redo</b> buttons still affect the ladder).  Unlock the ladder with the same button. 
 </p>
 </div>
 </div>
-<div id="outline-container-org1ddf460" class="outline-4">
-<h4 id="org1ddf460">Ladder editor</h4>
-<div class="outline-text-4" id="text-org1ddf460">
+<div id="outline-container-orgfac6e52" class="outline-4">
+<h4 id="orgfac6e52">Ladder editor</h4>
+<div class="outline-text-4" id="text-orgfac6e52">
 <p>
-Editing and creating ladders are discussed <a href="#org11524b3">below</a>.
+Editing and creating ladders are discussed <a href="#org7aff49b">below</a>.
 </p>
 </div>
 </div>
-<div id="outline-container-orgd4cad59" class="outline-4">
-<h4 id="orgd4cad59">Preferences</h4>
-<div class="outline-text-4" id="text-orgd4cad59">
+<div id="outline-container-org95f0b95" class="outline-4">
+<h4 id="org95f0b95">Settings</h4>
+<div class="outline-text-4" id="text-org95f0b95">
 <p>
-Preferences are discussed <a href="#org9d214ab">below</a>.
+Settings are discussed <a href="#orgdf3fce6">below</a>.
 </p>
 </div>
 </div>
-<div id="outline-container-org9a75c2f" class="outline-4">
-<h4 id="org9a75c2f">Help</h4>
-<div class="outline-text-4" id="text-org9a75c2f">
+<div id="outline-container-orgbbfca37" class="outline-4">
+<h4 id="orgbbfca37">Help</h4>
+<div class="outline-text-4" id="text-orgbbfca37">
 <p>
 View this help file.
 </p>
 </div>
 </div>
-<div id="outline-container-orgb1c17d0" class="outline-4">
-<h4 id="orgb1c17d0">About</h4>
-<div class="outline-text-4" id="text-orgb1c17d0">
+<div id="outline-container-org84e76d8" class="outline-4">
+<h4 id="org84e76d8">About</h4>
+<div class="outline-text-4" id="text-org84e76d8">
 <p>
 View a dialog with copyright and version information about the app.
 </p>
 </div>
 </div>
 </div>
-<div id="outline-container-org11524b3" class="outline-3">
-<h3 id="org11524b3">Editing and creating ladders</h3>
-<div class="outline-text-3" id="text-org11524b3">
+<div id="outline-container-org7aff49b" class="outline-3">
+<h3 id="org7aff49b">Editing and creating ladders</h3>
+<div class="outline-text-3" id="text-org7aff49b">
 <p>
 You are not limited to the default ladders that come with the app.  You can create your own ladders, change ladders, or delete those that you don't use. There are two ways to edit ladders.  If in edit mode you long press on a label of the current ladder, a menu appears that allows you to make changes to the regions and the ladder.
 </p>
 
 
-<div id="org628208c" class="figure">
+<div id="org3d8ec5a" class="figure">
 <p><img src="./img/region_menu.png" alt="region_menu.png" />
 </p>
 <p><span class="figure-number">Figure 24: </span>Region menu</p>
 </div>
 </div>
-
-<div id="outline-container-orgd5933de" class="outline-4">
-<h4 id="orgd5933de">New mark style</h4>
-<div class="outline-text-4" id="text-orgd5933de">
+<div id="outline-container-org3dae3c0" class="outline-4">
+<h4 id="org3dae3c0">New mark style</h4>
+<div class="outline-text-4" id="text-org3dae3c0">
 <p>
-Newly added marks just assume the default style set in <a href="#org9d214ab">preferences</a> but you can change this in a region to a different default.  This does not change the style of marks already present.  Use the <b>Style</b> menu item in edit mode to do that.
+Newly added marks just assume the default style set in <a href="#orgdf3fce6">settings</a> but you can change this in a region to a different default.  This does not change the style of marks already present.  Use the <b>Style</b> menu item in edit mode to do that.
 </p>
 </div>
 </div>
-<div id="outline-container-orgb72d744" class="outline-4">
-<h4 id="orgb72d744">Edit label</h4>
-<div class="outline-text-4" id="text-orgb72d744">
+<div id="outline-container-org427f4dc" class="outline-4">
+<h4 id="org427f4dc">Edit label</h4>
+<div class="outline-text-4" id="text-org427f4dc">
 <p>
 Change the region name and description.
 </p>
 </div>
 </div>
-<div id="outline-container-orgeb16e7d" class="outline-4">
-<h4 id="orgeb16e7d">Add region</h4>
-<div class="outline-text-4" id="text-orgeb16e7d">
+<div id="outline-container-orgd57fc65" class="outline-4">
+<h4 id="orgd57fc65">Add region</h4>
+<div class="outline-text-4" id="text-orgd57fc65">
 <p>
 Add a region above or below the selected region.
 </p>
 </div>
 </div>
-<div id="outline-container-orgf3a1189" class="outline-4">
-<h4 id="orgf3a1189">Remove region</h4>
-<div class="outline-text-4" id="text-orgf3a1189">
+<div id="outline-container-orge235116" class="outline-4">
+<h4 id="orge235116">Remove region</h4>
+<div class="outline-text-4" id="text-orge235116">
 <p>
 Remove a region.
 </p>
 </div>
 </div>
-<div id="outline-container-org1814095" class="outline-4">
-<h4 id="org1814095">Region height</h4>
-<div class="outline-text-4" id="text-org1814095">
+<div id="outline-container-orgac55625" class="outline-4">
+<h4 id="orgac55625">Region height</h4>
+<div class="outline-text-4" id="text-orgac55625">
 <p>
 Change the height of a region.
 </p>
 </div>
 </div>
-<div id="outline-container-org84d2fba" class="outline-4">
-<h4 id="org84d2fba">Adjust left margin</h4>
-<div class="outline-text-4" id="text-org84d2fba">
+<div id="outline-container-orgfc39a7d" class="outline-4">
+<h4 id="orgfc39a7d">Adjust left margin</h4>
+<div class="outline-text-4" id="text-orgfc39a7d">
 <p>
 Change the left margin.
 </p>
 </div>
 </div>
-<div id="outline-container-org1fce573" class="outline-4">
-<h4 id="org1fce573">The ladder editor</h4>
-<div class="outline-text-4" id="text-org1fce573">
+<div id="outline-container-orgdd48233" class="outline-4">
+<h4 id="orgdd48233">The ladder editor</h4>
+<div class="outline-text-4" id="text-orgdd48233">
 <p>
-To change or add to the templates that your ladders are based on, use the <b>Ladder editor</b> from the <a href="#org9e5cec0">side menu</a>.  The ladder editor will not affect diagrams that you have already created.  Instead it affects the templates that new ladders are based on. 
+To change or add to the templates that your ladders are based on, use the <b>Ladder editor</b> from the <a href="#org1de486f">side menu</a>.  The ladder editor will not affect diagrams that you have already created.  Instead it affects the templates that new ladders are based on. 
 </p>
 
 
-<div id="orge0908f2" class="figure">
+<div id="org796142b" class="figure">
 <p><img src="./img/ladder_editor.png" alt="ladder_editor.png" />
 </p>
 <p><span class="figure-number">Figure 25: </span>The ladder editor</p>
@@ -1522,7 +1475,7 @@ Tap <b>Edit</b> to delete ladders, or to change the order of ladders on the list
 </p>
 
 
-<div id="org5d7b851" class="figure">
+<div id="orgfff2aa1" class="figure">
 <p><img src="./img/edit_ladder.png" alt="edit_ladder.png" />
 </p>
 <p><span class="figure-number">Figure 26: </span>Edit ladder screen</p>
@@ -1533,7 +1486,7 @@ On this screen you can change the name and description of the ladder, the left m
 </p>
 
 
-<div id="org5ddf169" class="figure">
+<div id="org2d6ef89" class="figure">
 <p><img src="./img/region_editor.png" alt="region_editor.png" />
 </p>
 <p><span class="figure-number">Figure 27: </span>Region editor</p>
@@ -1545,152 +1498,151 @@ Here you can change the name, description, height, and default mark line style o
 </div>
 </div>
 </div>
-
-<div id="outline-container-org8584250" class="outline-3">
-<h3 id="org8584250">Preferences</h3>
-<div class="outline-text-3" id="text-org8584250">
+<div id="outline-container-orgdf3fce6" class="outline-3">
+<h3 id="orgdf3fce6">Settings</h3>
+<div class="outline-text-3" id="text-orgdf3fce6">
 <p>
-There are multiple app preferences that you can set, as shown below.  
+There are multiple app settings that you can set, as shown below.  
 </p>
 
 
-<div id="orgc817986" class="figure">
-<p><img src="./img/preferences.png" alt="preferences.png" />
+<div id="org6f4fe5d" class="figure">
+<p><img src="./img/settings.png" alt="settings.png" />
 </p>
-<p><span class="figure-number">Figure 28: </span>App preferences</p>
+<p><span class="figure-number">Figure 28: </span>App settings</p>
 </div>
 
 <p>
 Most are self-explanatory, and rather than list each one, we'll just provide an overview of them.
 </p>
 </div>
-<div id="outline-container-org016ef37" class="outline-4">
-<h4 id="org016ef37">Colors</h4>
-<div class="outline-text-4" id="text-org016ef37">
+<div id="outline-container-org66433f3" class="outline-4">
+<h4 id="org66433f3">Colors</h4>
+<div class="outline-text-4" id="text-org66433f3">
 <p>
 Change the colors of marks, calipers, cursors.
 </p>
 </div>
 </div>
-<div id="outline-container-org8e22333" class="outline-4">
-<h4 id="org8e22333">Line width</h4>
-<div class="outline-text-4" id="text-org8e22333">
+<div id="outline-container-orgab04f71" class="outline-4">
+<h4 id="orgab04f71">Line width</h4>
+<div class="outline-text-4" id="text-orgab04f71">
 <p>
 Change the thickness of the lines used for various elements, making them more visible.
 </p>
 </div>
 </div>
-<div id="outline-container-org28958ce" class="outline-4">
-<h4 id="org28958ce">Show impulse origin and block</h4>
-<div class="outline-text-4" id="text-org28958ce">
+<div id="outline-container-org12461f3" class="outline-4">
+<h4 id="org12461f3">Show impulse origin and block</h4>
+<div class="outline-text-4" id="text-org12461f3">
 <p>
 Turn off and on automatic detection of impulse origin and sites of block.
 </p>
 </div>
 </div>
-<div id="outline-container-orgb7678a1" class="outline-4">
-<h4 id="orgb7678a1">Measurements</h4>
-<div class="outline-text-4" id="text-orgb7678a1">
+<div id="outline-container-org0e627c9" class="outline-4">
+<h4 id="org0e627c9">Measurements</h4>
+<div class="outline-text-4" id="text-org0e627c9">
 <p>
 Show conduction times or intervals.  Even with these options selected, these measurements won't appear unless you have calibrated the diagram.
 </p>
 </div>
 </div>
-<div id="outline-container-orgb262cf8" class="outline-4">
-<h4 id="orgb262cf8">Markers</h4>
-<div class="outline-text-4" id="text-orgb262cf8">
+<div id="outline-container-orgc9a550b" class="outline-4">
+<h4 id="orgc9a550b">Markers</h4>
+<div class="outline-text-4" id="text-orgc9a550b">
 <p>
 Markers are lines that appear on the image that correspond to the two endpoints of each mark.  They are similar to the cursor, except they are aligned with every mark.  They can sometimes be useful in fine-tuning the alignment of the marks to the ECG.
 </p>
 </div>
 </div>
-<div id="outline-container-org468ae89" class="outline-4">
-<h4 id="org468ae89">Conduction direction</h4>
-<div class="outline-text-4" id="text-org468ae89">
+<div id="outline-container-orgc2f1fd1" class="outline-4">
+<h4 id="orgc2f1fd1">Conduction direction</h4>
+<div class="outline-text-4" id="text-orgc2f1fd1">
 <p>
 Show arrows pointing in the direction of conduction.
 </p>
 </div>
 </div>
-<div id="outline-container-org4e8450d" class="outline-4">
-<h4 id="org4e8450d">Default mark line style</h4>
-<div class="outline-text-4" id="text-org4e8450d">
+<div id="outline-container-orgf23c2b7" class="outline-4">
+<h4 id="orgf23c2b7">Default mark line style</h4>
+<div class="outline-text-4" id="text-orgf23c2b7">
 <p>
 The style of new marks added to the ladder.  This can be overridden by the region and mark context menus.
 </p>
 </div>
 </div>
-<div id="outline-container-org1f2a79c" class="outline-4">
-<h4 id="org1f2a79c">Label description visibility</h4>
-<div class="outline-text-4" id="text-org1f2a79c">
+<div id="outline-container-org85511ed" class="outline-4">
+<h4 id="org85511ed">Label description visibility</h4>
+<div class="outline-text-4" id="text-org85511ed">
 <p>
 Set this to show the label descriptions under the names of the region labels.
 </p>
 </div>
 </div>
-<div id="outline-container-orgb3d695e" class="outline-4">
-<h4 id="orgb3d695e">Period preferences</h4>
-<div class="outline-text-4" id="text-orgb3d695e">
+<div id="outline-container-orge524b7d" class="outline-4">
+<h4 id="orge524b7d">Period settings</h4>
+<div class="outline-text-4" id="text-orge524b7d">
 </div>
 <ul class="org-ul">
-<li><a id="orga13fe15"></a>Show periods<br />
-<div class="outline-text-5" id="text-orga13fe15">
+<li><a id="orgecf8b98"></a>Show periods<br />
+<div class="outline-text-5" id="text-orgecf8b98">
 <p>
 Switch on to make periods visible.  Note that even with this setting on, periods will only be visible if the diagram is calibrated.
 </p>
 </div>
 </li>
-<li><a id="org8f91922"></a>Position of periods in region<br />
-<div class="outline-text-5" id="text-org8f91922">
+<li><a id="orgbee14ee"></a>Position of periods in region<br />
+<div class="outline-text-5" id="text-orgbee14ee">
 <p>
 Choose whether periods are shown at the top or the bottom of a region.
 </p>
 </div>
 </li>
-<li><a id="orgfdbce64"></a>Period text justification<br />
-<div class="outline-text-5" id="text-orgfdbce64">
+<li><a id="orgeb93144"></a>Period text justification<br />
+<div class="outline-text-5" id="text-orgeb93144">
 <p>
 Left justify or center the period name in the period rectangle.
 </p>
 </div>
 </li>
-<li><a id="orgfa47952"></a>Periods overlap marks<br />
-<div class="outline-text-5" id="text-orgfa47952">
+<li><a id="orgd203c49"></a>Periods overlap marks<br />
+<div class="outline-text-5" id="text-orgd203c49">
 <p>
 Choose whether marks are visible where they intersect periods.  Note that periods with transparency will still show the underlying marks even if this is switched on.
 </p>
 </div>
 </li>
-<li><a id="orgeed8170"></a>Default period color<br />
-<div class="outline-text-5" id="text-orgeed8170">
+<li><a id="org1b95cdb"></a>Default period color<br />
+<div class="outline-text-5" id="text-org1b95cdb">
 <p>
-The default color for new periods.  Each period's color can be changed individually when adding or editing periods as described <a href="#orga5f88e3">above</a>.
+The default color for new periods.  Each period's color can be changed individually when adding or editing periods as described <a href="#orga16ccaa">above</a>.
 </p>
 </div>
 </li>
-<li><a id="org0231ef2"></a>Period transparency<br />
-<div class="outline-text-5" id="text-org0231ef2">
+<li><a id="org8f1238a"></a>Period transparency<br />
+<div class="outline-text-5" id="text-org8f1238a">
 <p>
-Transparency of the period background color.  This can be adjusted to make the period text stand out or just for esthetics.  Note that this seting affects all periods, but the transparency of the colors of individual periods can also be adjusted while <a href="#orga5f88e3">adding or editing periods</a>.
+Transparency of the period background color.  This can be adjusted to make the period text stand out or just for esthetics.  Note that this seting affects all periods, but the transparency of the colors of individual periods can also be adjusted while <a href="#orga16ccaa">adding or editing periods</a>.
 </p>
 </div>
 </li>
-<li><a id="org2eda1c7"></a>Period size<br />
-<div class="outline-text-5" id="text-org2eda1c7">
+<li><a id="orgc409cf7"></a>Period size<br />
+<div class="outline-text-5" id="text-orgc409cf7">
 <p>
 Choose between a small, medium, or large rectangle size.
 </p>
 </div>
 </li>
-<li><a id="org47b4c28"></a>Show period border<br />
-<div class="outline-text-5" id="text-org47b4c28">
+<li><a id="orgeca1473"></a>Show period border<br />
+<div class="outline-text-5" id="text-orgeca1473">
 <p>
 Switch on to draw a thin border around the period rectangle.
 </p>
 </div>
 </li>
-<li><a id="org1ef086c"></a>Reset method<br />
-<div class="outline-text-5" id="text-org1ef086c">
+<li><a id="orgda88c66"></a>Reset method<br />
+<div class="outline-text-5" id="text-orgda88c66">
 <p>
 Select whether a resettable period is <i>clipped</i> or <i>interrupted</i>.  A clipped period is shortened when a following mark impinges on it.  An interrupted period is still fully shown, but the part of the rectangle after to the resetting mark is drawn with increased transparency.
 </p>
@@ -1698,45 +1650,43 @@ Select whether a resettable period is <i>clipped</i> or <i>interrupted</i>.  A c
 </li>
 </ul>
 </div>
-
-<div id="outline-container-orgf7ff713" class="outline-4">
-<h4 id="orgf7ff713">Hide all marks</h4>
-<div class="outline-text-4" id="text-orgf7ff713">
+<div id="outline-container-org01c7e97" class="outline-4">
+<h4 id="org01c7e97">Hide all marks</h4>
+<div class="outline-text-4" id="text-org01c7e97">
 <p>
 For teaching purposes, it may be useful to hide the ladder marks and just show the ECG image.
 </p>
 </div>
 </div>
-<div id="outline-container-orgb026f90" class="outline-4">
-<h4 id="orgb026f90">Play sounds</h4>
-<div class="outline-text-4" id="text-orgb026f90">
+<div id="outline-container-org991ad0b" class="outline-4">
+<h4 id="org991ad0b">Play sounds</h4>
+<div class="outline-text-4" id="text-org991ad0b">
 <p>
 Play lock sounds when the image or ladder is locked.
 </p>
 </div>
 </div>
-<div id="outline-container-org9857dd7" class="outline-4">
-<h4 id="org9857dd7">Auto-link marks</h4>
-<div class="outline-text-4" id="text-org9857dd7">
+<div id="outline-container-org4252416" class="outline-4">
+<h4 id="org4252416">Auto-link marks</h4>
+<div class="outline-text-4" id="text-org4252416">
 <p>
 It is recommended to leave this on, so that marks are automatically linked together and "snap" into position.  If it is turned off, all mark alignment will need to be performed manually.  In addition, impulse origin and block will need to be set manually as they cannot be ascertained automatically.
 </p>
 </div>
 </div>
 </div>
-<div id="outline-container-org0969ef9" class="outline-3">
-<h3 id="org0969ef9">Diagram snapshots</h3>
-<div class="outline-text-3" id="text-org0969ef9">
+<div id="outline-container-orgc9b6a7b" class="outline-3">
+<h3 id="orgc9b6a7b">Diagram snapshots</h3>
+<div class="outline-text-3" id="text-orgc9b6a7b">
 <p>
 To create a snapshot and save it to the Photos app, simply tap the <b>Snapshot</b> button (next to the <b>X</b> button) at the top right of the screen.  If a dialog appears asking for permission to access your photo library, select access to all photos if you wish to take diagram snapshots.
 </p>
 </div>
 </div>
 </div>
-
-<div id="outline-container-org08b3875" class="outline-2">
-<h2 id="org08b3875">Known issues/bugs/limitations</h2>
-<div class="outline-text-2" id="text-org08b3875">
+<div id="outline-container-orgf15977f" class="outline-2">
+<h2 id="orgf15977f">Known issues/bugs/limitations</h2>
+<div class="outline-text-2" id="text-orgf15977f">
 <ul class="org-ul">
 <li>Drag and drop works for image files (e.g. JPG files) but not for PDF or diagram files.  This will be addressed in a future release.</li>
 <li>Calibration is not saved if there is no image file loaded.</li>
@@ -1744,20 +1694,20 @@ To create a snapshot and save it to the Photos app, simply tap the <b>Snapshot</
 </ul>
 </div>
 </div>
-<div id="outline-container-orgde8d788" class="outline-2">
-<h2 id="orgde8d788">References</h2>
-<div class="outline-text-2" id="text-orgde8d788">
+<div id="outline-container-orgb996f09" class="outline-2">
+<h2 id="orgb996f09">References</h2>
+<div class="outline-text-2" id="text-orgb996f09">
 <ul class="org-ul">
-<li>Johnson NP, Denes P. The Ladder Diagram (A 100+ Year History). American Journal of Cardiology. 2008;101(12):1801-1804. <a href="https://doi.org/10.1016/j.amjcard.2008.02.085">https://doi.org/10.1016/j.amjcard.2008.02.085</a></li>
-<li>Antiperovitch P, Luna AB de, Alencar JN de, et al. Old teaching tools should not be forgotten: The value of the Lewis ladder diagram in understanding bigeminal rhythms. Annals of Noninvasive Electrocardiology. 2019;24(5):e12685. <a href="https://doi.org/10.1111/anec.12685">https://doi.org/10.1111/anec.12685</a></li>
+<li>Johnson NP, Denes P. The Ladder Diagram (A 100+ Year History). American Journal of Cardiology. 2008;101(12):1801-1804. <a href="https://doi.org/https://doi.org/10.1016/j.amjcard.2008.02.085">doi:https://doi.org/10.1016/j.amjcard.2008.02.085</a></li>
+<li>Antiperovitch P, Luna AB de, Alencar JN de, et al. Old teaching tools should not be forgotten: The value of the Lewis ladder diagram in understanding bigeminal rhythms. Annals of Noninvasive Electrocardiology. 2019;24(5):e12685. <a href="https://doi.org/https://doi.org/10.1111/anec.12685">doi:https://doi.org/10.1111/anec.12685</a></li>
 <li><a href="https://www.epstudiossoftware.com/introducing-ep-diagram/">Blog post on EP Diagram</a></li>
 <li><a href="https://youtu.be/EyVYrOHzPjQ">Basic EP Diagram tutorial on YouTube</a></li>
 </ul>
 </div>
 </div>
-<div id="outline-container-orga26e3a9" class="outline-2">
-<h2 id="orga26e3a9">Acknowledgments</h2>
-<div class="outline-text-2" id="text-orga26e3a9">
+<div id="outline-container-org609f26c" class="outline-2">
+<h2 id="org609f26c">Acknowledgments</h2>
+<div class="outline-text-2" id="text-org609f26c">
 <ul class="org-ul">
 <li>This app was inspired by a user who complained that the <b>EP Calipers</b> app didn't have the ability to draw ladder diagrams, so it was hardly worth $1.99.  As it turns out, implementing a ladder diagram app is a non-trivial operation.  Nevertheless, thanks to this reviewer for giving me the idea.</li>
 

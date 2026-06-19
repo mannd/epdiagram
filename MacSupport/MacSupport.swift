@@ -7,11 +7,10 @@
 //
 
 import AppKit
+import UniformTypeIdentifiers
 
 class MacSupport: NSObject, SharedAppKitProtocol {
     required override init() {}
-
-    var openPanel: NSPanel?
 
 
     func setupNotifications() {
@@ -44,20 +43,6 @@ class MacSupport: NSObject, SharedAppKitProtocol {
     }
 
     @objc
-    func closeWindows(_ sender: Any) {
-        for window in NSApplication.shared.windows {
-            window.standardWindowButton(.closeButton)?.isHidden = true
-        }
-    }
-
-    @objc
-    func disableCloseButton(nsWindow: AnyObject) {
-        if let nsWindow = nsWindow as? NSWindow {
-            nsWindow.standardWindowButton(.closeButton)?.isHidden = true
-        }
-    }
-
-    @objc
     func windowClosing() {
         print("window closing")
     }
@@ -69,10 +54,10 @@ class MacSupport: NSObject, SharedAppKitProtocol {
         if let startingURL = startingURL  {
             panel.message = "EP Diagram needs permission to access the \(startingURL.lastPathComponent) folder.  It should be already selected and all you need to do is click the Select button."
         } else {
-            panel.message = "Please select a folder to add to the App Sandbox"
+            panel.message = "Please select a folder that you would like EP Diagram to have access to."
         }
         panel.canChooseFiles = false
-        panel.allowedFileTypes = ["N/A"]
+        panel.allowedContentTypes = [.folder]
         panel.allowsOtherFileTypes = false
         panel.allowsMultipleSelection = false
         panel.canChooseDirectories = true
@@ -89,5 +74,37 @@ class MacSupport: NSObject, SharedAppKitProtocol {
                 }
             }
         })
+    }
+
+    @objc func getDiagram(nsWindow: AnyObject?, startingURL: URL?, completion: ((URL)->Void)?) {
+        print("getDiagram - MacSupport startingURL", startingURL?.path ?? "nil")
+        let panel = NSOpenPanel()
+        panel.prompt = "Open"
+        panel.message = "Select an EP Diagram file."
+        panel.canChooseFiles = true
+        panel.canChooseDirectories = false
+        panel.allowedContentTypes = [UTType(exportedAs: "org.epstudios.diagram")]
+        panel.allowsOtherFileTypes = false
+        panel.allowsMultipleSelection = false
+        if let startingURL = startingURL {
+            panel.directoryURL = startingURL
+        }
+
+        let handleResponse: (NSApplication.ModalResponse) -> Void = { response in
+            print("getDiagram - MacSupport response", response.rawValue)
+            guard response == .OK, let url = panel.urls.first else {
+                print("getDiagram - MacSupport cancelled or no URL")
+                return
+            }
+            print("getDiagram - MacSupport selected URL", url.path)
+            completion?(url)
+        }
+
+        if let nsWindow = nsWindow as? NSWindow {
+            panel.beginSheetModal(for: nsWindow, completionHandler: handleResponse)
+        } else {
+            print("getDiagram - MacSupport using app-modal open panel")
+            handleResponse(panel.runModal())
+        }
     }
 }

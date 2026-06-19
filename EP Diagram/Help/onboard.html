@@ -3,16 +3,15 @@
 "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
 <head>
-<!-- 2021-04-15 Thu 10:05 -->
+<!-- 2026-06-16 Tue 12:14 -->
 <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>&lrm;</title>
-<meta name="generator" content="Org mode" />
 <meta name="author" content="David Mann" />
-<meta name="description" content="EP Diagram Help"
- />
+<meta name="description" content="EP Diagram Help" />
+<meta name="generator" content="Org Mode" />
 <style type="text/css">
- <!--/*--><![CDATA[/*><!--*/
+  #content { max-width: 60em; margin: auto; }
   .title  { text-align: center;
              margin-bottom: .2em; }
   .subtitle { text-align: center;
@@ -33,8 +32,9 @@
   #postamble p, #preamble p { font-size: 90%; margin: .2em; }
   p.verse { margin-left: 3%; }
   pre {
-    border: 1px solid #ccc;
-    box-shadow: 3px 3px 3px #eee;
+    border: 1px solid #e6e6e6;
+    border-radius: 3px;
+    background-color: #f2f2f2;
     padding: 8pt;
     font-family: monospace;
     overflow: auto;
@@ -43,21 +43,22 @@
   pre.src {
     position: relative;
     overflow: auto;
-    padding-top: 1.2em;
   }
   pre.src:before {
     display: none;
     position: absolute;
-    background-color: white;
-    top: -10px;
-    right: 10px;
+    top: -8px;
+    right: 12px;
     padding: 3px;
-    border: 1px solid black;
+    color: #555;
+    background-color: #f2f2f299;
   }
   pre.src:hover:before { display: inline; margin-top: 14px;}
   /* Languages per Org manual */
   pre.src-asymptote:before { content: 'Asymptote'; }
   pre.src-awk:before { content: 'Awk'; }
+  pre.src-authinfo::before { content: 'Authinfo'; }
+  pre.src-c:before { content: 'C'; }
   pre.src-C:before { content: 'C'; }
   /* pre.src-C++ doesn't work in CSS */
   pre.src-clojure:before { content: 'Clojure'; }
@@ -72,7 +73,7 @@
   pre.src-haskell:before { content: 'Haskell'; }
   pre.src-hledger:before { content: 'hledger'; }
   pre.src-java:before { content: 'Java'; }
-  pre.src-js:before { content: 'Javascript'; }
+  pre.src-js:before { content: 'JavaScript'; }
   pre.src-latex:before { content: 'LaTeX'; }
   pre.src-ledger:before { content: 'Ledger'; }
   pre.src-lisp:before { content: 'Lisp'; }
@@ -192,105 +193,73 @@
     { font-size: 10px; font-weight: bold; white-space: nowrap; }
   .org-info-js_search-highlight
     { background-color: #ffff00; color: #000000; font-weight: bold; }
-  .org-svg { width: 90%; }
-  /*]]>*/-->
+  .org-svg { }
 </style>
 <style media="screen" type="text/css"> img {max-width: 100%; height: auto;} </style>
 <style  type="text/css">:root { color-scheme: light dark; }</style>
 <link rel="stylesheet" type="text/css" href="./org.css"/>
-<script type="text/javascript">
-// @license magnet:?xt=urn:btih:e95b018ef3580986a04669f1b5879592219e2a7a&dn=public-domain.txt Public Domain
-<!--/*--><![CDATA[/*><!--*/
-     function CodeHighlightOn(elem, id)
-     {
-       var target = document.getElementById(id);
-       if(null != target) {
-         elem.classList.add("code-highlighted");
-         target.classList.add("code-highlighted");
-       }
-     }
-     function CodeHighlightOff(elem, id)
-     {
-       var target = document.getElementById(id);
-       if(null != target) {
-         elem.classList.remove("code-highlighted");
-         target.classList.remove("code-highlighted");
-       }
-     }
-    /*]]>*///-->
-// @license-end
-</script>
 </head>
 <body>
-<div id="content">
-
-
-<div id="outline-container-org55fe0ea" class="outline-2">
-<h2 id="org55fe0ea">Tap the "hamburger" icon to open the <i>side menu</i></h2>
-<div class="outline-text-2" id="text-org55fe0ea">
+<div id="content" class="content">
+<div id="outline-container-org8440f40" class="outline-2">
+<h2 id="org8440f40">Tap the "hamburger" icon to open the <i>side menu</i></h2>
+<div class="outline-text-2" id="text-org8440f40">
 <ul class="org-ul">
-<li>Use it to load images for analysis, change preferences, and get help!</li>
+<li>Use it to load images for analysis, change settings, and get help!</li>
 </ul>
 </div>
 </div>
-
-<div id="outline-container-org8f4c90a" class="outline-2">
-<h2 id="org8f4c90a">Scroll and zoom the image</h2>
-<div class="outline-text-2" id="text-org8f4c90a">
+<div id="outline-container-org06a2486" class="outline-2">
+<h2 id="org06a2486">Scroll and zoom the image</h2>
+<div class="outline-text-2" id="text-org06a2486">
 <ul class="org-ul">
 <li>The ladder will scroll and zoom as well.</li>
 </ul>
 </div>
 </div>
-
-<div id="outline-container-orgb060b95" class="outline-2">
-<h2 id="orgb060b95">Tap the <i>Connect</i> button to connect marks</h2>
-<div class="outline-text-2" id="text-orgb060b95">
+<div id="outline-container-orgeeec9d3" class="outline-2">
+<h2 id="orgeeec9d3">Tap the <i>Connect</i> button to connect marks</h2>
+<div class="outline-text-2" id="text-orgeeec9d3">
 <ul class="org-ul">
 <li>Tap pairs of marks, or tap a mark and an adjacent region to connect marks.</li>
 </ul>
 </div>
 </div>
-
-<div id="outline-container-org289e8d1" class="outline-2">
-<h2 id="org289e8d1">Tap the <i>Edit</i> button to edit the ladder</h2>
-<div class="outline-text-2" id="text-org289e8d1">
+<div id="outline-container-org0343caf" class="outline-2">
+<h2 id="org0343caf">Tap the <i>Edit</i> button to edit the ladder</h2>
+<div class="outline-text-2" id="text-org0343caf">
 <ul class="org-ul">
 <li>Tap or drag to select regions and marks.  Then long press on the ladder to open a menu with options to style marks, copy and paste, generate rhythms, and much more.  Also try a long press on the ladder labels and image while in Edit mode.</li>
 </ul>
 </div>
 </div>
-
-<div id="outline-container-orgec01b7d" class="outline-2">
-<h2 id="orgec01b7d">Use the <i>Calibrate</i> button to calibrate your diagram</h2>
-<div class="outline-text-2" id="text-orgec01b7d">
+<div id="outline-container-org5128a32" class="outline-2">
+<h2 id="org5128a32">Use the <i>Calibrate</i> button to calibrate your diagram</h2>
+<div class="outline-text-2" id="text-org5128a32">
 <ul class="org-ul">
-<li>Afterwards intervals and conduction times will appear on your diagram (make sure these are set to show up in <i>Preferences</i>.</li>
+<li>Afterwards intervals and conduction times will appear on your diagram (make sure these are set to show up in <i>Settings</i>).</li>
 </ul>
 </div>
 </div>
-
-<div id="outline-container-org3918178" class="outline-2">
-<h2 id="org3918178">Autosave and the <i>Undo</i> and <i>Redo</i> buttons are your friends</h2>
-<div class="outline-text-2" id="text-org3918178">
+<div id="outline-container-orgb878e1b" class="outline-2">
+<h2 id="orgb878e1b">Autosave and the <i>Undo</i> and <i>Redo</i> buttons are your friends</h2>
+<div class="outline-text-2" id="text-orgb878e1b">
 <ul class="org-ul">
 <li>All changes are automatically saved.  Use the <i>Undo</i> and <i>Redo</i> buttons to revert and restore your changes.  Tap the <i>X</i> at the top right to close your diagram.</li>
 </ul>
 </div>
 </div>
-
-<div id="outline-container-org5d54616" class="outline-2">
-<h2 id="org5d54616">Play around and experiment.</h2>
-<div class="outline-text-2" id="text-org5d54616">
+<div id="outline-container-org43a4f66" class="outline-2">
+<h2 id="org43a4f66">Play around and experiment.</h2>
+<div class="outline-text-2" id="text-org43a4f66">
 <ul class="org-ul">
 <li>There are a lot of features to explore.  Look at the <i>Help</i> option on the side menu to learn new features.</li>
 </ul>
 </div>
 </div>
-
-<div id="outline-container-orga5565ae" class="outline-2">
-<h2 id="orga5565ae">That's it!</h2>
-<div class="outline-text-2" id="text-orga5565ae">
+<div id="outline-container-org4cc1ec6" class="outline-2">
+<h2 id="org4cc1ec6">That's it!</h2>
+<div class="outline-text-2" id="text-org4cc1ec6">
 <ul class="org-ul">
 <li>Hit the back button at the top left to begin using <i>EP Diagram</i>.</li>
 </ul>

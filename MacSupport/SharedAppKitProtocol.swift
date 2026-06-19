@@ -14,8 +14,7 @@ protocol SharedAppKitProtocol: NSObjectProtocol {
 
     func sayHello()  // for testing
     func loadRecentMenu()
-    func closeWindows(_ sender: Any)
     func setupNotifications()
-    func disableCloseButton(nsWindow: AnyObject)
     func getDirectory(nsWindow: AnyObject, startingURL: URL?, completion: ((URL)->Void)?)
+    func getDiagram(nsWindow: AnyObject?, startingURL: URL?, completion: ((URL)->Void)?)
 }

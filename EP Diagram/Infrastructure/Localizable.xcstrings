@@ -1,0 +1,412 @@
+{
+  "sourceLanguage" : "en",
+  "strings" : {
+    "" : {
+
+    },
+    "%@" : {
+
+    },
+    "%lld" : {
+
+    },
+    "%lld height units" : {
+
+    },
+    "%lld points" : {
+
+    },
+    "Active region color" : {
+
+    },
+    "Apply" : {
+
+    },
+    "Arrange periods in desired order" : {
+
+    },
+    "Auto-link marks" : {
+
+    },
+    "Auto-linking is used to link marks together and to automatically determine block and impulse origin.  If you turn it off, you will need to manually align marks and annotate block and impulse origin." : {
+
+    },
+    "Bottom" : {
+
+    },
+    "Caliper" : {
+
+    },
+    "Caliper color" : {
+
+    },
+    "Caliper width = %lld" : {
+
+    },
+    "Cancel" : {
+
+    },
+    "Center" : {
+
+    },
+    "Clip" : {
+
+    },
+    "Color" : {
+
+    },
+    "Conduction direction" : {
+
+    },
+    "Connected color" : {
+
+    },
+    "Cursor" : {
+
+    },
+    "Cursor color" : {
+
+    },
+    "Cursor width = %lld" : {
+
+    },
+    "Cycle length = %lld msec" : {
+
+    },
+    "Dashed" : {
+
+    },
+    "Default mark style" : {
+
+    },
+    "Default period color" : {
+
+    },
+    "Delete marks in selected area first?" : {
+
+    },
+    "Delete preexisting marks?" : {
+
+    },
+    "Description" : {
+
+    },
+    "Distal -> Proximal" : {
+
+    },
+    "Dotted" : {
+
+    },
+    "Double line block marker" : {
+
+    },
+    "Duration (msec)" : {
+
+    },
+    "Duration: %lld msec" : {
+
+    },
+    "Edit Ladder" : {
+
+    },
+    "Edit Period" : {
+
+    },
+    "Edit Region" : {
+
+    },
+    "Fibrillation maximum cycle length = %lld msec" : {
+
+    },
+    "Fibrillation minimum cycle length = %lld msec" : {
+
+    },
+    "Fibrillation Parameters" : {
+
+    },
+    "Files" : {
+
+    },
+    "First in list is default ladder for new diagrams" : {
+
+    },
+    "Full exterior" : {
+
+    },
+    "Full interior" : {
+
+    },
+    "General" : {
+
+    },
+    "Height" : {
+
+    },
+    "Height: " : {
+
+    },
+    "Hello" : {
+
+    },
+    "Hide all marks" : {
+
+    },
+    "Hide conduction times if zero" : {
+
+    },
+    "Highlighted color" : {
+
+    },
+    "Image Source" : {
+
+    },
+    "Impulse origin contiguous with mark" : {
+
+    },
+    "Interrupt" : {
+
+    },
+    "Interval grouping" : {
+
+    },
+    "Invisible" : {
+
+    },
+    "Label description visibility" : {
+
+    },
+    "Ladder" : {
+
+    },
+    "Ladders" : {
+
+    },
+    "Large" : {
+
+    },
+    "Large impulse origin symbol" : {
+
+    },
+    "Ledder details" : {
+
+    },
+    "Left" : {
+
+    },
+    "Left margin" : {
+
+    },
+    "Line style" : {
+
+    },
+    "Line style: " : {
+
+    },
+    "Linked color" : {
+
+    },
+    "Mark" : {
+
+    },
+    "Mark width = %lld" : {
+
+    },
+    "Marker color" : {
+
+    },
+    "Marker width = %lld" : {
+
+    },
+    "Medium" : {
+
+    },
+    "Name" : {
+
+    },
+    "Name: %@" : {
+
+    },
+    "Offset" : {
+
+    },
+    "Offset: %lld" : {
+
+    },
+    "OK" : {
+
+    },
+    "Partial above" : {
+
+    },
+    "Partial below" : {
+
+    },
+    "Period" : {
+
+    },
+    "Period size" : {
+
+    },
+    "Period text justification" : {
+
+    },
+    "Period transparency" : {
+
+    },
+    "Periods" : {
+
+    },
+    "Periods overlap marks" : {
+
+    },
+    "Photos" : {
+
+    },
+    "Play sounds" : {
+
+    },
+    "Position of periods in region" : {
+
+    },
+    "Preferences" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Settings"
+          }
+        }
+      }
+    },
+    "Proximal -> Distal" : {
+
+    },
+    "Random" : {
+
+    },
+    "Randomize conduction time" : {
+
+    },
+    "Randomize impulse origin" : {
+
+    },
+    "Region" : {
+
+    },
+    "Regions" : {
+
+    },
+    "Regular Rhythm Cycle Length" : {
+
+    },
+    "Regularity" : {
+
+    },
+    "Reset method" : {
+
+    },
+    "Resettable" : {
+
+    },
+    "Resettable: %@" : {
+
+    },
+    "Rhythm Details" : {
+
+    },
+    "Right angle block marker" : {
+
+    },
+    "Sample Diagrams" : {
+
+    },
+    "Select" : {
+
+    },
+    "Select ladder" : {
+
+    },
+    "Select Ladder" : {
+
+    },
+    "Select Periods" : {
+
+    },
+    "Select periods to copy to selected marks" : {
+
+    },
+    "Selected color" : {
+
+    },
+    "Settings..." : {
+      "comment" : "Menu item title that opens the app settings window."
+    },
+    "Show block" : {
+
+    },
+    "Show conduction times (after calibration)" : {
+
+    },
+    "Show direction of conduction arrows" : {
+
+    },
+    "Show impulse origin" : {
+
+    },
+    "Show intervals (after calibration)" : {
+
+    },
+    "Show mark labels" : {
+
+    },
+    "Show markers" : {
+
+    },
+    "Show period border" : {
+
+    },
+    "Show periods" : {
+
+    },
+    "Small" : {
+
+    },
+    "Solid" : {
+
+    },
+    "Tab1" : {
+
+    },
+    "Tab2" : {
+
+    },
+    "Too Few Regions" : {
+
+    },
+    "Top" : {
+
+    },
+    "Value in msec" : {
+
+    },
+    "Visible" : {
+
+    },
+    "Visible if fits" : {
+
+    },
+    "Warning: No Auto-Linking" : {
+
+    },
+    "World" : {
+
+    },
+    "You have no saved ladders.  Use the Ladder Editor to create new ones." : {
+
+    },
+    "You have to have at least 1 region in your ladder." : {
+
+    }
+  },
+  "version" : "1.3"
+}

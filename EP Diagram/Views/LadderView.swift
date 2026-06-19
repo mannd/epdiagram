@@ -183,6 +183,14 @@ final class LadderView: ScaledView {
 
     var leftMargin: CGFloat = 0
     var viewHeight: CGFloat = 0
+    #if targetEnvironment(macCatalyst)
+    private let bottomToolbarClearance: CGFloat = 64
+    #else
+    private let bottomToolbarClearance: CGFloat = 0
+    #endif
+    private var usableViewHeight: CGFloat {
+        max(0, frame.height - bottomToolbarClearance)
+    }
     // viewMaxWidth is width of image, or width of ladderView if no image is present
     var viewMaxWidth: CGFloat = 0 {
         didSet {
@@ -223,7 +231,7 @@ final class LadderView: ScaledView {
 
     private func setupView() {
         os_log("setupView() - LadderView", log: .action, type: .info)
-        viewHeight = self.frame.height
+        viewHeight = usableViewHeight
         initializeRegions()
         removeConnectedMarks()
 
@@ -2502,7 +2510,7 @@ final class LadderView: ScaledView {
 
     func resetSize(setActiveRegion: Bool = true, width: CGFloat? = nil) {
         os_log("resetSize() - LadderView", log: .action, type: .info)
-        viewHeight = self.frame.height
+        viewHeight = usableViewHeight
         if let width = width { // only reset width if asked
             viewMaxWidth = width
         }
