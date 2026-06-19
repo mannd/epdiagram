@@ -47,6 +47,10 @@ class MacSupport: NSObject, SharedAppKitProtocol {
         print("window closing")
     }
 
+    @objc func showHelp() {
+        NSApp.showHelp(nil)
+    }
+
     @objc func getDirectory(nsWindow: AnyObject, startingURL: URL?, completion: ((URL)->Void)?) {
         guard let nsWindow = nsWindow as? NSWindow else { return }
         let panel = NSOpenPanel()

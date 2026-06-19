@@ -37,6 +37,15 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
             }
 
             #if targetEnvironment(macCatalyst)
+            if shouldShowMacWelcomeScene(for: scene, connectionOptions: connectionOptions) {
+                os_log("willConnect routing Mac welcome scene", log: .lifeCycle, type: .info)
+                scene.title = L("EP Diagram")
+                scene.userActivity = NSUserActivity(activityType: AppDelegate.mainActivityType)
+                documentBrowserViewController.restorationInfo = nil
+                window?.rootViewController = MacWelcomeViewController()
+                return
+            }
+
             let toolbar = NSToolbar(identifier: "EP Diagram Mac Toolbar")
             toolbar.delegate = self
             toolbar.displayMode = .iconOnly
@@ -65,12 +74,6 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
                 documentBrowserViewController.openDocument(url: documentURL)
             } else {
                 os_log("willConnect routing idle browser/restoration scene", log: .lifeCycle, type: .info)
-                #if targetEnvironment(macCatalyst)
-                if AppDelegate.consumeShouldDiscardNextUncommandedBrowserScene() {
-                    os_log("willConnect destroying uncommanded idle browser scene", log: .lifeCycle, type: .info)
-                    destroySceneWhenConnected(scene)
-                }
-                #endif
             }
         } else if (window?.rootViewController as? MacPreferencesViewController) != nil  {
             scene.title = L("Preferences")
@@ -122,13 +125,11 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
     }
 
     #if targetEnvironment(macCatalyst)
-    private func destroySceneWhenConnected(_ scene: UIWindowScene) {
-        DispatchQueue.main.async {
-            let options = UIWindowSceneDestructionRequestOptions()
-            UIApplication.shared.requestSceneSessionDestruction(scene.session, options: options) { error in
-                print("Error closing uncommanded browser window", error.localizedDescription)
-            }
-        }
+    private func shouldShowMacWelcomeScene(for scene: UIWindowScene, connectionOptions: UIScene.ConnectionOptions) -> Bool {
+        guard connectionOptions.urlContexts.isEmpty else { return false }
+        if shouldCreateNewDocument(from: scene.userActivity) { return false }
+        if documentURL(from: scene.userActivity) != nil { return false }
+        return true
     }
     #endif
 
@@ -136,7 +137,10 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
     func scene(_ scene: UIScene, openURLContexts URLContexts: Set<UIOpenURLContext>) {
         os_log("scene(_:openURLContexts:) - SceneDelegate session=%s count=%d", log: .lifeCycle, type: .info, scene.session.persistentIdentifier, URLContexts.count)
         guard let documentBrowserViewController = self.window?.rootViewController as? DocumentBrowserViewController else {
-            os_log("openURLContexts ignored: root is not DocumentBrowserViewController", log: .lifeCycle, type: .info)
+            os_log("openURLContexts routing file URLs to new scenes because root is not DocumentBrowserViewController", log: .lifeCycle, type: .info)
+            for context in URLContexts where context.url.isFileURL {
+                openDocumentInNewScene(url: context.url)
+            }
             return
         }
         for context in URLContexts {
