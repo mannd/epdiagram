@@ -26,6 +26,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     static let openBrowserKey = "org.epstudios.epdiagram.openBrowser"
     #if targetEnvironment(macCatalyst)
     private var hasHandledInitialCatalystActivation = false
+    private var macWelcomeSceneSessionIdentifier: String?
     #endif
 
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
@@ -392,6 +393,24 @@ extension AppDelegate {
         UIApplication.shared.requestSceneSessionDestruction(sceneSession, options: options) { error in
             print("Error closing welcome window", error.localizedDescription)
         }
+    }
+
+    func claimMacWelcomeScene(session: UISceneSession) -> Bool {
+        if let existingIdentifier = macWelcomeSceneSessionIdentifier,
+           existingIdentifier != session.persistentIdentifier {
+            os_log("claimMacWelcomeScene rejected duplicate session=%s existing=%s", log: .lifeCycle, type: .info, session.persistentIdentifier, existingIdentifier)
+            return false
+        }
+
+        macWelcomeSceneSessionIdentifier = session.persistentIdentifier
+        os_log("claimMacWelcomeScene accepted session=%s", log: .lifeCycle, type: .info, session.persistentIdentifier)
+        return true
+    }
+
+    func releaseMacWelcomeScene(session: UISceneSession) {
+        guard macWelcomeSceneSessionIdentifier == session.persistentIdentifier else { return }
+        os_log("releaseMacWelcomeScene session=%s", log: .lifeCycle, type: .info, session.persistentIdentifier)
+        macWelcomeSceneSessionIdentifier = nil
     }
 
     private func showWelcomeWindowIfNoVisibleWindows(reason: String) {

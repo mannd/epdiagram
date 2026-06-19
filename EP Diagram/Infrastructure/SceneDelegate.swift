@@ -38,6 +38,14 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
 
             #if targetEnvironment(macCatalyst)
             if shouldShowMacWelcomeScene(for: scene, connectionOptions: connectionOptions) {
+                guard let appDelegate = UIApplication.shared.delegate as? AppDelegate,
+                      appDelegate.claimMacWelcomeScene(session: session) else {
+                    os_log("willConnect destroying duplicate Mac welcome scene session=%s", log: .lifeCycle, type: .info, session.persistentIdentifier)
+                    UIApplication.shared.requestSceneSessionDestruction(session, options: nil) { error in
+                        print("Error closing duplicate welcome window", error.localizedDescription)
+                    }
+                    return
+                }
                 os_log("willConnect routing Mac welcome scene", log: .lifeCycle, type: .info)
                 scene.title = L("EP Diagram")
                 scene.userActivity = NSUserActivity(activityType: AppDelegate.mainActivityType)
@@ -131,6 +139,25 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         if documentURL(from: scene.userActivity) != nil { return false }
         return true
     }
+
+    private func refreshMacTitlebarAppearance(for scene: UIScene) {
+        guard let windowScene = scene as? UIWindowScene else {
+            os_log("refreshMacTitlebarAppearance(SceneDelegate) skipped: scene is not a UIWindowScene", log: .lifeCycle, type: .info)
+            return
+        }
+        os_log("refreshMacTitlebarAppearance(SceneDelegate) called title=%s activationState=%ld style=%ld", log: .lifeCycle, type: .info, windowScene.title, windowScene.activationState.rawValue, windowScene.traitCollection.userInterfaceStyle.rawValue)
+        windowScene.title = windowScene.title
+
+        guard let titlebar = windowScene.titlebar else {
+            os_log("refreshMacTitlebarAppearance(SceneDelegate) skipped: titlebar is nil", log: .lifeCycle, type: .info)
+            return
+        }
+        let titleVisibility = titlebar.titleVisibility
+        os_log("refreshMacTitlebarAppearance(SceneDelegate) toggling titleVisibility=%ld", log: .lifeCycle, type: .info, titleVisibility.rawValue)
+        titlebar.titleVisibility = titleVisibility == .visible ? .hidden : .visible
+        titlebar.titleVisibility = titleVisibility
+        os_log("refreshMacTitlebarAppearance(SceneDelegate) finished titleVisibility=%ld", log: .lifeCycle, type: .info, titlebar.titleVisibility.rawValue)
+    }
     #endif
 
     // Used for opening external documents (from Finder or Open Recent menu).
@@ -180,8 +207,26 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
 
     func sceneDidDisconnect(_ scene: UIScene) {
         os_log("sceneDidDisconnect(_:) - SceneDelegate, %s", log: .lifeCycle, type: .info, scene.session.persistentIdentifier)
+        #if targetEnvironment(macCatalyst)
+        if self.window?.rootViewController is MacWelcomeViewController,
+           let appDelegate = UIApplication.shared.delegate as? AppDelegate {
+            appDelegate.releaseMacWelcomeScene(session: scene.session)
+            return
+        }
+        #endif
         guard let documentBrowserViewController = self.window?.rootViewController as? DocumentBrowserViewController else { return }
         documentBrowserViewController.closeCurrentDocument()
+    }
+
+    func sceneDidBecomeActive(_ scene: UIScene) {
+        os_log("sceneDidBecomeActive(_:) - SceneDelegate", log: .lifeCycle, type: .info)
+        #if targetEnvironment(macCatalyst)
+        refreshMacTitlebarAppearance(for: scene)
+        DispatchQueue.main.async { [weak self, weak scene] in
+            guard let scene = scene else { return }
+            self?.refreshMacTitlebarAppearance(for: scene)
+        }
+        #endif
     }
 
     func sceneWillResignActive(_ scene: UIScene) {
