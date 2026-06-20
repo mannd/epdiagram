@@ -108,6 +108,7 @@
 		8ED3651F261B66A900F2A2B6 /* UIView+findViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8ED3651E261B66A900F2A2B6 /* UIView+findViewController.swift */; };
 		8ED3B1B62360DA0D00549381 /* Anchor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8ED3B1B52360DA0D00549381 /* Anchor.swift */; };
 		8ED8CBD125D8B1FF00A6234F /* DiagramModelController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8ED8CBD025D8B1FF00A6234F /* DiagramModelController.swift */; };
+		8EDC02922FE4D28800066652 /* MacWelcomeViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8EDC02912FE4D28800066652 /* MacWelcomeViewController.swift */; };
 		8EDCE17F25EC0C7400B9C7B8 /* Color.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8EDCE17E25EC0C7400B9C7B8 /* Color.swift */; };
 		8EE1411E261F9A5B00392100 /* Onboarding.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8EE1411D261F9A5B00392100 /* Onboarding.swift */; };
 		8EE141232620EED500392100 /* onboard.html in Resources */ = {isa = PBXBuildFile; fileRef = 8EE141222620EED500392100 /* onboard.html */; platformFilter = ios; };
@@ -275,6 +276,7 @@
 		8ED3651E261B66A900F2A2B6 /* UIView+findViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "UIView+findViewController.swift"; sourceTree = "<group>"; };
 		8ED3B1B52360DA0D00549381 /* Anchor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Anchor.swift; sourceTree = "<group>"; };
 		8ED8CBD025D8B1FF00A6234F /* DiagramModelController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DiagramModelController.swift; sourceTree = "<group>"; };
+		8EDC02912FE4D28800066652 /* MacWelcomeViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MacWelcomeViewController.swift; sourceTree = "<group>"; };
 		8EDCE17E25EC0C7400B9C7B8 /* Color.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Color.swift; sourceTree = "<group>"; };
 		8EE1411D261F9A5B00392100 /* Onboarding.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Onboarding.swift; sourceTree = "<group>"; };
 		8EE141222620EED500392100 /* onboard.html */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.html; path = onboard.html; sourceTree = "<group>"; };
@@ -560,6 +562,7 @@
 				8E4ACA8124478D7C00575538 /* HamburgerTableViewController.swift */,
 				8E1276DE24D4734E00AC4B8F /* HelpViewController.swift */,
 				8E33927F262E7655002A7447 /* MacPreferencesViewController.swift */,
+				8EDC02912FE4D28800066652 /* MacWelcomeViewController.swift */,
 			);
 			path = ViewControllers;
 			sourceTree = "<group>";
@@ -856,6 +859,7 @@
 				8E08CB1826E1A1AE008B730D /* Period.swift in Sources */,
 				8E982F9324EAF8B500E94F71 /* Zone.swift in Sources */,
 				8ED3651A261B664D00F2A2B6 /* LadderError.swift in Sources */,
+				8EDC02922FE4D28800066652 /* MacWelcomeViewController.swift in Sources */,
 				8E93CA9225A0227100C74F1F /* Global.swift in Sources */,
 				8E033CEA24AC10A300BE6D6F /* Calibration.swift in Sources */,
 				8E9B8045228347DE008873BB /* Region.swift in Sources */,
@@ -1088,7 +1092,7 @@
 				CODE_SIGN_IDENTITY = "Apple Development";
 				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 39;
+				CURRENT_PROJECT_VERSION = 43;
 				DERIVE_MACCATALYST_PRODUCT_BUNDLE_IDENTIFIER = NO;
 				"ENABLE_HARDENED_RUNTIME[sdk=macosx*]" = YES;
 				INFOPLIST_FILE = "EP Diagram/Info.plist";
@@ -1098,7 +1102,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 1.4.0;
+				MARKETING_VERSION = 1.4.1;
 				PRODUCT_BUNDLE_IDENTIFIER = "org.epstudios.EP-Diagram";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
@@ -1117,7 +1121,7 @@
 				CODE_SIGN_IDENTITY = "Apple Development";
 				"CODE_SIGN_IDENTITY[sdk=macosx*]" = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 39;
+				CURRENT_PROJECT_VERSION = 43;
 				DERIVE_MACCATALYST_PRODUCT_BUNDLE_IDENTIFIER = NO;
 				"ENABLE_HARDENED_RUNTIME[sdk=macosx*]" = YES;
 				INFOPLIST_FILE = "EP Diagram/Info.plist";
@@ -1127,7 +1131,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 1.4.0;
+				MARKETING_VERSION = 1.4.1;
 				PRODUCT_BUNDLE_IDENTIFIER = "org.epstudios.EP-Diagram";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";

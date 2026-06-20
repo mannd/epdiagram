@@ -66,17 +66,23 @@ Ladder diagram terminology is not standardized.  Here is a glossary of the terms
 | ⌘S  | Save screenshot |
 | ⌘Q  | Quit app        |
 ** Diagrams
+*** Welcome screen
+The initial screen on starting the app provides shortcuts to create a new diagram, open a previously created diagram, adjust app settings, or get help.
+
+#+CAPTION: Welcome screen
+[[../gfx/welcome_screen.png]]
+
 *** Creating and opening diagrams
-EP Diagram is a file based app, meaning the diagrams you create are stored on your Mac or on iCloud, and you can copy them, rename them, or delete them outside of the *EP Diagram* app.  The diagram files you create have a file extension of ~diagram~ and a specific icon and file format.  When you open the app, the initial screen is a file browser that allows you to create a new diagram or open a previously created diagram.  After starting the app, use the *File | Open...* menu item to open a previously saved diagram.  Use *File | Open Recent* to open a recently opened diagram.  Use the *File | New* menu item to create a new diagram. 
+EP Diagram is a file based app, meaning the diagrams you create are stored on your Mac or on iCloud, and you can copy them, rename them, or delete them outside of the *EP Diagram* app.  The diagram files you create have a file extension of /diagram/ and a specific icon and file format.  After starting the app, use the *File | Open...* menu item to open a previously saved diagram.  Use *File | Open Recent* to open a recently opened diagram.  Use the *File | New* menu item to create a new diagram. 
 
-#+CAPTION: File dialog. Click *New Document* to create a diagram file, or select one of your previously created diagrams.
-[[../gfx/epdiagram_files.png]]
+#+CAPTION: File dialog 
+[[../gfx/file_picker.png]]
 
-*** Dealing with the app sandbox
-Apps distributed on the Apple App Store are "sandboxed", meaning they have access only to the files in the container they run in, which is a private folder assigned to the app.  Most file operations, such as creating, opening, and saving diagrams aren't affected by this sandboxing, but certain operations, like renaming a diagram will require that you respond to an additional dialog requesting permission to access the specific folder where the operation will take place.  
+*** Dealing with file folder permissions
+Apps distributed on the Apple App Store are "sandboxed", meaning they have limited access to the file folders on your computer by default.  Most file operations, such as creating, opening, and saving diagrams aren't affected by this sandboxing, but certain operations, like renaming a diagram will require that you respond to an additional dialog requesting permission to access the specific folder where the operation will take place.  Once you grant permission to access a file folder, it should not be necessary to ask for it again.
 
 #+CAPTION: Add folder to sandbox, in this case the Diagrams folder
-[[../gfx/sandbox.png]]
+[[../gfx/new_sandbox.png]]
 
 *** Initial diagram screen
 
@@ -91,7 +97,7 @@ There is no need to specifically save changes you make to a diagram.  Every chan
 ** Images
 *** Adding an image
 **** Image types
-*EP Diagram* supports most image formats, such as ~jpg~ and ~png~, and it also can load PDF files. 
+*EP Diagram* supports most image formats, such as /jpg/ and /png/, and it also can load PDF files. 
 **** Selecting images
 Use the *Diagram | Import Image* menu item or toolbar button to import an image from the Photos app or from your files.  You can also drag and drop images files (except for PDF files) on the diagram window.  If a dialog appears asking for permission to access your files Photos app, go ahead and grant permission.  *EP Diagram* does not alter the image in your Photos app or the original image file in any way.  After selecting an image, it will appear in the top half of the diagram.
 

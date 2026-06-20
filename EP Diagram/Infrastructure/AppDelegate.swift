@@ -25,7 +25,8 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     static let createNewDocumentKey = "org.epstudios.epdiagram.createNewDocument"
     static let openBrowserKey = "org.epstudios.epdiagram.openBrowser"
     #if targetEnvironment(macCatalyst)
-    private static var shouldDiscardNextUncommandedBrowserScene = false
+    private var hasHandledInitialCatalystActivation = false
+    private var macWelcomeSceneSessionIdentifier: String?
     #endif
 
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
@@ -54,6 +55,17 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         return true
     }
 
+    func applicationDidBecomeActive(_ application: UIApplication) {
+        #if targetEnvironment(macCatalyst)
+        guard hasHandledInitialCatalystActivation else {
+            hasHandledInitialCatalystActivation = true
+            os_log("applicationDidBecomeActive skipped initial Catalyst activation", log: .lifeCycle, type: .info)
+            return
+        }
+        showWelcomeWindowIfNoVisibleWindows(reason: "applicationDidBecomeActive")
+        #endif
+    }
+
     // MARK: UISceneSession Lifecycle
     // NB: This is only called the first time an application is launched.  If there are windows
     // that are being restored by the operating system (macOS), this is skipped.
@@ -77,18 +89,6 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 
 #if targetEnvironment(macCatalyst)
 extension AppDelegate {
-
-    static func discardNextUncommandedBrowserScene() {
-        shouldDiscardNextUncommandedBrowserScene = true
-        os_log("discardNextUncommandedBrowserScene() - AppDelegate", log: .lifeCycle, type: .info)
-    }
-
-    static func consumeShouldDiscardNextUncommandedBrowserScene() -> Bool {
-        guard shouldDiscardNextUncommandedBrowserScene else { return false }
-        shouldDiscardNextUncommandedBrowserScene = false
-        os_log("consumeShouldDiscardNextUncommandedBrowserScene() - AppDelegate", log: .lifeCycle, type: .info)
-        return true
-    }
 
     // MARK: - Mac support app kit plugin
 
@@ -322,28 +322,29 @@ extension AppDelegate {
 
     @IBAction func newDiagramWindow(_ sender: Any) {
         requestNewDiagramScene()
+        closeWelcomeWindowIfOpen()
     }
 
     @IBAction func openDiagramFromMenu(_ sender: Any) {
         os_log("openDiagramFromMenu(_:) - AppDelegate", log: .lifeCycle, type: .info)
+        openDiagramWithAppKitPanel { [weak self] url in
+            os_log("openDiagramFromMenu selected URL=%s", log: .lifeCycle, type: .info, url.path)
+            self?.requestOpenDocumentScene(url: url)
+            self?.closeWelcomeWindowIfOpen()
+        }
+    }
+
+    private func openDiagramWithAppKitPanel(completion: @escaping (URL) -> Void) {
         guard let plugin = appKitPlugin else {
-            os_log("openDiagramFromMenu fallback: AppKit plugin is nil", log: .lifeCycle, type: .info)
+            os_log("openDiagramWithAppKitPanel fallback: AppKit plugin is nil", log: .lifeCycle, type: .info)
             requestMainDocumentBrowserScene(errorMessage: "Error showing open browser")
             return
         }
 
         let documentBrowserViewController = activeDocumentBrowserViewController()
-        let nsWindow = documentBrowserViewController?.view.window?.nsWindow
         let startingURL = documentBrowserViewController?.currentDocument?.fileURL.deletingLastPathComponent()
-        if nsWindow == nil {
-            os_log("openDiagramFromMenu showing app-modal open panel because no active NSWindow is available", log: .lifeCycle, type: .info)
-            Self.discardNextUncommandedBrowserScene()
-        }
-        os_log("openDiagramFromMenu showing AppKit open panel startingURL=%s", log: .lifeCycle, type: .info, startingURL?.path ?? "nil")
-        plugin.getDiagram(nsWindow: nsWindow, startingURL: startingURL) { [weak self] url in
-            os_log("openDiagramFromMenu selected URL=%s", log: .lifeCycle, type: .info, url.path)
-            self?.requestOpenDocumentScene(url: url)
-        }
+        os_log("openDiagramWithAppKitPanel showing app-modal AppKit open panel startingURL=%s", log: .lifeCycle, type: .info, startingURL?.path ?? "nil")
+        plugin.getDiagram(nsWindow: nil, startingURL: startingURL, completion: completion)
     }
 
     private func requestNewDiagramScene() {
@@ -356,7 +357,11 @@ extension AppDelegate {
     }
 
     private func requestMainDocumentBrowserScene(errorMessage: String) {
-        os_log("requestMainDocumentBrowserScene() - AppDelegate errorMessage=%s", log: .lifeCycle, type: .info, errorMessage)
+        requestMacWelcomeScene(errorMessage: errorMessage)
+    }
+
+    private func requestMacWelcomeScene(errorMessage: String) {
+        os_log("requestMacWelcomeScene() - AppDelegate errorMessage=%s", log: .lifeCycle, type: .info, errorMessage)
         let activity = NSUserActivity(activityType: Self.mainActivityType)
         activity.addUserInfoEntries(from: [Self.openBrowserKey: true])
         UIApplication.shared.requestSceneSessionActivation(nil, userActivity: activity, options: nil) { error in
@@ -371,6 +376,55 @@ extension AppDelegate {
         UIApplication.shared.requestSceneSessionActivation(nil, userActivity: activity, options: nil) { error in
             print("Error opening diagram", error.localizedDescription)
         }
+    }
+
+    func closeWelcomeWindow(containing viewController: UIViewController) {
+        guard let sceneSession = viewController.view.window?.windowScene?.session else { return }
+        closeWelcomeWindow(session: sceneSession)
+    }
+
+    private func closeWelcomeWindowIfOpen() {
+        let windowScenes = UIApplication.shared.connectedScenes.compactMap { $0 as? UIWindowScene }
+        for scene in windowScenes {
+            guard scene.windows.contains(where: { $0.rootViewController is MacWelcomeViewController }) else { continue }
+            closeWelcomeWindow(session: scene.session)
+            return
+        }
+    }
+
+    private func closeWelcomeWindow(session: UISceneSession) {
+        let options = UIWindowSceneDestructionRequestOptions()
+        UIApplication.shared.requestSceneSessionDestruction(session, options: options) { error in
+            print("Error closing welcome window", error.localizedDescription)
+        }
+    }
+
+    func claimMacWelcomeScene(session: UISceneSession) -> Bool {
+        if let existingIdentifier = macWelcomeSceneSessionIdentifier,
+           existingIdentifier != session.persistentIdentifier {
+            os_log("claimMacWelcomeScene rejected duplicate session=%s existing=%s", log: .lifeCycle, type: .info, session.persistentIdentifier, existingIdentifier)
+            return false
+        }
+
+        macWelcomeSceneSessionIdentifier = session.persistentIdentifier
+        os_log("claimMacWelcomeScene accepted session=%s", log: .lifeCycle, type: .info, session.persistentIdentifier)
+        return true
+    }
+
+    func releaseMacWelcomeScene(session: UISceneSession) {
+        guard macWelcomeSceneSessionIdentifier == session.persistentIdentifier else { return }
+        os_log("releaseMacWelcomeScene session=%s", log: .lifeCycle, type: .info, session.persistentIdentifier)
+        macWelcomeSceneSessionIdentifier = nil
+    }
+
+    private func showWelcomeWindowIfNoVisibleWindows(reason: String) {
+        let windowScenes = UIApplication.shared.connectedScenes.compactMap { $0 as? UIWindowScene }
+        let visibleWindowCount = windowScenes.reduce(0) { count, scene in
+            count + scene.windows.filter { !$0.isHidden }.count
+        }
+        os_log("showWelcomeWindowIfNoVisibleWindows reason=%s windowScenes=%d visibleWindows=%d", log: .lifeCycle, type: .info, reason, windowScenes.count, visibleWindowCount)
+        guard visibleWindowCount == 0 else { return }
+        requestMacWelcomeScene(errorMessage: "Error showing welcome window")
     }
 
     private func activeDocumentBrowserViewController() -> DocumentBrowserViewController? {
@@ -399,6 +453,11 @@ extension AppDelegate {
 
         os_log("activeDocumentBrowserViewController returning nil", log: .lifeCycle, type: .info)
         return nil
+    }
+
+    func showMacHelp(_ sender: Any) {
+        os_log("showMacHelp(_:) - AppDelegate", log: .lifeCycle, type: .info)
+        appKitPlugin?.showHelp()
     }
 
     // See https://stackoverflow.com/questions/58882047/open-a-new-window-in-mac-catalyst

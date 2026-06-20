@@ -24,9 +24,9 @@
 #+END_EXPORT
 * [[../../shrd/64.png]] Quick start
 ** Create a diagram file
-- On starting the app, a file selection screen should appear.  To create a new diagram file, click the *New Document* button at the lower left corner of the window.
+- On starting the app, a welcome screen will appear from which you can select the option to create a new diagram.
 ** Load an ECG image
-- You should at this point have a nice blank ladder diagram on your screen, with a blank space above.  This is where the ECG image goes.
+- You should at this point have a blank ladder diagram on your screen, with a blank space above.  This is where the ECG image goes.
 - Click the *Import image* toolbar button, or select the *Diagram | Import Image* main menu item to import an image from the Photos app or from your files.  You can also drag and drop an image onto the window.
 - Use gestures to pan and zoom the image, or click on the zoom toolbar buttons.
 ** Create marks
@@ -56,12 +56,11 @@
 - Change to a different ladder (*Diagram | Ladder | Select Ladder*)
 - Edit or create ladders (*Diagram | Ladder | Edit Ladder*)
 - Load sample diagrams (*Diagram | Samples*)
-- Rename the diagram (*File | Rename*)
 ** Take screenshots
-- Take screenshots using the *Screenshot* button at the upper right of the screen, next to the *Close* button.
+- Take screenshots using the *Screenshot* button at the upper right of the screen.
 ** Settings
 - Use the *EP Diagram | Settings* menu item, or type *Command-,* to open the settings window and change the overall appearance or behavior of the app.  Many aspects are customizable.
 ** File management
-- Use the *Open...*, *New*, and *Close Window* menu items in the *File* menu to open a previously created diagram, create a new diagram, or close a diagram window.
+- Use the *Open...*, *New*, and *Close Window* menu items in the *File* menu to open a previously created diagram, create a new diagram, or close a diagram window.  Use *Rename Diagram* in the *File* menu to give the diagram a memorable name. 
 ** Those are the basics
 - If you want more detail, read the [[./manual.html][EP Diagram manual]].

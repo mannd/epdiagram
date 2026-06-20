@@ -15,6 +15,7 @@ protocol SharedAppKitProtocol: NSObjectProtocol {
     func sayHello()  // for testing
     func loadRecentMenu()
     func setupNotifications()
+    func showHelp()
     func getDirectory(nsWindow: AnyObject, startingURL: URL?, completion: ((URL)->Void)?)
     func getDiagram(nsWindow: AnyObject?, startingURL: URL?, completion: ((URL)->Void)?)
 }
