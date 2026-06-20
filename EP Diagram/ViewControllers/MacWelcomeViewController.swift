@@ -58,17 +58,13 @@ class MacWelcomeViewController: UIHostingController<MacWelcomeView> {
             helpAction: {}
         ))
         rootView = MacWelcomeView(
-            newDiagramAction: { [weak self] in
+            newDiagramAction: {
                 guard let appDelegate = UIApplication.shared.delegate as? AppDelegate else { return }
                 appDelegate.newDiagramWindow(appDelegate)
-                if let self = self {
-                    appDelegate.closeWelcomeWindow(containing: self)
-                }
             },
-            openDiagramAction: { [weak self] in
-                guard let self = self,
-                      let appDelegate = UIApplication.shared.delegate as? AppDelegate else { return }
-                appDelegate.openDiagramFromWelcome(self)
+            openDiagramAction: {
+                guard let appDelegate = UIApplication.shared.delegate as? AppDelegate else { return }
+                appDelegate.openDiagramFromMenu(appDelegate)
             },
             settingsAction: { [weak self] in
                 guard let appDelegate = UIApplication.shared.delegate as? AppDelegate else { return }

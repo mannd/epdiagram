@@ -322,6 +322,7 @@ extension AppDelegate {
 
     @IBAction func newDiagramWindow(_ sender: Any) {
         requestNewDiagramScene()
+        closeWelcomeWindowIfOpen()
     }
 
     @IBAction func openDiagramFromMenu(_ sender: Any) {
@@ -329,17 +330,7 @@ extension AppDelegate {
         openDiagramWithAppKitPanel { [weak self] url in
             os_log("openDiagramFromMenu selected URL=%s", log: .lifeCycle, type: .info, url.path)
             self?.requestOpenDocumentScene(url: url)
-        }
-    }
-
-    func openDiagramFromWelcome(_ welcomeViewController: UIViewController) {
-        os_log("openDiagramFromWelcome(_:) - AppDelegate", log: .lifeCycle, type: .info)
-        openDiagramWithAppKitPanel { [weak self, weak welcomeViewController] url in
-            os_log("openDiagramFromWelcome selected URL=%s", log: .lifeCycle, type: .info, url.path)
-            self?.requestOpenDocumentScene(url: url)
-            if let welcomeViewController = welcomeViewController {
-                self?.closeWelcomeWindow(containing: welcomeViewController)
-            }
+            self?.closeWelcomeWindowIfOpen()
         }
     }
 
@@ -389,8 +380,21 @@ extension AppDelegate {
 
     func closeWelcomeWindow(containing viewController: UIViewController) {
         guard let sceneSession = viewController.view.window?.windowScene?.session else { return }
+        closeWelcomeWindow(session: sceneSession)
+    }
+
+    private func closeWelcomeWindowIfOpen() {
+        let windowScenes = UIApplication.shared.connectedScenes.compactMap { $0 as? UIWindowScene }
+        for scene in windowScenes {
+            guard scene.windows.contains(where: { $0.rootViewController is MacWelcomeViewController }) else { continue }
+            closeWelcomeWindow(session: scene.session)
+            return
+        }
+    }
+
+    private func closeWelcomeWindow(session: UISceneSession) {
         let options = UIWindowSceneDestructionRequestOptions()
-        UIApplication.shared.requestSceneSessionDestruction(sceneSession, options: options) { error in
+        UIApplication.shared.requestSceneSessionDestruction(session, options: options) { error in
             print("Error closing welcome window", error.localizedDescription)
         }
     }
