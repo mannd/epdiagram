@@ -574,6 +574,7 @@ final class DiagramViewController: UIViewController {
 
         setupNotifications()
 
+
         let firstRun: Bool = !UserDefaults.standard.bool(forKey: Preferences.notFirstRunKey)
 
         if debugForceOnboarding || firstRun { // || first run
@@ -666,6 +667,7 @@ final class DiagramViewController: UIViewController {
         super.viewWillDisappear(animated)
         // No need anymore (since iOS9) to remove notifications.
     }
+
 
     deinit {
         NotificationCenter.default.removeObserver(self)

@@ -38,6 +38,14 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
 
             #if targetEnvironment(macCatalyst)
             if shouldShowMacWelcomeScene(for: scene, connectionOptions: connectionOptions) {
+                guard let appDelegate = UIApplication.shared.delegate as? AppDelegate,
+                      appDelegate.claimMacWelcomeScene(session: session) else {
+                    os_log("willConnect destroying duplicate Mac welcome scene session=%s", log: .lifeCycle, type: .info, session.persistentIdentifier)
+                    UIApplication.shared.requestSceneSessionDestruction(session, options: nil) { error in
+                        print("Error closing duplicate welcome window", error.localizedDescription)
+                    }
+                    return
+                }
                 os_log("willConnect routing Mac welcome scene", log: .lifeCycle, type: .info)
                 scene.title = L("EP Diagram")
                 scene.userActivity = NSUserActivity(activityType: AppDelegate.mainActivityType)
@@ -131,6 +139,7 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         if documentURL(from: scene.userActivity) != nil { return false }
         return true
     }
+
     #endif
 
     // Used for opening external documents (from Finder or Open Recent menu).
@@ -138,9 +147,15 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         os_log("scene(_:openURLContexts:) - SceneDelegate session=%s count=%d", log: .lifeCycle, type: .info, scene.session.persistentIdentifier, URLContexts.count)
         guard let documentBrowserViewController = self.window?.rootViewController as? DocumentBrowserViewController else {
             os_log("openURLContexts routing file URLs to new scenes because root is not DocumentBrowserViewController", log: .lifeCycle, type: .info)
-            for context in URLContexts where context.url.isFileURL {
+            let openedFileURLs = URLContexts.filter { $0.url.isFileURL }
+            for context in openedFileURLs {
                 openDocumentInNewScene(url: context.url)
             }
+            #if targetEnvironment(macCatalyst)
+            if !openedFileURLs.isEmpty, self.window?.rootViewController is MacWelcomeViewController {
+                closeMacWelcomeScene(scene)
+            }
+            #endif
             return
         }
         for context in URLContexts {
@@ -171,6 +186,15 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         }
     }
 
+    #if targetEnvironment(macCatalyst)
+    private func closeMacWelcomeScene(_ scene: UIScene) {
+        os_log("closeMacWelcomeScene(_:) session=%s", log: .lifeCycle, type: .info, scene.session.persistentIdentifier)
+        UIApplication.shared.requestSceneSessionDestruction(scene.session, options: nil) { error in
+            print("Error closing welcome window", error.localizedDescription)
+        }
+    }
+    #endif
+
     func scene(_ scene: UIScene, continue userActivity: NSUserActivity) {
         os_log("scene(_:continue:) - SceneDelegate, %s", log: .lifeCycle, type: .info, scene.session.persistentIdentifier)
         if let window = self.window {
@@ -180,9 +204,17 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
 
     func sceneDidDisconnect(_ scene: UIScene) {
         os_log("sceneDidDisconnect(_:) - SceneDelegate, %s", log: .lifeCycle, type: .info, scene.session.persistentIdentifier)
+        #if targetEnvironment(macCatalyst)
+        if self.window?.rootViewController is MacWelcomeViewController,
+           let appDelegate = UIApplication.shared.delegate as? AppDelegate {
+            appDelegate.releaseMacWelcomeScene(session: scene.session)
+            return
+        }
+        #endif
         guard let documentBrowserViewController = self.window?.rootViewController as? DocumentBrowserViewController else { return }
         documentBrowserViewController.closeCurrentDocument()
     }
+
 
     func sceneWillResignActive(_ scene: UIScene) {
         os_log("sceneWillResignActive(_:) - SceneDeleage", log: .lifeCycle, type: .info)

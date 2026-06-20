@@ -26,6 +26,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     static let openBrowserKey = "org.epstudios.epdiagram.openBrowser"
     #if targetEnvironment(macCatalyst)
     private var hasHandledInitialCatalystActivation = false
+    private var macWelcomeSceneSessionIdentifier: String?
     #endif
 
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
@@ -321,6 +322,7 @@ extension AppDelegate {
 
     @IBAction func newDiagramWindow(_ sender: Any) {
         requestNewDiagramScene()
+        closeWelcomeWindowIfOpen()
     }
 
     @IBAction func openDiagramFromMenu(_ sender: Any) {
@@ -328,17 +330,7 @@ extension AppDelegate {
         openDiagramWithAppKitPanel { [weak self] url in
             os_log("openDiagramFromMenu selected URL=%s", log: .lifeCycle, type: .info, url.path)
             self?.requestOpenDocumentScene(url: url)
-        }
-    }
-
-    func openDiagramFromWelcome(_ welcomeViewController: UIViewController) {
-        os_log("openDiagramFromWelcome(_:) - AppDelegate", log: .lifeCycle, type: .info)
-        openDiagramWithAppKitPanel { [weak self, weak welcomeViewController] url in
-            os_log("openDiagramFromWelcome selected URL=%s", log: .lifeCycle, type: .info, url.path)
-            self?.requestOpenDocumentScene(url: url)
-            if let welcomeViewController = welcomeViewController {
-                self?.closeWelcomeWindow(containing: welcomeViewController)
-            }
+            self?.closeWelcomeWindowIfOpen()
         }
     }
 
@@ -388,10 +380,41 @@ extension AppDelegate {
 
     func closeWelcomeWindow(containing viewController: UIViewController) {
         guard let sceneSession = viewController.view.window?.windowScene?.session else { return }
+        closeWelcomeWindow(session: sceneSession)
+    }
+
+    private func closeWelcomeWindowIfOpen() {
+        let windowScenes = UIApplication.shared.connectedScenes.compactMap { $0 as? UIWindowScene }
+        for scene in windowScenes {
+            guard scene.windows.contains(where: { $0.rootViewController is MacWelcomeViewController }) else { continue }
+            closeWelcomeWindow(session: scene.session)
+            return
+        }
+    }
+
+    private func closeWelcomeWindow(session: UISceneSession) {
         let options = UIWindowSceneDestructionRequestOptions()
-        UIApplication.shared.requestSceneSessionDestruction(sceneSession, options: options) { error in
+        UIApplication.shared.requestSceneSessionDestruction(session, options: options) { error in
             print("Error closing welcome window", error.localizedDescription)
         }
+    }
+
+    func claimMacWelcomeScene(session: UISceneSession) -> Bool {
+        if let existingIdentifier = macWelcomeSceneSessionIdentifier,
+           existingIdentifier != session.persistentIdentifier {
+            os_log("claimMacWelcomeScene rejected duplicate session=%s existing=%s", log: .lifeCycle, type: .info, session.persistentIdentifier, existingIdentifier)
+            return false
+        }
+
+        macWelcomeSceneSessionIdentifier = session.persistentIdentifier
+        os_log("claimMacWelcomeScene accepted session=%s", log: .lifeCycle, type: .info, session.persistentIdentifier)
+        return true
+    }
+
+    func releaseMacWelcomeScene(session: UISceneSession) {
+        guard macWelcomeSceneSessionIdentifier == session.persistentIdentifier else { return }
+        os_log("releaseMacWelcomeScene session=%s", log: .lifeCycle, type: .info, session.persistentIdentifier)
+        macWelcomeSceneSessionIdentifier = nil
     }
 
     private func showWelcomeWindowIfNoVisibleWindows(reason: String) {

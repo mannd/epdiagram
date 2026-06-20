@@ -26,7 +26,7 @@
 * Known issues/bugs/limitations
 - If you are used to the iPad version of *EP Diagram*, there are some differences and limitations relating to porting the app to the Mac.  These include:
   - Locking and unlocking of the image and ladder are not implemented on the Mac.
-  - It is sometimes necessary to grant permission to access folders in the Mac.  If so, an open folder dialog will appear requesting the permission. 
+  - It is sometimes necessary to grant permission to access folders in the Mac.  If so, a dialog will appear requesting the permission. 
 - Drag and drop works for image files (e.g. JPG files) but not for PDF or diagram files.  
 - Complexly linked marks in the same region may not always track with the moving mark.  We can't decide if this is a bug or feature.
 - Attempting to switch diagrams by two-finger clicking on the app icon in the dock and selecting another diagram doesn't work.  This is problem with Mac Catalyst which we hope will be fixed in a later version of macOS.
