@@ -31,8 +31,22 @@ struct SampleSelector: View {
                 }
             }
             .navigationBarTitle(Text("Sample Diagrams"), displayMode: .inline)
+            #if targetEnvironment(macCatalyst)
+            .navigationBarItems(leading: backButton)
+            #endif
         }
         .navigationViewStyle(StackNavigationViewStyle())
+    }
+
+    private var backButton: some View {
+        Button(action: {
+            presentationMode.wrappedValue.dismiss()
+        }) {
+            HStack {
+                Image(systemName: "chevron.left")
+                Text("Back")
+            }
+        }
     }
 }
 
