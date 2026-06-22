@@ -41,7 +41,21 @@ struct PeriodListEditor: View {
                 }
             }
             .navigationBarTitle(Text("Periods"), displayMode: .inline)
+            #if targetEnvironment(macCatalyst)
+            .toolbar {
+                ToolbarItem(placement: .navigation) {
+                    backButton
+                }
+                ToolbarItem(placement: .navigation) {
+                    EditButton()
+                }
+                ToolbarItem(placement: .primaryAction) {
+                    addButton
+                }
+            }
+            #else
             .navigationBarItems(leading: EditButton(), trailing: addButton)
+            #endif
             .environment(\.editMode, $editMode)
             .onDisappear() {
                 if let dismissAction = dismissAction {
@@ -51,6 +65,14 @@ struct PeriodListEditor: View {
         }
         // Force full screen for this view even on iPad
         .navigationViewStyle(StackNavigationViewStyle())
+    }
+
+    private var backButton: some View {
+        Button(action: {
+            presentationMode.wrappedValue.dismiss()
+        }) {
+            Label("Back", systemImage: "chevron.left")
+        }
     }
 
     private var addButton: some View {

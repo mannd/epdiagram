@@ -42,6 +42,9 @@ struct PeriodSelector: View {
                 }
             }
             .navigationBarTitle(Text("Select Periods"), displayMode: .inline)
+            #if targetEnvironment(macCatalyst)
+            .navigationBarItems(leading: backButton)
+            #endif
             .environment(\.editMode, .constant(EditMode.active))
             .onDisappear() {
                 if let dismissAction = dismissAction {
@@ -51,6 +54,17 @@ struct PeriodSelector: View {
             }
         }
         .navigationViewStyle(StackNavigationViewStyle())
+    }
+
+    private var backButton: some View {
+        Button(action: {
+            presentationMode.wrappedValue.dismiss()
+        }) {
+            HStack {
+                Image(systemName: "chevron.left")
+                Text("Back")
+            }
+        }
     }
 }
 
