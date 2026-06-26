@@ -51,10 +51,11 @@ struct LadderSelector: View {
                 }
             }
             .navigationBarTitle(Text("Select Ladder"), displayMode: .inline)
-            .navigationBarItems(trailing: Button(action: {
-                self.selectLadder()
-                self.presentationMode.wrappedValue.dismiss() }) {
-                Text("Select") })
+            #if targetEnvironment(macCatalyst)
+            .navigationBarItems(leading: cancelButton, trailing: selectButton)
+            #else
+            .navigationBarItems(trailing: selectButton)
+            #endif
         }
     }
 
@@ -74,6 +75,23 @@ struct LadderSelector: View {
     var emptyListView: some View {
            Text("You have no saved ladders.  Use the Ladder Editor to create new ones.")
        }
+
+    private var cancelButton: some View {
+        Button(action: {
+            presentationMode.wrappedValue.dismiss()
+        }) {
+            Text("Cancel")
+        }
+    }
+
+    private var selectButton: some View {
+        Button(action: {
+            selectLadder()
+            presentationMode.wrappedValue.dismiss()
+        }) {
+            Text("Select")
+        }
+    }
 
     private func selectLadder() {
         os_log("selectLadder()", log: OSLog.action, type: .info)

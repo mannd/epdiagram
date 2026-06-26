@@ -20,10 +20,16 @@ struct PeriodSelector: View {
     @State private var selection: Set<UUID> = []
     @Environment(\.presentationMode) var presentationMode: Binding<PresentationMode>
 
+    #if targetEnvironment(macCatalyst)
+    let header_message: String = "Select periods to copy to selected marks.  Hold command to select multiple marks."
+    #else
+    let header_message: String = "Select periods to copy to selected marks"
+    #endif
+
     var body: some View {
         NavigationView {
             List(selection: $selection) {
-                Section(header: Text("Select periods to copy to selected marks")) {
+                Section(header: Text(header_message)) {
                 ForEach(periods, id: \.self.id) { period in
                     VStack(alignment: .leading) {
                         Text("Name: \(period.name)")
@@ -42,6 +48,9 @@ struct PeriodSelector: View {
                 }
             }
             .navigationBarTitle(Text("Select Periods"), displayMode: .inline)
+            #if targetEnvironment(macCatalyst)
+            .navigationBarItems(leading: backButton)
+            #endif
             .environment(\.editMode, .constant(EditMode.active))
             .onDisappear() {
                 if let dismissAction = dismissAction {
@@ -51,6 +60,17 @@ struct PeriodSelector: View {
             }
         }
         .navigationViewStyle(StackNavigationViewStyle())
+    }
+
+    private var backButton: some View {
+        Button(action: {
+            presentationMode.wrappedValue.dismiss()
+        }) {
+            HStack {
+                Image(systemName: "chevron.left")
+                Text("Back")
+            }
+        }
     }
 }
 

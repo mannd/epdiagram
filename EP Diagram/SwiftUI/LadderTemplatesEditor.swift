@@ -43,7 +43,21 @@ struct LadderTemplatesEditor: View {
 
             }
             .navigationBarTitle(Text("Ladders"), displayMode: .inline)
+            #if targetEnvironment(macCatalyst)
+            .toolbar {
+                ToolbarItem(placement: .navigation) {
+                    backButton
+                }
+                ToolbarItem(placement: .navigation) {
+                    EditButton()
+                }
+                ToolbarItem(placement: .primaryAction) {
+                    addButton
+                }
+            }
+            #else
             .navigationBarItems(leading: EditButton(), trailing: addButton)
+            #endif
             .environment(\.editMode, $editMode)
         }
         // Force full screen for this view even on iPad
@@ -57,6 +71,14 @@ struct LadderTemplatesEditor: View {
             fatalError("Ladder template doesn't exist.")
         }
         return self.$ladderTemplatesController.ladderTemplates[index]
+    }
+
+    private var backButton: some View {
+        Button(action: {
+            presentationMode.wrappedValue.dismiss()
+        }) {
+            Label("Back", systemImage: "chevron.left")
+        }
     }
 
     private var addButton: some View {
