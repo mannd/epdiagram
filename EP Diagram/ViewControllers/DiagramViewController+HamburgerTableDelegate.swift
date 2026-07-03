@@ -306,7 +306,7 @@ extension DiagramViewController: HamburgerTableDelegate, UIImagePickerController
         UserAlert.showMessage(
             viewController: self,
             title: L("EP Diagram"),
-            message: L("Copyright 2021-2022 EP Studios, Inc." + "\nVersion \(version)"))
+            message: L("Copyright 2021-2026 EP Studios, Inc." + "\nVersion \(version)"))
     }
 
     // Use to test features during development
