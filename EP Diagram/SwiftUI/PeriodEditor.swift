@@ -20,13 +20,9 @@ struct PeriodEditor: View {
     @Binding var period: Period
     @State var resettable = false
     @State var periodColor: Color = Color(Preferences.defaultPeriodColor)
+    @State private var durationText = ""
 
-    static var numberFormatter: NumberFormatter = {
-        let formatter = NumberFormatter()
-        formatter.minimum = 10
-        formatter.maximum = 2000
-        return formatter
-    }()
+    private static let durationRange: ClosedRange<CGFloat> = 10...2000
 
     var body: some View {
         NavigationView {
@@ -36,9 +32,21 @@ struct PeriodEditor: View {
                 }
                 Section(header: Text("Duration (msec)")) {
                     HStack {
-                        TextField("Value in msec", value: $period.duration, formatter: Self.numberFormatter)
-                            .keyboardType(.numbersAndPunctuation)
-                        Stepper("", value: $period.duration, in: 10...2000, step: 1).labelsHidden()
+                        TextField("Value in msec", text: $durationText, onEditingChanged: { isEditing in
+                            if !isEditing {
+                                commitDurationText()
+                            }
+                        }, onCommit: {
+                            commitDurationText()
+                        })
+                        .keyboardType(.numberPad)
+
+                        Stepper("", value: Binding(
+                            get: { period.duration },
+                            set: { newValue in
+                                stepDuration(to: newValue)
+                            }), in: Self.durationRange, step: 1)
+                        .labelsHidden()
                     }
                 }
                 Section(header: Text("Color")) {
@@ -64,8 +72,10 @@ struct PeriodEditor: View {
             }
             .onAppear {
                 periodColor = Color.convertColorName(periodColorName) ?? periodColor
+                updateDurationText()
             }
             .onDisappear() {
+                commitDurationText()
                 if let dismissAction = dismissAction {
                     dismissAction(periodsModelController.periods, false)
                 }
@@ -73,6 +83,38 @@ struct PeriodEditor: View {
             .navigationBarTitle(Text("Edit Period"), displayMode: .inline)
         }
         .navigationViewStyle(StackNavigationViewStyle())
+    }
+
+    private func commitDurationText() {
+        guard let typedDuration = parsedDurationText() else {
+            updateDurationText()
+            return
+        }
+
+        period.duration = typedDuration
+        updateDurationText()
+    }
+
+    private func stepDuration(to newValue: CGFloat) {
+        let step = newValue - period.duration
+        let baseDuration = parsedDurationText() ?? period.duration
+        let steppedDuration = min(max(baseDuration + step, Self.durationRange.lowerBound), Self.durationRange.upperBound)
+        period.duration = steppedDuration.rounded()
+        updateDurationText()
+    }
+
+    private func parsedDurationText() -> CGFloat? {
+        let trimmedText = durationText.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard let value = Double(trimmedText) else {
+            return nil
+        }
+
+        let clampedDuration = min(max(CGFloat(value), Self.durationRange.lowerBound), Self.durationRange.upperBound)
+        return clampedDuration.rounded()
+    }
+
+    private func updateDurationText() {
+        durationText = "\(Int(period.duration.rounded()))"
     }
 }
 
