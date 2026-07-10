@@ -597,7 +597,7 @@ final class DiagramViewController: UIViewController {
         #else
         navigationController?.setNavigationBarHidden(false, animated: animated)
         #endif
-        navigationController?.setToolbarHidden(false, animated: animated)
+        setToolbarsHidden(false, animated: animated)
 
         // Fixes view opening flush with left margin on Mac.
         // However, this triggers UITableViewAlertForLayoutOutsideViewHierarchy breakpoint
@@ -785,6 +785,13 @@ final class DiagramViewController: UIViewController {
         title = titleLabel
         #if targetEnvironment(macCatalyst)
         view.window?.windowScene?.title = titleLabel
+        #endif
+    }
+
+    private func setToolbarsHidden(_ hidden: Bool, animated: Bool) {
+        navigationController?.setToolbarHidden(hidden, animated: animated)
+        #if targetEnvironment(macCatalyst)
+        view.window?.windowScene?.titlebar?.toolbar?.isVisible = !hidden
         #endif
     }
 
@@ -1501,7 +1508,7 @@ final class DiagramViewController: UIViewController {
     }
 
     @IBSegueAction func showTemplateEditor(_ coder: NSCoder) -> UIViewController? {
-        navigationController?.setToolbarHidden(true, animated: false)
+        setToolbarsHidden(true, animated: false)
         let ladderTemplatesModelController = LadderTemplatesModelController(viewController: self)
         let templateEditor = LadderTemplatesEditor(ladderTemplatesController: ladderTemplatesModelController)
         let hostingController = UIHostingController(coder: coder, rootView: templateEditor)
@@ -1510,7 +1517,7 @@ final class DiagramViewController: UIViewController {
 
     @IBSegueAction func showLadderSelector(_ coder: NSCoder) -> UIViewController? {
         os_log("showLadderSelector")
-        navigationController?.setToolbarHidden(true, animated: false)
+        setToolbarsHidden(true, animated: false)
         let ladderTemplates = LadderTemplate.templates()
         let index = ladderTemplates.firstIndex(where: { ladderTemplate in
             ladderTemplate.name == ladderView.ladder.name
@@ -1522,7 +1529,7 @@ final class DiagramViewController: UIViewController {
     }
 
     @IBSegueAction func showPreferences(_ coder: NSCoder) -> UIViewController? {
-        navigationController?.setToolbarHidden(true, animated: false)
+        setToolbarsHidden(true, animated: false)
         let diagramModelController = DiagramModelController(diagram: diagram, diagramViewController: self)
         let preferencesView = PreferencesView(diagramController: diagramModelController)
         let hostingController = UIHostingController(coder: coder, rootView: preferencesView)
@@ -1530,31 +1537,34 @@ final class DiagramViewController: UIViewController {
     }
 
     @IBSegueAction func showSampleSelector(_ coder: NSCoder) -> UIViewController? {
-        navigationController?.setToolbarHidden(true, animated: false)
+        setToolbarsHidden(true, animated: false)
         let sampleSelector = SampleSelector(sampleDiagrams: Diagram.sampleDiagrams(), delegate: self)
         let hostingController = UIHostingController(coder: coder, rootView: sampleSelector)
         return hostingController
     }
 
     @IBSegueAction func performShowHelpSegueAction(_ coder: NSCoder) -> HelpViewController? {
-        navigationController?.setToolbarHidden(true, animated: false)
+        setToolbarsHidden(true, animated: false)
         let helpViewController = HelpViewController(coder: coder)
         return helpViewController
     }
 
     @IBSegueAction func performSelectPeriodsAction(_ coder: NSCoder) -> UIViewController? {
+        setToolbarsHidden(true, animated: false)
         let periodSelector = PeriodSelector(dismissAction: ladderView.setPeriods, periods: .constant(ladderView.ladder.getUniqueLadderPeriods()))
         let hostingController = UIHostingController(coder: coder, rootView: periodSelector)
         return hostingController
     }
     
     @IBSegueAction func performEditPeriodsAction(_ coder: NSCoder) -> UIViewController? {
+        setToolbarsHidden(true, animated: false)
         let periodsEditor = PeriodListEditor(dismissAction: applyPeriods, periodsModelController: ladderView.periodsModelController)
         let hostingController = UIHostingController(coder: coder, rootView: periodsEditor)
         return hostingController
     }
 
     @IBSegueAction func performRhythmSegueAction(_ coder: NSCoder) -> UIViewController? {
+        setToolbarsHidden(true, animated: false)
         // Have to provide dismiss action to SwiftUI modal view.  It won't dismiss itself.
         let rhythmView = RhythmView(dismissAction: applyRhythm(rhythm:cancel:))
         let hostingController = UIHostingController(coder: coder, rootView: rhythmView)
@@ -2134,7 +2144,7 @@ extension DiagramViewController {
 
     @IBAction func macShowCalibrateToolbar(_ sender: Any) {
         mode = .calibrate
-        navigationController?.setToolbarHidden(false, animated: true)
+        setToolbarsHidden(false, animated: true)
     }
 
     @IBAction func macSelectImage(_ sender: Any) {
