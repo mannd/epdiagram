@@ -2730,6 +2730,12 @@ final class LadderView: ScaledView {
     ///  3. All marks have the same periods, or no periods.
     ///  Throws specific error if any of the above conditions is false.
     func checkForEditablePeriods() throws {
+        guard let calibration = calibration else {
+            fatalError("calibration is nil")
+        }
+        if !calibration.isCalibrated {
+            throw LadderError.notCalibrated
+        }
         let selectedMarks = ladder.allMarksWithMode(.selected)
         selectedMarksPeriods = []
         if selectedMarks.count == 1 { // 1 mark can always be edited
@@ -2754,6 +2760,12 @@ final class LadderView: ScaledView {
     }
 
     func checkForCopyablePeriods() throws {
+        guard let calibration = calibration else {
+            fatalError("calibration is nil")
+        }
+        if !calibration.isCalibrated {
+            throw LadderError.notCalibrated
+        }
         let selectedMarks = ladder.allMarksWithMode(.selected)
         if selectedMarks.count == 0 {
             throw LadderError.noMarks
