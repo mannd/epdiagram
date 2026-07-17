@@ -2134,7 +2134,8 @@ final class LadderView: ScaledView {
     func drawPeriods(region: Region, context: CGContext) {
         guard let calibration = calibration, calibration.isCalibrated else { return }
         guard showPeriods else { return }
-        let periodHeight = periodSize.getHeight()
+        var periodHeight = periodSize.getHeight()
+        periodHeight = min(periodHeight, region.height / 4)
         for mark in region.marks {
             let numPeriods = numPeriodsFit(forMark: mark, inRegion: region, withHeight: periodHeight)
             var startY: CGFloat
