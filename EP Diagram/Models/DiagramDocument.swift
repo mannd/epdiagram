@@ -47,6 +47,18 @@ final class DiagramDocument: UIDocument {
         }
     }
 
+    override func save(to url: URL, for saveOperation: UIDocument.SaveOperation, completionHandler: ((Bool) -> Void)? = nil) {
+        let accessDirectoryURL = Sandbox.getPersistentDirectoryURL(forFileURL: url)
+        let didStartAccessing = accessDirectoryURL?.startAccessingSecurityScopedResource() ?? false
+
+        super.save(to: url, for: saveOperation) { success in
+            if didStartAccessing {
+                accessDirectoryURL?.stopAccessingSecurityScopedResource()
+            }
+            completionHandler?(success)
+        }
+    }
+
     override func handleError(_ error: Error, userInteractionPermitted: Bool) {
         super.handleError(error, userInteractionPermitted: userInteractionPermitted)
         os_log("handleError called: %s", log: OSLog.errors, type: .error, error.localizedDescription)
