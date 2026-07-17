@@ -134,7 +134,11 @@ final class DiagramViewController: UIViewController {
     var pdfToolbarButtons: [UIBarButtonItem]?
 
     weak var diagramEditorDelegate: DiagramEditorDelegate?
-    var currentDocument: DiagramDocument?
+    var currentDocument: DiagramDocument? {
+        didSet {
+            bindCurrentDocumentToSubviewUndoManagers()
+        }
+    }
 
     // PDF and launch from URL stuff
     var pdfRef: CGPDFDocument?
@@ -500,9 +504,7 @@ final class DiagramViewController: UIViewController {
         cursorView.ladderViewDelegate = ladderView
         ladderView.cursorViewDelegate = cursorView
 
-        // Current document needed to access UndoManager.
-        cursorView.currentDocument = currentDocument
-        ladderView.currentDocument = currentDocument
+        bindCurrentDocumentToSubviewUndoManagers()
 
         leftMargin = diagram.ladder.leftMargin
 
@@ -1714,6 +1716,12 @@ extension DiagramViewController {
 #endif
 
 extension DiagramViewController {
+    private func bindCurrentDocumentToSubviewUndoManagers() {
+        guard isViewLoaded else { return }
+        cursorView.currentDocument = currentDocument
+        ladderView.currentDocument = currentDocument
+    }
+
     func setupNotifications() {
         NotificationCenter.default.addObserver(self, selector: #selector(onDidUndoableAction(_:)), name: .didUndoableAction, object: nil)
         NotificationCenter.default.addObserver(self, selector: #selector(updatePreferences), name: UserDefaults.didChangeNotification, object: nil)
@@ -1968,9 +1976,11 @@ extension DiagramViewController {
                 }
 
                 renamedDocument.diagram = self.diagram
+                renamedDocument.undoManager.removeAllActions()
                 self.currentDocument = renamedDocument
                 self.diagramEditorDelegate?.diagramEditor(self, didRenameDocumentTo: renamedDocument)
                 self.setTitle()
+                self.updateUndoRedoButtons()
                 renamedDocument.updateChangeCount(.done)
                 completion?(.success(renamedURL))
             }
@@ -2023,16 +2033,9 @@ extension DiagramViewController {
 
     private func performCoordinatedRename(oldURL: URL, newURL: URL) -> Result<URL, Error> {
         let accessDirectoryURL = Sandbox.getPersistentDirectoryURL(forFileURL: oldURL)
-        let sourceURL: URL
-        let destinationURL: URL
-
-        if let accessDirectoryURL = accessDirectoryURL {
-            sourceURL = accessDirectoryURL.appendingPathComponent(oldURL.lastPathComponent)
-            destinationURL = accessDirectoryURL.appendingPathComponent(newURL.lastPathComponent)
-        } else {
-            sourceURL = oldURL
-            destinationURL = newURL
-        }
+        let sourceURL = oldURL
+        let destinationURL = oldURL.deletingLastPathComponent()
+            .appendingPathComponent(newURL.lastPathComponent)
 
         let didStartAccessing = accessDirectoryURL?.startAccessingSecurityScopedResource() ?? false
         defer {

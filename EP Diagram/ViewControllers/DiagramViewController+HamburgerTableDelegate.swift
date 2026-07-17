@@ -234,6 +234,7 @@ extension DiagramViewController: HamburgerTableDelegate, UIImagePickerController
             message +=
                 L("""
                 \nDescription = \(diagram.longDescription)
+                File path = \(currentDocument.fileURL.path)
                 Diagram file version = \(diagram.fileVersion)
                 Ladder name = \(diagram.ladder.name)
                 Ladder description = \(diagram.ladder.longDescription)
