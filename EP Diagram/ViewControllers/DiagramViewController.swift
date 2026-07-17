@@ -644,6 +644,7 @@ final class DiagramViewController: UIViewController {
         #endif
 
         setTitle()
+        setToolbarsHidden(false, animated: false)
 
         self.userActivity = self.view.window?.windowScene?.userActivity
         self.userActivity?.delegate = self
