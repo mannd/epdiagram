@@ -55,7 +55,7 @@ class ImageSaver: NSObject {
             title = L("Error Saving Snapshot")
             message = L("Make sure you have allowed EP Diagram to save to the Photos Library in the Settings app.  Error message: \(error.localizedDescription)")
         } else {
-            // See https://www.hackingwithswift.com/books/ios-swiftui/how-to-save-images-to-the-users-photo-library
+            // See https://www.hackingwithswift.com/books/ios-swiftui/how-to-/-images-to-the-users-photo-library
             os_log("Snapshot successfully saved.", log: .action, type: .info)
             title = L("Diagram Snapshot Saved")
             message = L("Diagram snapshot saved to Photo Library.")
@@ -283,10 +283,6 @@ extension DiagramViewController: HamburgerTableDelegate, UIImagePickerController
         performShowPreferencesSegue()
     }
 
-//    @IBAction func showNewPreferences(_ sender: Any) {
-//        showPreferences()
-//    }
-
     func showIOSHelp() {
         os_log("showIOSHelp()", log: OSLog.action, type: .info)
         performShowHelpSegue()
@@ -402,6 +398,8 @@ extension DiagramViewController: HamburgerTableDelegate, UIImagePickerController
         NotificationCenter.default.post(name: .didUndoableAction, object: nil)
 
         diagram.imageIsUpscaled = imageIsUpscaled
+        diagram.imageScale = scale
+        diagram.imageContentOffset = contentOffset
         let scaledImage = scaleImageForImageView(image)
         diagram.image = scaledImage
         imageView.image = scaledImage

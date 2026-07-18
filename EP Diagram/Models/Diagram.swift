@@ -36,11 +36,24 @@ struct Diagram: Codable {
     // fileVersion 1 was for app versions 1 up to 1.1.0.
     // fileVersion 2 was for app versions 1.1.0 up to 1.2.0.
     // fileVerions 3 for files created with app version of at least 1.2.0
-    @DefaultCodable<FileVersion> var fileVersion: Int = 3 // For version 1.2.0 and above.
+    @DefaultCodable<FileVersion> var fileVersion: Int = 4 // For version 1.5.0 and above
+    // Version 4 fields
+    @DefaultCodable<ImageScale> var imageScale: CGFloat = 1
+    @DefaultCodable<ImageContentOffset> var imageContentOffset: CGPoint = .zero
 
     struct FileVersion: DefaultCodableStrategy {
         typealias DefaultValue = Int
-        static var defaultValue: DefaultValue { return 3 } // == fileVersion
+        static var defaultValue: DefaultValue { return 4 } // == fileVersion
+    }
+
+    struct ImageScale: DefaultCodableStrategy {
+        typealias DefaultValue = CGFloat
+        static var defaultValue: DefaultValue { return 1 } 
+    }
+
+    struct ImageContentOffset: DefaultCodableStrategy {
+        typealias DefaultValue = CGPoint
+        static var defaultValue: DefaultValue { return .zero }
     }
 
     init(name: String?, description: String, image: UIImage?, ladder: Ladder) {

@@ -629,6 +629,9 @@ final class DiagramViewController: UIViewController {
                 restorationContentOffset.y = contentOffsetY as? CGFloat ?? 0
             }
             imageScrollView.setContentOffset(restorationContentOffset, animated: true)
+        } else {
+            imageScrollView.zoomScale = diagram.imageScale
+            imageScrollView.setContentOffset(diagram.imageContentOffset, animated: false)
         }
         super.viewWillLayoutSubviews()
     }
@@ -1135,6 +1138,7 @@ final class DiagramViewController: UIViewController {
             self.separatorView = nil
         }
         view.endEditing(true)
+        syncImageViewStateToDiagram()
         documentIsClosing = true
         currentDocument?.undoManager.removeAllActions()
         diagramEditorDelegate?.diagramEditorDidFinishEditing(self, diagram: diagram)
@@ -1745,6 +1749,18 @@ extension DiagramViewController {
         }
     }
 
+    func syncImageViewStateToDiagram() {
+        os_log("syncImageViewStateToDiagram()", log: .init(subsystem: "com.moods.Diagram", category: "DiagramViewController"))
+        diagram.imageScale = imageScrollView.zoomScale
+        diagram.imageContentOffset = imageScrollView.contentOffset
+    }
+
+    func syncImageViewStateToDiagramAndMarkChangedIfNeeded() {
+        guard diagram.imageScale != imageScrollView.zoomScale || diagram.imageContentOffset != imageScrollView.contentOffset else { return }
+        syncImageViewStateToDiagram()
+        currentDocument?.updateChangeCount(.done)
+    }
+
     @objc func didEnterBackground() {
         os_log("didEnterBackground() - DiagramViewController", log: .lifeCycle, type: .info)
     }
@@ -1856,6 +1872,7 @@ extension DiagramViewController {
         //os_log("resolveFileConflicts()", log: .action, type: .info)
         guard let currentDocument = currentDocument else { return }
         if currentDocument.documentState == UIDocument.State.inConflict {
+            syncImageViewStateToDiagram()
             // Use newest file wins strategy.
             do {
                 try NSFileVersion.removeOtherVersionsOfItem(at: currentDocument.fileURL)
@@ -1941,6 +1958,7 @@ extension DiagramViewController {
             return
         }
 
+        syncImageViewStateToDiagram()
         currentDocument?.diagram = diagram
         currentDocument?.close { [weak self] success in
             guard let self = self else { return }

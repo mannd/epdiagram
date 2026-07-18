@@ -40,6 +40,7 @@ extension DiagramViewController: UIScrollViewDelegate {
 
     fileprivate func scrollFinished() {
         os_log("scrollFinished()", log: OSLog.viewCycle, type: .info)
+        syncImageViewStateToDiagramAndMarkChangedIfNeeded()
     }
 
     func scrollViewWillBeginZooming(_ scrollView: UIScrollView, with view: UIView?) {
@@ -49,6 +50,7 @@ extension DiagramViewController: UIScrollViewDelegate {
     func scrollViewDidEndZooming(_ scrollView: UIScrollView, with view: UIView?, atScale scale: CGFloat) {
         os_log("scrollViewDidEndZooming()", log: OSLog.viewCycle, type: .info)
         scrollViewAdjustViews(scrollView)
+        syncImageViewStateToDiagramAndMarkChangedIfNeeded()
     }
 
     func scrollViewDidZoom(_ scrollView: UIScrollView) {

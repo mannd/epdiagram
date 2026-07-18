@@ -284,7 +284,11 @@ class DocumentBrowserViewController: UIDocumentBrowserViewController, UIDocument
 
     private func prepareForDocumentClose() {
         os_log("prepareForDocumentClose() clearing scene userActivity and restorationInfo", log: .lifeCycle, type: .info)
-        diagramViewController?.documentIsClosing = true
+        if let diagramViewController = diagramViewController {
+            diagramViewController.syncImageViewStateToDiagram()
+            currentDocument?.diagram = diagramViewController.diagram
+            diagramViewController.documentIsClosing = true
+        }
         view.window?.windowScene?.userActivity = NSUserActivity(activityType: AppDelegate.mainActivityType)
         restorationInfo = nil
     }
@@ -416,6 +420,7 @@ extension DocumentBrowserViewController {
     private func closeDocumentAndOpenBrowserScene() {
         os_log("closeDocumentAndOpenBrowserScene()", log: .lifeCycle, type: .info)
         if let diagramViewController = diagramViewController {
+            diagramViewController.syncImageViewStateToDiagram()
             currentDocument?.diagram = diagramViewController.diagram
         }
         closeDiagramController { [weak self] in
