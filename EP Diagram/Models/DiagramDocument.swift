@@ -25,6 +25,7 @@ final class DiagramDocument: UIDocument {
     override func contents(forType typeName: String) throws -> Any {
         let data: Data
         do {
+            diagram.fileVersion = Diagram.FileVersion.defaultValue
             let encoder = JSONEncoder()
             data = try encoder.encode(diagram)
         } catch {
