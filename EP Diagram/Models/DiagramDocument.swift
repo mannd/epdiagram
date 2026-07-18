@@ -13,6 +13,7 @@ final class DiagramDocument: UIDocument {
     static let extensionName = "diagram"
 
     var diagram = Diagram.blankDiagram()
+    var loadError: Error?
 
     deinit {
         print("*****DiagramDocument deinited*****")
@@ -38,13 +39,29 @@ final class DiagramDocument: UIDocument {
     }
 
     override func load(fromContents contents: Any, ofType typeName: String?) throws {
-        guard let data = contents as? Data else { throw DocumentError.unrecognizedContent }
+        loadError = nil
+        guard let data = contents as? Data else {
+            let error = DocumentError.unrecognizedContent
+            loadError = error
+            throw error
+        }
 
         let decoder = JSONDecoder()
         do {
+            let fileVersion = try decoder.decode(DiagramFileVersion.self, from: data).fileVersion
+            if let fileVersion = fileVersion, fileVersion > Diagram.FileVersion.defaultValue {
+                let error = DocumentError.unsupportedFileVersion(fileVersion)
+                loadError = error
+                throw error
+            }
             diagram = try decoder.decode(Diagram.self, from: data)
+        } catch let error as DocumentError {
+            loadError = error
+            throw error
         } catch {
-            throw DocumentError.corruptDocument
+            let error = DocumentError.corruptDocument
+            loadError = error
+            throw error
         }
     }
 
@@ -67,12 +84,17 @@ final class DiagramDocument: UIDocument {
     }
 }
 
-enum DocumentError: Error {
+private struct DiagramFileVersion: Decodable {
+    let fileVersion: Int?
+}
+
+enum DocumentError: LocalizedError {
     case unrecognizedContent
     case corruptDocument
     case archivingFailure
+    case unsupportedFileVersion(Int)
 
-    var localizedDescription: String {
+    var errorDescription: String? {
         switch self {
         case .unrecognizedContent:
             return L("File is an unrecognised format")
@@ -80,6 +102,8 @@ enum DocumentError: Error {
             return L("File could not be read")
         case .archivingFailure:
             return L("File could not be saved")
+        case .unsupportedFileVersion(let fileVersion):
+            return L("This diagram file uses file version \(fileVersion), but this version of EP Diagram supports file versions up to \(Diagram.FileVersion.defaultValue).")
         }
     }
 }
