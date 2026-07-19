@@ -617,7 +617,8 @@ final class DiagramViewController: UIViewController {
             return
         }
         didFirstWillLayout = true
-        if restorationInfo != nil {
+        let shouldRestoreViewState = restorationInfo?[Self.restorationDoRestorationKey] as? Bool ?? false
+        if shouldRestoreViewState {
             if let zoomScale = restorationInfo?[Self.restorationZoomKey] as? CGFloat {
                 imageScrollView.zoomScale = zoomScale
             }
@@ -1750,7 +1751,7 @@ extension DiagramViewController {
     }
 
     func syncImageViewStateToDiagram() {
-        os_log("syncImageViewStateToDiagram()", log: .init(subsystem: "com.moods.Diagram", category: "DiagramViewController"))
+        os_log("syncImageViewStateToDiagram() - DiagramViewController")
         diagram.imageScale = imageScrollView.zoomScale
         diagram.imageContentOffset = imageScrollView.contentOffset
     }
