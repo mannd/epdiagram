@@ -609,6 +609,8 @@ final class DiagramViewController: UIViewController {
     }
 
     var didFirstWillLayout = false
+    private var didApplyInitialImageViewState = false
+
     override func viewWillLayoutSubviews() {
         os_log("viewWillLayoutSubviews() - DiagramViewController", log: OSLog.viewCycle, type: .info)
         getImageViewHeight()
@@ -617,19 +619,6 @@ final class DiagramViewController: UIViewController {
             return
         }
         didFirstWillLayout = true
-        if restorationInfo != nil {
-            if let zoomScale = restorationInfo?[Self.restorationZoomKey] as? CGFloat {
-                imageScrollView.zoomScale = zoomScale
-            }
-            var restorationContentOffset = CGPoint()
-            if let contentOffsetX = restorationInfo?[Self.restorationContentOffsetXKey] {
-                restorationContentOffset.x = (contentOffsetX as? CGFloat ?? 0) * imageScrollView.zoomScale
-            }
-            if let contentOffsetY = restorationInfo?[Self.restorationContentOffsetYKey] {
-                restorationContentOffset.y = contentOffsetY as? CGFloat ?? 0
-            }
-            imageScrollView.setContentOffset(restorationContentOffset, animated: true)
-        }
         super.viewWillLayoutSubviews()
     }
 
@@ -650,7 +639,6 @@ final class DiagramViewController: UIViewController {
 
         self.userActivity = self.view.window?.windowScene?.userActivity
         self.userActivity?.delegate = self
-        self.restorationInfo = nil
         // See https://github.com/mattneub/Programming-iOS-Book-Examples/blob/master/bk2ch06p357StateSaveAndRestoreWithNSUserActivity/ch19p626pageController/SceneDelegate.swift
 
         UIView.animate(withDuration: 0.4) {
@@ -664,6 +652,8 @@ final class DiagramViewController: UIViewController {
         updateToolbarButtons()
         updateUndoRedoButtons()
         resetViews(setActiveRegion: false)
+        applyInitialImageViewStateIfNeeded()
+        self.restorationInfo = nil
     }
 
     override func viewWillDisappear(_ animated: Bool) {
@@ -1135,6 +1125,7 @@ final class DiagramViewController: UIViewController {
             self.separatorView = nil
         }
         view.endEditing(true)
+        syncImageViewStateToDiagram()
         documentIsClosing = true
         currentDocument?.undoManager.removeAllActions()
         diagramEditorDelegate?.diagramEditorDidFinishEditing(self, diagram: diagram)
@@ -1745,6 +1736,42 @@ extension DiagramViewController {
         }
     }
 
+    private func applyInitialImageViewStateIfNeeded() {
+        guard !didApplyInitialImageViewState else { return }
+        didApplyInitialImageViewState = true
+
+        let shouldRestoreViewState = restorationInfo?[Self.restorationDoRestorationKey] as? Bool ?? false
+        if shouldRestoreViewState {
+            if let zoomScale = restorationInfo?[Self.restorationZoomKey] as? CGFloat {
+                imageScrollView.zoomScale = zoomScale
+            }
+            var restorationContentOffset = CGPoint()
+            if let contentOffsetX = restorationInfo?[Self.restorationContentOffsetXKey] {
+                restorationContentOffset.x = (contentOffsetX as? CGFloat ?? 0) * imageScrollView.zoomScale
+            }
+            if let contentOffsetY = restorationInfo?[Self.restorationContentOffsetYKey] {
+                restorationContentOffset.y = contentOffsetY as? CGFloat ?? 0
+            }
+            imageScrollView.setContentOffset(restorationContentOffset, animated: false)
+        } else {
+            imageScrollView.zoomScale = diagram.imageScale
+            imageScrollView.setContentOffset(diagram.imageContentOffset, animated: false)
+        }
+        scrollViewAdjustViews(imageScrollView)
+    }
+
+    func syncImageViewStateToDiagram() {
+        os_log("syncImageViewStateToDiagram() - DiagramViewController")
+        diagram.imageScale = imageScrollView.zoomScale
+        diagram.imageContentOffset = imageScrollView.contentOffset
+    }
+
+    func syncImageViewStateToDiagramAndMarkChangedIfNeeded() {
+        guard diagram.imageScale != imageScrollView.zoomScale || diagram.imageContentOffset != imageScrollView.contentOffset else { return }
+        syncImageViewStateToDiagram()
+        currentDocument?.updateChangeCount(.done)
+    }
+
     @objc func didEnterBackground() {
         os_log("didEnterBackground() - DiagramViewController", log: .lifeCycle, type: .info)
     }
@@ -1856,6 +1883,7 @@ extension DiagramViewController {
         //os_log("resolveFileConflicts()", log: .action, type: .info)
         guard let currentDocument = currentDocument else { return }
         if currentDocument.documentState == UIDocument.State.inConflict {
+            syncImageViewStateToDiagram()
             // Use newest file wins strategy.
             do {
                 try NSFileVersion.removeOtherVersionsOfItem(at: currentDocument.fileURL)
@@ -1941,6 +1969,7 @@ extension DiagramViewController {
             return
         }
 
+        syncImageViewStateToDiagram()
         currentDocument?.diagram = diagram
         currentDocument?.close { [weak self] success in
             guard let self = self else { return }
