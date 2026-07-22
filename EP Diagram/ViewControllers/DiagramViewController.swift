@@ -134,7 +134,11 @@ final class DiagramViewController: UIViewController {
     var pdfToolbarButtons: [UIBarButtonItem]?
 
     weak var diagramEditorDelegate: DiagramEditorDelegate?
-    var currentDocument: DiagramDocument?
+    var currentDocument: DiagramDocument? {
+        didSet {
+            bindCurrentDocumentToSubviewUndoManagers()
+        }
+    }
 
     // PDF and launch from URL stuff
     var pdfRef: CGPDFDocument?
@@ -500,9 +504,7 @@ final class DiagramViewController: UIViewController {
         cursorView.ladderViewDelegate = ladderView
         ladderView.cursorViewDelegate = cursorView
 
-        // Current document needed to access UndoManager.
-        cursorView.currentDocument = currentDocument
-        ladderView.currentDocument = currentDocument
+        bindCurrentDocumentToSubviewUndoManagers()
 
         leftMargin = diagram.ladder.leftMargin
 
@@ -597,7 +599,7 @@ final class DiagramViewController: UIViewController {
         #else
         navigationController?.setNavigationBarHidden(false, animated: animated)
         #endif
-        navigationController?.setToolbarHidden(false, animated: animated)
+        setToolbarsHidden(false, animated: animated)
 
         // Fixes view opening flush with left margin on Mac.
         // However, this triggers UITableViewAlertForLayoutOutsideViewHierarchy breakpoint
@@ -607,6 +609,8 @@ final class DiagramViewController: UIViewController {
     }
 
     var didFirstWillLayout = false
+    private var didApplyInitialImageViewState = false
+
     override func viewWillLayoutSubviews() {
         os_log("viewWillLayoutSubviews() - DiagramViewController", log: OSLog.viewCycle, type: .info)
         getImageViewHeight()
@@ -615,19 +619,6 @@ final class DiagramViewController: UIViewController {
             return
         }
         didFirstWillLayout = true
-        if restorationInfo != nil {
-            if let zoomScale = restorationInfo?[Self.restorationZoomKey] as? CGFloat {
-                imageScrollView.zoomScale = zoomScale
-            }
-            var restorationContentOffset = CGPoint()
-            if let contentOffsetX = restorationInfo?[Self.restorationContentOffsetXKey] {
-                restorationContentOffset.x = (contentOffsetX as? CGFloat ?? 0) * imageScrollView.zoomScale
-            }
-            if let contentOffsetY = restorationInfo?[Self.restorationContentOffsetYKey] {
-                restorationContentOffset.y = contentOffsetY as? CGFloat ?? 0
-            }
-            imageScrollView.setContentOffset(restorationContentOffset, animated: true)
-        }
         super.viewWillLayoutSubviews()
     }
 
@@ -644,10 +635,10 @@ final class DiagramViewController: UIViewController {
         #endif
 
         setTitle()
+        setToolbarsHidden(false, animated: false)
 
         self.userActivity = self.view.window?.windowScene?.userActivity
         self.userActivity?.delegate = self
-        self.restorationInfo = nil
         // See https://github.com/mattneub/Programming-iOS-Book-Examples/blob/master/bk2ch06p357StateSaveAndRestoreWithNSUserActivity/ch19p626pageController/SceneDelegate.swift
 
         UIView.animate(withDuration: 0.4) {
@@ -661,6 +652,8 @@ final class DiagramViewController: UIViewController {
         updateToolbarButtons()
         updateUndoRedoButtons()
         resetViews(setActiveRegion: false)
+        applyInitialImageViewStateIfNeeded()
+        self.restorationInfo = nil
     }
 
     override func viewWillDisappear(_ animated: Bool) {
@@ -785,6 +778,13 @@ final class DiagramViewController: UIViewController {
         title = titleLabel
         #if targetEnvironment(macCatalyst)
         view.window?.windowScene?.title = titleLabel
+        #endif
+    }
+
+    private func setToolbarsHidden(_ hidden: Bool, animated: Bool) {
+        navigationController?.setToolbarHidden(hidden, animated: animated)
+        #if targetEnvironment(macCatalyst)
+        view.window?.windowScene?.titlebar?.toolbar?.isVisible = !hidden
         #endif
     }
 
@@ -1125,6 +1125,7 @@ final class DiagramViewController: UIViewController {
             self.separatorView = nil
         }
         view.endEditing(true)
+        syncImageViewStateToDiagram()
         documentIsClosing = true
         currentDocument?.undoManager.removeAllActions()
         diagramEditorDelegate?.diagramEditorDidFinishEditing(self, diagram: diagram)
@@ -1501,7 +1502,7 @@ final class DiagramViewController: UIViewController {
     }
 
     @IBSegueAction func showTemplateEditor(_ coder: NSCoder) -> UIViewController? {
-        navigationController?.setToolbarHidden(true, animated: false)
+        setToolbarsHidden(true, animated: false)
         let ladderTemplatesModelController = LadderTemplatesModelController(viewController: self)
         let templateEditor = LadderTemplatesEditor(ladderTemplatesController: ladderTemplatesModelController)
         let hostingController = UIHostingController(coder: coder, rootView: templateEditor)
@@ -1510,7 +1511,7 @@ final class DiagramViewController: UIViewController {
 
     @IBSegueAction func showLadderSelector(_ coder: NSCoder) -> UIViewController? {
         os_log("showLadderSelector")
-        navigationController?.setToolbarHidden(true, animated: false)
+        setToolbarsHidden(true, animated: false)
         let ladderTemplates = LadderTemplate.templates()
         let index = ladderTemplates.firstIndex(where: { ladderTemplate in
             ladderTemplate.name == ladderView.ladder.name
@@ -1522,7 +1523,7 @@ final class DiagramViewController: UIViewController {
     }
 
     @IBSegueAction func showPreferences(_ coder: NSCoder) -> UIViewController? {
-        navigationController?.setToolbarHidden(true, animated: false)
+        setToolbarsHidden(true, animated: false)
         let diagramModelController = DiagramModelController(diagram: diagram, diagramViewController: self)
         let preferencesView = PreferencesView(diagramController: diagramModelController)
         let hostingController = UIHostingController(coder: coder, rootView: preferencesView)
@@ -1530,31 +1531,34 @@ final class DiagramViewController: UIViewController {
     }
 
     @IBSegueAction func showSampleSelector(_ coder: NSCoder) -> UIViewController? {
-        navigationController?.setToolbarHidden(true, animated: false)
+        setToolbarsHidden(true, animated: false)
         let sampleSelector = SampleSelector(sampleDiagrams: Diagram.sampleDiagrams(), delegate: self)
         let hostingController = UIHostingController(coder: coder, rootView: sampleSelector)
         return hostingController
     }
 
     @IBSegueAction func performShowHelpSegueAction(_ coder: NSCoder) -> HelpViewController? {
-        navigationController?.setToolbarHidden(true, animated: false)
+        setToolbarsHidden(true, animated: false)
         let helpViewController = HelpViewController(coder: coder)
         return helpViewController
     }
 
     @IBSegueAction func performSelectPeriodsAction(_ coder: NSCoder) -> UIViewController? {
+        setToolbarsHidden(true, animated: false)
         let periodSelector = PeriodSelector(dismissAction: ladderView.setPeriods, periods: .constant(ladderView.ladder.getUniqueLadderPeriods()))
         let hostingController = UIHostingController(coder: coder, rootView: periodSelector)
         return hostingController
     }
     
     @IBSegueAction func performEditPeriodsAction(_ coder: NSCoder) -> UIViewController? {
+        setToolbarsHidden(true, animated: false)
         let periodsEditor = PeriodListEditor(dismissAction: applyPeriods, periodsModelController: ladderView.periodsModelController)
         let hostingController = UIHostingController(coder: coder, rootView: periodsEditor)
         return hostingController
     }
 
     @IBSegueAction func performRhythmSegueAction(_ coder: NSCoder) -> UIViewController? {
+        setToolbarsHidden(true, animated: false)
         // Have to provide dismiss action to SwiftUI modal view.  It won't dismiss itself.
         let rhythmView = RhythmView(dismissAction: applyRhythm(rhythm:cancel:))
         let hostingController = UIHostingController(coder: coder, rootView: rhythmView)
@@ -1703,6 +1707,12 @@ extension DiagramViewController {
 #endif
 
 extension DiagramViewController {
+    private func bindCurrentDocumentToSubviewUndoManagers() {
+        guard isViewLoaded else { return }
+        cursorView.currentDocument = currentDocument
+        ladderView.currentDocument = currentDocument
+    }
+
     func setupNotifications() {
         NotificationCenter.default.addObserver(self, selector: #selector(onDidUndoableAction(_:)), name: .didUndoableAction, object: nil)
         NotificationCenter.default.addObserver(self, selector: #selector(updatePreferences), name: UserDefaults.didChangeNotification, object: nil)
@@ -1724,6 +1734,42 @@ extension DiagramViewController {
             self.undoButton.isEnabled = self.currentDocument?.undoManager?.canUndo ?? false
             self.redoButton.isEnabled = self.currentDocument?.undoManager?.canRedo ?? false
         }
+    }
+
+    private func applyInitialImageViewStateIfNeeded() {
+        guard !didApplyInitialImageViewState else { return }
+        didApplyInitialImageViewState = true
+
+        let shouldRestoreViewState = restorationInfo?[Self.restorationDoRestorationKey] as? Bool ?? false
+        if shouldRestoreViewState {
+            if let zoomScale = restorationInfo?[Self.restorationZoomKey] as? CGFloat {
+                imageScrollView.zoomScale = zoomScale
+            }
+            var restorationContentOffset = CGPoint()
+            if let contentOffsetX = restorationInfo?[Self.restorationContentOffsetXKey] {
+                restorationContentOffset.x = (contentOffsetX as? CGFloat ?? 0) * imageScrollView.zoomScale
+            }
+            if let contentOffsetY = restorationInfo?[Self.restorationContentOffsetYKey] {
+                restorationContentOffset.y = contentOffsetY as? CGFloat ?? 0
+            }
+            imageScrollView.setContentOffset(restorationContentOffset, animated: false)
+        } else {
+            imageScrollView.zoomScale = diagram.imageScale
+            imageScrollView.setContentOffset(diagram.imageContentOffset, animated: false)
+        }
+        scrollViewAdjustViews(imageScrollView)
+    }
+
+    func syncImageViewStateToDiagram() {
+        os_log("syncImageViewStateToDiagram() - DiagramViewController")
+        diagram.imageScale = imageScrollView.zoomScale
+        diagram.imageContentOffset = imageScrollView.contentOffset
+    }
+
+    func syncImageViewStateToDiagramAndMarkChangedIfNeeded() {
+        guard diagram.imageScale != imageScrollView.zoomScale || diagram.imageContentOffset != imageScrollView.contentOffset else { return }
+        syncImageViewStateToDiagram()
+        currentDocument?.updateChangeCount(.done)
     }
 
     @objc func didEnterBackground() {
@@ -1837,6 +1883,7 @@ extension DiagramViewController {
         //os_log("resolveFileConflicts()", log: .action, type: .info)
         guard let currentDocument = currentDocument else { return }
         if currentDocument.documentState == UIDocument.State.inConflict {
+            syncImageViewStateToDiagram()
             // Use newest file wins strategy.
             do {
                 try NSFileVersion.removeOtherVersionsOfItem(at: currentDocument.fileURL)
@@ -1922,6 +1969,7 @@ extension DiagramViewController {
             return
         }
 
+        syncImageViewStateToDiagram()
         currentDocument?.diagram = diagram
         currentDocument?.close { [weak self] success in
             guard let self = self else { return }
@@ -1957,9 +2005,11 @@ extension DiagramViewController {
                 }
 
                 renamedDocument.diagram = self.diagram
+                renamedDocument.undoManager.removeAllActions()
                 self.currentDocument = renamedDocument
                 self.diagramEditorDelegate?.diagramEditor(self, didRenameDocumentTo: renamedDocument)
                 self.setTitle()
+                self.updateUndoRedoButtons()
                 renamedDocument.updateChangeCount(.done)
                 completion?(.success(renamedURL))
             }
@@ -2012,16 +2062,9 @@ extension DiagramViewController {
 
     private func performCoordinatedRename(oldURL: URL, newURL: URL) -> Result<URL, Error> {
         let accessDirectoryURL = Sandbox.getPersistentDirectoryURL(forFileURL: oldURL)
-        let sourceURL: URL
-        let destinationURL: URL
-
-        if let accessDirectoryURL = accessDirectoryURL {
-            sourceURL = accessDirectoryURL.appendingPathComponent(oldURL.lastPathComponent)
-            destinationURL = accessDirectoryURL.appendingPathComponent(newURL.lastPathComponent)
-        } else {
-            sourceURL = oldURL
-            destinationURL = newURL
-        }
+        let sourceURL = oldURL
+        let destinationURL = oldURL.deletingLastPathComponent()
+            .appendingPathComponent(newURL.lastPathComponent)
 
         let didStartAccessing = accessDirectoryURL?.startAccessingSecurityScopedResource() ?? false
         defer {
@@ -2134,7 +2177,7 @@ extension DiagramViewController {
 
     @IBAction func macShowCalibrateToolbar(_ sender: Any) {
         mode = .calibrate
-        navigationController?.setToolbarHidden(false, animated: true)
+        setToolbarsHidden(false, animated: true)
     }
 
     @IBAction func macSelectImage(_ sender: Any) {

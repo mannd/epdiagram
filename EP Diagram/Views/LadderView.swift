@@ -2134,7 +2134,8 @@ final class LadderView: ScaledView {
     func drawPeriods(region: Region, context: CGContext) {
         guard let calibration = calibration, calibration.isCalibrated else { return }
         guard showPeriods else { return }
-        let periodHeight = periodSize.getHeight()
+        var periodHeight = periodSize.getHeight()
+        periodHeight = min(periodHeight, region.height / 4)
         for mark in region.marks {
             let numPeriods = numPeriodsFit(forMark: mark, inRegion: region, withHeight: periodHeight)
             var startY: CGFloat
@@ -2730,6 +2731,12 @@ final class LadderView: ScaledView {
     ///  3. All marks have the same periods, or no periods.
     ///  Throws specific error if any of the above conditions is false.
     func checkForEditablePeriods() throws {
+        guard let calibration = calibration else {
+            fatalError("calibration is nil")
+        }
+        if !calibration.isCalibrated {
+            throw LadderError.notCalibrated
+        }
         let selectedMarks = ladder.allMarksWithMode(.selected)
         selectedMarksPeriods = []
         if selectedMarks.count == 1 { // 1 mark can always be edited
@@ -2754,6 +2761,12 @@ final class LadderView: ScaledView {
     }
 
     func checkForCopyablePeriods() throws {
+        guard let calibration = calibration else {
+            fatalError("calibration is nil")
+        }
+        if !calibration.isCalibrated {
+            throw LadderError.notCalibrated
+        }
         let selectedMarks = ladder.allMarksWithMode(.selected)
         if selectedMarks.count == 0 {
             throw LadderError.noMarks

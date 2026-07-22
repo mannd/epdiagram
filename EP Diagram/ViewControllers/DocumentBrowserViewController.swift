@@ -86,15 +86,23 @@ class DocumentBrowserViewController: UIDocumentBrowserViewController, UIDocument
     func installInportHandler() {
         browserDelegate.inportHandler = { [weak self] url, error in
             guard error == nil else {
-                let alert = UIAlertController(title: L("Error Opening Diagram"), message: L("This diagram could not be opened."), preferredStyle: .alert)
-                alert.addAction(UIAlertAction(title: L("OK"), style: .cancel, handler: { _ in }))
-                self?.present(alert, animated: true)
+                self?.showOpenDocumentError(error)
                 return
             }
             if let url = url, let self = self {
                 self.openDocument(url: url)
             }
         }
+    }
+
+    private func showOpenDocumentError(_ error: Error?) {
+        let message: String
+        if let error = error {
+            message = L("This diagram could not be opened.\n\n\(error.localizedDescription)")
+        } else {
+            message = L("This diagram could not be opened.")
+        }
+        UserAlert.showMessage(viewController: self, title: L("Error Opening Diagram"), message: message)
     }
 
     func openDocument(url: URL) {
@@ -112,7 +120,11 @@ class DocumentBrowserViewController: UIDocumentBrowserViewController, UIDocument
                 guard openSuccess else {
                     os_log("openDocument failed to open %s", log: .lifeCycle, type: .info, url.path)
                     print ("could not open \(url)")
-                    self.getIOSBookmark(url: url)
+                    if let error = document.loadError {
+                        self.showOpenDocumentError(error)
+                    } else {
+                        self.getIOSBookmark(url: url)
+                    }
                     return
                 }
                 os_log("openDocument succeeded %s", log: .lifeCycle, type: .info, url.path)
@@ -190,6 +202,7 @@ class DocumentBrowserViewController: UIDocumentBrowserViewController, UIDocument
             guard let self = self else { return }
             guard openSuccess else {
                 print ("could not open \(url)")
+                self.showOpenDocumentError(document.loadError)
                 return
             }
             self.currentDocument = document
@@ -284,7 +297,11 @@ class DocumentBrowserViewController: UIDocumentBrowserViewController, UIDocument
 
     private func prepareForDocumentClose() {
         os_log("prepareForDocumentClose() clearing scene userActivity and restorationInfo", log: .lifeCycle, type: .info)
-        diagramViewController?.documentIsClosing = true
+        if let diagramViewController = diagramViewController {
+            diagramViewController.syncImageViewStateToDiagram()
+            currentDocument?.diagram = diagramViewController.diagram
+            diagramViewController.documentIsClosing = true
+        }
         view.window?.windowScene?.userActivity = NSUserActivity(activityType: AppDelegate.mainActivityType)
         restorationInfo = nil
     }
@@ -416,6 +433,7 @@ extension DocumentBrowserViewController {
     private func closeDocumentAndOpenBrowserScene() {
         os_log("closeDocumentAndOpenBrowserScene()", log: .lifeCycle, type: .info)
         if let diagramViewController = diagramViewController {
+            diagramViewController.syncImageViewStateToDiagram()
             currentDocument?.diagram = diagramViewController.diagram
         }
         closeDiagramController { [weak self] in
