@@ -692,7 +692,7 @@ final class DiagramViewController: UIViewController {
         NSLayoutConstraint.deactivate(safeAreaConstraints)
 
         NSLayoutConstraint.activate([
-            imageScrollView.topAnchor.constraint(equalTo: view.topAnchor),
+            imageScrollView.topAnchor.constraint(equalTo: safeArea.topAnchor),
             imageScrollView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
             imageScrollView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
 
@@ -700,17 +700,17 @@ final class DiagramViewController: UIViewController {
             ladderView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
             ladderView.bottomAnchor.constraint(equalTo: view.bottomAnchor),
 
-            cursorView.topAnchor.constraint(equalTo: view.topAnchor),
+            cursorView.topAnchor.constraint(equalTo: safeArea.topAnchor),
             cursorView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
             cursorView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
             cursorView.bottomAnchor.constraint(equalTo: view.bottomAnchor),
 
-            blackView.topAnchor.constraint(equalTo: view.topAnchor),
+            blackView.topAnchor.constraint(equalTo: safeArea.topAnchor),
             blackView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
             blackView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
             blackView.bottomAnchor.constraint(equalTo: view.bottomAnchor),
 
-            hamburgerView.topAnchor.constraint(equalTo: view.topAnchor),
+            hamburgerView.topAnchor.constraint(equalTo: safeArea.topAnchor),
             hamburgerView.bottomAnchor.constraint(equalTo: view.bottomAnchor)
         ])
     }
