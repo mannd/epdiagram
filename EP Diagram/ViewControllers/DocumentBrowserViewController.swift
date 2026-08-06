@@ -142,7 +142,7 @@ class DocumentBrowserViewController: UIDocumentBrowserViewController, UIDocument
         documentPicker.delegate = self
 
         // Set the initial directory.
-        documentPicker.directoryURL = url
+        documentPicker.directoryURL = url.deletingLastPathComponent()
 
         // Present the document picker.
         present(documentPicker, animated: true, completion: nil)
