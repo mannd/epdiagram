@@ -69,7 +69,7 @@ class ImageSaver: NSObject {
 // MARK: -
 
 extension DiagramViewController: HamburgerTableDelegate, UIImagePickerControllerDelegate & UINavigationControllerDelegate, UIDocumentPickerDelegate {
-    
+
     var imageIsLocked: Bool {
         get { _imageIsLocked }
         set { _imageIsLocked = newValue}
@@ -360,7 +360,8 @@ extension DiagramViewController: HamburgerTableDelegate, UIImagePickerController
         documentPicker.delegate = self
 
         // Set the initial directory.
-        documentPicker.directoryURL = FileIO.getDocumentsURL()
+        //documentPicker.directoryURL = FileIO.getDocumentsURL()
+        // We omit this to allow macOS to use the last opened directory.
 
         // Present the document picker.
         present(documentPicker, animated: true, completion: nil)
@@ -453,7 +454,7 @@ extension DiagramViewController: HamburgerTableDelegate, UIImagePickerController
         handleSelectFile()
 
     }
- 
+
     // MARK: - Hamburger menu functions
 
     @objc func toggleHamburgerMenu() {
@@ -680,4 +681,3 @@ private final class RenameDiagramViewController: UIViewController, UITextFieldDe
     }
 }
 #endif
-
