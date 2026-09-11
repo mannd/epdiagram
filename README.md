@@ -39,7 +39,7 @@ this app.
 
 ## Copyright
 
-Copyright © 2019-2022
+Copyright © 2019-2026
 [EP Studios, Inc.](http://www.epstudiossoftware.com)
 
 ## Author
