@@ -1584,6 +1584,7 @@ final class DiagramViewController: UIViewController {
         if !cancel {
             ladderView.fillWithRhythm(rhythm)
         }
+        setToolbarsHidden(false, animated: false)
         self.dismiss(animated: true, completion: nil)
     }
 
