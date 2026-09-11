@@ -1558,7 +1558,7 @@ final class DiagramViewController: UIViewController {
     }
 
     @IBSegueAction func performRhythmSegueAction(_ coder: NSCoder) -> UIViewController? {
-        setToolbarsHidden(true, animated: false)
+        // NOTE: Toolbars are not hidden since this is a modal dialog.
         // Have to provide dismiss action to SwiftUI modal view.  It won't dismiss itself.
         let rhythmView = RhythmView(dismissAction: applyRhythm(rhythm:cancel:))
         let hostingController = UIHostingController(coder: coder, rootView: rhythmView)
@@ -1584,7 +1584,6 @@ final class DiagramViewController: UIViewController {
         if !cancel {
             ladderView.fillWithRhythm(rhythm)
         }
-        setToolbarsHidden(false, animated: false)
         self.dismiss(animated: true, completion: nil)
     }
 
