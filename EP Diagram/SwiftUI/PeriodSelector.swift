@@ -18,7 +18,7 @@ struct PeriodSelector: View {
     @Binding var periods: [Period]
     @State private var editMode = EditMode.inactive
     @State private var selection: Set<UUID> = []
-    @Environment(\.presentationMode) var presentationMode: Binding<PresentationMode>
+    let onBack: () -> Void
 
     #if targetEnvironment(macCatalyst)
     let header_message: String = "Select periods to copy to selected marks.  Hold command to select multiple marks."
@@ -27,7 +27,7 @@ struct PeriodSelector: View {
     #endif
 
     var body: some View {
-        NavigationView {
+        NavigationStack {
             List(selection: $selection) {
                 Section(header: Text(header_message)) {
                 ForEach(periods, id: \.self.id) { period in
@@ -47,10 +47,13 @@ struct PeriodSelector: View {
                 }
                 }
             }
-            .navigationBarTitle(Text("Select Periods"), displayMode: .inline)
-            #if targetEnvironment(macCatalyst)
-            .navigationBarItems(leading: backButton)
-            #endif
+            .navigationTitle("Select Periods")
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .topBarLeading) {
+                    backButton
+                }
+            }
             .environment(\.editMode, .constant(EditMode.active))
             .onDisappear() {
                 if let dismissAction = dismissAction {
@@ -59,13 +62,10 @@ struct PeriodSelector: View {
                 }
             }
         }
-        .navigationViewStyle(StackNavigationViewStyle())
     }
 
     private var backButton: some View {
-        Button(action: {
-            presentationMode.wrappedValue.dismiss()
-        }) {
+        Button(action: onBack) {
             HStack {
                 Image(systemName: "chevron.left")
                 Text("Back")
@@ -77,6 +77,6 @@ struct PeriodSelector: View {
 struct PeriodSelector_Previews: PreviewProvider {
     static var testPeriods: [Period] = [Period(), Period(color: .red)]
     static var previews: some View {
-        PeriodSelector(periods: .constant(testPeriods))
+        PeriodSelector(periods: .constant(testPeriods), onBack: {})
     }
 }

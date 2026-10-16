@@ -25,64 +25,62 @@ struct PeriodEditor: View {
     private static let durationRange: ClosedRange<CGFloat> = 10...2000
 
     var body: some View {
-        NavigationView {
-            Form {
-                Section(header: Text("Name")) {
-                    TextField(period.name, text: $period.name)
-                }
-                Section(header: Text("Duration (msec)")) {
-                    HStack {
-                        TextField("Value in msec", text: $durationText, onEditingChanged: { isEditing in
-                            if !isEditing {
-                                commitDurationText()
-                            }
-                        }, onCommit: {
+        Form {
+            Section(header: Text("Name")) {
+                TextField(period.name, text: $period.name)
+            }
+            Section(header: Text("Duration (msec)")) {
+                HStack {
+                    TextField("Value in msec", text: $durationText, onEditingChanged: { isEditing in
+                        if !isEditing {
                             commitDurationText()
-                        })
-                        .keyboardType(.numberPad)
-
-                        Stepper("", value: Binding(
-                            get: { period.duration },
-                            set: { newValue in
-                                stepDuration(to: newValue)
-                            }), in: Self.durationRange, step: 1)
-                        .labelsHidden()
-                    }
-                }
-                Section(header: Text("Color")) {
-                    getColorPicker(title: "Color", selection: Binding(
-                        get: { Color(period.color) },
-                        set: { newValue in
-                            periodColorName = newValue.toString
-                            period.color = UIColor(newValue)
-                        }))
-                }
-                Section(header: Text("Resettable")) {
-                    Toggle(isOn: $period.resettable) {
-                        Text("Resettable")
-                    }
-                }
-                Section(header: Text("Offset")) {
-                        Stepper(value: $period.offset, in: 0...3, step: 1) {
-                            HStack {
-                                Text("\(period.offset) height units")
-                            }
                         }
+                    }, onCommit: {
+                        commitDurationText()
+                    })
+                    .keyboardType(.numberPad)
+
+                    Stepper("", value: Binding(
+                        get: { period.duration },
+                        set: { newValue in
+                            stepDuration(to: newValue)
+                        }), in: Self.durationRange, step: 1)
+                    .labelsHidden()
                 }
             }
-            .onAppear {
-                periodColor = Color.convertColorName(periodColorName) ?? periodColor
-                updateDurationText()
+            Section(header: Text("Color")) {
+                getColorPicker(title: "Color", selection: Binding(
+                    get: { Color(period.color) },
+                    set: { newValue in
+                        periodColorName = newValue.toString
+                        period.color = UIColor(newValue)
+                    }))
             }
-            .onDisappear() {
-                commitDurationText()
-                if let dismissAction = dismissAction {
-                    dismissAction(periodsModelController.periods, false)
+            Section(header: Text("Resettable")) {
+                Toggle(isOn: $period.resettable) {
+                    Text("Resettable")
                 }
             }
-            .navigationBarTitle(Text("Edit Period"), displayMode: .inline)
+            Section(header: Text("Offset")) {
+                    Stepper(value: $period.offset, in: 0...3, step: 1) {
+                        HStack {
+                            Text("\(period.offset) height units")
+                        }
+                    }
+            }
         }
-        .navigationViewStyle(StackNavigationViewStyle())
+        .onAppear {
+            periodColor = Color.convertColorName(periodColorName) ?? periodColor
+            updateDurationText()
+        }
+        .onDisappear() {
+            commitDurationText()
+            if let dismissAction = dismissAction {
+                dismissAction(periodsModelController.periods, false)
+            }
+        }
+        .navigationTitle("Edit Period")
+        .navigationBarTitleDisplayMode(.inline)
     }
 
     private func commitDurationText() {
@@ -120,6 +118,8 @@ struct PeriodEditor: View {
 
 struct PeriodEditor_Previews: PreviewProvider {
     static var previews: some View {
-        PeriodEditor(periodsModelController: PeriodsModelController(periods: []), period: .constant(Period(name: "LRI", duration: 200, color: .green, resettable: true)))
+        NavigationStack {
+            PeriodEditor(periodsModelController: PeriodsModelController(periods: []), period: .constant(Period(name: "LRI", duration: 200, color: .green, resettable: true)))
+        }
     }
 }

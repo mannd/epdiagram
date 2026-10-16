@@ -1507,7 +1507,7 @@ final class DiagramViewController: UIViewController {
         let templateEditor = LadderTemplatesEditor(ladderTemplatesController: ladderTemplatesModelController) { [weak self] in
             self?.navigationController?.popViewController(animated: true)
         }
-        let hostingController = TemplateEditorHostingController(coder: coder, rootView: templateEditor)
+        let hostingController = EditorNavigationHostingController(coder: coder, rootView: templateEditor)
         return hostingController
     }
 
@@ -1547,15 +1547,19 @@ final class DiagramViewController: UIViewController {
 
     @IBSegueAction func performSelectPeriodsAction(_ coder: NSCoder) -> UIViewController? {
         setToolbarsHidden(true, animated: false)
-        let periodSelector = PeriodSelector(dismissAction: ladderView.setPeriods, periods: .constant(ladderView.ladder.getUniqueLadderPeriods()))
-        let hostingController = UIHostingController(coder: coder, rootView: periodSelector)
+        let periodSelector = PeriodSelector(dismissAction: ladderView.setPeriods, periods: .constant(ladderView.ladder.getUniqueLadderPeriods())) { [weak self] in
+            self?.navigationController?.popViewController(animated: true)
+        }
+        let hostingController = EditorNavigationHostingController(coder: coder, rootView: periodSelector)
         return hostingController
     }
     
     @IBSegueAction func performEditPeriodsAction(_ coder: NSCoder) -> UIViewController? {
         setToolbarsHidden(true, animated: false)
-        let periodsEditor = PeriodListEditor(dismissAction: applyPeriods, periodsModelController: ladderView.periodsModelController)
-        let hostingController = UIHostingController(coder: coder, rootView: periodsEditor)
+        let periodsEditor = PeriodListEditor(dismissAction: applyPeriods, periodsModelController: ladderView.periodsModelController) { [weak self] in
+            self?.navigationController?.popViewController(animated: true)
+        }
+        let hostingController = EditorNavigationHostingController(coder: coder, rootView: periodsEditor)
         return hostingController
     }
 
@@ -2268,7 +2272,7 @@ extension DiagramViewController {
 
 
 // This flow owns its navigation in SwiftUI, so the enclosing UIKit bar must stay hidden.
-private final class TemplateEditorHostingController: UIHostingController<LadderTemplatesEditor> {
+private final class EditorNavigationHostingController<Content: View>: UIHostingController<Content> {
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
         navigationController?.setNavigationBarHidden(true, animated: animated)

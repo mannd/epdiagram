@@ -14,9 +14,9 @@ struct PeriodListEditor: View {
     var dismissAction: (([Period], Bool) -> Void)?
     @ObservedObject var periodsModelController: PeriodsModelController
     @State private var editMode = EditMode.inactive
-    @Environment(\.presentationMode) var presentationMode: Binding<PresentationMode>
+    let onBack: () -> Void
     var body: some View {
-        NavigationView {
+        NavigationStack {
             Form {
                 Section(header: Text("Arrange periods in desired order")) {
                     List() {
@@ -40,22 +40,19 @@ struct PeriodListEditor: View {
                     }
                 }
             }
-            .navigationBarTitle(Text("Periods"), displayMode: .inline)
-            #if targetEnvironment(macCatalyst)
+            .navigationTitle("Periods")
+            .navigationBarTitleDisplayMode(.inline)
             .toolbar {
-                ToolbarItem(placement: .navigation) {
+                ToolbarItem(placement: .topBarLeading) {
                     backButton
                 }
-                ToolbarItem(placement: .navigation) {
+                ToolbarItem(placement: .topBarTrailing) {
                     EditButton()
                 }
-                ToolbarItem(placement: .primaryAction) {
+                ToolbarItem(placement: .topBarTrailing) {
                     addButton
                 }
             }
-            #else
-            .navigationBarItems(leading: EditButton(), trailing: addButton)
-            #endif
             .environment(\.editMode, $editMode)
             .onDisappear() {
                 if let dismissAction = dismissAction {
@@ -63,14 +60,10 @@ struct PeriodListEditor: View {
                 }
             }
         }
-        // Force full screen for this view even on iPad
-        .navigationViewStyle(StackNavigationViewStyle())
     }
 
     private var backButton: some View {
-        Button(action: {
-            presentationMode.wrappedValue.dismiss()
-        }) {
+        Button(action: onBack) {
             Label("Back", systemImage: "chevron.left")
         }
     }
@@ -102,6 +95,6 @@ fileprivate let testPeriods = [Period(name: "LRI", duration: 400, color: .green,
 
 struct PeriodListEditor_Previews: PreviewProvider {
     static var previews: some View {
-        PeriodListEditor(periodsModelController: PeriodsModelController(periods: testPeriods))
+        PeriodListEditor(periodsModelController: PeriodsModelController(periods: testPeriods), onBack: {})
     }
 }
