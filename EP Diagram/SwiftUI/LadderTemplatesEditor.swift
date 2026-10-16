@@ -14,12 +14,11 @@ struct LadderTemplatesEditor: View {
     @State private var editMode = EditMode.inactive
     @State private var fileSaveError = false
     @State private var errorMessage = String()
-    @Environment(\.presentationMode) private var presentationMode: Binding<PresentationMode>
+    let onBack: () -> Void
     @GestureState private var dragOffset = CGSize.zero
 
     var body: some View {
-        //        VStack {
-        NavigationView {
+        NavigationStack {
             Form {
                 Section(header: Text("First in list is default ladder for new diagrams")) {
                     List() {
@@ -42,26 +41,21 @@ struct LadderTemplatesEditor: View {
                 }
 
             }
-            .navigationBarTitle(Text("Ladders"), displayMode: .inline)
-            #if targetEnvironment(macCatalyst)
+            .navigationTitle("Ladders")
+            .navigationBarTitleDisplayMode(.inline)
             .toolbar {
-                ToolbarItem(placement: .navigation) {
+                ToolbarItem(placement: .topBarLeading) {
                     backButton
                 }
-                ToolbarItem(placement: .navigation) {
+                ToolbarItem(placement: .topBarTrailing) {
                     EditButton()
                 }
-                ToolbarItem(placement: .primaryAction) {
+                ToolbarItem(placement: .topBarTrailing) {
                     addButton
                 }
             }
-            #else
-            .navigationBarItems(leading: EditButton(), trailing: addButton)
-            #endif
             .environment(\.editMode, $editMode)
         }
-        // Force full screen for this view even on iPad
-        .navigationViewStyle(StackNavigationViewStyle())
 
     }
 
@@ -74,9 +68,7 @@ struct LadderTemplatesEditor: View {
     }
 
     private var backButton: some View {
-        Button(action: {
-            presentationMode.wrappedValue.dismiss()
-        }) {
+        Button(action: onBack) {
             Label("Back", systemImage: "chevron.left")
         }
     }
@@ -103,7 +95,7 @@ fileprivate let testData = [LadderTemplate.defaultTemplate_A_AV_V(), LadderTempl
 
 struct LadderTemplatesEditor_Previews: PreviewProvider {
     static var previews: some View {
-        LadderTemplatesEditor(ladderTemplatesController: LadderTemplatesModelController(ladderTemplates: LadderTemplate.defaultTemplates()))
+        LadderTemplatesEditor(ladderTemplatesController: LadderTemplatesModelController(ladderTemplates: LadderTemplate.defaultTemplates()), onBack: {})
 
     }
 }

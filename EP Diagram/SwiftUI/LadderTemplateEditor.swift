@@ -16,35 +16,37 @@ struct LadderTemplateEditor: View {
     @ObservedObject var ladderTemplatesController: LadderTemplatesModelController
     @Binding var ladderTemplate: LadderTemplate
     @State private var editMode = EditMode.inactive
-    @Environment(\.presentationMode) var presentationMode: Binding<PresentationMode>
 
     var body: some View {
-//        VStack {
-            NavigationView {
-                Form {
-                    Section(header: Text("Name")) {
-                        TextField(ladderTemplate.name, text: $ladderTemplate.name)
-                    }
-                    Section(header: Text("Description")) {
-                        TextEditor(text: $ladderTemplate.description)
-                    }
-                    Section(header: Text("Left margin")) {
-                        Stepper(value: $ladderTemplate.leftMargin, in: 30...100, step: 5) {
-                            HStack {
-                                Text("\(Int(ladderTemplate.leftMargin)) points")
-                            }
-                        }
-                    }
-                    Section(header: Text("Regions")) {
-                        RegionListView(ladderTemplatesController: ladderTemplatesController, ladderTemplate: $ladderTemplate)
+        Form {
+            Section(header: Text("Name")) {
+                TextField(ladderTemplate.name, text: $ladderTemplate.name)
+            }
+            Section(header: Text("Description")) {
+                TextEditor(text: $ladderTemplate.description)
+            }
+            Section(header: Text("Left margin")) {
+                Stepper(value: $ladderTemplate.leftMargin, in: 30...100, step: 5) {
+                    HStack {
+                        Text("\(Int(ladderTemplate.leftMargin)) points")
                     }
                 }
-                .navigationBarTitle(Text("Edit Ladder"), displayMode: .inline)
-                .navigationBarItems(leading: EditButton(), trailing: addButton)
-                .environment(\.editMode, $editMode)
             }
-            .navigationViewStyle(StackNavigationViewStyle())
-//        }
+            Section(header: Text("Regions")) {
+                RegionListView(ladderTemplatesController: ladderTemplatesController, ladderTemplate: $ladderTemplate)
+            }
+        }
+        .navigationTitle("Edit Ladder")
+        .navigationBarTitleDisplayMode(.inline)
+        .toolbar {
+            ToolbarItem(placement: .topBarTrailing) {
+                EditButton()
+            }
+            ToolbarItem(placement: .topBarTrailing) {
+                addButton
+            }
+        }
+        .environment(\.editMode, $editMode)
     }
 
     private var addButton: some View {
@@ -108,7 +110,9 @@ struct RegionListView: View {
 struct LadderEditor_Previews: PreviewProvider {
 
     static var previews: some View {
-        LadderTemplateEditor(ladderTemplatesController: LadderTemplatesModelController(ladderTemplates: LadderTemplate.defaultTemplates()), ladderTemplate: .constant(LadderTemplate.defaultTemplate_A_AV_V()))
+        NavigationStack {
+            LadderTemplateEditor(ladderTemplatesController: LadderTemplatesModelController(ladderTemplates: LadderTemplate.defaultTemplates()), ladderTemplate: .constant(LadderTemplate.defaultTemplate_A_AV_V()))
+        }
     }
 }
 #endif

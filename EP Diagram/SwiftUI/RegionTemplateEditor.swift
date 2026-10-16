@@ -13,40 +13,41 @@ struct RegionTemplateEditor: View {
     @Binding var regionTemplate: RegionTemplate
 
     var body: some View {
-        NavigationView {
-            Form {
-                Section(header: Text("Name")) {
-                    TextField(regionTemplate.name, text: $regionTemplate.name)
-                }
-                Section(header: Text("Description")) {
-                    TextEditor(text: $regionTemplate.description)
-                }
-                Section(header: Text("Height")) {
-                    Stepper(value: $regionTemplate.unitHeight, in: 1...4, step: 1) {
-                        HStack {
-                            Text("\(regionTemplate.unitHeight) unit" + (regionTemplate.unitHeight > 1 ? "s" : ""))
-                        }
+        Form {
+            Section(header: Text("Name")) {
+                TextField(regionTemplate.name, text: $regionTemplate.name)
+            }
+            Section(header: Text("Description")) {
+                TextEditor(text: $regionTemplate.description)
+            }
+            Section(header: Text("Height")) {
+                Stepper(value: $regionTemplate.unitHeight, in: 1...4, step: 1) {
+                    HStack {
+                        Text("\(regionTemplate.unitHeight) unit" + (regionTemplate.unitHeight > 1 ? "s" : ""))
                     }
                 }
-                Section(header: Text("Line style")) {
-                    Picker(selection: $regionTemplate.style, label: Text("Line style"), content: {
-                        ForEach(Mark.Style.allCases) { style in
-                            Text(style.description)
-
-                        }
-                    }).pickerStyle(SegmentedPickerStyle())
-                }
             }
-            .navigationBarTitle(Text("Edit Region"), displayMode: .inline)
+            Section(header: Text("Line style")) {
+                Picker(selection: $regionTemplate.style, label: Text("Line style"), content: {
+                    ForEach(Mark.Style.allCases) { style in
+                        Text(style.description)
+
+                    }
+                }).pickerStyle(SegmentedPickerStyle())
+            }
         }
-        .navigationViewStyle(StackNavigationViewStyle())
+        .navigationTitle("Edit Region")
+        .navigationBarTitleDisplayMode(.inline)
     }
+
 }
 
 #if DEBUG
 struct RegionEditor_Previews: PreviewProvider {
     static var previews: some View {
-        RegionTemplateEditor(ladderTemplatesController: LadderTemplatesModelController(ladderTemplates: LadderTemplate.defaultTemplates()), regionTemplate: .constant(RegionTemplate(name: "A", description: "Atrium", unitHeight: 1, style: .solid)))
+        NavigationStack {
+            RegionTemplateEditor(ladderTemplatesController: LadderTemplatesModelController(ladderTemplates: LadderTemplate.defaultTemplates()), regionTemplate: .constant(RegionTemplate(name: "A", description: "Atrium", unitHeight: 1, style: .solid)))
+        }
     }
 }
 #endif

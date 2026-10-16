@@ -1504,8 +1504,10 @@ final class DiagramViewController: UIViewController {
     @IBSegueAction func showTemplateEditor(_ coder: NSCoder) -> UIViewController? {
         setToolbarsHidden(true, animated: false)
         let ladderTemplatesModelController = LadderTemplatesModelController(viewController: self)
-        let templateEditor = LadderTemplatesEditor(ladderTemplatesController: ladderTemplatesModelController)
-        let hostingController = UIHostingController(coder: coder, rootView: templateEditor)
+        let templateEditor = LadderTemplatesEditor(ladderTemplatesController: ladderTemplatesModelController) { [weak self] in
+            self?.navigationController?.popViewController(animated: true)
+        }
+        let hostingController = TemplateEditorHostingController(coder: coder, rootView: templateEditor)
         return hostingController
     }
 
@@ -2262,4 +2264,13 @@ extension DiagramViewController {
         }
     }
     #endif
+}
+
+
+// This flow owns its navigation in SwiftUI, so the enclosing UIKit bar must stay hidden.
+private final class TemplateEditorHostingController: UIHostingController<LadderTemplatesEditor> {
+    override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
+        navigationController?.setNavigationBarHidden(true, animated: animated)
+    }
 }
