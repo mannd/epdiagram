@@ -837,7 +837,19 @@ final class DiagramViewController: UIViewController {
             #if targetEnvironment(macCatalyst)
             selectToolbarButtons = [selectAllButton, spacer, clearButton, spacer, doneButton]
             #else
-            selectToolbarButtons = [selectAllButton, spacer, clearButton, spacer, undoButton, spacer, redoButton, spacer, doneButton]
+            if traitCollection.userInterfaceIdiom == .phone {
+                selectAllButton.title = nil
+                selectAllButton.image = UIImage(systemName: "checkmark.square")
+                selectAllButton.accessibilityLabel = L("Select All")
+                clearButton.title = nil
+                clearButton.image = UIImage(systemName: "square")
+                clearButton.accessibilityLabel = L("Clear Selection")
+                let compactDoneButton = UIBarButtonItem(image: UIImage(systemName: "checkmark"), style: .done, target: self, action: #selector(cancelSelectMode))
+                compactDoneButton.accessibilityLabel = L("Done")
+                selectToolbarButtons = [selectAllButton, clearButton, spacer, undoButton, redoButton, compactDoneButton]
+            } else {
+                selectToolbarButtons = [selectAllButton, spacer, clearButton, spacer, undoButton, spacer, redoButton, spacer, doneButton]
+            }
             #endif
         }
         setToolbarItems(selectToolbarButtons, animated: false)
