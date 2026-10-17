@@ -793,6 +793,8 @@ final class DiagramViewController: UIViewController {
     @objc func showMainToolbar() {
         if mainToolbarButtons == nil {
             calibrateButton = UIBarButtonItem(title: L("Calibrate"), style: UIBarButtonItem.Style.plain, target: self, action: #selector(launchCalibrateMode))
+//            let testButton = UIBarButtonItem(image: UIImage(systemName: "pencil"), style: .plain, target: self, action: #selector(launchSelectMode))
+//            selectButton = testButton
             selectButton = UIBarButtonItem(title: L("Edit"), style: .plain, target: self, action: #selector(launchSelectMode))
             connectButton = UIBarButtonItem(title: L("Connect"), style: .plain, target: self, action: #selector(launchConnectMode))
             undoButton = UIBarButtonItem(barButtonSystemItem: .undo, target: self, action: #selector(undo))
@@ -800,7 +802,21 @@ final class DiagramViewController: UIViewController {
             #if targetEnvironment(macCatalyst)
             mainToolbarButtons = [calibrateButton, spacer,  connectButton, spacer, selectButton]
             #else
-            mainToolbarButtons = [calibrateButton, spacer,  connectButton, spacer, selectButton, spacer, undoButton, spacer, redoButton]
+            if traitCollection.userInterfaceIdiom == .phone {
+                // Symbols keep the mode actions compact while retaining standard touch targets.
+                calibrateButton.title = nil
+                calibrateButton.image = UIImage(systemName: "ruler")
+                calibrateButton.accessibilityLabel = L("Calibrate")
+                connectButton.title = nil
+                connectButton.image = UIImage(systemName: "link")
+                connectButton.accessibilityLabel = L("Connect")
+                selectButton.title = nil
+                selectButton.image = UIImage(systemName: "pencil")
+                selectButton.accessibilityLabel = L("Edit")
+                mainToolbarButtons = [calibrateButton, connectButton, selectButton, spacer, undoButton, redoButton]
+            } else {
+                mainToolbarButtons = [calibrateButton, spacer, connectButton, spacer, selectButton, spacer, undoButton, spacer, redoButton]
+            }
             #endif
 
 
