@@ -383,6 +383,16 @@ final class CursorView: ScaledView {
         setNeedsDisplay()
     }
 
+    /// Repositions the caliper after resizing without changing the measured interval.
+    func recenterCaliper() {
+        let midpoint = (caliper.bar1Position + caliper.bar2Position) / 2
+        let translation = bounds.midX - midpoint
+        caliper.bar1Position += translation
+        caliper.bar2Position += translation
+        caliper.crossbarPosition = (caliperMinY + caliperMaxY) / 2
+        setNeedsDisplay()
+    }
+
     func newCalibration(zoom: CGFloat) -> Calibration {
         let calibration = Calibration()
         calibration.set(zoom: zoom, value: caliper.value)

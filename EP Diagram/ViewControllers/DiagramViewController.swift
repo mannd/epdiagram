@@ -1512,7 +1512,11 @@ final class DiagramViewController: UIViewController {
         }
         coordinator.animate(alongsideTransition: nil, completion: {
             _ in
+            self.view.layoutIfNeeded()
             self.resetViews()
+            if self.mode == .calibrate {
+                self.cursorView.recenterCaliper()
+            }
         })
     }
 
