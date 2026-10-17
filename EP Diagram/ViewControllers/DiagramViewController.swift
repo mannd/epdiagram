@@ -867,14 +867,21 @@ final class DiagramViewController: UIViewController {
             #if targetEnvironment(macCatalyst)
             let labelText = L("Click pairs of marks to connect them")
             #else
-            let labelText = isIPad() ? L("Tap pairs of marks to connect them") : L("Tap pairs of marks")
+            let labelText = isIPad() ? L("Tap pairs of marks to connect them") : L("Tap pairs")
             #endif
             let prompt = makePrompt(text: labelText)
             let doneButton = UIBarButtonItem(barButtonSystemItem: .done, target: self, action: #selector(cancelConnectMode))
             #if targetEnvironment(macCatalyst)
             connectToolbarButtons = [prompt, spacer, doneButton]
             #else
-            connectToolbarButtons = [prompt, spacer, undoButton, spacer, redoButton, spacer, doneButton]
+            if traitCollection.userInterfaceIdiom == .phone {
+                let compactDoneButton = UIBarButtonItem(image: UIImage(systemName: "checkmark"), style: .done, target: self, action: #selector(cancelConnectMode))
+                compactDoneButton.accessibilityLabel = L("Done")
+                prompt.customView?.accessibilityLabel = L("Tap pairs of marks to connect them")
+                connectToolbarButtons = [prompt, spacer, undoButton, redoButton, compactDoneButton]
+            } else {
+                connectToolbarButtons = [prompt, spacer, undoButton, spacer, redoButton, spacer, doneButton]
+            }
             #endif
 
         }
@@ -1219,7 +1226,21 @@ final class DiagramViewController: UIViewController {
             let setButton = UIBarButtonItem(title: L("Set"), style: .plain, target: self, action: #selector(setCalibration))
             let clearButton = UIBarButtonItem(title: L("Clear"), style: .plain, target: self, action: #selector(clearCalibration))
             let doneButton = UIBarButtonItem(barButtonSystemItem: .done, target: self, action: #selector(cancelCalibrateMode))
-            calibrateToolbarButtons = [promptButton, spacer, setButton, spacer, clearButton, spacer, doneButton]
+            if traitCollection.userInterfaceIdiom == .phone {
+                let compactPrompt = makePrompt(text: L("1000 ms"))
+                compactPrompt.customView?.accessibilityLabel = L("Set caliper to 1000 ms")
+                setButton.title = nil
+                setButton.image = UIImage(systemName: "checkmark")
+                setButton.accessibilityLabel = L("Set calibration")
+                clearButton.title = nil
+                clearButton.image = UIImage(systemName: "eraser")
+                clearButton.accessibilityLabel = L("Clear calibration")
+                let cancelButton = UIBarButtonItem(image: UIImage(systemName: "xmark"), style: .plain, target: self, action: #selector(cancelCalibrateMode))
+                cancelButton.accessibilityLabel = L("Cancel calibration")
+                calibrateToolbarButtons = [compactPrompt, spacer, setButton, clearButton, cancelButton]
+            } else {
+                calibrateToolbarButtons = [promptButton, spacer, setButton, spacer, clearButton, spacer, doneButton]
+            }
         }
         setToolbarItems(calibrateToolbarButtons, animated: false)
     }
